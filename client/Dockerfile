@@ -1,6 +1,6 @@
 FROM node:alpine
 WORKDIR /app
 COPY package.json .
-RUN yarn install
-COPY basicwebsite/simple-vite-react-project .
-CMD ["yarn", "run", "dev"]
+RUN npm install
+COPY . .
+CMD ["npm", "run", "dev"]
