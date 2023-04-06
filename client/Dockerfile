@@ -1,6 +1,11 @@
 FROM node:alpine
-WORKDIR /app
-COPY package.json .
-RUN npm install
-COPY . .
-CMD ["npm", "run", "dev"]
+
+WORKDIR /app/client/
+
+COPY package.json /app/client
+
+RUN yarn install
+
+COPY . /app/frontend/
+
+CMD ["yarn", "run", "dev"]
