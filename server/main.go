@@ -26,6 +26,7 @@ func apitest(c *fiber.Ctx) error {
 	req.Header.Add("X-RapidAPI-Host", viper.GetString("API_HOST"))
 	fmt.Println(viper.GetString("API_KEY"))
 	fmt.Println(viper.GetString("API_HOST"))
+	fmt.Println("Viper Data Should Be Above")
 	res, _ := http.DefaultClient.Do(req)
 
 	defer res.Body.Close()
@@ -33,7 +34,7 @@ func apitest(c *fiber.Ctx) error {
 
 	fmt.Println(res)
 	fmt.Println(string(body))
-	fmt.Println("Requested Data")
+	fmt.Println("Requested Data", viper.GetString("USER"))
 	return c.SendString(string(body))
 }
 
