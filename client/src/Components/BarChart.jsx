@@ -7,11 +7,10 @@ function BarChart() {
     const svgRef = useRef();
 
     const handleClick = () => {
-        //fetch('https://jsonplaceholder.typicode.com/posts')
-            //.then(response => response.json())
-            //.then(data => setData(data))
-            //.catch(error => console.error(error));
-        console.log("fetch");
+        fetch('http://localhost:8080')
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error(error));
     };
 
     useEffect(() => {
