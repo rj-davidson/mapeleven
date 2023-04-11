@@ -1,23 +1,33 @@
 import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
+import {Button} from "./Button.jsx";
+import './NavigationBar.css';
 
 
 
 function NavigationBar(){
 const [click, setClick] = useState(false);
+const [button, setButton] = useState(true);
 
 const handleClick = () => setClick(!click);
 const closeMenu = () => setClick(false);
-// q: How to make a navigation bar that has 4 different tabs in the top right corner?
 
+const showButton = () => {
+    if(window.innerWidth <= 960){
+        setButton(false);
+    } else {
+        setButton(true);
+    }
+}
 
+window.addEventListener('resize', showButton);
 
 
     return(
         <nav className="navigationbar">
             <div className="navigationbar-container">
                 <div className='menu-icon' onClick={handleClick}>
-                    <i className={click ? 'fas fa-time': 'fas fa-bars'}/>
+                    <i className={click ? 'fas fa-times': 'fas fa-bars'}/>
                 </div>
                 <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                     <li className='nav-item'>
@@ -36,7 +46,7 @@ const closeMenu = () => setClick(false);
                         <Link to='/About' className = 'nav-links' onClick = {closeMenu}> About </Link>
                     </li>
                 </ul>
-
+                {button && <Button buttonStyle='button--primary'>Good luck Ethan!</Button>}
             </div>
         </nav>
     );

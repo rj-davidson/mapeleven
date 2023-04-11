@@ -2,7 +2,7 @@ import React from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
-import BarChart from "./BarChart.jsx";
+import BarChart from "./Components/BarChart.jsx";
 import NavigationBar from "./Components/NavigationBar.jsx";
 import {BrowserRouter, Router, Routes} from "react-router-dom";
 //import NavigationBar from "./NavigationBar.jsx";
@@ -13,10 +13,10 @@ function App() {
 //this is a comment
   return (
       <div className='App'>
-        <h1>Hello world</h1>
           <BrowserRouter>
               <NavigationBar />
           </BrowserRouter>
+          <h1>Hello world</h1>
           <BarChart />
       </div>
   );
