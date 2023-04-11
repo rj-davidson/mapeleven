@@ -23,6 +23,18 @@ const closeMenu = () => setClick(false);
                     <li className='nav-item'>
                         <Link to='/Fixtures' className = 'nav-links' onClick = {closeMenu}> Fixtures </Link>
                     </li>
+                    <li className='nav-item'>
+                        <Link to='/Players' className = 'nav-links' onClick = {closeMenu}> Players </Link>
+                    </li>
+                    <li className='nav-item'>
+                        <Link to='/Clubs' className = 'nav-links' onClick = {closeMenu}> Clubs </Link>
+                    </li>
+                    <li className='nav-item'>
+                        <Link to='/Competitions' className = 'nav-links' onClick = {closeMenu}> Competitions </Link>
+                    </li>
+                    <li className='nav-item'>
+                        <Link to='/About' className = 'nav-links' onClick = {closeMenu}> About </Link>
+                    </li>
                 </ul>
             </div>
         </nav>
