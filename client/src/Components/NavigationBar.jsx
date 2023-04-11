@@ -36,6 +36,7 @@ const closeMenu = () => setClick(false);
                         <Link to='/About' className = 'nav-links' onClick = {closeMenu}> About </Link>
                     </li>
                 </ul>
+
             </div>
         </nav>
     );
