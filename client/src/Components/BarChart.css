@@ -1,0 +1,18 @@
+.bar {
+    fill: #3854FC;
+}
+
+.bar:hover{
+    stroke: white;
+    stroke-width: 2;
+}
+
+.button {
+    transition-duration: 0.4s;
+    margin-right: 30px;
+}
+
+.button:hover {
+    background-color: #3854FC; /* Green */
+    color: white;
+}

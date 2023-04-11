@@ -1,9 +1,18 @@
 import React, {useState, useRef, useEffect} from "react";
 import * as d3 from 'd3';
+import "./BarChart.css";
 
 function BarChart() {
-    const [data] = useState([100, 80, 180, 300, 120, 220]);
+    const [data, setData] = useState([]);
     const svgRef = useRef();
+
+    const handleClick = () => {
+        //fetch('https://jsonplaceholder.typicode.com/posts')
+            //.then(response => response.json())
+            //.then(data => setData(data))
+            //.catch(error => console.error(error));
+        console.log("fetch");
+    };
 
     useEffect(() => {
         // set up container
@@ -52,6 +61,7 @@ function BarChart() {
 
     return (
         <div className="BarChart">
+            <button className={"button"} onClick={handleClick}>Fetch</button>
             <svg ref={svgRef}></svg>
         </div>
     );
