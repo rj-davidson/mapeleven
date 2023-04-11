@@ -1,38 +1,16 @@
 package main
 
 import (
-	"entgo.io/ent/dialect"
-	"entgo.io/ent/dialect/sql"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"log"
-	"mapeleven-server/ent"
 	"net/http"
-	"time"
 )
 
 func main() {
-	// Ent -> Database
-	cfg := &Config{
-		Dialect:  dialect.Postgres,
-		Host:     viper.GetString("DB_HOST"),
-		Port:     viper.GetString("DB_PORT"),
-		Username: viper.GetString("DB_USER"),
-		Password: viper.GetString("DB_PASS"),
-		Database: viper.GetString("DB_NAME"),
-	}
-
-	client, err := ent.Open(cfg.Dialect.String(), fmt.Sprintf(
-		"host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-		cfg.Host, cfg.Port, cfg.Username, cfg.Password, cfg.Database,
-	))
-	if err != nil {
-		// handle error
-	}
-	defer client.Close()
 	// Web App
 	app := fiber.New()
 
