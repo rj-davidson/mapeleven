@@ -1,9 +1,17 @@
 import React, {useState, useRef, useEffect} from "react";
 import * as d3 from 'd3';
+import "./BarChart.css";
 
 function BarChart() {
-    const [data] = useState([100, 80, 180, 300, 120, 220]);
+    const [data, setData] = useState([]);
     const svgRef = useRef();
+
+    const handleClick = () => {
+        fetch('http://localhost:8080')
+            .then(response => response.json())
+            .then(data => console.log(data))
+            .catch(error => console.error(error));
+    };
 
     useEffect(() => {
         // set up container
@@ -52,6 +60,7 @@ function BarChart() {
 
     return (
         <div className="BarChart">
+            <button className={"button"} onClick={handleClick}>Fetch</button>
             <svg ref={svgRef}></svg>
         </div>
     );

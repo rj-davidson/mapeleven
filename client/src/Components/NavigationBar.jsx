@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import {Link} from 'react-router-dom';
 import {Button} from "./Button.jsx";
 import './NavigationBar.css';
-import fetch from 'fetch';
+//import fetch from 'fetch';
 
 
 function NavigationBar(){
@@ -47,9 +47,6 @@ window.addEventListener('resize', showButton);
                     </li>
                 </ul>
                 {button && <Button buttonStyle='button--primary'>Good luck Ethan!</Button>}
-                //q: How to make a button that sends a request to the server?
-
-                <Button onClick={() => fetch('http://localhost:8080/apitest')}>Click me</Button>
             </div>
         </nav>
     );
@@ -59,6 +56,7 @@ window.addEventListener('resize', showButton);
         <Link to='/Fixtures' className = 'nav-links' onClick = {closeMenu}>
             Fixtures
         </Link>
+                <Button onClick={() => fetch('http://localhost:8080/apitest')}>Click me</Button>
     </li>
     <li className='nav-item'>
         <Link to='/Players' className = 'nav-links' onClick = {closeMenu}>
