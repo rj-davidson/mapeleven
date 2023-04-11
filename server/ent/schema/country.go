@@ -1,6 +1,10 @@
 package schema
 
-import "entgo.io/ent"
+import (
+	"entgo.io/ent"
+	"entgo.io/ent/schema/edge"
+	"entgo.io/ent/schema/field"
+)
 
 // Country holds the schema definition for the Country entity.
 type Country struct {
@@ -9,10 +13,22 @@ type Country struct {
 
 // Fields of the Country.
 func (Country) Fields() []ent.Field {
-	return nil
+	return []ent.Field{
+		field.Int("id").Unique().Immutable(),
+		field.String("name").MaxLen(255),
+		field.String("code").MaxLen(2),
+		field.String("flag").MaxLen(255),
+		field.String("flag_icon").MaxLen(255),
+		field.String("search").MaxLen(3),
+	}
 }
 
 // Edges of the Country.
 func (Country) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("competition", Competition.Type).
+			Ref("country").
+			Unique().
+			Required(),
+	}
 }
