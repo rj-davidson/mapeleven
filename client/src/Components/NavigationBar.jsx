@@ -26,8 +26,12 @@ window.addEventListener('resize', showButton);
     return(
         <nav className="navigationbar">
             <div className="navigationbar-container">
+
                 <div className='menu-icon' onClick={handleClick}>
                     <i className={click ? 'fas fa-times': 'fas fa-bars'}/>
+                </div>
+                <div className={"title"}>
+                    <h1>mapeleven</h1>
                 </div>
                 <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                     <li className='nav-item'>
