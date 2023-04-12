@@ -46,7 +46,6 @@ window.addEventListener('resize', showButton);
                         <Link to='/About' className = 'nav-links' onClick = {closeMenu}> About </Link>
                     </li>
                 </ul>
-                {button && <Button buttonStyle='button--primary'>Good luck Ethan!</Button>}
             </div>
         </nav>
     );
