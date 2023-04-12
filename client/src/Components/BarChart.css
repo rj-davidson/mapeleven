@@ -9,10 +9,10 @@
 
 .button {
     transition-duration: 0.4s;
-    margin-right: 30px;
+    margin-right: 50px;
 }
 
 .button:hover {
-    background-color: #3854FC; /* Green */
+    background-color: #3854FC;
     color: white;
 }
