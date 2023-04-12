@@ -16,7 +16,6 @@ function App() {
           <BrowserRouter>
               <NavigationBar />
           </BrowserRouter>
-          <h1>Hello world</h1>
           <BarChart />
       </div>
   );
