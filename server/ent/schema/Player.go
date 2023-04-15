@@ -22,8 +22,6 @@ func (Player) Fields() []ent.Field {
 		field.String("footed"),
 		field.Int("salary"),
 		field.String("country"),
-		field.String("team"),
-		field.String("league"),
 	}
 }
 
@@ -33,13 +31,15 @@ func (Player) Edges() []ent.Edge {
 		edge.From("team", Team.Type).
 			Ref("players").
 			Unique(),
+		edge.From("achievements", Achievements.Type).
+			Ref("player"),
+		edge.To("events", Event.Type),
+		edge.To("playerStats", PlayerStats.Type),
 		edge.From("league", League.Type).
 			Ref("players").
+			Field("league_id").
 			Unique(),
-		edge.From("achievements", Achievements.Type).
-			Ref("player").
-			Unique(),
-		edge.From("playerStats", PlayerStats.Type).
+		edge.From("id", PlayerStatisticalLeader.Type).
 			Ref("player").
 			Unique(),
 	}

@@ -29,10 +29,7 @@ func (Achievements) Edges() []ent.Edge {
 			Ref("achievements").
 			Unique(),
 		edge.From("coach", Coach.Type).
-			Ref("achievements").
-			Unique(),
-		edge.From("player", Player.Type).
-			Ref("achievements").
-			Unique(),
+			Ref("achievements"),
+		edge.To("player", Player.Type),
 	}
 }

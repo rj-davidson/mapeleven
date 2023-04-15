@@ -24,13 +24,12 @@ func (PlayerStats) Fields() []ent.Field {
 // Edges of the PlayerStats.
 func (PlayerStats) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("player", Player.Type).
-			Ref("playerStats").
-			Unique().
-			Required(),
 		edge.From("fixture", Fixture.Type).
 			Ref("playerStats").
-			Unique().
-			Required(),
+			Unique(),
+		edge.From("player", Player.Type).
+			Ref("playerStats").
+			Field("player_id").
+			Unique(),
 	}
 }

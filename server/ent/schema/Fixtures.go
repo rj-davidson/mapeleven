@@ -19,8 +19,6 @@ func (Fixture) Fields() []ent.Field {
 			Immutable(),
 		field.Time("date"),
 		field.Int("time_zone"),
-		field.Bool("status"),
-		field.Int("round"),
 	}
 }
 
@@ -39,5 +37,8 @@ func (Fixture) Edges() []ent.Edge {
 		edge.To("lineups", Lineup.Type),
 		edge.To("events", Event.Type),
 		edge.To("h2h", H2H.Type),
+		edge.To("playerStats", PlayerStats.Type).
+			Field("fixture_id").
+			Unique(),
 	}
 }

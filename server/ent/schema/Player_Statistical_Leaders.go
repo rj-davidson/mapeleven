@@ -23,12 +23,10 @@ func (PlayerStatisticalLeader) Fields() []ent.Field {
 // Edges of the PlayerStatisticalLeader.
 func (PlayerStatisticalLeader) Edges() []ent.Edge {
 	return []ent.Edge{
+		edge.To("player", Player.Type).
+			Unique(),
 		edge.From("competition", Competition.Type).
-			Ref("competition").
-			Required(),
-		edge.From("player", Player.Type).
-			Ref("name").
-			Unique().
-			Required(),
+			Ref("playerStatisticalLeaders").
+			Unique(),
 	}
 }

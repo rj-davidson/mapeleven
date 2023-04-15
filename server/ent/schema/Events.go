@@ -34,9 +34,9 @@ func (Event) Edges() []ent.Edge {
 			Ref("events").
 			Unique().
 			Required(),
-		edge.From("player", Player.Type).
-			Ref("events_player2").
-			Unique(),
+		//edge.From("player", Player.Type).
+		//	Ref("events_player2").
+		//	Unique(),
 		edge.From("fixture", Fixture.Type).
 			Ref("events").
 			Unique().

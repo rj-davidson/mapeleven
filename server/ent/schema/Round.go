@@ -24,14 +24,14 @@ func (Round) Fields() []ent.Field {
 // Edges of the Round.
 func (Round) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("league", League.Type).
-			Ref("rounds").
-			Unique().
-			Required(),
 		edge.From("season", Season.Type).
 			Ref("rounds").
 			Unique().
 			Required(),
 		edge.To("fixtures", Fixture.Type),
+		edge.From("league", League.Type).
+			Ref("rounds").
+			Field("league_id").
+			Unique(),
 	}
 }

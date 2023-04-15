@@ -31,9 +31,7 @@ func (Coach) Edges() []ent.Edge {
 			Required(),
 		edge.To("achievements", Achievements.Type),
 		edge.To("transfers", Transfers.Type),
-		edge.From("teamStats", TeamStats.Type).
-			Ref("record").
-			Unique().
-			Required(),
+		edge.To("teamStats", TeamStats.Type).Required(),
+		edge.To("lineup", Lineup.Type),
 	}
 }

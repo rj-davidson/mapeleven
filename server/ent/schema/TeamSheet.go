@@ -15,7 +15,6 @@ type TeamSheet struct {
 func (TeamSheet) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Unique().Immutable(),
-		field.Int("player").Unique(),
 		field.Int("x"),
 		field.Int("y"),
 		field.Enum("type").Values("Strt", "Bnch", "MF", "Sus", "Inj"),
@@ -29,7 +28,6 @@ func (TeamSheet) Edges() []ent.Edge {
 			Ref("teamsheet").
 			Unique().
 			Required(),
-		edge.From("Lineup", Lineup.Type).
-			Required(),
+		edge.From("Lineup", Lineup.Type).Ref("teamSheet").Required(),
 	}
 }

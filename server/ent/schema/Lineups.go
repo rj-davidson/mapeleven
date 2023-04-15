@@ -24,15 +24,15 @@ func (Lineup) Fields() []ent.Field {
 // Edges of the Lineup.
 func (Lineup) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("team", Team.Type).
-			Ref("lineup").
-			Unique().
-			Required(),
 		edge.From("coach", Coach.Type).
 			Ref("lineup").
 			Unique().
 			Required(),
 		edge.To("teamsheet", TeamSheet.Type),
+		edge.From("team", Team.Type).
+			Ref("lineups").
+			Field("team_id").
+			Unique(),
 		edge.From("fixture", Fixture.Type).
 			Ref("lineups").
 			Unique().

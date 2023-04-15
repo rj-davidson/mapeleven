@@ -27,5 +27,11 @@ func (League) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("teams", Team.Type).Unique(),
 		edge.To("achievements", Achievements.Type).Unique(),
+		edge.To("players", Player.Type),
+		edge.To("rounds", Round.Type),
+		edge.From("country", Country.Type).
+			Ref("leagues").
+			Field("country_id").
+			Unique(),
 	}
 }

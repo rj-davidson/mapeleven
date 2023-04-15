@@ -28,6 +28,11 @@ func (Team) Edges() []ent.Edge {
 		edge.To("transfers", Transfers.Type),
 		edge.To("team_statistics", TeamStats.Type),
 		edge.To("player_statistics", PlayerStats.Type),
+		edge.To("events", Event.Type),
+		edge.To("h2h_away", H2H.Type),
+		edge.To("h2h_home", H2H.Type),
+		edge.To("lineups", Lineup.Type),
+		edge.To("match_statistics", MatchStatistics.Type),
 		edge.From("league", League.Type).
 			Ref("teams").
 			Unique().

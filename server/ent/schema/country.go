@@ -26,8 +26,7 @@ func (Country) Fields() []ent.Field {
 // Edges of the Country.
 func (Country) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("competition", Competition.Type).
-			Ref("country").
+		edge.To("competition", Competition.Type).
 			Unique().
 			Required(),
 	}

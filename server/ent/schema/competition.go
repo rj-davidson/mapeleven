@@ -39,5 +39,7 @@ func (Competition) Edges() []ent.Edge {
 		edge.To("player_statistical_leaders", PlayerStatisticalLeader.Type).
 			Unique().
 			Field("competition"),
+		edge.To("fixtures", Fixture.Type),
+		edge.To("playerStatisticalLeaders", PlayerStatisticalLeader.Type),
 	}
 }

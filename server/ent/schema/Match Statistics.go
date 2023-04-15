@@ -45,7 +45,7 @@ func (MatchStatistics) Edges() []ent.Edge {
 			Required(),
 		edge.From("team", Team.Type).
 			Ref("match_statistics").
-			Unique().
-			Required(),
+			Field("team_id").
+			Unique(),
 	}
 }
