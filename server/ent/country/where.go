@@ -3,7 +3,8 @@
 package country
 
 import (
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/predicate"
+	"mapeleven/ent/predicate"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )

@@ -1,4 +1,4 @@
-module capstone-cs.eng.utah.edu/mapeleven/mapeleven
+module mapeleven
 
 go 1.20
 
@@ -21,6 +21,7 @@ require (
 	github.com/hashicorp/hcl/v2 v2.13.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.16.4 // indirect
+	github.com/lib/pq v1.10.8 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.17 // indirect

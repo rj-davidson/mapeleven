@@ -4,9 +4,9 @@ package ent
 
 import (
 	"context"
+	"mapeleven/ent/predicate"
+	"mapeleven/ent/standings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/predicate"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/standings"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

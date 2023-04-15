@@ -5,11 +5,11 @@ package ent
 import (
 	"context"
 	"fmt"
+	"mapeleven/ent/birth"
+	"mapeleven/ent/player"
+	"mapeleven/ent/predicate"
 	"math"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/birth"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/player"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/predicate"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

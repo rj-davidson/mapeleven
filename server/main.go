@@ -1,40 +1,43 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	_ "github.com/lib/pq"
+	"io"
+	"log"
+	"mapeleven/ent"
+	"mapeleven/ent/migrate"
+	"net/http"
+
+	"entgo.io/ent/dialect"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/spf13/viper"
-	"io"
-	"log"
-	"net/http"
 )
 
-//func initEntClient() (*ent.Client, error) {
-//	viper.AutomaticEnv()
-//	dbUser := viper.GetString("DB_USER")
-//	dbPass := viper.GetString("DB_PASS")
-//	dbHost := viper.GetString("DB_HOST")
-//	dbPort := viper.GetString("DB_PORT")
-//	dbName := viper.GetString("DB_NAME")
-//
-//	connStr := "host=%s port=%s user=%s dbname=%s password=%s sslmode=disable"
-//	connStr = fmt.Sprintf(connStr, dbHost, dbPort, dbUser, dbName, dbPass)
-//
-//	client, err := ent.Open("postgres", connStr)
-//	if err != nil {
-//		log.Fatalf("failed opening connection to postgres: %v", err)
-//	}
-//
-//	// Run the auto migration tool.
-//	if err := client.Schema.Create(context.Background()); err != nil {
-//		log.Fatalf("failed creating schema resources: %v", err)
-//	}
-//
-//	return client, nil
-//}
-
 func main() {
+	// Set up Viper configuration
+	viper.SetConfigFile(".env")
+	viper.ReadInConfig()
+	viper.AutomaticEnv()
+
+	// Build Connection String
+	connectionString := "postgres://" + viper.GetString("DB_USER") + ":" + viper.GetString("DB_PASS") + "@" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + "/" + viper.GetString("DB_NAME") + "?sslmode=disable"
+
+	// Create a new Ent client instance
+	client, err := ent.Open(dialect.Postgres, connectionString)
+	if err != nil {
+		log.Fatalf("failed opening connection to postgres: %v", err)
+	}
+	defer client.Close()
+
+	// Run migrations on startup
+	err = client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true))
+	if err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+
 	// Web App
 	app := fiber.New()
 
@@ -44,25 +47,21 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
-	//entClient, errorEnt := initEntClient()
-	//if errorEnt != nil {
-	//	log.Fatalf("failed to connect to ent: %v", errorEnt)
-	//}
-	//defer entClient.Close()
-
-	app.Get("/", func(c *fiber.Ctx) error {
-		return api(c)
-	})
+	// Set up routes
+	setupRoutes(app, client)
 
 	fmt.Println("Server is running on port 8080")
 	log.Fatal(app.Listen(":8080"))
 }
 
-// func api(c *fiber.Ctx, client *ent.Client) error {
-func api(c *fiber.Ctx) error {
-	viper.SetConfigFile(".env")
-	viper.ReadInConfig()
+func setupRoutes(app *fiber.App, client *ent.Client) {
+	// Add your routes here, e.g., creating a new user
+	app.Get("/", func(c *fiber.Ctx) error {
+		return api(c, client)
+	})
+}
 
+func api(c *fiber.Ctx, client *ent.Client) error {
 	url := "https://api-football-v1.p.rapidapi.com/v3/teams?id=33"
 
 	req, err := http.NewRequest("GET", url, nil)

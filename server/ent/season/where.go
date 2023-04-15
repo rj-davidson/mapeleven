@@ -3,9 +3,9 @@
 package season
 
 import (
+	"mapeleven/ent/predicate"
 	"time"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/predicate"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )

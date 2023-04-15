@@ -4,11 +4,11 @@ package ent
 
 import (
 	"fmt"
+	"mapeleven/ent/league"
+	"mapeleven/ent/standings"
+	"mapeleven/ent/team"
 	"strings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/league"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/standings"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/team"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )

@@ -6,11 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mapeleven/ent/country"
+	"mapeleven/ent/league"
+	"mapeleven/ent/player"
+	"mapeleven/ent/team"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/country"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/league"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/player"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/team"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )

@@ -4,10 +4,10 @@ package ent
 
 import (
 	"fmt"
+	"mapeleven/ent/birth"
+	"mapeleven/ent/player"
 	"strings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/birth"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/player"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )

@@ -4,12 +4,12 @@ package enttest
 
 import (
 	"context"
-
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent"
+	"mapeleven/ent"
 	// required by schema hooks.
-	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/runtime"
+	_ "mapeleven/ent/runtime"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/migrate"
+	"mapeleven/ent/migrate"
+
 	"entgo.io/ent/dialect/sql/schema"
 )
 

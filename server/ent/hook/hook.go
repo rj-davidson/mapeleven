@@ -5,8 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent"
+	"mapeleven/ent"
 )
 
 // The BirthFunc type is an adapter to allow the use of ordinary

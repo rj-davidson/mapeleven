@@ -3,9 +3,9 @@
 package ent
 
 import (
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/schema"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/season"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/team"
+	"mapeleven/ent/schema"
+	"mapeleven/ent/season"
+	"mapeleven/ent/team"
 )
 
 // The init function reads all schema descriptors with runtime code

@@ -5,12 +5,12 @@ package ent
 import (
 	"context"
 	"fmt"
+	"mapeleven/ent/league"
+	"mapeleven/ent/predicate"
+	"mapeleven/ent/standings"
+	"mapeleven/ent/team"
 	"math"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/league"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/predicate"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/standings"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/team"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
