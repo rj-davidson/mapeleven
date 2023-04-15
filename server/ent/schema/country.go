@@ -15,19 +15,15 @@ type Country struct {
 func (Country) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Unique().Immutable(),
-		field.String("name").MaxLen(255),
-		field.String("code").MaxLen(2),
-		field.String("flag").MaxLen(255),
-		field.String("flag_icon").MaxLen(255),
-		field.String("search").MaxLen(3),
+		field.String("name"),
 	}
 }
 
 // Edges of the Country.
 func (Country) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("competition", Competition.Type).
-			Unique().
-			Required(),
+		edge.To("players", Player.Type),
+		edge.To("leagues", League.Type),
+		edge.To("teams", Team.Type),
 	}
 }

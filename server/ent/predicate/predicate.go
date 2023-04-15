@@ -6,11 +6,23 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Competition is the predicate function for competition builders.
-type Competition func(*sql.Selector)
+// Birth is the predicate function for birth builders.
+type Birth func(*sql.Selector)
 
 // Country is the predicate function for country builders.
 type Country func(*sql.Selector)
 
+// League is the predicate function for league builders.
+type League func(*sql.Selector)
+
+// Player is the predicate function for player builders.
+type Player func(*sql.Selector)
+
 // Season is the predicate function for season builders.
 type Season func(*sql.Selector)
+
+// Standings is the predicate function for standings builders.
+type Standings func(*sql.Selector)
+
+// Team is the predicate function for team builders.
+type Team func(*sql.Selector)

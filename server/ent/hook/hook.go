@@ -5,19 +5,20 @@ package hook
 import (
 	"context"
 	"fmt"
-	"mapeleven-server/ent"
+
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent"
 )
 
-// The CompetitionFunc type is an adapter to allow the use of ordinary
-// function as Competition mutator.
-type CompetitionFunc func(context.Context, *ent.CompetitionMutation) (ent.Value, error)
+// The BirthFunc type is an adapter to allow the use of ordinary
+// function as Birth mutator.
+type BirthFunc func(context.Context, *ent.BirthMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f CompetitionFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.CompetitionMutation); ok {
+func (f BirthFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.BirthMutation); ok {
 		return f(ctx, mv)
 	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CompetitionMutation", m)
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BirthMutation", m)
 }
 
 // The CountryFunc type is an adapter to allow the use of ordinary
@@ -32,6 +33,30 @@ func (f CountryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CountryMutation", m)
 }
 
+// The LeagueFunc type is an adapter to allow the use of ordinary
+// function as League mutator.
+type LeagueFunc func(context.Context, *ent.LeagueMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f LeagueFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.LeagueMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LeagueMutation", m)
+}
+
+// The PlayerFunc type is an adapter to allow the use of ordinary
+// function as Player mutator.
+type PlayerFunc func(context.Context, *ent.PlayerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PlayerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PlayerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlayerMutation", m)
+}
+
 // The SeasonFunc type is an adapter to allow the use of ordinary
 // function as Season mutator.
 type SeasonFunc func(context.Context, *ent.SeasonMutation) (ent.Value, error)
@@ -42,6 +67,30 @@ func (f SeasonFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.SeasonMutation", m)
+}
+
+// The StandingsFunc type is an adapter to allow the use of ordinary
+// function as Standings mutator.
+type StandingsFunc func(context.Context, *ent.StandingsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f StandingsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.StandingsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StandingsMutation", m)
+}
+
+// The TeamFunc type is an adapter to allow the use of ordinary
+// function as Team mutator.
+type TeamFunc func(context.Context, *ent.TeamMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TeamFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TeamMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TeamMutation", m)
 }
 
 // Condition is a hook condition function.

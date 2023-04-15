@@ -4,9 +4,13 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
-	"mapeleven-server/ent/country"
 
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/country"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/league"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/team"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
@@ -16,6 +20,63 @@ type CountryCreate struct {
 	config
 	mutation *CountryMutation
 	hooks    []Hook
+}
+
+// SetName sets the "name" field.
+func (cc *CountryCreate) SetName(s string) *CountryCreate {
+	cc.mutation.SetName(s)
+	return cc
+}
+
+// SetID sets the "id" field.
+func (cc *CountryCreate) SetID(i int) *CountryCreate {
+	cc.mutation.SetID(i)
+	return cc
+}
+
+// AddPlayerIDs adds the "players" edge to the Player entity by IDs.
+func (cc *CountryCreate) AddPlayerIDs(ids ...int) *CountryCreate {
+	cc.mutation.AddPlayerIDs(ids...)
+	return cc
+}
+
+// AddPlayers adds the "players" edges to the Player entity.
+func (cc *CountryCreate) AddPlayers(p ...*Player) *CountryCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return cc.AddPlayerIDs(ids...)
+}
+
+// AddLeagueIDs adds the "leagues" edge to the League entity by IDs.
+func (cc *CountryCreate) AddLeagueIDs(ids ...int) *CountryCreate {
+	cc.mutation.AddLeagueIDs(ids...)
+	return cc
+}
+
+// AddLeagues adds the "leagues" edges to the League entity.
+func (cc *CountryCreate) AddLeagues(l ...*League) *CountryCreate {
+	ids := make([]int, len(l))
+	for i := range l {
+		ids[i] = l[i].ID
+	}
+	return cc.AddLeagueIDs(ids...)
+}
+
+// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
+func (cc *CountryCreate) AddTeamIDs(ids ...int) *CountryCreate {
+	cc.mutation.AddTeamIDs(ids...)
+	return cc
+}
+
+// AddTeams adds the "teams" edges to the Team entity.
+func (cc *CountryCreate) AddTeams(t ...*Team) *CountryCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return cc.AddTeamIDs(ids...)
 }
 
 // Mutation returns the CountryMutation object of the builder.
@@ -52,6 +113,9 @@ func (cc *CountryCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CountryCreate) check() error {
+	if _, ok := cc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Country.name"`)}
+	}
 	return nil
 }
 
@@ -66,8 +130,10 @@ func (cc *CountryCreate) sqlSave(ctx context.Context) (*Country, error) {
 		}
 		return nil, err
 	}
-	id := _spec.ID.Value.(int64)
-	_node.ID = int(id)
+	if _spec.ID.Value != _node.ID {
+		id := _spec.ID.Value.(int64)
+		_node.ID = int(id)
+	}
 	cc.mutation.id = &_node.ID
 	cc.mutation.done = true
 	return _node, nil
@@ -78,6 +144,62 @@ func (cc *CountryCreate) createSpec() (*Country, *sqlgraph.CreateSpec) {
 		_node = &Country{config: cc.config}
 		_spec = sqlgraph.NewCreateSpec(country.Table, sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt))
 	)
+	if id, ok := cc.mutation.ID(); ok {
+		_node.ID = id
+		_spec.ID.Value = id
+	}
+	if value, ok := cc.mutation.Name(); ok {
+		_spec.SetField(country.FieldName, field.TypeString, value)
+		_node.Name = value
+	}
+	if nodes := cc.mutation.PlayersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   country.PlayersTable,
+			Columns: []string{country.PlayersColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.LeaguesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   country.LeaguesTable,
+			Columns: []string{country.LeaguesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.TeamsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   country.TeamsTable,
+			Columns: []string{country.TeamsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -104,8 +226,8 @@ func (ccb *CountryCreateBulk) Save(ctx context.Context) ([]*Country, error) {
 					return nil, err
 				}
 				builder.mutation = mutation
-				nodes[i], specs[i] = builder.createSpec()
 				var err error
+				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
 					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
 				} else {
@@ -121,7 +243,7 @@ func (ccb *CountryCreateBulk) Save(ctx context.Context) ([]*Country, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil {
+				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}

@@ -4,17 +4,65 @@ package ent
 
 import (
 	"fmt"
-	"mapeleven-server/ent/country"
 	"strings"
 
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/country"
+	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
 
 // Country is the model entity for the Country schema.
 type Country struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the CountryQuery when eager-loading is set.
+	Edges              CountryEdges `json:"edges"`
+	player_nationality *int
+	selectValues       sql.SelectValues
+}
+
+// CountryEdges holds the relations/edges for other nodes in the graph.
+type CountryEdges struct {
+	// Players holds the value of the players edge.
+	Players []*Player `json:"players,omitempty"`
+	// Leagues holds the value of the leagues edge.
+	Leagues []*League `json:"leagues,omitempty"`
+	// Teams holds the value of the teams edge.
+	Teams []*Team `json:"teams,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [3]bool
+}
+
+// PlayersOrErr returns the Players value or an error if the edge
+// was not loaded in eager-loading.
+func (e CountryEdges) PlayersOrErr() ([]*Player, error) {
+	if e.loadedTypes[0] {
+		return e.Players, nil
+	}
+	return nil, &NotLoadedError{edge: "players"}
+}
+
+// LeaguesOrErr returns the Leagues value or an error if the edge
+// was not loaded in eager-loading.
+func (e CountryEdges) LeaguesOrErr() ([]*League, error) {
+	if e.loadedTypes[1] {
+		return e.Leagues, nil
+	}
+	return nil, &NotLoadedError{edge: "leagues"}
+}
+
+// TeamsOrErr returns the Teams value or an error if the edge
+// was not loaded in eager-loading.
+func (e CountryEdges) TeamsOrErr() ([]*Team, error) {
+	if e.loadedTypes[2] {
+		return e.Teams, nil
+	}
+	return nil, &NotLoadedError{edge: "teams"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -24,8 +72,12 @@ func (*Country) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case country.FieldID:
 			values[i] = new(sql.NullInt64)
+		case country.FieldName:
+			values[i] = new(sql.NullString)
+		case country.ForeignKeys[0]: // player_nationality
+			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type Country", columns[i])
+			values[i] = new(sql.UnknownType)
 		}
 	}
 	return values, nil
@@ -45,9 +97,45 @@ func (c *Country) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			c.ID = int(value.Int64)
+		case country.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				c.Name = value.String
+			}
+		case country.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field player_nationality", value)
+			} else if value.Valid {
+				c.player_nationality = new(int)
+				*c.player_nationality = int(value.Int64)
+			}
+		default:
+			c.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
+}
+
+// Value returns the ent.Value that was dynamically selected and assigned to the Country.
+// This includes values selected through modifiers, order, etc.
+func (c *Country) Value(name string) (ent.Value, error) {
+	return c.selectValues.Get(name)
+}
+
+// QueryPlayers queries the "players" edge of the Country entity.
+func (c *Country) QueryPlayers() *PlayerQuery {
+	return NewCountryClient(c.config).QueryPlayers(c)
+}
+
+// QueryLeagues queries the "leagues" edge of the Country entity.
+func (c *Country) QueryLeagues() *LeagueQuery {
+	return NewCountryClient(c.config).QueryLeagues(c)
+}
+
+// QueryTeams queries the "teams" edge of the Country entity.
+func (c *Country) QueryTeams() *TeamQuery {
+	return NewCountryClient(c.config).QueryTeams(c)
 }
 
 // Update returns a builder for updating this Country.
@@ -72,7 +160,9 @@ func (c *Country) Unwrap() *Country {
 func (c *Country) String() string {
 	var builder strings.Builder
 	builder.WriteString("Country(")
-	builder.WriteString(fmt.Sprintf("id=%v", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString("name=")
+	builder.WriteString(c.Name)
 	builder.WriteByte(')')
 	return builder.String()
 }

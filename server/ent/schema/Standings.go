@@ -6,29 +6,27 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// Standing holds the schema definition for the Standing entity.
-type Standing struct {
+// Standings holds the schema definition for the Standings entity.
+type Standings struct {
 	ent.Schema
 }
 
-// Fields of the Standing.
-func (Standing) Fields() []ent.Field {
+// Fields of the Standings.
+func (Standings) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique().Immutable(),
-		field.Int("points"),
-		field.Int("wins"),
-		field.Int("draws"),
-		field.Int("losses"),
-		field.Int("goals_for"),
-		field.Int("goals_against"),
+		field.Int("rank").Unique(),
+		field.String("description"),
 	}
 }
 
-// Edges of the Standing.
-func (Standing) Edges() []ent.Edge {
+// Edges of the Standings.
+func (Standings) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("competition", Competition.Type).
-			Ref("name").
+		edge.From("league", League.Type).
+			Ref("standings").
+			Unique(),
+		edge.From("team", Team.Type).
+			Ref("standings").
 			Unique(),
 	}
 }

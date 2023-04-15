@@ -16,22 +16,20 @@ func (League) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Unique().Immutable(),
 		field.String("name"),
-		field.String("location"),
-		field.String("champion"),
-		field.Int("num_teams"),
+		field.Enum("type").
+			Values("League", "Cup", "Tournament", "Friendly"),
+		field.String("logo"),
 	}
 }
 
 // Edges of the League.
 func (League) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("teams", Team.Type).Unique(),
-		edge.To("achievements", Achievements.Type).Unique(),
-		edge.To("players", Player.Type),
-		edge.To("rounds", Round.Type),
+		edge.To("seasons", Season.Type),
+		edge.To("standings", Standings.Type),
+		edge.To("teams", Team.Type),
 		edge.From("country", Country.Type).
 			Ref("leagues").
-			Field("country_id").
 			Unique(),
 	}
 }

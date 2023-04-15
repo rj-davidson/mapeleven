@@ -6,9 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mapeleven-server/ent/predicate"
-	"mapeleven-server/ent/season"
+	"time"
 
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/league"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/predicate"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/season"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,9 +29,73 @@ func (su *SeasonUpdate) Where(ps ...predicate.Season) *SeasonUpdate {
 	return su
 }
 
+// SetYear sets the "year" field.
+func (su *SeasonUpdate) SetYear(i int) *SeasonUpdate {
+	su.mutation.ResetYear()
+	su.mutation.SetYear(i)
+	return su
+}
+
+// AddYear adds i to the "year" field.
+func (su *SeasonUpdate) AddYear(i int) *SeasonUpdate {
+	su.mutation.AddYear(i)
+	return su
+}
+
+// SetStart sets the "start" field.
+func (su *SeasonUpdate) SetStart(t time.Time) *SeasonUpdate {
+	su.mutation.SetStart(t)
+	return su
+}
+
+// SetEnd sets the "end" field.
+func (su *SeasonUpdate) SetEnd(t time.Time) *SeasonUpdate {
+	su.mutation.SetEnd(t)
+	return su
+}
+
+// SetCurrent sets the "current" field.
+func (su *SeasonUpdate) SetCurrent(b bool) *SeasonUpdate {
+	su.mutation.SetCurrent(b)
+	return su
+}
+
+// SetNillableCurrent sets the "current" field if the given value is not nil.
+func (su *SeasonUpdate) SetNillableCurrent(b *bool) *SeasonUpdate {
+	if b != nil {
+		su.SetCurrent(*b)
+	}
+	return su
+}
+
+// SetLeagueID sets the "league" edge to the League entity by ID.
+func (su *SeasonUpdate) SetLeagueID(id int) *SeasonUpdate {
+	su.mutation.SetLeagueID(id)
+	return su
+}
+
+// SetNillableLeagueID sets the "league" edge to the League entity by ID if the given value is not nil.
+func (su *SeasonUpdate) SetNillableLeagueID(id *int) *SeasonUpdate {
+	if id != nil {
+		su = su.SetLeagueID(*id)
+	}
+	return su
+}
+
+// SetLeague sets the "league" edge to the League entity.
+func (su *SeasonUpdate) SetLeague(l *League) *SeasonUpdate {
+	return su.SetLeagueID(l.ID)
+}
+
 // Mutation returns the SeasonMutation object of the builder.
 func (su *SeasonUpdate) Mutation() *SeasonMutation {
 	return su.mutation
+}
+
+// ClearLeague clears the "league" edge to the League entity.
+func (su *SeasonUpdate) ClearLeague() *SeasonUpdate {
+	su.mutation.ClearLeague()
+	return su
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -68,6 +134,50 @@ func (su *SeasonUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := su.mutation.Year(); ok {
+		_spec.SetField(season.FieldYear, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedYear(); ok {
+		_spec.AddField(season.FieldYear, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.Start(); ok {
+		_spec.SetField(season.FieldStart, field.TypeTime, value)
+	}
+	if value, ok := su.mutation.End(); ok {
+		_spec.SetField(season.FieldEnd, field.TypeTime, value)
+	}
+	if value, ok := su.mutation.Current(); ok {
+		_spec.SetField(season.FieldCurrent, field.TypeBool, value)
+	}
+	if su.mutation.LeagueCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   season.LeagueTable,
+			Columns: []string{season.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.LeagueIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   season.LeagueTable,
+			Columns: []string{season.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{season.Label}
@@ -88,9 +198,73 @@ type SeasonUpdateOne struct {
 	mutation *SeasonMutation
 }
 
+// SetYear sets the "year" field.
+func (suo *SeasonUpdateOne) SetYear(i int) *SeasonUpdateOne {
+	suo.mutation.ResetYear()
+	suo.mutation.SetYear(i)
+	return suo
+}
+
+// AddYear adds i to the "year" field.
+func (suo *SeasonUpdateOne) AddYear(i int) *SeasonUpdateOne {
+	suo.mutation.AddYear(i)
+	return suo
+}
+
+// SetStart sets the "start" field.
+func (suo *SeasonUpdateOne) SetStart(t time.Time) *SeasonUpdateOne {
+	suo.mutation.SetStart(t)
+	return suo
+}
+
+// SetEnd sets the "end" field.
+func (suo *SeasonUpdateOne) SetEnd(t time.Time) *SeasonUpdateOne {
+	suo.mutation.SetEnd(t)
+	return suo
+}
+
+// SetCurrent sets the "current" field.
+func (suo *SeasonUpdateOne) SetCurrent(b bool) *SeasonUpdateOne {
+	suo.mutation.SetCurrent(b)
+	return suo
+}
+
+// SetNillableCurrent sets the "current" field if the given value is not nil.
+func (suo *SeasonUpdateOne) SetNillableCurrent(b *bool) *SeasonUpdateOne {
+	if b != nil {
+		suo.SetCurrent(*b)
+	}
+	return suo
+}
+
+// SetLeagueID sets the "league" edge to the League entity by ID.
+func (suo *SeasonUpdateOne) SetLeagueID(id int) *SeasonUpdateOne {
+	suo.mutation.SetLeagueID(id)
+	return suo
+}
+
+// SetNillableLeagueID sets the "league" edge to the League entity by ID if the given value is not nil.
+func (suo *SeasonUpdateOne) SetNillableLeagueID(id *int) *SeasonUpdateOne {
+	if id != nil {
+		suo = suo.SetLeagueID(*id)
+	}
+	return suo
+}
+
+// SetLeague sets the "league" edge to the League entity.
+func (suo *SeasonUpdateOne) SetLeague(l *League) *SeasonUpdateOne {
+	return suo.SetLeagueID(l.ID)
+}
+
 // Mutation returns the SeasonMutation object of the builder.
 func (suo *SeasonUpdateOne) Mutation() *SeasonMutation {
 	return suo.mutation
+}
+
+// ClearLeague clears the "league" edge to the League entity.
+func (suo *SeasonUpdateOne) ClearLeague() *SeasonUpdateOne {
+	suo.mutation.ClearLeague()
+	return suo
 }
 
 // Where appends a list predicates to the SeasonUpdate builder.
@@ -158,6 +332,50 @@ func (suo *SeasonUpdateOne) sqlSave(ctx context.Context) (_node *Season, err err
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := suo.mutation.Year(); ok {
+		_spec.SetField(season.FieldYear, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedYear(); ok {
+		_spec.AddField(season.FieldYear, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.Start(); ok {
+		_spec.SetField(season.FieldStart, field.TypeTime, value)
+	}
+	if value, ok := suo.mutation.End(); ok {
+		_spec.SetField(season.FieldEnd, field.TypeTime, value)
+	}
+	if value, ok := suo.mutation.Current(); ok {
+		_spec.SetField(season.FieldCurrent, field.TypeBool, value)
+	}
+	if suo.mutation.LeagueCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   season.LeagueTable,
+			Columns: []string{season.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.LeagueIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   season.LeagueTable,
+			Columns: []string{season.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Season{config: suo.config}
 	_spec.Assign = _node.assignValues

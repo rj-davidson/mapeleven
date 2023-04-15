@@ -4,11 +4,15 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
-	"mapeleven-server/ent/country"
-	"mapeleven-server/ent/predicate"
 	"math"
 
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/country"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/league"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/predicate"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/team"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -17,10 +21,14 @@ import (
 // CountryQuery is the builder for querying Country entities.
 type CountryQuery struct {
 	config
-	ctx        *QueryContext
-	order      []OrderFunc
-	inters     []Interceptor
-	predicates []predicate.Country
+	ctx         *QueryContext
+	order       []country.Order
+	inters      []Interceptor
+	predicates  []predicate.Country
+	withPlayers *PlayerQuery
+	withLeagues *LeagueQuery
+	withTeams   *TeamQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -52,9 +60,75 @@ func (cq *CountryQuery) Unique(unique bool) *CountryQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (cq *CountryQuery) Order(o ...OrderFunc) *CountryQuery {
+func (cq *CountryQuery) Order(o ...country.Order) *CountryQuery {
 	cq.order = append(cq.order, o...)
 	return cq
+}
+
+// QueryPlayers chains the current query on the "players" edge.
+func (cq *CountryQuery) QueryPlayers() *PlayerQuery {
+	query := (&PlayerClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(country.Table, country.FieldID, selector),
+			sqlgraph.To(player.Table, player.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, country.PlayersTable, country.PlayersColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLeagues chains the current query on the "leagues" edge.
+func (cq *CountryQuery) QueryLeagues() *LeagueQuery {
+	query := (&LeagueClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(country.Table, country.FieldID, selector),
+			sqlgraph.To(league.Table, league.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, country.LeaguesTable, country.LeaguesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTeams chains the current query on the "teams" edge.
+func (cq *CountryQuery) QueryTeams() *TeamQuery {
+	query := (&TeamClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(country.Table, country.FieldID, selector),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, country.TeamsTable, country.TeamsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Country entity from the query.
@@ -244,19 +318,67 @@ func (cq *CountryQuery) Clone() *CountryQuery {
 		return nil
 	}
 	return &CountryQuery{
-		config:     cq.config,
-		ctx:        cq.ctx.Clone(),
-		order:      append([]OrderFunc{}, cq.order...),
-		inters:     append([]Interceptor{}, cq.inters...),
-		predicates: append([]predicate.Country{}, cq.predicates...),
+		config:      cq.config,
+		ctx:         cq.ctx.Clone(),
+		order:       append([]country.Order{}, cq.order...),
+		inters:      append([]Interceptor{}, cq.inters...),
+		predicates:  append([]predicate.Country{}, cq.predicates...),
+		withPlayers: cq.withPlayers.Clone(),
+		withLeagues: cq.withLeagues.Clone(),
+		withTeams:   cq.withTeams.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
 	}
 }
 
+// WithPlayers tells the query-builder to eager-load the nodes that are connected to
+// the "players" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CountryQuery) WithPlayers(opts ...func(*PlayerQuery)) *CountryQuery {
+	query := (&PlayerClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withPlayers = query
+	return cq
+}
+
+// WithLeagues tells the query-builder to eager-load the nodes that are connected to
+// the "leagues" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CountryQuery) WithLeagues(opts ...func(*LeagueQuery)) *CountryQuery {
+	query := (&LeagueClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withLeagues = query
+	return cq
+}
+
+// WithTeams tells the query-builder to eager-load the nodes that are connected to
+// the "teams" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CountryQuery) WithTeams(opts ...func(*TeamQuery)) *CountryQuery {
+	query := (&TeamClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withTeams = query
+	return cq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Country.Query().
+//		GroupBy(country.FieldName).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (cq *CountryQuery) GroupBy(field string, fields ...string) *CountryGroupBy {
 	cq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &CountryGroupBy{build: cq}
@@ -268,6 +390,16 @@ func (cq *CountryQuery) GroupBy(field string, fields ...string) *CountryGroupBy 
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Name string `json:"name,omitempty"`
+//	}
+//
+//	client.Country.Query().
+//		Select(country.FieldName).
+//		Scan(ctx, &v)
 func (cq *CountryQuery) Select(fields ...string) *CountrySelect {
 	cq.ctx.Fields = append(cq.ctx.Fields, fields...)
 	sbuild := &CountrySelect{CountryQuery: cq}
@@ -309,15 +441,25 @@ func (cq *CountryQuery) prepareQuery(ctx context.Context) error {
 
 func (cq *CountryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Country, error) {
 	var (
-		nodes = []*Country{}
-		_spec = cq.querySpec()
+		nodes       = []*Country{}
+		withFKs     = cq.withFKs
+		_spec       = cq.querySpec()
+		loadedTypes = [3]bool{
+			cq.withPlayers != nil,
+			cq.withLeagues != nil,
+			cq.withTeams != nil,
+		}
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, country.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Country).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Country{config: cq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -329,7 +471,122 @@ func (cq *CountryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Coun
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := cq.withPlayers; query != nil {
+		if err := cq.loadPlayers(ctx, query, nodes,
+			func(n *Country) { n.Edges.Players = []*Player{} },
+			func(n *Country, e *Player) { n.Edges.Players = append(n.Edges.Players, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withLeagues; query != nil {
+		if err := cq.loadLeagues(ctx, query, nodes,
+			func(n *Country) { n.Edges.Leagues = []*League{} },
+			func(n *Country, e *League) { n.Edges.Leagues = append(n.Edges.Leagues, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withTeams; query != nil {
+		if err := cq.loadTeams(ctx, query, nodes,
+			func(n *Country) { n.Edges.Teams = []*Team{} },
+			func(n *Country, e *Team) { n.Edges.Teams = append(n.Edges.Teams, e) }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (cq *CountryQuery) loadPlayers(ctx context.Context, query *PlayerQuery, nodes []*Country, init func(*Country), assign func(*Country, *Player)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Country)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Player(func(s *sql.Selector) {
+		s.Where(sql.InValues(country.PlayersColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.country_players
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "country_players" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "country_players" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (cq *CountryQuery) loadLeagues(ctx context.Context, query *LeagueQuery, nodes []*Country, init func(*Country), assign func(*Country, *League)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Country)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.League(func(s *sql.Selector) {
+		s.Where(sql.InValues(country.LeaguesColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.country_leagues
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "country_leagues" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "country_leagues" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (cq *CountryQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*Country, init func(*Country), assign func(*Country, *Team)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Country)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Team(func(s *sql.Selector) {
+		s.Where(sql.InValues(country.TeamsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.country_teams
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "country_teams" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "country_teams" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
 }
 
 func (cq *CountryQuery) sqlCount(ctx context.Context) (int, error) {

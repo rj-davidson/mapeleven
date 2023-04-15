@@ -63,7 +63,7 @@ func api(c *fiber.Ctx) error {
 	viper.SetConfigFile(".env")
 	viper.ReadInConfig()
 
-	url := "https://api-football-v1.p.rapidapi.com/v3/players/topscorers?league=39&season=2022"
+	url := "https://api-football-v1.p.rapidapi.com/v3/teams?id=33"
 
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {

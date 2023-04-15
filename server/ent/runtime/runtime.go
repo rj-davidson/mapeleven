@@ -2,9 +2,9 @@
 
 package runtime
 
-// The schema-stitching logic is generated in mapeleven-server/ent/runtime.go
+// The schema-stitching logic is generated in capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/runtime.go
 
 const (
-	Version = "v0.11.10"                                        // Version of ent codegen.
-	Sum     = "h1:iqn32ybY5HRW3xSAyMNdNKpZhKgMf1Zunsej9yPKUI8=" // Sum of ent codegen.
+	Version = "v0.12.0"                                         // Version of ent codegen.
+	Sum     = "h1:DTub/yd0pMK9s0ONfZps2cYkyD2VPIuknVBv10BESc0=" // Sum of ent codegen.
 )

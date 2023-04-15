@@ -16,31 +16,23 @@ func (Player) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Unique().Immutable(),
 		field.String("name"),
+		field.String("firstname"),
+		field.String("lastname"),
 		field.Int("age"),
+		field.Float("height"),
+		field.Float("weight"),
+		field.Bool("injured"),
 		field.String("photo"),
-		field.String("position"),
-		field.String("footed"),
-		field.Int("salary"),
-		field.String("country"),
 	}
 }
 
 // Edges of the Player.
 func (Player) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("team", Team.Type).
-			Ref("players").
+		edge.To("birth", Birth.Type).
 			Unique(),
-		edge.From("achievements", Achievements.Type).
-			Ref("player"),
-		edge.To("events", Event.Type),
-		edge.To("playerStats", PlayerStats.Type),
-		edge.From("league", League.Type).
-			Ref("players").
-			Field("league_id").
-			Unique(),
-		edge.From("id", PlayerStatisticalLeader.Type).
-			Ref("player").
-			Unique(),
+		edge.To("nationality", Country.Type),
+		edge.From("teams", Team.Type).
+			Ref("players"),
 	}
 }

@@ -5,10 +5,11 @@ package ent
 import (
 	"context"
 	"fmt"
-	"mapeleven-server/ent/predicate"
-	"mapeleven-server/ent/season"
 	"math"
 
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/league"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/predicate"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/ent/season"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -18,9 +19,11 @@ import (
 type SeasonQuery struct {
 	config
 	ctx        *QueryContext
-	order      []OrderFunc
+	order      []season.Order
 	inters     []Interceptor
 	predicates []predicate.Season
+	withLeague *LeagueQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -52,9 +55,31 @@ func (sq *SeasonQuery) Unique(unique bool) *SeasonQuery {
 }
 
 // Order specifies how the records should be ordered.
-func (sq *SeasonQuery) Order(o ...OrderFunc) *SeasonQuery {
+func (sq *SeasonQuery) Order(o ...season.Order) *SeasonQuery {
 	sq.order = append(sq.order, o...)
 	return sq
+}
+
+// QueryLeague chains the current query on the "league" edge.
+func (sq *SeasonQuery) QueryLeague() *LeagueQuery {
+	query := (&LeagueClient{config: sq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(season.Table, season.FieldID, selector),
+			sqlgraph.To(league.Table, league.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, season.LeagueTable, season.LeagueColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first Season entity from the query.
@@ -246,17 +271,41 @@ func (sq *SeasonQuery) Clone() *SeasonQuery {
 	return &SeasonQuery{
 		config:     sq.config,
 		ctx:        sq.ctx.Clone(),
-		order:      append([]OrderFunc{}, sq.order...),
+		order:      append([]season.Order{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Season{}, sq.predicates...),
+		withLeague: sq.withLeague.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
 	}
 }
 
+// WithLeague tells the query-builder to eager-load the nodes that are connected to
+// the "league" edge. The optional arguments are used to configure the query builder of the edge.
+func (sq *SeasonQuery) WithLeague(opts ...func(*LeagueQuery)) *SeasonQuery {
+	query := (&LeagueClient{config: sq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withLeague = query
+	return sq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Year int `json:"year,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Season.Query().
+//		GroupBy(season.FieldYear).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
 func (sq *SeasonQuery) GroupBy(field string, fields ...string) *SeasonGroupBy {
 	sq.ctx.Fields = append([]string{field}, fields...)
 	grbuild := &SeasonGroupBy{build: sq}
@@ -268,6 +317,16 @@ func (sq *SeasonQuery) GroupBy(field string, fields ...string) *SeasonGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Year int `json:"year,omitempty"`
+//	}
+//
+//	client.Season.Query().
+//		Select(season.FieldYear).
+//		Scan(ctx, &v)
 func (sq *SeasonQuery) Select(fields ...string) *SeasonSelect {
 	sq.ctx.Fields = append(sq.ctx.Fields, fields...)
 	sbuild := &SeasonSelect{SeasonQuery: sq}
@@ -309,15 +368,26 @@ func (sq *SeasonQuery) prepareQuery(ctx context.Context) error {
 
 func (sq *SeasonQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Season, error) {
 	var (
-		nodes = []*Season{}
-		_spec = sq.querySpec()
+		nodes       = []*Season{}
+		withFKs     = sq.withFKs
+		_spec       = sq.querySpec()
+		loadedTypes = [1]bool{
+			sq.withLeague != nil,
+		}
 	)
+	if sq.withLeague != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, season.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Season).scanValues(nil, columns)
 	}
 	_spec.Assign = func(columns []string, values []any) error {
 		node := &Season{config: sq.config}
 		nodes = append(nodes, node)
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	for i := range hooks {
@@ -329,7 +399,46 @@ func (sq *SeasonQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Seaso
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+	if query := sq.withLeague; query != nil {
+		if err := sq.loadLeague(ctx, query, nodes, nil,
+			func(n *Season, e *League) { n.Edges.League = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
+}
+
+func (sq *SeasonQuery) loadLeague(ctx context.Context, query *LeagueQuery, nodes []*Season, init func(*Season), assign func(*Season, *League)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Season)
+	for i := range nodes {
+		if nodes[i].league_seasons == nil {
+			continue
+		}
+		fk := *nodes[i].league_seasons
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(league.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "league_seasons" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
 }
 
 func (sq *SeasonQuery) sqlCount(ctx context.Context) (int, error) {
