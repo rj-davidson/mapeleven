@@ -2,18 +2,18 @@ package main
 
 import (
 	"context"
-	"fmt"
-	_ "github.com/lib/pq"
-	"io"
-	"log"
-	"mapeleven/ent"
-	"mapeleven/ent/migrate"
-	"net/http"
-
 	"entgo.io/ent/dialect"
+	"fmt"
+	"log"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
+
+	"mapeleven/models"
+	"mapeleven/models/ent"
+	"mapeleven/models/ent/migrate"
 )
 
 func main() {
@@ -55,38 +55,8 @@ func main() {
 }
 
 func setupRoutes(app *fiber.App, client *ent.Client) {
-	// Add your routes here, e.g., creating a new user
 	app.Get("/", func(c *fiber.Ctx) error {
-		return api(c, client)
+		return models.LoadCountriesFromAPI(c, client)
+		//return models.LoadLeaguesFromAPI(c, client)
 	})
-}
-
-func api(c *fiber.Ctx, client *ent.Client) error {
-	url := "https://api-football-v1.p.rapidapi.com/v3/teams?id=33"
-
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return err
-	}
-
-	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
-	req.Header.Add("X-RapidAPI-Host", viper.GetString("API_HOST"))
-	fmt.Println("API Key: ", viper.GetString("API_KEY"))
-	fmt.Println("API Host: ", viper.GetString("API_HOST"))
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	body, err := io.ReadAll(res.Body)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(res)
-	fmt.Println(string(body))
-
-	c.Type("application/json", "utf-8")
-	return c.Send(body)
 }
