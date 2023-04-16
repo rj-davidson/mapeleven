@@ -5,13 +5,14 @@ import (
 	"entgo.io/ent/dialect"
 	"fmt"
 	"log"
+	"mapeleven/handlers"
+	"mapeleven/initialization"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 
-	"mapeleven/models"
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/migrate"
 )
@@ -19,7 +20,10 @@ import (
 func main() {
 	// Set up Viper configuration
 	viper.SetConfigFile(".env")
-	viper.ReadInConfig()
+	err := viper.ReadInConfig()
+	if err != nil {
+		log.Fatalf("Error reading config file, %s", err)
+	}
 	viper.AutomaticEnv()
 
 	// Build Connection String
@@ -47,16 +51,31 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
+	// Initialize data
+	app.Use(func(c *fiber.Ctx) error {
+		err := initialization.InitializeData(c, client)
+		if err != nil {
+			log.Fatalf("failed initializing data: %v", err)
+		}
+		return c.Next()
+	})
+
 	// Set up routes
-	setupRoutes(app, client)
+	setupAPIRoutes(app)
 
 	fmt.Println("Server is running on port 8080")
 	log.Fatal(app.Listen(":8080"))
 }
 
-func setupRoutes(app *fiber.App, client *ent.Client) {
-	app.Get("/", func(c *fiber.Ctx) error {
-		return models.LoadCountriesFromAPI(c, client)
-		//return models.LoadLeaguesFromAPI(c, client)
+func setupAPIRoutes(app *fiber.App) {
+	// Players endpoints
+	app.Get("/players", func(c *fiber.Ctx) error {
+		return handlers.GetAllPlayers(c)
 	})
+	app.Get("/players/:id", func(c *fiber.Ctx) error {
+		return handlers.GetPlayerByID(c)
+	})
+
+	// Other endpoints
+	// ...
 }
