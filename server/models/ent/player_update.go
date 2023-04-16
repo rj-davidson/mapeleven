@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/models/ent/birth"
-	"mapeleven/models/ent/country"
 	"mapeleven/models/ent/player"
 	"mapeleven/models/ent/predicate"
 	"mapeleven/models/ent/team"
@@ -118,21 +117,6 @@ func (pu *PlayerUpdate) SetBirth(b *Birth) *PlayerUpdate {
 	return pu.SetBirthID(b.ID)
 }
 
-// AddNationalityIDs adds the "nationality" edge to the Country entity by IDs.
-func (pu *PlayerUpdate) AddNationalityIDs(ids ...int) *PlayerUpdate {
-	pu.mutation.AddNationalityIDs(ids...)
-	return pu
-}
-
-// AddNationality adds the "nationality" edges to the Country entity.
-func (pu *PlayerUpdate) AddNationality(c ...*Country) *PlayerUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return pu.AddNationalityIDs(ids...)
-}
-
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
 func (pu *PlayerUpdate) AddTeamIDs(ids ...int) *PlayerUpdate {
 	pu.mutation.AddTeamIDs(ids...)
@@ -157,27 +141,6 @@ func (pu *PlayerUpdate) Mutation() *PlayerMutation {
 func (pu *PlayerUpdate) ClearBirth() *PlayerUpdate {
 	pu.mutation.ClearBirth()
 	return pu
-}
-
-// ClearNationality clears all "nationality" edges to the Country entity.
-func (pu *PlayerUpdate) ClearNationality() *PlayerUpdate {
-	pu.mutation.ClearNationality()
-	return pu
-}
-
-// RemoveNationalityIDs removes the "nationality" edge to Country entities by IDs.
-func (pu *PlayerUpdate) RemoveNationalityIDs(ids ...int) *PlayerUpdate {
-	pu.mutation.RemoveNationalityIDs(ids...)
-	return pu
-}
-
-// RemoveNationality removes "nationality" edges to Country entities.
-func (pu *PlayerUpdate) RemoveNationality(c ...*Country) *PlayerUpdate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return pu.RemoveNationalityIDs(ids...)
 }
 
 // ClearTeams clears all "teams" edges to the Team entity.
@@ -292,51 +255,6 @@ func (pu *PlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(birth.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if pu.mutation.NationalityCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   player.NationalityTable,
-			Columns: []string{player.NationalityColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pu.mutation.RemovedNationalityIDs(); len(nodes) > 0 && !pu.mutation.NationalityCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   player.NationalityTable,
-			Columns: []string{player.NationalityColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pu.mutation.NationalityIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   player.NationalityTable,
-			Columns: []string{player.NationalityColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -497,21 +415,6 @@ func (puo *PlayerUpdateOne) SetBirth(b *Birth) *PlayerUpdateOne {
 	return puo.SetBirthID(b.ID)
 }
 
-// AddNationalityIDs adds the "nationality" edge to the Country entity by IDs.
-func (puo *PlayerUpdateOne) AddNationalityIDs(ids ...int) *PlayerUpdateOne {
-	puo.mutation.AddNationalityIDs(ids...)
-	return puo
-}
-
-// AddNationality adds the "nationality" edges to the Country entity.
-func (puo *PlayerUpdateOne) AddNationality(c ...*Country) *PlayerUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return puo.AddNationalityIDs(ids...)
-}
-
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
 func (puo *PlayerUpdateOne) AddTeamIDs(ids ...int) *PlayerUpdateOne {
 	puo.mutation.AddTeamIDs(ids...)
@@ -536,27 +439,6 @@ func (puo *PlayerUpdateOne) Mutation() *PlayerMutation {
 func (puo *PlayerUpdateOne) ClearBirth() *PlayerUpdateOne {
 	puo.mutation.ClearBirth()
 	return puo
-}
-
-// ClearNationality clears all "nationality" edges to the Country entity.
-func (puo *PlayerUpdateOne) ClearNationality() *PlayerUpdateOne {
-	puo.mutation.ClearNationality()
-	return puo
-}
-
-// RemoveNationalityIDs removes the "nationality" edge to Country entities by IDs.
-func (puo *PlayerUpdateOne) RemoveNationalityIDs(ids ...int) *PlayerUpdateOne {
-	puo.mutation.RemoveNationalityIDs(ids...)
-	return puo
-}
-
-// RemoveNationality removes "nationality" edges to Country entities.
-func (puo *PlayerUpdateOne) RemoveNationality(c ...*Country) *PlayerUpdateOne {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return puo.RemoveNationalityIDs(ids...)
 }
 
 // ClearTeams clears all "teams" edges to the Team entity.
@@ -701,51 +583,6 @@ func (puo *PlayerUpdateOne) sqlSave(ctx context.Context) (_node *Player, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(birth.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if puo.mutation.NationalityCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   player.NationalityTable,
-			Columns: []string{player.NationalityColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := puo.mutation.RemovedNationalityIDs(); len(nodes) > 0 && !puo.mutation.NationalityCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   player.NationalityTable,
-			Columns: []string{player.NationalityColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := puo.mutation.NationalityIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   player.NationalityTable,
-			Columns: []string{player.NationalityColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

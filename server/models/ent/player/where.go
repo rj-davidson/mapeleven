@@ -507,29 +507,6 @@ func HasBirthWith(preds ...predicate.Birth) predicate.Player {
 	})
 }
 
-// HasNationality applies the HasEdge predicate on the "nationality" edge.
-func HasNationality() predicate.Player {
-	return predicate.Player(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, NationalityTable, NationalityColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasNationalityWith applies the HasEdge predicate on the "nationality" edge with a given conditions (other predicates).
-func HasNationalityWith(preds ...predicate.Country) predicate.Player {
-	return predicate.Player(func(s *sql.Selector) {
-		step := newNationalityStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasTeams applies the HasEdge predicate on the "teams" edge.
 func HasTeams() predicate.Player {
 	return predicate.Player(func(s *sql.Selector) {

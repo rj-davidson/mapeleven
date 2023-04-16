@@ -24,9 +24,8 @@ type Country struct {
 	Flag string `json:"flag,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CountryQuery when eager-loading is set.
-	Edges              CountryEdges `json:"edges"`
-	player_nationality *int
-	selectValues       sql.SelectValues
+	Edges        CountryEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // CountryEdges holds the relations/edges for other nodes in the graph.
@@ -78,8 +77,6 @@ func (*Country) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case country.FieldName, country.FieldCode, country.FieldFlag:
 			values[i] = new(sql.NullString)
-		case country.ForeignKeys[0]: // player_nationality
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -118,13 +115,6 @@ func (c *Country) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field flag", values[i])
 			} else if value.Valid {
 				c.Flag = value.String
-			}
-		case country.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_nationality", value)
-			} else if value.Valid {
-				c.player_nationality = new(int)
-				*c.player_nationality = int(value.Int64)
 			}
 		default:
 			c.selectValues.Set(columns[i], values[i])

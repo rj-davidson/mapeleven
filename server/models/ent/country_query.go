@@ -28,7 +28,6 @@ type CountryQuery struct {
 	withPlayers *PlayerQuery
 	withLeagues *LeagueQuery
 	withTeams   *TeamQuery
-	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -442,7 +441,6 @@ func (cq *CountryQuery) prepareQuery(ctx context.Context) error {
 func (cq *CountryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Country, error) {
 	var (
 		nodes       = []*Country{}
-		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
 		loadedTypes = [3]bool{
 			cq.withPlayers != nil,
@@ -450,9 +448,6 @@ func (cq *CountryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Coun
 			cq.withTeams != nil,
 		}
 	)
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, country.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Country).scanValues(nil, columns)
 	}

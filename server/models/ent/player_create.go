@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/models/ent/birth"
-	"mapeleven/models/ent/country"
 	"mapeleven/models/ent/player"
 	"mapeleven/models/ent/team"
 
@@ -93,21 +92,6 @@ func (pc *PlayerCreate) SetNillableBirthID(id *int) *PlayerCreate {
 // SetBirth sets the "birth" edge to the Birth entity.
 func (pc *PlayerCreate) SetBirth(b *Birth) *PlayerCreate {
 	return pc.SetBirthID(b.ID)
-}
-
-// AddNationalityIDs adds the "nationality" edge to the Country entity by IDs.
-func (pc *PlayerCreate) AddNationalityIDs(ids ...int) *PlayerCreate {
-	pc.mutation.AddNationalityIDs(ids...)
-	return pc
-}
-
-// AddNationality adds the "nationality" edges to the Country entity.
-func (pc *PlayerCreate) AddNationality(c ...*Country) *PlayerCreate {
-	ids := make([]int, len(c))
-	for i := range c {
-		ids[i] = c[i].ID
-	}
-	return pc.AddNationalityIDs(ids...)
 }
 
 // AddTeamIDs adds the "teams" edge to the Team entity by IDs.
@@ -256,22 +240,6 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(birth.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := pc.mutation.NationalityIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   player.NationalityTable,
-			Columns: []string{player.NationalityColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

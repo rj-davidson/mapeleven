@@ -44,13 +44,11 @@ type Player struct {
 type PlayerEdges struct {
 	// Birth holds the value of the birth edge.
 	Birth *Birth `json:"birth,omitempty"`
-	// Nationality holds the value of the nationality edge.
-	Nationality []*Country `json:"nationality,omitempty"`
 	// Teams holds the value of the teams edge.
 	Teams []*Team `json:"teams,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [2]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -66,19 +64,10 @@ func (e PlayerEdges) BirthOrErr() (*Birth, error) {
 	return nil, &NotLoadedError{edge: "birth"}
 }
 
-// NationalityOrErr returns the Nationality value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerEdges) NationalityOrErr() ([]*Country, error) {
-	if e.loadedTypes[1] {
-		return e.Nationality, nil
-	}
-	return nil, &NotLoadedError{edge: "nationality"}
-}
-
 // TeamsOrErr returns the Teams value or an error if the edge
 // was not loaded in eager-loading.
 func (e PlayerEdges) TeamsOrErr() ([]*Team, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		return e.Teams, nil
 	}
 	return nil, &NotLoadedError{edge: "teams"}
@@ -191,11 +180,6 @@ func (pl *Player) Value(name string) (ent.Value, error) {
 // QueryBirth queries the "birth" edge of the Player entity.
 func (pl *Player) QueryBirth() *BirthQuery {
 	return NewPlayerClient(pl.config).QueryBirth(pl)
-}
-
-// QueryNationality queries the "nationality" edge of the Player entity.
-func (pl *Player) QueryNationality() *CountryQuery {
-	return NewPlayerClient(pl.config).QueryNationality(pl)
 }
 
 // QueryTeams queries the "teams" edge of the Player entity.

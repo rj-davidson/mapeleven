@@ -836,22 +836,6 @@ func (c *PlayerClient) QueryBirth(pl *Player) *BirthQuery {
 	return query
 }
 
-// QueryNationality queries the nationality edge of a Player.
-func (c *PlayerClient) QueryNationality(pl *Player) *CountryQuery {
-	query := (&CountryClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(country.Table, country.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, player.NationalityTable, player.NationalityColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryTeams queries the teams edge of a Player.
 func (c *PlayerClient) QueryTeams(pl *Player) *TeamQuery {
 	query := (&TeamClient{config: c.config}).Query()

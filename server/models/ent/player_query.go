@@ -7,7 +7,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"mapeleven/models/ent/birth"
-	"mapeleven/models/ent/country"
 	"mapeleven/models/ent/player"
 	"mapeleven/models/ent/predicate"
 	"mapeleven/models/ent/team"
@@ -21,14 +20,13 @@ import (
 // PlayerQuery is the builder for querying Player entities.
 type PlayerQuery struct {
 	config
-	ctx             *QueryContext
-	order           []player.Order
-	inters          []Interceptor
-	predicates      []predicate.Player
-	withBirth       *BirthQuery
-	withNationality *CountryQuery
-	withTeams       *TeamQuery
-	withFKs         bool
+	ctx        *QueryContext
+	order      []player.Order
+	inters     []Interceptor
+	predicates []predicate.Player
+	withBirth  *BirthQuery
+	withTeams  *TeamQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,28 +78,6 @@ func (pq *PlayerQuery) QueryBirth() *BirthQuery {
 			sqlgraph.From(player.Table, player.FieldID, selector),
 			sqlgraph.To(birth.Table, birth.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, player.BirthTable, player.BirthColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryNationality chains the current query on the "nationality" edge.
-func (pq *PlayerQuery) QueryNationality() *CountryQuery {
-	query := (&CountryClient{config: pq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, selector),
-			sqlgraph.To(country.Table, country.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, player.NationalityTable, player.NationalityColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +294,13 @@ func (pq *PlayerQuery) Clone() *PlayerQuery {
 		return nil
 	}
 	return &PlayerQuery{
-		config:          pq.config,
-		ctx:             pq.ctx.Clone(),
-		order:           append([]player.Order{}, pq.order...),
-		inters:          append([]Interceptor{}, pq.inters...),
-		predicates:      append([]predicate.Player{}, pq.predicates...),
-		withBirth:       pq.withBirth.Clone(),
-		withNationality: pq.withNationality.Clone(),
-		withTeams:       pq.withTeams.Clone(),
+		config:     pq.config,
+		ctx:        pq.ctx.Clone(),
+		order:      append([]player.Order{}, pq.order...),
+		inters:     append([]Interceptor{}, pq.inters...),
+		predicates: append([]predicate.Player{}, pq.predicates...),
+		withBirth:  pq.withBirth.Clone(),
+		withTeams:  pq.withTeams.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -340,17 +315,6 @@ func (pq *PlayerQuery) WithBirth(opts ...func(*BirthQuery)) *PlayerQuery {
 		opt(query)
 	}
 	pq.withBirth = query
-	return pq
-}
-
-// WithNationality tells the query-builder to eager-load the nodes that are connected to
-// the "nationality" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *PlayerQuery) WithNationality(opts ...func(*CountryQuery)) *PlayerQuery {
-	query := (&CountryClient{config: pq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	pq.withNationality = query
 	return pq
 }
 
@@ -444,9 +408,8 @@ func (pq *PlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Playe
 		nodes       = []*Player{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			pq.withBirth != nil,
-			pq.withNationality != nil,
 			pq.withTeams != nil,
 		}
 	)
@@ -474,13 +437,6 @@ func (pq *PlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Playe
 	if query := pq.withBirth; query != nil {
 		if err := pq.loadBirth(ctx, query, nodes, nil,
 			func(n *Player, e *Birth) { n.Edges.Birth = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := pq.withNationality; query != nil {
-		if err := pq.loadNationality(ctx, query, nodes,
-			func(n *Player) { n.Edges.Nationality = []*Country{} },
-			func(n *Player, e *Country) { n.Edges.Nationality = append(n.Edges.Nationality, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -517,37 +473,6 @@ func (pq *PlayerQuery) loadBirth(ctx context.Context, query *BirthQuery, nodes [
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "player_birth" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (pq *PlayerQuery) loadNationality(ctx context.Context, query *CountryQuery, nodes []*Player, init func(*Player), assign func(*Player, *Country)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Player)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Country(func(s *sql.Selector) {
-		s.Where(sql.InValues(player.NationalityColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.player_nationality
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "player_nationality" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_nationality" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

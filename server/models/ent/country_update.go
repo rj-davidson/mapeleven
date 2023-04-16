@@ -30,18 +30,6 @@ func (cu *CountryUpdate) Where(ps ...predicate.Country) *CountryUpdate {
 	return cu
 }
 
-// SetName sets the "name" field.
-func (cu *CountryUpdate) SetName(s string) *CountryUpdate {
-	cu.mutation.SetName(s)
-	return cu
-}
-
-// SetCode sets the "code" field.
-func (cu *CountryUpdate) SetCode(s string) *CountryUpdate {
-	cu.mutation.SetCode(s)
-	return cu
-}
-
 // SetFlag sets the "flag" field.
 func (cu *CountryUpdate) SetFlag(s string) *CountryUpdate {
 	cu.mutation.SetFlag(s)
@@ -196,12 +184,6 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cu.mutation.Name(); ok {
-		_spec.SetField(country.FieldName, field.TypeString, value)
-	}
-	if value, ok := cu.mutation.Code(); ok {
-		_spec.SetField(country.FieldCode, field.TypeString, value)
 	}
 	if value, ok := cu.mutation.Flag(); ok {
 		_spec.SetField(country.FieldFlag, field.TypeString, value)
@@ -359,18 +341,6 @@ type CountryUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *CountryMutation
-}
-
-// SetName sets the "name" field.
-func (cuo *CountryUpdateOne) SetName(s string) *CountryUpdateOne {
-	cuo.mutation.SetName(s)
-	return cuo
-}
-
-// SetCode sets the "code" field.
-func (cuo *CountryUpdateOne) SetCode(s string) *CountryUpdateOne {
-	cuo.mutation.SetCode(s)
-	return cuo
 }
 
 // SetFlag sets the "flag" field.
@@ -557,12 +527,6 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 				ps[i](selector)
 			}
 		}
-	}
-	if value, ok := cuo.mutation.Name(); ok {
-		_spec.SetField(country.FieldName, field.TypeString, value)
-	}
-	if value, ok := cuo.mutation.Code(); ok {
-		_spec.SetField(country.FieldCode, field.TypeString, value)
 	}
 	if value, ok := cuo.mutation.Flag(); ok {
 		_spec.SetField(country.FieldFlag, field.TypeString, value)

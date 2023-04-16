@@ -33,24 +33,15 @@ var (
 	// CountriesColumns holds the columns for the "countries" table.
 	CountriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "code", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString, Unique: true},
+		{Name: "code", Type: field.TypeString, Unique: true},
 		{Name: "flag", Type: field.TypeString},
-		{Name: "player_nationality", Type: field.TypeInt, Nullable: true},
 	}
 	// CountriesTable holds the schema information for the "countries" table.
 	CountriesTable = &schema.Table{
 		Name:       "countries",
 		Columns:    CountriesColumns,
 		PrimaryKey: []*schema.Column{CountriesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "countries_players_nationality",
-				Columns:    []*schema.Column{CountriesColumns[4]},
-				RefColumns: []*schema.Column{PlayersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// LeaguesColumns holds the columns for the "leagues" table.
 	LeaguesColumns = []*schema.Column{
@@ -242,7 +233,6 @@ var (
 
 func init() {
 	BirthsTable.ForeignKeys[0].RefTable = PlayersTable
-	CountriesTable.ForeignKeys[0].RefTable = PlayersTable
 	LeaguesTable.ForeignKeys[0].RefTable = CountriesTable
 	PlayersTable.ForeignKeys[0].RefTable = CountriesTable
 	SeasonsTable.ForeignKeys[0].RefTable = LeaguesTable

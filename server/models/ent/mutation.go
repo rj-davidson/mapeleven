@@ -1994,32 +1994,29 @@ func (m *LeagueMutation) ResetEdge(name string) error {
 // PlayerMutation represents an operation that mutates the Player nodes in the graph.
 type PlayerMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	name               *string
-	firstname          *string
-	lastname           *string
-	age                *int
-	addage             *int
-	height             *float64
-	addheight          *float64
-	weight             *float64
-	addweight          *float64
-	injured            *bool
-	photo              *string
-	clearedFields      map[string]struct{}
-	birth              *int
-	clearedbirth       bool
-	nationality        map[int]struct{}
-	removednationality map[int]struct{}
-	clearednationality bool
-	teams              map[int]struct{}
-	removedteams       map[int]struct{}
-	clearedteams       bool
-	done               bool
-	oldValue           func(context.Context) (*Player, error)
-	predicates         []predicate.Player
+	op            Op
+	typ           string
+	id            *int
+	name          *string
+	firstname     *string
+	lastname      *string
+	age           *int
+	addage        *int
+	height        *float64
+	addheight     *float64
+	weight        *float64
+	addweight     *float64
+	injured       *bool
+	photo         *string
+	clearedFields map[string]struct{}
+	birth         *int
+	clearedbirth  bool
+	teams         map[int]struct{}
+	removedteams  map[int]struct{}
+	clearedteams  bool
+	done          bool
+	oldValue      func(context.Context) (*Player, error)
+	predicates    []predicate.Player
 }
 
 var _ ent.Mutation = (*PlayerMutation)(nil)
@@ -2513,60 +2510,6 @@ func (m *PlayerMutation) ResetBirth() {
 	m.clearedbirth = false
 }
 
-// AddNationalityIDs adds the "nationality" edge to the Country entity by ids.
-func (m *PlayerMutation) AddNationalityIDs(ids ...int) {
-	if m.nationality == nil {
-		m.nationality = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.nationality[ids[i]] = struct{}{}
-	}
-}
-
-// ClearNationality clears the "nationality" edge to the Country entity.
-func (m *PlayerMutation) ClearNationality() {
-	m.clearednationality = true
-}
-
-// NationalityCleared reports if the "nationality" edge to the Country entity was cleared.
-func (m *PlayerMutation) NationalityCleared() bool {
-	return m.clearednationality
-}
-
-// RemoveNationalityIDs removes the "nationality" edge to the Country entity by IDs.
-func (m *PlayerMutation) RemoveNationalityIDs(ids ...int) {
-	if m.removednationality == nil {
-		m.removednationality = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.nationality, ids[i])
-		m.removednationality[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedNationality returns the removed IDs of the "nationality" edge to the Country entity.
-func (m *PlayerMutation) RemovedNationalityIDs() (ids []int) {
-	for id := range m.removednationality {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// NationalityIDs returns the "nationality" edge IDs in the mutation.
-func (m *PlayerMutation) NationalityIDs() (ids []int) {
-	for id := range m.nationality {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetNationality resets all changes to the "nationality" edge.
-func (m *PlayerMutation) ResetNationality() {
-	m.nationality = nil
-	m.clearednationality = false
-	m.removednationality = nil
-}
-
 // AddTeamIDs adds the "teams" edge to the Team entity by ids.
 func (m *PlayerMutation) AddTeamIDs(ids ...int) {
 	if m.teams == nil {
@@ -2912,12 +2855,9 @@ func (m *PlayerMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PlayerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.birth != nil {
 		edges = append(edges, player.EdgeBirth)
-	}
-	if m.nationality != nil {
-		edges = append(edges, player.EdgeNationality)
 	}
 	if m.teams != nil {
 		edges = append(edges, player.EdgeTeams)
@@ -2933,12 +2873,6 @@ func (m *PlayerMutation) AddedIDs(name string) []ent.Value {
 		if id := m.birth; id != nil {
 			return []ent.Value{*id}
 		}
-	case player.EdgeNationality:
-		ids := make([]ent.Value, 0, len(m.nationality))
-		for id := range m.nationality {
-			ids = append(ids, id)
-		}
-		return ids
 	case player.EdgeTeams:
 		ids := make([]ent.Value, 0, len(m.teams))
 		for id := range m.teams {
@@ -2951,10 +2885,7 @@ func (m *PlayerMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PlayerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
-	if m.removednationality != nil {
-		edges = append(edges, player.EdgeNationality)
-	}
+	edges := make([]string, 0, 2)
 	if m.removedteams != nil {
 		edges = append(edges, player.EdgeTeams)
 	}
@@ -2965,12 +2896,6 @@ func (m *PlayerMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *PlayerMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case player.EdgeNationality:
-		ids := make([]ent.Value, 0, len(m.removednationality))
-		for id := range m.removednationality {
-			ids = append(ids, id)
-		}
-		return ids
 	case player.EdgeTeams:
 		ids := make([]ent.Value, 0, len(m.removedteams))
 		for id := range m.removedteams {
@@ -2983,12 +2908,9 @@ func (m *PlayerMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PlayerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedbirth {
 		edges = append(edges, player.EdgeBirth)
-	}
-	if m.clearednationality {
-		edges = append(edges, player.EdgeNationality)
 	}
 	if m.clearedteams {
 		edges = append(edges, player.EdgeTeams)
@@ -3002,8 +2924,6 @@ func (m *PlayerMutation) EdgeCleared(name string) bool {
 	switch name {
 	case player.EdgeBirth:
 		return m.clearedbirth
-	case player.EdgeNationality:
-		return m.clearednationality
 	case player.EdgeTeams:
 		return m.clearedteams
 	}
@@ -3027,9 +2947,6 @@ func (m *PlayerMutation) ResetEdge(name string) error {
 	switch name {
 	case player.EdgeBirth:
 		m.ResetBirth()
-		return nil
-	case player.EdgeNationality:
-		m.ResetNationality()
 		return nil
 	case player.EdgeTeams:
 		m.ResetTeams()

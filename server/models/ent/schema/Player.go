@@ -31,7 +31,6 @@ func (Player) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("birth", Birth.Type).
 			Unique(),
-		edge.To("nationality", Country.Type),
 		edge.From("teams", Team.Type).
 			Ref("players"),
 	}

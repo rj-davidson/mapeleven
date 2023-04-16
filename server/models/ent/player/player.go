@@ -30,8 +30,6 @@ const (
 	FieldPhoto = "photo"
 	// EdgeBirth holds the string denoting the birth edge name in mutations.
 	EdgeBirth = "birth"
-	// EdgeNationality holds the string denoting the nationality edge name in mutations.
-	EdgeNationality = "nationality"
 	// EdgeTeams holds the string denoting the teams edge name in mutations.
 	EdgeTeams = "teams"
 	// Table holds the table name of the player in the database.
@@ -43,13 +41,6 @@ const (
 	BirthInverseTable = "births"
 	// BirthColumn is the table column denoting the birth relation/edge.
 	BirthColumn = "player_birth"
-	// NationalityTable is the table that holds the nationality relation/edge.
-	NationalityTable = "countries"
-	// NationalityInverseTable is the table name for the Country entity.
-	// It exists in this package in order to avoid circular dependency with the "country" package.
-	NationalityInverseTable = "countries"
-	// NationalityColumn is the table column denoting the nationality relation/edge.
-	NationalityColumn = "player_nationality"
 	// TeamsTable is the table that holds the teams relation/edge. The primary key declared below.
 	TeamsTable = "team_players"
 	// TeamsInverseTable is the table name for the Team entity.
@@ -152,20 +143,6 @@ func ByBirthField(field string, opts ...sql.OrderTermOption) Order {
 	}
 }
 
-// ByNationalityCount orders the results by nationality count.
-func ByNationalityCount(opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newNationalityStep(), opts...)
-	}
-}
-
-// ByNationality orders the results by nationality terms.
-func ByNationality(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newNationalityStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByTeamsCount orders the results by teams count.
 func ByTeamsCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
@@ -184,13 +161,6 @@ func newBirthStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BirthInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, BirthTable, BirthColumn),
-	)
-}
-func newNationalityStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(NationalityInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, NationalityTable, NationalityColumn),
 	)
 }
 func newTeamsStep() *sqlgraph.Step {
