@@ -12,10 +12,10 @@ const (
 	Label = "country"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
 	// FieldCode holds the string denoting the code field in the database.
 	FieldCode = "code"
+	// FieldName holds the string denoting the name field in the database.
+	FieldName = "name"
 	// FieldFlag holds the string denoting the flag field in the database.
 	FieldFlag = "flag"
 	// EdgePlayers holds the string denoting the players edge name in mutations.
@@ -52,8 +52,8 @@ const (
 // Columns holds all SQL columns for country fields.
 var Columns = []string{
 	FieldID,
-	FieldName,
 	FieldCode,
+	FieldName,
 	FieldFlag,
 }
 
@@ -67,6 +67,11 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	CodeValidator func(string) error
+)
+
 // Order defines the ordering method for the Country queries.
 type Order func(*sql.Selector)
 
@@ -75,14 +80,14 @@ func ByID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
 // ByCode orders the results by the code field.
 func ByCode(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldCode, opts...).ToFunc()
+}
+
+// ByName orders the results by the name field.
+func ByName(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldName, opts...).ToFunc()
 }
 
 // ByFlag orders the results by the flag field.

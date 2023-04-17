@@ -14,8 +14,14 @@ type Country struct {
 // Fields of the Country.
 func (Country) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("name").Unique().Immutable(),
-		field.String("code").Unique().Immutable(),
+		field.String("code").
+			Unique().
+			Immutable().
+			MaxLen(3).
+			StorageKey("code"),
+		field.String("name").
+			Unique().
+			Immutable(),
 		field.String("flag"),
 	}
 }

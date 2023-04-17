@@ -25,12 +25,12 @@ const (
 	// Table holds the table name of the season in the database.
 	Table = "seasons"
 	// LeagueTable is the table that holds the league relation/edge.
-	LeagueTable = "seasons"
+	LeagueTable = "leagues"
 	// LeagueInverseTable is the table name for the League entity.
 	// It exists in this package in order to avoid circular dependency with the "league" package.
 	LeagueInverseTable = "leagues"
 	// LeagueColumn is the table column denoting the league relation/edge.
-	LeagueColumn = "league_seasons"
+	LeagueColumn = "season_league"
 )
 
 // Columns holds all SQL columns for season fields.
@@ -42,21 +42,10 @@ var Columns = []string{
 	FieldCurrent,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "seasons"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"league_seasons",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -106,6 +95,6 @@ func newLeagueStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LeagueInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LeagueTable, LeagueColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, LeagueTable, LeagueColumn),
 	)
 }

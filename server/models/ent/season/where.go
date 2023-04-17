@@ -210,7 +210,7 @@ func HasLeague() predicate.Season {
 	return predicate.Season(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LeagueTable, LeagueColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, LeagueTable, LeagueColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

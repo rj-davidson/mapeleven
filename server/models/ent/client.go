@@ -638,15 +638,15 @@ func (c *LeagueClient) GetX(ctx context.Context, id int) *League {
 	return obj
 }
 
-// QuerySeasons queries the seasons edge of a League.
-func (c *LeagueClient) QuerySeasons(l *League) *SeasonQuery {
+// QuerySeason queries the season edge of a League.
+func (c *LeagueClient) QuerySeason(l *League) *SeasonQuery {
 	query := (&SeasonClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := l.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(league.Table, league.FieldID, id),
 			sqlgraph.To(season.Table, season.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, league.SeasonsTable, league.SeasonsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, league.SeasonTable, league.SeasonColumn),
 		)
 		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
 		return fromV, nil
@@ -978,7 +978,7 @@ func (c *SeasonClient) QueryLeague(s *Season) *LeagueQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(season.Table, season.FieldID, id),
 			sqlgraph.To(league.Table, league.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, season.LeagueTable, season.LeagueColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, season.LeagueTable, season.LeagueColumn),
 		)
 		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil

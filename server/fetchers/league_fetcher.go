@@ -1,126 +1,116 @@
 package fetchers
 
 import (
+	"context"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"io/ioutil"
 	"mapeleven/models"
+	"mapeleven/models/ent"
 	"mapeleven/models/ent/league"
 	"net/http"
-	"strings"
 )
 
 type LeagueFetcher struct {
-	apiKey        string
-	client        *http.Client
-	leagueModel   *models.LeagueModel
-	countryModel  *models.CountryModel
-	seasonModel   *models.SeasonModel
-	apiBaseURL    string
-	apiLeaguePath string
+	client         *http.Client
+	leagueModel    *models.LeagueModel
+	countryFetcher *CountryFetcher
 }
 
-type APIResponse struct {
-	Results  int                `json:"results"`
-	Response []APILeagueWrapper `json:"response"`
-}
-
-type APILeagueWrapper struct {
-	League APILeague `json:"league"`
+type APILeagueResponse struct {
+	Response []struct {
+		League  APILeague                 `json:"league"`
+		Country models.CreateCountryInput `json:"country"`
+	} `json:"response"`
 }
 
 type APILeague struct {
-	ID      int    `json:"id"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
-	Logo    string `json:"logo"`
-	Country struct {
-		ID int `json:"id"`
-	} `json:"country"`
+	ID   int         `json:"id"`
+	Name string      `json:"name"`
+	Type league.Type `json:"type"`
+	Logo string      `json:"logo"`
 }
 
-func NewLeagueFetcher(apiKey string, leagueModel *models.LeagueModel, countryModel *models.CountryModel, seasonModel *models.SeasonModel) *LeagueFetcher {
+func NewLeagueFetcher(leagueModel *models.LeagueModel, countryFetcher *CountryFetcher) *LeagueFetcher {
 	return &LeagueFetcher{
-		apiKey:        apiKey,
-		client:        &http.Client{},
-		leagueModel:   leagueModel,
-		countryModel:  countryModel,
-		seasonModel:   seasonModel,
-		apiBaseURL:    "https://api-football-v1.p.rapidapi.com",
-		apiLeaguePath: "/v3/leagues",
+		client:         &http.Client{},
+		leagueModel:    leagueModel,
+		countryFetcher: countryFetcher,
 	}
 }
 
-func (lf *LeagueFetcher) FetchLeague(leagueID int) error {
-	leag, err := lf.fetchLeague(leagueID)
+func (lf *LeagueFetcher) FetchLeagueData(url string) (models.CreateLeagueInput, models.CreateCountryInput, error) {
+	resp, err := http.Get(url)
 	if err != nil {
-		return err
-	}
-
-	input := models.CreateLeagueInput{
-		ID:      leag.ID,
-		Name:    leag.Name,
-		Type:    leagueType(leag.Type),
-		Logo:    leag.Logo,
-		Country: leag.Country.ID,
-	}
-
-	_, err = lf.leagueModel.CreateLeague(input)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (lf *LeagueFetcher) fetchLeague(id int) (*APILeague, error) {
-	url := fmt.Sprintf("%s%s?id=%d", lf.apiBaseURL, lf.apiLeaguePath, id)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
-	}
-	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
-	req.Header.Add("x-rapidapi-key", lf.apiKey)
-
-	resp, err := lf.client.Do(req)
-	if err != nil {
-		return nil, err
+		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
 	}
 
-	var apiResponse APIResponse
-	err = json.Unmarshal(body, &apiResponse)
+	var apiResponse APILeagueResponse
+	err = json.Unmarshal(data, &apiResponse)
 	if err != nil {
-		return nil, err
+		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
 	}
 
-	if len(apiResponse.Response) == 0 {
-		return nil, fmt.Errorf("league not found")
+	inputData := models.CreateLeagueInput{
+		ID:      apiResponse.Response[0].League.ID,
+		Name:    apiResponse.Response[0].League.Name,
+		Type:    apiResponse.Response[0].League.Type,
+		Logo:    apiResponse.Response[0].League.Logo,
+		Country: apiResponse.Response[0].Country.Code,
 	}
 
-	l := apiResponse.Response[0].League
-	l.Type = string(leagueType(l.Type))
-
-	return &l, nil
+	return inputData, apiResponse.Response[0].Country, nil
 }
 
-func leagueType(typ string) league.Type {
-	typ = strings.ToLower(typ)
-	switch typ {
-	case "league":
-		return league.TypeLeague
-	case "cup":
-		return league.TypeCup
-	case "tournament":
-		return league.TypeTournament
-	case "friendly":
-		return league.TypeFriendly
-	default:
-		return league.TypeLeague
+func (lf *LeagueFetcher) UpsertLeague(url string) (*ent.League, error) {
+	ctx := context.Background()
+
+	inputData, inputCountry, err := lf.FetchLeagueData(url)
+	if err != nil {
+		return nil, err
+	}
+
+	// Upsert the foreign key (Country) if necessary
+	upsertedCountry, err := lf.countryFetcher.FetchCountry(ctx, inputCountry.Code)
+	if err != nil {
+		return nil, err
+	}
+
+	// Use the upserted country's ID for inputData
+	inputData.Country = upsertedCountry.Code
+
+	// Check if the league exists
+	_, err = lf.leagueModel.GetLeague(inputData.ID)
+
+	if ent.IsNotFound(errors.Unwrap(err)) {
+		// Create the league if it doesn't exist
+		newLeague, err := lf.leagueModel.CreateLeague(inputData)
+		if err != nil {
+			return nil, err
+		}
+		return newLeague, nil
+	} else if err == nil {
+		// Update the league if it exists
+		updateInput := models.UpdateLeagueInput{
+			ID:      inputData.ID,
+			Name:    &inputData.Name,
+			Type:    &inputData.Type,
+			Logo:    &inputData.Logo,
+			Country: &upsertedCountry.ID,
+		}
+		updatedLeague, err := lf.leagueModel.UpdateLeague(updateInput)
+		if err != nil {
+			return nil, err
+		}
+		return updatedLeague, nil
+	} else {
+		// Return any other error that may occur
+		return nil, err
 	}
 }

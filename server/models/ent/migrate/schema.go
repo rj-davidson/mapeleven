@@ -33,8 +33,8 @@ var (
 	// CountriesColumns holds the columns for the "countries" table.
 	CountriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "code", Type: field.TypeString, Unique: true, Size: 3},
 		{Name: "name", Type: field.TypeString, Unique: true},
-		{Name: "code", Type: field.TypeString, Unique: true},
 		{Name: "flag", Type: field.TypeString},
 	}
 	// CountriesTable holds the schema information for the "countries" table.
@@ -50,6 +50,7 @@ var (
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"League", "Cup", "Tournament", "Friendly"}},
 		{Name: "logo", Type: field.TypeString},
 		{Name: "country_leagues", Type: field.TypeInt, Nullable: true},
+		{Name: "season_league", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// LeaguesTable holds the schema information for the "leagues" table.
 	LeaguesTable = &schema.Table{
@@ -61,6 +62,12 @@ var (
 				Symbol:     "leagues_countries_leagues",
 				Columns:    []*schema.Column{LeaguesColumns[4]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "leagues_seasons_league",
+				Columns:    []*schema.Column{LeaguesColumns[5]},
+				RefColumns: []*schema.Column{SeasonsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -99,21 +106,12 @@ var (
 		{Name: "start", Type: field.TypeTime},
 		{Name: "end", Type: field.TypeTime},
 		{Name: "current", Type: field.TypeBool, Default: false},
-		{Name: "league_seasons", Type: field.TypeInt, Nullable: true},
 	}
 	// SeasonsTable holds the schema information for the "seasons" table.
 	SeasonsTable = &schema.Table{
 		Name:       "seasons",
 		Columns:    SeasonsColumns,
 		PrimaryKey: []*schema.Column{SeasonsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "seasons_leagues_seasons",
-				Columns:    []*schema.Column{SeasonsColumns[5]},
-				RefColumns: []*schema.Column{LeaguesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// StandingsColumns holds the columns for the "standings" table.
 	StandingsColumns = []*schema.Column{
@@ -234,8 +232,8 @@ var (
 func init() {
 	BirthsTable.ForeignKeys[0].RefTable = PlayersTable
 	LeaguesTable.ForeignKeys[0].RefTable = CountriesTable
+	LeaguesTable.ForeignKeys[1].RefTable = SeasonsTable
 	PlayersTable.ForeignKeys[0].RefTable = CountriesTable
-	SeasonsTable.ForeignKeys[0].RefTable = LeaguesTable
 	StandingsTable.ForeignKeys[0].RefTable = LeaguesTable
 	StandingsTable.ForeignKeys[1].RefTable = TeamsTable
 	TeamsTable.ForeignKeys[0].RefTable = CountriesTable

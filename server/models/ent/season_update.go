@@ -151,8 +151,8 @@ func (su *SeasonUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if su.mutation.LeagueCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   season.LeagueTable,
 			Columns: []string{season.LeagueColumn},
 			Bidi:    false,
@@ -164,8 +164,8 @@ func (su *SeasonUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := su.mutation.LeagueIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   season.LeagueTable,
 			Columns: []string{season.LeagueColumn},
 			Bidi:    false,
@@ -350,8 +350,8 @@ func (suo *SeasonUpdateOne) sqlSave(ctx context.Context) (_node *Season, err err
 	}
 	if suo.mutation.LeagueCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   season.LeagueTable,
 			Columns: []string{season.LeagueColumn},
 			Bidi:    false,
@@ -363,8 +363,8 @@ func (suo *SeasonUpdateOne) sqlSave(ctx context.Context) (_node *Season, err err
 	}
 	if nodes := suo.mutation.LeagueIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
 			Table:   season.LeagueTable,
 			Columns: []string{season.LeagueColumn},
 			Bidi:    false,

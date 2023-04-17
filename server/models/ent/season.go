@@ -28,9 +28,8 @@ type Season struct {
 	Current bool `json:"current,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SeasonQuery when eager-loading is set.
-	Edges          SeasonEdges `json:"edges"`
-	league_seasons *int
-	selectValues   sql.SelectValues
+	Edges        SeasonEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // SeasonEdges holds the relations/edges for other nodes in the graph.
@@ -66,8 +65,6 @@ func (*Season) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case season.FieldStart, season.FieldEnd:
 			values[i] = new(sql.NullTime)
-		case season.ForeignKeys[0]: // league_seasons
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -112,13 +109,6 @@ func (s *Season) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field current", values[i])
 			} else if value.Valid {
 				s.Current = value.Bool
-			}
-		case season.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field league_seasons", value)
-			} else if value.Valid {
-				s.league_seasons = new(int)
-				*s.league_seasons = int(value.Int64)
 			}
 		default:
 			s.selectValues.Set(columns[i], values[i])

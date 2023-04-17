@@ -214,21 +214,21 @@ func LogoContainsFold(v string) predicate.League {
 	return predicate.League(sql.FieldContainsFold(FieldLogo, v))
 }
 
-// HasSeasons applies the HasEdge predicate on the "seasons" edge.
-func HasSeasons() predicate.League {
+// HasSeason applies the HasEdge predicate on the "season" edge.
+func HasSeason() predicate.League {
 	return predicate.League(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, SeasonsTable, SeasonsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, SeasonTable, SeasonColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasSeasonsWith applies the HasEdge predicate on the "seasons" edge with a given conditions (other predicates).
-func HasSeasonsWith(preds ...predicate.Season) predicate.League {
+// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
+func HasSeasonWith(preds ...predicate.Season) predicate.League {
 	return predicate.League(func(s *sql.Selector) {
-		step := newSeasonsStep()
+		step := newSeasonStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

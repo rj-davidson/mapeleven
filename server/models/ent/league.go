@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"mapeleven/models/ent/country"
 	"mapeleven/models/ent/league"
+	"mapeleven/models/ent/season"
 	"strings"
 
 	"entgo.io/ent"
@@ -27,13 +28,14 @@ type League struct {
 	// The values are being populated by the LeagueQuery when eager-loading is set.
 	Edges           LeagueEdges `json:"edges"`
 	country_leagues *int
+	season_league   *int
 	selectValues    sql.SelectValues
 }
 
 // LeagueEdges holds the relations/edges for other nodes in the graph.
 type LeagueEdges struct {
-	// Seasons holds the value of the seasons edge.
-	Seasons []*Season `json:"seasons,omitempty"`
+	// Season holds the value of the season edge.
+	Season *Season `json:"season,omitempty"`
 	// Standings holds the value of the standings edge.
 	Standings []*Standings `json:"standings,omitempty"`
 	// Teams holds the value of the teams edge.
@@ -45,13 +47,17 @@ type LeagueEdges struct {
 	loadedTypes [4]bool
 }
 
-// SeasonsOrErr returns the Seasons value or an error if the edge
-// was not loaded in eager-loading.
-func (e LeagueEdges) SeasonsOrErr() ([]*Season, error) {
+// SeasonOrErr returns the Season value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e LeagueEdges) SeasonOrErr() (*Season, error) {
 	if e.loadedTypes[0] {
-		return e.Seasons, nil
+		if e.Season == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: season.Label}
+		}
+		return e.Season, nil
 	}
-	return nil, &NotLoadedError{edge: "seasons"}
+	return nil, &NotLoadedError{edge: "season"}
 }
 
 // StandingsOrErr returns the Standings value or an error if the edge
@@ -95,6 +101,8 @@ func (*League) scanValues(columns []string) ([]any, error) {
 		case league.FieldName, league.FieldType, league.FieldLogo:
 			values[i] = new(sql.NullString)
 		case league.ForeignKeys[0]: // country_leagues
+			values[i] = new(sql.NullInt64)
+		case league.ForeignKeys[1]: // season_league
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -142,6 +150,13 @@ func (l *League) assignValues(columns []string, values []any) error {
 				l.country_leagues = new(int)
 				*l.country_leagues = int(value.Int64)
 			}
+		case league.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field season_league", value)
+			} else if value.Valid {
+				l.season_league = new(int)
+				*l.season_league = int(value.Int64)
+			}
 		default:
 			l.selectValues.Set(columns[i], values[i])
 		}
@@ -155,9 +170,9 @@ func (l *League) Value(name string) (ent.Value, error) {
 	return l.selectValues.Get(name)
 }
 
-// QuerySeasons queries the "seasons" edge of the League entity.
-func (l *League) QuerySeasons() *SeasonQuery {
-	return NewLeagueClient(l.config).QuerySeasons(l)
+// QuerySeason queries the "season" edge of the League entity.
+func (l *League) QuerySeason() *SeasonQuery {
+	return NewLeagueClient(l.config).QuerySeason(l)
 }
 
 // QueryStandings queries the "standings" edge of the League entity.

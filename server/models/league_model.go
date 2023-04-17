@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"mapeleven/models/ent"
+	"mapeleven/models/ent/country"
 	"mapeleven/models/ent/league"
 )
 
@@ -13,7 +14,7 @@ type CreateLeagueInput struct {
 	Name    string
 	Type    league.Type
 	Logo    string
-	Country int
+	Country string
 }
 
 // UpdateLeagueInput holds the input data needed to update an existing league record.
@@ -37,13 +38,24 @@ func NewLeagueModel(client *ent.Client) *LeagueModel {
 
 // CreateLeague creates a new league record.
 func (lm *LeagueModel) CreateLeague(input CreateLeagueInput) (*ent.League, error) {
+	// Find the country by its code
+	c, err := lm.client.Country.
+		Query().
+		Where(country.CodeEQ(input.Country)).
+		Only(context.Background())
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Use the country's ID instead of the country code
 	return lm.client.League.
 		Create().
 		SetID(input.ID).
 		SetName(input.Name).
 		SetType(input.Type).
 		SetLogo(input.Logo).
-		SetCountryID(input.Country).
+		SetCountryID(c.ID). // Set the country ID here
 		Save(context.Background())
 }
 
@@ -83,7 +95,7 @@ func (lm *LeagueModel) GetLeagueSeason(ctx context.Context, leagueID int) (*ent.
 	season, err := lm.client.League.
 		Query().
 		Where(league.ID(leagueID)).
-		QuerySeasons().
+		QuerySeason().
 		Only(ctx)
 
 	if err != nil {

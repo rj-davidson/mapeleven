@@ -1,18 +1,22 @@
 package fetchers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"mapeleven/models"
+	"mapeleven/models/ent"
 	"mapeleven/utils"
 	"net/http"
+	"os"
 )
 
 type CountryFetcher struct {
 	apiKey         string
 	client         *http.Client
 	countryModel   *models.CountryModel
+	entClient      *ent.Client
 	apiBaseURL     string
 	apiCountryPath string
 }
@@ -27,40 +31,79 @@ type APICountry struct {
 	Flag string `json:"flag"`
 }
 
-func NewCountryFetcher(apiKey string, countryModel *models.CountryModel) *CountryFetcher {
+func NewCountryFetcher(apiKey string, countryModel *models.CountryModel, entClient *ent.Client) *CountryFetcher {
 	return &CountryFetcher{
 		apiKey:         apiKey,
 		client:         &http.Client{},
 		countryModel:   countryModel,
+		entClient:      entClient,
 		apiBaseURL:     "https://api-football-v1.p.rapidapi.com",
 		apiCountryPath: "/v3/countries",
 	}
 }
 
-func (cf *CountryFetcher) FetchCountry(countryCode string) (*models.CreateCountryInput, error) {
-	apiCountry, err := cf.fetchCountryByCode(countryCode)
+func (cf *CountryFetcher) FetchCountry(ctx context.Context, countryCode string) (*ent.Country, error) {
+	// Search for country by code in Ent DB
+	country, err := cf.countryModel.GetCountryByCode(countryCode)
+
 	if err != nil {
-		return nil, err
+		// Country does not exist, fetch from API
+		apiCountry, err := cf.fetchCountryByCode(ctx, countryCode)
+		if err != nil {
+			return nil, err
+		}
+
+		filePath := fmt.Sprintf("public/images/flags/%s.svg", apiCountry.Code)
+		err = utils.DownloadFile(apiCountry.Flag, filePath)
+		if err != nil {
+			return nil, err
+		}
+
+		// Create country in Ent DB
+		createInput := &models.CreateCountryInput{
+			Name: apiCountry.Name,
+			Code: apiCountry.Code,
+			Flag: filePath,
+		}
+		country, err = cf.countryModel.CreateCountry(*createInput)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		// Country exists, update flag if necessary
+		flagPath := fmt.Sprintf("public/images/flags/%s.svg", country.Code)
+		if _, err := os.Stat(flagPath); os.IsNotExist(err) {
+			// Flag file does not exist, download from API
+			err = utils.DownloadFile(country.Flag, flagPath)
+			if err != nil {
+				return nil, err
+			}
+
+			// Update country in Ent DB with new flag path
+			updateInput := &models.UpdateCountryInput{
+				Code: country.Code,
+				Flag: string(flagPath),
+			}
+
+			_, err = cf.countryModel.UpdateCountry(*updateInput)
+			if err != nil {
+				return nil, err
+			}
+
+			// Reload country from Ent DB to get updated flag path
+			country, err = cf.countryModel.GetCountryByCode(countryCode)
+			if err != nil {
+				return nil, err
+			}
+		}
 	}
 
-	filePath := fmt.Sprintf("public/images/flags/%s.svg", apiCountry.Code)
-	err = utils.DownloadFile(apiCountry.Flag, filePath)
-	if err != nil {
-		return nil, err
-	}
-
-	input := &models.CreateCountryInput{
-		Name: apiCountry.Name,
-		Code: apiCountry.Code,
-		Flag: filePath,
-	}
-
-	return input, nil
+	return country, nil
 }
 
-func (cf *CountryFetcher) fetchCountryByCode(code string) (*APICountry, error) {
+func (cf *CountryFetcher) fetchCountryByCode(ctx context.Context, code string) (*APICountry, error) {
 	url := fmt.Sprintf("%s%s?code=%s", cf.apiBaseURL, cf.apiCountryPath, code)
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}

@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"mapeleven/models/ent/country"
 	"mapeleven/models/ent/schema"
 	"mapeleven/models/ent/season"
 	"mapeleven/models/ent/team"
@@ -12,6 +13,12 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	countryFields := schema.Country{}.Fields()
+	_ = countryFields
+	// countryDescCode is the schema descriptor for code field.
+	countryDescCode := countryFields[0].Descriptor()
+	// country.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	country.CodeValidator = countryDescCode.Validators[0].(func(string) error)
 	seasonFields := schema.Season{}.Fields()
 	_ = seasonFields
 	// seasonDescCurrent is the schema descriptor for current field.

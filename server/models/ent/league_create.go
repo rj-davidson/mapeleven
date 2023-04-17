@@ -47,19 +47,23 @@ func (lc *LeagueCreate) SetID(i int) *LeagueCreate {
 	return lc
 }
 
-// AddSeasonIDs adds the "seasons" edge to the Season entity by IDs.
-func (lc *LeagueCreate) AddSeasonIDs(ids ...int) *LeagueCreate {
-	lc.mutation.AddSeasonIDs(ids...)
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (lc *LeagueCreate) SetSeasonID(id int) *LeagueCreate {
+	lc.mutation.SetSeasonID(id)
 	return lc
 }
 
-// AddSeasons adds the "seasons" edges to the Season entity.
-func (lc *LeagueCreate) AddSeasons(s ...*Season) *LeagueCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
+func (lc *LeagueCreate) SetNillableSeasonID(id *int) *LeagueCreate {
+	if id != nil {
+		lc = lc.SetSeasonID(*id)
 	}
-	return lc.AddSeasonIDs(ids...)
+	return lc
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (lc *LeagueCreate) SetSeason(s *Season) *LeagueCreate {
+	return lc.SetSeasonID(s.ID)
 }
 
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
@@ -203,12 +207,12 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 		_spec.SetField(league.FieldLogo, field.TypeString, value)
 		_node.Logo = value
 	}
-	if nodes := lc.mutation.SeasonsIDs(); len(nodes) > 0 {
+	if nodes := lc.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   league.SeasonsTable,
-			Columns: []string{league.SeasonsColumn},
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   league.SeasonTable,
+			Columns: []string{league.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
@@ -217,6 +221,7 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.season_league = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := lc.mutation.StandingsIDs(); len(nodes) > 0 {

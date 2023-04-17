@@ -370,12 +370,12 @@ func (cq *CountryQuery) WithTeams(opts ...func(*TeamQuery)) *CountryQuery {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Code string `json:"code,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Country.Query().
-//		GroupBy(country.FieldName).
+//		GroupBy(country.FieldCode).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (cq *CountryQuery) GroupBy(field string, fields ...string) *CountryGroupBy {
@@ -393,11 +393,11 @@ func (cq *CountryQuery) GroupBy(field string, fields ...string) *CountryGroupBy 
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Code string `json:"code,omitempty"`
 //	}
 //
 //	client.Country.Query().
-//		Select(country.FieldName).
+//		Select(country.FieldCode).
 //		Scan(ctx, &v)
 func (cq *CountryQuery) Select(fields ...string) *CountrySelect {
 	cq.ctx.Fields = append(cq.ctx.Fields, fields...)

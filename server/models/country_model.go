@@ -2,7 +2,9 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"mapeleven/models/ent"
+	"mapeleven/models/ent/country"
 )
 
 // CreateCountryInput holds the input data needed to create a new country record.
@@ -14,8 +16,8 @@ type CreateCountryInput struct {
 
 // UpdateCountryInput holds the input data needed to update an existing country record.
 type UpdateCountryInput struct {
-	ID   int
-	Flag *string
+	Code string
+	Flag string
 }
 
 // CountryModel handles the CRUD operations for the Country entity.
@@ -40,22 +42,45 @@ func (cm *CountryModel) CreateCountry(input CreateCountryInput) (*ent.Country, e
 
 // UpdateCountry updates an existing country record.
 func (cm *CountryModel) UpdateCountry(input UpdateCountryInput) (*ent.Country, error) {
-	updater := cm.client.Country.UpdateOneID(input.ID)
-	if input.Flag != nil {
-		updater.SetFlag(*input.Flag)
+	c, err := cm.client.Country.
+		Query().
+		Where(country.CodeEQ(input.Code)).
+		First(context.Background())
+
+	if err != nil {
+		return nil, err
 	}
-	return updater.Save(context.Background())
+
+	updatedCountry, err := c.Update().
+		SetFlag(input.Flag).
+		Save(context.Background())
+
+	if err != nil {
+		return nil, err
+	}
+
+	return updatedCountry, nil
 }
 
-// DeleteCountry deletes a country record by ID.
-func (cm *CountryModel) DeleteCountry(id int) error {
-	return cm.client.Country.
-		DeleteOneID(id).
+// DeleteCountry deletes a country record by code.
+func (cm *CountryModel) DeleteCountry(code string) error {
+	numDeleted, err := cm.client.Country.
+		Delete().
+		Where(country.CodeEQ(code)).
 		Exec(context.Background())
+	if err != nil {
+		return err
+	}
+	if numDeleted == 0 {
+		return fmt.Errorf("no country found with code %s", code)
+	}
+	return nil
 }
 
-// GetCountry retrieves a country record by ID.
-func (cm *CountryModel) GetCountry(id int) (*ent.Country, error) {
+// GetCountryByCode retrieves a country record by country code.
+func (cm *CountryModel) GetCountryByCode(code string) (*ent.Country, error) {
 	return cm.client.Country.
-		Get(context.Background(), id)
+		Query().
+		Where(country.CodeEQ(code)).
+		First(context.Background())
 }

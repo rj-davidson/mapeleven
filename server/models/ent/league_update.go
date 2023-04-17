@@ -49,19 +49,23 @@ func (lu *LeagueUpdate) SetLogo(s string) *LeagueUpdate {
 	return lu
 }
 
-// AddSeasonIDs adds the "seasons" edge to the Season entity by IDs.
-func (lu *LeagueUpdate) AddSeasonIDs(ids ...int) *LeagueUpdate {
-	lu.mutation.AddSeasonIDs(ids...)
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (lu *LeagueUpdate) SetSeasonID(id int) *LeagueUpdate {
+	lu.mutation.SetSeasonID(id)
 	return lu
 }
 
-// AddSeasons adds the "seasons" edges to the Season entity.
-func (lu *LeagueUpdate) AddSeasons(s ...*Season) *LeagueUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
+func (lu *LeagueUpdate) SetNillableSeasonID(id *int) *LeagueUpdate {
+	if id != nil {
+		lu = lu.SetSeasonID(*id)
 	}
-	return lu.AddSeasonIDs(ids...)
+	return lu
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (lu *LeagueUpdate) SetSeason(s *Season) *LeagueUpdate {
+	return lu.SetSeasonID(s.ID)
 }
 
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
@@ -118,25 +122,10 @@ func (lu *LeagueUpdate) Mutation() *LeagueMutation {
 	return lu.mutation
 }
 
-// ClearSeasons clears all "seasons" edges to the Season entity.
-func (lu *LeagueUpdate) ClearSeasons() *LeagueUpdate {
-	lu.mutation.ClearSeasons()
+// ClearSeason clears the "season" edge to the Season entity.
+func (lu *LeagueUpdate) ClearSeason() *LeagueUpdate {
+	lu.mutation.ClearSeason()
 	return lu
-}
-
-// RemoveSeasonIDs removes the "seasons" edge to Season entities by IDs.
-func (lu *LeagueUpdate) RemoveSeasonIDs(ids ...int) *LeagueUpdate {
-	lu.mutation.RemoveSeasonIDs(ids...)
-	return lu
-}
-
-// RemoveSeasons removes "seasons" edges to Season entities.
-func (lu *LeagueUpdate) RemoveSeasons(s ...*Season) *LeagueUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return lu.RemoveSeasonIDs(ids...)
 }
 
 // ClearStandings clears all "standings" edges to the Standings entity.
@@ -245,12 +234,12 @@ func (lu *LeagueUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := lu.mutation.Logo(); ok {
 		_spec.SetField(league.FieldLogo, field.TypeString, value)
 	}
-	if lu.mutation.SeasonsCleared() {
+	if lu.mutation.SeasonCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   league.SeasonsTable,
-			Columns: []string{league.SeasonsColumn},
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   league.SeasonTable,
+			Columns: []string{league.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
@@ -258,28 +247,12 @@ func (lu *LeagueUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := lu.mutation.RemovedSeasonsIDs(); len(nodes) > 0 && !lu.mutation.SeasonsCleared() {
+	if nodes := lu.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   league.SeasonsTable,
-			Columns: []string{league.SeasonsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := lu.mutation.SeasonsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   league.SeasonsTable,
-			Columns: []string{league.SeasonsColumn},
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   league.SeasonTable,
+			Columns: []string{league.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
@@ -447,19 +420,23 @@ func (luo *LeagueUpdateOne) SetLogo(s string) *LeagueUpdateOne {
 	return luo
 }
 
-// AddSeasonIDs adds the "seasons" edge to the Season entity by IDs.
-func (luo *LeagueUpdateOne) AddSeasonIDs(ids ...int) *LeagueUpdateOne {
-	luo.mutation.AddSeasonIDs(ids...)
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (luo *LeagueUpdateOne) SetSeasonID(id int) *LeagueUpdateOne {
+	luo.mutation.SetSeasonID(id)
 	return luo
 }
 
-// AddSeasons adds the "seasons" edges to the Season entity.
-func (luo *LeagueUpdateOne) AddSeasons(s ...*Season) *LeagueUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
+func (luo *LeagueUpdateOne) SetNillableSeasonID(id *int) *LeagueUpdateOne {
+	if id != nil {
+		luo = luo.SetSeasonID(*id)
 	}
-	return luo.AddSeasonIDs(ids...)
+	return luo
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (luo *LeagueUpdateOne) SetSeason(s *Season) *LeagueUpdateOne {
+	return luo.SetSeasonID(s.ID)
 }
 
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
@@ -516,25 +493,10 @@ func (luo *LeagueUpdateOne) Mutation() *LeagueMutation {
 	return luo.mutation
 }
 
-// ClearSeasons clears all "seasons" edges to the Season entity.
-func (luo *LeagueUpdateOne) ClearSeasons() *LeagueUpdateOne {
-	luo.mutation.ClearSeasons()
+// ClearSeason clears the "season" edge to the Season entity.
+func (luo *LeagueUpdateOne) ClearSeason() *LeagueUpdateOne {
+	luo.mutation.ClearSeason()
 	return luo
-}
-
-// RemoveSeasonIDs removes the "seasons" edge to Season entities by IDs.
-func (luo *LeagueUpdateOne) RemoveSeasonIDs(ids ...int) *LeagueUpdateOne {
-	luo.mutation.RemoveSeasonIDs(ids...)
-	return luo
-}
-
-// RemoveSeasons removes "seasons" edges to Season entities.
-func (luo *LeagueUpdateOne) RemoveSeasons(s ...*Season) *LeagueUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return luo.RemoveSeasonIDs(ids...)
 }
 
 // ClearStandings clears all "standings" edges to the Standings entity.
@@ -673,12 +635,12 @@ func (luo *LeagueUpdateOne) sqlSave(ctx context.Context) (_node *League, err err
 	if value, ok := luo.mutation.Logo(); ok {
 		_spec.SetField(league.FieldLogo, field.TypeString, value)
 	}
-	if luo.mutation.SeasonsCleared() {
+	if luo.mutation.SeasonCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   league.SeasonsTable,
-			Columns: []string{league.SeasonsColumn},
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   league.SeasonTable,
+			Columns: []string{league.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
@@ -686,28 +648,12 @@ func (luo *LeagueUpdateOne) sqlSave(ctx context.Context) (_node *League, err err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := luo.mutation.RemovedSeasonsIDs(); len(nodes) > 0 && !luo.mutation.SeasonsCleared() {
+	if nodes := luo.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   league.SeasonsTable,
-			Columns: []string{league.SeasonsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := luo.mutation.SeasonsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   league.SeasonsTable,
-			Columns: []string{league.SeasonsColumn},
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   league.SeasonTable,
+			Columns: []string{league.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),

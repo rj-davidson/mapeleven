@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"mapeleven/models/ent/league"
 	"mapeleven/models/ent/predicate"
@@ -23,7 +24,6 @@ type SeasonQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Season
 	withLeague *LeagueQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -74,7 +74,7 @@ func (sq *SeasonQuery) QueryLeague() *LeagueQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(season.Table, season.FieldID, selector),
 			sqlgraph.To(league.Table, league.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, season.LeagueTable, season.LeagueColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, season.LeagueTable, season.LeagueColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -369,18 +369,11 @@ func (sq *SeasonQuery) prepareQuery(ctx context.Context) error {
 func (sq *SeasonQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Season, error) {
 	var (
 		nodes       = []*Season{}
-		withFKs     = sq.withFKs
 		_spec       = sq.querySpec()
 		loadedTypes = [1]bool{
 			sq.withLeague != nil,
 		}
 	)
-	if sq.withLeague != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, season.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Season).scanValues(nil, columns)
 	}
@@ -409,34 +402,30 @@ func (sq *SeasonQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Seaso
 }
 
 func (sq *SeasonQuery) loadLeague(ctx context.Context, query *LeagueQuery, nodes []*Season, init func(*Season), assign func(*Season, *League)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Season)
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Season)
 	for i := range nodes {
-		if nodes[i].league_seasons == nil {
-			continue
-		}
-		fk := *nodes[i].league_seasons
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
 	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(league.IDIn(ids...))
+	query.withFKs = true
+	query.Where(predicate.League(func(s *sql.Selector) {
+		s.Where(sql.InValues(season.LeagueColumn, fks...))
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		fk := n.season_league
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "season_league" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "league_seasons" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "season_league" returned %v for node %v`, *fk, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

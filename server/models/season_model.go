@@ -166,7 +166,7 @@ func (m *SeasonModel) GetLeagueSeason(ctx context.Context, leagueID int) ([]*ent
 	seasons, err := m.client.League.
 		Query().
 		Where(league.ID(leagueID)).
-		QuerySeasons().
+		QuerySeason().
 		All(ctx)
 
 	if err != nil {

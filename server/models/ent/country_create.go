@@ -22,15 +22,15 @@ type CountryCreate struct {
 	hooks    []Hook
 }
 
-// SetName sets the "name" field.
-func (cc *CountryCreate) SetName(s string) *CountryCreate {
-	cc.mutation.SetName(s)
-	return cc
-}
-
 // SetCode sets the "code" field.
 func (cc *CountryCreate) SetCode(s string) *CountryCreate {
 	cc.mutation.SetCode(s)
+	return cc
+}
+
+// SetName sets the "name" field.
+func (cc *CountryCreate) SetName(s string) *CountryCreate {
+	cc.mutation.SetName(s)
 	return cc
 }
 
@@ -119,11 +119,16 @@ func (cc *CountryCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (cc *CountryCreate) check() error {
-	if _, ok := cc.mutation.Name(); !ok {
-		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Country.name"`)}
-	}
 	if _, ok := cc.mutation.Code(); !ok {
 		return &ValidationError{Name: "code", err: errors.New(`ent: missing required field "Country.code"`)}
+	}
+	if v, ok := cc.mutation.Code(); ok {
+		if err := country.CodeValidator(v); err != nil {
+			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "Country.code": %w`, err)}
+		}
+	}
+	if _, ok := cc.mutation.Name(); !ok {
+		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Country.name"`)}
 	}
 	if _, ok := cc.mutation.Flag(); !ok {
 		return &ValidationError{Name: "flag", err: errors.New(`ent: missing required field "Country.flag"`)}
@@ -154,13 +159,13 @@ func (cc *CountryCreate) createSpec() (*Country, *sqlgraph.CreateSpec) {
 		_node = &Country{config: cc.config}
 		_spec = sqlgraph.NewCreateSpec(country.Table, sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt))
 	)
-	if value, ok := cc.mutation.Name(); ok {
-		_spec.SetField(country.FieldName, field.TypeString, value)
-		_node.Name = value
-	}
 	if value, ok := cc.mutation.Code(); ok {
 		_spec.SetField(country.FieldCode, field.TypeString, value)
 		_node.Code = value
+	}
+	if value, ok := cc.mutation.Name(); ok {
+		_spec.SetField(country.FieldName, field.TypeString, value)
+		_node.Name = value
 	}
 	if value, ok := cc.mutation.Flag(); ok {
 		_spec.SetField(country.FieldFlag, field.TypeString, value)

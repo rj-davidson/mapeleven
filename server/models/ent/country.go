@@ -16,10 +16,10 @@ type Country struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
 	// Code holds the value of the "code" field.
 	Code string `json:"code,omitempty"`
+	// Name holds the value of the "name" field.
+	Name string `json:"name,omitempty"`
 	// Flag holds the value of the "flag" field.
 	Flag string `json:"flag,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -75,7 +75,7 @@ func (*Country) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case country.FieldID:
 			values[i] = new(sql.NullInt64)
-		case country.FieldName, country.FieldCode, country.FieldFlag:
+		case country.FieldCode, country.FieldName, country.FieldFlag:
 			values[i] = new(sql.NullString)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -98,17 +98,17 @@ func (c *Country) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			c.ID = int(value.Int64)
-		case country.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				c.Name = value.String
-			}
 		case country.FieldCode:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field code", values[i])
 			} else if value.Valid {
 				c.Code = value.String
+			}
+		case country.FieldName:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field name", values[i])
+			} else if value.Valid {
+				c.Name = value.String
 			}
 		case country.FieldFlag:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -167,11 +167,11 @@ func (c *Country) String() string {
 	var builder strings.Builder
 	builder.WriteString("Country(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
-	builder.WriteString("name=")
-	builder.WriteString(c.Name)
-	builder.WriteString(", ")
 	builder.WriteString("code=")
 	builder.WriteString(c.Code)
+	builder.WriteString(", ")
+	builder.WriteString("name=")
+	builder.WriteString(c.Name)
 	builder.WriteString(", ")
 	builder.WriteString("flag=")
 	builder.WriteString(c.Flag)
