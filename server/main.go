@@ -4,14 +4,13 @@ import (
 	"context"
 	"entgo.io/ent/dialect"
 	"fmt"
-	"log"
-	"mapeleven/handlers"
-	"mapeleven/initialization"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
+	"log"
+	"mapeleven/handlers"
+	"mapeleven/initialization"
 
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/migrate"
@@ -53,7 +52,7 @@ func main() {
 
 	// Initialize data
 	app.Use(func(c *fiber.Ctx) error {
-		err := initialization.InitializeData(c, client)
+		err = initialization.InitializeData(c, client)
 		if err != nil {
 			log.Fatalf("failed initializing data: %v", err)
 		}
