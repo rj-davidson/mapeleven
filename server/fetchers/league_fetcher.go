@@ -21,8 +21,12 @@ type LeagueFetcher struct {
 }
 
 type APIResponse struct {
-	Results int         `json:"results"`
-	Leagues []APILeague `json:"leagues"`
+	Results  int                `json:"results"`
+	Response []APILeagueWrapper `json:"response"`
+}
+
+type APILeagueWrapper struct {
+	League APILeague `json:"league"`
 }
 
 type APILeague struct {
@@ -96,11 +100,11 @@ func (lf *LeagueFetcher) fetchLeague(id int) (*APILeague, error) {
 		return nil, err
 	}
 
-	if len(apiResponse.Leagues) == 0 {
+	if len(apiResponse.Response) == 0 {
 		return nil, fmt.Errorf("league not found")
 	}
 
-	l := apiResponse.Leagues[0]
+	l := apiResponse.Response[0].League
 	l.Type = string(leagueType(l.Type))
 
 	return &l, nil
