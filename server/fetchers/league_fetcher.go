@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"mapeleven/models"
 	"mapeleven/models/ent"
@@ -40,7 +42,16 @@ func NewLeagueFetcher(leagueModel *models.LeagueModel, countryFetcher *CountryFe
 }
 
 func (lf *LeagueFetcher) FetchLeagueData(url string) (models.CreateLeagueInput, models.CreateCountryInput, error) {
-	resp, err := http.Get(url)
+	ctx := context.Background()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
+	}
+	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
+	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
+
+	resp, err := lf.client.Do(req)
 	if err != nil {
 		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
 	}
@@ -68,8 +79,11 @@ func (lf *LeagueFetcher) FetchLeagueData(url string) (models.CreateLeagueInput, 
 	return inputData, apiResponse.Response[0].Country, nil
 }
 
-func (lf *LeagueFetcher) UpsertLeague(url string) (*ent.League, error) {
+func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
 	ctx := context.Background()
+
+	// Construct the API URL with the leagueID
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/leagues?id=%d", leagueID)
 
 	inputData, inputCountry, err := lf.FetchLeagueData(url)
 	if err != nil {

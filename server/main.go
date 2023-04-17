@@ -78,24 +78,28 @@ func setupAPIRoutes(app *fiber.App) {
 }
 
 func initializeLeagues(client *ent.Client) error {
-	ids := []int{39, 1}
+	ids := []int{1, 39}
 
 	// Initialize models
 	leagueModel := models.NewLeagueModel(client)
 	countryModel := models.NewCountryModel(client)
-	seasonModel := models.NewSeasonModel(client)
+
+	// Create a new CountryFetcher instance
+	countryFetcher := fetchers.NewCountryFetcher(countryModel, client)
 
 	// Create a new LeagueFetcher instance
-	leagueFetcher := fetchers.NewLeagueFetcher(viper.GetString("API_KEY"), leagueModel, countryModel, seasonModel, client)
+	leagueFetcher := fetchers.NewLeagueFetcher(leagueModel, countryFetcher)
 
-	// Fetch leagues
-	leagueFetcher := fetchers.NewLeagueFetcher(viper.GetString("API_KEY"), leagueModel, countryModel, seasonModel, client)
-	err := leagueFetcher.FetchLeague()
-	if err != nil {
-		// handle error
+	// Fetch and upsert leagues
+	for _, id := range ids {
+		league, err := leagueFetcher.UpsertLeague(id)
+		if err != nil {
+			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
+		}
+		fmt.Printf("Upserted league with ID %d: %+v\n", id, league)
 	}
 
-	fmt.Println("    Leagues loaded")
+	fmt.Println("Leagues loaded")
 
 	return nil
 }

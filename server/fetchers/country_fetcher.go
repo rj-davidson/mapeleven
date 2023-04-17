@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"mapeleven/models"
 	"mapeleven/models/ent"
@@ -31,9 +32,9 @@ type APICountry struct {
 	Flag string `json:"flag"`
 }
 
-func NewCountryFetcher(apiKey string, countryModel *models.CountryModel, entClient *ent.Client) *CountryFetcher {
+func NewCountryFetcher(countryModel *models.CountryModel, entClient *ent.Client) *CountryFetcher {
 	return &CountryFetcher{
-		apiKey:         apiKey,
+		apiKey:         viper.GetString("API_KEY"),
 		client:         &http.Client{},
 		countryModel:   countryModel,
 		entClient:      entClient,
