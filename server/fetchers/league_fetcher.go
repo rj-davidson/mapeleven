@@ -51,26 +51,25 @@ func NewLeagueFetcher(apiKey string, leagueModel *models.LeagueModel, countryMod
 	}
 }
 
-func (lf *LeagueFetcher) FetchLeagues(leagueIDs []int) error {
-	for _, id := range leagueIDs {
-		leag, err := lf.fetchLeague(id)
-		if err != nil {
-			return err
-		}
-
-		input := models.CreateLeagueInput{
-			ID:      leag.ID,
-			Name:    leag.Name,
-			Type:    league.Type(leag.Type),
-			Logo:    leag.Logo,
-			Country: leag.Country.ID,
-		}
-
-		_, err = lf.leagueModel.CreateLeague(input)
-		if err != nil {
-			return err
-		}
+func (lf *LeagueFetcher) FetchLeague(leagueID int) error {
+	leag, err := lf.fetchLeague(leagueID)
+	if err != nil {
+		return err
 	}
+
+	input := models.CreateLeagueInput{
+		ID:      leag.ID,
+		Name:    leag.Name,
+		Type:    leagueType(leag.Type),
+		Logo:    leag.Logo,
+		Country: leag.Country.ID,
+	}
+
+	_, err = lf.leagueModel.CreateLeague(input)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

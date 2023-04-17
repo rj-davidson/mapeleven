@@ -89,9 +89,11 @@ func initializeLeagues(client *ent.Client) error {
 	leagueFetcher := fetchers.NewLeagueFetcher(viper.GetString("API_KEY"), leagueModel, countryModel, seasonModel)
 
 	// Fetch leagues
-	err := leagueFetcher.FetchLeagues(ids)
-	if err != nil {
-		return err
+	for _, id := range ids {
+		err := leagueFetcher.FetchLeague(id)
+		if err != nil {
+			return err
+		}
 	}
 
 	fmt.Println("    Leagues loaded")

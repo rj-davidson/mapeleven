@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"errors"
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/league"
 )
@@ -75,4 +76,21 @@ func (lm *LeagueModel) DeleteLeague(id int) error {
 func (lm *LeagueModel) GetLeague(id int) (*ent.League, error) {
 	return lm.client.League.
 		Get(context.Background(), id)
+}
+
+// GetLeagueSeason retrieves the season of a league.
+func (lm *LeagueModel) GetLeagueSeason(ctx context.Context, leagueID int) (*ent.Season, error) {
+	season, err := lm.client.League.
+		Query().
+		Where(league.ID(leagueID)).
+		QuerySeasons().
+		Only(ctx)
+
+	if err != nil {
+		if ent.IsNotFound(err) {
+			return nil, errors.New("season not found")
+		}
+		return nil, err
+	}
+	return season, nil
 }

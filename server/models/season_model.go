@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"mapeleven/models/ent"
+	"mapeleven/models/ent/league"
 	"mapeleven/models/ent/season"
 	"time"
 )
@@ -44,13 +45,20 @@ func NewSeasonModel(client *ent.Client) *SeasonModel {
 
 // CreateSeason creates a new season.
 func (m *SeasonModel) CreateSeason(ctx context.Context, input CreateSeasonInput) (*ent.Season, error) {
+	leagueEnt, err := m.client.League.
+		Get(ctx, input.League)
+
+	if err != nil {
+		return nil, err
+	}
+
 	se, err := m.client.Season.
 		Create().
 		SetYear(input.Year).
 		SetStart(input.Start).
 		SetEnd(input.End).
 		SetCurrent(input.Current).
-		SetLeagueID(input.League).
+		SetLeague(leagueEnt).
 		Save(ctx)
 
 	if err != nil {
@@ -76,7 +84,14 @@ func (m *SeasonModel) UpdateSeason(ctx context.Context, input UpdateSeasonInput)
 		update.SetCurrent(*input.Current)
 	}
 	if input.League != nil {
-		update.SetLeagueID(*input.League)
+		leagueEnt, err := m.client.League.
+			Get(ctx, *input.League)
+
+		if err != nil {
+			return nil, err
+		}
+
+		update.SetLeague(leagueEnt)
 	}
 
 	se, err := update.Save(ctx)
@@ -144,4 +159,18 @@ func (m *SeasonModel) GetSeasonLeague(ctx context.Context, seasonID int) (*ent.L
 		return nil, err
 	}
 	return league, nil
+}
+
+// GetLeagueSeason retrieves the season of a league.
+func (m *SeasonModel) GetLeagueSeason(ctx context.Context, leagueID int) ([]*ent.Season, error) {
+	seasons, err := m.client.League.
+		Query().
+		Where(league.ID(leagueID)).
+		QuerySeasons().
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	return seasons, nil
 }

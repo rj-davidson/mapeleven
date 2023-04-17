@@ -25,7 +25,9 @@ func (League) Fields() []ent.Field {
 // Edges of the League.
 func (League) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("seasons", Season.Type),
+		edge.From("season", Season.Type).
+			Ref("league").
+			Unique(),
 		edge.To("standings", Standings.Type),
 		edge.To("teams", Team.Type),
 		edge.From("country", Country.Type).
