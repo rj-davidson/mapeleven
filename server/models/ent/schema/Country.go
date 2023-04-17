@@ -16,12 +16,10 @@ func (Country) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("code").
 			Unique().
-			Immutable().
 			MaxLen(3).
 			StorageKey("code"),
 		field.String("name").
-			Unique().
-			Immutable(),
+			Unique(),
 		field.String("flag"),
 	}
 }

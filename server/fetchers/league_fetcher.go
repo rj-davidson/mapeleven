@@ -2,7 +2,6 @@ package fetchers
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/spf13/viper"
@@ -10,6 +9,7 @@ import (
 	"mapeleven/models"
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/league"
+	"mapeleven/utils"
 	"net/http"
 )
 
@@ -41,57 +41,62 @@ func NewLeagueFetcher(leagueModel *models.LeagueModel, countryFetcher *CountryFe
 	}
 }
 
-func (lf *LeagueFetcher) FetchLeagueData(url string) (models.CreateLeagueInput, models.CreateCountryInput, error) {
+func (lf *LeagueFetcher) FetchLeagueData(data []byte) (models.CreateLeagueInput, models.CreateCountryInput, error) {
+	var response struct {
+		Response []struct {
+			League  APILeague `json:"league"`
+			Country []byte    `json:"country"`
+		} `json:"response"`
+	}
+
+	fmt.Println(response.Response[0].Country)
+	league, err := utils.GetLeagueData(response.Response[0].League)
+	country, err := utils.GetCountryData(response.Response[0].Country)
+	if err != nil {
+		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
+	}
+
+	inputData := models.CreateLeagueInput{
+		ID:      response.Response[0].League.ID,
+		Name:    response.Response[0].League.Name,
+		Type:    response.Response[0].League.Type,
+		Logo:    response.Response[0].League.Logo,
+		Country: country.Code,
+	}
+
+	return inputData, country, nil
+}
+
+func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
+	// Construct the API URL with the leagueID
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/leagues?id=%d", leagueID)
+
 	ctx := context.Background()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
+		return nil, err
 	}
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
 	resp, err := lf.client.Do(req)
 	if err != nil {
-		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
+		return nil, err
 	}
 
-	var apiResponse APILeagueResponse
-	err = json.Unmarshal(data, &apiResponse)
-	if err != nil {
-		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
-	}
-
-	inputData := models.CreateLeagueInput{
-		ID:      apiResponse.Response[0].League.ID,
-		Name:    apiResponse.Response[0].League.Name,
-		Type:    apiResponse.Response[0].League.Type,
-		Logo:    apiResponse.Response[0].League.Logo,
-		Country: apiResponse.Response[0].Country.Code,
-	}
-
-	return inputData, apiResponse.Response[0].Country, nil
-}
-
-func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
-	ctx := context.Background()
-
-	// Construct the API URL with the leagueID
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/leagues?id=%d", leagueID)
-
-	inputData, inputCountry, err := lf.FetchLeagueData(url)
+	inputData, inputCountry, err := lf.FetchLeagueData(data)
 	if err != nil {
 		return nil, err
 	}
 
-	// Upsert the foreign key (Country) if necessary
-	upsertedCountry, err := lf.countryFetcher.FetchCountry(ctx, inputCountry.Code)
+	upsertedCountry, err := lf.countryFetcher.UpsertCountry(inputCountry)
 	if err != nil {
 		return nil, err
 	}

@@ -16,6 +16,7 @@ type CreateCountryInput struct {
 
 // UpdateCountryInput holds the input data needed to update an existing country record.
 type UpdateCountryInput struct {
+	Name string
 	Code string
 	Flag string
 }
