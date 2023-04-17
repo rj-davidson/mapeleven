@@ -9,13 +9,6 @@ import (
 	"mapeleven/models"
 )
 
-type APILeague struct {
-	ID   int         `json:"id"`
-	Name string      `json:"name"`
-	Type league.Type `json:"type"`
-	Logo string      `json:"logo"`
-}
-
 // Returns a CreateCountryInput struct, accepts a JSON country object
 func GetCountryData(countryJSON []byte) (models.CreateCountryInput, error) {
 	var countryData map[string]interface{}

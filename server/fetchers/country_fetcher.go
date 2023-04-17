@@ -1,7 +1,6 @@
 package fetchers
 
 import (
-	"errors"
 	"mapeleven/models"
 	"mapeleven/models/ent"
 	"strings"
@@ -27,35 +26,24 @@ func (cf *CountryFetcher) UpsertCountry(c models.CreateCountryInput) (*ent.Count
 	}
 
 	// Search for country by code in Ent DB
-	country, err := cf.countryModel.GetCountryByCode(c.Code)
+	country, _ := cf.countryModel.GetCountryByCode(c.Code)
 
-	if ent.IsNotFound(errors.Unwrap(err)) {
+	if country == nil {
 		// Country does not exist, create it
 		createInput := &models.CreateCountryInput{
 			Name: c.Name,
 			Code: c.Code,
 			Flag: c.Flag,
 		}
-		country, err = cf.countryModel.CreateCountry(*createInput)
-		if err != nil {
-			return nil, err
-		}
-	} else if err == nil {
+		country, _ = cf.countryModel.CreateCountry(*createInput)
+	} else {
 		// Country exists, update it
 		updateInput := &models.UpdateCountryInput{
 			Code: c.Code,
 			Name: c.Name,
 			Flag: c.Flag,
 		}
-
-		country, err = cf.countryModel.UpdateCountry(*updateInput)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		// Return any other error that may occur
-		return nil, err
+		country, _ = cf.countryModel.UpdateCountry(*updateInput)
 	}
-
 	return country, nil
 }

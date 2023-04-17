@@ -2,14 +2,13 @@ package fetchers
 
 import (
 	"context"
-	"errors"
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/viper"
 	"io/ioutil"
 	"mapeleven/models"
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/league"
-	"mapeleven/utils"
 	"net/http"
 )
 
@@ -21,7 +20,7 @@ type LeagueFetcher struct {
 
 type APILeagueResponse struct {
 	Response []struct {
-		League  APILeague                 `json:"league"`
+		League  models.CreateLeagueInput  `json:"league"`
 		Country models.CreateCountryInput `json:"country"`
 	} `json:"response"`
 }
@@ -44,27 +43,32 @@ func NewLeagueFetcher(leagueModel *models.LeagueModel, countryFetcher *CountryFe
 func (lf *LeagueFetcher) FetchLeagueData(data []byte) (models.CreateLeagueInput, models.CreateCountryInput, error) {
 	var response struct {
 		Response []struct {
-			League  APILeague `json:"league"`
-			Country []byte    `json:"country"`
+			League  json.RawMessage `json:"league"`
+			Country json.RawMessage `json:"country"`
 		} `json:"response"`
 	}
 
-	fmt.Println(response.Response[0].Country)
-	league, err := utils.GetLeagueData(response.Response[0].League)
-	country, err := utils.GetCountryData(response.Response[0].Country)
-	if err != nil {
+	if err := json.Unmarshal(data, &response); err != nil {
 		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
 	}
 
-	inputData := models.CreateLeagueInput{
-		ID:      response.Response[0].League.ID,
-		Name:    response.Response[0].League.Name,
-		Type:    response.Response[0].League.Type,
-		Logo:    response.Response[0].League.Logo,
-		Country: country.Code,
+	lg := APILeague{}
+	if err := json.Unmarshal(response.Response[0].League, &lg); err != nil {
+		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
+	}
+	leagueInput := models.CreateLeagueInput{
+		ID:   lg.ID,
+		Name: lg.Name,
+		Type: lg.Type,
+		Logo: lg.Logo,
 	}
 
-	return inputData, country, nil
+	co := models.CreateCountryInput{}
+	if err := json.Unmarshal(response.Response[0].Country, &co); err != nil {
+		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
+	}
+
+	return leagueInput, co, nil
 }
 
 func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
@@ -106,8 +110,7 @@ func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
 
 	// Check if the league exists
 	_, err = lf.leagueModel.GetLeague(inputData.ID)
-
-	if ent.IsNotFound(errors.Unwrap(err)) {
+	if ent.IsNotFound(err) {
 		// Create the league if it doesn't exist
 		newLeague, err := lf.leagueModel.CreateLeague(inputData)
 		if err != nil {
