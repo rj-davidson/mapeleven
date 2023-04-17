@@ -9,8 +9,9 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
+	"mapeleven/fetchers"
 	"mapeleven/handlers"
-	"mapeleven/initialization"
+	"mapeleven/models"
 
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/migrate"
@@ -51,13 +52,10 @@ func main() {
 	}))
 
 	// Initialize data
-	app.Use(func(c *fiber.Ctx) error {
-		err = initialization.InitializeData(c, client)
-		if err != nil {
-			log.Fatalf("failed initializing data: %v", err)
-		}
-		return c.Next()
-	})
+	err = initializeLeagues(client)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	// Set up routes
 	setupAPIRoutes(app)
@@ -77,4 +75,26 @@ func setupAPIRoutes(app *fiber.App) {
 
 	// Other endpoints
 	// ...
+}
+
+func initializeLeagues(client *ent.Client) error {
+	ids := []int{39, 1}
+
+	// Initialize models
+	leagueModel := models.NewLeagueModel(client)
+	countryModel := models.NewCountryModel(client)
+	seasonModel := models.NewSeasonModel(client)
+
+	// Create a new LeagueFetcher instance
+	leagueFetcher := fetchers.NewLeagueFetcher(viper.GetString("API_KEY"), leagueModel, countryModel, seasonModel)
+
+	// Fetch leagues
+	err := leagueFetcher.FetchLeagues(ids)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("    Leagues loaded")
+
+	return nil
 }
