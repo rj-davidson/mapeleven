@@ -4,6 +4,8 @@
 # Editor-based HTTP Client requests
 /httpRequests/
 
+server/public/*
+
 .idea/
 *.iml
 *.xml
