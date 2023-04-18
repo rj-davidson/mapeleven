@@ -10,11 +10,10 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"mapeleven/fetchers"
-	"mapeleven/handlers"
 	"mapeleven/models"
-
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/migrate"
+	"mapeleven/routes"
 )
 
 func main() {
@@ -58,27 +57,20 @@ func main() {
 	}
 
 	// Set up routes
-	setupAPIRoutes(app)
+	SetupRoutes(app, client)
 
 	fmt.Println("Server is running on port 8080")
 	log.Fatal(app.Listen(":8080"))
 }
 
-func setupAPIRoutes(app *fiber.App) {
-	// Players endpoints
-	app.Get("/players", func(c *fiber.Ctx) error {
-		return handlers.GetAllPlayers(c)
-	})
-	app.Get("/players/:id", func(c *fiber.Ctx) error {
-		return handlers.GetPlayerByID(c)
-	})
-
-	// Other endpoints
-	// ...
-}
-
 func initializeLeagues(client *ent.Client) error {
-	ids := []int{1, 39}
+	laLigaID := 140
+	serieAID := 39
+	bundesligaID := 78
+	premierLeagueID := 61
+	ligue1ID := 71
+	majorleaguesoccerID := 253
+	leagueIDs := []int{laLigaID, serieAID, bundesligaID, premierLeagueID, ligue1ID, majorleaguesoccerID}
 
 	// Initialize models
 	leagueModel := models.NewLeagueModel(client)
@@ -91,7 +83,7 @@ func initializeLeagues(client *ent.Client) error {
 	leagueFetcher := fetchers.NewLeagueFetcher(leagueModel, countryFetcher)
 
 	// Fetch and upsert leagues
-	for _, id := range ids {
+	for _, id := range leagueIDs {
 		league, err := leagueFetcher.UpsertLeague(id)
 		if err != nil {
 			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
@@ -102,4 +94,21 @@ func initializeLeagues(client *ent.Client) error {
 	fmt.Println("Leagues loaded")
 
 	return nil
+}
+
+func SetupRoutes(app *fiber.App, client *ent.Client) {
+	// Setup routes for players
+	routes.SetupPlayersRoutes(app, client)
+
+	// Setup routes for teams
+	routes.SetupTeamsRoutes(app, client)
+
+	// Setup routes for leagues
+	routes.SetupLeaguesRoutes(app, client)
+
+	// Setup routes for stats
+	routes.SetupStatsRoutes(app)
+
+	// Serve images from public directory
+	app.Static("/images", "./public/images")
 }

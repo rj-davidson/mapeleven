@@ -5,6 +5,7 @@ import (
 	"errors"
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/player"
+	"mapeleven/models/ent/team"
 )
 
 // CreatePlayerInput holds the required fields to create a new player.
@@ -177,4 +178,18 @@ func (m *PlayerModel) GetPlayerTeams(ctx context.Context, playerID int) ([]*ent.
 		return nil, err
 	}
 	return teams, nil
+}
+
+// FilterPlayersByTeams retrieves a list of players who belong to the specified team(s)
+func (m *PlayerModel) FilterPlayersByTeams(ctx context.Context, teamIDs []int) ([]*ent.Player, error) {
+	players, err := m.client.Player.
+		Query().
+		Where(player.HasTeamsWith(team.IDIn(teamIDs...))).
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return players, nil
 }

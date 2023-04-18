@@ -75,7 +75,7 @@ func (lf *LeagueFetcher) FetchLeagueData(data []byte) (models.CreateLeagueInput,
 
 func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
 	// Construct the API URL with the leagueID
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/leagues?id=%d", leagueID)
+	url := fmt.Sprintf("https://api-football-v3.p.rapidapi.com/v3/leagues?id=%d", leagueID)
 
 	ctx := context.Background()
 
@@ -112,14 +112,14 @@ func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
 
 	// Download the logo and set the logoLocation
 	if inputData.Logo != "" {
-		inputData.Logo, _ = utils.DownloadImage(
+		inputData.Logo, _ = utils.DownloadImageIfNeeded(
 			inputData.Logo,
-			fmt.Sprintf("public/images/leagues/%d%s", inputData.ID, filepath.Ext(inputData.Logo)),
+			fmt.Sprintf("images/leagues/%d%s", inputData.ID, filepath.Ext(inputData.Logo)),
 		)
 	}
 
 	// Check if the league exists
-	_, err = lf.leagueModel.GetLeague(inputData.ID)
+	_, err = lf.leagueModel.GetLeague(context.Background(), inputData.ID)
 	if ent.IsNotFound(err) {
 		// Create the league if it doesn't exist
 		newLeague, err := lf.leagueModel.CreateLeague(inputData)
