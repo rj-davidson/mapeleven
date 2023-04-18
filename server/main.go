@@ -64,7 +64,13 @@ func main() {
 }
 
 func initializeLeagues(client *ent.Client) error {
-	ids := []int{1, 39}
+	laLigaID := 140
+	serieAID := 39
+	bundesligaID := 78
+	premierLeagueID := 61
+	ligue1ID := 71
+	majorleaguesoccerID := 253
+	leagueIDs := []int{laLigaID, serieAID, bundesligaID, premierLeagueID, ligue1ID, majorleaguesoccerID}
 
 	// Initialize models
 	leagueModel := models.NewLeagueModel(client)
@@ -77,7 +83,7 @@ func initializeLeagues(client *ent.Client) error {
 	leagueFetcher := fetchers.NewLeagueFetcher(leagueModel, countryFetcher)
 
 	// Fetch and upsert leagues
-	for _, id := range ids {
+	for _, id := range leagueIDs {
 		league, err := leagueFetcher.UpsertLeague(id)
 		if err != nil {
 			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
@@ -91,14 +97,17 @@ func initializeLeagues(client *ent.Client) error {
 }
 
 func SetupRoutes(app *fiber.App, client *ent.Client) {
-	// Setup routes for managing players
+	// Setup routes for players
 	routes.SetupPlayersRoutes(app, client)
 
-	// Setup routes for managing teams
+	// Setup routes for teams
 	routes.SetupTeamsRoutes(app, client)
 
-	// Setup routes for managing leagues
+	// Setup routes for leagues
 	routes.SetupLeaguesRoutes(app, client)
+
+	// Setup routes for stats
+	routes.SetupStatsRoutes(app)
 
 	// Serve images from public directory
 	app.Static("/images", "./public/images")
