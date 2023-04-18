@@ -5,7 +5,6 @@ import "./ScatterPlot.css";
 function ScatterPlot() {
     // Declare state variables using the `useState` hook.
     const [data, setData] = useState([]);
-    const [names, setNames] = useState([]);
 
     // Create a reference for the SVG element.
     const svgRef = useRef();
@@ -20,18 +19,15 @@ function ScatterPlot() {
                 // Extract the data from the response.
                 const response = jsonData.response;
                 const newData = []
-                const newNames = []
                 for (let i = 0; i < response.length; i++) {
                     const goals = response[i].statistics[0].goals.total;
                     const shots = response[i].statistics[0].shots.total;
                     const name = response[i].player.name;
                     const gvs = {x: shots, y: goals, player: name};
                     newData.push(gvs);
-                    newNames.push(name);
                 }
                 // Update the state variables with the new data.
                 setData(newData);
-                setNames(newNames);
             })
             .catch(error => console.error(error));
     };
