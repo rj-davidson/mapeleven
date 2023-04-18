@@ -1,0 +1,30 @@
+
+.point {
+    fill: #3854FC;
+}
+
+.point:hover{
+    stroke: white;
+    stroke-width: 2;
+}
+
+.container{
+    margin-bottom: 30px;
+}
+
+.labels{
+    fill: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
+
+.button {
+    transition-duration: 0.4s;
+    margin-right: 50px;
+}
+
+.button:hover {
+    background-color: #3854FC;
+    color: white;
+}

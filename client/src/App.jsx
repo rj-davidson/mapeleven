@@ -5,6 +5,7 @@ import './App.css'
 import BarChart from "./Components/BarChart.jsx";
 import NavigationBar from "./Components/NavigationBar.jsx";
 import {BrowserRouter, Router, Routes} from "react-router-dom";
+import ScatterPlot from "./Components/ScatterPlot.jsx";
 //import NavigationBar from "./NavigationBar.jsx";
 //import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
@@ -17,6 +18,7 @@ function App() {
               <NavigationBar />
           </BrowserRouter>
           <BarChart />
+          <ScatterPlot />
       </div>
   );
 }
