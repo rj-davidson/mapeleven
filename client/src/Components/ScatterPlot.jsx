@@ -17,27 +17,6 @@ function ScatterPlot() {
 
     // Define a function to handle the button click.
     const handleClick = () => {
-        // Send a GET request to the API.
-        /*
-        fetch('http://localhost:8080')
-            .then(response => response.json())
-            .then(jsonData => {
-                // Extract the data from the response.
-                const response = jsonData.response;
-                const newData = []
-                const newNames = []
-                for (let i = 0; i < response.length; i++) {
-                    const goals = response[i].statistics[0].goals.total;
-                    const name = response[i].player.name;
-                    newData.push(goals);
-                    newNames.push(name);
-                }
-                // Update the state variables with the new data.
-                setData(newData);
-                setNames(newNames);
-            })
-            .catch(error => console.error(error));
-         */
     };
 
     // Define the D3 visualization using the `useEffect` hook.
@@ -93,10 +72,10 @@ function ScatterPlot() {
             .append('circle')
                 .attr('cx', d => xScale(d.x))
                 .attr('cy', d => yScale(d.y))
-                .attr('r', 3)
-                .attr('class', 'point');
-
-
+                .attr('r', 4)
+                .attr('class', 'point')
+                .append('title') // add a `title` element to the `circle` elements
+                    .text(d => `x: ${d.x}, y: ${d.y}`);
 
     }, [data]);
 
