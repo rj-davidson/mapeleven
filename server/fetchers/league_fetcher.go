@@ -9,7 +9,9 @@ import (
 	"mapeleven/models"
 	"mapeleven/models/ent"
 	"mapeleven/models/ent/league"
+	"mapeleven/utils"
 	"net/http"
+	"path/filepath"
 )
 
 type LeagueFetcher struct {
@@ -107,6 +109,14 @@ func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
 
 	// Use the upserted country's ID for inputData
 	inputData.Country = upsertedCountry.Code
+
+	// Download the logo and set the logoLocation
+	if inputData.Logo != "" {
+		inputData.Logo, _ = utils.DownloadImage(
+			inputData.Logo,
+			fmt.Sprintf("public/images/leagues/%d%s", inputData.ID, filepath.Ext(inputData.Logo)),
+		)
+	}
 
 	// Check if the league exists
 	_, err = lf.leagueModel.GetLeague(inputData.ID)

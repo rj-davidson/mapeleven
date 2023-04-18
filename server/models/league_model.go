@@ -69,7 +69,7 @@ func (lm *LeagueModel) UpdateLeague(input UpdateLeagueInput) (*ent.League, error
 		updater.SetType(*input.Type)
 	}
 	if input.Logo != nil {
-		updater.SetLogo("public/images/leagues/" + *input.Logo)
+		updater.SetLogo(*input.Logo)
 	}
 	if input.Country != nil {
 		updater.SetCountryID(*input.Country)

@@ -1,8 +1,11 @@
 package fetchers
 
 import (
+	"fmt"
 	"mapeleven/models"
 	"mapeleven/models/ent"
+	"mapeleven/utils"
+	"path/filepath"
 	"strings"
 )
 
@@ -25,6 +28,12 @@ func (cf *CountryFetcher) UpsertCountry(c models.CreateCountryInput) (*ent.Count
 		c.Code = strings.ToUpper(c.Name[:3])
 	}
 
+	// Download the flag and set the local path to the flag
+	if c.Flag != "" {
+		c.Flag, _ = utils.DownloadImage(c.Code,
+			fmt.Sprintf("public/images/flags/%s%s", c.Code, filepath.Ext(c.Flag)))
+	}
+
 	// Search for country by code in Ent DB
 	country, _ := cf.countryModel.GetCountryByCode(c.Code)
 
@@ -45,5 +54,6 @@ func (cf *CountryFetcher) UpsertCountry(c models.CreateCountryInput) (*ent.Count
 		}
 		country, _ = cf.countryModel.UpdateCountry(*updateInput)
 	}
+
 	return country, nil
 }
