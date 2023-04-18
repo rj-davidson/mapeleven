@@ -12,7 +12,7 @@ import Clubs from "./Components/tabpages/Clubs.jsx";
 import Leagues from "./Components/tabpages/Leagues.jsx";
 import About from "./Components/tabpages/About.jsx";
 //import NavigationBar from "./NavigationBar.jsx";
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route, BrowserRouter} from 'react-router-dom';
 
 function App() {
   //const [count, setCount] = useState(0);
@@ -21,7 +21,7 @@ function App() {
 
   return (
       <div className='App'>
-          <Router>
+          <BrowserRouter>
               <NavigationBar />
               <Routes>
                     <Route path='/' exact component={Home} />
@@ -31,8 +31,7 @@ function App() {
                     <Route path='/leagues' component={Leagues} />
                     <Route path='/about' component={About} />
               </Routes>
-          </Router>
-          <BarChart />
+          </BrowserRouter>
       </div>
   );
 }
@@ -41,6 +40,8 @@ export default App;
 
 
         /*return (
+
+          <!--<BarChart /> -->
             <div className="App">
                 <div>
                     <a href="https://vitejs.dev" target="_blank">
