@@ -42,8 +42,6 @@ function ScatterPlot() {
 
     // Define the D3 visualization using the `useEffect` hook.
     useEffect(() => {
-        const tooltip = d3tip()
-
         // Set up the SVG container.
         const w = 600;
         const h = 400;
