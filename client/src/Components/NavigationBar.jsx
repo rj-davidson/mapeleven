@@ -44,7 +44,7 @@ window.addEventListener('resize', showButton);
                         <Link to='/clubs' className = 'nav-links' onClick = {closeMenu}> Clubs </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/competitions' className = 'nav-links' onClick = {closeMenu}> Competitions </Link>
+                        <Link to='/leagues' className = 'nav-links' onClick = {closeMenu}> Leagues </Link>
                     </li>
                     <li className='nav-item'>
                         <Link to='/about' className = 'nav-links' onClick = {closeMenu}> About </Link>
