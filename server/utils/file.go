@@ -9,6 +9,8 @@ import (
 )
 
 func DownloadImage(url string, filename string) (string, error) {
+	// Prepend the public directory to the filename
+	filename = "public/" + filename
 	// Create the directory if it doesn't exist
 	dir := filepath.Dir(filename)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -48,6 +50,9 @@ func DownloadImage(url string, filename string) (string, error) {
 	}
 
 	fmt.Printf("Downloaded image: %s\n", filename)
+
+	// Remove the public directory from the filename
+	filename = filename[7:]
 
 	return filename, nil
 }

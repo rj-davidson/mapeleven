@@ -114,12 +114,12 @@ func (lf *LeagueFetcher) UpsertLeague(leagueID int) (*ent.League, error) {
 	if inputData.Logo != "" {
 		inputData.Logo, _ = utils.DownloadImage(
 			inputData.Logo,
-			fmt.Sprintf("public/images/leagues/%d%s", inputData.ID, filepath.Ext(inputData.Logo)),
+			fmt.Sprintf("images/leagues/%d%s", inputData.ID, filepath.Ext(inputData.Logo)),
 		)
 	}
 
 	// Check if the league exists
-	_, err = lf.leagueModel.GetLeague(inputData.ID)
+	_, err = lf.leagueModel.GetLeague(context.Background(), inputData.ID)
 	if ent.IsNotFound(err) {
 		// Create the league if it doesn't exist
 		newLeague, err := lf.leagueModel.CreateLeague(inputData)

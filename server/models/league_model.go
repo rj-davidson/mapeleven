@@ -85,9 +85,9 @@ func (lm *LeagueModel) DeleteLeague(id int) error {
 }
 
 // GetLeague retrieves a league record by ID.
-func (lm *LeagueModel) GetLeague(id int) (*ent.League, error) {
+func (lm *LeagueModel) GetLeague(ctx context.Context, id int) (*ent.League, error) {
 	return lm.client.League.
-		Get(context.Background(), id)
+		Get(ctx, id)
 }
 
 // GetLeagueSeason retrieves the season of a league.
@@ -105,4 +105,17 @@ func (lm *LeagueModel) GetLeagueSeason(ctx context.Context, leagueID int) (*ent.
 		return nil, err
 	}
 	return season, nil
+}
+
+// ListLeagues retrieves a list of all leagues.
+func (lm *LeagueModel) ListLeagues(ctx context.Context) ([]*ent.League, error) {
+	leagues, err := lm.client.League.
+		Query().
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return leagues, nil
 }
