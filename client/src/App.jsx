@@ -4,18 +4,34 @@ import viteLogo from '/vite.svg'
 import './App.css'
 import BarChart from "./Components/BarChart.jsx";
 import NavigationBar from "./Components/NavigationBar.jsx";
-import {BrowserRouter, Router, Routes} from "react-router-dom";
+//import {BrowserRouter, Router, Routes} from "react-router-dom";
+import Home from "./Components/tabpages/Home.jsx";
+import Fixtures from "./Components/tabpages/Fixtures.jsx";
+import Players from "./Components/tabpages/Players.jsx";
+import Clubs from "./Components/tabpages/Clubs.jsx";
+import Leagues from "./Components/tabpages/Leagues.jsx";
+import About from "./Components/tabpages/About.jsx";
 //import NavigationBar from "./NavigationBar.jsx";
-//import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 function App() {
   //const [count, setCount] = useState(0);
-//this is a comment
+
+
+
   return (
       <div className='App'>
-          <BrowserRouter>
+          <Router>
               <NavigationBar />
-          </BrowserRouter>
+              <Routes>
+                    <Route path='/' exact component={Home} />
+                    <Route path='/fixtures' component={Fixtures} />
+                    <Route path='/players' component={Players} />
+                    <Route path='/clubs' component={Clubs} />
+                    <Route path='/leagues' component={Leagues} />
+                    <Route path='/about' component={About} />
+              </Routes>
+          </Router>
           <BarChart />
       </div>
   );

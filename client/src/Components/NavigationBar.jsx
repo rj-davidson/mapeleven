@@ -35,19 +35,19 @@ window.addEventListener('resize', showButton);
                 </div>
                 <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                     <li className='nav-item'>
-                        <Link to='/Fixtures' className = 'nav-links' onClick = {closeMenu}> Fixtures </Link>
+                        <Link to='/fixtures' className = 'nav-links' onClick = {closeMenu}> Fixtures </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/Players' className = 'nav-links' onClick = {closeMenu}> Players </Link>
+                        <Link to='/players' className = 'nav-links' onClick = {closeMenu}> Players </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/Clubs' className = 'nav-links' onClick = {closeMenu}> Clubs </Link>
+                        <Link to='/clubs' className = 'nav-links' onClick = {closeMenu}> Clubs </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/Competitions' className = 'nav-links' onClick = {closeMenu}> Competitions </Link>
+                        <Link to='/competitions' className = 'nav-links' onClick = {closeMenu}> Competitions </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/About' className = 'nav-links' onClick = {closeMenu}> About </Link>
+                        <Link to='/about' className = 'nav-links' onClick = {closeMenu}> About </Link>
                     </li>
                 </ul>
             </div>
