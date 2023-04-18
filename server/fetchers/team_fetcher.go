@@ -1,6 +1,10 @@
 package fetchers
 
 import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"mapeleven/models"
 	"mapeleven/models/ent"
 	"net/http"
@@ -18,7 +22,6 @@ type APITeamResponse struct {
 	} `json:"response"`
 }
 
-// Remove VenueModel from the constructor
 func NewTeamFetcher(teamModel *models.TeamModel, countryFetcher *CountryFetcher) *TeamFetcher {
 	return &TeamFetcher{
 		client:         &http.Client{},
@@ -27,7 +30,13 @@ func NewTeamFetcher(teamModel *models.TeamModel, countryFetcher *CountryFetcher)
 	}
 }
 
-func (tf *TeamFetcher) FetchTeamData(data []byte) (models.CreateTeamInput, error) {
+func (tf *TeamFetcher) FetchTeamData(teamID int) (models.CreateTeamInput, error) {
+	// Fetch data from API using teamID
+	data, err := tf.getAPITeamData(teamID)
+	if err != nil {
+		return models.CreateTeamInput{}, err
+	}
+
 	var response APITeamResponse
 
 	if err := json.Unmarshal(data, &response); err != nil {
@@ -39,11 +48,33 @@ func (tf *TeamFetcher) FetchTeamData(data []byte) (models.CreateTeamInput, error
 	return teamInput, nil
 }
 
-// Other functions ...
+func (tf *TeamFetcher) getAPITeamData(teamID int) ([]byte, error) {
+	apiURL := fmt.Sprintf("https://api.example.com/teams/%d", teamID) // Replace with your actual API URL
+	req, err := http.NewRequest("GET", apiURL, nil)
 
-func (tf *TeamFetcher) UpsertTeam(teamID int) (*ent.Team, error) {
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Set("Authorization", "Bearer fda98bbd4fmshf7ac8b80f84ef2cp1d3f5bjsnfc890892cfe4")
+
+	resp, err := tf.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (tf *TeamFetcher) UpsertTeam(ctx context.Context, teamID int) (*ent.Team, error) {
 	// Fetch team data from API
-	teamInput, err := tf.fetchTeamData(teamID)
+	teamInput, err := tf.FetchTeamData(teamID)
 	if err != nil {
 		return nil, err
 	}
