@@ -4,19 +4,36 @@ import "./ScatterPlot.css";
 
 function ScatterPlot() {
     // Declare state variables using the `useState` hook.
-    const [data, setData] = useState([
-        { x: 40, y: 30 },
-        { x: 20, y: 15 },
-        { x: 8, y: 2 },
-        { x: 12, y: 5 }
-    ]);
-    //const [names, setNames] = useState([]);
+    const [data, setData] = useState([]);
+    const [names, setNames] = useState([]);
 
     // Create a reference for the SVG element.
     const svgRef = useRef();
 
     // Define a function to handle the button click.
     const handleClick = () => {
+        // Send a GET request to the API.
+        fetch('http://localhost:8080/stats/topscorers')
+            .then(response => response.json())
+            .then(jsonData => {
+                console.log(jsonData.response);
+                // Extract the data from the response.
+                const response = jsonData.response;
+                const newData = []
+                const newNames = []
+                for (let i = 0; i < response.length; i++) {
+                    const goals = response[i].statistics[0].goals.total;
+                    const shots = response[i].statistics[0].shots.total;
+                    const name = response[i].player.name;
+                    const gvs = {x: shots, y: goals, player: name};
+                    newData.push(gvs);
+                    newNames.push(name);
+                }
+                // Update the state variables with the new data.
+                setData(newData);
+                setNames(newNames);
+            })
+            .catch(error => console.error(error));
     };
 
     // Define the D3 visualization using the `useEffect` hook.
@@ -28,7 +45,7 @@ function ScatterPlot() {
             .attr('width', w)
             .attr('height', h)
             .style('overflow', 'visible')
-            .style('margin-top', '75px');
+            .style('margin-top', '120px');
 
         // Set up the scaling.
         const xScale = d3.scaleLinear()
@@ -75,7 +92,7 @@ function ScatterPlot() {
                 .attr('r', 4)
                 .attr('class', 'point')
                 .append('title') // add a `title` element to the `circle` elements
-                    .text(d => `x: ${d.x}, y: ${d.y}`);
+                    .text(d => `${d.player}\nShots: ${d.x}\nGoals: ${d.y}`);
 
     }, [data]);
 

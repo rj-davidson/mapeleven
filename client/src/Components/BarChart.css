@@ -16,3 +16,10 @@
     background-color: #3854FC;
     color: white;
 }
+
+.labels{
+    fill: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: normal;
+    font-style: normal;
+}
