@@ -30,7 +30,7 @@ func (cf *CountryFetcher) UpsertCountry(c models.CreateCountryInput) (*ent.Count
 
 	// Download the flag and set the local path to the flag
 	if c.Flag != "" {
-		c.Flag, _ = utils.DownloadImage(c.Flag,
+		c.Flag, _ = utils.DownloadImageIfNeeded(c.Flag,
 			fmt.Sprintf("images/flags/%s%s", c.Code, filepath.Ext(c.Flag)))
 	}
 

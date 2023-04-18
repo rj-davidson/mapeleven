@@ -8,9 +8,16 @@ import (
 	"path/filepath"
 )
 
-func DownloadImage(url string, filename string) (string, error) {
+func DownloadImageIfNeeded(url string, filename string) (string, error) {
 	// Prepend the public directory to the filename
 	filename = "public/" + filename
+
+	// Check if the file already exists
+	if _, err := os.Stat(filename); err == nil {
+		fmt.Printf("File already exists: %s\n", filename)
+		return filename[7:], nil // Remove the public directory from the filename
+	}
+
 	// Create the directory if it doesn't exist
 	dir := filepath.Dir(filename)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
@@ -24,24 +31,14 @@ func DownloadImage(url string, filename string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer func(Body io.ReadCloser) {
-		err := Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(resp.Body)
+	defer resp.Body.Close()
 
 	// Create the file
 	file, err := os.Create(filename)
 	if err != nil {
 		return "", err
 	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}(file)
+	defer file.Close()
 
 	// Copy the response body to the file
 	_, err = io.Copy(file, resp.Body)
