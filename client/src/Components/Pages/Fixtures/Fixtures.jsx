@@ -1,6 +1,6 @@
 import React from "react";
-import '../../App.css';
-import NavigationBar from "../NavigationBar.jsx";
+import '../../../App.css';
+import NavigationBar from "../../Layout/NavigationBar.tsx";
 
 function Fixtures() {
     return (

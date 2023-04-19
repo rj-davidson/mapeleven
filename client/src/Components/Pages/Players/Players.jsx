@@ -1,9 +1,9 @@
 import React from "react";
-import '../../App.css';
-import NavigationBar from "../NavigationBar.jsx";
-import BarChart from "../BarChart.jsx";
-import SpiderChart from "../SpiderChart.jsx";
-import ScatterPlot from "../ScatterPlot.jsx";
+import '../../../App.css';
+import NavigationBar from "../../Layout/NavigationBar.tsx";
+import BarChart from "../../DataVis/BarChart.jsx";
+import SpiderChart from "../../DataVis/SpiderChart.jsx";
+import ScatterPlot from "../../DataVis/ScatterPlot.jsx";
 
 function Players() {
     return (
