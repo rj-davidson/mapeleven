@@ -2,7 +2,7 @@ package models
 
 import (
 	"context"
-	"mapeleven/models/ent"
+	"mapeleven/db/ent"
 	"time"
 )
 

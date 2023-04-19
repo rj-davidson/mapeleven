@@ -3,9 +3,9 @@ package models
 import (
 	"context"
 	"errors"
-	"mapeleven/models/ent"
-	"mapeleven/models/ent/league"
-	"mapeleven/models/ent/season"
+	"mapeleven/db/ent"
+	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"time"
 )
 
