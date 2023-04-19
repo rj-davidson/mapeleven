@@ -5,7 +5,7 @@
   padding: 0;
 }
 
-.home, .about, .leagues, .fixtures, .clubs, .players {
+.about, .leagues, .fixtures, .clubs, .players {
   color: #fff;
   text-decoration: none;
   font-size: 3rem;
