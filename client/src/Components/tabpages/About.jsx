@@ -1,6 +1,15 @@
 import React from "react";
 import '../../App.css';
+import NavigationBar from "../NavigationBar";
 
-export default function About() {
-    return <h1 className='about'>ABOUT</h1>;
+function About() {
+    return(
+        <div>
+            <NavigationBar />
+            <h1 className='about'>ABOUT</h1>
+            <h1>Hello</h1>
+        </div>
+    );
 }
+
+export default About;

@@ -1,6 +1,14 @@
 import React from "react";
 import '../../App.css';
+import NavigationBar from "../NavigationBar.jsx";
 
-export default function Fixtures() {
-    return <h1 className='fixtures'>FIXTURES</h1>;
+function Fixtures() {
+    return (
+        <div>
+            <NavigationBar />
+            <h1 className='fixtures'>FIXTURES</h1>;
+        </div>
+    );
 }
+
+export default Fixtures;

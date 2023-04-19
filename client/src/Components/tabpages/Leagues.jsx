@@ -1,6 +1,14 @@
 import React from "react";
 import '../../App.css';
+import NavigationBar from "../NavigationBar.jsx";
 
-export default function Leagues() {
-    return <h1 className='leagues'>LEAGUES</h1>;
+function Leagues() {
+    return (
+        <div>
+            <NavigationBar />
+            <h1 className='leagues'>LEAGUES</h1>;
+        </div>
+    );
 }
+
+export default Leagues;

@@ -1,6 +1,14 @@
 import React from "react";
 import '../../App.css';
+import NavigationBar from "../NavigationBar";
 
-export default function Clubs() {
-    return <h1 className='clubs'>CLUBS</h1>;
+function Clubs() {
+    return(
+        <div>
+            <NavigationBar/>
+            <h1 className='clubs'>CLUBS</h1>;
+        </div>
+    );
 }
+
+export default Clubs;

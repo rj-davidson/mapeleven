@@ -2,7 +2,8 @@ import React from 'react'
 import './App.css'
 import BarChart from "./Components/BarChart.jsx";
 import NavigationBar from "./Components/NavigationBar.jsx";
-import PictureButton from "./Components/PictureButton.jsx";
+//import PictureButton from "./Components/PictureButton.jsx";
+import DisplayLeagues from "./Components/DisplayLeagues.jsx";
 import Home from "./Components/tabpages/Home";
 import Fixtures from "./Components/tabpages/Fixtures";
 import Players from "./Components/tabpages/Players";
@@ -20,15 +21,13 @@ function App() {
   return (
       <div className='App'>
           <Router>
-              <NavigationBar />
-              <BarChart />
               <Routes>
-                  <Route path='/fixtures' component={Fixtures} />
-                  <Route path='/players' component={Players} />
-                  <Route path='/clubs' component={Clubs} />
-                  <Route path='/leagues' component={Leagues} />
-                  <Route path='/about' component={About} />
-                  <Route path='/' exact component = {Home}/>
+                  <Route path='/fixtures' element={<Fixtures/>} />
+                  <Route path='/players' element={<Players/>} />
+                  <Route path='/clubs' element={<Clubs/>} />
+                  <Route path='/leagues' element={<Leagues/>} />
+                  <Route path='/about' element={<About/>} />
+                  <Route path='/' exact element = {<Home/>}/>
               </Routes>
           </Router>
       </div>
