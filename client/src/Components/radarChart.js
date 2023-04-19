@@ -219,8 +219,8 @@ export function RadarChart(id, data, options) {
 		.style("fill", "none")
 		.style("pointer-events", "all")
 		.on("mouseover", function(d,i) {
-			newX =  parseFloat(d3.select(this).attr('cx')) - 10;
-			newY =  parseFloat(d3.select(this).attr('cy')) - 10;
+			var newX =  parseFloat(d3.select(this).attr('cx')) - 10;
+			var newY =  parseFloat(d3.select(this).attr('cy')) - 10;
 					
 			tooltip
 				.attr('x', newX)
