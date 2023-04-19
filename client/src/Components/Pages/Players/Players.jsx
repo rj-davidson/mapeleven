@@ -1,18 +1,18 @@
 import React from "react";
 import '../../../App.css';
-import NavigationBar from "../../Layout/NavigationBar.tsx";
 import BarChart from "../../DataVis/BarChart.jsx";
 import SpiderChart from "../../DataVis/SpiderChart.jsx";
 import ScatterPlot from "../../DataVis/ScatterPlot.jsx";
+import Layout from "../../Layout/Layout.tsx";
 
 function Players() {
     return (
         <div>
-            <NavigationBar />
-            <BarChart />
-            <ScatterPlot />
-            <SpiderChart />
-            <h1 className='players'>PLAYERS</h1>;
+            <Layout>
+                <BarChart />
+                <ScatterPlot />
+                <SpiderChart />
+            </Layout>
         </div>
     );
 }

@@ -1,12 +1,13 @@
 import React from "react";
 import '../../../App.css';
-import NavigationBar from "../../Layout/NavigationBar.tsx";
+import Layout from "../../Layout/Layout.tsx";
 
 function Fixtures() {
     return (
         <div>
-            <NavigationBar />
-            <h1 className='fixtures'>FIXTURES</h1>;
+            <Layout>
+                <h1 className='fixtures'>FIXTURES</h1>;
+            </Layout>
         </div>
     );
 }
