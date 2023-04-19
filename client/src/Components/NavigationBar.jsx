@@ -31,7 +31,7 @@ window.addEventListener('resize', showButton);
                     <i className={click ? 'fas fa-times': 'fas fa-bars'}/>
                 </div>
                 <div className={"title"}>
-                    <h1>mapeleven</h1>
+                    <Link to='/' className = 'nav-links' onClick = {closeMenu}> mapeleven </Link>
                 </div>
                 <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                     <li className='nav-item'>

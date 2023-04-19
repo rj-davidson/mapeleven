@@ -1,16 +1,11 @@
 import React from 'react'
 import './App.css'
-import BarChart from "./Components/BarChart.jsx";
-import NavigationBar from "./Components/NavigationBar.jsx";
-//import PictureButton from "./Components/PictureButton.jsx";
-import DisplayLeagues from "./Components/DisplayLeagues.jsx";
 import Home from "./Components/tabpages/Home";
 import Fixtures from "./Components/tabpages/Fixtures";
 import Players from "./Components/tabpages/Players";
 import Clubs from "./Components/tabpages/Clubs";
 import Leagues from "./Components/tabpages/Leagues";
 import About from "./Components/tabpages/About";
-//import NavigationBar from "./NavigationBar.jsx";
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 function App() {
