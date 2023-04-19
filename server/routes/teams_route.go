@@ -4,8 +4,8 @@ import (
 	"context"
 	"github.com/gofiber/fiber/v2"
 	"log"
+	"mapeleven/db/ent"
 	"mapeleven/models"
-	"mapeleven/models/ent"
 	"strconv"
 )
 
