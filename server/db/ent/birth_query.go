@@ -5,9 +5,9 @@ package ent
 import (
 	"context"
 	"fmt"
-	"mapeleven/models/ent/birth"
-	"mapeleven/models/ent/player"
-	"mapeleven/models/ent/predicate"
+	"mapeleven/db/ent/birth"
+	"mapeleven/db/ent/player"
+	"mapeleven/db/ent/predicate"
 	"math"
 
 	"entgo.io/ent/dialect/sql"

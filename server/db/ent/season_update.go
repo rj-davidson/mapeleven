@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mapeleven/models/ent/league"
-	"mapeleven/models/ent/predicate"
-	"mapeleven/models/ent/season"
+	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/predicate"
+	"mapeleven/db/ent/season"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"mapeleven/models/ent/country"
+	"mapeleven/db/ent/country"
 	"strings"
 
 	"entgo.io/ent"

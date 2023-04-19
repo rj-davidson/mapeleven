@@ -4,8 +4,8 @@ package ent
 
 import (
 	"fmt"
-	"mapeleven/models/ent/country"
-	"mapeleven/models/ent/team"
+	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/team"
 	"strings"
 
 	"entgo.io/ent"

@@ -4,11 +4,11 @@ package enttest
 
 import (
 	"context"
-	"mapeleven/models/ent"
+	"mapeleven/db/ent"
 	// required by schema hooks.
-	_ "mapeleven/models/ent/runtime"
+	_ "mapeleven/db/ent/runtime"
 
-	"mapeleven/models/ent/migrate"
+	"mapeleven/db/ent/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

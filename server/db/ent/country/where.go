@@ -3,7 +3,7 @@
 package country
 
 import (
-	"mapeleven/models/ent/predicate"
+	"mapeleven/db/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

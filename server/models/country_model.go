@@ -3,8 +3,8 @@ package models
 import (
 	"context"
 	"fmt"
-	"mapeleven/models/ent"
-	"mapeleven/models/ent/country"
+	"mapeleven/db/ent"
+	"mapeleven/db/ent/country"
 )
 
 // CreateCountryInput holds the input data needed to create a new country record.

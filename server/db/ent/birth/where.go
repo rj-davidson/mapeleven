@@ -3,7 +3,7 @@
 package birth
 
 import (
-	"mapeleven/models/ent/predicate"
+	"mapeleven/db/ent/predicate"
 	"time"
 
 	"entgo.io/ent/dialect/sql"

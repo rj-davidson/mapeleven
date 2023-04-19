@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mapeleven/models/ent/league"
-	"mapeleven/models/ent/season"
+	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"

@@ -3,10 +3,10 @@
 package ent
 
 import (
-	"mapeleven/models/ent/country"
-	"mapeleven/models/ent/schema"
-	"mapeleven/models/ent/season"
-	"mapeleven/models/ent/team"
+	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/schema"
+	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/team"
 )
 
 // The init function reads all schema descriptors with runtime code

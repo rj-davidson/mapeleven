@@ -8,15 +8,15 @@ import (
 	"fmt"
 	"log"
 
-	"mapeleven/models/ent/migrate"
+	"mapeleven/db/ent/migrate"
 
-	"mapeleven/models/ent/birth"
-	"mapeleven/models/ent/country"
-	"mapeleven/models/ent/league"
-	"mapeleven/models/ent/player"
-	"mapeleven/models/ent/season"
-	"mapeleven/models/ent/standings"
-	"mapeleven/models/ent/team"
+	"mapeleven/db/ent/birth"
+	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/player"
+	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/standings"
+	"mapeleven/db/ent/team"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"

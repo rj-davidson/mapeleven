@@ -5,7 +5,7 @@ package hook
 import (
 	"context"
 	"fmt"
-	"mapeleven/models/ent"
+	"mapeleven/db/ent"
 )
 
 // The BirthFunc type is an adapter to allow the use of ordinary

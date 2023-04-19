@@ -4,9 +4,9 @@ package ent
 
 import (
 	"fmt"
-	"mapeleven/models/ent/country"
-	"mapeleven/models/ent/league"
-	"mapeleven/models/ent/season"
+	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"strings"
 
 	"entgo.io/ent"

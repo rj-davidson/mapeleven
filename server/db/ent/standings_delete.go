@@ -4,8 +4,8 @@ package ent
 
 import (
 	"context"
-	"mapeleven/models/ent/predicate"
-	"mapeleven/models/ent/standings"
+	"mapeleven/db/ent/predicate"
+	"mapeleven/db/ent/standings"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

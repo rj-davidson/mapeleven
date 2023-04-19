@@ -6,9 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mapeleven/models/ent/birth"
-	"mapeleven/models/ent/player"
-	"mapeleven/models/ent/team"
+	"mapeleven/db/ent/birth"
+	"mapeleven/db/ent/player"
+	"mapeleven/db/ent/team"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"

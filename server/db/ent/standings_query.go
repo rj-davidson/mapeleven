@@ -5,10 +5,10 @@ package ent
 import (
 	"context"
 	"fmt"
-	"mapeleven/models/ent/league"
-	"mapeleven/models/ent/predicate"
-	"mapeleven/models/ent/standings"
-	"mapeleven/models/ent/team"
+	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/predicate"
+	"mapeleven/db/ent/standings"
+	"mapeleven/db/ent/team"
 	"math"
 
 	"entgo.io/ent/dialect/sql"

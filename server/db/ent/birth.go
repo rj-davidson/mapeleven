@@ -4,8 +4,8 @@ package ent
 
 import (
 	"fmt"
-	"mapeleven/models/ent/birth"
-	"mapeleven/models/ent/player"
+	"mapeleven/db/ent/birth"
+	"mapeleven/db/ent/player"
 	"strings"
 	"time"
 

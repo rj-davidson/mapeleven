@@ -4,8 +4,8 @@ package ent
 
 import (
 	"context"
-	"mapeleven/models/ent/predicate"
-	"mapeleven/models/ent/season"
+	"mapeleven/db/ent/predicate"
+	"mapeleven/db/ent/season"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"

@@ -3,8 +3,9 @@ package models
 import (
 	"context"
 	"errors"
-	"mapeleven/models/ent"
-	"mapeleven/models/ent/team"
+	"mapeleven/db/ent"
+	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/team"
 )
 
 // CreateTeamInput holds the required fields to create a new team.
@@ -15,7 +16,7 @@ type CreateTeamInput struct {
 	Founded  int
 	National bool
 	Logo     string
-	Country  int
+	Country  string
 }
 
 // UpdateTeamInput holds the fields to update an existing team.
@@ -26,7 +27,7 @@ type UpdateTeamInput struct {
 	Founded  *int
 	National *bool
 	Logo     *string
-	Country  *int
+	Country  *string
 }
 
 // DeleteTeamInput holds the required fields to delete a team.
@@ -46,6 +47,13 @@ func NewTeamModel(client *ent.Client) *TeamModel {
 
 // CreateTeam creates a new team.
 func (m *TeamModel) CreateTeam(ctx context.Context, input CreateTeamInput) (*ent.Team, error) {
+	// Get the country by code
+	// Find the country by its code
+	c, err := m.client.Country.
+		Query().
+		Where(country.CodeEQ(input.Country)).
+		Only(context.Background())
+
 	t, err := m.client.Team.
 		Create().
 		SetID(input.ID).
@@ -54,7 +62,7 @@ func (m *TeamModel) CreateTeam(ctx context.Context, input CreateTeamInput) (*ent
 		SetFounded(input.Founded).
 		SetNational(input.National).
 		SetLogo(input.Logo).
-		SetCountryID(input.Country).
+		SetCountryID(c.ID).
 		Save(ctx)
 
 	if err != nil {
@@ -66,6 +74,11 @@ func (m *TeamModel) CreateTeam(ctx context.Context, input CreateTeamInput) (*ent
 // UpdateTeam updates an existing team.
 func (m *TeamModel) UpdateTeam(ctx context.Context, input UpdateTeamInput) (*ent.Team, error) {
 	update := m.client.Team.UpdateOneID(input.ID)
+	// Find the country by its code
+	c, err := m.client.Country.
+		Query().
+		Where(country.CodeEQ(*input.Country)).
+		Only(context.Background())
 
 	if input.Name != nil {
 		update.SetName(*input.Name)
@@ -83,7 +96,7 @@ func (m *TeamModel) UpdateTeam(ctx context.Context, input UpdateTeamInput) (*ent
 		update.SetLogo(*input.Logo)
 	}
 	if input.Country != nil {
-		update.SetCountryID(*input.Country)
+		update.SetCountryID(c.ID)
 	}
 
 	t, err := update.Save(ctx)
@@ -138,7 +151,7 @@ func (m *TeamModel) ListTeams(ctx context.Context) ([]*ent.Team, error) {
 
 // GetTeamCountry retrieves the country of a team.
 func (m *TeamModel) GetTeamCountry(ctx context.Context, teamID int) (*ent.Country, error) {
-	country, err := m.client.Team.
+	c, err := m.client.Team.
 		Query().
 		Where(team.ID(teamID)).
 		QueryCountry().
@@ -150,7 +163,7 @@ func (m *TeamModel) GetTeamCountry(ctx context.Context, teamID int) (*ent.Countr
 		}
 		return nil, err
 	}
-	return country, nil
+	return c, nil
 }
 
 // GetTeamLeagues retrieves the leagues of a team.
