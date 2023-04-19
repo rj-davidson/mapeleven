@@ -47,20 +47,16 @@ func (cm *CountryModel) UpdateCountry(input UpdateCountryInput) (*ent.Country, e
 		Query().
 		Where(country.CodeEQ(input.Code)).
 		First(context.Background())
-
 	if err != nil {
 		return nil, err
 	}
 
 	updatedCountry, err := c.Update().
 		SetFlag(input.Flag).
+		SetCode(input.Code).
 		Save(context.Background())
 
-	if err != nil {
-		return nil, err
-	}
-
-	return updatedCountry, nil
+	return updatedCountry, err
 }
 
 // DeleteCountry deletes a country record by code.
@@ -78,7 +74,7 @@ func (cm *CountryModel) DeleteCountry(id int) error {
 	return nil
 }
 
-// GetCountryByName retrieves a country record by country code.
+// GetCountryByName retrieves a country record by country name.
 func (cm *CountryModel) GetCountryByName(name string) (*ent.Country, error) {
 	return cm.client.Country.
 		Query().

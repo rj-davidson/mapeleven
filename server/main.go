@@ -51,10 +51,7 @@ func main() {
 	}))
 
 	// Initialize data
-	err = initializeLeagues(client)
-	if err != nil {
-		log.Fatal(err)
-	}
+	initializeData(client)
 
 	// Set up routes
 	SetupRoutes(app, client)
@@ -63,7 +60,8 @@ func main() {
 	log.Fatal(app.Listen(":8080"))
 }
 
-func initializeLeagues(client *ent.Client) error {
+func initializeData(client *ent.Client) {
+	// Initialize data
 	laLigaID := 140
 	serieAID := 39
 	bundesligaID := 78
@@ -72,41 +70,35 @@ func initializeLeagues(client *ent.Client) error {
 	majorleaguesoccerID := 253
 	leagueIDs := []int{laLigaID, serieAID, bundesligaID, premierLeagueID, ligue1ID, majorleaguesoccerID}
 
-	// Initialize models
-	leagueModel := models.NewLeagueModel(client)
-	countryModel := models.NewCountryModel(client)
-	teamModel := models.NewTeamModel(client)
+	// Country Initialization
+	//{
+	//	countryModel := models.NewCountryModel(client)
+	//	countryController := controllers.NewCountryController(countryModel)
+	//	err := countryController.InitializeCountries()
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//}
 
-	// Create a new LeagueController instance
-	countryController := controllers.NewCountryController(countryModel, client)
-
-	// Create a new LeagueController instance
-	leagueController := controllers.NewLeagueController(leagueModel, countryController)
-
-	// Create a new TeamController instance
-	teamController := controllers.NewTeamController(teamModel, countryController)
-
-	// Fetch and upsert leagues
-	for _, id := range leagueIDs {
-		league, err := leagueController.UpsertLeague(context.Background(), id)
+	// League Initialization
+	{
+		leagueModel := models.NewLeagueModel(client)
+		leagueController := controllers.NewLeagueController(leagueModel)
+		err := leagueController.InitializeLeagues(leagueIDs)
 		if err != nil {
-			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
+			log.Fatal(err)
 		}
-		fmt.Printf("Upserted league with ID %d: %+v\n", id, league)
 	}
 
-	// Fetch and upsert teams
-	for _, id := range leagueIDs {
-		team, err := teamController.UpsertTeam(context.Background(), id)
+	// Team Initialization
+	{
+		teamModel := models.NewTeamModel(client)
+		teamController := controllers.NewTeamController(teamModel)
+		err := teamController.InitializeTeams(leagueIDs)
 		if err != nil {
-			return fmt.Errorf("failed to upsert team with ID %d: %v", id, err)
+			log.Fatal(err)
 		}
-		fmt.Printf("Upserted team with ID %d: %+v\n", id, team)
 	}
-
-	fmt.Println("Leagues loaded")
-
-	return nil
 }
 
 func SetupRoutes(app *fiber.App, client *ent.Client) {

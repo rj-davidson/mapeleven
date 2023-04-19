@@ -17,18 +17,16 @@ import (
 type CountryController struct {
 	client       *http.Client
 	countryModel *models.CountryModel
-	entClient    *ent.Client
 }
 
-func NewCountryController(countryModel *models.CountryModel, client *ent.Client) *CountryController {
+func NewCountryController(countryModel *models.CountryModel) *CountryController {
 	return &CountryController{
-		client:       &http.Client{},
+		client:       http.DefaultClient,
 		countryModel: countryModel,
-		entClient:    client,
 	}
 }
 
-func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (*ent.Country, error) {
+func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (ent.Country, error) {
 	// Convert the code to uppercase if it is not empty
 	c.Code = strings.ToUpper(c.Code)
 
@@ -44,16 +42,19 @@ func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (*ent.Co
 	}
 
 	// Search for country by code in Ent DB
-	country, _ := cc.countryModel.GetCountryByName(c.Name)
-
+	country, err := cc.countryModel.GetCountryByName(c.Name)
 	if country == nil {
+		fmt.Printf("DB[countries] -> Adding <   %s   > \n", c.Name)
 		// Country does not exist, create it
 		createInput := &models.CreateCountryInput{
 			Name: c.Name,
 			Code: c.Code,
 			Flag: c.Flag,
 		}
-		country, _ = cc.countryModel.CreateCountry(*createInput)
+		country, err = cc.countryModel.CreateCountry(*createInput)
+		if err != nil {
+			return ent.Country{}, err
+		}
 	} else {
 		// Country exists, update it
 		updateInput := &models.UpdateCountryInput{
@@ -61,51 +62,62 @@ func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (*ent.Co
 			Name: c.Name,
 			Flag: c.Flag,
 		}
-		country, _ = cc.countryModel.UpdateCountry(*updateInput)
+		country, err = cc.countryModel.UpdateCountry(*updateInput)
+		if err != nil {
+			return ent.Country{}, err
+		}
 	}
 
-	return country, nil
+	return *country, nil
 }
 
-func (cc *CountryController) FetchCountryByName(countryName string) (models.CreateCountryInput, error) {
-	// Fetch the country data from the API
-	data, err := cc.GetCountryData(context.Background(), countryName)
+func (cc *CountryController) InitializeCountries() error {
+	// Fetch all country data from the API
+	data, err := cc.GetAllCountryData(context.Background())
 	if err != nil {
-		fmt.Printf("Error fetching country data: %s     Error: %s", countryName, err.Error())
+		return fmt.Errorf("error fetching country data: %s", err.Error())
 	}
 
 	// Decode the API response into a map
 	var resp map[string]interface{}
 	err = json.Unmarshal(data, &resp)
 	if err != nil {
-		fmt.Printf("Error decoding country data: %s     Error: %s", countryName, err.Error())
+		return fmt.Errorf("error decoding country data: %s", err.Error())
 	}
 
-	// Extract the country
-	c := resp["response"].([]interface{})[0].(map[string]interface{})
-
-	// Decode the first object into a struct
-	apiCountry := models.CreateCountryInput{
-		Name: c["name"].(string),
-		Code: c["code"].(string),
-		Flag: c["flag"].(string),
+	// Extract the countries
+	response := resp["response"].([]interface{})
+	if len(response) == 0 {
+		return fmt.Errorf("no countries found")
 	}
 
-	// Check if country exists in the Ent database
-	entCountry, err := cc.countryModel.GetCountryByName(apiCountry.Name)
-	if entCountry != nil {
-		return apiCountry, nil
-	} else {
-		// Country does not exist in the Ent database, create it
-		_, err = cc.UpsertCountry(apiCountry)
-	}
+	for _, countryData := range response {
+		// Decode each country object into a struct
+		c := countryData.(map[string]interface{})
+		apiCountry := models.CreateCountryInput{
+			Name: c["name"].(string),
+			Code: "",
+			Flag: "",
+		}
+		if code, ok := c["code"].(string); ok && c["code"] != nil {
+			apiCountry.Code = code
+		}
+		if flag, ok := c["flag"].(string); ok && c["flag"] != nil {
+			apiCountry.Flag = flag
+		}
 
-	return apiCountry, nil
+		// Upsert Country
+		_, err := cc.UpsertCountry(apiCountry)
+		if err != nil {
+			return fmt.Errorf("error upserting country: %s, error: %s", apiCountry.Name, err.Error())
+		}
+	}
+	return nil
 }
 
-func (cc *CountryController) GetCountryData(ctx context.Context, countryName string) ([]byte, error) {
-	// Construct the API URL with the country name
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/countries?name=%s", strings.ToLower(countryName))
+func (cc *CountryController) GetAllCountryData(ctx context.Context) ([]byte, error) {
+	// Construct the API URL to fetch all countries
+	url := "https://api-football-v1.p.rapidapi.com/v3/countries"
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
