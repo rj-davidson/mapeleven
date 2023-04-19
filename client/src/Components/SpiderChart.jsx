@@ -74,12 +74,12 @@ function SpiderChart() {
         // Set up the SVG container.
         const w = 600;
         const h = 400;
-        const svg = d3.select(svgRef.current)
+        d3.select(svgRef.current)
             .attr('width', w)
             .attr('height', h)
             .style('overflow', 'visible')
             .style('margin-top', '-50px')
-            .style('margin-bottom', '280px');
+            .style('margin-bottom', '0px');
 
         var margin = {top: 100, right: 100, bottom: 100, left: 100},
             width = Math.min(700, window.innerWidth - 10) - margin.left - margin.right,
