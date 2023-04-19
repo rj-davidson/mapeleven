@@ -1,11 +1,10 @@
 import React from 'react'
 import './App.css'
-import Home from "./Components/tabpages/Home";
-import Fixtures from "./Components/tabpages/Fixtures";
-import Players from "./Components/tabpages/Players";
-import Clubs from "./Components/tabpages/Clubs";
-import Leagues from "./Components/tabpages/Leagues";
-import About from "./Components/tabpages/About";
+import Fixtures from "./Components/Pages/Fixtures/Fixtures.jsx";
+import Players from "./Components/Pages/Players/Players.jsx";
+import Clubs from "./Components/Pages/Clubs/Clubs.jsx";
+import Leagues from "./Components/Pages/Leagues/Leagues.jsx";
+import About from "./Components/Pages/About/About";
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 function App() {
@@ -22,7 +21,7 @@ function App() {
                   <Route path='/clubs' element={<Clubs/>} />
                   <Route path='/leagues' element={<Leagues/>} />
                   <Route path='/about' element={<About/>} />
-                  <Route path='/' exact element = {<Home/>}/>
+                  <Route path='/' exact element = {<Fixtures/>}/>
               </Routes>
           </Router>
       </div>

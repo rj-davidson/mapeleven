@@ -1,7 +1,7 @@
 import React from "react";
-import '../../App.css';
-import NavigationBar from "../NavigationBar.jsx";
-import DisplayLeagues from "../DisplayLeagues.jsx";
+import '../../../App.css';
+import NavigationBar from "../../Layout/NavigationBar.tsx";
+import DisplayLeagues from "./DisplayLeagues.jsx";
 
 function Leagues() {
     return (
