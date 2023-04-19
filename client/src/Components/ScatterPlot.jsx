@@ -94,12 +94,8 @@ function ScatterPlot() {
 
     return (
         <div className="ScatterPlot">
-            <div className="container">
-                {/* Render a button that triggers the `handleClick` function when clicked. */}
-                <button className={"button"} onClick={handleClick}>Get Top Scorers</button>
-                {/* Render an SVG element using the `svgRef` reference. */}
-                <svg ref={svgRef}></svg>
-            </div>
+            <button className={"button"} onClick={handleClick}>Get Top Scorers</button>
+            <svg ref={svgRef}></svg>
         </div>
     );
 }

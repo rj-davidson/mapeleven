@@ -10,6 +10,7 @@
 .button {
     transition-duration: 0.4s;
     margin-right: 50px;
+    font-family: 'Poppins', sans-serif;
 }
 
 .button:hover {

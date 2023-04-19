@@ -122,8 +122,6 @@ function SpiderChart() {
                     </select>
                 </div>
             </div>
-
-            {/* Render an SVG element using the `svgRef` reference. */}
             <div className="chart">
                 <svg ref={svgRef}></svg>
             </div>
