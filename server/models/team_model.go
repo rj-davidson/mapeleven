@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"fmt"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/team"
@@ -45,14 +46,17 @@ func NewTeamModel(client *ent.Client) *TeamModel {
 	return &TeamModel{client: client}
 }
 
-// CreateTeam creates a new team.
 func (m *TeamModel) CreateTeam(ctx context.Context, input CreateTeamInput) (*ent.Team, error) {
 	// Get the country by code
 	// Find the country by its code
 	c, err := m.client.Country.
 		Query().
-		Where(country.CodeEQ(input.Country)).
+		Where(country.NameEQ(input.Country)).
 		Only(context.Background())
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to find country: %w", err)
+	}
 
 	t, err := m.client.Team.
 		Create().
@@ -66,8 +70,9 @@ func (m *TeamModel) CreateTeam(ctx context.Context, input CreateTeamInput) (*ent
 		Save(ctx)
 
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to create team: %w", err)
 	}
+
 	return t, nil
 }
 

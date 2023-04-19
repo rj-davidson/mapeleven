@@ -68,7 +68,7 @@ func (tc *TeamController) FetchTeamData(data []byte) (models.CreateTeamInput, mo
 		Logo:     response.Response[0].Team.Logo,
 	}
 
-	countryInput := models.CreateCountryInput{} // no country field in JSON data
+	countryInput, _ := tc.countryController.FetchCountryByName(response.Response[0].Team.Country)
 	return teamInput, countryInput, nil
 }
 
@@ -135,15 +135,15 @@ func (tc *TeamController) UpsertTeam(teamID int) (*ent.Team, error) {
 	}
 
 	// Check if the team exists
-	_, err = tc.teamModel.GetTeamByID(context.Background(), inputData.ID)
-	if ent.IsNotFound(err) {
+	t, err := tc.teamModel.GetTeamByID(context.Background(), inputData.ID)
+	if t == nil {
 		// Create the team if it doesn't exist
 		newTeam, err := tc.teamModel.CreateTeam(context.Background(), inputData)
 		if err != nil {
 			return nil, err
 		}
 		return newTeam, nil
-	} else if err == nil {
+	} else {
 		// Update the team if it exists
 		updateInput := models.UpdateTeamInput{
 			ID:       inputData.ID,
@@ -159,8 +159,5 @@ func (tc *TeamController) UpsertTeam(teamID int) (*ent.Team, error) {
 			return nil, err
 		}
 		return updatedTeam, nil
-	} else {
-		// Return any other error that may occur
-		return nil, err
 	}
 }

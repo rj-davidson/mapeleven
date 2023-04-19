@@ -64,7 +64,7 @@ func (lm *LeagueModel) UpdateLeague(input UpdateLeagueInput) (*ent.League, error
 	// Find the country by its code
 	c, err := lm.client.Country.
 		Query().
-		Where(country.CodeEQ(*input.Country)).
+		Where(country.NameEQ(*input.Country)).
 		Only(context.Background())
 
 	if err != nil {

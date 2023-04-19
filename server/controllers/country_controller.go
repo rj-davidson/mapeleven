@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"mapeleven/db/ent"
 	"mapeleven/models"
@@ -19,10 +20,11 @@ type CountryController struct {
 	entClient    *ent.Client
 }
 
-func NewCountryController(countryModel *models.CountryModel, entClient *ent.Client) *CountryController {
+func NewCountryController(countryModel *models.CountryModel, client *ent.Client) *CountryController {
 	return &CountryController{
+		client:       &http.Client{},
 		countryModel: countryModel,
-		entClient:    entClient,
+		entClient:    client,
 	}
 }
 
@@ -65,18 +67,28 @@ func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (*ent.Co
 	return country, nil
 }
 
-func (cc *CountryController) GetCountryByName(countryName string) (models.CreateCountryInput, error) {
+func (cc *CountryController) FetchCountryByName(countryName string) (models.CreateCountryInput, error) {
 	// Fetch the country data from the API
 	data, err := cc.GetCountryData(countryName)
 	if err != nil {
 		fmt.Printf("Error fetching country data: %s     Error: %s", countryName, err.Error())
 	}
 
-	// Decode the API response into a struct
-	apiCountry := models.CreateCountryInput{}
-	err = json.Unmarshal(data, &apiCountry)
+	// Decode the API response into a map
+	var resp map[string]interface{}
+	err = json.Unmarshal(data, &resp)
 	if err != nil {
 		fmt.Printf("Error decoding country data: %s     Error: %s", countryName, err.Error())
+	}
+
+	// Extract the country
+	c := resp["response"].([]interface{})[0].(map[string]interface{})
+
+	// Decode the first object into a struct
+	apiCountry := models.CreateCountryInput{
+		Name: c["name"].(string),
+		Code: c["code"].(string),
+		Flag: c["flag"].(string),
 	}
 
 	// Check if country exists in the Ent database
@@ -93,7 +105,7 @@ func (cc *CountryController) GetCountryByName(countryName string) (models.Create
 
 func (cc *CountryController) GetCountryData(countryName string) ([]byte, error) {
 	// Construct the API URL with the country name
-	url := fmt.Sprintf("https://api-football-v3.p.rapidapi.com/v3/leagues?id=%d", strings.ToLower(countryName))
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/countries?name=%s", strings.ToLower(countryName))
 
 	ctx := context.Background()
 
@@ -101,6 +113,9 @@ func (cc *CountryController) GetCountryData(countryName string) ([]byte, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
+	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
 	resp, err := cc.client.Do(req)
 	if err != nil {
