@@ -1,6 +1,6 @@
 import React from 'react'
 import './App.css'
-import Fixtures from "./Components/Pages/Fixtures/Fixtures.jsx";
+import Fixtures from "./Components/Pages/Fixtures/Fixtures.tsx";
 import Players from "./Components/Pages/Players/Players.jsx";
 import Clubs from "./Components/Pages/Clubs/Clubs.jsx";
 import Leagues from "./Components/Pages/Leagues/Leagues.jsx";
