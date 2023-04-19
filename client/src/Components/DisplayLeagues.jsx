@@ -11,28 +11,40 @@ class DisplayLeagues extends React.Component {
         this.componentDidMount();
     }
     componentDidMount() {
-        fetch("http://localhost:3000/leagues").then(
+        fetch("http://localhost:8080/leagues").then(
             (response) => response.json()
             ).then(data => {
-                this.setState({ leagues: data });
-                console.log(data);
+                this.setState({ leagues: data })
+                console.log(data)
             })
     }
 
 
     //.then(leagues => this.setState({ leagues: leagues }));
     render() {
-        return (
+       let table_data = this.state.leagues.map((league) => {
+            return (
+                <tr key={league.id}>
+                    <td>{league.id}</td>
+                    <td>{league.name}</td>
+                    <td>{league.type}</td>
+                </tr>
+            )
+       })
+
+
+         return(
             <div>
                 <h1>Leagues</h1>
-                <ul>
-                    {this.state.leagues.map(league => (
-                        <li key={league.id}></li>
-                    ))}
-                </ul>
+                <table>
+                    <tbody>
+                    {table_data}
+                    </tbody>
+                </table>
             </div>
-        );
+        )
     }
+
 }
 
 export default DisplayLeagues;
