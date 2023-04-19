@@ -624,13 +624,6 @@ d3-shape@3:
   dependencies:
     d3-path "^3.1.0"
 
-d3-spider-chart@^0.0.1:
-  version "0.0.1"
-  resolved "https://registry.yarnpkg.com/d3-spider-chart/-/d3-spider-chart-0.0.1.tgz#1564a8dd547a6e84207ddfc6beeb4ae2afd82a48"
-  integrity sha512-0SPoEZ6oPdmeBVTQhaXbX1qLQXRiRRWx1kyRP94pEi1zCz3BU7g/Nsc1IZyDEfDgpKKS78vXfJ85b7Fi+XcgoQ==
-  dependencies:
-    d3 "~3.5.5"
-
 "d3-time-format@2 - 4", d3-time-format@4:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/d3-time-format/-/d3-time-format-4.1.0.tgz#7ab5257a5041d11ecb4fe70a5c7d16a195bb408a"
@@ -707,11 +700,6 @@ d3@^7.8.4:
     d3-timer "3"
     d3-transition "3"
     d3-zoom "3"
-
-d3@~3.5.5:
-  version "3.5.17"
-  resolved "https://registry.yarnpkg.com/d3/-/d3-3.5.17.tgz#bc46748004378b21a360c9fc7cf5231790762fb8"
-  integrity sha512-yFk/2idb8OHPKkbAL8QaOaqENNoMhIaSHZerk3oQsECwkObkCpJyjYwCe+OHiq6UEdhe1m8ZGARRRO3ljFjlKg==
 
 debug@^4.1.0:
   version "4.3.4"
