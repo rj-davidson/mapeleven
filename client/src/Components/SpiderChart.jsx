@@ -86,7 +86,7 @@ function SpiderChart() {
             height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
 
         const color = d3.scaleOrdinal()
-            .range(["#3854FC","#CC333F"]);
+            .range(["#CC333F", "#3854FC"]);
 
         var radarChartOptions = {
             w: width,
