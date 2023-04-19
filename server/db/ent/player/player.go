@@ -32,6 +32,8 @@ const (
 	EdgeBirth = "birth"
 	// EdgeTeams holds the string denoting the teams edge name in mutations.
 	EdgeTeams = "teams"
+	// EdgePlayerTeamSeasons holds the string denoting the playerteamseasons edge name in mutations.
+	EdgePlayerTeamSeasons = "playerTeamSeasons"
 	// Table holds the table name of the player in the database.
 	Table = "players"
 	// BirthTable is the table that holds the birth relation/edge.
@@ -46,6 +48,13 @@ const (
 	// TeamsInverseTable is the table name for the Team entity.
 	// It exists in this package in order to avoid circular dependency with the "team" package.
 	TeamsInverseTable = "teams"
+	// PlayerTeamSeasonsTable is the table that holds the playerTeamSeasons relation/edge.
+	PlayerTeamSeasonsTable = "player_team_seasons"
+	// PlayerTeamSeasonsInverseTable is the table name for the PlayerTeamSeason entity.
+	// It exists in this package in order to avoid circular dependency with the "playerteamseason" package.
+	PlayerTeamSeasonsInverseTable = "player_team_seasons"
+	// PlayerTeamSeasonsColumn is the table column denoting the playerTeamSeasons relation/edge.
+	PlayerTeamSeasonsColumn = "player_player_team_seasons"
 )
 
 // Columns holds all SQL columns for player fields.
@@ -156,6 +165,20 @@ func ByTeams(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 		sqlgraph.OrderByNeighborTerms(s, newTeamsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPlayerTeamSeasonsCount orders the results by playerTeamSeasons count.
+func ByPlayerTeamSeasonsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPlayerTeamSeasonsStep(), opts...)
+	}
+}
+
+// ByPlayerTeamSeasons orders the results by playerTeamSeasons terms.
+func ByPlayerTeamSeasons(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerTeamSeasonsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newBirthStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -168,5 +191,12 @@ func newTeamsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, true, TeamsTable, TeamsPrimaryKey...),
+	)
+}
+func newPlayerTeamSeasonsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayerTeamSeasonsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PlayerTeamSeasonsTable, PlayerTeamSeasonsColumn),
 	)
 }

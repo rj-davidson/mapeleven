@@ -27,5 +27,6 @@ func (Season) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("league", League.Type).
 			Unique(),
+		edge.To("teamSeasons", TeamSeason.Type),
 	}
 }

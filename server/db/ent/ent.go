@@ -10,9 +10,11 @@ import (
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
+	"mapeleven/db/ent/playerteamseason"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
+	"mapeleven/db/ent/teamseason"
 	"reflect"
 	"sync"
 
@@ -79,13 +81,15 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			birth.Table:     birth.ValidColumn,
-			country.Table:   country.ValidColumn,
-			league.Table:    league.ValidColumn,
-			player.Table:    player.ValidColumn,
-			season.Table:    season.ValidColumn,
-			standings.Table: standings.ValidColumn,
-			team.Table:      team.ValidColumn,
+			birth.Table:            birth.ValidColumn,
+			country.Table:          country.ValidColumn,
+			league.Table:           league.ValidColumn,
+			player.Table:           player.ValidColumn,
+			playerteamseason.Table: playerteamseason.ValidColumn,
+			season.Table:           season.ValidColumn,
+			standings.Table:        standings.ValidColumn,
+			team.Table:             team.ValidColumn,
+			teamseason.Table:       teamseason.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)
