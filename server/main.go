@@ -88,7 +88,7 @@ func initializeLeagues(client *ent.Client) error {
 
 	// Fetch and upsert leagues
 	for _, id := range leagueIDs {
-		league, err := leagueController.UpsertLeague(id)
+		league, err := leagueController.UpsertLeague(context.Background(), id)
 		if err != nil {
 			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
 		}
@@ -97,7 +97,7 @@ func initializeLeagues(client *ent.Client) error {
 
 	// Fetch and upsert teams
 	for _, id := range leagueIDs {
-		team, err := teamController.UpsertTeam(id)
+		team, err := teamController.UpsertTeam(context.Background(), id)
 		if err != nil {
 			return fmt.Errorf("failed to upsert team with ID %d: %v", id, err)
 		}

@@ -46,6 +46,14 @@ type APIVenue struct {
 	Image    string `json:"image"`
 }
 
+func NewTeamController(teamModel *models.TeamModel, countryController *CountryController) *TeamController {
+	return &TeamController{
+		client:            &http.Client{},
+		teamModel:         teamModel,
+		countryController: countryController,
+	}
+}
+
 func (tc *TeamController) FetchTeamData(data []byte) (models.CreateTeamInput, models.CreateCountryInput, error) {
 	var response struct {
 		Response []struct {
@@ -68,23 +76,18 @@ func (tc *TeamController) FetchTeamData(data []byte) (models.CreateTeamInput, mo
 		Logo:     response.Response[0].Team.Logo,
 	}
 
-	countryInput, _ := tc.countryController.FetchCountryByName(response.Response[0].Team.Country)
-	return teamInput, countryInput, nil
-}
-
-func NewTeamController(teamModel *models.TeamModel, countryController *CountryController) *TeamController {
-	return &TeamController{
-		client:            &http.Client{},
-		teamModel:         teamModel,
-		countryController: countryController,
+	// If country is not found, create a new country
+	if c, err := tc.countryController.FetchCountryByName(response.Response[0].Team.Country); err != nil {
+		return teamInput, c, nil
+	} else {
+		newCountry, _ := tc.countryController.FetchCountryByName(response.Response[0].Team.Country)
+		return teamInput, newCountry, nil
 	}
 }
 
-func (tc *TeamController) GetTeamData(teamID int) ([]byte, error) {
+func (tc *TeamController) GetTeamData(ctx context.Context, teamID int) ([]byte, error) {
 	// Construct the API URL with the teamID
 	url := fmt.Sprintf("https://api-football-v3.p.rapidapi.com/v3/teams?id=%d", teamID)
-
-	ctx := context.Background()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -107,8 +110,8 @@ func (tc *TeamController) GetTeamData(teamID int) ([]byte, error) {
 	return data, nil
 }
 
-func (tc *TeamController) UpsertTeam(teamID int) (*ent.Team, error) {
-	data, err := tc.GetTeamData(teamID)
+func (tc *TeamController) UpsertTeam(ctx context.Context, teamID int) (*ent.Team, error) {
+	data, err := tc.GetTeamData(ctx, teamID)
 	if err != nil {
 		return nil, err
 	}

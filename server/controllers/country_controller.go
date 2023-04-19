@@ -69,7 +69,7 @@ func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (*ent.Co
 
 func (cc *CountryController) FetchCountryByName(countryName string) (models.CreateCountryInput, error) {
 	// Fetch the country data from the API
-	data, err := cc.GetCountryData(countryName)
+	data, err := cc.GetCountryData(context.Background(), countryName)
 	if err != nil {
 		fmt.Printf("Error fetching country data: %s     Error: %s", countryName, err.Error())
 	}
@@ -103,11 +103,9 @@ func (cc *CountryController) FetchCountryByName(countryName string) (models.Crea
 	return apiCountry, nil
 }
 
-func (cc *CountryController) GetCountryData(countryName string) ([]byte, error) {
+func (cc *CountryController) GetCountryData(ctx context.Context, countryName string) ([]byte, error) {
 	// Construct the API URL with the country name
 	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/countries?name=%s", strings.ToLower(countryName))
-
-	ctx := context.Background()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {

@@ -73,11 +73,9 @@ func (lc *LeagueController) FetchLeagueData(data []byte) (models.CreateLeagueInp
 	return leagueInput, co, nil
 }
 
-func (lc *LeagueController) UpsertLeague(leagueID int) (*ent.League, error) {
+func (lc *LeagueController) UpsertLeague(ctx context.Context, leagueID int) (*ent.League, error) {
 	// Construct the API URL with the leagueID
 	url := fmt.Sprintf("https://api-football-v3.p.rapidapi.com/v3/leagues?id=%d", leagueID)
-
-	ctx := context.Background()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -119,7 +117,7 @@ func (lc *LeagueController) UpsertLeague(leagueID int) (*ent.League, error) {
 	}
 
 	// Check if the league exists, and either create or update it accordingly
-	existingLeague, err := lc.leagueModel.GetLeague(context.Background(), leagueInput.ID)
+	existingLeague, err := lc.leagueModel.GetLeagueByID(context.Background(), leagueInput.ID)
 	if existingLeague == nil {
 		return lc.createLeague(&leagueInput)
 	} else {
@@ -153,7 +151,7 @@ func (lc *LeagueController) downloadLeagueLogoIfNeeded(leagueInput *models.Creat
 }
 
 func (lc *LeagueController) createLeague(leagueInput *models.CreateLeagueInput) (*ent.League, error) {
-	newLeague, err := lc.leagueModel.CreateLeague(*leagueInput)
+	newLeague, err := lc.leagueModel.CreateLeague(context.Background(), *leagueInput)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +166,7 @@ func (lc *LeagueController) updateLeague(leagueInput *models.CreateLeagueInput, 
 		Logo:    &leagueInput.Logo,
 		Country: countryName,
 	}
-	updatedLeague, err := lc.leagueModel.UpdateLeague(updateInput)
+	updatedLeague, err := lc.leagueModel.UpdateLeague(context.Background(), updateInput)
 	if err != nil {
 		return nil, err
 	}
