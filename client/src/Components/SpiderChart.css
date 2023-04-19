@@ -1,0 +1,31 @@
+.buttons {
+    display: flex;
+    flex-direction: row; /* This is the default value for flex-direction but it's good practice to specify it explicitly */
+    justify-content: flex-start; /* Align child elements to the left of the container */
+    align-items: center; /* Align child elements vertically centered within the container */
+}
+
+.drop-downs {
+    margin-top: 20px;
+
+}
+
+.chart{
+    margin-top: 70px;
+}
+
+.player1{
+    background-color: #3854FC;
+}
+
+.player2{
+    background-color: #CC333F;
+}
+
+.SpiderChart{
+    display: flex;
+    flex-direction: column; /* This is the default value for flex-direction but it's good practice to specify it explicitly */
+    justify-content: flex-start; /* Align child elements to the left of the container */
+    align-items: center; /* Align child elements vertically centered within the container */
+    margin-top: 100px;
+}
