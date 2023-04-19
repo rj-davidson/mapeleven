@@ -33,7 +33,7 @@ var (
 	// CountriesColumns holds the columns for the "countries" table.
 	CountriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "code", Type: field.TypeString, Unique: true, Size: 3},
+		{Name: "code", Type: field.TypeString, Size: 3},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "flag", Type: field.TypeString},
 	}
@@ -96,6 +96,33 @@ var (
 				Columns:    []*schema.Column{PlayersColumns[9]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PlayerTeamSeasonsColumns holds the columns for the "player_team_seasons" table.
+	PlayerTeamSeasonsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "player_team_season_id", Type: field.TypeInt, Unique: true},
+		{Name: "player_player_team_seasons", Type: field.TypeInt},
+		{Name: "team_season_player_team_seasons", Type: field.TypeInt},
+	}
+	// PlayerTeamSeasonsTable holds the schema information for the "player_team_seasons" table.
+	PlayerTeamSeasonsTable = &schema.Table{
+		Name:       "player_team_seasons",
+		Columns:    PlayerTeamSeasonsColumns,
+		PrimaryKey: []*schema.Column{PlayerTeamSeasonsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "player_team_seasons_players_playerTeamSeasons",
+				Columns:    []*schema.Column{PlayerTeamSeasonsColumns[2]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "player_team_seasons_team_seasons_playerTeamSeasons",
+				Columns:    []*schema.Column{PlayerTeamSeasonsColumns[3]},
+				RefColumns: []*schema.Column{TeamSeasonsColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -165,6 +192,33 @@ var (
 			},
 		},
 	}
+	// TeamSeasonsColumns holds the columns for the "team_seasons" table.
+	TeamSeasonsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "team_season_id", Type: field.TypeInt, Unique: true},
+		{Name: "season_team_seasons", Type: field.TypeInt},
+		{Name: "team_team_seasons", Type: field.TypeInt},
+	}
+	// TeamSeasonsTable holds the schema information for the "team_seasons" table.
+	TeamSeasonsTable = &schema.Table{
+		Name:       "team_seasons",
+		Columns:    TeamSeasonsColumns,
+		PrimaryKey: []*schema.Column{TeamSeasonsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "team_seasons_seasons_teamSeasons",
+				Columns:    []*schema.Column{TeamSeasonsColumns[2]},
+				RefColumns: []*schema.Column{SeasonsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "team_seasons_teams_teamSeasons",
+				Columns:    []*schema.Column{TeamSeasonsColumns[3]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// LeagueTeamsColumns holds the columns for the "league_teams" table.
 	LeagueTeamsColumns = []*schema.Column{
 		{Name: "league_id", Type: field.TypeInt},
@@ -221,9 +275,11 @@ var (
 		CountriesTable,
 		LeaguesTable,
 		PlayersTable,
+		PlayerTeamSeasonsTable,
 		SeasonsTable,
 		StandingsTable,
 		TeamsTable,
+		TeamSeasonsTable,
 		LeagueTeamsTable,
 		TeamPlayersTable,
 	}
@@ -234,9 +290,13 @@ func init() {
 	LeaguesTable.ForeignKeys[0].RefTable = CountriesTable
 	LeaguesTable.ForeignKeys[1].RefTable = SeasonsTable
 	PlayersTable.ForeignKeys[0].RefTable = CountriesTable
+	PlayerTeamSeasonsTable.ForeignKeys[0].RefTable = PlayersTable
+	PlayerTeamSeasonsTable.ForeignKeys[1].RefTable = TeamSeasonsTable
 	StandingsTable.ForeignKeys[0].RefTable = LeaguesTable
 	StandingsTable.ForeignKeys[1].RefTable = TeamsTable
 	TeamsTable.ForeignKeys[0].RefTable = CountriesTable
+	TeamSeasonsTable.ForeignKeys[0].RefTable = SeasonsTable
+	TeamSeasonsTable.ForeignKeys[1].RefTable = TeamsTable
 	LeagueTeamsTable.ForeignKeys[0].RefTable = LeaguesTable
 	LeagueTeamsTable.ForeignKeys[1].RefTable = TeamsTable
 	TeamPlayersTable.ForeignKeys[0].RefTable = TeamsTable

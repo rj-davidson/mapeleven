@@ -9,6 +9,7 @@ import (
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/teamseason"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -87,6 +88,21 @@ func (su *SeasonUpdate) SetLeague(l *League) *SeasonUpdate {
 	return su.SetLeagueID(l.ID)
 }
 
+// AddTeamSeasonIDs adds the "teamSeasons" edge to the TeamSeason entity by IDs.
+func (su *SeasonUpdate) AddTeamSeasonIDs(ids ...int) *SeasonUpdate {
+	su.mutation.AddTeamSeasonIDs(ids...)
+	return su
+}
+
+// AddTeamSeasons adds the "teamSeasons" edges to the TeamSeason entity.
+func (su *SeasonUpdate) AddTeamSeasons(t ...*TeamSeason) *SeasonUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return su.AddTeamSeasonIDs(ids...)
+}
+
 // Mutation returns the SeasonMutation object of the builder.
 func (su *SeasonUpdate) Mutation() *SeasonMutation {
 	return su.mutation
@@ -96,6 +112,27 @@ func (su *SeasonUpdate) Mutation() *SeasonMutation {
 func (su *SeasonUpdate) ClearLeague() *SeasonUpdate {
 	su.mutation.ClearLeague()
 	return su
+}
+
+// ClearTeamSeasons clears all "teamSeasons" edges to the TeamSeason entity.
+func (su *SeasonUpdate) ClearTeamSeasons() *SeasonUpdate {
+	su.mutation.ClearTeamSeasons()
+	return su
+}
+
+// RemoveTeamSeasonIDs removes the "teamSeasons" edge to TeamSeason entities by IDs.
+func (su *SeasonUpdate) RemoveTeamSeasonIDs(ids ...int) *SeasonUpdate {
+	su.mutation.RemoveTeamSeasonIDs(ids...)
+	return su
+}
+
+// RemoveTeamSeasons removes "teamSeasons" edges to TeamSeason entities.
+func (su *SeasonUpdate) RemoveTeamSeasons(t ...*TeamSeason) *SeasonUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return su.RemoveTeamSeasonIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -171,6 +208,51 @@ func (su *SeasonUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if su.mutation.TeamSeasonsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   season.TeamSeasonsTable,
+			Columns: []string{season.TeamSeasonsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.RemovedTeamSeasonsIDs(); len(nodes) > 0 && !su.mutation.TeamSeasonsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   season.TeamSeasonsTable,
+			Columns: []string{season.TeamSeasonsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.TeamSeasonsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   season.TeamSeasonsTable,
+			Columns: []string{season.TeamSeasonsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -256,6 +338,21 @@ func (suo *SeasonUpdateOne) SetLeague(l *League) *SeasonUpdateOne {
 	return suo.SetLeagueID(l.ID)
 }
 
+// AddTeamSeasonIDs adds the "teamSeasons" edge to the TeamSeason entity by IDs.
+func (suo *SeasonUpdateOne) AddTeamSeasonIDs(ids ...int) *SeasonUpdateOne {
+	suo.mutation.AddTeamSeasonIDs(ids...)
+	return suo
+}
+
+// AddTeamSeasons adds the "teamSeasons" edges to the TeamSeason entity.
+func (suo *SeasonUpdateOne) AddTeamSeasons(t ...*TeamSeason) *SeasonUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return suo.AddTeamSeasonIDs(ids...)
+}
+
 // Mutation returns the SeasonMutation object of the builder.
 func (suo *SeasonUpdateOne) Mutation() *SeasonMutation {
 	return suo.mutation
@@ -265,6 +362,27 @@ func (suo *SeasonUpdateOne) Mutation() *SeasonMutation {
 func (suo *SeasonUpdateOne) ClearLeague() *SeasonUpdateOne {
 	suo.mutation.ClearLeague()
 	return suo
+}
+
+// ClearTeamSeasons clears all "teamSeasons" edges to the TeamSeason entity.
+func (suo *SeasonUpdateOne) ClearTeamSeasons() *SeasonUpdateOne {
+	suo.mutation.ClearTeamSeasons()
+	return suo
+}
+
+// RemoveTeamSeasonIDs removes the "teamSeasons" edge to TeamSeason entities by IDs.
+func (suo *SeasonUpdateOne) RemoveTeamSeasonIDs(ids ...int) *SeasonUpdateOne {
+	suo.mutation.RemoveTeamSeasonIDs(ids...)
+	return suo
+}
+
+// RemoveTeamSeasons removes "teamSeasons" edges to TeamSeason entities.
+func (suo *SeasonUpdateOne) RemoveTeamSeasons(t ...*TeamSeason) *SeasonUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return suo.RemoveTeamSeasonIDs(ids...)
 }
 
 // Where appends a list predicates to the SeasonUpdate builder.
@@ -370,6 +488,51 @@ func (suo *SeasonUpdateOne) sqlSave(ctx context.Context) (_node *Season, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if suo.mutation.TeamSeasonsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   season.TeamSeasonsTable,
+			Columns: []string{season.TeamSeasonsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.RemovedTeamSeasonsIDs(); len(nodes) > 0 && !suo.mutation.TeamSeasonsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   season.TeamSeasonsTable,
+			Columns: []string{season.TeamSeasonsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.TeamSeasonsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   season.TeamSeasonsTable,
+			Columns: []string{season.TeamSeasonsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

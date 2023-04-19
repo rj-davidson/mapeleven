@@ -9,6 +9,7 @@ import (
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/teamseason"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -19,11 +20,12 @@ import (
 // SeasonQuery is the builder for querying Season entities.
 type SeasonQuery struct {
 	config
-	ctx        *QueryContext
-	order      []season.Order
-	inters     []Interceptor
-	predicates []predicate.Season
-	withLeague *LeagueQuery
+	ctx             *QueryContext
+	order           []season.Order
+	inters          []Interceptor
+	predicates      []predicate.Season
+	withLeague      *LeagueQuery
+	withTeamSeasons *TeamSeasonQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -75,6 +77,28 @@ func (sq *SeasonQuery) QueryLeague() *LeagueQuery {
 			sqlgraph.From(season.Table, season.FieldID, selector),
 			sqlgraph.To(league.Table, league.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, season.LeagueTable, season.LeagueColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryTeamSeasons chains the current query on the "teamSeasons" edge.
+func (sq *SeasonQuery) QueryTeamSeasons() *TeamSeasonQuery {
+	query := (&TeamSeasonClient{config: sq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(season.Table, season.FieldID, selector),
+			sqlgraph.To(teamseason.Table, teamseason.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, season.TeamSeasonsTable, season.TeamSeasonsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,12 +293,13 @@ func (sq *SeasonQuery) Clone() *SeasonQuery {
 		return nil
 	}
 	return &SeasonQuery{
-		config:     sq.config,
-		ctx:        sq.ctx.Clone(),
-		order:      append([]season.Order{}, sq.order...),
-		inters:     append([]Interceptor{}, sq.inters...),
-		predicates: append([]predicate.Season{}, sq.predicates...),
-		withLeague: sq.withLeague.Clone(),
+		config:          sq.config,
+		ctx:             sq.ctx.Clone(),
+		order:           append([]season.Order{}, sq.order...),
+		inters:          append([]Interceptor{}, sq.inters...),
+		predicates:      append([]predicate.Season{}, sq.predicates...),
+		withLeague:      sq.withLeague.Clone(),
+		withTeamSeasons: sq.withTeamSeasons.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
@@ -289,6 +314,17 @@ func (sq *SeasonQuery) WithLeague(opts ...func(*LeagueQuery)) *SeasonQuery {
 		opt(query)
 	}
 	sq.withLeague = query
+	return sq
+}
+
+// WithTeamSeasons tells the query-builder to eager-load the nodes that are connected to
+// the "teamSeasons" edge. The optional arguments are used to configure the query builder of the edge.
+func (sq *SeasonQuery) WithTeamSeasons(opts ...func(*TeamSeasonQuery)) *SeasonQuery {
+	query := (&TeamSeasonClient{config: sq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withTeamSeasons = query
 	return sq
 }
 
@@ -370,8 +406,9 @@ func (sq *SeasonQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Seaso
 	var (
 		nodes       = []*Season{}
 		_spec       = sq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			sq.withLeague != nil,
+			sq.withTeamSeasons != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -395,6 +432,13 @@ func (sq *SeasonQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Seaso
 	if query := sq.withLeague; query != nil {
 		if err := sq.loadLeague(ctx, query, nodes, nil,
 			func(n *Season, e *League) { n.Edges.League = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := sq.withTeamSeasons; query != nil {
+		if err := sq.loadTeamSeasons(ctx, query, nodes,
+			func(n *Season) { n.Edges.TeamSeasons = []*TeamSeason{} },
+			func(n *Season, e *TeamSeason) { n.Edges.TeamSeasons = append(n.Edges.TeamSeasons, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -424,6 +468,37 @@ func (sq *SeasonQuery) loadLeague(ctx context.Context, query *LeagueQuery, nodes
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "season_league" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (sq *SeasonQuery) loadTeamSeasons(ctx context.Context, query *TeamSeasonQuery, nodes []*Season, init func(*Season), assign func(*Season, *TeamSeason)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Season)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.TeamSeason(func(s *sql.Selector) {
+		s.Where(sql.InValues(season.TeamSeasonsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.season_team_seasons
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "season_team_seasons" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "season_team_seasons" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -20,12 +20,16 @@ type Tx struct {
 	League *LeagueClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
+	// PlayerTeamSeason is the client for interacting with the PlayerTeamSeason builders.
+	PlayerTeamSeason *PlayerTeamSeasonClient
 	// Season is the client for interacting with the Season builders.
 	Season *SeasonClient
 	// Standings is the client for interacting with the Standings builders.
 	Standings *StandingsClient
 	// Team is the client for interacting with the Team builders.
 	Team *TeamClient
+	// TeamSeason is the client for interacting with the TeamSeason builders.
+	TeamSeason *TeamSeasonClient
 
 	// lazily loaded.
 	client     *Client
@@ -161,9 +165,11 @@ func (tx *Tx) init() {
 	tx.Country = NewCountryClient(tx.config)
 	tx.League = NewLeagueClient(tx.config)
 	tx.Player = NewPlayerClient(tx.config)
+	tx.PlayerTeamSeason = NewPlayerTeamSeasonClient(tx.config)
 	tx.Season = NewSeasonClient(tx.config)
 	tx.Standings = NewStandingsClient(tx.config)
 	tx.Team = NewTeamClient(tx.config)
+	tx.TeamSeason = NewTeamSeasonClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
