@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"errors"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
@@ -37,11 +36,11 @@ func NewLeagueModel(client *ent.Client) *LeagueModel {
 }
 
 // CreateLeague creates a new league record.
-func (lm *LeagueModel) CreateLeague(input CreateLeagueInput) (*ent.League, error) {
+func (lm *LeagueModel) CreateLeague(ctx context.Context, input CreateLeagueInput) (*ent.League, error) {
 	// Find the country by its code
 	c, err := lm.client.Country.
 		Query().
-		Where(country.CodeEQ(input.Country)).
+		Where(country.NameEQ(input.Country)).
 		Only(context.Background())
 
 	if err != nil {
@@ -56,15 +55,15 @@ func (lm *LeagueModel) CreateLeague(input CreateLeagueInput) (*ent.League, error
 		SetType(input.Type).
 		SetLogo(input.Logo).
 		SetCountryID(c.ID). // Set the country ID here
-		Save(context.Background())
+		Save(ctx)
 }
 
 // UpdateLeague updates an existing league record.
-func (lm *LeagueModel) UpdateLeague(input UpdateLeagueInput) (*ent.League, error) {
+func (lm *LeagueModel) UpdateLeague(ctx context.Context, input UpdateLeagueInput) (*ent.League, error) {
 	// Find the country by its code
 	c, err := lm.client.Country.
 		Query().
-		Where(country.CodeEQ(*input.Country)).
+		Where(country.NameEQ(*input.Country)).
 		Only(context.Background())
 
 	if err != nil {
@@ -84,48 +83,35 @@ func (lm *LeagueModel) UpdateLeague(input UpdateLeagueInput) (*ent.League, error
 	if input.Country != nil {
 		updater.SetCountryID(c.ID)
 	}
-	return updater.Save(context.Background())
+
+	return updater.Save(ctx)
 }
 
 // DeleteLeague deletes a league record by ID.
-func (lm *LeagueModel) DeleteLeague(id int) error {
+func (lm *LeagueModel) DeleteLeague(ctx context.Context, id int) error {
 	return lm.client.League.
 		DeleteOneID(id).
-		Exec(context.Background())
+		Exec(ctx)
 }
 
-// GetLeague retrieves a league record by ID.
-func (lm *LeagueModel) GetLeague(ctx context.Context, id int) (*ent.League, error) {
+// GetLeagueByID retrieves a league record by ID.
+func (lm *LeagueModel) GetLeagueByID(ctx context.Context, id int) (*ent.League, error) {
 	return lm.client.League.
 		Get(ctx, id)
 }
 
 // GetLeagueSeason retrieves the season of a league.
 func (lm *LeagueModel) GetLeagueSeason(ctx context.Context, leagueID int) (*ent.Season, error) {
-	season, err := lm.client.League.
+	return lm.client.League.
 		Query().
 		Where(league.ID(leagueID)).
 		QuerySeason().
 		Only(ctx)
-
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, errors.New("season not found")
-		}
-		return nil, err
-	}
-	return season, nil
 }
 
 // ListLeagues retrieves a list of all leagues.
 func (lm *LeagueModel) ListLeagues(ctx context.Context) ([]*ent.League, error) {
-	leagues, err := lm.client.League.
+	return lm.client.League.
 		Query().
 		All(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return leagues, nil
 }

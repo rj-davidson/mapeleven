@@ -47,41 +47,37 @@ func (cm *CountryModel) UpdateCountry(input UpdateCountryInput) (*ent.Country, e
 		Query().
 		Where(country.CodeEQ(input.Code)).
 		First(context.Background())
-
 	if err != nil {
 		return nil, err
 	}
 
 	updatedCountry, err := c.Update().
 		SetFlag(input.Flag).
+		SetCode(input.Code).
 		Save(context.Background())
 
-	if err != nil {
-		return nil, err
-	}
-
-	return updatedCountry, nil
+	return updatedCountry, err
 }
 
 // DeleteCountry deletes a country record by code.
-func (cm *CountryModel) DeleteCountry(code string) error {
+func (cm *CountryModel) DeleteCountry(id int) error {
 	numDeleted, err := cm.client.Country.
 		Delete().
-		Where(country.CodeEQ(code)).
+		Where(country.IDEQ(id)).
 		Exec(context.Background())
 	if err != nil {
 		return err
 	}
 	if numDeleted == 0 {
-		return fmt.Errorf("no country found with code %s", code)
+		return fmt.Errorf("no country found with code %d", id)
 	}
 	return nil
 }
 
-// GetCountryByCode retrieves a country record by country code.
-func (cm *CountryModel) GetCountryByCode(code string) (*ent.Country, error) {
+// GetCountryByName retrieves a country record by country name.
+func (cm *CountryModel) GetCountryByName(name string) (*ent.Country, error) {
 	return cm.client.Country.
 		Query().
-		Where(country.CodeEQ(code)).
+		Where(country.NameEQ(name)).
 		First(context.Background())
 }

@@ -27,6 +27,7 @@ func DownloadImageIfNeeded(url string, filename string) (string, error) {
 	}
 
 	// Download the image
+	fmt.Printf("local --> Downloading image: %s\n", filename)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", err

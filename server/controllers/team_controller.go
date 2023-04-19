@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"mapeleven/db/ent"
 	"mapeleven/models"
 	"mapeleven/utils"
 	"net/http"
@@ -14,16 +13,8 @@ import (
 )
 
 type TeamController struct {
-	client            *http.Client
-	teamModel         *models.TeamModel
-	countryController *CountryController
-}
-
-type APITeamResponse struct {
-	Response []struct {
-		Team    models.CreateTeamInput    `json:"team"`
-		Country models.CreateCountryInput `json:"country"`
-	} `json:"response"`
+	client    *http.Client
+	teamModel *models.TeamModel
 }
 
 type APITeam struct {
@@ -33,130 +24,144 @@ type APITeam struct {
 	Founded  int    `json:"founded"`
 	National bool   `json:"national"`
 	Logo     string `json:"logo"`
+	Country  struct {
+		Name string `json:"name"`
+		Code string `json:"code"`
+	} `json:"country"`
 }
 
-func NewTeamController(teamModel *models.TeamModel, countryController *CountryController) *TeamController {
+type APITeamsResponse struct {
+	Response []APITeam `json:"response"`
+}
+
+func NewTeamController(teamModel *models.TeamModel) *TeamController {
 	return &TeamController{
-		client:            &http.Client{},
-		teamModel:         teamModel,
-		countryController: countryController,
+		client:    &http.Client{},
+		teamModel: teamModel,
 	}
 }
 
-func (tc *TeamController) FetchTeamData(data []byte) (models.CreateTeamInput, models.CreateCountryInput, error) {
-	var response struct {
-		Response []struct {
-			Team    json.RawMessage `json:"team"`
-			Country json.RawMessage `json:"country"`
-		} `json:"response"`
-	}
-
+func (tc *TeamController) FetchTeamData(data []byte) ([]models.CreateTeamInput, error) {
+	var response APITeamsResponse
 	if err := json.Unmarshal(data, &response); err != nil {
-		return models.CreateTeamInput{}, models.CreateCountryInput{}, err
+		return nil, err
 	}
 
-	team := APITeam{}
-	if err := json.Unmarshal(response.Response[0].Team, &team); err != nil {
-		return models.CreateTeamInput{}, models.CreateCountryInput{}, err
-	}
-	teamInput := models.CreateTeamInput{
-		ID:       team.ID,
-		Name:     team.Name,
-		Code:     team.Code,
-		Founded:  team.Founded,
-		National: team.National,
-		Logo:     team.Logo,
-	}
-
-	countryInput := models.CreateCountryInput{}
-	if err := json.Unmarshal(response.Response[0].Country, &countryInput); err != nil {
-		return models.CreateTeamInput{}, models.CreateCountryInput{}, err
+	teamInputs := make([]models.CreateTeamInput, len(response.Response))
+	for i, team := range response.Response {
+		teamInputs[i] = models.CreateTeamInput{
+			ID:       team.ID,
+			Name:     team.Name,
+			Code:     team.Code,
+			Founded:  team.Founded,
+			National: team.National,
+			Logo:     team.Logo,
+			Country:  team.Country.Name,
+		}
 	}
 
-	return teamInput, countryInput, nil
+	return teamInputs, nil
 }
 
-func (tc *TeamController) GetTeamData(teamID int) ([]byte, error) {
-	// Construct the API URL with the teamID
-	url := fmt.Sprintf("https://api-football-v3.p.rapidapi.com/v3/teams?id=%d", teamID)
-
-	ctx := context.Background()
+func (tc *TeamController) UpsertTeam(ctx context.Context, teamID int) error {
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/teams?id=%d", teamID)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
-	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
+	req.Header.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
+	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
 
 	resp, err := tc.client.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return data, nil
-}
-
-func (tc *TeamController) CreateOrUpdateTeam(teamID int) (*ent.Team, error) {
-	data, err := tc.GetTeamData(teamID)
+	// Parse the team data from the API response
+	teamInput, err := tc.parseTeamData(data)
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	inputData, inputCountry, err := tc.FetchTeamData(data)
-	if err != nil {
-		return nil, err
-	}
-
-	upsertedCountry, err := tc.countryController.UpsertCountry(inputCountry)
-	if err != nil {
-		return nil, err
-	}
-
-	// Use the upserted country's code
-	inputData.Country = upsertedCountry.Code
 
 	// Download the logo and set the logoLocation
-	if inputData.Logo != "" {
-		inputData.Logo, _ = utils.DownloadImageIfNeeded(
-			inputData.Logo,
-			fmt.Sprintf("images/teams/%d%s", inputData.ID, filepath.Ext(inputData.Logo)),
-		)
+	err = tc.downloadTeamLogoIfNeeded(teamInput)
+	if err != nil {
+		return err
 	}
 
-	// Check if the team exists
-	_, err = tc.teamModel.GetTeamByID(context.Background(), inputData.ID)
-	if ent.IsNotFound(err) {
-		// Create the team if it doesn't exist
-		newTeam, err := tc.teamModel.CreateTeam(context.Background(), inputData)
+	// Check if the team exists, and either create or update it accordingly
+	existingTeam, err := tc.teamModel.GetTeamByID(context.Background(), teamInput.ID)
+	if existingTeam == nil {
+		_, err = tc.teamModel.CreateTeam(context.Background(), *teamInput)
 		if err != nil {
-			return nil, err
+			return err
 		}
-		return newTeam, nil
-	} else if err == nil {
-		// Update the team if it exists
-		updateInput := models.UpdateTeamInput{
-			ID:       inputData.ID,
-			Name:     &inputData.Name,
-			Code:     &inputData.Code,
-			Founded:  &inputData.Founded,
-			National: &inputData.National,
-			Logo:     &inputData.Logo,
-			Country:  &upsertedCountry.Code,
-		}
-		updatedTeam, err := tc.teamModel.UpdateTeam(context.Background(), updateInput)
-		if err != nil {
-			return nil, err
-		}
-		return updatedTeam, nil
 	} else {
-		// Return any other error that may occur
+		_, err = tc.teamModel.UpdateTeam(context.Background(), models.UpdateTeamInput{
+			ID:       teamInput.ID,
+			Name:     &teamInput.Name,
+			Code:     &teamInput.Code,
+			Founded:  &teamInput.Founded,
+			National: &teamInput.National,
+			Logo:     &teamInput.Logo,
+			Country:  &teamInput.Country,
+		})
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (tc *TeamController) parseTeamData(data []byte) (*models.CreateTeamInput, error) {
+	var response struct {
+		Response []struct {
+			Team models.CreateTeamInput `json:"team"`
+		} `json:"response"`
+	}
+
+	if err := json.Unmarshal(data, &response); err != nil {
 		return nil, err
 	}
+
+	// Extract the first team from the response
+	r := response.Response[0]
+	teamInput := r.Team
+
+	return &teamInput, nil
+}
+
+func (tc *TeamController) downloadTeamLogoIfNeeded(teamInput *models.CreateTeamInput) error {
+	if teamInput.Logo != "" {
+		logoLocation, err := utils.DownloadImageIfNeeded(
+			teamInput.Logo,
+			fmt.Sprintf("images/teams/%d%s", teamInput.ID, filepath.Ext(teamInput.Logo)),
+		)
+		if err != nil {
+			return err
+		}
+		teamInput.Logo = logoLocation
+	}
+	return nil
+}
+
+func (tc *TeamController) InitializeTeams(teamIDs []int) error {
+	// Fetch and upsert teams
+	for _, teamID := range teamIDs {
+		err := tc.UpsertTeam(context.Background(), teamID)
+		if err != nil {
+			return fmt.Errorf("failed to initialize team - error: %v", err)
+		}
+	}
+
+	fmt.Println("Teams loaded")
+	return nil
 }

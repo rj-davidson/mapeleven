@@ -34,11 +34,10 @@ type APILeague struct {
 	Logo string      `json:"logo"`
 }
 
-func NewLeagueController(leagueModel *models.LeagueModel, countryController *CountryController) *LeagueController {
+func NewLeagueController(leagueModel *models.LeagueModel) *LeagueController {
 	return &LeagueController{
-		client:            &http.Client{},
-		leagueModel:       leagueModel,
-		countryController: countryController,
+		client:      &http.Client{},
+		leagueModel: leagueModel,
 	}
 }
 
@@ -73,11 +72,9 @@ func (lc *LeagueController) FetchLeagueData(data []byte) (models.CreateLeagueInp
 	return leagueInput, co, nil
 }
 
-func (lc *LeagueController) UpsertLeague(leagueID int) (*ent.League, error) {
+func (lc *LeagueController) UpsertLeague(ctx context.Context, leagueID int) (*ent.League, error) {
 	// Construct the API URL with the leagueID
 	url := fmt.Sprintf("https://api-football-v3.p.rapidapi.com/v3/leagues?id=%d", leagueID)
-
-	ctx := context.Background()
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -103,14 +100,8 @@ func (lc *LeagueController) UpsertLeague(leagueID int) (*ent.League, error) {
 		return nil, err
 	}
 
-	// Create or update the country associated with the league
-	upsertedCountry, err := lc.countryController.UpsertCountry(inputCountry)
-	if err != nil {
-		return nil, err
-	}
-
-	// Use the upserted country's ID for inputData
-	leagueInput.Country = upsertedCountry.Code
+	// Use the country's name for inputData
+	leagueInput.Country = inputCountry.Name
 
 	// Download the logo and set the logoLocation
 	err = lc.downloadLeagueLogoIfNeeded(&leagueInput)
@@ -119,11 +110,11 @@ func (lc *LeagueController) UpsertLeague(leagueID int) (*ent.League, error) {
 	}
 
 	// Check if the league exists, and either create or update it accordingly
-	existingLeague, err := lc.leagueModel.GetLeague(context.Background(), leagueInput.ID)
+	existingLeague, err := lc.leagueModel.GetLeagueByID(context.Background(), leagueInput.ID)
 	if existingLeague == nil {
 		return lc.createLeague(&leagueInput)
 	} else {
-		return lc.updateLeague(&leagueInput, &upsertedCountry.Code)
+		return lc.updateLeague(&leagueInput)
 	}
 }
 
@@ -153,24 +144,38 @@ func (lc *LeagueController) downloadLeagueLogoIfNeeded(leagueInput *models.Creat
 }
 
 func (lc *LeagueController) createLeague(leagueInput *models.CreateLeagueInput) (*ent.League, error) {
-	newLeague, err := lc.leagueModel.CreateLeague(*leagueInput)
+	newLeague, err := lc.leagueModel.CreateLeague(context.Background(), *leagueInput)
 	if err != nil {
 		return nil, err
 	}
 	return newLeague, nil
 }
 
-func (lc *LeagueController) updateLeague(leagueInput *models.CreateLeagueInput, countryCode *string) (*ent.League, error) {
+func (lc *LeagueController) updateLeague(leagueInput *models.CreateLeagueInput) (*ent.League, error) {
 	updateInput := models.UpdateLeagueInput{
 		ID:      leagueInput.ID,
 		Name:    &leagueInput.Name,
 		Type:    &leagueInput.Type,
 		Logo:    &leagueInput.Logo,
-		Country: countryCode,
+		Country: &leagueInput.Country,
 	}
-	updatedLeague, err := lc.leagueModel.UpdateLeague(updateInput)
+	updatedLeague, err := lc.leagueModel.UpdateLeague(context.Background(), updateInput)
 	if err != nil {
 		return nil, err
 	}
 	return updatedLeague, nil
+}
+
+func (lc *LeagueController) InitializeLeagues(leagueIDs []int) error {
+	// Fetch and upsert leagues
+	for _, id := range leagueIDs {
+		leag, err := lc.UpsertLeague(context.Background(), id)
+		if err != nil {
+			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
+		}
+		fmt.Printf("Upserted league with ID %d: %+v\n", id, leag)
+	}
+
+	fmt.Println("Leagues loaded")
+	return nil
 }
