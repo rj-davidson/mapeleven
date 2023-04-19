@@ -1,10 +1,22 @@
-.bar {
+
+.point {
     fill: #3854FC;
 }
 
-.bar:hover{
+.point:hover{
     stroke: white;
     stroke-width: 2;
+}
+
+.container{
+    margin-bottom: 30px;
+}
+
+.labels{
+    fill: white;
+    font-family: 'Poppins', sans-serif;
+    font-weight: normal;
+    font-style: normal;
 }
 
 .button {
@@ -15,11 +27,4 @@
 .button:hover {
     background-color: #3854FC;
     color: white;
-}
-
-.labels{
-    fill: white;
-    font-family: 'Poppins', sans-serif;
-    font-weight: normal;
-    font-style: normal;
 }
