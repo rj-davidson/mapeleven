@@ -3,8 +3,8 @@ package routes
 import (
 	"context"
 	"github.com/gofiber/fiber/v2"
+	"mapeleven/db/ent"
 	"mapeleven/models"
-	"mapeleven/models/ent"
 	"strconv"
 )
 
@@ -26,7 +26,7 @@ func SetupLeaguesRoutes(app *fiber.App, client *ent.Client) {
 			return fiber.NewError(fiber.StatusBadRequest, "Invalid ID parameter")
 		}
 
-		league, err := leagueModel.GetLeague(context.Background(), id)
+		league, err := leagueModel.GetLeagueByID(context.Background(), id)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				return fiber.NewError(fiber.StatusNotFound, "League not found")

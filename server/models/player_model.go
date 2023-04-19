@@ -3,9 +3,9 @@ package models
 import (
 	"context"
 	"errors"
-	"mapeleven/models/ent"
-	"mapeleven/models/ent/player"
-	"mapeleven/models/ent/team"
+	"mapeleven/db/ent"
+	"mapeleven/db/ent/player"
+	"mapeleven/db/ent/team"
 )
 
 // CreatePlayerInput holds the required fields to create a new player.

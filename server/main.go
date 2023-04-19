@@ -9,10 +9,10 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
-	"mapeleven/fetchers"
+	"mapeleven/controllers"
+	"mapeleven/db/ent"
+	"mapeleven/db/ent/migrate"
 	"mapeleven/models"
-	"mapeleven/models/ent"
-	"mapeleven/models/ent/migrate"
 	"mapeleven/routes"
 )
 
@@ -51,10 +51,7 @@ func main() {
 	}))
 
 	// Initialize data
-	err = initializeLeagues(client)
-	if err != nil {
-		log.Fatal(err)
-	}
+	initializeData(client)
 
 	// Set up routes
 	SetupRoutes(app, client)
@@ -63,7 +60,8 @@ func main() {
 	log.Fatal(app.Listen(":8080"))
 }
 
-func initializeLeagues(client *ent.Client) error {
+func initializeData(client *ent.Client) {
+	// Initialize data
 	laLigaID := 140
 	serieAID := 39
 	bundesligaID := 78
@@ -72,28 +70,35 @@ func initializeLeagues(client *ent.Client) error {
 	majorleaguesoccerID := 253
 	leagueIDs := []int{laLigaID, serieAID, bundesligaID, premierLeagueID, ligue1ID, majorleaguesoccerID}
 
-	// Initialize models
-	leagueModel := models.NewLeagueModel(client)
-	countryModel := models.NewCountryModel(client)
+	// Country Initialization
+	//{
+	//	countryModel := models.NewCountryModel(client)
+	//	countryController := controllers.NewCountryController(countryModel)
+	//	err := countryController.InitializeCountries()
+	//	if err != nil {
+	//		log.Fatal(err)
+	//	}
+	//}
 
-	// Create a new CountryFetcher instance
-	countryFetcher := fetchers.NewCountryFetcher(countryModel, client)
-
-	// Create a new LeagueFetcher instance
-	leagueFetcher := fetchers.NewLeagueFetcher(leagueModel, countryFetcher)
-
-	// Fetch and upsert leagues
-	for _, id := range leagueIDs {
-		league, err := leagueFetcher.UpsertLeague(id)
+	// League Initialization
+	{
+		leagueModel := models.NewLeagueModel(client)
+		leagueController := controllers.NewLeagueController(leagueModel)
+		err := leagueController.InitializeLeagues(leagueIDs)
 		if err != nil {
-			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
+			log.Fatal(err)
 		}
-		fmt.Printf("Upserted league with ID %d: %+v\n", id, league)
 	}
 
-	fmt.Println("Leagues loaded")
-
-	return nil
+	// Team Initialization
+	{
+		teamModel := models.NewTeamModel(client)
+		teamController := controllers.NewTeamController(teamModel)
+		err := teamController.InitializeTeams(leagueIDs)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func SetupRoutes(app *fiber.App, client *ent.Client) {
