@@ -1,15 +1,20 @@
 package controllers
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"mapeleven/db/ent"
 	"mapeleven/models"
 	"mapeleven/utils"
+	"net/http"
 	"path/filepath"
 	"strings"
 )
 
 type CountryController struct {
+	client       *http.Client
 	countryModel *models.CountryModel
 	entClient    *ent.Client
 }
@@ -37,7 +42,7 @@ func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (*ent.Co
 	}
 
 	// Search for country by code in Ent DB
-	country, _ := cc.countryModel.GetCountryByCode(c.Code)
+	country, _ := cc.countryModel.GetCountryByName(c.Name)
 
 	if country == nil {
 		// Country does not exist, create it
@@ -58,4 +63,55 @@ func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (*ent.Co
 	}
 
 	return country, nil
+}
+
+func (cc *CountryController) GetCountryByName(countryName string) (models.CreateCountryInput, error) {
+	// Fetch the country data from the API
+	data, err := cc.GetCountryData(countryName)
+	if err != nil {
+		fmt.Printf("Error fetching country data: %s     Error: %s", countryName, err.Error())
+	}
+
+	// Decode the API response into a struct
+	apiCountry := models.CreateCountryInput{}
+	err = json.Unmarshal(data, &apiCountry)
+	if err != nil {
+		fmt.Printf("Error decoding country data: %s     Error: %s", countryName, err.Error())
+	}
+
+	// Check if country exists in the Ent database
+	entCountry, err := cc.countryModel.GetCountryByName(apiCountry.Name)
+	if entCountry != nil {
+		return apiCountry, nil
+	} else {
+		// Country does not exist in the Ent database, create it
+		_, err = cc.UpsertCountry(apiCountry)
+	}
+
+	return apiCountry, nil
+}
+
+func (cc *CountryController) GetCountryData(countryName string) ([]byte, error) {
+	// Construct the API URL with the country name
+	url := fmt.Sprintf("https://api-football-v3.p.rapidapi.com/v3/leagues?id=%d", strings.ToLower(countryName))
+
+	ctx := context.Background()
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := cc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }

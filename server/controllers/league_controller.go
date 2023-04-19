@@ -109,8 +109,8 @@ func (lc *LeagueController) UpsertLeague(leagueID int) (*ent.League, error) {
 		return nil, err
 	}
 
-	// Use the upserted country's ID for inputData
-	leagueInput.Country = upsertedCountry.Code
+	// Use the upserted country's name for inputData
+	leagueInput.Country = upsertedCountry.Name
 
 	// Download the logo and set the logoLocation
 	err = lc.downloadLeagueLogoIfNeeded(&leagueInput)
@@ -123,7 +123,7 @@ func (lc *LeagueController) UpsertLeague(leagueID int) (*ent.League, error) {
 	if existingLeague == nil {
 		return lc.createLeague(&leagueInput)
 	} else {
-		return lc.updateLeague(&leagueInput, &upsertedCountry.Code)
+		return lc.updateLeague(&leagueInput, &upsertedCountry.Name)
 	}
 }
 
@@ -160,13 +160,13 @@ func (lc *LeagueController) createLeague(leagueInput *models.CreateLeagueInput) 
 	return newLeague, nil
 }
 
-func (lc *LeagueController) updateLeague(leagueInput *models.CreateLeagueInput, countryCode *string) (*ent.League, error) {
+func (lc *LeagueController) updateLeague(leagueInput *models.CreateLeagueInput, countryName *string) (*ent.League, error) {
 	updateInput := models.UpdateLeagueInput{
 		ID:      leagueInput.ID,
 		Name:    &leagueInput.Name,
 		Type:    &leagueInput.Type,
 		Logo:    &leagueInput.Logo,
-		Country: countryCode,
+		Country: countryName,
 	}
 	updatedLeague, err := lc.leagueModel.UpdateLeague(updateInput)
 	if err != nil {

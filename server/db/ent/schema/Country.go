@@ -15,9 +15,7 @@ type Country struct {
 func (Country) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("code").
-			Unique().
-			MaxLen(3).
-			StorageKey("code"),
+			MaxLen(3),
 		field.String("name").
 			Unique(),
 		field.String("flag"),

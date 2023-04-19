@@ -75,12 +75,16 @@ func initializeLeagues(client *ent.Client) error {
 	// Initialize models
 	leagueModel := models.NewLeagueModel(client)
 	countryModel := models.NewCountryModel(client)
+	teamModel := models.NewTeamModel(client)
 
-	// Create a new CountryFetcher instance
+	// Create a new LeagueController instance
 	countryController := controllers.NewCountryController(countryModel, client)
 
-	// Create a new LeagueFetcher instance
+	// Create a new LeagueController instance
 	leagueController := controllers.NewLeagueController(leagueModel, countryController)
+
+	// Create a new TeamController instance
+	teamController := controllers.NewTeamController(teamModel, countryController)
 
 	// Fetch and upsert leagues
 	for _, id := range leagueIDs {
@@ -89,6 +93,15 @@ func initializeLeagues(client *ent.Client) error {
 			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
 		}
 		fmt.Printf("Upserted league with ID %d: %+v\n", id, league)
+	}
+
+	// Fetch and upsert teams
+	for _, id := range leagueIDs {
+		team, err := teamController.UpsertTeam(id)
+		if err != nil {
+			return fmt.Errorf("failed to upsert team with ID %d: %v", id, err)
+		}
+		fmt.Printf("Upserted team with ID %d: %+v\n", id, team)
 	}
 
 	fmt.Println("Leagues loaded")

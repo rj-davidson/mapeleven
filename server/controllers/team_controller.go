@@ -32,7 +32,44 @@ type APITeam struct {
 	Code     string `json:"code"`
 	Founded  int    `json:"founded"`
 	National bool   `json:"national"`
+	Country  string `json:"country"`
 	Logo     string `json:"logo"`
+}
+
+type APIVenue struct {
+	ID       int    `json:"id"`
+	Name     string `json:"name"`
+	Address  string `json:"address"`
+	City     string `json:"city"`
+	Capacity int    `json:"capacity"`
+	Surface  string `json:"surface"`
+	Image    string `json:"image"`
+}
+
+func (tc *TeamController) FetchTeamData(data []byte) (models.CreateTeamInput, models.CreateCountryInput, error) {
+	var response struct {
+		Response []struct {
+			Team  APITeam  `json:"team"`
+			Venue APIVenue `json:"venue"`
+		} `json:"response"`
+	}
+
+	if err := json.Unmarshal(data, &response); err != nil {
+		return models.CreateTeamInput{}, models.CreateCountryInput{}, err
+	}
+
+	teamInput := models.CreateTeamInput{
+		ID:       response.Response[0].Team.ID,
+		Name:     response.Response[0].Team.Name,
+		Code:     response.Response[0].Team.Code,
+		Founded:  response.Response[0].Team.Founded,
+		National: response.Response[0].Team.National,
+		Country:  response.Response[0].Team.Country,
+		Logo:     response.Response[0].Team.Logo,
+	}
+
+	countryInput := models.CreateCountryInput{} // no country field in JSON data
+	return teamInput, countryInput, nil
 }
 
 func NewTeamController(teamModel *models.TeamModel, countryController *CountryController) *TeamController {
@@ -41,39 +78,6 @@ func NewTeamController(teamModel *models.TeamModel, countryController *CountryCo
 		teamModel:         teamModel,
 		countryController: countryController,
 	}
-}
-
-func (tc *TeamController) FetchTeamData(data []byte) (models.CreateTeamInput, models.CreateCountryInput, error) {
-	var response struct {
-		Response []struct {
-			Team    json.RawMessage `json:"team"`
-			Country json.RawMessage `json:"country"`
-		} `json:"response"`
-	}
-
-	if err := json.Unmarshal(data, &response); err != nil {
-		return models.CreateTeamInput{}, models.CreateCountryInput{}, err
-	}
-
-	team := APITeam{}
-	if err := json.Unmarshal(response.Response[0].Team, &team); err != nil {
-		return models.CreateTeamInput{}, models.CreateCountryInput{}, err
-	}
-	teamInput := models.CreateTeamInput{
-		ID:       team.ID,
-		Name:     team.Name,
-		Code:     team.Code,
-		Founded:  team.Founded,
-		National: team.National,
-		Logo:     team.Logo,
-	}
-
-	countryInput := models.CreateCountryInput{}
-	if err := json.Unmarshal(response.Response[0].Country, &countryInput); err != nil {
-		return models.CreateTeamInput{}, models.CreateCountryInput{}, err
-	}
-
-	return teamInput, countryInput, nil
 }
 
 func (tc *TeamController) GetTeamData(teamID int) ([]byte, error) {
@@ -103,7 +107,7 @@ func (tc *TeamController) GetTeamData(teamID int) ([]byte, error) {
 	return data, nil
 }
 
-func (tc *TeamController) CreateOrUpdateTeam(teamID int) (*ent.Team, error) {
+func (tc *TeamController) UpsertTeam(teamID int) (*ent.Team, error) {
 	data, err := tc.GetTeamData(teamID)
 	if err != nil {
 		return nil, err
@@ -119,8 +123,8 @@ func (tc *TeamController) CreateOrUpdateTeam(teamID int) (*ent.Team, error) {
 		return nil, err
 	}
 
-	// Use the upserted country's code
-	inputData.Country = upsertedCountry.Code
+	// Use the upserted country's name
+	inputData.Country = upsertedCountry.Name
 
 	// Download the logo and set the logoLocation
 	if inputData.Logo != "" {
