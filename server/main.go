@@ -9,10 +9,10 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
-	"mapeleven/fetchers"
+	"mapeleven/controllers"
+	"mapeleven/db/ent"
+	"mapeleven/db/ent/migrate"
 	"mapeleven/models"
-	"mapeleven/models/ent"
-	"mapeleven/models/ent/migrate"
 	"mapeleven/routes"
 )
 
@@ -77,14 +77,14 @@ func initializeLeagues(client *ent.Client) error {
 	countryModel := models.NewCountryModel(client)
 
 	// Create a new CountryFetcher instance
-	countryFetcher := fetchers.NewCountryFetcher(countryModel, client)
+	countryController := controllers.NewCountryController(countryModel, client)
 
 	// Create a new LeagueFetcher instance
-	leagueFetcher := fetchers.NewLeagueFetcher(leagueModel, countryFetcher)
+	leagueController := controllers.NewLeagueController(leagueModel, countryController)
 
 	// Fetch and upsert leagues
 	for _, id := range leagueIDs {
-		league, err := leagueFetcher.UpsertLeague(id)
+		league, err := leagueController.UpsertLeague(id)
 		if err != nil {
 			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
 		}

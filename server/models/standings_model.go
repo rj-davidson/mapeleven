@@ -3,8 +3,8 @@ package models
 import (
 	"context"
 	"errors"
-	"mapeleven/models/ent"
-	"mapeleven/models/ent/standings"
+	"mapeleven/db/ent"
+	"mapeleven/db/ent/standings"
 )
 
 // CreateStandingsInput holds the required fields to create a new standings entry.

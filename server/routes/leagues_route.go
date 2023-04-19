@@ -3,8 +3,8 @@ package routes
 import (
 	"context"
 	"github.com/gofiber/fiber/v2"
+	"mapeleven/db/ent"
 	"mapeleven/models"
-	"mapeleven/models/ent"
 	"strconv"
 )
 
