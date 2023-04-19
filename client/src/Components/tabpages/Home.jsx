@@ -1,7 +1,7 @@
 import React from "react";
 import '../../App.css';
-import BarChart from "../BarChart.jsx";
-import NavigationBar from "../NavigationBar.jsx";
+import BarChart from "../BarChart";
+import NavigationBar from "../NavigationBar";
 
 function Home() {
     return (

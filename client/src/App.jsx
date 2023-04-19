@@ -1,18 +1,16 @@
 import React from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import BarChart from "./Components/BarChart.jsx";
 import NavigationBar from "./Components/NavigationBar.jsx";
-//import {BrowserRouter, Router, Routes} from "react-router-dom";
-import Home from "./Components/tabpages/Home.jsx";
-import Fixtures from "./Components/tabpages/Fixtures.jsx";
-import Players from "./Components/tabpages/Players.jsx";
-import Clubs from "./Components/tabpages/Clubs.jsx";
-import Leagues from "./Components/tabpages/Leagues.jsx";
-import About from "./Components/tabpages/About.jsx";
+import PictureButton from "./Components/PictureButton.jsx";
+import Home from "./Components/tabpages/Home";
+import Fixtures from "./Components/tabpages/Fixtures";
+import Players from "./Components/tabpages/Players";
+import Clubs from "./Components/tabpages/Clubs";
+import Leagues from "./Components/tabpages/Leagues";
+import About from "./Components/tabpages/About";
 //import NavigationBar from "./NavigationBar.jsx";
-import {BrowserRouter as Router, Routes, Route, BrowserRouter} from 'react-router-dom';
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 function App() {
   //const [count, setCount] = useState(0);
@@ -21,17 +19,18 @@ function App() {
 
   return (
       <div className='App'>
-          <BrowserRouter>
+          <Router>
               <NavigationBar />
+              <BarChart />
               <Routes>
-                    <Route path='/' exact component={Home} />
-                    <Route path='/fixtures' component={Fixtures} />
-                    <Route path='/players' component={Players} />
-                    <Route path='/clubs' component={Clubs} />
-                    <Route path='/leagues' component={Leagues} />
-                    <Route path='/about' component={About} />
+                  <Route path='/fixtures' component={Fixtures} />
+                  <Route path='/players' component={Players} />
+                  <Route path='/clubs' component={Clubs} />
+                  <Route path='/leagues' component={Leagues} />
+                  <Route path='/about' component={About} />
+                  <Route path='/' exact component = {Home}/>
               </Routes>
-          </BrowserRouter>
+          </Router>
       </div>
   );
 }
@@ -41,6 +40,9 @@ export default App;
 
         /*return (
 
+              <NavigationBar />
+              <BarChart />
+              <h1>Hello World</h1>
           <!--<BarChart /> -->
             <div className="App">
                 <div>
