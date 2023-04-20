@@ -1,13 +1,24 @@
 @import url('../node_modules/bootstrap/dist/css/bootstrap.min.css');
 
 :root {
+  --dark0: #2E3440;
+  --dark1: #3B4252;
+  --dark2: #434C5E;
+  --dark3: #4C566A;
+  --light0: #D8DEE9;
+  --light1: #E5E9F0;
+  --light2: #ECEFF4;
+  --focus: #3854FC;
+  --red: #BF616A;
+  --orange: #D08770;
+  --yellow: #EBCB8B;
+  --green: #A3BE8C;
+  --blue: #5E81AC;
+  --indigo: #B48EAD;
+
   font-family: 'Poppins', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;

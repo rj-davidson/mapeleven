@@ -3,33 +3,47 @@ import '../../../App.css';
 import Layout from '../../Layout/Layout';
 import DaySwitcher from './DaySwitcher';
 import Fixture from './Fixture';
-import './FixturesPage.css';
+import FixtureTeam from './FixtureTeam';
+import { Container, Grid } from '@material-ui/core';
 
 function FixturesPage(): JSX.Element {
+    const fixtures = [];
+    for (let i = 0; i < 6; i++) {
+        fixtures.push(
+            <Fixture
+                key={i}
+                homeTeam={
+                    <FixtureTeam
+                        logo='https://media-3.api-sports.io/football/teams/33.png'
+                        name='Home team'
+                        score='4'
+                    />
+                }
+                awayTeam={
+                    <FixtureTeam
+                        logo='https://media-3.api-sports.io/football/teams/33.png'
+                        name='Away Name'
+                        score='3'
+                    />
+                }
+                fixtureInfo='Premier League'
+            />,
+        );
+    }
+
     return (
         <div>
             <Layout>
                 <DaySwitcher />
-                <Fixture
-                    league='Premier League'
-                    homeTeam='Manchester United'
-                    homeLogo={'https://media-3.api-sports.io/football/teams/33.png'}
-                    awayTeam='Liverpool'
-                    awayLogo={'https://media-3.api-sports.io/football/teams/33.png'}
-                    matchClock='50:30'
-                    homeScore={1}
-                    awayScore={0}
-                />
-                <Fixture
-                    league='La Liga'
-                    homeTeam='Real Madrid'
-                    homeLogo={'https://media-3.api-sports.io/football/teams/33.png'}
-                    awayTeam='Barcelona'
-                    awayLogo={'https://media-3.api-sports.io/football/teams/33.png'}
-                    matchClock='20:00'
-                    homeScore={0}
-                    awayScore={0}
-                />
+                <Container maxWidth='lg'>
+                    <Grid container spacing={2}>
+                        {fixtures.map(fixture => (
+                            <Grid item xs={12} md={12} lg={12} key={fixture.key}>
+                                {fixture}
+                            </Grid>
+                        ))}
+                    </Grid>
+                </Container>
             </Layout>
         </div>
     );

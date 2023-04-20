@@ -1,20 +1,49 @@
-import { MultiSlotComponentProps } from 'react';
-import './Fixture.css';
+import * as React from 'react';
+import FixtureTeam from './FixtureTeam';
+import { Box, Card, CardContent, Grid, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
 type FixtureProps = {
     homeTeam: React.ReactNode;
     awayTeam: React.ReactNode;
     fixtureInfo: React.ReactNode;
 };
-const Fixture: React.FC<MultiSlotComponentProps> = ({ homeTeam, awayTeam, fixtureInfo }) => {
+
+const useStyles = makeStyles({
+    root: {
+        minWidth: 400,
+        width: '100%',
+        margin: '16px',
+    },
+    teamName: {
+        fontSize: 24,
+    },
+    teamScore: {
+        fontSize: 48,
+        fontWeight: 'bold',
+    },
+});
+
+const Fixture: React.FC<FixtureProps> = ({ homeTeam, awayTeam, fixtureInfo }) => {
+    const classes = useStyles();
+
     return (
-        <div className='fixture-wrapper'>
-            <div className='teamsCol'>
-                <div className='homeTeam'>{homeTeam}</div>
-                <div className='awayTeam'>{awayTeam}</div>
-            </div>
-            <div className='infoCol'>{fixtureInfo}</div>
-        </div>
+        <Card className={classes.root}>
+            <CardContent>
+                <Grid item xs={12} sm={6} md={4}>
+                    <Box display='flex' flexDirection='row'>
+                        <Box flexDirection='column'>
+                            <Box marginBottom={2}>{homeTeam}</Box>
+                            <Box>{awayTeam}</Box>
+                        </Box>
+                    </Box>
+                </Grid>
+
+                <Box marginTop={2}>
+                    <Typography>{fixtureInfo}</Typography>
+                </Box>
+            </CardContent>
+        </Card>
     );
 };
 
