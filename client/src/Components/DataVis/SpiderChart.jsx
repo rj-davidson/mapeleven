@@ -103,17 +103,17 @@ function SpiderChart() {
     return (
         <div className="SpiderChart">
             <div className="buttons">
-                <button className={"button"} onClick={handleClick}>Generate Spider Chart</button>
-                <button className={"button"} onClick={handleList}>Get Player List</button>
+                <button className={"button"} onClick={handleClick}>generate chart</button>
+                <button className={"button"} onClick={handleList}>get player list</button>
                 <div className="drop-downs">
                     <select className="player1" value={player1} onChange={e => setPlayer1(parseInt(e.target.value))}>
-                        <option value="">Select Player 1</option>
+                        <option value="">select player 1</option>
                         {playerList.map((playerName, index) => (
                             <option key={index} value={index}>{playerName}</option>
                         ))}
                     </select>
                     <select className="player2" value={player2} onChange={e => setPlayer2(parseInt(e.target.value))}>
-                        <option value="">Select Player 2</option>
+                        <option value="">select player 2</option>
                         {playerList.map((playerName, index) => (
                             <option key={index} value={index}>{playerName}</option>
                         ))}
