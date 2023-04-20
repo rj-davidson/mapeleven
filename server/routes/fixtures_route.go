@@ -10,10 +10,27 @@ import (
 )
 
 func SetupFixtureRoutes(app *fiber.App) {
-	// Get Fixtures of a specific date
-	app.Get("/fixtures/:date", func(c *fiber.Ctx) error {
-		date := c.Params("date")
-		url := "https://api-football-v1.p.rapidapi.com/v3/fixtures?date=" + date
+	app.Get("/fixtures", func(c *fiber.Ctx) error {
+		date := c.Query("date")
+		live := c.Query("live")
+		url := "https://api-football-v1.p.rapidapi.com/v3/fixtures"
+
+		// If neither are requested, return Error
+		if date != "" && live != "" {
+			return fmt.Errorf("invalid fixture query parameters for end-point [%s]: date=%s, live=%s",
+				"/fixtures", date, live)
+		}
+
+		// Format URL to fetch live fixtures
+		if live == "all" {
+			url += "?live=all"
+		}
+
+		// Format URL to fetch fixtures by date
+		if date != "" {
+			url += "?date=" + date
+		}
+
 		req, err := http.NewRequestWithContext(context.Background(), "GET", url, nil)
 		if err != nil {
 			return err
@@ -39,4 +56,5 @@ func SetupFixtureRoutes(app *fiber.App) {
 
 		return c.JSON(result)
 	})
+
 }
