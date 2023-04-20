@@ -1,22 +1,29 @@
 import React from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
-import BarChart from "./Components/BarChart.jsx";
-import NavigationBar from "./Components/NavigationBar.jsx";
-import {BrowserRouter, Router, Routes} from "react-router-dom";
-//import NavigationBar from "./NavigationBar.jsx";
-//import {BrowserRouter as Router, Switch, Route} from 'react-router-dom';
+import Fixtures from "./Components/Pages/Fixtures/Fixtures.jsx";
+import Players from "./Components/Pages/Players/Players.jsx";
+import Clubs from "./Components/Pages/Clubs/Clubs.jsx";
+import Leagues from "./Components/Pages/Leagues/Leagues.jsx";
+import About from "./Components/Pages/About/About";
+import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 
 function App() {
   //const [count, setCount] = useState(0);
-//this is a comment
+
+
+
   return (
       <div className='App'>
-          <BrowserRouter>
-              <NavigationBar />
-          </BrowserRouter>
-          <BarChart />
+          <Router>
+              <Routes>
+                  <Route path='/fixtures' element={<Fixtures/>} />
+                  <Route path='/players' element={<Players/>} />
+                  <Route path='/clubs' element={<Clubs/>} />
+                  <Route path='/leagues' element={<Leagues/>} />
+                  <Route path='/about' element={<About/>} />
+                  <Route path='/' exact element = {<Fixtures/>}/>
+              </Routes>
+          </Router>
       </div>
   );
 }
@@ -25,6 +32,11 @@ export default App;
 
 
         /*return (
+
+              <NavigationBar />
+              <BarChart />
+              <h1>Hello World</h1>
+          <!--<BarChart /> -->
             <div className="App">
                 <div>
                     <a href="https://vitejs.dev" target="_blank">

@@ -13,9 +13,10 @@ function BarChart() {
     // Define a function to handle the button click.
     const handleClick = () => {
         // Send a GET request to the API.
-        fetch('http://localhost:8080')
+        fetch('http://localhost:8080/stats/topscorers')
             .then(response => response.json())
             .then(jsonData => {
+                console.log(jsonData.response);
                 // Extract the data from the response.
                 const response = jsonData.response;
                 const newData = []
@@ -74,6 +75,18 @@ function BarChart() {
             .attr('class', 'axis')
             .call(yAxis);
 
+        // Labels
+        svg.append('text')
+            .attr('x', w/2)
+            .attr('y', h + 80)
+            .text('players')
+            .attr('class', 'labels');
+        svg.append('text')
+            .attr('x', -80)
+            .attr('y', h/2)
+            .text('goals')
+            .attr('class', 'labels');
+
         // Set up the bars.
         svg.selectAll('.bar')
             .data(data)
@@ -84,18 +97,16 @@ function BarChart() {
             .attr('y', yScale)
             .attr('width', xScale.bandwidth())
             .attr('height', val => h - yScale(val))
-            .attr('class', 'bar');
+            .attr('class', 'bar')
 
     }, [data]);
 
     return (
         <div className="BarChart">
-            <div className="container">
-                {/* Render a button that triggers the `handleClick` function when clicked. */}
-                <button className={"button"} onClick={handleClick}>Get Top Scorers</button>
-                {/* Render an SVG element using the `svgRef` reference. */}
-                <svg ref={svgRef}></svg>
-            </div>
+            {/* Render a button that triggers the `handleClick` function when clicked. */}
+            <button className={"button"} onClick={handleClick}>Get Top Scorers</button>
+            {/* Render an SVG element using the `svgRef` reference. */}
+            <svg ref={svgRef}></svg>
         </div>
     );
 }
