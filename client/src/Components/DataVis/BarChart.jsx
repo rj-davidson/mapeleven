@@ -104,7 +104,7 @@ function BarChart() {
     return (
         <div className="BarChart">
             {/* Render a button that triggers the `handleClick` function when clicked. */}
-            <button className={"button"} onClick={handleClick}>Get Top Scorers</button>
+            <button className={"button"} onClick={handleClick}>get top scorers</button>
             {/* Render an SVG element using the `svgRef` reference. */}
             <svg ref={svgRef}></svg>
         </div>

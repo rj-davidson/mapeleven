@@ -94,7 +94,7 @@ function ScatterPlot() {
 
     return (
         <div className="ScatterPlot">
-            <button className={"button"} onClick={handleClick}>Get Top Scorers</button>
+            <button className={"button"} onClick={handleClick}>get top scorers</button>
             <svg ref={svgRef}></svg>
         </div>
     );

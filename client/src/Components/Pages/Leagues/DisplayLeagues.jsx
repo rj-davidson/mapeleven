@@ -1,7 +1,5 @@
 import React from "react";
-//import table from "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js";
-
-
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 
 class DisplayLeagues extends React.Component {
     constructor(props) {
@@ -13,49 +11,49 @@ class DisplayLeagues extends React.Component {
         this.componentDidMount = this.componentDidMount.bind(this)
         this.componentDidMount();
     }
+
     componentDidMount() {
         fetch("http://localhost:8080/leagues").then(
             (response) => response.json()
-            ).then(data => {
-                this.setState({ leagues: data })
-                console.log(data)
-            })
+        ).then(data => {
+            this.setState({ leagues: data })
+            console.log(data)
+        })
     }
 
-
-    //.then(leagues => this.setState({ leagues: leagues }));
     render() {
-       let table_data = this.state.leagues.map((league) => {
+        let table_data = this.state.leagues.map((league) => {
             return (
-                <tr key={league.id}>
-                    <td>{league.id}</td>
-                    <td>{league.name}</td>
-                    <td>{league.type}</td>
-                </tr>
+                <TableRow key={league.id}>
+                    <TableCell>{league.id}</TableCell>
+                    <TableCell>{league.name}</TableCell>
+                    <TableCell>{league.type}</TableCell>
+                </TableRow>
             )
-       })
+        })
 
-
-         return(
+        return(
             <div>
-                <table className='table table-striped'>
-                    <caption className='caption-top'>Leagues</caption>
-                    <thead>
-                        <tr>
-                            <th>League Id</th>
-                            <th>League Name</th>
-                            <th>League Type</th>
-                        </tr>
-                    </thead>
+                <TableContainer>
+                    <Table>
+                        <caption>Leagues</caption>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>League Id</TableCell>
+                                <TableCell>League Name</TableCell>
+                                <TableCell>League Type</TableCell>
+                            </TableRow>
+                        </TableHead>
 
-                    <tbody>
-                    {table_data}
-                    </tbody>
-                </table>
+                        <TableBody>
+                            {table_data}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
             </div>
         )
     }
 
 }
-//className='table table-striped'
+
 export default DisplayLeagues;
