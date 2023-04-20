@@ -30,7 +30,7 @@ const Fixture: React.FC<FixtureProps> = ({ homeTeam, awayTeam, fixtureInfo }) =>
     return (
         <Card className={classes.root}>
             <CardContent>
-                <Grid item xs={12} sm={6} md={4}>
+                <Grid item xs={8} sm={8} md={8} lg={8}>
                     <Box display='flex' flexDirection='row'>
                         <Box flexDirection='column'>
                             <Box marginBottom={2}>{homeTeam}</Box>
@@ -39,7 +39,7 @@ const Fixture: React.FC<FixtureProps> = ({ homeTeam, awayTeam, fixtureInfo }) =>
                     </Box>
                 </Grid>
 
-                <Box marginTop={2}>
+                <Box paddingTop={12}>
                     <Typography>{fixtureInfo}</Typography>
                 </Box>
             </CardContent>
