@@ -27,6 +27,7 @@
   -webkit-text-size-adjust: 100%;
 }
 
+
 @font-face {
   font-family: 'Poppins';
   font-weight: normal;
@@ -64,10 +65,6 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-<<<<<<< HEAD
-  background-color: #1a1a1a;
-=======
->>>>>>> parent of fe3ecfb (tried to make the css more uniform)
   cursor: pointer;
   transition: border-color 0.25s;
 }
@@ -83,23 +80,18 @@ button:focus-visible {
   :root {
     color: #213547;
     background-color: #ffffff;
-<<<<<<< HEAD
-=======
   }
   .bg-dark {
     background-color: #ffffff !important;
   }
   a {
     color: #646cff;
->>>>>>> parent of fe3ecfb (tried to make the css more uniform)
   }
   a:hover {
     color: #747bff;
   }
   button {
     background-color: #f9f9f9;
-<<<<<<< HEAD
-=======
     color: #000;
   }
   button:hover {
@@ -129,6 +121,5 @@ button:focus-visible {
   button:hover {
     border-color: #646cff;
     background-color: #141414;
->>>>>>> parent of fe3ecfb (tried to make the css more uniform)
   }
 }
