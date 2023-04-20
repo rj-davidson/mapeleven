@@ -1,13 +1,24 @@
 @import url('../node_modules/bootstrap/dist/css/bootstrap.min.css');
 
 :root {
+  --dark0: #2E3440;
+  --dark1: #3B4252;
+  --dark2: #434C5E;
+  --dark3: #4C566A;
+  --light0: #D8DEE9;
+  --light1: #E5E9F0;
+  --light2: #ECEFF4;
+  --focus: #3854FC;
+  --red: #BF616A;
+  --orange: #D08770;
+  --yellow: #EBCB8B;
+  --green: #A3BE8C;
+  --blue: #5E81AC;
+  --indigo: #B48EAD;
+
   font-family: 'Poppins', sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -16,20 +27,20 @@
   -webkit-text-size-adjust: 100%;
 }
 
+
 @font-face {
   font-family: 'Poppins';
-  src: url('../public/Poppins-Regular.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--blue);
   text-decoration: inherit;
 }
 a:hover {
-  color: #535bf2;
+  color: var(--focus);
 }
 
 body {
@@ -54,13 +65,16 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--dark2);
+  color: var(--light0);
   cursor: pointer;
   transition: border-color 0.25s;
 }
+
 button:hover {
-  border-color: #646cff;
+  border-color: var(--focus);
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
@@ -68,13 +82,48 @@ button:focus-visible {
 
 @media (prefers-color-scheme: light) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--dark1);
+    background-color: var(--light0);
+  }
+  .bg-dark {
+    background-color: var(--dark1) !important;
+  }
+  a {
+    color: var(--blue);
   }
   a:hover {
-    color: #747bff;
+    color: var(--focus);
   }
   button {
-    background-color: #f9f9f9;
+    background-color: var(--light2);
+    color: var(--dark1);
+  }
+  button:hover {
+    border-color: var(--focus);
+    background-color: var(--light1);
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color: var(--light0);
+    background-color: var(--dark2);
+  }
+
+  .bg-light {
+    background-color: var(--dark2) !important;
+  }
+
+  a {
+    color: var(--indigo);
+  }
+
+  a:hover {
+    color: var(--focus);
+  }
+
+  button {
+    background-color: var(--dark3);
+    color: var(--light0);
   }
 }

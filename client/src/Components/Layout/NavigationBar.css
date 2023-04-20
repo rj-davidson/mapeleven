@@ -5,8 +5,8 @@
 }
 
 .navigationbar {
-    /*background: linear-gradient(90deg, rgb(28, 27, 27) 0%, rgb(26, 23, 23) 100%); */
-    background:#747bff;
+    background-color: var(--light2);
+    color: var(--focus);
     text-transform: lowercase;
     height: 80px;
     display: flex;
@@ -16,7 +16,6 @@
     position: sticky;
     top: 0;
     z-index: 999;
-
 }
 
 .navigationbar-container {
@@ -27,7 +26,6 @@
     max-width: 1920px;
     font-family: 'Poppins', sans-serif;
 }
-
 
 .nav-menu {
     display: grid;
@@ -53,7 +51,6 @@
 
 .nav-item {
     height: 60px;
-
 }
 
 .nav-links {
@@ -112,11 +109,8 @@
         border-radius: 0;
     }
 
-
     .fa-times {
         color: #fff;
         font-size: 2rem;
     }
-
-
 }

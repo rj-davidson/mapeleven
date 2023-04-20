@@ -1,6 +1,6 @@
 import React from 'react'
 import './App.css'
-import Fixtures from "./Components/Pages/Fixtures/Fixtures.jsx";
+import FixturesPage from "./Components/Pages/Fixtures/FixturesPage.tsx";
 import Players from "./Components/Pages/Players/Players.jsx";
 import Clubs from "./Components/Pages/Clubs/Clubs.jsx";
 import Leagues from "./Components/Pages/Leagues/Leagues.jsx";
@@ -16,12 +16,12 @@ function App() {
       <div className='App'>
           <Router>
               <Routes>
-                  <Route path='/fixtures' element={<Fixtures/>} />
+                  <Route path='/fixtures' element={<FixturesPage/>} />
                   <Route path='/players' element={<Players/>} />
                   <Route path='/clubs' element={<Clubs/>} />
                   <Route path='/leagues' element={<Leagues/>} />
                   <Route path='/about' element={<About/>} />
-                  <Route path='/' exact element = {<Fixtures/>}/>
+                  <Route path='/' exact element = {<FixturesPage/>}/>
               </Routes>
           </Router>
       </div>
