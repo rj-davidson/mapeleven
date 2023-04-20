@@ -1,0 +1,11 @@
+.day-switcher {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#current-date {
+    text-align: center;
+    flex-grow: 1;
+}
