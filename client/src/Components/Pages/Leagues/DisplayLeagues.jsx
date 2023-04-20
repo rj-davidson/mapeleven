@@ -38,8 +38,15 @@ class DisplayLeagues extends React.Component {
 
          return(
             <div>
-                <h1>Leagues</h1>
                 <table className='table table-striped'>
+                    <caption className='caption-top'>Leagues</caption>
+                    <thead>
+                        <tr>
+                            <th>League Id</th>
+                            <th>League Name</th>
+                            <th>League Type</th>
+                        </tr>
+                    </thead>
 
                     <tbody>
                     {table_data}
