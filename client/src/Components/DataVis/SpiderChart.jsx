@@ -1,13 +1,35 @@
 import React, { useState, useRef, useEffect } from "react";
 import * as d3 from 'd3';
 import {RadarChart} from './radarChart.js';
+import './SpiderChart.css'
 
 function SpiderChart() {
     // Declare state variables using the `useState` hook.
     const [data, setData] = useState([[]]);
+    const [playerList, setList] = useState([]);
+    const [player1, setPlayer1] = useState(0);
+    const [player2, setPlayer2] = useState(1);
 
     // Create a reference for the SVG element.
     const svgRef = useRef();
+    const handleList = () => {
+        fetch('http://localhost:8080/stats/topscorers')
+        .then(response => response.json())
+        .then(jsonData => {
+            console.log(jsonData.response[0].player.name);
+            // Extract the data from the response.
+            const response = jsonData.response;
+            const newNames = []
+            for (let i = 0; i < response.length; i++) {
+                const name = response[i].player.name;
+                newNames.push(name);
+            }
+
+            // Update the state variables with the new data.
+            setList(newNames);
+        })
+        .catch(error => console.error(error));
+    }
 
     // Define a function to handle the button click.
     const handleClick = () => {
@@ -20,50 +42,27 @@ function SpiderChart() {
                 const response = jsonData.response;
                 const newData = []
 
-                const firstshots = response[0].statistics[0].shots.total;
-                const firston = response[0].statistics[0].shots.on;
-                const firstpasses = response[0].statistics[0].passes.key;
-                const firstduels = response[0].statistics[0].duels.won;
-                const firstdribbles = response[0].statistics[0].dribbles.success;
+                function addPlayers(i){
+                    const goals = response[i].statistics[0].goals.total;
+                    const assists = response[i].statistics[0].goals.assists;
+                    const shotson = response[i].statistics[0].shots.on;
+                    const keypasses = response[i].statistics[0].passes.key;
+                    const dribbles = response[i].statistics[0].dribbles.success;
 
-                const first = [//iPhone
-                    {axis:"Shots",value:firstshots},
-                    {axis:"Shots on Target",value:firston},
-                    {axis:"Key Passes",value:firstpasses},
-                    {axis:"Duels Won",value:firstduels},
-                    {axis:"Successful Dribbles",value:firstdribbles},
-                ]
-                
-                const secondshots = response[1].statistics[0].shots.total;
-                const secondon = response[1].statistics[0].shots.on;
-                const secondpasses = response[1].statistics[0].passes.key;
-                const secondduels = response[1].statistics[0].duels.won;
-                const seconddribbles = response[1].statistics[0].dribbles.success;
+                    const player = [
+                        {axis:"Goals",value:goals},
+                        {axis:"Assists",value:assists},
+                        {axis:"Shots on Target",value:shotson},
+                        {axis:"Key Passes",value:keypasses},
+                        {axis:"Successful Dribbles",value:dribbles},
+                    ]
 
-                const second = [//iPhone
-                    {axis:"Shots",value:secondshots},
-                    {axis:"Shots on Target",value:secondon},
-                    {axis:"Key Passes",value:secondpasses},
-                    {axis:"Duels Won",value:secondduels},
-                    {axis:"Successful Dribbles",value:seconddribbles},
-                ]
+                    newData.push(player);
+                }
 
-                const thirdshots = response[19].statistics[0].shots.total;
-                const thirdon = response[19].statistics[0].shots.on;
-                const thirdpasses = response[19].statistics[0].passes.key;
-                const thirdduels = response[19].statistics[0].duels.won;
-                const thirddribbles = response[19].statistics[0].dribbles.success;
+                addPlayers(player1);
+                addPlayers(player2);
 
-                const third = [//iPhone
-                    {axis:"Shots",value:thirdshots},
-                    {axis:"Shots on Target",value:thirdon},
-                    {axis:"Key Passes",value:thirdpasses},
-                    {axis:"Duels Won",value:thirdduels},
-                    {axis:"Successful Dribbles",value:thirddribbles},
-                ]
-                newData.push(first);
-                newData.push(second);
-                newData.push(third);
                 // Update the state variables with the new data.
                 setData(newData);
             })
@@ -75,19 +74,19 @@ function SpiderChart() {
         // Set up the SVG container.
         const w = 600;
         const h = 400;
-        const svg = d3.select(svgRef.current)
+        d3.select(svgRef.current)
             .attr('width', w)
             .attr('height', h)
             .style('overflow', 'visible')
-            .style('margin-top', '75px')
-            .style('margin-bottom', '280px');
+            .style('margin-top', '-50px')
+            .style('margin-bottom', '0px');
 
         var margin = {top: 100, right: 100, bottom: 100, left: 100},
             width = Math.min(700, window.innerWidth - 10) - margin.left - margin.right,
             height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
 
         const color = d3.scaleOrdinal()
-            .range(["#3854FC","#CC333F", "green"]);
+            .range(["#CC333F", "#3854FC"]);
 
         var radarChartOptions = {
             w: width,
@@ -104,11 +103,28 @@ function SpiderChart() {
     }, [data]);
 
     return (
-        <div className="BarChart">
-            {/* Render a button that triggers the `handleClick` function when clicked. */}
-            <button className={"button"} onClick={handleClick}>Get Top Scorers</button>
-            {/* Render an SVG element using the `svgRef` reference. */}
-            <svg ref={svgRef}></svg>
+        <div className="SpiderChart">
+            <div className="buttons">
+                <button className={"button"} onClick={handleClick}>Generate Spider Chart</button>
+                <button className={"button"} onClick={handleList}>Get Player List</button>
+                <div className="drop-downs">
+                    <select className="player1" value={player1} onChange={e => setPlayer1(parseInt(e.target.value))}>
+                        <option value="">Select Player 1</option>
+                        {playerList.map((playerName, index) => (
+                            <option key={index} value={index}>{playerName}</option>
+                        ))}
+                    </select>
+                    <select className="player2" value={player2} onChange={e => setPlayer2(parseInt(e.target.value))}>
+                        <option value="">Select Player 2</option>
+                        {playerList.map((playerName, index) => (
+                            <option key={index} value={index}>{playerName}</option>
+                        ))}
+                    </select>
+                </div>
+            </div>
+            <div className="chart">
+                <svg ref={svgRef}></svg>
+            </div>
         </div>
     );
 }

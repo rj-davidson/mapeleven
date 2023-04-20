@@ -1,4 +1,7 @@
 import React from "react";
+//import table from "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js";
+
+
 
 class DisplayLeagues extends React.Component {
     constructor(props) {
@@ -35,8 +38,16 @@ class DisplayLeagues extends React.Component {
 
          return(
             <div>
-                <h1>Leagues</h1>
-                <table>
+                <table className='table table-striped'>
+                    <caption className='caption-top'>Leagues</caption>
+                    <thead>
+                        <tr>
+                            <th>League Id</th>
+                            <th>League Name</th>
+                            <th>League Type</th>
+                        </tr>
+                    </thead>
+
                     <tbody>
                     {table_data}
                     </tbody>
@@ -46,5 +57,5 @@ class DisplayLeagues extends React.Component {
     }
 
 }
-
+//className='table table-striped'
 export default DisplayLeagues;
