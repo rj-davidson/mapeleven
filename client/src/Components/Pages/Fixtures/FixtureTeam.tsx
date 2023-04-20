@@ -1,22 +1,17 @@
 import * as React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Box, Typography } from '@material-ui/core';
+import { Box, Typography } from '@mui/material';
 
 type FixtureTeamProps = {
     logo: string;
     name: string;
-    score: string;
+    score: number;
 };
 
-const useStyles = makeStyles({
+const styles = {
     teamWrapper: {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 44,
-    },
-    teamLogo: {
-        width: 44,
         height: 44,
     },
     teamName: {
@@ -27,18 +22,20 @@ const useStyles = makeStyles({
         fontSize: 20,
         fontWeight: 'bold',
     },
-});
+};
 
 const FixtureTeam: React.FC<FixtureTeamProps> = ({ logo, name, score }) => {
-    const classes = useStyles();
+    if (typeof logo !== 'string' || typeof name !== 'string' || typeof score !== 'number') {
+        return null; // or handle the error in some other way
+    }
 
     return (
-        <Box className={classes.teamWrapper}>
-            <img src={logo} alt={`${name} logo`} className={classes.teamLogo} />
-            <Typography variant='body1' className={classes.teamName}>
+        <Box sx={styles.teamWrapper}>
+            <img src={logo} alt={`${name} logo`} width='44' height='44' />
+            <Typography variant='body1' sx={styles.teamName}>
                 {name}
             </Typography>
-            <Typography variant='body1' className={classes.teamScore}>
+            <Typography variant='body1' sx={styles.teamScore}>
                 {score}
             </Typography>
         </Box>

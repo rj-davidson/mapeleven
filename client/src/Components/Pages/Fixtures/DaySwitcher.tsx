@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { Box, Button, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Button, Typography } from '@mui/material';
 
 type DaySwitcherProps = {};
 
-const useStyles = makeStyles({
+const styles = {
     root: {
         display: 'flex',
         alignItems: 'center',
@@ -16,29 +15,24 @@ const useStyles = makeStyles({
         fontSize: '24px',
         margin: '0 16px',
     },
-});
+};
 
 const DaySwitcher: React.FC<DaySwitcherProps> = () => {
-    const classes = useStyles();
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const handleBackwardClick = () => {
-        const newDate = new Date();
-        newDate.setDate(currentDate.getDate() - 1);
-        setCurrentDate(newDate);
+        setCurrentDate(prevDate => new Date(prevDate.getTime() - 86400000)); // 86400000 = 24 hours * 60 minutes * 60 seconds * 1000 milliseconds
     };
 
     const handleForwardClick = () => {
-        const newDate = new Date();
-        newDate.setDate(currentDate.getDate() + 1);
-        setCurrentDate(newDate);
+        setCurrentDate(prevDate => new Date(prevDate.getTime() + 86400000));
     };
 
     return (
-        <Box className={classes.root}>
-            <Button onClick={handleBackwardClick}>&lt;</Button>
-            <Typography className={classes.dateText}>{currentDate.toDateString()}</Typography>
-            <Button onClick={handleForwardClick}>&gt;</Button>
+        <Box sx={styles.root}>
+            <Button onClick={handleBackwardClick}>{'<'}</Button>
+            <Typography sx={styles.dateText}>{currentDate.toDateString()}</Typography>
+            <Button onClick={handleForwardClick}>{'>'}</Button>
         </Box>
     );
 };

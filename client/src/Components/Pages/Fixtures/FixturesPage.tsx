@@ -4,7 +4,7 @@ import Layout from '../../Layout/Layout';
 import DaySwitcher from './DaySwitcher';
 import Fixture from './Fixture';
 import FixtureTeam from './FixtureTeam';
-import { Container, Grid } from '@material-ui/core';
+import { Container, Grid } from '@mui/material';
 
 function FixturesPage(): JSX.Element {
     const fixtures = [];
@@ -16,14 +16,14 @@ function FixturesPage(): JSX.Element {
                     <FixtureTeam
                         logo='https://media-3.api-sports.io/football/teams/33.png'
                         name='Home team'
-                        score='4'
+                        score={4}
                     />
                 }
                 awayTeam={
                     <FixtureTeam
                         logo='https://media-3.api-sports.io/football/teams/33.png'
                         name='Away Name'
-                        score='3'
+                        score={3}
                     />
                 }
                 fixtureInfo='Premier League'
