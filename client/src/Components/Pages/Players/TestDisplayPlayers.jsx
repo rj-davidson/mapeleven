@@ -32,8 +32,10 @@ class TestDisplayPlayers extends React.Component {
         let table_data = this.state.players.map(player => {
             return (
                 <TableRow key={player.id}>
-                    <TableCell>{player.photo}</TableCell>
-                    <TableCell>{player.name}</TableCell>
+                    <TableCell>{<img src={player.photo} alt="Player Photo" width="50" height="50" />}</TableCell>
+                    <TableCell>{player.firstname} {player.lastname}</TableCell>
+                    <TableCell>{player.nationality}</TableCell>
+                    <TableCell>{player.age}</TableCell>
                     <TableCell>{player.height}</TableCell>
                     <TableCell>{player.weight}</TableCell>
                 </TableRow>
@@ -47,8 +49,10 @@ class TestDisplayPlayers extends React.Component {
                         <caption>Players</caption>
                         <TableHead>
                             <TableRow>
-                                <TableCell>Player Photo</TableCell>
+                                <TableCell></TableCell>
                                 <TableCell>Player Name</TableCell>
+                                <TableCell>Player Nationality</TableCell>
+                                <TableCell>Player Age</TableCell>
                                 <TableCell>Player Height</TableCell>
                                 <TableCell>Player Weight</TableCell>
                             </TableRow>
