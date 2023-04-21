@@ -1,6 +1,5 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
-import {json} from "react-router-dom";
 
 class TestDisplayPlayers extends React.Component {
     constructor(props) {
@@ -18,11 +17,13 @@ class TestDisplayPlayers extends React.Component {
             (response) => response.json()
         ).then(data => {
             const response = data.response;
+            const tempPlayers = [];
             console.log(data)
             for(let i = 0; i < response.length; i++) {
                 const player = response[i].player;
-                this.state.players.push(player);
+                tempPlayers.push(player);
             }
+            this.setState({ players: tempPlayers })
             console.log(this.state.players)
         })
     }
@@ -31,8 +32,8 @@ class TestDisplayPlayers extends React.Component {
         let table_data = this.state.players.map(player => {
             return (
                 <TableRow key={player.id}>
+                    <TableCell>{player.photo}</TableCell>
                     <TableCell>{player.name}</TableCell>
-                    <TableCell>{player.nationality}</TableCell>
                     <TableCell>{player.height}</TableCell>
                     <TableCell>{player.weight}</TableCell>
                 </TableRow>
@@ -46,8 +47,8 @@ class TestDisplayPlayers extends React.Component {
                         <caption>Players</caption>
                         <TableHead>
                             <TableRow>
+                                <TableCell>Player Photo</TableCell>
                                 <TableCell>Player Name</TableCell>
-                                <TableCell>Player Nationality</TableCell>
                                 <TableCell>Player Height</TableCell>
                                 <TableCell>Player Weight</TableCell>
                             </TableRow>
