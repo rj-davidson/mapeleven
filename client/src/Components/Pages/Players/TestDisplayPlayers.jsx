@@ -1,33 +1,30 @@
-import React, {useState} from "react";
+import React from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
-import {console} from "yarn/lib/cli.js";
+import {json} from "react-router-dom";
 
-class DisplayPlayers extends React.Component {
-
+class TestDisplayPlayers extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             players: []
-        };
+        }
+
+        this.componentDidMount = this.componentDidMount.bind(this)
+        this.componentDidMount();
     }
 
     componentDidMount() {
-        fetch('http://localhost:8080/stats/topscorers')
-            .then(response => response.json())
-            .then(jsonData => {
-                console.log(jsonData.response[0].player.name);
-                // Extract the data from the response.
-                const response = jsonData.response;
-                const newPlayers = []
-                for (let i = 0; i < response.length; i++) {
-                    const player = response[i].player;
-                    newPlayers.push(player);
-                }
-
-                // Update the state variables with the new data.
-                this.state.players = newPlayers;
-            })
-            .catch(error => console.error(error));
+        fetch("http://localhost:8080/stats/topscorers").then(
+            (response) => response.json()
+        ).then(data => {
+            const response = data.response;
+            console.log(data)
+            for(let i = 0; i < response.length; i++) {
+                const player = response[i].player;
+                this.state.players.push(player);
+            }
+            console.log(this.state.players)
+        })
     }
 
     render() {
@@ -35,7 +32,7 @@ class DisplayPlayers extends React.Component {
             return (
                 <TableRow key={player.id}>
                     <TableCell>{player.name}</TableCell>
-                    <TableCell>{player.position}</TableCell>
+                    <TableCell>{player.nationality}</TableCell>
                     <TableCell>{player.height}</TableCell>
                     <TableCell>{player.weight}</TableCell>
                 </TableRow>
@@ -50,7 +47,7 @@ class DisplayPlayers extends React.Component {
                         <TableHead>
                             <TableRow>
                                 <TableCell>Player Name</TableCell>
-                                <TableCell>Player Position</TableCell>
+                                <TableCell>Player Nationality</TableCell>
                                 <TableCell>Player Height</TableCell>
                                 <TableCell>Player Weight</TableCell>
                             </TableRow>
@@ -62,19 +59,7 @@ class DisplayPlayers extends React.Component {
             </div>
         );
     }
+
 }
 
-export default DisplayPlayers;
-
-
-//<TableCell>{player.nationality}</TableCell>
-//<TableCell>{player.age}</TableCell>
-//export default DisplayPlayers;
-/*
-* constructor(props) {
-        super(props);
-        this.state = {
-            players: []
-        };
-    }
-* */
+export default TestDisplayPlayers;
