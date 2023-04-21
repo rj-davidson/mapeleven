@@ -43,7 +43,7 @@ function BarChart() {
             .attr('width', w)
             .attr('height', h)
             .style('overflow', 'visible')
-            .style('margin-top', '75px');
+            .style('margin-top', '20px');
 
         // Set up the scaling.
         const xScale = d3.scaleBand()
@@ -103,9 +103,9 @@ function BarChart() {
 
     return (
         <div className="BarChart">
-            {/* Render a button that triggers the `handleClick` function when clicked. */}
-            <button className={"button"} onClick={handleClick}>get top scorers</button>
-            {/* Render an SVG element using the `svgRef` reference. */}
+            <div className="chart-button">
+                <button className={"button"} onClick={handleClick}>get top scorers</button>
+            </div>
             <svg ref={svgRef}></svg>
         </div>
     );

@@ -105,11 +105,11 @@ button:focus-visible {
 @media (prefers-color-scheme: dark) {
   :root {
     color: var(--light0);
-    background-color: var(--dark2);
+    background-color: var(--dark0);
   }
 
   .bg-light {
-    background-color: var(--dark2) !important;
+    background-color: var(--dark0) !important;
   }
 
   a {

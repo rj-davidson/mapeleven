@@ -41,7 +41,7 @@ function ScatterPlot() {
             .attr('width', w)
             .attr('height', h)
             .style('overflow', 'visible')
-            .style('margin-top', '120px');
+            .style('margin-top', '20px');
 
         // Set up the scaling.
         const xScale = d3.scaleLinear()
@@ -69,7 +69,7 @@ function ScatterPlot() {
 
         svg.append('text')
             .attr('x', w/2)
-            .attr('y', h + 50)
+            .attr('y', h + 80)
             .text('shots')
             .attr('class', 'labels');
         svg.append('text')
@@ -94,7 +94,9 @@ function ScatterPlot() {
 
     return (
         <div className="ScatterPlot">
-            <button className={"button"} onClick={handleClick}>get top scorers</button>
+            <div className="chart-button">
+                <button className={"button"} onClick={handleClick}>get top scorers</button>
+            </div>
             <svg ref={svgRef}></svg>
         </div>
     );
