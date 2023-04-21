@@ -13,14 +13,17 @@ const styles = {
         alignItems: 'center',
         justifyContent: 'space-between',
         height: 44,
+        color: 'black',
     },
     teamName: {
         flexGrow: 1,
         paddingLeft: 10,
+        color: 'var(--light1)',
     },
     teamScore: {
         fontSize: 20,
         fontWeight: 'bold',
+        color: 'var(--light1)',
     },
 };
 

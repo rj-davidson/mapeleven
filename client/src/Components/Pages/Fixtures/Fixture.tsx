@@ -12,11 +12,15 @@ const styles = {
         minWidth: 400,
         width: '100%',
         margin: '16px',
+        backgroundColor: 'var(--dark2)',
+        color: 'var(--light1)',
     },
     teamName: {
+        color: 'var(--light1)',
         fontSize: 24,
     },
     teamScore: {
+        color: 'var(--light1)',
         fontSize: 48,
         fontWeight: 'bold',
     },
