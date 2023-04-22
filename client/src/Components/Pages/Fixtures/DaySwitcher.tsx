@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 
-type DaySwitcherProps = {};
+type DaySwitcherProps = {
+    onDateChange: (newDate: Date) => void;
+};
 
 const styles = {
     root: {
@@ -17,15 +19,19 @@ const styles = {
     },
 };
 
-const DaySwitcher: React.FC<DaySwitcherProps> = () => {
+const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const handleBackwardClick = () => {
-        setCurrentDate(prevDate => new Date(prevDate.getTime() - 86400000)); // 86400000 = 24 hours * 60 minutes * 60 seconds * 1000 milliseconds
+        const newDate = new Date(currentDate.getTime() - 86400000);
+        setCurrentDate(newDate);
+        onDateChange(newDate);
     };
 
     const handleForwardClick = () => {
-        setCurrentDate(prevDate => new Date(prevDate.getTime() + 86400000));
+        const newDate = new Date(currentDate.getTime() + 86400000);
+        setCurrentDate(newDate);
+        onDateChange(newDate);
     };
 
     return (
