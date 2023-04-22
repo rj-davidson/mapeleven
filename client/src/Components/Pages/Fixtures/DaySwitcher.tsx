@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Box, Button, Typography } from '@mui/material';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
 type DaySwitcherProps = {
     onDateChange: (newDate: Date) => void;
@@ -13,11 +15,10 @@ const styles = {
         width: '100%',
         marginBottom: '16px',
         marginTop: '16px',
-        backgroundColor: 'var(--dark1)',
+        border: '1.5px solid var(--dark2)',
         borderRadius: '12px',
     },
     dateText: {
-        fontSize: '24px',
         margin: '0 16px',
     },
     arrowButton: {
@@ -50,9 +51,13 @@ const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
 
     return (
         <Box sx={styles.root}>
-            <Button sx={styles.arrowButton} onClick={handleBackwardClick}>{'<'}</Button>
+            <Button sx={styles.arrowButton} onClick={handleBackwardClick}>
+                <ChevronLeftIcon />
+            </Button>
             <Typography sx={styles.dateText}>{currentDate.toDateString()}</Typography>
-            <Button sx={styles.arrowButton} onClick={handleForwardClick}>{'>'}</Button>
+            <Button sx={styles.arrowButton} onClick={handleForwardClick}>
+                <ChevronRightIcon />
+            </Button>
         </Box>
     );
 };
