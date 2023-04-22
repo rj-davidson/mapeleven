@@ -25,6 +25,7 @@ class DisplayLeagues extends React.Component {
         let table_data = this.state.leagues.map((league) => {
             return (
                 <TableRow key={league.id}>
+                    <TableCell>{<img src={'http://localhost:8080/' + league.logo} alt="League Photo" width="50" height="50" />}</TableCell>
                     <TableCell>{league.id}</TableCell>
                     <TableCell>{league.name}</TableCell>
                     <TableCell>{league.type}</TableCell>
@@ -39,6 +40,7 @@ class DisplayLeagues extends React.Component {
                         <caption>Leagues</caption>
                         <TableHead>
                             <TableRow>
+                                <TableCell></TableCell>
                                 <TableCell>League Id</TableCell>
                                 <TableCell>League Name</TableCell>
                                 <TableCell>League Type</TableCell>
