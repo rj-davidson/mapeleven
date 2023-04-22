@@ -1,4 +1,5 @@
 import * as React from 'react';
+import { Box, Grid } from '@mui/material';
 
 type FooterProps = {
     companyName: string;
@@ -7,8 +8,8 @@ type FooterProps = {
 
 const Footer: React.FC<FooterProps> = ({ companyName, year }) => {
     return (
-        <footer>
-            <div>{companyName} &copy; {year}</div>
+        <footer style={{ textAlign: 'center', padding: '12px' }}>
+            {companyName} &copy; {year}
         </footer>
     );
 };

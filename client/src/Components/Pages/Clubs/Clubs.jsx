@@ -1,13 +1,11 @@
-import React from "react";
+import React from 'react';
 import '../../../App.css';
-import Layout from "../../Layout/Layout.tsx";
+import Layout from '../../Layout/Layout.tsx';
 
 function Clubs() {
-    return(
+    return (
         <div>
-            <Layout>
-                <h1 className='clubs'>CLUBS</h1>;
-            </Layout>
+            <h1 className='clubs'>CLUBS</h1>;
         </div>
     );
 }
