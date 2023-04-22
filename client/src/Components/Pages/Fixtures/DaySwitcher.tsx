@@ -54,7 +54,9 @@ const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
             <Button sx={styles.arrowButton} onClick={handleBackwardClick}>
                 <ChevronLeftIcon />
             </Button>
-            <Typography sx={styles.dateText}>{currentDate.toDateString()}</Typography>
+            <Typography sx={styles.dateText}>
+                {currentDate.toDateString() === new Date().toDateString() ? 'Today' : currentDate.toLocaleDateString()}
+            </Typography>
             <Button sx={styles.arrowButton} onClick={handleForwardClick}>
                 <ChevronRightIcon />
             </Button>
