@@ -6,13 +6,15 @@ import Clubs from "./Components/Pages/Clubs/Clubs.jsx";
 import Leagues from "./Components/Pages/Leagues/Leagues.jsx";
 import About from "./Components/Pages/About/About";
 import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-
+import {ThemeProvider} from "@mui/material";
+import dark from "./Components/Theme/MapTheme.tsx"
 function App() {
   //const [count, setCount] = useState(0);
 
 
 
   return (
+      <ThemeProvider theme={dark}>
       <div className='App'>
           <Router>
               <Routes>
@@ -25,6 +27,7 @@ function App() {
               </Routes>
           </Router>
       </div>
+      </ThemeProvider>
   );
 }
 export default App;

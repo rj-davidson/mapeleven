@@ -46,8 +46,6 @@ export default function FixturesPage(): JSX.Element {
             <Layout>
                 <DaySwitcher onDateChange={handleDateChange} />
                 <Container maxWidth='lg'>
-                    {loading && <p>Loading...</p>}
-                    {!loading && (
                         <Grid container spacing={2}>
                             {liveFixtures.slice(0, 3).map((fixture, index) => (
                                 <Grid item xs={12} md={12} lg={12} key={index}>
@@ -104,7 +102,6 @@ export default function FixturesPage(): JSX.Element {
                                 </Grid>
                             ))}
                         </Grid>
-                    )}
                 </Container>
             </Layout>
         </div>
