@@ -9,9 +9,11 @@ type FixtureProps = {
 
 const styles = {
     teamName: {
+        color: 'var(--light1)',
         fontSize: 24,
     },
     teamScore: {
+        color: 'var(--light1)',
         fontSize: 48,
         fontWeight: 'bold',
     },

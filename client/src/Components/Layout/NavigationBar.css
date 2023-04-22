@@ -5,7 +5,7 @@
 }
 
 .navigationbar {
-    background-color: var(--light2);
+    background-color: var(--dark0);
     color: var(--focus);
     text-transform: lowercase;
     height: 80px;
@@ -54,7 +54,7 @@
 }
 
 .nav-links {
-    color: #fff;
+    color: var(--light2);
     display: flex;
     align-items: center;
     text-decoration: none;
