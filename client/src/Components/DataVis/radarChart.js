@@ -85,8 +85,8 @@ export function RadarChart(id, data, options) {
 		.append("circle")
 		.attr("class", "gridCircle")
 		.attr("r", function(d, i){return radius/cfg.levels*d;})
-		.style("fill", "#CDCDCD")
-		.style("stroke", "#CDCDCD")
+		.style("fill", "var(--light0)")
+		.style("stroke", "var(--light0)")
 		.style("fill-opacity", cfg.opacityCircles)
 		.style("filter" , "url(#glow)");
 
@@ -99,7 +99,7 @@ export function RadarChart(id, data, options) {
 	   .attr("y", function(d){return -d*radius/cfg.levels;})
 	   .attr("dy", "0.4em")
 	   .style("font-size", "10px")
-	   .attr("fill", "white")
+	   .attr("fill", "var(--light2)")
 	   .text(function(d,i) { return Format(maxValue * d/cfg.levels); });
 
 	/////////////////////////////////////////////////////////
