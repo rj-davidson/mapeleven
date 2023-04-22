@@ -4,16 +4,16 @@ import BarChart from "../../DataVis/BarChart.jsx";
 import SpiderChart from "../../DataVis/SpiderChart.jsx";
 import ScatterPlot from "../../DataVis/ScatterPlot.jsx";
 import Layout from "../../Layout/Layout.tsx";
-import './Players.css'
+import TestDisplayPlayers from "./TestDisplayPlayers.jsx"
+;
 
 function Players() {
     return (
         <div>
             <Layout>
-                <div className="chartWrapper1">
-                    <BarChart />
-                    <ScatterPlot />
-                </div>
+                <TestDisplayPlayers />
+                <BarChart />
+                <ScatterPlot />
                 <SpiderChart />
             </Layout>
         </div>

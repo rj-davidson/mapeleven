@@ -8,13 +8,6 @@ type FixtureProps = {
 };
 
 const styles = {
-    root: {
-        minWidth: 400,
-        width: '100%',
-        margin: '16px',
-        backgroundColor: 'var(--dark2)',
-        color: 'var(--light1)',
-    },
     teamName: {
         color: 'var(--light1)',
         fontSize: 24,
@@ -28,24 +21,29 @@ const styles = {
 
 const Fixture: React.FC<FixtureProps> = ({ homeTeam, awayTeam, fixtureInfo }) => {
     return (
-        <Card sx={styles.root}>
-            <CardContent>
-                <Grid item xs={8} sm={8} md={8} lg={8}>
-                    <Box display='flex' flexDirection='row'>
-                        <Box flexDirection='column'>
-                            <Box marginBottom={2} sx={styles.teamName}>
-                                {homeTeam}
-                            </Box>
-                            <Box sx={styles.teamName}>{awayTeam}</Box>
-                        </Box>
-                    </Box>
-                </Grid>
-
-                <Box paddingTop={12}>
-                    <Typography>{fixtureInfo}</Typography>
-                </Box>
-            </CardContent>
-        </Card>
+        <Grid container sx={{ width: '100%', margin: '16px' }}>
+            <Grid item xs={12}>
+                <Card sx={{ width: '100%' }}>
+                    <CardContent>
+                        <Grid container id={"fixtureRow"}>
+                            <Grid item xs={9} sm={9} md={9} lg={9}>
+                                <Box>
+                                    <Typography marginBottom={2} sx={styles.teamName}>
+                                        {awayTeam}
+                                    </Typography>
+                                    <Typography sx={styles.teamName}>
+                                        {homeTeam}
+                                    </Typography>
+                                </Box>
+                            </Grid>
+                            <Grid item xs={3} sm={3} md={3} lg={3}>
+                                {fixtureInfo}
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
+            </Grid>
+        </Grid>
     );
 };
 
