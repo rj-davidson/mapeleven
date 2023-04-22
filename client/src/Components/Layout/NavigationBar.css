@@ -5,7 +5,7 @@
 }
 
 .navigationbar {
-    background-color: var(--dark0);
+    background-color: var(--dark1);
     color: var(--focus);
     text-transform: lowercase;
     height: 80px;
@@ -23,9 +23,10 @@
     justify-content: center;
     align-items: center;
     height: 80px;
-    max-width: 1920px;
+    max-width: 100%;
     font-family: 'Poppins', sans-serif;
 }
+
 
 .nav-menu {
     display: grid;
