@@ -13,7 +13,7 @@ const FixtureInfo: React.FC<FixtureInfoProps> = ({ live, time, kickoff, location
         <Grid container direction="column" sx={{ height: '100%'}}>
             {live ? (
                 <Grid item container sx={{ height: '100%'}} alignItems="center" justifyContent="center">
-                    <Typography variant="body1" color="var(--red)">
+                    <Typography variant="body1" color="var(--light0)">
                         {time}
                     </Typography>
                 </Grid>
