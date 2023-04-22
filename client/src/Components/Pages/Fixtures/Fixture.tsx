@@ -24,7 +24,7 @@ const styles = {
 
 const Fixture: React.FC<FixtureProps> = ({ homeTeam, awayTeam, fixtureInfo }) => {
     return (
-        <Card sx={styles.root}>
+        <Card >
             <CardContent>
                 <Grid item xs={8} sm={8} md={8} lg={8}>
                     <Box display='flex' flexDirection='row'>
