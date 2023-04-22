@@ -12,6 +12,9 @@ const styles = {
         justifyContent: 'space-between',
         width: '100%',
         marginBottom: '16px',
+        marginTop: '16px',
+        backgroundColor: 'var(--dark1)',
+        borderRadius: '12px',
     },
     dateText: {
         fontSize: '24px',

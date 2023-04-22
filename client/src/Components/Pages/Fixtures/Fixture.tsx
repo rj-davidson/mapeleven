@@ -23,7 +23,7 @@ const Fixture: React.FC<FixtureProps> = ({ homeTeam, awayTeam, fixtureInfo }) =>
     return (
         <Grid container sx={{ width: '100%', margin: '16px' }}>
             <Grid item xs={12}>
-                <Card sx={{ width: '100%' }}>
+                <Card sx={{ width: '100%' , backgroundColor: 'var(--dark3)'}}>
                     <CardContent>
                         <Grid container id={"fixtureRow"}>
                             <Grid item xs={9} sm={9} md={9} lg={9}>
