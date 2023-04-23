@@ -41,13 +41,13 @@ const FixtureTeam: React.FC<FixtureTeamProps> = ({ logo, name, score }) => {
                             <img src={logo} alt={`${name} logo`} width='44' height='44' />
                         </Grid>
                         <Grid item>
-                            <Typography variant='body1'>{name}</Typography>
+                            <Typography variant='body2'>{name}</Typography>
                         </Grid>
                     </Grid>
                 </Grid>
                 <Grid item>
                     <Grid container alignItems='center'>
-                        <Typography variant='body1' sx={styles.teamScore}>
+                        <Typography variant='body2' sx={styles.teamScore}>
                             {score !== undefined && score !== null ? score : ''}
                         </Typography>
                     </Grid>

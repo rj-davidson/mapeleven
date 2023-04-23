@@ -7,7 +7,6 @@ function Leagues() {
     return (
         <div>
             <DisplayLeagues />
-            <h1 className='leagues'>LEAGUES</h1>;
         </div>
     );
 }

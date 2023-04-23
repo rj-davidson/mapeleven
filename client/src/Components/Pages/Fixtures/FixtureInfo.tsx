@@ -27,12 +27,12 @@ const FixtureInfo: React.FC<FixtureInfoProps> = ({ live, time, kickoff, location
                     justifyContent='center'
                 >
                     <Grid item>
-                        <Typography variant='body1' color='var(--light1)'>
+                        <Typography variant='body2' color='var(--light1)'>
                             {kickoff}
                         </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography variant='body1' color='var(--light1)'>
+                        <Typography variant='body2' color='var(--light1)'>
                             {location}
                         </Typography>
                     </Grid>
