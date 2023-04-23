@@ -1,11 +1,12 @@
-import React from 'react';
+import React from "react";
 import '../../../App.css';
-import Layout from '../../Layout/Layout.tsx';
+import Layout from "../../Layout/Layout.tsx";
+import DisplayClubs from "./DisplayClubs.jsx";
 
 function Clubs() {
-    return (
+    return(
         <div>
-            <h1 className='clubs'>CLUBS</h1>;
+            <DisplayClubs />
         </div>
     );
 }
