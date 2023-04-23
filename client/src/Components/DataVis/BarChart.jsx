@@ -10,8 +10,7 @@ function BarChart() {
     // Create a reference for the SVG element.
     const svgRef = useRef();
 
-    // Define a function to handle the button click.
-    const handleClick = () => {
+    useEffect(() => {
         // Send a GET request to the API.
         fetch('http://localhost:8080/stats/topscorers')
             .then(response => response.json())
@@ -32,7 +31,7 @@ function BarChart() {
                 setNames(newNames);
             })
             .catch(error => console.error(error));
-    };
+    }, []);
 
     // Define the D3 visualization using the `useEffect` hook.
     useEffect(() => {
@@ -103,9 +102,6 @@ function BarChart() {
 
     return (
         <div className="BarChart">
-            <div className="chart-button">
-                <button className={"button"} onClick={handleClick}>get top scorers</button>
-            </div>
             <svg ref={svgRef}></svg>
         </div>
     );

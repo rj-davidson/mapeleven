@@ -12,24 +12,27 @@ function SpiderChart() {
 
     // Create a reference for the SVG element.
     const svgRef = useRef();
-    const handleList = () => {
+    // Fetch the player list when the page loads.
+    useEffect(() => {
         fetch('http://localhost:8080/stats/topscorers')
-        .then(response => response.json())
-        .then(jsonData => {
-            console.log(jsonData.response[0].player.name);
-            // Extract the data from the response.
-            const response = jsonData.response;
-            const newNames = []
-            for (let i = 0; i < response.length; i++) {
-                const name = response[i].player.name;
-                newNames.push(name);
-            }
+            .then(response => response.json())
+            .then(jsonData => {
+                console.log(jsonData.response[0].player.name);
+                // Extract the data from the response.
+                const response = jsonData.response;
+                const newNames = []
+                for (let i = 0; i < response.length; i++) {
+                    const name = response[i].player.name;
+                    newNames.push(name);
+                }
 
-            // Update the state variables with the new data.
-            setList(newNames);
-        })
-        .catch(error => console.error(error));
-    }
+                // Update the state variables with the new data.
+                setList(newNames);
+            })
+            .catch(error => console.error(error));
+
+        handleClick();
+    }, []);
 
     // Define a function to handle the button click.
     const handleClick = () => {
@@ -84,7 +87,7 @@ function SpiderChart() {
             height = Math.min(width, window.innerHeight - margin.top - margin.bottom - 20);
 
         const color = d3.scaleOrdinal()
-            .range(["#CC333F", "#3854FC"]);
+            .range(["#3854FC", "#CC333F"]);
 
         var radarChartOptions = {
             w: width,
@@ -102,22 +105,27 @@ function SpiderChart() {
 
     return (
         <div className="SpiderChart">
-            <div className="buttons">
+            <div className="spider-ui">
                 <button className={"button"} onClick={handleClick}>generate chart</button>
-                <button className={"button"} onClick={handleList}>get player list</button>
-                <div className="drop-downs">
-                    <select className="player1" value={player1} onChange={e => setPlayer1(parseInt(e.target.value))}>
-                        <option value="">select player 1</option>
-                        {playerList.map((playerName, index) => (
-                            <option key={index} value={index}>{playerName}</option>
-                        ))}
-                    </select>
-                    <select className="player2" value={player2} onChange={e => setPlayer2(parseInt(e.target.value))}>
-                        <option value="">select player 2</option>
-                        {playerList.map((playerName, index) => (
-                            <option key={index} value={index}>{playerName}</option>
-                        ))}
-                    </select>
+                <div className={"drop-downs"}>
+                    <div className="pl1">
+                        <div className="player1title">player 1</div>
+                        <select className="player1" value={player1} onChange={e => setPlayer1(parseInt(e.target.value))}>
+                            <option value="">select player 1</option>
+                            {playerList.map((playerName, index) => (
+                                <option key={index} value={index}>{playerName}</option>
+                            ))}
+                        </select>
+                    </div>
+                    <div className="pl1">
+                        <div>player 2</div>
+                        <select className="player2" value={player2} onChange={e => setPlayer2(parseInt(e.target.value))}>
+                            <option value="">select player 2</option>
+                            {playerList.map((playerName, index) => (
+                                <option key={index} value={index}>{playerName}</option>
+                            ))}
+                        </select>
+                    </div>
                 </div>
             </div>
             <div className="chart">
