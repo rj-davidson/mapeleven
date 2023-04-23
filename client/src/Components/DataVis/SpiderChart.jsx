@@ -30,6 +30,8 @@ function SpiderChart() {
                 setList(newNames);
             })
             .catch(error => console.error(error));
+
+        handleClick();
     }, []);
 
     // Define a function to handle the button click.
