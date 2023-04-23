@@ -6,19 +6,38 @@
 }
 
 .drop-downs {
-    margin-top: 20px;
+    display: flex;
+    flex-direction: row; /* This is the default value for flex-direction but it's good practice to specify it explicitly */
+    justify-content: flex-start; /* Align child elements to the left of the container */
+    align-items: center; /* Align child elements vertically centered within the container */
 }
 .chart{
-    margin-top: 20px;
     margin-bottom: 250px;
+    padding-right: 90px;
+}
+
+.pl1 {
+    display: flex;
+    flex-direction: column; /* This is the default value for flex-direction but it's good practice to specify it explicitly */
+    justify-content: flex-start; /* Align child elements to the left of the container */
+    align-items: center;
 }
 
 .player1{
-    background-color: #CC333F;
+    background-color: #3854FC;
+    margin-right: 300px;
+}
+
+.player1title{
+    margin-right: 300px;
 }
 
 .player2{
-    background-color: #3854FC;
+    background-color: #CC333F;
+}
+
+.generate-graph {
+    margin-bottom: 100px;
 }
 
 .SpiderChart{
@@ -26,5 +45,12 @@
     flex-direction: column; /* This is the default value for flex-direction but it's good practice to specify it explicitly */
     justify-content: flex-start; /* Align child elements to the left of the container */
     align-items: center; /* Align child elements vertically centered within the container */
-    margin-top: 100px;
+    margin-top: 200px;
+}
+
+.spider-ui{
+    display: flex;
+    flex-direction: column; /* This is the default value for flex-direction but it's good practice to specify it explicitly */
+    justify-content: flex-start; /* Align child elements to the left of the container */
+    align-items: center; /* Align child elements vertically centered within the container */
 }
