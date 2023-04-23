@@ -1,12 +1,27 @@
-import * as React from 'react'
-import './PageBody.css';
+import * as React from 'react';
+import { Box } from '@mui/material';
 
 type PageBodyProps = {
     children: React.ReactNode;
 };
 
 const PageBody: React.FC<PageBodyProps> = ({ children }) => {
-    return <div className="page-body">{children}</div>;
+    return (
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                padding: '1rem',
+                margin: '0 auto',
+                width: '100%',
+                maxWidth: 800,
+                gap: 24,
+            }}
+        >
+            {children}
+        </Box>
+    );
 };
 
 export default PageBody;

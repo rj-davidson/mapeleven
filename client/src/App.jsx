@@ -1,69 +1,33 @@
-import React from 'react'
-import './App.css'
-import FixturesPage from "./Components/Pages/Fixtures/FixturesPage.tsx";
-import Players from "./Components/Pages/Players/Players.jsx";
-import Clubs from "./Components/Pages/Clubs/Clubs.jsx";
-import Leagues from "./Components/Pages/Leagues/Leagues.jsx";
-import About from "./Components/Pages/About/About";
-import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
-
+import React from 'react';
+import './App.css';
+import FixturesPage from './Components/Pages/Fixtures/FixturesPage.tsx';
+import Players from './Components/Pages/Players/Players.jsx';
+import Clubs from './Components/Pages/Clubs/Clubs.jsx';
+import Leagues from './Components/Pages/Leagues/Leagues.jsx';
+import About from './Components/Pages/About/About.tsx';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { ThemeProvider } from '@mui/material';
+import dark from './Components/Theme/MapTheme.tsx';
+import Layout from './Components/Layout/Layout.tsx';
 function App() {
-  //const [count, setCount] = useState(0);
-
-
-
-  return (
-      <div className='App'>
-          <Router>
-              <Routes>
-                  <Route path='/fixtures' element={<FixturesPage/>} />
-                  <Route path='/players' element={<Players/>} />
-                  <Route path='/clubs' element={<Clubs/>} />
-                  <Route path='/leagues' element={<Leagues/>} />
-                  <Route path='/about' element={<About/>} />
-                  <Route path='/' exact element = {<FixturesPage/>}/>
-              </Routes>
-          </Router>
-      </div>
-  );
-}
-export default App;
-
-
-
-        /*return (
-
-              <NavigationBar />
-              <BarChart />
-              <h1>Hello World</h1>
-          <!--<BarChart /> -->
-            <div className="App">
-                <div>
-                    <a href="https://vitejs.dev" target="_blank">
-                        <img src={viteLogo} className="logo" alt="Vite logo" />
-                    </a>
-                    <a href="https://reactjs.org" target="_blank">
-                        <img src={reactLogo} className="logo react" alt="React logo" />
-                    </a>
-                </div>
-                <h1>Vite + React</h1>
-                <div className="card">
-                    <button onClick={() => setCount((count) => count + 1)}>
-                        count is {count}
-                    </button>
-                    <p>
-                        Edit <code>src/App.jsx</code> and save to test HMR
-                    </p>
-                </div>
-                <p className="read-the-docs">
-                    Click on the Vite and React logos to learn more
-                </p>
-                <BarChart />
-
-
+    return (
+        <ThemeProvider theme={dark}>
+            <div className='App'>
+                <Router>
+                    <Layout>
+                        <Routes>
+                            <Route path='/fixtures' element={<FixturesPage />} />
+                            <Route path='/players' element={<Players />} />
+                            <Route path='/clubs' element={<Clubs />} />
+                            <Route path='/leagues' element={<Leagues />} />
+                            <Route path='/about' element={<About />} />
+                            <Route path='/' element={<FixturesPage />} />
+                        </Routes>
+                    </Layout>
+                </Router>
             </div>
-            */
+        </ThemeProvider>
+    );
+}
 
-
-
-
+export default App;

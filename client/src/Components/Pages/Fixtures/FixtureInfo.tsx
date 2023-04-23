@@ -10,20 +10,31 @@ type FixtureInfoProps = {
 
 const FixtureInfo: React.FC<FixtureInfoProps> = ({ live, time, kickoff, location }) => {
     return (
-        <Grid container direction="column" sx={{ height: '100%'}}>
+        <Grid container direction='column' sx={{ height: '100%' }}>
             {live ? (
-                <Grid item container sx={{ height: '100%'}} alignItems="center" justifyContent="center">
-                    <Typography variant="body1" color="--focus">
+                <Grid item container sx={{ height: '100%' }} alignItems='center' justifyContent='center'>
+                    <Typography variant='body1' color='var(--green)' fontWeight='700'>
                         {time}
                     </Typography>
                 </Grid>
             ) : (
-                <Grid container direction="column" spacing={3} sx={{ height: '100%'}} alignItems="center" justifyContent="center">
+                <Grid
+                    container
+                    direction='column'
+                    spacing={3}
+                    sx={{ height: '100%' }}
+                    alignItems='center'
+                    justifyContent='center'
+                >
                     <Grid item>
-                        <Typography variant="body1">{kickoff}</Typography>
+                        <Typography variant='body1' color='var(--light1)'>
+                            {kickoff}
+                        </Typography>
                     </Grid>
                     <Grid item>
-                        <Typography variant="body1">{location}</Typography>
+                        <Typography variant='body1' color='var(--light1)'>
+                            {location}
+                        </Typography>
                     </Grid>
                 </Grid>
             )}

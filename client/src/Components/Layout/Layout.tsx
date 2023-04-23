@@ -2,6 +2,7 @@ import Footer from './Footer';
 import { ReactNode } from 'react';
 import NavigationBar from './NavigationBar';
 import PageBody from './PageBody';
+import { Grid } from '@mui/material';
 
 type LayoutProps = {
     children: ReactNode;
@@ -9,13 +10,19 @@ type LayoutProps = {
 
 const Layout = ({ children }: LayoutProps) => {
     return (
-        <>
-            <NavigationBar />
+        <Grid container direction='column'>
+            <Grid item>
+                <NavigationBar />
+            </Grid>
 
-            <PageBody>{children}</PageBody>
+            <Grid item>
+                <PageBody>{children}</PageBody>
+            </Grid>
 
-            <Footer companyName={'mapeleven'} year={new Date().getFullYear()} />
-        </>
+            <Grid item>
+                <Footer companyName={'mapeleven'} year={new Date().getFullYear()} />
+            </Grid>
+        </Grid>
     );
 };
 

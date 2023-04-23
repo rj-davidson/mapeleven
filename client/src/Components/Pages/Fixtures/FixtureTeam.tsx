@@ -33,27 +33,27 @@ const FixtureTeam: React.FC<FixtureTeamProps> = ({ logo, name, score }) => {
     }
 
     return (
-            <Box sx={{ width: '100%' }} id="teamBox">
-                <Grid container justifyContent="space-between" alignItems="center">
-                    <Grid item>
-                        <Grid container alignItems="center" spacing={3}>
-                            <Grid item>
-                                <img src={logo} alt={`${name} logo`} width="44" height="44" />
-                            </Grid>
-                            <Grid item>
-                                <Typography variant="body2">{name}</Typography>
-                            </Grid>
+        <Box sx={{ width: '100%' }} id='teamBox'>
+            <Grid container justifyContent='space-between' alignItems='center'>
+                <Grid item>
+                    <Grid container alignItems='center' spacing={3}>
+                        <Grid item>
+                            <img src={logo} alt={`${name} logo`} width='44' height='44' />
                         </Grid>
-                    </Grid>
-                    <Grid item>
-                        <Grid container alignItems="center">
-                            <Typography variant="body1" sx={styles.teamScore}>
-                                {score !== undefined && score !== null ? score : ''}
-                            </Typography>
+                        <Grid item>
+                            <Typography variant='body1'>{name}</Typography>
                         </Grid>
                     </Grid>
                 </Grid>
-            </Box>
+                <Grid item>
+                    <Grid container alignItems='center'>
+                        <Typography variant='body1' sx={styles.teamScore}>
+                            {score !== undefined && score !== null ? score : ''}
+                        </Typography>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Box>
     );
 };
 
