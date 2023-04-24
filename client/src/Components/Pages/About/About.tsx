@@ -17,16 +17,16 @@ function About() {
                 Published Cloud Site: We are planning to use AWS.
             </Typography>
             <Typography variant='body1' mb={2}>
-                Complete Project Description: Map Eleven aims to provide soccer fans, clubs, and scouts a tool to
+                Complete Project Description: mapeleven aims to provide soccer fans, clubs, and scouts a tool to
                 visualize match event data. The web application’s name is a combination of the idea of mapping data and
-                the number of players a team can field in a soccer match, Map Eleven. The match event data is complex
-                and hard to understand without tools to visualize the data. With Map Eleven, we want to provide users
-                with a data dashboard that clearly communicates this data through visualization techniques. The charts
-                will give valuable insights into the data of players, matches, clubs and leagues. The data for this
-                project is already collected by several companies. We plan to import this data and use scalable
-                technologies to create a service that will allow users to customize their experience using the
-                visualization tools that we create. The purpose of this custom experience is to allow users to best
-                understand the data by selecting their own data points and chart type.
+                the number of players a team can field in a soccer match, mapeleven. The match event data is complex and
+                hard to understand without tools to visualize the data. With mapeleven, we want to provide users with a
+                data dashboard that clearly communicates this data through visualization techniques. The charts will
+                give valuable insights into the data of players, matches, clubs and leagues. The data for this project
+                is already collected by several companies. We plan to import this data and use scalable technologies to
+                create a service that will allow users to customize their experience using the visualization tools that
+                we create. The purpose of this custom experience is to allow users to best understand the data by
+                selecting their own data points and chart type.
             </Typography>
             <Typography variant='body1'>
                 Our Goals:
