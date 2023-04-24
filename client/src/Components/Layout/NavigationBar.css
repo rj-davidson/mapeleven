@@ -63,6 +63,11 @@
     height: 100%;
 }
 
+.nav-links.active {
+    border-bottom: 4px solid #3854FC;
+}
+
+
 .nav-links:hover {
     border-bottom: 4px solid #242424;
     transition: all 0.2s ease-out;
