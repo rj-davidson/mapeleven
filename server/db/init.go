@@ -25,8 +25,10 @@ func InitializeData(client *ent.Client) {
 	premierLeagueID := 61
 	ligue1ID := 71
 	majorleaguesoccerID := 253
+	championsLeagueID := 2
+	europaLeagueID := 3
 	//clubIDs := []int{42, 50, 34, 33, 47, 66, 40, 51, 36, 55, 49, 52, 48, 39, 35, 63, 46, 45, 65, 41}
-	leagueIDs := []int{laLigaID, serieAID, bundesligaID, premierLeagueID, ligue1ID, majorleaguesoccerID}
+	leagueIDs := []int{laLigaID, serieAID, bundesligaID, premierLeagueID, ligue1ID, majorleaguesoccerID, championsLeagueID, europaLeagueID}
 
 	// Model Declaration
 	countryModel = models.NewCountryModel(client)

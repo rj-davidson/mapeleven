@@ -70,7 +70,7 @@ class ClubCard extends React.Component<{}, DisplayClubsState> {
                 <Typography variant='h4' component='h2' gutterBottom>
                     Clubs
                 </Typography>
-                <Grid container spacing={4} sx={{ justifyContent: 'space-between' }}>
+                <Grid container spacing={3} sx={{ justifyContent: 'space-between' }}>
                     {clubCards}
                 </Grid>
             </div>

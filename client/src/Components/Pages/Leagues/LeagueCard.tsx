@@ -1,5 +1,7 @@
 import * as React from 'react';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
+import LeagueIcon from '@mui/icons-material/SportsSoccer';
+import CupIcon from '@mui/icons-material/EmojiEvents';
 
 interface League {
     id: number;
@@ -48,7 +50,7 @@ class LeagueCards extends React.Component<{}, DisplayLeaguesState> {
                                 {league.name}
                             </Typography>
                             <Typography variant='body1' color='text.secondary' sx={{ mr: 2 }}>
-                                Type: {league.type}
+                                {league.type.toLowerCase() === 'league' ? <LeagueIcon /> : <CupIcon />}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -61,7 +63,7 @@ class LeagueCards extends React.Component<{}, DisplayLeaguesState> {
                 <Typography variant='h4' component='h2' gutterBottom>
                     Leagues
                 </Typography>
-                <Grid container spacing={4} sx={{ justifyContent: 'space-between' }}>
+                <Grid container spacing={3} sx={{ justifyContent: 'space-between' }}>
                     {leagueCards}
                 </Grid>
             </div>
