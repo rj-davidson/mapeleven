@@ -32,6 +32,8 @@ const FixtureTeam: React.FC<FixtureTeamProps> = ({ logo, name, score }) => {
         return null; // or handle the error in some other way
     }
 
+    const trimmedName = name.length > 20 ? name.substr(0, 20).replace(/\s+$/, '') : name;
+
     return (
         <Box sx={{ width: '100%' }} id='teamBox'>
             <Grid container justifyContent='space-between' alignItems='center'>
@@ -41,7 +43,7 @@ const FixtureTeam: React.FC<FixtureTeamProps> = ({ logo, name, score }) => {
                             <img src={logo} alt={`${name} logo`} width='44' height='44' />
                         </Grid>
                         <Grid item>
-                            <Typography variant='body2'>{name}</Typography>
+                            <Typography variant='body2'>{trimmedName}</Typography>
                         </Grid>
                     </Grid>
                 </Grid>

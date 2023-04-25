@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import './NavigationBar.css';
 
 function NavigationBar(): JSX.Element {
     const [click, setClick] = useState(false);
     const [button, setButton] = useState(true);
+    const location = useLocation();
+    const [activePage, setActivePage] = useState(location.pathname.split('/')[1]);
 
     const handleClick = () => setClick(!click);
     const closeMenu = () => setClick(false);
@@ -15,7 +17,7 @@ function NavigationBar(): JSX.Element {
         } else {
             setButton(true);
         }
-    }
+    };
 
     useEffect(() => {
         window.addEventListener('resize', showButton);
@@ -24,31 +26,72 @@ function NavigationBar(): JSX.Element {
         };
     }, []);
 
-    return (
-        <nav className="navigationbar">
-            <div className="navigationbar-container">
+    useEffect(() => {
+        setActivePage(location.pathname.split('/')[1]);
+    }, [location]);
 
+    return (
+        <nav className='navigationbar'>
+            <div className='navigationbar-container'>
                 <div className='menu-icon' onClick={handleClick}>
                     <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
                 </div>
-                <div className={"title"}>
-                    <Link to='/' className='nav-links' onClick={closeMenu}> mapeleven </Link>
+                <div className={'title'}>
+                    <Link to='/' className='nav-links' onClick={closeMenu}>
+                        {' '}
+                        mapeleven{' '}
+                    </Link>
                 </div>
                 <ul className={click ? 'nav-menu active' : 'nav-menu'}>
                     <li className='nav-item'>
-                        <Link to='/fixtures' className='nav-links' onClick={closeMenu}> Fixtures </Link>
+                        <Link
+                            to='/fixtures'
+                            className={activePage === 'fixtures' ? 'nav-links active' : 'nav-links'}
+                            onClick={closeMenu}
+                        >
+                            {' '}
+                            Fixtures{' '}
+                        </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/players' className='nav-links' onClick={closeMenu}> Players </Link>
+                        <Link
+                            to='/players'
+                            className={activePage === 'players' ? 'nav-links active' : 'nav-links'}
+                            onClick={closeMenu}
+                        >
+                            {' '}
+                            Players{' '}
+                        </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/clubs' className='nav-links' onClick={closeMenu}> Clubs </Link>
+                        <Link
+                            to='/clubs'
+                            className={activePage === 'clubs' ? 'nav-links active' : 'nav-links'}
+                            onClick={closeMenu}
+                        >
+                            {' '}
+                            Clubs{' '}
+                        </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/leagues' className='nav-links' onClick={closeMenu}> Leagues </Link>
+                        <Link
+                            to='/leagues'
+                            className={activePage === 'leagues' ? 'nav-links active' : 'nav-links'}
+                            onClick={closeMenu}
+                        >
+                            {' '}
+                            Leagues{' '}
+                        </Link>
                     </li>
                     <li className='nav-item'>
-                        <Link to='/about' className='nav-links' onClick={closeMenu}> About </Link>
+                        <Link
+                            to='/about'
+                            className={activePage === 'about' ? 'nav-links active' : 'nav-links'}
+                            onClick={closeMenu}
+                        >
+                            {' '}
+                            About{' '}
+                        </Link>
                     </li>
                 </ul>
             </div>

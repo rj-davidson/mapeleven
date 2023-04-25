@@ -1,6 +1,24 @@
-import { createTheme } from '@mui/material/styles';
+import { CommonColors, createTheme } from '@mui/material/styles';
+import { common, orange } from '@mui/material/colors';
 
-const dark = createTheme({
+interface CustomColors extends CommonColors {
+    dark0: string;
+    dark1: string;
+    dark2: string;
+    dark3: string;
+    light0: string;
+    light1: string;
+    light2: string;
+    focus: string;
+    red: string;
+    orange: string;
+    yellow: string;
+    green: string;
+    blue: string;
+    indigo: string;
+}
+
+const customTheme = createTheme({
     palette: {
         primary: {
             main: '#D08770',
@@ -10,21 +28,44 @@ const dark = createTheme({
         },
         text: {
             primary: '#D8DEE9',
-            secondary: '#4C566A',
+            secondary: '#E5E9F0',
         },
+        common: {
+            dark0: '#2E3440',
+            dark1: '#3B4252',
+            dark2: '#434C5E',
+            dark3: '#4C566A',
+            light0: '#D8DEE9',
+            light1: '#E5E9F0',
+            light2: '#ECEFF4',
+            focus: '#3854FC',
+            red: '#BF616A',
+            orange: '#D08770',
+            yellow: '#EBCB8B',
+            green: '#A3BE8C',
+            blue: '#5E81AC',
+            indigo: '#B48EAD',
+        } as CustomColors,
     },
     components: {
         MuiCard: {
             styleOverrides: {
                 root: {
-                    backgroundColor: 'var(--dark0)',
-                    border: '1px solid var(--dark1)',
                     borderRadius: '10px',
                     boxShadow: 'none',
+                    width: '100%',
+                    backgroundColor: 'var(--dark1)',
+                    border: '3px solid var(--dark1)',
+                    margin: '0',
+                    padding: '0',
+                    '&:hover': {
+                        border: '3px solid var(--focus)',
+                        backgroundColor: 'var(--dark2)',
+                    },
                 },
             },
         },
-    }
+    },
 });
 
-export default dark;
+export default customTheme;
