@@ -58,9 +58,7 @@ function PlayerCards() {
                             <Typography variant='body1' color='text.primary'>
                                 {player.name}
                             </Typography>
-                            <Typography variant='body1' color='text.secondary'>
-                                {player.nationality}
-                            </Typography>
+
                             <Typography variant='body1' color='text.secondary'>
                                 Age: {player.age}
                             </Typography>
