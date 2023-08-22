@@ -2,6 +2,8 @@ package main
 
 import (
 	"context"
+	"database/sql"
+	_ "database/sql"
 	"entgo.io/ent/dialect"
 	"flag"
 	"fmt"
@@ -22,6 +24,27 @@ func init() {
 	flag.BoolVar(&updateData, "update-data", false, "Update data on startup")
 	flag.Parse()
 }
+func resetDatabase() {
+	// Connect to the default "postgres" database to reset the specific database
+	connectionString := "postgres://" + viper.GetString("DB_USER") + ":" + viper.GetString("DB_PASS") + "@" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + "/postgres?sslmode=disable"
+	db, err := sql.Open("postgres", connectionString)
+	if err != nil {
+		log.Fatalf("Failed to connect to the default postgres database: %v", err)
+	}
+	defer db.Close()
+
+	// Drop the database
+	_, err = db.Exec(`DROP DATABASE IF EXISTS "` + viper.GetString("DB_NAME") + `"`)
+	if err != nil {
+		log.Fatalf("Failed to drop database: %v", err)
+	}
+
+	// Create the database
+	_, err = db.Exec(`CREATE DATABASE "` + viper.GetString("DB_NAME") + `"`)
+	if err != nil {
+		log.Fatalf("Failed to create database: %v", err)
+	}
+}
 
 func main() {
 	// Set up Viper configuration
@@ -32,10 +55,12 @@ func main() {
 	}
 	viper.AutomaticEnv()
 
+	// Reset the database
+	resetDatabase()
+
 	// Build Connection String
 	connectionString := "postgres://" + viper.GetString("DB_USER") + ":" + viper.GetString("DB_PASS") + "@" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + "/" + viper.GetString("DB_NAME") + "?sslmode=disable"
 
-	// Create a new Ent client instance
 	client, err := ent.Open(dialect.Postgres, connectionString)
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
@@ -60,6 +85,17 @@ func main() {
 	// Initialize data
 	if updateData {
 		db.InitializeData(client) // Use the exported function
+
+		// Check if data has been transferred successfully
+		players, err := client.Player.Query().All(context.Background())
+		if err != nil {
+			log.Fatalf("Failed to fetch players from database: %v", err)
+		}
+		if len(players) > 0 {
+			fmt.Println("Data has been successfully transferred to the database!")
+		} else {
+			fmt.Println("No data found in the database!")
+		}
 	}
 
 	// Set up routes
