@@ -36,13 +36,13 @@ func InitializeData(client *ent.Client) {
 	teamModel = models.NewTeamModel(client)
 
 	//// Country Initialization
-	//{
-	//	countryController := controllers.NewCountryController(countryModel)
-	//	err := countryController.InitializeCountries()
-	//	if err != nil {
-	//		log.Fatal(err)
-	//	}
-	//}
+	{
+		countryController := controllers.NewCountryController(countryModel)
+		err := countryController.InitializeCountries()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	// League Initialization
 	{
