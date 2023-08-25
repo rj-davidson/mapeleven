@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+  db:
+    image: postgres:14
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 15s
+      retries: 12
+
+  api:
+    build: .
+    command:
+      - "dlv"
+      - "debug"
+      - "--"
+      - "/app/main"
+      - "-update-data"
+      - "--continue"
+      - "--accept-multiclient"
+      - "--api-version=2"
+      - "--headless"
+      - "--listen=:40000"
+      - "--log"
+    ports:
+      - "8080:8080"
+      - "40000:40000" # Debug port for Delve
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
