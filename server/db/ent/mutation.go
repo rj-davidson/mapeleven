@@ -1243,6 +1243,7 @@ type LeagueMutation struct {
 	op               Op
 	typ              string
 	id               *int
+	slug             *string
 	name             *string
 	_type            *league.Type
 	logo             *string
@@ -1364,6 +1365,42 @@ func (m *LeagueMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetSlug sets the "slug" field.
+func (m *LeagueMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *LeagueMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the League entity.
+// If the League object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeagueMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *LeagueMutation) ResetSlug() {
+	m.slug = nil
 }
 
 // SetName sets the "name" field.
@@ -1694,7 +1731,10 @@ func (m *LeagueMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LeagueMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
+	if m.slug != nil {
+		fields = append(fields, league.FieldSlug)
+	}
 	if m.name != nil {
 		fields = append(fields, league.FieldName)
 	}
@@ -1712,6 +1752,8 @@ func (m *LeagueMutation) Fields() []string {
 // schema.
 func (m *LeagueMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case league.FieldSlug:
+		return m.Slug()
 	case league.FieldName:
 		return m.Name()
 	case league.FieldType:
@@ -1727,6 +1769,8 @@ func (m *LeagueMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *LeagueMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case league.FieldSlug:
+		return m.OldSlug(ctx)
 	case league.FieldName:
 		return m.OldName(ctx)
 	case league.FieldType:
@@ -1742,6 +1786,13 @@ func (m *LeagueMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *LeagueMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case league.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
+		return nil
 	case league.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -1812,6 +1863,9 @@ func (m *LeagueMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *LeagueMutation) ResetField(name string) error {
 	switch name {
+	case league.FieldSlug:
+		m.ResetSlug()
+		return nil
 	case league.FieldName:
 		m.ResetName()
 		return nil
@@ -1977,6 +2031,7 @@ type PlayerMutation struct {
 	op                       Op
 	typ                      string
 	id                       *int
+	slug                     *string
 	name                     *string
 	firstname                *string
 	lastname                 *string
@@ -2104,6 +2159,42 @@ func (m *PlayerMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetSlug sets the "slug" field.
+func (m *PlayerMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *PlayerMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the Player entity.
+// If the Player object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlayerMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *PlayerMutation) ResetSlug() {
+	m.slug = nil
 }
 
 // SetName sets the "name" field.
@@ -2635,7 +2726,10 @@ func (m *PlayerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PlayerMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
+	if m.slug != nil {
+		fields = append(fields, player.FieldSlug)
+	}
 	if m.name != nil {
 		fields = append(fields, player.FieldName)
 	}
@@ -2668,6 +2762,8 @@ func (m *PlayerMutation) Fields() []string {
 // schema.
 func (m *PlayerMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case player.FieldSlug:
+		return m.Slug()
 	case player.FieldName:
 		return m.Name()
 	case player.FieldFirstname:
@@ -2693,6 +2789,8 @@ func (m *PlayerMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PlayerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case player.FieldSlug:
+		return m.OldSlug(ctx)
 	case player.FieldName:
 		return m.OldName(ctx)
 	case player.FieldFirstname:
@@ -2718,6 +2816,13 @@ func (m *PlayerMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *PlayerMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case player.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
+		return nil
 	case player.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -2862,6 +2967,9 @@ func (m *PlayerMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PlayerMutation) ResetField(name string) error {
 	switch name {
+	case player.FieldSlug:
+		m.ResetSlug()
+		return nil
 	case player.FieldName:
 		m.ResetName()
 		return nil
@@ -4730,6 +4838,7 @@ type TeamMutation struct {
 	op                 Op
 	typ                string
 	id                 *int
+	slug               *string
 	name               *string
 	code               *string
 	founded            *int
@@ -4858,6 +4967,42 @@ func (m *TeamMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetSlug sets the "slug" field.
+func (m *TeamMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *TeamMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the Team entity.
+// If the Team object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TeamMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *TeamMutation) ResetSlug() {
+	m.slug = nil
 }
 
 // SetName sets the "name" field.
@@ -5349,7 +5494,10 @@ func (m *TeamMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TeamMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
+	if m.slug != nil {
+		fields = append(fields, team.FieldSlug)
+	}
 	if m.name != nil {
 		fields = append(fields, team.FieldName)
 	}
@@ -5373,6 +5521,8 @@ func (m *TeamMutation) Fields() []string {
 // schema.
 func (m *TeamMutation) Field(name string) (ent.Value, bool) {
 	switch name {
+	case team.FieldSlug:
+		return m.Slug()
 	case team.FieldName:
 		return m.Name()
 	case team.FieldCode:
@@ -5392,6 +5542,8 @@ func (m *TeamMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *TeamMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
+	case team.FieldSlug:
+		return m.OldSlug(ctx)
 	case team.FieldName:
 		return m.OldName(ctx)
 	case team.FieldCode:
@@ -5411,6 +5563,13 @@ func (m *TeamMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *TeamMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case team.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
+		return nil
 	case team.FieldName:
 		v, ok := value.(string)
 		if !ok {
@@ -5510,6 +5669,9 @@ func (m *TeamMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *TeamMutation) ResetField(name string) error {
 	switch name {
+	case team.FieldSlug:
+		m.ResetSlug()
+		return nil
 	case team.FieldName:
 		m.ResetName()
 		return nil

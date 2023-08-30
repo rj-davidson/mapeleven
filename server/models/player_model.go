@@ -6,6 +6,7 @@ import (
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/team"
+	"mapeleven/utils"
 )
 
 // CreatePlayerInput holds the required fields to create a new player.
@@ -54,6 +55,7 @@ func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput)
 	p, err := m.client.Player.
 		Create().
 		SetID(input.ID).
+		SetSlug(utils.Slugify(input.Name)).
 		SetName(input.Name).
 		SetFirstname(input.Firstname).
 		SetLastname(input.Lastname).

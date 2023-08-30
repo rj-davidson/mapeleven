@@ -22,6 +22,12 @@ type PlayerCreate struct {
 	hooks    []Hook
 }
 
+// SetSlug sets the "slug" field.
+func (pc *PlayerCreate) SetSlug(s string) *PlayerCreate {
+	pc.mutation.SetSlug(s)
+	return pc
+}
+
 // SetName sets the "name" field.
 func (pc *PlayerCreate) SetName(s string) *PlayerCreate {
 	pc.mutation.SetName(s)
@@ -159,6 +165,9 @@ func (pc *PlayerCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *PlayerCreate) check() error {
+	if _, ok := pc.mutation.Slug(); !ok {
+		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "Player.slug"`)}
+	}
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Player.name"`)}
 	}
@@ -214,6 +223,10 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 	if id, ok := pc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := pc.mutation.Slug(); ok {
+		_spec.SetField(player.FieldSlug, field.TypeString, value)
+		_node.Slug = value
 	}
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.SetField(player.FieldName, field.TypeString, value)

@@ -12,6 +12,8 @@ const (
 	Label = "team"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldSlug holds the string denoting the slug field in the database.
+	FieldSlug = "slug"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldCode holds the string denoting the code field in the database.
@@ -70,6 +72,7 @@ const (
 // Columns holds all SQL columns for team fields.
 var Columns = []string{
 	FieldID,
+	FieldSlug,
 	FieldName,
 	FieldCode,
 	FieldFounded,
@@ -118,6 +121,11 @@ type Order func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// BySlug orders the results by the slug field.
+func BySlug(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldSlug, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.

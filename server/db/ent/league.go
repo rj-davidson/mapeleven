@@ -18,6 +18,8 @@ type League struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Slug holds the value of the "slug" field.
+	Slug string `json:"slug,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Type holds the value of the "type" field.
@@ -98,7 +100,7 @@ func (*League) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case league.FieldID:
 			values[i] = new(sql.NullInt64)
-		case league.FieldName, league.FieldType, league.FieldLogo:
+		case league.FieldSlug, league.FieldName, league.FieldType, league.FieldLogo:
 			values[i] = new(sql.NullString)
 		case league.ForeignKeys[0]: // country_leagues
 			values[i] = new(sql.NullInt64)
@@ -125,6 +127,12 @@ func (l *League) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			l.ID = int(value.Int64)
+		case league.FieldSlug:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field slug", values[i])
+			} else if value.Valid {
+				l.Slug = value.String
+			}
 		case league.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -213,6 +221,9 @@ func (l *League) String() string {
 	var builder strings.Builder
 	builder.WriteString("League(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", l.ID))
+	builder.WriteString("slug=")
+	builder.WriteString(l.Slug)
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(l.Name)
 	builder.WriteString(", ")

@@ -15,6 +15,7 @@ type Team struct {
 func (Team) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("id").Unique().Immutable(),
+		field.String("slug").Unique().Immutable(),
 		field.String("name"),
 		field.String("code").MaxLen(3),
 		field.Int("founded"),

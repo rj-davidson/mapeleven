@@ -443,12 +443,12 @@ func (tq *TeamQuery) WithTeamSeasons(opts ...func(*TeamSeasonQuery)) *TeamQuery 
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Slug string `json:"slug,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Team.Query().
-//		GroupBy(team.FieldName).
+//		GroupBy(team.FieldSlug).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
@@ -466,11 +466,11 @@ func (tq *TeamQuery) GroupBy(field string, fields ...string) *TeamGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Slug string `json:"slug,omitempty"`
 //	}
 //
 //	client.Team.Query().
-//		Select(team.FieldName).
+//		Select(team.FieldSlug).
 //		Scan(ctx, &v)
 func (tq *TeamQuery) Select(fields ...string) *TeamSelect {
 	tq.ctx.Fields = append(tq.ctx.Fields, fields...)

@@ -22,7 +22,7 @@ services:
       - "debug"
       - "--"
       - "/app/main"
-      - "-update-data"
+      - "-initialize"
       - "--continue"
       - "--accept-multiclient"
       - "--api-version=2"
