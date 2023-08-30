@@ -5,6 +5,7 @@ import (
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
+	"mapeleven/utils"
 )
 
 // CreateLeagueInput holds the input data needed to create a new league record.
@@ -51,10 +52,11 @@ func (lm *LeagueModel) CreateLeague(ctx context.Context, input CreateLeagueInput
 	return lm.client.League.
 		Create().
 		SetID(input.ID).
+		SetSlug(utils.Slugify(input.Name)).
 		SetName(input.Name).
 		SetType(input.Type).
 		SetLogo(input.Logo).
-		SetCountryID(c.ID). // Set the country ID here
+		SetCountryID(c.ID).
 		Save(ctx)
 }
 

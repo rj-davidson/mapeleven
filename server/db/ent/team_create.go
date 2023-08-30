@@ -24,6 +24,12 @@ type TeamCreate struct {
 	hooks    []Hook
 }
 
+// SetSlug sets the "slug" field.
+func (tc *TeamCreate) SetSlug(s string) *TeamCreate {
+	tc.mutation.SetSlug(s)
+	return tc
+}
+
 // SetName sets the "name" field.
 func (tc *TeamCreate) SetName(s string) *TeamCreate {
 	tc.mutation.SetName(s)
@@ -173,6 +179,9 @@ func (tc *TeamCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TeamCreate) check() error {
+	if _, ok := tc.mutation.Slug(); !ok {
+		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "Team.slug"`)}
+	}
 	if _, ok := tc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Team.name"`)}
 	}
@@ -224,6 +233,10 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 	if id, ok := tc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := tc.mutation.Slug(); ok {
+		_spec.SetField(team.FieldSlug, field.TypeString, value)
+		_node.Slug = value
 	}
 	if value, ok := tc.mutation.Name(); ok {
 		_spec.SetField(team.FieldName, field.TypeString, value)

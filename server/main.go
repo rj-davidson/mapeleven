@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	_ "database/sql"
 	"entgo.io/ent/dialect"
 	"flag"
@@ -12,39 +11,47 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
-	"mapeleven/db"
+	"mapeleven/controllers"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/migrate"
 	"mapeleven/routes"
+	"os"
+	"os/signal"
+	"sync"
+	"syscall"
 )
 
 var updateData bool
 
+var initialize bool
+
 func init() {
-	flag.BoolVar(&updateData, "update-data", false, "Update data on startup")
+	flag.BoolVar(&initialize, "initialize", false, "Force initialization")
+	flag.BoolVar(&updateData, "update", false, "Enable cron job scheduler")
 	flag.Parse()
 }
-func resetDatabase() {
-	// Connect to the default "postgres" database to reset the specific database
-	connectionString := "postgres://" + viper.GetString("DB_USER") + ":" + viper.GetString("DB_PASS") + "@" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + "/postgres?sslmode=disable"
-	db, err := sql.Open("postgres", connectionString)
-	if err != nil {
-		log.Fatalf("Failed to connect to the default postgres database: %v", err)
-	}
-	defer db.Close()
 
-	// Drop the database
-	_, err = db.Exec(`DROP DATABASE IF EXISTS "` + viper.GetString("DB_NAME") + `"`)
-	if err != nil {
-		log.Fatalf("Failed to drop database: %v", err)
-	}
-
-	// Create the database
-	_, err = db.Exec(`CREATE DATABASE "` + viper.GetString("DB_NAME") + `"`)
-	if err != nil {
-		log.Fatalf("Failed to create database: %v", err)
-	}
-}
+//func resetDatabase() {
+//	// Connect to the default "postgres" database to reset the specific database
+//	connectionString := "postgres://" + viper.GetString("DB_USER") + ":" + viper.GetString("DB_PASS") + "@" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + "/postgres?sslmode=disable"
+//	db, err := sql.Open("postgres", connectionString)
+//	if err != nil {
+//		log.Fatalf("Failed to connect to the default postgres database: %v", err)
+//	}
+//	defer db.Close()
+//
+//	// Drop the database
+//	_, err = db.Exec(`DROP DATABASE IF EXISTS "` + viper.GetString("DB_NAME") + `"`)
+//	if err != nil {
+//		log.Fatalf("Failed to drop database: %v", err)
+//	}
+//
+//	// Create the database
+//	_, err = db.Exec(`CREATE DATABASE "` + viper.GetString("DB_NAME") + `"`)
+//	if err != nil {
+//		log.Fatalf("Failed to create database: %v", err)
+//	}
+//}
 
 func main() {
 	// Set up Viper configuration
@@ -55,13 +62,40 @@ func main() {
 	}
 	viper.AutomaticEnv()
 
-	// Reset the database
-	resetDatabase()
+	// Initialize WaitGroup
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
 
 	// Build Connection String
 	connectionString := "postgres://" + viper.GetString("DB_USER") + ":" + viper.GetString("DB_PASS") + "@" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + "/" + viper.GetString("DB_NAME") + "?sslmode=disable"
 
+	// Connect to Database
 	client, err := ent.Open(dialect.Postgres, connectionString)
+
+	if err != nil {
+		log.Fatalf("failed connecting to postgres database: %v", err)
+	}
+	defer client.Close()
+	ctx := context.Background()
+
+	// Run migration.
+	err = client.Schema.Create(
+		ctx,
+		migrate.WithDropIndex(true),
+		migrate.WithDropColumn(true),
+	)
+	if err != nil {
+		log.Fatalf("failed creating schema resources: %v", err)
+	}
+
+	// If initialize flag is true, run initialization logic
+	fmt.Println("-- Initialize flag: ", initialize)
+	fmt.Println("-- Update flag: ", updateData)
+	go func() {
+		controllers.CronScheduler(client, initialize, updateData)
+		wg.Done()
+	}()
+
 	if err != nil {
 		log.Fatalf("failed opening connection to postgres: %v", err)
 	}
@@ -73,7 +107,7 @@ func main() {
 		log.Fatalf("failed creating schema resources: %v", err)
 	}
 
-	// Web App
+	// Web App Initialization
 	app := fiber.New()
 
 	// Add CORS middleware
@@ -82,27 +116,30 @@ func main() {
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
-	// Initialize data
-	if updateData {
-		db.InitializeData(client) // Use the exported function
-
-		// Check if data has been transferred successfully
-		players, err := client.Player.Query().All(context.Background())
-		if err != nil {
-			log.Fatalf("Failed to fetch players from database: %v", err)
-		}
-		if len(players) > 0 {
-			fmt.Println("Data has been successfully transferred to the database!")
-		} else {
-			fmt.Println("No data found in the database!")
-		}
-	}
-
 	// Set up routes
 	SetupRoutes(app, client)
 
+	// Print Server Running Message
 	fmt.Println("Server is running on port 8080")
-	log.Fatal(app.Listen(":8080"))
+
+	// Start the server
+	go func() {
+		if err := app.Listen(":8080"); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	// Graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	fmt.Println("Shutdown signal received. Shutting down...")
+
+	// Wait for all goroutines (like the CronScheduler) to finish
+	wg.Wait()
+
+	fmt.Println("Server stopped.")
 }
 
 func SetupRoutes(app *fiber.App, client *ent.Client) {

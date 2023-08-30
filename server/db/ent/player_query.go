@@ -371,12 +371,12 @@ func (pq *PlayerQuery) WithPlayerTeamSeasons(opts ...func(*PlayerTeamSeasonQuery
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Slug string `json:"slug,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Player.Query().
-//		GroupBy(player.FieldName).
+//		GroupBy(player.FieldSlug).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *PlayerQuery) GroupBy(field string, fields ...string) *PlayerGroupBy {
@@ -394,11 +394,11 @@ func (pq *PlayerQuery) GroupBy(field string, fields ...string) *PlayerGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Name string `json:"name,omitempty"`
+//		Slug string `json:"slug,omitempty"`
 //	}
 //
 //	client.Player.Query().
-//		Select(player.FieldName).
+//		Select(player.FieldSlug).
 //		Scan(ctx, &v)
 func (pq *PlayerQuery) Select(fields ...string) *PlayerSelect {
 	pq.ctx.Fields = append(pq.ctx.Fields, fields...)

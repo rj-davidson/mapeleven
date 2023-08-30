@@ -28,7 +28,7 @@ func init() {
 	teamFields := schema.Team{}.Fields()
 	_ = teamFields
 	// teamDescCode is the schema descriptor for code field.
-	teamDescCode := teamFields[2].Descriptor()
+	teamDescCode := teamFields[3].Descriptor()
 	// team.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	team.CodeValidator = teamDescCode.Validators[0].(func(string) error)
 }

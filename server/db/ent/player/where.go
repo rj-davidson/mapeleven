@@ -54,6 +54,11 @@ func IDLTE(id int) predicate.Player {
 	return predicate.Player(sql.FieldLTE(FieldID, id))
 }
 
+// Slug applies equality check predicate on the "slug" field. It's identical to SlugEQ.
+func Slug(v string) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldSlug, v))
+}
+
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
 func Name(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldName, v))
@@ -92,6 +97,71 @@ func Injured(v bool) predicate.Player {
 // Photo applies equality check predicate on the "photo" field. It's identical to PhotoEQ.
 func Photo(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldPhoto, v))
+}
+
+// SlugEQ applies the EQ predicate on the "slug" field.
+func SlugEQ(v string) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldSlug, v))
+}
+
+// SlugNEQ applies the NEQ predicate on the "slug" field.
+func SlugNEQ(v string) predicate.Player {
+	return predicate.Player(sql.FieldNEQ(FieldSlug, v))
+}
+
+// SlugIn applies the In predicate on the "slug" field.
+func SlugIn(vs ...string) predicate.Player {
+	return predicate.Player(sql.FieldIn(FieldSlug, vs...))
+}
+
+// SlugNotIn applies the NotIn predicate on the "slug" field.
+func SlugNotIn(vs ...string) predicate.Player {
+	return predicate.Player(sql.FieldNotIn(FieldSlug, vs...))
+}
+
+// SlugGT applies the GT predicate on the "slug" field.
+func SlugGT(v string) predicate.Player {
+	return predicate.Player(sql.FieldGT(FieldSlug, v))
+}
+
+// SlugGTE applies the GTE predicate on the "slug" field.
+func SlugGTE(v string) predicate.Player {
+	return predicate.Player(sql.FieldGTE(FieldSlug, v))
+}
+
+// SlugLT applies the LT predicate on the "slug" field.
+func SlugLT(v string) predicate.Player {
+	return predicate.Player(sql.FieldLT(FieldSlug, v))
+}
+
+// SlugLTE applies the LTE predicate on the "slug" field.
+func SlugLTE(v string) predicate.Player {
+	return predicate.Player(sql.FieldLTE(FieldSlug, v))
+}
+
+// SlugContains applies the Contains predicate on the "slug" field.
+func SlugContains(v string) predicate.Player {
+	return predicate.Player(sql.FieldContains(FieldSlug, v))
+}
+
+// SlugHasPrefix applies the HasPrefix predicate on the "slug" field.
+func SlugHasPrefix(v string) predicate.Player {
+	return predicate.Player(sql.FieldHasPrefix(FieldSlug, v))
+}
+
+// SlugHasSuffix applies the HasSuffix predicate on the "slug" field.
+func SlugHasSuffix(v string) predicate.Player {
+	return predicate.Player(sql.FieldHasSuffix(FieldSlug, v))
+}
+
+// SlugEqualFold applies the EqualFold predicate on the "slug" field.
+func SlugEqualFold(v string) predicate.Player {
+	return predicate.Player(sql.FieldEqualFold(FieldSlug, v))
+}
+
+// SlugContainsFold applies the ContainsFold predicate on the "slug" field.
+func SlugContainsFold(v string) predicate.Player {
+	return predicate.Player(sql.FieldContainsFold(FieldSlug, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.

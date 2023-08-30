@@ -17,6 +17,8 @@ type Player struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Slug holds the value of the "slug" field.
+	Slug string `json:"slug,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Firstname holds the value of the "firstname" field.
@@ -95,7 +97,7 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullFloat64)
 		case player.FieldID, player.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldPhoto:
+		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldPhoto:
 			values[i] = new(sql.NullString)
 		case player.ForeignKeys[0]: // country_players
 			values[i] = new(sql.NullInt64)
@@ -120,6 +122,12 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pl.ID = int(value.Int64)
+		case player.FieldSlug:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field slug", values[i])
+			} else if value.Valid {
+				pl.Slug = value.String
+			}
 		case player.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
@@ -226,6 +234,9 @@ func (pl *Player) String() string {
 	var builder strings.Builder
 	builder.WriteString("Player(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pl.ID))
+	builder.WriteString("slug=")
+	builder.WriteString(pl.Slug)
+	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(pl.Name)
 	builder.WriteString(", ")

@@ -23,6 +23,12 @@ type LeagueCreate struct {
 	hooks    []Hook
 }
 
+// SetSlug sets the "slug" field.
+func (lc *LeagueCreate) SetSlug(s string) *LeagueCreate {
+	lc.mutation.SetSlug(s)
+	return lc
+}
+
 // SetName sets the "name" field.
 func (lc *LeagueCreate) SetName(s string) *LeagueCreate {
 	lc.mutation.SetName(s)
@@ -149,6 +155,9 @@ func (lc *LeagueCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (lc *LeagueCreate) check() error {
+	if _, ok := lc.mutation.Slug(); !ok {
+		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "League.slug"`)}
+	}
 	if _, ok := lc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "League.name"`)}
 	}
@@ -194,6 +203,10 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 	if id, ok := lc.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
+	}
+	if value, ok := lc.mutation.Slug(); ok {
+		_spec.SetField(league.FieldSlug, field.TypeString, value)
+		_node.Slug = value
 	}
 	if value, ok := lc.mutation.Name(); ok {
 		_spec.SetField(league.FieldName, field.TypeString, value)

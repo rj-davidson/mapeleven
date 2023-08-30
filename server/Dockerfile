@@ -7,4 +7,4 @@ COPY . .
 RUN go generate ./db/ent
 RUN go build -o main .
 EXPOSE 8080
-ENTRYPOINT ["/app/main", "-update-data"]
+ENTRYPOINT ["/app/main", "-initialize"]

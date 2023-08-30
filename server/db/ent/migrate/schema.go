@@ -46,6 +46,7 @@ var (
 	// LeaguesColumns holds the columns for the "leagues" table.
 	LeaguesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "slug", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"League", "Cup", "Tournament", "Friendly"}},
 		{Name: "logo", Type: field.TypeString},
@@ -60,13 +61,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "leagues_countries_leagues",
-				Columns:    []*schema.Column{LeaguesColumns[4]},
+				Columns:    []*schema.Column{LeaguesColumns[5]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "leagues_seasons_league",
-				Columns:    []*schema.Column{LeaguesColumns[5]},
+				Columns:    []*schema.Column{LeaguesColumns[6]},
 				RefColumns: []*schema.Column{SeasonsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -75,6 +76,7 @@ var (
 	// PlayersColumns holds the columns for the "players" table.
 	PlayersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "slug", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "firstname", Type: field.TypeString},
 		{Name: "lastname", Type: field.TypeString},
@@ -93,7 +95,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "players_countries_players",
-				Columns:    []*schema.Column{PlayersColumns[9]},
+				Columns:    []*schema.Column{PlayersColumns[10]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -171,6 +173,7 @@ var (
 	// TeamsColumns holds the columns for the "teams" table.
 	TeamsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "slug", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "code", Type: field.TypeString, Size: 3},
 		{Name: "founded", Type: field.TypeInt},
@@ -186,7 +189,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "teams_countries_teams",
-				Columns:    []*schema.Column{TeamsColumns[6]},
+				Columns:    []*schema.Column{TeamsColumns[7]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

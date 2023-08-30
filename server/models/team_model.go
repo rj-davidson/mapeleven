@@ -6,6 +6,7 @@ import (
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/team"
+	"mapeleven/utils"
 )
 
 // CreateTeamInput holds the required fields to create a new team.
@@ -55,6 +56,7 @@ func (m *TeamModel) CreateTeam(ctx context.Context, input CreateTeamInput) (*ent
 	return m.client.Team.
 		Create().
 		SetID(input.ID).
+		SetSlug(utils.Slugify(input.Name)).
 		SetName(input.Name).
 		SetCode(input.Code).
 		SetFounded(input.Founded).
