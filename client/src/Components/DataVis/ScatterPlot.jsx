@@ -92,8 +92,8 @@ function ScatterPlot() {
     }, [data]);
 
     return (
-        <div className="ScatterPlot">
-            <svg ref={svgRef}></svg>
+        <div className="ScatterPlot" style={{marginBottom: '80px'}}>
+            <svg ref={svgRef} style={{width: '100%'}}></svg>
         </div>
     );
 }

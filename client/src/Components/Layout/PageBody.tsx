@@ -15,7 +15,7 @@ const PageBody: React.FC<PageBodyProps> = ({ children }) => {
                 padding: '1rem',
                 margin: '0 auto',
                 width: '100%',
-                maxWidth: 800,
+                maxWidth: 1440,
                 gap: 24,
                 paddingTop: '128px',
             }}
