@@ -113,7 +113,7 @@ button:focus-visible {
   }
 
   a {
-    color: var(--indigo);
+    color: var(--light0);
   }
 
   a:hover {
