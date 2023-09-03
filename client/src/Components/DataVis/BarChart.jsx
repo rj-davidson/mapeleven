@@ -101,8 +101,8 @@ function BarChart() {
     }, [data]);
 
     return (
-        <div className="BarChart">
-            <svg ref={svgRef}></svg>
+        <div className="BarChart" style={{marginBottom: '80px'}}>
+            <svg ref={svgRef} style={{width: '100%'}}></svg>
         </div>
     );
 }

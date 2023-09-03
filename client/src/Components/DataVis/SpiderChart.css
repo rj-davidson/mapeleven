@@ -45,7 +45,6 @@
     flex-direction: column; /* This is the default value for flex-direction but it's good practice to specify it explicitly */
     justify-content: flex-start; /* Align child elements to the left of the container */
     align-items: center; /* Align child elements vertically centered within the container */
-    margin-top: 200px;
 }
 
 .spider-ui{
