@@ -14,7 +14,7 @@ type Standings struct {
 // Fields of the Standings.
 func (Standings) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("rank").Unique(),
+		field.Int("rank"),
 		field.String("description"),
 	}
 }

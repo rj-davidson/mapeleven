@@ -156,3 +156,15 @@ func (m *TeamModel) GetTeamPlayers(ctx context.Context, teamID int) ([]*ent.Play
 		QueryPlayers().
 		All(ctx)
 }
+func (m *TeamModel) Exists(ctx context.Context, teamID int) (bool, error) {
+	count, err := m.client.Team.
+		Query().
+		Where(team.IDEQ(teamID)).
+		Count(ctx)
+
+	if err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}

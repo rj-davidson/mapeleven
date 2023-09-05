@@ -17,6 +17,10 @@ import (
 var countryModel *models.CountryModel
 var leagueModel *models.LeagueModel
 var teamModel *models.TeamModel
+var standingsModel *models.StandingsModel
+
+//var seasonModel *models.SeasonModel
+//var teamSeasonsModel *models.TeamSeasonsModel
 
 func CronScheduler(client *ent.Client, initialize bool, runScheduler bool) {
 	// Initialize scheduler
@@ -26,6 +30,9 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool) {
 	countryModel = models.NewCountryModel(client)
 	leagueModel = models.NewLeagueModel(client)
 	teamModel = models.NewTeamModel(client)
+	standingsModel = models.NewStandingsModel(client)
+	//seasonModel = models.NewSeasonModel(client)
+	//teamSeasonsModel = models.NewTeamSeasonsModel(client)
 
 	if initialize {
 		// Country Initialization
@@ -36,6 +43,15 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool) {
 
 		// Team Initialization
 		fetchTeams(teamModel)
+
+		// Standings Initialization
+		fetchStandings(standingsModel)
+
+		// Season Initialization
+		//fetchSeason(seasonModel)
+
+		// Team Seasons Initialization
+		//fetchTeamSeasons(teamSeasonsModel)
 	}
 
 	if runScheduler {
@@ -43,6 +59,9 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool) {
 		s.Every(14).Days().At("00:00").Do(fetchCountries, countryModel)
 		s.Every(14).Days().At("00:00").Do(fetchLeagues, leagueModel)
 		s.Every(14).Days().At("00:00").Do(fetchTeams, teamModel)
+		s.Every(14).Days().At("00:00").Do(fetchStandings, standingsModel)
+		//s.Every(14).Days().At("00:00").Do(fetchSeason, seasonModel)
+		//s.Every(14).Days().At("00:00").Do(fetchTeamSeasons, teamSeasonsModel)
 	}
 }
 
@@ -73,6 +92,7 @@ func fetchLeagues(leagueModel *models.LeagueModel) {
 	}
 }
 
+// Fetches teams from API and saves them to the database
 func fetchTeams(teamModel *models.TeamModel) {
 	// Request Standings for each league
 	// Initialize empty teams array of type int
@@ -86,6 +106,7 @@ func fetchTeams(teamModel *models.TeamModel) {
 	}
 }
 
+// Fetches team IDs from API
 func fetchTeamIDs() []int {
 	type StandingsResponse struct {
 		Response []struct {
@@ -148,3 +169,160 @@ func fetchTeamIDs() []int {
 
 	return teamIDs
 }
+
+// Fetches standings from API and saves them to the database
+func fetchStandings(standingsModel *models.StandingsModel) {
+	// Get league IDs from database
+	fmt.Println("Fetching Standings Data")
+	type StandingsResponse struct {
+		Response []struct {
+			League struct {
+				Standings [][]struct {
+					Rank        int    `json:"rank"`        // Added Rank field
+					Description string `json:"description"` // Added Description field
+					Team        struct {
+						ID int `json:"id"`
+					} `json:"team"`
+				} `json:"standings"`
+			} `json:"league"`
+		} `json:"response"`
+	}
+	leagues, err := leagueModel.ListLeagues(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// Initialize an HTTP client
+	httpClient := &http.Client{}
+
+	for _, league := range leagues {
+		leagueID := league.ID
+		url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/standings?season=2022&league=%d", leagueID)
+
+		req, err := http.NewRequestWithContext(context.Background(), "GET", url, nil)
+		if err != nil {
+			log.Printf("Error getting standings for league %d: %v", leagueID, err)
+			continue
+		}
+		req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
+		req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
+
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			log.Printf("Error getting standings for league %d: %v", leagueID, err)
+			continue
+		}
+
+		data, err := ioutil.ReadAll(resp.Body)
+		resp.Body.Close() // Close the body as soon as we're done reading it
+		if err != nil {
+			log.Printf("Error reading standings data for league %d: %v", leagueID, err)
+			continue
+		}
+
+		var response StandingsResponse
+		err = json.Unmarshal(data, &response)
+		if err != nil {
+			log.Printf("Error unmarshaling standings data for league %d: %v", leagueID, err)
+			continue
+		}
+
+		// Initialize standings for each team in the league
+		for _, teamStanding := range response.Response[0].League.Standings[0] {
+			input := models.CreateStandingsInput{
+				Rank:        teamStanding.Rank,
+				Description: teamStanding.Description,
+				League:      leagueID,
+				Team:        teamStanding.Team.ID,
+			}
+
+			_, err := standingsModel.CreateStandings(context.Background(), input)
+			if err != nil {
+				log.Printf("Error inserting standing for team %d: %v", teamStanding.Team.ID, err)
+			}
+		}
+	}
+	log.Println("Standings loaded")
+}
+
+//// Fetches season from API and saves them to the database
+//func fetchSeason(seasonModel *models.SeasonModel) {
+//	// Fetch seasonIDs from the database (this is just a placeholder)
+//	seasonIDs, err := seasonModel.ListSeasonIDs(context.Background())
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//
+//	seasonController := NewSeasonController(seasonModel)
+//	err = seasonController.InitializeSeasons(seasonIDs)
+//	if err != nil {
+//		log.Fatal(err)
+//	}
+//}
+
+// Fetches team seasons from API and saves them to the database
+//func fetchTeamSeasons(teamSeasonsModel *models.TeamSeasonsModel) {
+//	// Initialize the TeamSeasonsController
+//	teamSeasonsController := NewTeamSeasonsController(teamSeasonsModel)
+//
+//	// Initialize an HTTP client
+//	httpClient := &http.Client{}
+//
+//	// Fetch team IDs based on your requirements.
+//	teamIDs := fetchTeamIDs()
+//
+//	// Loop through each team ID to fetch and store data
+//	for _, teamID := range teamIDs {
+//		// Construct the API URL based on the current team ID
+//		url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/teams/seasons?team=%d", teamID)
+//
+//		// Create a new request
+//		req, err := http.NewRequestWithContext(context.Background(), "GET", url, nil)
+//		if err != nil {
+//			log.Printf("Error fetching team seasons for team %d: %v", teamID, err)
+//			continue
+//		}
+//		req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
+//		req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
+//
+//		// Make the request
+//		resp, err := httpClient.Do(req)
+//		if err != nil {
+//			log.Printf("Error fetching team seasons for team %d: %v", teamID, err)
+//			continue
+//		}
+//		defer resp.Body.Close()
+//
+//		// Read the response data
+//		data, err := ioutil.ReadAll(resp.Body)
+//		if err != nil {
+//			log.Printf("Error reading team seasons data for team %d: %v", teamID, err)
+//			continue
+//		}
+//
+//		// Define a structure to unmarshal the response data
+//		type ApiResponse struct {
+//			Response []int `json:"response"`
+//		}
+//
+//		var apiResponse ApiResponse
+//		err = json.Unmarshal(data, &apiResponse)
+//		if err != nil {
+//			log.Printf("Error unmarshaling team seasons data for team %d: %v", teamID, err)
+//			continue
+//		}
+//
+//		// Initialize team seasons for each season in the response
+//		for _, seasonID := range apiResponse.Response {
+//			input := models.CreateTeamSeasonInput{
+//				TeamSeasonID: teamID*1000 + seasonID, // Create a unique ID
+//				TeamID:       teamID,
+//				SeasonID:     seasonID,
+//			}
+//			_, err := teamSeasonsController.teamSeasonsModel.CreateTeamSeason(context.Background(), input)
+//			if err != nil {
+//				log.Printf("Error inserting team season for team %d and season %d: %v", teamID, seasonID, err)
+//			}
+//		}
+//	}
+//}

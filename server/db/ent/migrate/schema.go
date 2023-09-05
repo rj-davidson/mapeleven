@@ -145,7 +145,7 @@ var (
 	// StandingsColumns holds the columns for the "standings" table.
 	StandingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "rank", Type: field.TypeInt, Unique: true},
+		{Name: "rank", Type: field.TypeInt},
 		{Name: "description", Type: field.TypeString},
 		{Name: "league_standings", Type: field.TypeInt, Nullable: true},
 		{Name: "team_standings", Type: field.TypeInt, Nullable: true},
