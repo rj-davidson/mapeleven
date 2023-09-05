@@ -174,3 +174,21 @@ func (m *SeasonModel) GetLeagueSeason(ctx context.Context, leagueID int) ([]*ent
 	}
 	return seasons, nil
 }
+
+// ListSeasonIDs retrieves a list of all season IDs.
+func (m *SeasonModel) ListSeasonIDs(ctx context.Context) ([]int, error) {
+	seasons, err := m.client.Season.
+		Query().
+		Select(season.FieldID).
+		All(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	seasonIDs := make([]int, len(seasons))
+	for i, s := range seasons {
+		seasonIDs[i] = s.ID
+	}
+	return seasonIDs, nil
+}
