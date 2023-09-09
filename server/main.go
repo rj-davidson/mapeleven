@@ -155,8 +155,11 @@ func SetupRoutes(app *fiber.App, client *ent.Client) {
 	// Setup routes for stats
 	routes.SetupStatsRoutes(app)
 
-	// Setup Routes for stats
+	// Setup routes for stats
 	routes.SetupFixtureRoutes(app)
+
+	// Setup routes for search
+	routes.SetupSearchRoutes(app, client)
 
 	// Serve images from public directory
 	app.Static("/images", "./public/images")
