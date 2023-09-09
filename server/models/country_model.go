@@ -81,3 +81,11 @@ func (cm *CountryModel) GetCountryByName(name string) (*ent.Country, error) {
 		Where(country.NameEQ(name)).
 		First(context.Background())
 }
+
+// GetCountryByID retrieves a country record by country ID.
+func (cm *CountryModel) GetCountryByID(id int) (*ent.Country, error) {
+	return cm.client.Country.
+		Query().
+		Where(country.IDEQ(id)).
+		First(context.Background())
+}
