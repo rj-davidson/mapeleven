@@ -1,5 +1,4 @@
-import { CommonColors, createTheme } from '@mui/material/styles';
-import { common, orange } from '@mui/material/colors';
+import {CommonColors, createTheme} from '@mui/material/styles';
 
 interface CustomColors extends CommonColors {
     dark0: string;
@@ -21,7 +20,7 @@ interface CustomColors extends CommonColors {
 const customTheme = createTheme({
     palette: {
         primary: {
-            main: '#D08770',
+            main: '#3854FC',
         },
         secondary: {
             main: '#3B4252',
@@ -47,6 +46,9 @@ const customTheme = createTheme({
             indigo: '#B48EAD',
         } as CustomColors,
     },
+    typography: {
+        fontFamily: 'Poppins'
+    },
     components: {
         MuiCard: {
             styleOverrides: {
@@ -61,6 +63,21 @@ const customTheme = createTheme({
                     '&:hover': {
                         border: '3px solid var(--focus)',
                         backgroundColor: 'var(--dark2)',
+                    },
+                },
+            },
+        },
+        MuiAutocomplete: {
+            styleOverrides: {
+                root: {
+                    '& .MuiOutlinedInput-root': {
+                        backgroundColor: 'var(--dark2)',
+                        '& fieldset': {
+                            border: 'none', // Remove the border
+                        },
+                    },
+                    '& .MuiInputLabel-root.Mui-focused': {
+                        color: 'var(--light2)', // Change to your desired label color
                     },
                 },
             },

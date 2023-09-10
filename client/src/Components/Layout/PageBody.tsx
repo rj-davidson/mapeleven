@@ -1,11 +1,11 @@
 import * as React from 'react';
-import { Box } from '@mui/material';
+import {Box} from '@mui/material';
 
 type PageBodyProps = {
     children: React.ReactNode;
 };
 
-const PageBody: React.FC<PageBodyProps> = ({ children }) => {
+const PageBody: React.FC<PageBodyProps> = ({children}) => {
     return (
         <Box
             sx={{
@@ -17,7 +17,7 @@ const PageBody: React.FC<PageBodyProps> = ({ children }) => {
                 width: '100%',
                 maxWidth: 1440,
                 gap: 24,
-                paddingTop: { xs: '72px', sm: '96px' },
+                paddingTop: '108px',
             }}
         >
             {children}
