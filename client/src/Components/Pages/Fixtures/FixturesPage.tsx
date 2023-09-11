@@ -2,10 +2,13 @@ import { useState, useEffect } from 'react';
 import FixtureInfo from './FixtureInfo';
 import Layout from '../../Layout/Layout';
 import DaySwitcher from './DaySwitcher';
-import { Container, Grid } from '@mui/material';
+import { Container, Grid, Card, CardContent, Typography, Skeleton } from '@mui/material';
 import Fixture from './Fixture';
 import FixtureTeam from './FixtureTeam';
 import FixtureHeader from './FixtureHeader';
+import DisplayPlayers from '../Players/PlayerCardFixtures';
+import DisplayClubs from '../Clubs/ClubCardFixtures';
+import {Tile} from "../../Util/TileTS";
 
 export default function FixturesPage(): JSX.Element {
     const [liveFixtures, setLiveFixtures] = useState([]);
@@ -46,56 +49,188 @@ export default function FixturesPage(): JSX.Element {
     };
 
     return (
-        <div style={{ width: '100%', padding: '0', margin: '0' }}>
-            <DaySwitcher onDateChange={handleDateChange} />
+        loading ? (
             <Grid container spacing={2}>
-                {liveFixtures.slice(0, 4).map((fixture, index) => (
-                    <Grid item xs={12} md={12} lg={6} key={index}>
-                        <Fixture
-                            homeTeam={
-                                <FixtureTeam
-                                    logo={fixture.teams.home.logo}
-                                    name={fixture.teams.home.name}
-                                    score={fixture.goals.home}
-                                />
-                            }
-                            awayTeam={
-                                <FixtureTeam
-                                    logo={fixture.teams.away.logo}
-                                    name={fixture.teams.away.name}
-                                    score={fixture.goals.away}
-                                />
-                            }
-                            fixtureHeader={<FixtureHeader league={fixture.league.name} flag={fixture.league.flag} />}
-                            fixtureInfo={
-                                <FixtureInfo
-                                    live={true}
-                                    time={`${fixture.fixture.status.elapsed}'`}
-                                    kickoff={fixture.fixture.date.slice(11, 16)}
-                                    location={fixture.fixture.venue.city}
-                                />
-                            }
-                        />
+                <Grid item xs={12} sm={12} md={2} lg={2} width='100%'>
+                    <Skeleton variant="rectangular" height="2000px" width="100%" sx={{background:'gray', borderRadius:'12px'}}/>
+                </Grid>
+
+
+                    <Grid item xs={12} sm={12} md={8} lg={8} width='100%'>
+                        <Skeleton variant="rectangular" height="2000px" width="100%" sx={{background:'gray', borderRadius:'12px'}}/>
                     </Grid>
-                ))}
-                {dateFixtures.slice(0, 10).map((fixture, index) => (
-                    <Grid item xs={12} md={12} lg={6} key={index}>
-                        <Fixture
-                            homeTeam={<FixtureTeam logo={fixture.teams.home.logo} name={fixture.teams.home.name} />}
-                            awayTeam={<FixtureTeam logo={fixture.teams.away.logo} name={fixture.teams.away.name} />}
-                            fixtureHeader={<FixtureHeader league={fixture.league.name} flag={fixture.league.flag} />}
-                            fixtureInfo={
-                                <FixtureInfo
-                                    live={false}
-                                    time={fixture.fixture.date.slice(11, 16)}
-                                    kickoff={new Date(fixture.fixture.timestamp * 1000).toLocaleTimeString()}
-                                    location={fixture.fixture.venue.city}
-                                />
-                            }
-                        />
-                    </Grid>
-                ))}
+
+                <Grid item xs={12} sm={12} md={2} lg={2} width='100%'>
+                    <Skeleton variant="rectangular" height="2000px" width="100%" sx={{background:'gray', borderRadius:'12px'}}/>
+                </Grid>
             </Grid>
-        </div>
+
+        ) : (
+            <Grid container spacing={2} direction="row">
+                <Grid item xs={12} sm={12} md={12} lg={2} width='100%'>
+                    <Tile>
+                        <DisplayPlayers/>
+                    </Tile>
+                </Grid>
+
+                <Grid item xs={12} sm={12} md={12} lg={8} width='100%'>
+
+
+                    <Tile style={{flexDirection:"column"}}>
+                        <DaySwitcher onDateChange={handleDateChange} />
+                        <Grid container spacing={2}>
+
+                            {liveFixtures.slice(0, 4).map((fixture, index) => (
+                                <Grid item xs={12} md={4} lg={6} key={index}>
+                                    <Fixture
+                                        homeTeam={
+                                            <FixtureTeam
+                                                logo={fixture.teams.home.logo}
+                                                name={fixture.teams.home.name}
+                                                score={fixture.goals.home}
+                                            />
+                                        }
+                                        awayTeam={
+                                            <FixtureTeam
+                                                logo={fixture.teams.away.logo}
+                                                name={fixture.teams.away.name}
+                                                score={fixture.goals.away}
+                                            />
+                                        }
+                                        fixtureHeader={<FixtureHeader league={fixture.league.name} flag={fixture.league.flag} />}
+                                        fixtureInfo={
+                                            <FixtureInfo
+                                                live={true}
+                                                time={`${fixture.fixture.status.elapsed}'`}
+                                                kickoff={fixture.fixture.date.slice(11, 16)}
+                                                location={fixture.fixture.venue.city}
+                                            />
+                                        }
+                                    />
+                                </Grid>
+                            ))}
+                            {dateFixtures.slice(0, 10).map((fixture, index) => (
+                                <Grid item xs={12} md={4} lg={6} key={index}>
+                                    <Fixture
+                                        homeTeam={<FixtureTeam logo={fixture.teams.home.logo} name={fixture.teams.home.name} />}
+                                        awayTeam={<FixtureTeam logo={fixture.teams.away.logo} name={fixture.teams.away.name} />}
+                                        fixtureHeader={<FixtureHeader league={fixture.league.name} flag={fixture.league.flag} />}
+                                        fixtureInfo={
+                                            <FixtureInfo
+                                                live={false}
+                                                time={fixture.fixture.date.slice(11, 16)}
+                                                kickoff={new Date(fixture.fixture.timestamp * 1000).toLocaleTimeString()}
+                                                location={fixture.fixture.venue.city}
+                                            />
+                                        }
+                                    />
+                                </Grid>
+                            ))}
+                        </Grid>
+
+                    </Tile>
+                </Grid>
+
+                <Grid item xs={12} sm={12} md={12} lg={2} width='100%'>
+                    <Tile>
+                        <DisplayClubs/>
+                    </Tile>
+                </Grid>
+            </Grid>
+        )
     );
 }
+
+{/*
+
+{loading ? (
+                <Grid>
+
+                    <Skeleton variant="rectangular" height={600} width={200} /> // Replace with your Skeleton component
+                </Grid>
+
+            ) : (
+                <Card>
+                    <CardContent>
+                        <DisplayPlayers />
+                    </CardContent>
+                </Card>
+            )}
+
+            <Grid>
+
+            </Grid>
+            {/*<DisplayClubs/>*/}
+{/*setLoading && <SkeletonLoader cards = {8}/>*/}
+/**{loading ? (
+    <Skeleton variant="rectangular" height="100%" width="100%"/> // Replace with your Skeleton component
+) : (
+    <Card>
+        <DaySwitcher onDateChange={handleDateChange} />
+        <Grid container spacing={2}>
+
+            {liveFixtures.slice(0, 4).map((fixture, index) => (
+                <Grid item xs={12} md={4} lg={6} key={index}>
+                    <Fixture
+                        homeTeam={
+                            <FixtureTeam
+                                logo={fixture.teams.home.logo}
+                                name={fixture.teams.home.name}
+                                score={fixture.goals.home}
+                            />
+                        }
+                        awayTeam={
+                            <FixtureTeam
+                                logo={fixture.teams.away.logo}
+                                name={fixture.teams.away.name}
+                                score={fixture.goals.away}
+                            />
+                        }
+                        fixtureHeader={<FixtureHeader league={fixture.league.name} flag={fixture.league.flag} />}
+                        fixtureInfo={
+                            <FixtureInfo
+                                live={true}
+                                time={`${fixture.fixture.status.elapsed}'`}
+                                kickoff={fixture.fixture.date.slice(11, 16)}
+                                location={fixture.fixture.venue.city}
+                            />
+                        }
+                    />
+                </Grid>
+            ))}
+            {dateFixtures.slice(0, 10).map((fixture, index) => (
+                <Grid item xs={12} md={4} lg={6} key={index}>
+                    <Fixture
+                        homeTeam={<FixtureTeam logo={fixture.teams.home.logo} name={fixture.teams.home.name} />}
+                        awayTeam={<FixtureTeam logo={fixture.teams.away.logo} name={fixture.teams.away.name} />}
+                        fixtureHeader={<FixtureHeader league={fixture.league.name} flag={fixture.league.flag} />}
+                        fixtureInfo={
+                            <FixtureInfo
+                                live={false}
+                                time={fixture.fixture.date.slice(11, 16)}
+                                kickoff={new Date(fixture.fixture.timestamp * 1000).toLocaleTimeString()}
+                                location={fixture.fixture.venue.city}
+                            />
+                        }
+                    />
+                </Grid>
+            ))}
+        </Grid>
+
+    </Card>
+)}
+
+
+
+{loading ? (
+    <Skeleton variant="rectangular" height="100%" width="100%" /> // Replace with your Skeleton component
+) : (
+    <Card>
+        <CardContent>
+            <DisplayClubs />
+
+        </CardContent>
+    </Card>
+)}
+ **/
+
