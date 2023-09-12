@@ -44,17 +44,26 @@ interface LeagueStandings {
   standings: TeamStanding[];
 }
 
-interface TeamStanding {
-  Team: TeamModel;
-  League: LeagueModel;
-  Position: number;
-  PlayedGames: number;
+interface TeamRecord {
+  Played: number;
   Won: number;
   Draw: number;
   Lost: number;
-  Points: number;
   GoalsFor: number;
   GoalsAgainst: number;
-  GoalDifference: number;
+}
+
+interface TeamStanding {
+  Rank: number;
+  Description: string;
+  League: LeagueModel;
+  Team: TeamModel;
+  Points: number;
+  GoalsDiff: number;
+  Group: string;
   Form: string;
+  Status: string;
+  Home: TeamRecord;
+  Away: TeamRecord;
+  Overall: TeamRecord;
 }
