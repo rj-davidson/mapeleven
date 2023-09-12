@@ -26,11 +26,12 @@ func NewLeagueSerializer(client *ent.Client) *LeagueSerializer {
 
 func SerializeLeague(league *ent.League) (*APILeague, error) {
 	countryItem, err := SerializeCountry(league.Edges.Country)
-	APIStandings := make([]APIStanding, len(league.Edges.Standings))
+	APIStandings := make([]APIStanding, 0, len(league.Edges.Standings))
 	for _, standing := range league.Edges.Standings {
 		s := SerializeStanding(standing)
 		APIStandings = append(APIStandings, *s)
 	}
+
 	if err != nil {
 		return nil, fmt.Errorf("serialize country for league %s: %w", league.Name, err)
 	}
@@ -65,7 +66,7 @@ func (ls *LeagueSerializer) GetLeagues(ctx context.Context) ([]*APILeague, error
 	leagues, err := ls.client.League.Query().
 		WithCountry().
 		WithStandings(func(q *ent.StandingsQuery) {
-			q.WithLeague().WithTeam()
+			q.WithTeam()
 		}).
 		All(ctx)
 

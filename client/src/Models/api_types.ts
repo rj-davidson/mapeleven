@@ -68,7 +68,6 @@ interface APIRecord {
 interface APIStanding {
   Rank: number;
   Description: string;
-  League: APILeague;
   Team: APITeam;
   Points: number;
   GoalsDiff: number;
