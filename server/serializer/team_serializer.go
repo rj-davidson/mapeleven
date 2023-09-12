@@ -41,12 +41,18 @@ func SerializeTeam(team *ent.Team) *APITeam {
 		Badge:        team.Logo,
 		Founded:      team.Founded,
 		NationalTeam: team.National,
+		Country: APICountry{
+			Code: team.Edges.Country.Code,
+			Name: team.Edges.Country.Name,
+			Flag: team.Edges.Country.Flag,
+		},
 	}
 }
 
 func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string) (*APITeam, error) {
 	t, err := ts.client.Team.Query().
 		Where(team.Slug(slug)).
+		WithCountry().
 		First(ctx)
 
 	if err != nil {
