@@ -17,5 +17,5 @@ func generateRandomString(n int) string {
 }
 
 func Slugify(s string) string {
-	return slug.Make(s + "-" + generateRandomString(5))
+	return slug.Make(s + "-" + generateRandomString(8))
 }

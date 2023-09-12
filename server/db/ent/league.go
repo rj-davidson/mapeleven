@@ -44,9 +44,11 @@ type LeagueEdges struct {
 	Teams []*Team `json:"teams,omitempty"`
 	// Country holds the value of the country edge.
 	Country *Country `json:"country,omitempty"`
+	// Fixtures holds the value of the fixtures edge.
+	Fixtures []*Fixture `json:"fixtures,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // SeasonOrErr returns the Season value or an error if the edge
@@ -91,6 +93,15 @@ func (e LeagueEdges) CountryOrErr() (*Country, error) {
 		return e.Country, nil
 	}
 	return nil, &NotLoadedError{edge: "country"}
+}
+
+// FixturesOrErr returns the Fixtures value or an error if the edge
+// was not loaded in eager-loading.
+func (e LeagueEdges) FixturesOrErr() ([]*Fixture, error) {
+	if e.loadedTypes[4] {
+		return e.Fixtures, nil
+	}
+	return nil, &NotLoadedError{edge: "fixtures"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -196,6 +207,11 @@ func (l *League) QueryTeams() *TeamQuery {
 // QueryCountry queries the "country" edge of the League entity.
 func (l *League) QueryCountry() *CountryQuery {
 	return NewLeagueClient(l.config).QueryCountry(l)
+}
+
+// QueryFixtures queries the "fixtures" edge of the League entity.
+func (l *League) QueryFixtures() *FixtureQuery {
+	return NewLeagueClient(l.config).QueryFixtures(l)
 }
 
 // Update returns a builder for updating this League.

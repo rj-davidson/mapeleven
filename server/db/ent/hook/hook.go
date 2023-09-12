@@ -32,6 +32,18 @@ func (f CountryFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CountryMutation", m)
 }
 
+// The FixtureFunc type is an adapter to allow the use of ordinary
+// function as Fixture mutator.
+type FixtureFunc func(context.Context, *ent.FixtureMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FixtureFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FixtureMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FixtureMutation", m)
+}
+
 // The LeagueFunc type is an adapter to allow the use of ordinary
 // function as League mutator.
 type LeagueFunc func(context.Context, *ent.LeagueMutation) (ent.Value, error)

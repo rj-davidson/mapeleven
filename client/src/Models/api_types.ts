@@ -28,5 +28,33 @@ interface LeagueModel {
   name: string;
   type: LeagueType;
   logo: string;
-  country: CountryModel;
+  country?: CountryModel;
+  leagueStandings?: LeagueStandings;
+}
+
+interface TeamModel {
+  slug: string;
+  name: string;
+  logo: string;
+  country?: CountryModel;
+  league?: LeagueModel;
+}
+
+interface LeagueStandings {
+  standings: TeamStanding[];
+}
+
+interface TeamStanding {
+  Team: TeamModel;
+  League: LeagueModel;
+  Position: number;
+  PlayedGames: number;
+  Won: number;
+  Draw: number;
+  Lost: number;
+  Points: number;
+  GoalsFor: number;
+  GoalsAgainst: number;
+  GoalDifference: number;
+  Form: string;
 }

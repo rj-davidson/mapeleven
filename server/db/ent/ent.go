@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/playerteamseason"
@@ -83,6 +84,7 @@ func checkColumn(table, column string) error {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			birth.Table:            birth.ValidColumn,
 			country.Table:          country.ValidColumn,
+			fixture.Table:          fixture.ValidColumn,
 			league.Table:           league.ValidColumn,
 			player.Table:           player.ValidColumn,
 			playerteamseason.Table: playerteamseason.ValidColumn,

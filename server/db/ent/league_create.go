@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
@@ -119,6 +120,21 @@ func (lc *LeagueCreate) SetNillableCountryID(id *int) *LeagueCreate {
 // SetCountry sets the "country" edge to the Country entity.
 func (lc *LeagueCreate) SetCountry(c *Country) *LeagueCreate {
 	return lc.SetCountryID(c.ID)
+}
+
+// AddFixtureIDs adds the "fixtures" edge to the Fixture entity by IDs.
+func (lc *LeagueCreate) AddFixtureIDs(ids ...int) *LeagueCreate {
+	lc.mutation.AddFixtureIDs(ids...)
+	return lc
+}
+
+// AddFixtures adds the "fixtures" edges to the Fixture entity.
+func (lc *LeagueCreate) AddFixtures(f ...*Fixture) *LeagueCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return lc.AddFixtureIDs(ids...)
 }
 
 // Mutation returns the LeagueMutation object of the builder.
@@ -284,6 +300,22 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.country_leagues = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := lc.mutation.FixturesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   league.FixturesTable,
+			Columns: []string{league.FixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

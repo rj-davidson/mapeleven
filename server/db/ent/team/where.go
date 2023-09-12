@@ -509,6 +509,52 @@ func HasTeamSeasonsWith(preds ...predicate.TeamSeason) predicate.Team {
 	})
 }
 
+// HasHomeFixtures applies the HasEdge predicate on the "homeFixtures" edge.
+func HasHomeFixtures() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, HomeFixturesTable, HomeFixturesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasHomeFixturesWith applies the HasEdge predicate on the "homeFixtures" edge with a given conditions (other predicates).
+func HasHomeFixturesWith(preds ...predicate.Fixture) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newHomeFixturesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAwayFixtures applies the HasEdge predicate on the "awayFixtures" edge.
+func HasAwayFixtures() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AwayFixturesTable, AwayFixturesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAwayFixturesWith applies the HasEdge predicate on the "awayFixtures" edge with a given conditions (other predicates).
+func HasAwayFixturesWith(preds ...predicate.Fixture) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newAwayFixturesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Team) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {

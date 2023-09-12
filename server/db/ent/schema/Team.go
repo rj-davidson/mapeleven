@@ -35,5 +35,7 @@ func (Team) Edges() []ent.Edge {
 			Ref("teams"),
 		edge.To("players", Player.Type),
 		edge.To("teamSeasons", TeamSeason.Type),
+		edge.To("homeFixtures", Fixture.Type),
+		edge.To("awayFixtures", Fixture.Type),
 	}
 }

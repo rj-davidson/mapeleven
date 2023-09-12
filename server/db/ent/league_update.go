@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
@@ -117,6 +118,21 @@ func (lu *LeagueUpdate) SetCountry(c *Country) *LeagueUpdate {
 	return lu.SetCountryID(c.ID)
 }
 
+// AddFixtureIDs adds the "fixtures" edge to the Fixture entity by IDs.
+func (lu *LeagueUpdate) AddFixtureIDs(ids ...int) *LeagueUpdate {
+	lu.mutation.AddFixtureIDs(ids...)
+	return lu
+}
+
+// AddFixtures adds the "fixtures" edges to the Fixture entity.
+func (lu *LeagueUpdate) AddFixtures(f ...*Fixture) *LeagueUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return lu.AddFixtureIDs(ids...)
+}
+
 // Mutation returns the LeagueMutation object of the builder.
 func (lu *LeagueUpdate) Mutation() *LeagueMutation {
 	return lu.mutation
@@ -174,6 +190,27 @@ func (lu *LeagueUpdate) RemoveTeams(t ...*Team) *LeagueUpdate {
 func (lu *LeagueUpdate) ClearCountry() *LeagueUpdate {
 	lu.mutation.ClearCountry()
 	return lu
+}
+
+// ClearFixtures clears all "fixtures" edges to the Fixture entity.
+func (lu *LeagueUpdate) ClearFixtures() *LeagueUpdate {
+	lu.mutation.ClearFixtures()
+	return lu
+}
+
+// RemoveFixtureIDs removes the "fixtures" edge to Fixture entities by IDs.
+func (lu *LeagueUpdate) RemoveFixtureIDs(ids ...int) *LeagueUpdate {
+	lu.mutation.RemoveFixtureIDs(ids...)
+	return lu
+}
+
+// RemoveFixtures removes "fixtures" edges to Fixture entities.
+func (lu *LeagueUpdate) RemoveFixtures(f ...*Fixture) *LeagueUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return lu.RemoveFixtureIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -382,6 +419,51 @@ func (lu *LeagueUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if lu.mutation.FixturesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   league.FixturesTable,
+			Columns: []string{league.FixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := lu.mutation.RemovedFixturesIDs(); len(nodes) > 0 && !lu.mutation.FixturesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   league.FixturesTable,
+			Columns: []string{league.FixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := lu.mutation.FixturesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   league.FixturesTable,
+			Columns: []string{league.FixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, lu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{league.Label}
@@ -488,6 +570,21 @@ func (luo *LeagueUpdateOne) SetCountry(c *Country) *LeagueUpdateOne {
 	return luo.SetCountryID(c.ID)
 }
 
+// AddFixtureIDs adds the "fixtures" edge to the Fixture entity by IDs.
+func (luo *LeagueUpdateOne) AddFixtureIDs(ids ...int) *LeagueUpdateOne {
+	luo.mutation.AddFixtureIDs(ids...)
+	return luo
+}
+
+// AddFixtures adds the "fixtures" edges to the Fixture entity.
+func (luo *LeagueUpdateOne) AddFixtures(f ...*Fixture) *LeagueUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return luo.AddFixtureIDs(ids...)
+}
+
 // Mutation returns the LeagueMutation object of the builder.
 func (luo *LeagueUpdateOne) Mutation() *LeagueMutation {
 	return luo.mutation
@@ -545,6 +642,27 @@ func (luo *LeagueUpdateOne) RemoveTeams(t ...*Team) *LeagueUpdateOne {
 func (luo *LeagueUpdateOne) ClearCountry() *LeagueUpdateOne {
 	luo.mutation.ClearCountry()
 	return luo
+}
+
+// ClearFixtures clears all "fixtures" edges to the Fixture entity.
+func (luo *LeagueUpdateOne) ClearFixtures() *LeagueUpdateOne {
+	luo.mutation.ClearFixtures()
+	return luo
+}
+
+// RemoveFixtureIDs removes the "fixtures" edge to Fixture entities by IDs.
+func (luo *LeagueUpdateOne) RemoveFixtureIDs(ids ...int) *LeagueUpdateOne {
+	luo.mutation.RemoveFixtureIDs(ids...)
+	return luo
+}
+
+// RemoveFixtures removes "fixtures" edges to Fixture entities.
+func (luo *LeagueUpdateOne) RemoveFixtures(f ...*Fixture) *LeagueUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return luo.RemoveFixtureIDs(ids...)
 }
 
 // Where appends a list predicates to the LeagueUpdate builder.
@@ -776,6 +894,51 @@ func (luo *LeagueUpdateOne) sqlSave(ctx context.Context) (_node *League, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if luo.mutation.FixturesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   league.FixturesTable,
+			Columns: []string{league.FixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := luo.mutation.RemovedFixturesIDs(); len(nodes) > 0 && !luo.mutation.FixturesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   league.FixturesTable,
+			Columns: []string{league.FixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := luo.mutation.FixturesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   league.FixturesTable,
+			Columns: []string{league.FixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

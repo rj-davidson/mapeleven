@@ -6,7 +6,9 @@ import (
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/schema"
 	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
+	"time"
 )
 
 // The init function reads all schema descriptors with runtime code
@@ -25,6 +27,30 @@ func init() {
 	seasonDescCurrent := seasonFields[3].Descriptor()
 	// season.DefaultCurrent holds the default value on creation for the current field.
 	season.DefaultCurrent = seasonDescCurrent.Default.(bool)
+	standingsFields := schema.Standings{}.Fields()
+	_ = standingsFields
+	// standingsDescPoints is the schema descriptor for points field.
+	standingsDescPoints := standingsFields[1].Descriptor()
+	// standings.DefaultPoints holds the default value on creation for the points field.
+	standings.DefaultPoints = standingsDescPoints.Default.(int)
+	// standingsDescGoalsDiff is the schema descriptor for goalsDiff field.
+	standingsDescGoalsDiff := standingsFields[2].Descriptor()
+	// standings.DefaultGoalsDiff holds the default value on creation for the goalsDiff field.
+	standings.DefaultGoalsDiff = standingsDescGoalsDiff.Default.(int)
+	// standingsDescGroup is the schema descriptor for group field.
+	standingsDescGroup := standingsFields[3].Descriptor()
+	// standings.DefaultGroup holds the default value on creation for the group field.
+	standings.DefaultGroup = standingsDescGroup.Default.(string)
+	// standingsDescForm is the schema descriptor for form field.
+	standingsDescForm := standingsFields[4].Descriptor()
+	// standings.DefaultForm holds the default value on creation for the form field.
+	standings.DefaultForm = standingsDescForm.Default.(string)
+	// standingsDescLastUpdated is the schema descriptor for LastUpdated field.
+	standingsDescLastUpdated := standingsFields[25].Descriptor()
+	// standings.DefaultLastUpdated holds the default value on creation for the LastUpdated field.
+	standings.DefaultLastUpdated = standingsDescLastUpdated.Default.(func() time.Time)
+	// standings.UpdateDefaultLastUpdated holds the default value on update for the LastUpdated field.
+	standings.UpdateDefaultLastUpdated = standingsDescLastUpdated.UpdateDefault.(func() time.Time)
 	teamFields := schema.Team{}.Fields()
 	_ = teamFields
 	// teamDescCode is the schema descriptor for code field.

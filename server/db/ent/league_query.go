@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
@@ -30,6 +31,7 @@ type LeagueQuery struct {
 	withStandings *StandingsQuery
 	withTeams     *TeamQuery
 	withCountry   *CountryQuery
+	withFixtures  *FixtureQuery
 	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -148,6 +150,28 @@ func (lq *LeagueQuery) QueryCountry() *CountryQuery {
 			sqlgraph.From(league.Table, league.FieldID, selector),
 			sqlgraph.To(country.Table, country.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, league.CountryTable, league.CountryColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFixtures chains the current query on the "fixtures" edge.
+func (lq *LeagueQuery) QueryFixtures() *FixtureQuery {
+	query := (&FixtureClient{config: lq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := lq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := lq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(league.Table, league.FieldID, selector),
+			sqlgraph.To(fixture.Table, fixture.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, league.FixturesTable, league.FixturesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
 		return fromU, nil
@@ -351,6 +375,7 @@ func (lq *LeagueQuery) Clone() *LeagueQuery {
 		withStandings: lq.withStandings.Clone(),
 		withTeams:     lq.withTeams.Clone(),
 		withCountry:   lq.withCountry.Clone(),
+		withFixtures:  lq.withFixtures.Clone(),
 		// clone intermediate query.
 		sql:  lq.sql.Clone(),
 		path: lq.path,
@@ -398,6 +423,17 @@ func (lq *LeagueQuery) WithCountry(opts ...func(*CountryQuery)) *LeagueQuery {
 		opt(query)
 	}
 	lq.withCountry = query
+	return lq
+}
+
+// WithFixtures tells the query-builder to eager-load the nodes that are connected to
+// the "fixtures" edge. The optional arguments are used to configure the query builder of the edge.
+func (lq *LeagueQuery) WithFixtures(opts ...func(*FixtureQuery)) *LeagueQuery {
+	query := (&FixtureClient{config: lq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	lq.withFixtures = query
 	return lq
 }
 
@@ -480,11 +516,12 @@ func (lq *LeagueQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Leagu
 		nodes       = []*League{}
 		withFKs     = lq.withFKs
 		_spec       = lq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			lq.withSeason != nil,
 			lq.withStandings != nil,
 			lq.withTeams != nil,
 			lq.withCountry != nil,
+			lq.withFixtures != nil,
 		}
 	)
 	if lq.withSeason != nil || lq.withCountry != nil {
@@ -534,6 +571,13 @@ func (lq *LeagueQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Leagu
 	if query := lq.withCountry; query != nil {
 		if err := lq.loadCountry(ctx, query, nodes, nil,
 			func(n *League, e *Country) { n.Edges.Country = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := lq.withFixtures; query != nil {
+		if err := lq.loadFixtures(ctx, query, nodes,
+			func(n *League) { n.Edges.Fixtures = []*Fixture{} },
+			func(n *League, e *Fixture) { n.Edges.Fixtures = append(n.Edges.Fixtures, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -693,6 +737,37 @@ func (lq *LeagueQuery) loadCountry(ctx context.Context, query *CountryQuery, nod
 		for i := range nodes {
 			assign(nodes[i], n)
 		}
+	}
+	return nil
+}
+func (lq *LeagueQuery) loadFixtures(ctx context.Context, query *FixtureQuery, nodes []*League, init func(*League), assign func(*League, *Fixture)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*League)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.Fixture(func(s *sql.Selector) {
+		s.Where(sql.InValues(league.FixturesColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.league_fixtures
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "league_fixtures" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "league_fixtures" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
 	}
 	return nil
 }

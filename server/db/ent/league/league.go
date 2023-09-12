@@ -30,6 +30,8 @@ const (
 	EdgeTeams = "teams"
 	// EdgeCountry holds the string denoting the country edge name in mutations.
 	EdgeCountry = "country"
+	// EdgeFixtures holds the string denoting the fixtures edge name in mutations.
+	EdgeFixtures = "fixtures"
 	// Table holds the table name of the league in the database.
 	Table = "leagues"
 	// SeasonTable is the table that holds the season relation/edge.
@@ -58,6 +60,13 @@ const (
 	CountryInverseTable = "countries"
 	// CountryColumn is the table column denoting the country relation/edge.
 	CountryColumn = "country_leagues"
+	// FixturesTable is the table that holds the fixtures relation/edge.
+	FixturesTable = "fixtures"
+	// FixturesInverseTable is the table name for the Fixture entity.
+	// It exists in this package in order to avoid circular dependency with the "fixture" package.
+	FixturesInverseTable = "fixtures"
+	// FixturesColumn is the table column denoting the fixtures relation/edge.
+	FixturesColumn = "league_fixtures"
 )
 
 // Columns holds all SQL columns for league fields.
@@ -191,6 +200,20 @@ func ByCountryField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newCountryStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByFixturesCount orders the results by fixtures count.
+func ByFixturesCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFixturesStep(), opts...)
+	}
+}
+
+// ByFixtures orders the results by fixtures terms.
+func ByFixtures(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFixturesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newSeasonStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -217,5 +240,12 @@ func newCountryStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CountryInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
+	)
+}
+func newFixturesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FixturesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FixturesTable, FixturesColumn),
 	)
 }

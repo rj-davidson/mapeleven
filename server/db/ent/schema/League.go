@@ -34,5 +34,6 @@ func (League) Edges() []ent.Edge {
 		edge.From("country", Country.Type).
 			Ref("leagues").
 			Unique(),
+		edge.To("fixtures", Fixture.Type),
 	}
 }
