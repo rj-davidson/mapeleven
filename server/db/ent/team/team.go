@@ -34,6 +34,10 @@ const (
 	EdgePlayers = "players"
 	// EdgeTeamSeasons holds the string denoting the teamseasons edge name in mutations.
 	EdgeTeamSeasons = "teamSeasons"
+	// EdgeHomeFixtures holds the string denoting the homefixtures edge name in mutations.
+	EdgeHomeFixtures = "homeFixtures"
+	// EdgeAwayFixtures holds the string denoting the awayfixtures edge name in mutations.
+	EdgeAwayFixtures = "awayFixtures"
 	// Table holds the table name of the team in the database.
 	Table = "teams"
 	// StandingsTable is the table that holds the standings relation/edge.
@@ -67,6 +71,20 @@ const (
 	TeamSeasonsInverseTable = "team_seasons"
 	// TeamSeasonsColumn is the table column denoting the teamSeasons relation/edge.
 	TeamSeasonsColumn = "team_team_seasons"
+	// HomeFixturesTable is the table that holds the homeFixtures relation/edge.
+	HomeFixturesTable = "fixtures"
+	// HomeFixturesInverseTable is the table name for the Fixture entity.
+	// It exists in this package in order to avoid circular dependency with the "fixture" package.
+	HomeFixturesInverseTable = "fixtures"
+	// HomeFixturesColumn is the table column denoting the homeFixtures relation/edge.
+	HomeFixturesColumn = "team_home_fixtures"
+	// AwayFixturesTable is the table that holds the awayFixtures relation/edge.
+	AwayFixturesTable = "fixtures"
+	// AwayFixturesInverseTable is the table name for the Fixture entity.
+	// It exists in this package in order to avoid circular dependency with the "fixture" package.
+	AwayFixturesInverseTable = "fixtures"
+	// AwayFixturesColumn is the table column denoting the awayFixtures relation/edge.
+	AwayFixturesColumn = "team_away_fixtures"
 )
 
 // Columns holds all SQL columns for team fields.
@@ -215,6 +233,34 @@ func ByTeamSeasons(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 		sqlgraph.OrderByNeighborTerms(s, newTeamSeasonsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByHomeFixturesCount orders the results by homeFixtures count.
+func ByHomeFixturesCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newHomeFixturesStep(), opts...)
+	}
+}
+
+// ByHomeFixtures orders the results by homeFixtures terms.
+func ByHomeFixtures(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newHomeFixturesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByAwayFixturesCount orders the results by awayFixtures count.
+func ByAwayFixturesCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAwayFixturesStep(), opts...)
+	}
+}
+
+// ByAwayFixtures orders the results by awayFixtures terms.
+func ByAwayFixtures(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAwayFixturesStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newStandingsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -248,5 +294,19 @@ func newTeamSeasonsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamSeasonsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TeamSeasonsTable, TeamSeasonsColumn),
+	)
+}
+func newHomeFixturesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(HomeFixturesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, HomeFixturesTable, HomeFixturesColumn),
+	)
+}
+func newAwayFixturesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AwayFixturesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AwayFixturesTable, AwayFixturesColumn),
 	)
 }

@@ -23,8 +23,8 @@ type StandingsQuery struct {
 	order      []standings.Order
 	inters     []Interceptor
 	predicates []predicate.Standings
-	withLeague *LeagueQuery
 	withTeam   *TeamQuery
+	withLeague *LeagueQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -62,28 +62,6 @@ func (sq *StandingsQuery) Order(o ...standings.Order) *StandingsQuery {
 	return sq
 }
 
-// QueryLeague chains the current query on the "league" edge.
-func (sq *StandingsQuery) QueryLeague() *LeagueQuery {
-	query := (&LeagueClient{config: sq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := sq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(standings.Table, standings.FieldID, selector),
-			sqlgraph.To(league.Table, league.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, standings.LeagueTable, standings.LeagueColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryTeam chains the current query on the "team" edge.
 func (sq *StandingsQuery) QueryTeam() *TeamQuery {
 	query := (&TeamClient{config: sq.config}).Query()
@@ -99,6 +77,28 @@ func (sq *StandingsQuery) QueryTeam() *TeamQuery {
 			sqlgraph.From(standings.Table, standings.FieldID, selector),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, standings.TeamTable, standings.TeamColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryLeague chains the current query on the "league" edge.
+func (sq *StandingsQuery) QueryLeague() *LeagueQuery {
+	query := (&LeagueClient{config: sq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := sq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := sq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(standings.Table, standings.FieldID, selector),
+			sqlgraph.To(league.Table, league.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, standings.LeagueTable, standings.LeagueColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -298,23 +298,12 @@ func (sq *StandingsQuery) Clone() *StandingsQuery {
 		order:      append([]standings.Order{}, sq.order...),
 		inters:     append([]Interceptor{}, sq.inters...),
 		predicates: append([]predicate.Standings{}, sq.predicates...),
-		withLeague: sq.withLeague.Clone(),
 		withTeam:   sq.withTeam.Clone(),
+		withLeague: sq.withLeague.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
 	}
-}
-
-// WithLeague tells the query-builder to eager-load the nodes that are connected to
-// the "league" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *StandingsQuery) WithLeague(opts ...func(*LeagueQuery)) *StandingsQuery {
-	query := (&LeagueClient{config: sq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	sq.withLeague = query
-	return sq
 }
 
 // WithTeam tells the query-builder to eager-load the nodes that are connected to
@@ -325,6 +314,17 @@ func (sq *StandingsQuery) WithTeam(opts ...func(*TeamQuery)) *StandingsQuery {
 		opt(query)
 	}
 	sq.withTeam = query
+	return sq
+}
+
+// WithLeague tells the query-builder to eager-load the nodes that are connected to
+// the "league" edge. The optional arguments are used to configure the query builder of the edge.
+func (sq *StandingsQuery) WithLeague(opts ...func(*LeagueQuery)) *StandingsQuery {
+	query := (&LeagueClient{config: sq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	sq.withLeague = query
 	return sq
 }
 
@@ -408,11 +408,11 @@ func (sq *StandingsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*St
 		withFKs     = sq.withFKs
 		_spec       = sq.querySpec()
 		loadedTypes = [2]bool{
-			sq.withLeague != nil,
 			sq.withTeam != nil,
+			sq.withLeague != nil,
 		}
 	)
-	if sq.withLeague != nil || sq.withTeam != nil {
+	if sq.withTeam != nil || sq.withLeague != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -436,53 +436,21 @@ func (sq *StandingsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*St
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := sq.withLeague; query != nil {
-		if err := sq.loadLeague(ctx, query, nodes, nil,
-			func(n *Standings, e *League) { n.Edges.League = e }); err != nil {
-			return nil, err
-		}
-	}
 	if query := sq.withTeam; query != nil {
 		if err := sq.loadTeam(ctx, query, nodes, nil,
 			func(n *Standings, e *Team) { n.Edges.Team = e }); err != nil {
 			return nil, err
 		}
 	}
+	if query := sq.withLeague; query != nil {
+		if err := sq.loadLeague(ctx, query, nodes, nil,
+			func(n *Standings, e *League) { n.Edges.League = e }); err != nil {
+			return nil, err
+		}
+	}
 	return nodes, nil
 }
 
-func (sq *StandingsQuery) loadLeague(ctx context.Context, query *LeagueQuery, nodes []*Standings, init func(*Standings), assign func(*Standings, *League)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Standings)
-	for i := range nodes {
-		if nodes[i].league_standings == nil {
-			continue
-		}
-		fk := *nodes[i].league_standings
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(league.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "league_standings" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
 func (sq *StandingsQuery) loadTeam(ctx context.Context, query *TeamQuery, nodes []*Standings, init func(*Standings), assign func(*Standings, *Team)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*Standings)
@@ -508,6 +476,38 @@ func (sq *StandingsQuery) loadTeam(ctx context.Context, query *TeamQuery, nodes 
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "team_standings" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (sq *StandingsQuery) loadLeague(ctx context.Context, query *LeagueQuery, nodes []*Standings, init func(*Standings), assign func(*Standings, *League)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Standings)
+	for i := range nodes {
+		if nodes[i].league_standings == nil {
+			continue
+		}
+		fk := *nodes[i].league_standings
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(league.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "league_standings" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

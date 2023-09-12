@@ -43,6 +43,49 @@ var (
 		Columns:    CountriesColumns,
 		PrimaryKey: []*schema.Column{CountriesColumns[0]},
 	}
+	// FixturesColumns holds the columns for the "fixtures" table.
+	FixturesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "slug", Type: field.TypeString, Unique: true},
+		{Name: "api_football_id", Type: field.TypeInt, Unique: true},
+		{Name: "referee", Type: field.TypeString, Nullable: true},
+		{Name: "timezone", Type: field.TypeString, Nullable: true},
+		{Name: "date", Type: field.TypeTime},
+		{Name: "elapsed", Type: field.TypeInt, Nullable: true},
+		{Name: "round", Type: field.TypeInt, Nullable: true},
+		{Name: "status", Type: field.TypeString},
+		{Name: "home_team_score", Type: field.TypeInt, Nullable: true},
+		{Name: "away_team_score", Type: field.TypeInt, Nullable: true},
+		{Name: "league_fixtures", Type: field.TypeInt, Nullable: true},
+		{Name: "team_home_fixtures", Type: field.TypeInt, Nullable: true},
+		{Name: "team_away_fixtures", Type: field.TypeInt, Nullable: true},
+	}
+	// FixturesTable holds the schema information for the "fixtures" table.
+	FixturesTable = &schema.Table{
+		Name:       "fixtures",
+		Columns:    FixturesColumns,
+		PrimaryKey: []*schema.Column{FixturesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "fixtures_leagues_fixtures",
+				Columns:    []*schema.Column{FixturesColumns[11]},
+				RefColumns: []*schema.Column{LeaguesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "fixtures_teams_homeFixtures",
+				Columns:    []*schema.Column{FixturesColumns[12]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "fixtures_teams_awayFixtures",
+				Columns:    []*schema.Column{FixturesColumns[13]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// LeaguesColumns holds the columns for the "leagues" table.
 	LeaguesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -146,9 +189,33 @@ var (
 	StandingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "rank", Type: field.TypeInt},
-		{Name: "description", Type: field.TypeString},
-		{Name: "league_standings", Type: field.TypeInt, Nullable: true},
-		{Name: "team_standings", Type: field.TypeInt, Nullable: true},
+		{Name: "points", Type: field.TypeInt, Default: 0},
+		{Name: "goals_diff", Type: field.TypeInt, Default: 0},
+		{Name: "group", Type: field.TypeString, Default: ""},
+		{Name: "form", Type: field.TypeString, Default: ""},
+		{Name: "status", Type: field.TypeString, Nullable: true},
+		{Name: "description", Type: field.TypeString, Nullable: true},
+		{Name: "all_played", Type: field.TypeInt},
+		{Name: "all_win", Type: field.TypeInt},
+		{Name: "all_draw", Type: field.TypeInt},
+		{Name: "all_lose", Type: field.TypeInt},
+		{Name: "all_goals_for", Type: field.TypeInt},
+		{Name: "all_goals_against", Type: field.TypeInt},
+		{Name: "home_played", Type: field.TypeInt},
+		{Name: "home_win", Type: field.TypeInt},
+		{Name: "home_draw", Type: field.TypeInt},
+		{Name: "home_lose", Type: field.TypeInt},
+		{Name: "home_goals_for", Type: field.TypeInt},
+		{Name: "home_goals_against", Type: field.TypeInt},
+		{Name: "away_played", Type: field.TypeInt},
+		{Name: "away_win", Type: field.TypeInt},
+		{Name: "away_draw", Type: field.TypeInt},
+		{Name: "away_lose", Type: field.TypeInt},
+		{Name: "away_goals_for", Type: field.TypeInt},
+		{Name: "away_goals_against", Type: field.TypeInt},
+		{Name: "last_updated", Type: field.TypeTime},
+		{Name: "league_standings", Type: field.TypeInt},
+		{Name: "team_standings", Type: field.TypeInt},
 	}
 	// StandingsTable holds the schema information for the "standings" table.
 	StandingsTable = &schema.Table{
@@ -158,15 +225,15 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "standings_leagues_standings",
-				Columns:    []*schema.Column{StandingsColumns[3]},
+				Columns:    []*schema.Column{StandingsColumns[27]},
 				RefColumns: []*schema.Column{LeaguesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "standings_teams_standings",
-				Columns:    []*schema.Column{StandingsColumns[4]},
+				Columns:    []*schema.Column{StandingsColumns[28]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -276,6 +343,7 @@ var (
 	Tables = []*schema.Table{
 		BirthsTable,
 		CountriesTable,
+		FixturesTable,
 		LeaguesTable,
 		PlayersTable,
 		PlayerTeamSeasonsTable,
@@ -290,6 +358,9 @@ var (
 
 func init() {
 	BirthsTable.ForeignKeys[0].RefTable = PlayersTable
+	FixturesTable.ForeignKeys[0].RefTable = LeaguesTable
+	FixturesTable.ForeignKeys[1].RefTable = TeamsTable
+	FixturesTable.ForeignKeys[2].RefTable = TeamsTable
 	LeaguesTable.ForeignKeys[0].RefTable = CountriesTable
 	LeaguesTable.ForeignKeys[1].RefTable = SeasonsTable
 	PlayersTable.ForeignKeys[0].RefTable = CountriesTable

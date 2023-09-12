@@ -9,6 +9,7 @@ import (
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -27,29 +28,210 @@ func (sc *StandingsCreate) SetRank(i int) *StandingsCreate {
 	return sc
 }
 
+// SetPoints sets the "points" field.
+func (sc *StandingsCreate) SetPoints(i int) *StandingsCreate {
+	sc.mutation.SetPoints(i)
+	return sc
+}
+
+// SetNillablePoints sets the "points" field if the given value is not nil.
+func (sc *StandingsCreate) SetNillablePoints(i *int) *StandingsCreate {
+	if i != nil {
+		sc.SetPoints(*i)
+	}
+	return sc
+}
+
+// SetGoalsDiff sets the "goalsDiff" field.
+func (sc *StandingsCreate) SetGoalsDiff(i int) *StandingsCreate {
+	sc.mutation.SetGoalsDiff(i)
+	return sc
+}
+
+// SetNillableGoalsDiff sets the "goalsDiff" field if the given value is not nil.
+func (sc *StandingsCreate) SetNillableGoalsDiff(i *int) *StandingsCreate {
+	if i != nil {
+		sc.SetGoalsDiff(*i)
+	}
+	return sc
+}
+
+// SetGroup sets the "group" field.
+func (sc *StandingsCreate) SetGroup(s string) *StandingsCreate {
+	sc.mutation.SetGroup(s)
+	return sc
+}
+
+// SetNillableGroup sets the "group" field if the given value is not nil.
+func (sc *StandingsCreate) SetNillableGroup(s *string) *StandingsCreate {
+	if s != nil {
+		sc.SetGroup(*s)
+	}
+	return sc
+}
+
+// SetForm sets the "form" field.
+func (sc *StandingsCreate) SetForm(s string) *StandingsCreate {
+	sc.mutation.SetForm(s)
+	return sc
+}
+
+// SetNillableForm sets the "form" field if the given value is not nil.
+func (sc *StandingsCreate) SetNillableForm(s *string) *StandingsCreate {
+	if s != nil {
+		sc.SetForm(*s)
+	}
+	return sc
+}
+
+// SetStatus sets the "status" field.
+func (sc *StandingsCreate) SetStatus(s string) *StandingsCreate {
+	sc.mutation.SetStatus(s)
+	return sc
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (sc *StandingsCreate) SetNillableStatus(s *string) *StandingsCreate {
+	if s != nil {
+		sc.SetStatus(*s)
+	}
+	return sc
+}
+
 // SetDescription sets the "description" field.
 func (sc *StandingsCreate) SetDescription(s string) *StandingsCreate {
 	sc.mutation.SetDescription(s)
 	return sc
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (sc *StandingsCreate) SetLeagueID(id int) *StandingsCreate {
-	sc.mutation.SetLeagueID(id)
-	return sc
-}
-
-// SetNillableLeagueID sets the "league" edge to the League entity by ID if the given value is not nil.
-func (sc *StandingsCreate) SetNillableLeagueID(id *int) *StandingsCreate {
-	if id != nil {
-		sc = sc.SetLeagueID(*id)
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (sc *StandingsCreate) SetNillableDescription(s *string) *StandingsCreate {
+	if s != nil {
+		sc.SetDescription(*s)
 	}
 	return sc
 }
 
-// SetLeague sets the "league" edge to the League entity.
-func (sc *StandingsCreate) SetLeague(l *League) *StandingsCreate {
-	return sc.SetLeagueID(l.ID)
+// SetAllPlayed sets the "allPlayed" field.
+func (sc *StandingsCreate) SetAllPlayed(i int) *StandingsCreate {
+	sc.mutation.SetAllPlayed(i)
+	return sc
+}
+
+// SetAllWin sets the "allWin" field.
+func (sc *StandingsCreate) SetAllWin(i int) *StandingsCreate {
+	sc.mutation.SetAllWin(i)
+	return sc
+}
+
+// SetAllDraw sets the "allDraw" field.
+func (sc *StandingsCreate) SetAllDraw(i int) *StandingsCreate {
+	sc.mutation.SetAllDraw(i)
+	return sc
+}
+
+// SetAllLose sets the "allLose" field.
+func (sc *StandingsCreate) SetAllLose(i int) *StandingsCreate {
+	sc.mutation.SetAllLose(i)
+	return sc
+}
+
+// SetAllGoalsFor sets the "allGoalsFor" field.
+func (sc *StandingsCreate) SetAllGoalsFor(i int) *StandingsCreate {
+	sc.mutation.SetAllGoalsFor(i)
+	return sc
+}
+
+// SetAllGoalsAgainst sets the "allGoalsAgainst" field.
+func (sc *StandingsCreate) SetAllGoalsAgainst(i int) *StandingsCreate {
+	sc.mutation.SetAllGoalsAgainst(i)
+	return sc
+}
+
+// SetHomePlayed sets the "homePlayed" field.
+func (sc *StandingsCreate) SetHomePlayed(i int) *StandingsCreate {
+	sc.mutation.SetHomePlayed(i)
+	return sc
+}
+
+// SetHomeWin sets the "homeWin" field.
+func (sc *StandingsCreate) SetHomeWin(i int) *StandingsCreate {
+	sc.mutation.SetHomeWin(i)
+	return sc
+}
+
+// SetHomeDraw sets the "homeDraw" field.
+func (sc *StandingsCreate) SetHomeDraw(i int) *StandingsCreate {
+	sc.mutation.SetHomeDraw(i)
+	return sc
+}
+
+// SetHomeLose sets the "homeLose" field.
+func (sc *StandingsCreate) SetHomeLose(i int) *StandingsCreate {
+	sc.mutation.SetHomeLose(i)
+	return sc
+}
+
+// SetHomeGoalsFor sets the "homeGoalsFor" field.
+func (sc *StandingsCreate) SetHomeGoalsFor(i int) *StandingsCreate {
+	sc.mutation.SetHomeGoalsFor(i)
+	return sc
+}
+
+// SetHomeGoalsAgainst sets the "homeGoalsAgainst" field.
+func (sc *StandingsCreate) SetHomeGoalsAgainst(i int) *StandingsCreate {
+	sc.mutation.SetHomeGoalsAgainst(i)
+	return sc
+}
+
+// SetAwayPlayed sets the "awayPlayed" field.
+func (sc *StandingsCreate) SetAwayPlayed(i int) *StandingsCreate {
+	sc.mutation.SetAwayPlayed(i)
+	return sc
+}
+
+// SetAwayWin sets the "awayWin" field.
+func (sc *StandingsCreate) SetAwayWin(i int) *StandingsCreate {
+	sc.mutation.SetAwayWin(i)
+	return sc
+}
+
+// SetAwayDraw sets the "awayDraw" field.
+func (sc *StandingsCreate) SetAwayDraw(i int) *StandingsCreate {
+	sc.mutation.SetAwayDraw(i)
+	return sc
+}
+
+// SetAwayLose sets the "awayLose" field.
+func (sc *StandingsCreate) SetAwayLose(i int) *StandingsCreate {
+	sc.mutation.SetAwayLose(i)
+	return sc
+}
+
+// SetAwayGoalsFor sets the "awayGoalsFor" field.
+func (sc *StandingsCreate) SetAwayGoalsFor(i int) *StandingsCreate {
+	sc.mutation.SetAwayGoalsFor(i)
+	return sc
+}
+
+// SetAwayGoalsAgainst sets the "awayGoalsAgainst" field.
+func (sc *StandingsCreate) SetAwayGoalsAgainst(i int) *StandingsCreate {
+	sc.mutation.SetAwayGoalsAgainst(i)
+	return sc
+}
+
+// SetLastUpdated sets the "LastUpdated" field.
+func (sc *StandingsCreate) SetLastUpdated(t time.Time) *StandingsCreate {
+	sc.mutation.SetLastUpdated(t)
+	return sc
+}
+
+// SetNillableLastUpdated sets the "LastUpdated" field if the given value is not nil.
+func (sc *StandingsCreate) SetNillableLastUpdated(t *time.Time) *StandingsCreate {
+	if t != nil {
+		sc.SetLastUpdated(*t)
+	}
+	return sc
 }
 
 // SetTeamID sets the "team" edge to the Team entity by ID.
@@ -58,17 +240,20 @@ func (sc *StandingsCreate) SetTeamID(id int) *StandingsCreate {
 	return sc
 }
 
-// SetNillableTeamID sets the "team" edge to the Team entity by ID if the given value is not nil.
-func (sc *StandingsCreate) SetNillableTeamID(id *int) *StandingsCreate {
-	if id != nil {
-		sc = sc.SetTeamID(*id)
-	}
-	return sc
-}
-
 // SetTeam sets the "team" edge to the Team entity.
 func (sc *StandingsCreate) SetTeam(t *Team) *StandingsCreate {
 	return sc.SetTeamID(t.ID)
+}
+
+// SetLeagueID sets the "league" edge to the League entity by ID.
+func (sc *StandingsCreate) SetLeagueID(id int) *StandingsCreate {
+	sc.mutation.SetLeagueID(id)
+	return sc
+}
+
+// SetLeague sets the "league" edge to the League entity.
+func (sc *StandingsCreate) SetLeague(l *League) *StandingsCreate {
+	return sc.SetLeagueID(l.ID)
 }
 
 // Mutation returns the StandingsMutation object of the builder.
@@ -78,6 +263,7 @@ func (sc *StandingsCreate) Mutation() *StandingsMutation {
 
 // Save creates the Standings in the database.
 func (sc *StandingsCreate) Save(ctx context.Context) (*Standings, error) {
+	sc.defaults()
 	return withHooks[*Standings, StandingsMutation](ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
@@ -103,13 +289,109 @@ func (sc *StandingsCreate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (sc *StandingsCreate) defaults() {
+	if _, ok := sc.mutation.Points(); !ok {
+		v := standings.DefaultPoints
+		sc.mutation.SetPoints(v)
+	}
+	if _, ok := sc.mutation.GoalsDiff(); !ok {
+		v := standings.DefaultGoalsDiff
+		sc.mutation.SetGoalsDiff(v)
+	}
+	if _, ok := sc.mutation.Group(); !ok {
+		v := standings.DefaultGroup
+		sc.mutation.SetGroup(v)
+	}
+	if _, ok := sc.mutation.Form(); !ok {
+		v := standings.DefaultForm
+		sc.mutation.SetForm(v)
+	}
+	if _, ok := sc.mutation.LastUpdated(); !ok {
+		v := standings.DefaultLastUpdated()
+		sc.mutation.SetLastUpdated(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
 func (sc *StandingsCreate) check() error {
 	if _, ok := sc.mutation.Rank(); !ok {
 		return &ValidationError{Name: "rank", err: errors.New(`ent: missing required field "Standings.rank"`)}
 	}
-	if _, ok := sc.mutation.Description(); !ok {
-		return &ValidationError{Name: "description", err: errors.New(`ent: missing required field "Standings.description"`)}
+	if _, ok := sc.mutation.Points(); !ok {
+		return &ValidationError{Name: "points", err: errors.New(`ent: missing required field "Standings.points"`)}
+	}
+	if _, ok := sc.mutation.GoalsDiff(); !ok {
+		return &ValidationError{Name: "goalsDiff", err: errors.New(`ent: missing required field "Standings.goalsDiff"`)}
+	}
+	if _, ok := sc.mutation.Group(); !ok {
+		return &ValidationError{Name: "group", err: errors.New(`ent: missing required field "Standings.group"`)}
+	}
+	if _, ok := sc.mutation.Form(); !ok {
+		return &ValidationError{Name: "form", err: errors.New(`ent: missing required field "Standings.form"`)}
+	}
+	if _, ok := sc.mutation.AllPlayed(); !ok {
+		return &ValidationError{Name: "allPlayed", err: errors.New(`ent: missing required field "Standings.allPlayed"`)}
+	}
+	if _, ok := sc.mutation.AllWin(); !ok {
+		return &ValidationError{Name: "allWin", err: errors.New(`ent: missing required field "Standings.allWin"`)}
+	}
+	if _, ok := sc.mutation.AllDraw(); !ok {
+		return &ValidationError{Name: "allDraw", err: errors.New(`ent: missing required field "Standings.allDraw"`)}
+	}
+	if _, ok := sc.mutation.AllLose(); !ok {
+		return &ValidationError{Name: "allLose", err: errors.New(`ent: missing required field "Standings.allLose"`)}
+	}
+	if _, ok := sc.mutation.AllGoalsFor(); !ok {
+		return &ValidationError{Name: "allGoalsFor", err: errors.New(`ent: missing required field "Standings.allGoalsFor"`)}
+	}
+	if _, ok := sc.mutation.AllGoalsAgainst(); !ok {
+		return &ValidationError{Name: "allGoalsAgainst", err: errors.New(`ent: missing required field "Standings.allGoalsAgainst"`)}
+	}
+	if _, ok := sc.mutation.HomePlayed(); !ok {
+		return &ValidationError{Name: "homePlayed", err: errors.New(`ent: missing required field "Standings.homePlayed"`)}
+	}
+	if _, ok := sc.mutation.HomeWin(); !ok {
+		return &ValidationError{Name: "homeWin", err: errors.New(`ent: missing required field "Standings.homeWin"`)}
+	}
+	if _, ok := sc.mutation.HomeDraw(); !ok {
+		return &ValidationError{Name: "homeDraw", err: errors.New(`ent: missing required field "Standings.homeDraw"`)}
+	}
+	if _, ok := sc.mutation.HomeLose(); !ok {
+		return &ValidationError{Name: "homeLose", err: errors.New(`ent: missing required field "Standings.homeLose"`)}
+	}
+	if _, ok := sc.mutation.HomeGoalsFor(); !ok {
+		return &ValidationError{Name: "homeGoalsFor", err: errors.New(`ent: missing required field "Standings.homeGoalsFor"`)}
+	}
+	if _, ok := sc.mutation.HomeGoalsAgainst(); !ok {
+		return &ValidationError{Name: "homeGoalsAgainst", err: errors.New(`ent: missing required field "Standings.homeGoalsAgainst"`)}
+	}
+	if _, ok := sc.mutation.AwayPlayed(); !ok {
+		return &ValidationError{Name: "awayPlayed", err: errors.New(`ent: missing required field "Standings.awayPlayed"`)}
+	}
+	if _, ok := sc.mutation.AwayWin(); !ok {
+		return &ValidationError{Name: "awayWin", err: errors.New(`ent: missing required field "Standings.awayWin"`)}
+	}
+	if _, ok := sc.mutation.AwayDraw(); !ok {
+		return &ValidationError{Name: "awayDraw", err: errors.New(`ent: missing required field "Standings.awayDraw"`)}
+	}
+	if _, ok := sc.mutation.AwayLose(); !ok {
+		return &ValidationError{Name: "awayLose", err: errors.New(`ent: missing required field "Standings.awayLose"`)}
+	}
+	if _, ok := sc.mutation.AwayGoalsFor(); !ok {
+		return &ValidationError{Name: "awayGoalsFor", err: errors.New(`ent: missing required field "Standings.awayGoalsFor"`)}
+	}
+	if _, ok := sc.mutation.AwayGoalsAgainst(); !ok {
+		return &ValidationError{Name: "awayGoalsAgainst", err: errors.New(`ent: missing required field "Standings.awayGoalsAgainst"`)}
+	}
+	if _, ok := sc.mutation.LastUpdated(); !ok {
+		return &ValidationError{Name: "LastUpdated", err: errors.New(`ent: missing required field "Standings.LastUpdated"`)}
+	}
+	if _, ok := sc.mutation.TeamID(); !ok {
+		return &ValidationError{Name: "team", err: errors.New(`ent: missing required edge "Standings.team"`)}
+	}
+	if _, ok := sc.mutation.LeagueID(); !ok {
+		return &ValidationError{Name: "league", err: errors.New(`ent: missing required edge "Standings.league"`)}
 	}
 	return nil
 }
@@ -141,26 +423,105 @@ func (sc *StandingsCreate) createSpec() (*Standings, *sqlgraph.CreateSpec) {
 		_spec.SetField(standings.FieldRank, field.TypeInt, value)
 		_node.Rank = value
 	}
+	if value, ok := sc.mutation.Points(); ok {
+		_spec.SetField(standings.FieldPoints, field.TypeInt, value)
+		_node.Points = value
+	}
+	if value, ok := sc.mutation.GoalsDiff(); ok {
+		_spec.SetField(standings.FieldGoalsDiff, field.TypeInt, value)
+		_node.GoalsDiff = value
+	}
+	if value, ok := sc.mutation.Group(); ok {
+		_spec.SetField(standings.FieldGroup, field.TypeString, value)
+		_node.Group = value
+	}
+	if value, ok := sc.mutation.Form(); ok {
+		_spec.SetField(standings.FieldForm, field.TypeString, value)
+		_node.Form = value
+	}
+	if value, ok := sc.mutation.Status(); ok {
+		_spec.SetField(standings.FieldStatus, field.TypeString, value)
+		_node.Status = value
+	}
 	if value, ok := sc.mutation.Description(); ok {
 		_spec.SetField(standings.FieldDescription, field.TypeString, value)
 		_node.Description = value
 	}
-	if nodes := sc.mutation.LeagueIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.league_standings = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
+	if value, ok := sc.mutation.AllPlayed(); ok {
+		_spec.SetField(standings.FieldAllPlayed, field.TypeInt, value)
+		_node.AllPlayed = value
+	}
+	if value, ok := sc.mutation.AllWin(); ok {
+		_spec.SetField(standings.FieldAllWin, field.TypeInt, value)
+		_node.AllWin = value
+	}
+	if value, ok := sc.mutation.AllDraw(); ok {
+		_spec.SetField(standings.FieldAllDraw, field.TypeInt, value)
+		_node.AllDraw = value
+	}
+	if value, ok := sc.mutation.AllLose(); ok {
+		_spec.SetField(standings.FieldAllLose, field.TypeInt, value)
+		_node.AllLose = value
+	}
+	if value, ok := sc.mutation.AllGoalsFor(); ok {
+		_spec.SetField(standings.FieldAllGoalsFor, field.TypeInt, value)
+		_node.AllGoalsFor = value
+	}
+	if value, ok := sc.mutation.AllGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldAllGoalsAgainst, field.TypeInt, value)
+		_node.AllGoalsAgainst = value
+	}
+	if value, ok := sc.mutation.HomePlayed(); ok {
+		_spec.SetField(standings.FieldHomePlayed, field.TypeInt, value)
+		_node.HomePlayed = value
+	}
+	if value, ok := sc.mutation.HomeWin(); ok {
+		_spec.SetField(standings.FieldHomeWin, field.TypeInt, value)
+		_node.HomeWin = value
+	}
+	if value, ok := sc.mutation.HomeDraw(); ok {
+		_spec.SetField(standings.FieldHomeDraw, field.TypeInt, value)
+		_node.HomeDraw = value
+	}
+	if value, ok := sc.mutation.HomeLose(); ok {
+		_spec.SetField(standings.FieldHomeLose, field.TypeInt, value)
+		_node.HomeLose = value
+	}
+	if value, ok := sc.mutation.HomeGoalsFor(); ok {
+		_spec.SetField(standings.FieldHomeGoalsFor, field.TypeInt, value)
+		_node.HomeGoalsFor = value
+	}
+	if value, ok := sc.mutation.HomeGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldHomeGoalsAgainst, field.TypeInt, value)
+		_node.HomeGoalsAgainst = value
+	}
+	if value, ok := sc.mutation.AwayPlayed(); ok {
+		_spec.SetField(standings.FieldAwayPlayed, field.TypeInt, value)
+		_node.AwayPlayed = value
+	}
+	if value, ok := sc.mutation.AwayWin(); ok {
+		_spec.SetField(standings.FieldAwayWin, field.TypeInt, value)
+		_node.AwayWin = value
+	}
+	if value, ok := sc.mutation.AwayDraw(); ok {
+		_spec.SetField(standings.FieldAwayDraw, field.TypeInt, value)
+		_node.AwayDraw = value
+	}
+	if value, ok := sc.mutation.AwayLose(); ok {
+		_spec.SetField(standings.FieldAwayLose, field.TypeInt, value)
+		_node.AwayLose = value
+	}
+	if value, ok := sc.mutation.AwayGoalsFor(); ok {
+		_spec.SetField(standings.FieldAwayGoalsFor, field.TypeInt, value)
+		_node.AwayGoalsFor = value
+	}
+	if value, ok := sc.mutation.AwayGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldAwayGoalsAgainst, field.TypeInt, value)
+		_node.AwayGoalsAgainst = value
+	}
+	if value, ok := sc.mutation.LastUpdated(); ok {
+		_spec.SetField(standings.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
 	}
 	if nodes := sc.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -177,6 +538,23 @@ func (sc *StandingsCreate) createSpec() (*Standings, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.team_standings = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sc.mutation.LeagueIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   standings.LeagueTable,
+			Columns: []string{standings.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.league_standings = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -196,6 +574,7 @@ func (scb *StandingsCreateBulk) Save(ctx context.Context) ([]*Standings, error) 
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*StandingsMutation)
 				if !ok {

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/standings"
@@ -143,6 +144,36 @@ func (tc *TeamCreate) AddTeamSeasons(t ...*TeamSeason) *TeamCreate {
 		ids[i] = t[i].ID
 	}
 	return tc.AddTeamSeasonIDs(ids...)
+}
+
+// AddHomeFixtureIDs adds the "homeFixtures" edge to the Fixture entity by IDs.
+func (tc *TeamCreate) AddHomeFixtureIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddHomeFixtureIDs(ids...)
+	return tc
+}
+
+// AddHomeFixtures adds the "homeFixtures" edges to the Fixture entity.
+func (tc *TeamCreate) AddHomeFixtures(f ...*Fixture) *TeamCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return tc.AddHomeFixtureIDs(ids...)
+}
+
+// AddAwayFixtureIDs adds the "awayFixtures" edge to the Fixture entity by IDs.
+func (tc *TeamCreate) AddAwayFixtureIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddAwayFixtureIDs(ids...)
+	return tc
+}
+
+// AddAwayFixtures adds the "awayFixtures" edges to the Fixture entity.
+func (tc *TeamCreate) AddAwayFixtures(f ...*Fixture) *TeamCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return tc.AddAwayFixtureIDs(ids...)
 }
 
 // Mutation returns the TeamMutation object of the builder.
@@ -332,6 +363,38 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.HomeFixturesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.HomeFixturesTable,
+			Columns: []string{team.HomeFixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.AwayFixturesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.AwayFixturesTable,
+			Columns: []string{team.AwayFixturesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

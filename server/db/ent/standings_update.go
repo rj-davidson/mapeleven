@@ -10,6 +10,7 @@ import (
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -42,29 +43,354 @@ func (su *StandingsUpdate) AddRank(i int) *StandingsUpdate {
 	return su
 }
 
+// SetPoints sets the "points" field.
+func (su *StandingsUpdate) SetPoints(i int) *StandingsUpdate {
+	su.mutation.ResetPoints()
+	su.mutation.SetPoints(i)
+	return su
+}
+
+// SetNillablePoints sets the "points" field if the given value is not nil.
+func (su *StandingsUpdate) SetNillablePoints(i *int) *StandingsUpdate {
+	if i != nil {
+		su.SetPoints(*i)
+	}
+	return su
+}
+
+// AddPoints adds i to the "points" field.
+func (su *StandingsUpdate) AddPoints(i int) *StandingsUpdate {
+	su.mutation.AddPoints(i)
+	return su
+}
+
+// SetGoalsDiff sets the "goalsDiff" field.
+func (su *StandingsUpdate) SetGoalsDiff(i int) *StandingsUpdate {
+	su.mutation.ResetGoalsDiff()
+	su.mutation.SetGoalsDiff(i)
+	return su
+}
+
+// SetNillableGoalsDiff sets the "goalsDiff" field if the given value is not nil.
+func (su *StandingsUpdate) SetNillableGoalsDiff(i *int) *StandingsUpdate {
+	if i != nil {
+		su.SetGoalsDiff(*i)
+	}
+	return su
+}
+
+// AddGoalsDiff adds i to the "goalsDiff" field.
+func (su *StandingsUpdate) AddGoalsDiff(i int) *StandingsUpdate {
+	su.mutation.AddGoalsDiff(i)
+	return su
+}
+
+// SetGroup sets the "group" field.
+func (su *StandingsUpdate) SetGroup(s string) *StandingsUpdate {
+	su.mutation.SetGroup(s)
+	return su
+}
+
+// SetNillableGroup sets the "group" field if the given value is not nil.
+func (su *StandingsUpdate) SetNillableGroup(s *string) *StandingsUpdate {
+	if s != nil {
+		su.SetGroup(*s)
+	}
+	return su
+}
+
+// SetForm sets the "form" field.
+func (su *StandingsUpdate) SetForm(s string) *StandingsUpdate {
+	su.mutation.SetForm(s)
+	return su
+}
+
+// SetNillableForm sets the "form" field if the given value is not nil.
+func (su *StandingsUpdate) SetNillableForm(s *string) *StandingsUpdate {
+	if s != nil {
+		su.SetForm(*s)
+	}
+	return su
+}
+
+// SetStatus sets the "status" field.
+func (su *StandingsUpdate) SetStatus(s string) *StandingsUpdate {
+	su.mutation.SetStatus(s)
+	return su
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (su *StandingsUpdate) SetNillableStatus(s *string) *StandingsUpdate {
+	if s != nil {
+		su.SetStatus(*s)
+	}
+	return su
+}
+
+// ClearStatus clears the value of the "status" field.
+func (su *StandingsUpdate) ClearStatus() *StandingsUpdate {
+	su.mutation.ClearStatus()
+	return su
+}
+
 // SetDescription sets the "description" field.
 func (su *StandingsUpdate) SetDescription(s string) *StandingsUpdate {
 	su.mutation.SetDescription(s)
 	return su
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (su *StandingsUpdate) SetLeagueID(id int) *StandingsUpdate {
-	su.mutation.SetLeagueID(id)
-	return su
-}
-
-// SetNillableLeagueID sets the "league" edge to the League entity by ID if the given value is not nil.
-func (su *StandingsUpdate) SetNillableLeagueID(id *int) *StandingsUpdate {
-	if id != nil {
-		su = su.SetLeagueID(*id)
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (su *StandingsUpdate) SetNillableDescription(s *string) *StandingsUpdate {
+	if s != nil {
+		su.SetDescription(*s)
 	}
 	return su
 }
 
-// SetLeague sets the "league" edge to the League entity.
-func (su *StandingsUpdate) SetLeague(l *League) *StandingsUpdate {
-	return su.SetLeagueID(l.ID)
+// ClearDescription clears the value of the "description" field.
+func (su *StandingsUpdate) ClearDescription() *StandingsUpdate {
+	su.mutation.ClearDescription()
+	return su
+}
+
+// SetAllPlayed sets the "allPlayed" field.
+func (su *StandingsUpdate) SetAllPlayed(i int) *StandingsUpdate {
+	su.mutation.ResetAllPlayed()
+	su.mutation.SetAllPlayed(i)
+	return su
+}
+
+// AddAllPlayed adds i to the "allPlayed" field.
+func (su *StandingsUpdate) AddAllPlayed(i int) *StandingsUpdate {
+	su.mutation.AddAllPlayed(i)
+	return su
+}
+
+// SetAllWin sets the "allWin" field.
+func (su *StandingsUpdate) SetAllWin(i int) *StandingsUpdate {
+	su.mutation.ResetAllWin()
+	su.mutation.SetAllWin(i)
+	return su
+}
+
+// AddAllWin adds i to the "allWin" field.
+func (su *StandingsUpdate) AddAllWin(i int) *StandingsUpdate {
+	su.mutation.AddAllWin(i)
+	return su
+}
+
+// SetAllDraw sets the "allDraw" field.
+func (su *StandingsUpdate) SetAllDraw(i int) *StandingsUpdate {
+	su.mutation.ResetAllDraw()
+	su.mutation.SetAllDraw(i)
+	return su
+}
+
+// AddAllDraw adds i to the "allDraw" field.
+func (su *StandingsUpdate) AddAllDraw(i int) *StandingsUpdate {
+	su.mutation.AddAllDraw(i)
+	return su
+}
+
+// SetAllLose sets the "allLose" field.
+func (su *StandingsUpdate) SetAllLose(i int) *StandingsUpdate {
+	su.mutation.ResetAllLose()
+	su.mutation.SetAllLose(i)
+	return su
+}
+
+// AddAllLose adds i to the "allLose" field.
+func (su *StandingsUpdate) AddAllLose(i int) *StandingsUpdate {
+	su.mutation.AddAllLose(i)
+	return su
+}
+
+// SetAllGoalsFor sets the "allGoalsFor" field.
+func (su *StandingsUpdate) SetAllGoalsFor(i int) *StandingsUpdate {
+	su.mutation.ResetAllGoalsFor()
+	su.mutation.SetAllGoalsFor(i)
+	return su
+}
+
+// AddAllGoalsFor adds i to the "allGoalsFor" field.
+func (su *StandingsUpdate) AddAllGoalsFor(i int) *StandingsUpdate {
+	su.mutation.AddAllGoalsFor(i)
+	return su
+}
+
+// SetAllGoalsAgainst sets the "allGoalsAgainst" field.
+func (su *StandingsUpdate) SetAllGoalsAgainst(i int) *StandingsUpdate {
+	su.mutation.ResetAllGoalsAgainst()
+	su.mutation.SetAllGoalsAgainst(i)
+	return su
+}
+
+// AddAllGoalsAgainst adds i to the "allGoalsAgainst" field.
+func (su *StandingsUpdate) AddAllGoalsAgainst(i int) *StandingsUpdate {
+	su.mutation.AddAllGoalsAgainst(i)
+	return su
+}
+
+// SetHomePlayed sets the "homePlayed" field.
+func (su *StandingsUpdate) SetHomePlayed(i int) *StandingsUpdate {
+	su.mutation.ResetHomePlayed()
+	su.mutation.SetHomePlayed(i)
+	return su
+}
+
+// AddHomePlayed adds i to the "homePlayed" field.
+func (su *StandingsUpdate) AddHomePlayed(i int) *StandingsUpdate {
+	su.mutation.AddHomePlayed(i)
+	return su
+}
+
+// SetHomeWin sets the "homeWin" field.
+func (su *StandingsUpdate) SetHomeWin(i int) *StandingsUpdate {
+	su.mutation.ResetHomeWin()
+	su.mutation.SetHomeWin(i)
+	return su
+}
+
+// AddHomeWin adds i to the "homeWin" field.
+func (su *StandingsUpdate) AddHomeWin(i int) *StandingsUpdate {
+	su.mutation.AddHomeWin(i)
+	return su
+}
+
+// SetHomeDraw sets the "homeDraw" field.
+func (su *StandingsUpdate) SetHomeDraw(i int) *StandingsUpdate {
+	su.mutation.ResetHomeDraw()
+	su.mutation.SetHomeDraw(i)
+	return su
+}
+
+// AddHomeDraw adds i to the "homeDraw" field.
+func (su *StandingsUpdate) AddHomeDraw(i int) *StandingsUpdate {
+	su.mutation.AddHomeDraw(i)
+	return su
+}
+
+// SetHomeLose sets the "homeLose" field.
+func (su *StandingsUpdate) SetHomeLose(i int) *StandingsUpdate {
+	su.mutation.ResetHomeLose()
+	su.mutation.SetHomeLose(i)
+	return su
+}
+
+// AddHomeLose adds i to the "homeLose" field.
+func (su *StandingsUpdate) AddHomeLose(i int) *StandingsUpdate {
+	su.mutation.AddHomeLose(i)
+	return su
+}
+
+// SetHomeGoalsFor sets the "homeGoalsFor" field.
+func (su *StandingsUpdate) SetHomeGoalsFor(i int) *StandingsUpdate {
+	su.mutation.ResetHomeGoalsFor()
+	su.mutation.SetHomeGoalsFor(i)
+	return su
+}
+
+// AddHomeGoalsFor adds i to the "homeGoalsFor" field.
+func (su *StandingsUpdate) AddHomeGoalsFor(i int) *StandingsUpdate {
+	su.mutation.AddHomeGoalsFor(i)
+	return su
+}
+
+// SetHomeGoalsAgainst sets the "homeGoalsAgainst" field.
+func (su *StandingsUpdate) SetHomeGoalsAgainst(i int) *StandingsUpdate {
+	su.mutation.ResetHomeGoalsAgainst()
+	su.mutation.SetHomeGoalsAgainst(i)
+	return su
+}
+
+// AddHomeGoalsAgainst adds i to the "homeGoalsAgainst" field.
+func (su *StandingsUpdate) AddHomeGoalsAgainst(i int) *StandingsUpdate {
+	su.mutation.AddHomeGoalsAgainst(i)
+	return su
+}
+
+// SetAwayPlayed sets the "awayPlayed" field.
+func (su *StandingsUpdate) SetAwayPlayed(i int) *StandingsUpdate {
+	su.mutation.ResetAwayPlayed()
+	su.mutation.SetAwayPlayed(i)
+	return su
+}
+
+// AddAwayPlayed adds i to the "awayPlayed" field.
+func (su *StandingsUpdate) AddAwayPlayed(i int) *StandingsUpdate {
+	su.mutation.AddAwayPlayed(i)
+	return su
+}
+
+// SetAwayWin sets the "awayWin" field.
+func (su *StandingsUpdate) SetAwayWin(i int) *StandingsUpdate {
+	su.mutation.ResetAwayWin()
+	su.mutation.SetAwayWin(i)
+	return su
+}
+
+// AddAwayWin adds i to the "awayWin" field.
+func (su *StandingsUpdate) AddAwayWin(i int) *StandingsUpdate {
+	su.mutation.AddAwayWin(i)
+	return su
+}
+
+// SetAwayDraw sets the "awayDraw" field.
+func (su *StandingsUpdate) SetAwayDraw(i int) *StandingsUpdate {
+	su.mutation.ResetAwayDraw()
+	su.mutation.SetAwayDraw(i)
+	return su
+}
+
+// AddAwayDraw adds i to the "awayDraw" field.
+func (su *StandingsUpdate) AddAwayDraw(i int) *StandingsUpdate {
+	su.mutation.AddAwayDraw(i)
+	return su
+}
+
+// SetAwayLose sets the "awayLose" field.
+func (su *StandingsUpdate) SetAwayLose(i int) *StandingsUpdate {
+	su.mutation.ResetAwayLose()
+	su.mutation.SetAwayLose(i)
+	return su
+}
+
+// AddAwayLose adds i to the "awayLose" field.
+func (su *StandingsUpdate) AddAwayLose(i int) *StandingsUpdate {
+	su.mutation.AddAwayLose(i)
+	return su
+}
+
+// SetAwayGoalsFor sets the "awayGoalsFor" field.
+func (su *StandingsUpdate) SetAwayGoalsFor(i int) *StandingsUpdate {
+	su.mutation.ResetAwayGoalsFor()
+	su.mutation.SetAwayGoalsFor(i)
+	return su
+}
+
+// AddAwayGoalsFor adds i to the "awayGoalsFor" field.
+func (su *StandingsUpdate) AddAwayGoalsFor(i int) *StandingsUpdate {
+	su.mutation.AddAwayGoalsFor(i)
+	return su
+}
+
+// SetAwayGoalsAgainst sets the "awayGoalsAgainst" field.
+func (su *StandingsUpdate) SetAwayGoalsAgainst(i int) *StandingsUpdate {
+	su.mutation.ResetAwayGoalsAgainst()
+	su.mutation.SetAwayGoalsAgainst(i)
+	return su
+}
+
+// AddAwayGoalsAgainst adds i to the "awayGoalsAgainst" field.
+func (su *StandingsUpdate) AddAwayGoalsAgainst(i int) *StandingsUpdate {
+	su.mutation.AddAwayGoalsAgainst(i)
+	return su
+}
+
+// SetLastUpdated sets the "LastUpdated" field.
+func (su *StandingsUpdate) SetLastUpdated(t time.Time) *StandingsUpdate {
+	su.mutation.SetLastUpdated(t)
+	return su
 }
 
 // SetTeamID sets the "team" edge to the Team entity by ID.
@@ -73,28 +399,25 @@ func (su *StandingsUpdate) SetTeamID(id int) *StandingsUpdate {
 	return su
 }
 
-// SetNillableTeamID sets the "team" edge to the Team entity by ID if the given value is not nil.
-func (su *StandingsUpdate) SetNillableTeamID(id *int) *StandingsUpdate {
-	if id != nil {
-		su = su.SetTeamID(*id)
-	}
-	return su
-}
-
 // SetTeam sets the "team" edge to the Team entity.
 func (su *StandingsUpdate) SetTeam(t *Team) *StandingsUpdate {
 	return su.SetTeamID(t.ID)
 }
 
+// SetLeagueID sets the "league" edge to the League entity by ID.
+func (su *StandingsUpdate) SetLeagueID(id int) *StandingsUpdate {
+	su.mutation.SetLeagueID(id)
+	return su
+}
+
+// SetLeague sets the "league" edge to the League entity.
+func (su *StandingsUpdate) SetLeague(l *League) *StandingsUpdate {
+	return su.SetLeagueID(l.ID)
+}
+
 // Mutation returns the StandingsMutation object of the builder.
 func (su *StandingsUpdate) Mutation() *StandingsMutation {
 	return su.mutation
-}
-
-// ClearLeague clears the "league" edge to the League entity.
-func (su *StandingsUpdate) ClearLeague() *StandingsUpdate {
-	su.mutation.ClearLeague()
-	return su
 }
 
 // ClearTeam clears the "team" edge to the Team entity.
@@ -103,8 +426,15 @@ func (su *StandingsUpdate) ClearTeam() *StandingsUpdate {
 	return su
 }
 
+// ClearLeague clears the "league" edge to the League entity.
+func (su *StandingsUpdate) ClearLeague() *StandingsUpdate {
+	su.mutation.ClearLeague()
+	return su
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *StandingsUpdate) Save(ctx context.Context) (int, error) {
+	su.defaults()
 	return withHooks[int, StandingsMutation](ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
@@ -130,7 +460,29 @@ func (su *StandingsUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (su *StandingsUpdate) defaults() {
+	if _, ok := su.mutation.LastUpdated(); !ok {
+		v := standings.UpdateDefaultLastUpdated()
+		su.mutation.SetLastUpdated(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (su *StandingsUpdate) check() error {
+	if _, ok := su.mutation.TeamID(); su.mutation.TeamCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Standings.team"`)
+	}
+	if _, ok := su.mutation.LeagueID(); su.mutation.LeagueCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Standings.league"`)
+	}
+	return nil
+}
+
 func (su *StandingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := su.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(standings.Table, standings.Columns, sqlgraph.NewFieldSpec(standings.FieldID, field.TypeInt))
 	if ps := su.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -145,37 +497,146 @@ func (su *StandingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := su.mutation.AddedRank(); ok {
 		_spec.AddField(standings.FieldRank, field.TypeInt, value)
 	}
+	if value, ok := su.mutation.Points(); ok {
+		_spec.SetField(standings.FieldPoints, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedPoints(); ok {
+		_spec.AddField(standings.FieldPoints, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.GoalsDiff(); ok {
+		_spec.SetField(standings.FieldGoalsDiff, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedGoalsDiff(); ok {
+		_spec.AddField(standings.FieldGoalsDiff, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.Group(); ok {
+		_spec.SetField(standings.FieldGroup, field.TypeString, value)
+	}
+	if value, ok := su.mutation.Form(); ok {
+		_spec.SetField(standings.FieldForm, field.TypeString, value)
+	}
+	if value, ok := su.mutation.Status(); ok {
+		_spec.SetField(standings.FieldStatus, field.TypeString, value)
+	}
+	if su.mutation.StatusCleared() {
+		_spec.ClearField(standings.FieldStatus, field.TypeString)
+	}
 	if value, ok := su.mutation.Description(); ok {
 		_spec.SetField(standings.FieldDescription, field.TypeString, value)
 	}
-	if su.mutation.LeagueCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	if su.mutation.DescriptionCleared() {
+		_spec.ClearField(standings.FieldDescription, field.TypeString)
 	}
-	if nodes := su.mutation.LeagueIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if value, ok := su.mutation.AllPlayed(); ok {
+		_spec.SetField(standings.FieldAllPlayed, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAllPlayed(); ok {
+		_spec.AddField(standings.FieldAllPlayed, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AllWin(); ok {
+		_spec.SetField(standings.FieldAllWin, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAllWin(); ok {
+		_spec.AddField(standings.FieldAllWin, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AllDraw(); ok {
+		_spec.SetField(standings.FieldAllDraw, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAllDraw(); ok {
+		_spec.AddField(standings.FieldAllDraw, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AllLose(); ok {
+		_spec.SetField(standings.FieldAllLose, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAllLose(); ok {
+		_spec.AddField(standings.FieldAllLose, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AllGoalsFor(); ok {
+		_spec.SetField(standings.FieldAllGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAllGoalsFor(); ok {
+		_spec.AddField(standings.FieldAllGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AllGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldAllGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAllGoalsAgainst(); ok {
+		_spec.AddField(standings.FieldAllGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.HomePlayed(); ok {
+		_spec.SetField(standings.FieldHomePlayed, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedHomePlayed(); ok {
+		_spec.AddField(standings.FieldHomePlayed, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.HomeWin(); ok {
+		_spec.SetField(standings.FieldHomeWin, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedHomeWin(); ok {
+		_spec.AddField(standings.FieldHomeWin, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.HomeDraw(); ok {
+		_spec.SetField(standings.FieldHomeDraw, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedHomeDraw(); ok {
+		_spec.AddField(standings.FieldHomeDraw, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.HomeLose(); ok {
+		_spec.SetField(standings.FieldHomeLose, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedHomeLose(); ok {
+		_spec.AddField(standings.FieldHomeLose, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.HomeGoalsFor(); ok {
+		_spec.SetField(standings.FieldHomeGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedHomeGoalsFor(); ok {
+		_spec.AddField(standings.FieldHomeGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.HomeGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldHomeGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedHomeGoalsAgainst(); ok {
+		_spec.AddField(standings.FieldHomeGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AwayPlayed(); ok {
+		_spec.SetField(standings.FieldAwayPlayed, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAwayPlayed(); ok {
+		_spec.AddField(standings.FieldAwayPlayed, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AwayWin(); ok {
+		_spec.SetField(standings.FieldAwayWin, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAwayWin(); ok {
+		_spec.AddField(standings.FieldAwayWin, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AwayDraw(); ok {
+		_spec.SetField(standings.FieldAwayDraw, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAwayDraw(); ok {
+		_spec.AddField(standings.FieldAwayDraw, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AwayLose(); ok {
+		_spec.SetField(standings.FieldAwayLose, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAwayLose(); ok {
+		_spec.AddField(standings.FieldAwayLose, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AwayGoalsFor(); ok {
+		_spec.SetField(standings.FieldAwayGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAwayGoalsFor(); ok {
+		_spec.AddField(standings.FieldAwayGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AwayGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldAwayGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.AddedAwayGoalsAgainst(); ok {
+		_spec.AddField(standings.FieldAwayGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.LastUpdated(); ok {
+		_spec.SetField(standings.FieldLastUpdated, field.TypeTime, value)
 	}
 	if su.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -199,6 +660,35 @@ func (su *StandingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if su.mutation.LeagueCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   standings.LeagueTable,
+			Columns: []string{standings.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.LeagueIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   standings.LeagueTable,
+			Columns: []string{standings.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -239,29 +729,354 @@ func (suo *StandingsUpdateOne) AddRank(i int) *StandingsUpdateOne {
 	return suo
 }
 
+// SetPoints sets the "points" field.
+func (suo *StandingsUpdateOne) SetPoints(i int) *StandingsUpdateOne {
+	suo.mutation.ResetPoints()
+	suo.mutation.SetPoints(i)
+	return suo
+}
+
+// SetNillablePoints sets the "points" field if the given value is not nil.
+func (suo *StandingsUpdateOne) SetNillablePoints(i *int) *StandingsUpdateOne {
+	if i != nil {
+		suo.SetPoints(*i)
+	}
+	return suo
+}
+
+// AddPoints adds i to the "points" field.
+func (suo *StandingsUpdateOne) AddPoints(i int) *StandingsUpdateOne {
+	suo.mutation.AddPoints(i)
+	return suo
+}
+
+// SetGoalsDiff sets the "goalsDiff" field.
+func (suo *StandingsUpdateOne) SetGoalsDiff(i int) *StandingsUpdateOne {
+	suo.mutation.ResetGoalsDiff()
+	suo.mutation.SetGoalsDiff(i)
+	return suo
+}
+
+// SetNillableGoalsDiff sets the "goalsDiff" field if the given value is not nil.
+func (suo *StandingsUpdateOne) SetNillableGoalsDiff(i *int) *StandingsUpdateOne {
+	if i != nil {
+		suo.SetGoalsDiff(*i)
+	}
+	return suo
+}
+
+// AddGoalsDiff adds i to the "goalsDiff" field.
+func (suo *StandingsUpdateOne) AddGoalsDiff(i int) *StandingsUpdateOne {
+	suo.mutation.AddGoalsDiff(i)
+	return suo
+}
+
+// SetGroup sets the "group" field.
+func (suo *StandingsUpdateOne) SetGroup(s string) *StandingsUpdateOne {
+	suo.mutation.SetGroup(s)
+	return suo
+}
+
+// SetNillableGroup sets the "group" field if the given value is not nil.
+func (suo *StandingsUpdateOne) SetNillableGroup(s *string) *StandingsUpdateOne {
+	if s != nil {
+		suo.SetGroup(*s)
+	}
+	return suo
+}
+
+// SetForm sets the "form" field.
+func (suo *StandingsUpdateOne) SetForm(s string) *StandingsUpdateOne {
+	suo.mutation.SetForm(s)
+	return suo
+}
+
+// SetNillableForm sets the "form" field if the given value is not nil.
+func (suo *StandingsUpdateOne) SetNillableForm(s *string) *StandingsUpdateOne {
+	if s != nil {
+		suo.SetForm(*s)
+	}
+	return suo
+}
+
+// SetStatus sets the "status" field.
+func (suo *StandingsUpdateOne) SetStatus(s string) *StandingsUpdateOne {
+	suo.mutation.SetStatus(s)
+	return suo
+}
+
+// SetNillableStatus sets the "status" field if the given value is not nil.
+func (suo *StandingsUpdateOne) SetNillableStatus(s *string) *StandingsUpdateOne {
+	if s != nil {
+		suo.SetStatus(*s)
+	}
+	return suo
+}
+
+// ClearStatus clears the value of the "status" field.
+func (suo *StandingsUpdateOne) ClearStatus() *StandingsUpdateOne {
+	suo.mutation.ClearStatus()
+	return suo
+}
+
 // SetDescription sets the "description" field.
 func (suo *StandingsUpdateOne) SetDescription(s string) *StandingsUpdateOne {
 	suo.mutation.SetDescription(s)
 	return suo
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (suo *StandingsUpdateOne) SetLeagueID(id int) *StandingsUpdateOne {
-	suo.mutation.SetLeagueID(id)
-	return suo
-}
-
-// SetNillableLeagueID sets the "league" edge to the League entity by ID if the given value is not nil.
-func (suo *StandingsUpdateOne) SetNillableLeagueID(id *int) *StandingsUpdateOne {
-	if id != nil {
-		suo = suo.SetLeagueID(*id)
+// SetNillableDescription sets the "description" field if the given value is not nil.
+func (suo *StandingsUpdateOne) SetNillableDescription(s *string) *StandingsUpdateOne {
+	if s != nil {
+		suo.SetDescription(*s)
 	}
 	return suo
 }
 
-// SetLeague sets the "league" edge to the League entity.
-func (suo *StandingsUpdateOne) SetLeague(l *League) *StandingsUpdateOne {
-	return suo.SetLeagueID(l.ID)
+// ClearDescription clears the value of the "description" field.
+func (suo *StandingsUpdateOne) ClearDescription() *StandingsUpdateOne {
+	suo.mutation.ClearDescription()
+	return suo
+}
+
+// SetAllPlayed sets the "allPlayed" field.
+func (suo *StandingsUpdateOne) SetAllPlayed(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAllPlayed()
+	suo.mutation.SetAllPlayed(i)
+	return suo
+}
+
+// AddAllPlayed adds i to the "allPlayed" field.
+func (suo *StandingsUpdateOne) AddAllPlayed(i int) *StandingsUpdateOne {
+	suo.mutation.AddAllPlayed(i)
+	return suo
+}
+
+// SetAllWin sets the "allWin" field.
+func (suo *StandingsUpdateOne) SetAllWin(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAllWin()
+	suo.mutation.SetAllWin(i)
+	return suo
+}
+
+// AddAllWin adds i to the "allWin" field.
+func (suo *StandingsUpdateOne) AddAllWin(i int) *StandingsUpdateOne {
+	suo.mutation.AddAllWin(i)
+	return suo
+}
+
+// SetAllDraw sets the "allDraw" field.
+func (suo *StandingsUpdateOne) SetAllDraw(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAllDraw()
+	suo.mutation.SetAllDraw(i)
+	return suo
+}
+
+// AddAllDraw adds i to the "allDraw" field.
+func (suo *StandingsUpdateOne) AddAllDraw(i int) *StandingsUpdateOne {
+	suo.mutation.AddAllDraw(i)
+	return suo
+}
+
+// SetAllLose sets the "allLose" field.
+func (suo *StandingsUpdateOne) SetAllLose(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAllLose()
+	suo.mutation.SetAllLose(i)
+	return suo
+}
+
+// AddAllLose adds i to the "allLose" field.
+func (suo *StandingsUpdateOne) AddAllLose(i int) *StandingsUpdateOne {
+	suo.mutation.AddAllLose(i)
+	return suo
+}
+
+// SetAllGoalsFor sets the "allGoalsFor" field.
+func (suo *StandingsUpdateOne) SetAllGoalsFor(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAllGoalsFor()
+	suo.mutation.SetAllGoalsFor(i)
+	return suo
+}
+
+// AddAllGoalsFor adds i to the "allGoalsFor" field.
+func (suo *StandingsUpdateOne) AddAllGoalsFor(i int) *StandingsUpdateOne {
+	suo.mutation.AddAllGoalsFor(i)
+	return suo
+}
+
+// SetAllGoalsAgainst sets the "allGoalsAgainst" field.
+func (suo *StandingsUpdateOne) SetAllGoalsAgainst(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAllGoalsAgainst()
+	suo.mutation.SetAllGoalsAgainst(i)
+	return suo
+}
+
+// AddAllGoalsAgainst adds i to the "allGoalsAgainst" field.
+func (suo *StandingsUpdateOne) AddAllGoalsAgainst(i int) *StandingsUpdateOne {
+	suo.mutation.AddAllGoalsAgainst(i)
+	return suo
+}
+
+// SetHomePlayed sets the "homePlayed" field.
+func (suo *StandingsUpdateOne) SetHomePlayed(i int) *StandingsUpdateOne {
+	suo.mutation.ResetHomePlayed()
+	suo.mutation.SetHomePlayed(i)
+	return suo
+}
+
+// AddHomePlayed adds i to the "homePlayed" field.
+func (suo *StandingsUpdateOne) AddHomePlayed(i int) *StandingsUpdateOne {
+	suo.mutation.AddHomePlayed(i)
+	return suo
+}
+
+// SetHomeWin sets the "homeWin" field.
+func (suo *StandingsUpdateOne) SetHomeWin(i int) *StandingsUpdateOne {
+	suo.mutation.ResetHomeWin()
+	suo.mutation.SetHomeWin(i)
+	return suo
+}
+
+// AddHomeWin adds i to the "homeWin" field.
+func (suo *StandingsUpdateOne) AddHomeWin(i int) *StandingsUpdateOne {
+	suo.mutation.AddHomeWin(i)
+	return suo
+}
+
+// SetHomeDraw sets the "homeDraw" field.
+func (suo *StandingsUpdateOne) SetHomeDraw(i int) *StandingsUpdateOne {
+	suo.mutation.ResetHomeDraw()
+	suo.mutation.SetHomeDraw(i)
+	return suo
+}
+
+// AddHomeDraw adds i to the "homeDraw" field.
+func (suo *StandingsUpdateOne) AddHomeDraw(i int) *StandingsUpdateOne {
+	suo.mutation.AddHomeDraw(i)
+	return suo
+}
+
+// SetHomeLose sets the "homeLose" field.
+func (suo *StandingsUpdateOne) SetHomeLose(i int) *StandingsUpdateOne {
+	suo.mutation.ResetHomeLose()
+	suo.mutation.SetHomeLose(i)
+	return suo
+}
+
+// AddHomeLose adds i to the "homeLose" field.
+func (suo *StandingsUpdateOne) AddHomeLose(i int) *StandingsUpdateOne {
+	suo.mutation.AddHomeLose(i)
+	return suo
+}
+
+// SetHomeGoalsFor sets the "homeGoalsFor" field.
+func (suo *StandingsUpdateOne) SetHomeGoalsFor(i int) *StandingsUpdateOne {
+	suo.mutation.ResetHomeGoalsFor()
+	suo.mutation.SetHomeGoalsFor(i)
+	return suo
+}
+
+// AddHomeGoalsFor adds i to the "homeGoalsFor" field.
+func (suo *StandingsUpdateOne) AddHomeGoalsFor(i int) *StandingsUpdateOne {
+	suo.mutation.AddHomeGoalsFor(i)
+	return suo
+}
+
+// SetHomeGoalsAgainst sets the "homeGoalsAgainst" field.
+func (suo *StandingsUpdateOne) SetHomeGoalsAgainst(i int) *StandingsUpdateOne {
+	suo.mutation.ResetHomeGoalsAgainst()
+	suo.mutation.SetHomeGoalsAgainst(i)
+	return suo
+}
+
+// AddHomeGoalsAgainst adds i to the "homeGoalsAgainst" field.
+func (suo *StandingsUpdateOne) AddHomeGoalsAgainst(i int) *StandingsUpdateOne {
+	suo.mutation.AddHomeGoalsAgainst(i)
+	return suo
+}
+
+// SetAwayPlayed sets the "awayPlayed" field.
+func (suo *StandingsUpdateOne) SetAwayPlayed(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAwayPlayed()
+	suo.mutation.SetAwayPlayed(i)
+	return suo
+}
+
+// AddAwayPlayed adds i to the "awayPlayed" field.
+func (suo *StandingsUpdateOne) AddAwayPlayed(i int) *StandingsUpdateOne {
+	suo.mutation.AddAwayPlayed(i)
+	return suo
+}
+
+// SetAwayWin sets the "awayWin" field.
+func (suo *StandingsUpdateOne) SetAwayWin(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAwayWin()
+	suo.mutation.SetAwayWin(i)
+	return suo
+}
+
+// AddAwayWin adds i to the "awayWin" field.
+func (suo *StandingsUpdateOne) AddAwayWin(i int) *StandingsUpdateOne {
+	suo.mutation.AddAwayWin(i)
+	return suo
+}
+
+// SetAwayDraw sets the "awayDraw" field.
+func (suo *StandingsUpdateOne) SetAwayDraw(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAwayDraw()
+	suo.mutation.SetAwayDraw(i)
+	return suo
+}
+
+// AddAwayDraw adds i to the "awayDraw" field.
+func (suo *StandingsUpdateOne) AddAwayDraw(i int) *StandingsUpdateOne {
+	suo.mutation.AddAwayDraw(i)
+	return suo
+}
+
+// SetAwayLose sets the "awayLose" field.
+func (suo *StandingsUpdateOne) SetAwayLose(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAwayLose()
+	suo.mutation.SetAwayLose(i)
+	return suo
+}
+
+// AddAwayLose adds i to the "awayLose" field.
+func (suo *StandingsUpdateOne) AddAwayLose(i int) *StandingsUpdateOne {
+	suo.mutation.AddAwayLose(i)
+	return suo
+}
+
+// SetAwayGoalsFor sets the "awayGoalsFor" field.
+func (suo *StandingsUpdateOne) SetAwayGoalsFor(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAwayGoalsFor()
+	suo.mutation.SetAwayGoalsFor(i)
+	return suo
+}
+
+// AddAwayGoalsFor adds i to the "awayGoalsFor" field.
+func (suo *StandingsUpdateOne) AddAwayGoalsFor(i int) *StandingsUpdateOne {
+	suo.mutation.AddAwayGoalsFor(i)
+	return suo
+}
+
+// SetAwayGoalsAgainst sets the "awayGoalsAgainst" field.
+func (suo *StandingsUpdateOne) SetAwayGoalsAgainst(i int) *StandingsUpdateOne {
+	suo.mutation.ResetAwayGoalsAgainst()
+	suo.mutation.SetAwayGoalsAgainst(i)
+	return suo
+}
+
+// AddAwayGoalsAgainst adds i to the "awayGoalsAgainst" field.
+func (suo *StandingsUpdateOne) AddAwayGoalsAgainst(i int) *StandingsUpdateOne {
+	suo.mutation.AddAwayGoalsAgainst(i)
+	return suo
+}
+
+// SetLastUpdated sets the "LastUpdated" field.
+func (suo *StandingsUpdateOne) SetLastUpdated(t time.Time) *StandingsUpdateOne {
+	suo.mutation.SetLastUpdated(t)
+	return suo
 }
 
 // SetTeamID sets the "team" edge to the Team entity by ID.
@@ -270,17 +1085,20 @@ func (suo *StandingsUpdateOne) SetTeamID(id int) *StandingsUpdateOne {
 	return suo
 }
 
-// SetNillableTeamID sets the "team" edge to the Team entity by ID if the given value is not nil.
-func (suo *StandingsUpdateOne) SetNillableTeamID(id *int) *StandingsUpdateOne {
-	if id != nil {
-		suo = suo.SetTeamID(*id)
-	}
-	return suo
-}
-
 // SetTeam sets the "team" edge to the Team entity.
 func (suo *StandingsUpdateOne) SetTeam(t *Team) *StandingsUpdateOne {
 	return suo.SetTeamID(t.ID)
+}
+
+// SetLeagueID sets the "league" edge to the League entity by ID.
+func (suo *StandingsUpdateOne) SetLeagueID(id int) *StandingsUpdateOne {
+	suo.mutation.SetLeagueID(id)
+	return suo
+}
+
+// SetLeague sets the "league" edge to the League entity.
+func (suo *StandingsUpdateOne) SetLeague(l *League) *StandingsUpdateOne {
+	return suo.SetLeagueID(l.ID)
 }
 
 // Mutation returns the StandingsMutation object of the builder.
@@ -288,15 +1106,15 @@ func (suo *StandingsUpdateOne) Mutation() *StandingsMutation {
 	return suo.mutation
 }
 
-// ClearLeague clears the "league" edge to the League entity.
-func (suo *StandingsUpdateOne) ClearLeague() *StandingsUpdateOne {
-	suo.mutation.ClearLeague()
-	return suo
-}
-
 // ClearTeam clears the "team" edge to the Team entity.
 func (suo *StandingsUpdateOne) ClearTeam() *StandingsUpdateOne {
 	suo.mutation.ClearTeam()
+	return suo
+}
+
+// ClearLeague clears the "league" edge to the League entity.
+func (suo *StandingsUpdateOne) ClearLeague() *StandingsUpdateOne {
+	suo.mutation.ClearLeague()
 	return suo
 }
 
@@ -315,6 +1133,7 @@ func (suo *StandingsUpdateOne) Select(field string, fields ...string) *Standings
 
 // Save executes the query and returns the updated Standings entity.
 func (suo *StandingsUpdateOne) Save(ctx context.Context) (*Standings, error) {
+	suo.defaults()
 	return withHooks[*Standings, StandingsMutation](ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
@@ -340,7 +1159,29 @@ func (suo *StandingsUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (suo *StandingsUpdateOne) defaults() {
+	if _, ok := suo.mutation.LastUpdated(); !ok {
+		v := standings.UpdateDefaultLastUpdated()
+		suo.mutation.SetLastUpdated(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (suo *StandingsUpdateOne) check() error {
+	if _, ok := suo.mutation.TeamID(); suo.mutation.TeamCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Standings.team"`)
+	}
+	if _, ok := suo.mutation.LeagueID(); suo.mutation.LeagueCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Standings.league"`)
+	}
+	return nil
+}
+
 func (suo *StandingsUpdateOne) sqlSave(ctx context.Context) (_node *Standings, err error) {
+	if err := suo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(standings.Table, standings.Columns, sqlgraph.NewFieldSpec(standings.FieldID, field.TypeInt))
 	id, ok := suo.mutation.ID()
 	if !ok {
@@ -372,37 +1213,146 @@ func (suo *StandingsUpdateOne) sqlSave(ctx context.Context) (_node *Standings, e
 	if value, ok := suo.mutation.AddedRank(); ok {
 		_spec.AddField(standings.FieldRank, field.TypeInt, value)
 	}
+	if value, ok := suo.mutation.Points(); ok {
+		_spec.SetField(standings.FieldPoints, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedPoints(); ok {
+		_spec.AddField(standings.FieldPoints, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.GoalsDiff(); ok {
+		_spec.SetField(standings.FieldGoalsDiff, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedGoalsDiff(); ok {
+		_spec.AddField(standings.FieldGoalsDiff, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.Group(); ok {
+		_spec.SetField(standings.FieldGroup, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.Form(); ok {
+		_spec.SetField(standings.FieldForm, field.TypeString, value)
+	}
+	if value, ok := suo.mutation.Status(); ok {
+		_spec.SetField(standings.FieldStatus, field.TypeString, value)
+	}
+	if suo.mutation.StatusCleared() {
+		_spec.ClearField(standings.FieldStatus, field.TypeString)
+	}
 	if value, ok := suo.mutation.Description(); ok {
 		_spec.SetField(standings.FieldDescription, field.TypeString, value)
 	}
-	if suo.mutation.LeagueCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	if suo.mutation.DescriptionCleared() {
+		_spec.ClearField(standings.FieldDescription, field.TypeString)
 	}
-	if nodes := suo.mutation.LeagueIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	if value, ok := suo.mutation.AllPlayed(); ok {
+		_spec.SetField(standings.FieldAllPlayed, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAllPlayed(); ok {
+		_spec.AddField(standings.FieldAllPlayed, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AllWin(); ok {
+		_spec.SetField(standings.FieldAllWin, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAllWin(); ok {
+		_spec.AddField(standings.FieldAllWin, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AllDraw(); ok {
+		_spec.SetField(standings.FieldAllDraw, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAllDraw(); ok {
+		_spec.AddField(standings.FieldAllDraw, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AllLose(); ok {
+		_spec.SetField(standings.FieldAllLose, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAllLose(); ok {
+		_spec.AddField(standings.FieldAllLose, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AllGoalsFor(); ok {
+		_spec.SetField(standings.FieldAllGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAllGoalsFor(); ok {
+		_spec.AddField(standings.FieldAllGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AllGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldAllGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAllGoalsAgainst(); ok {
+		_spec.AddField(standings.FieldAllGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.HomePlayed(); ok {
+		_spec.SetField(standings.FieldHomePlayed, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedHomePlayed(); ok {
+		_spec.AddField(standings.FieldHomePlayed, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.HomeWin(); ok {
+		_spec.SetField(standings.FieldHomeWin, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedHomeWin(); ok {
+		_spec.AddField(standings.FieldHomeWin, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.HomeDraw(); ok {
+		_spec.SetField(standings.FieldHomeDraw, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedHomeDraw(); ok {
+		_spec.AddField(standings.FieldHomeDraw, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.HomeLose(); ok {
+		_spec.SetField(standings.FieldHomeLose, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedHomeLose(); ok {
+		_spec.AddField(standings.FieldHomeLose, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.HomeGoalsFor(); ok {
+		_spec.SetField(standings.FieldHomeGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedHomeGoalsFor(); ok {
+		_spec.AddField(standings.FieldHomeGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.HomeGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldHomeGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedHomeGoalsAgainst(); ok {
+		_spec.AddField(standings.FieldHomeGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AwayPlayed(); ok {
+		_spec.SetField(standings.FieldAwayPlayed, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAwayPlayed(); ok {
+		_spec.AddField(standings.FieldAwayPlayed, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AwayWin(); ok {
+		_spec.SetField(standings.FieldAwayWin, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAwayWin(); ok {
+		_spec.AddField(standings.FieldAwayWin, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AwayDraw(); ok {
+		_spec.SetField(standings.FieldAwayDraw, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAwayDraw(); ok {
+		_spec.AddField(standings.FieldAwayDraw, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AwayLose(); ok {
+		_spec.SetField(standings.FieldAwayLose, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAwayLose(); ok {
+		_spec.AddField(standings.FieldAwayLose, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AwayGoalsFor(); ok {
+		_spec.SetField(standings.FieldAwayGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAwayGoalsFor(); ok {
+		_spec.AddField(standings.FieldAwayGoalsFor, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AwayGoalsAgainst(); ok {
+		_spec.SetField(standings.FieldAwayGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.AddedAwayGoalsAgainst(); ok {
+		_spec.AddField(standings.FieldAwayGoalsAgainst, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.LastUpdated(); ok {
+		_spec.SetField(standings.FieldLastUpdated, field.TypeTime, value)
 	}
 	if suo.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -426,6 +1376,35 @@ func (suo *StandingsUpdateOne) sqlSave(ctx context.Context) (_node *Standings, e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if suo.mutation.LeagueCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   standings.LeagueTable,
+			Columns: []string{standings.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.LeagueIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   standings.LeagueTable,
+			Columns: []string{standings.LeagueColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

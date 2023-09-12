@@ -25,9 +25,12 @@ var updateData bool
 
 var initialize bool
 
+var devRun bool
+
 func init() {
 	flag.BoolVar(&initialize, "initialize", false, "Force initialization")
 	flag.BoolVar(&updateData, "update", false, "Enable cron job scheduler")
+	flag.BoolVar(&devRun, "dev", false, "Enable dev mode")
 	flag.Parse()
 }
 
@@ -91,8 +94,9 @@ func main() {
 	// If initialize flag is true, run initialization logic
 	fmt.Println("-- Initialize flag: ", initialize)
 	fmt.Println("-- Update flag: ", updateData)
+	fmt.Println("-- Dev flag: ", devRun)
 	go func() {
-		controllers.CronScheduler(client, initialize, updateData)
+		controllers.CronScheduler(client, initialize, updateData, devRun)
 		wg.Done()
 	}()
 

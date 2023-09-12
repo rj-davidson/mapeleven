@@ -12,6 +12,9 @@ type Birth func(*sql.Selector)
 // Country is the predicate function for country builders.
 type Country func(*sql.Selector)
 
+// Fixture is the predicate function for fixture builders.
+type Fixture func(*sql.Selector)
+
 // League is the predicate function for league builders.
 type League func(*sql.Selector)
 

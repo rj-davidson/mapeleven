@@ -376,6 +376,29 @@ func HasCountryWith(preds ...predicate.Country) predicate.League {
 	})
 }
 
+// HasFixtures applies the HasEdge predicate on the "fixtures" edge.
+func HasFixtures() predicate.League {
+	return predicate.League(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FixturesTable, FixturesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFixturesWith applies the HasEdge predicate on the "fixtures" edge with a given conditions (other predicates).
+func HasFixturesWith(preds ...predicate.Fixture) predicate.League {
+	return predicate.League(func(s *sql.Selector) {
+		step := newFixturesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.League) predicate.League {
 	return predicate.League(func(s *sql.Selector) {

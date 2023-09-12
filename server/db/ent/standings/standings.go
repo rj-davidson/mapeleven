@@ -3,6 +3,8 @@
 package standings
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -14,21 +16,62 @@ const (
 	FieldID = "id"
 	// FieldRank holds the string denoting the rank field in the database.
 	FieldRank = "rank"
+	// FieldPoints holds the string denoting the points field in the database.
+	FieldPoints = "points"
+	// FieldGoalsDiff holds the string denoting the goalsdiff field in the database.
+	FieldGoalsDiff = "goals_diff"
+	// FieldGroup holds the string denoting the group field in the database.
+	FieldGroup = "group"
+	// FieldForm holds the string denoting the form field in the database.
+	FieldForm = "form"
+	// FieldStatus holds the string denoting the status field in the database.
+	FieldStatus = "status"
 	// FieldDescription holds the string denoting the description field in the database.
 	FieldDescription = "description"
-	// EdgeLeague holds the string denoting the league edge name in mutations.
-	EdgeLeague = "league"
+	// FieldAllPlayed holds the string denoting the allplayed field in the database.
+	FieldAllPlayed = "all_played"
+	// FieldAllWin holds the string denoting the allwin field in the database.
+	FieldAllWin = "all_win"
+	// FieldAllDraw holds the string denoting the alldraw field in the database.
+	FieldAllDraw = "all_draw"
+	// FieldAllLose holds the string denoting the alllose field in the database.
+	FieldAllLose = "all_lose"
+	// FieldAllGoalsFor holds the string denoting the allgoalsfor field in the database.
+	FieldAllGoalsFor = "all_goals_for"
+	// FieldAllGoalsAgainst holds the string denoting the allgoalsagainst field in the database.
+	FieldAllGoalsAgainst = "all_goals_against"
+	// FieldHomePlayed holds the string denoting the homeplayed field in the database.
+	FieldHomePlayed = "home_played"
+	// FieldHomeWin holds the string denoting the homewin field in the database.
+	FieldHomeWin = "home_win"
+	// FieldHomeDraw holds the string denoting the homedraw field in the database.
+	FieldHomeDraw = "home_draw"
+	// FieldHomeLose holds the string denoting the homelose field in the database.
+	FieldHomeLose = "home_lose"
+	// FieldHomeGoalsFor holds the string denoting the homegoalsfor field in the database.
+	FieldHomeGoalsFor = "home_goals_for"
+	// FieldHomeGoalsAgainst holds the string denoting the homegoalsagainst field in the database.
+	FieldHomeGoalsAgainst = "home_goals_against"
+	// FieldAwayPlayed holds the string denoting the awayplayed field in the database.
+	FieldAwayPlayed = "away_played"
+	// FieldAwayWin holds the string denoting the awaywin field in the database.
+	FieldAwayWin = "away_win"
+	// FieldAwayDraw holds the string denoting the awaydraw field in the database.
+	FieldAwayDraw = "away_draw"
+	// FieldAwayLose holds the string denoting the awaylose field in the database.
+	FieldAwayLose = "away_lose"
+	// FieldAwayGoalsFor holds the string denoting the awaygoalsfor field in the database.
+	FieldAwayGoalsFor = "away_goals_for"
+	// FieldAwayGoalsAgainst holds the string denoting the awaygoalsagainst field in the database.
+	FieldAwayGoalsAgainst = "away_goals_against"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
+	// EdgeLeague holds the string denoting the league edge name in mutations.
+	EdgeLeague = "league"
 	// Table holds the table name of the standings in the database.
 	Table = "standings"
-	// LeagueTable is the table that holds the league relation/edge.
-	LeagueTable = "standings"
-	// LeagueInverseTable is the table name for the League entity.
-	// It exists in this package in order to avoid circular dependency with the "league" package.
-	LeagueInverseTable = "leagues"
-	// LeagueColumn is the table column denoting the league relation/edge.
-	LeagueColumn = "league_standings"
 	// TeamTable is the table that holds the team relation/edge.
 	TeamTable = "standings"
 	// TeamInverseTable is the table name for the Team entity.
@@ -36,13 +79,44 @@ const (
 	TeamInverseTable = "teams"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "team_standings"
+	// LeagueTable is the table that holds the league relation/edge.
+	LeagueTable = "standings"
+	// LeagueInverseTable is the table name for the League entity.
+	// It exists in this package in order to avoid circular dependency with the "league" package.
+	LeagueInverseTable = "leagues"
+	// LeagueColumn is the table column denoting the league relation/edge.
+	LeagueColumn = "league_standings"
 )
 
 // Columns holds all SQL columns for standings fields.
 var Columns = []string{
 	FieldID,
 	FieldRank,
+	FieldPoints,
+	FieldGoalsDiff,
+	FieldGroup,
+	FieldForm,
+	FieldStatus,
 	FieldDescription,
+	FieldAllPlayed,
+	FieldAllWin,
+	FieldAllDraw,
+	FieldAllLose,
+	FieldAllGoalsFor,
+	FieldAllGoalsAgainst,
+	FieldHomePlayed,
+	FieldHomeWin,
+	FieldHomeDraw,
+	FieldHomeLose,
+	FieldHomeGoalsFor,
+	FieldHomeGoalsAgainst,
+	FieldAwayPlayed,
+	FieldAwayWin,
+	FieldAwayDraw,
+	FieldAwayLose,
+	FieldAwayGoalsFor,
+	FieldAwayGoalsAgainst,
+	FieldLastUpdated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "standings"
@@ -67,6 +141,21 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultPoints holds the default value on creation for the "points" field.
+	DefaultPoints int
+	// DefaultGoalsDiff holds the default value on creation for the "goalsDiff" field.
+	DefaultGoalsDiff int
+	// DefaultGroup holds the default value on creation for the "group" field.
+	DefaultGroup string
+	// DefaultForm holds the default value on creation for the "form" field.
+	DefaultForm string
+	// DefaultLastUpdated holds the default value on creation for the "LastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "LastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
+)
+
 // Order defines the ordering method for the Standings queries.
 type Order func(*sql.Selector)
 
@@ -80,16 +169,129 @@ func ByRank(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldRank, opts...).ToFunc()
 }
 
+// ByPoints orders the results by the points field.
+func ByPoints(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldPoints, opts...).ToFunc()
+}
+
+// ByGoalsDiff orders the results by the goalsDiff field.
+func ByGoalsDiff(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldGoalsDiff, opts...).ToFunc()
+}
+
+// ByGroup orders the results by the group field.
+func ByGroup(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldGroup, opts...).ToFunc()
+}
+
+// ByForm orders the results by the form field.
+func ByForm(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldForm, opts...).ToFunc()
+}
+
+// ByStatus orders the results by the status field.
+func ByStatus(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldStatus, opts...).ToFunc()
+}
+
 // ByDescription orders the results by the description field.
 func ByDescription(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldDescription, opts...).ToFunc()
 }
 
-// ByLeagueField orders the results by league field.
-func ByLeagueField(field string, opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLeagueStep(), sql.OrderByField(field, opts...))
-	}
+// ByAllPlayed orders the results by the allPlayed field.
+func ByAllPlayed(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAllPlayed, opts...).ToFunc()
+}
+
+// ByAllWin orders the results by the allWin field.
+func ByAllWin(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAllWin, opts...).ToFunc()
+}
+
+// ByAllDraw orders the results by the allDraw field.
+func ByAllDraw(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAllDraw, opts...).ToFunc()
+}
+
+// ByAllLose orders the results by the allLose field.
+func ByAllLose(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAllLose, opts...).ToFunc()
+}
+
+// ByAllGoalsFor orders the results by the allGoalsFor field.
+func ByAllGoalsFor(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAllGoalsFor, opts...).ToFunc()
+}
+
+// ByAllGoalsAgainst orders the results by the allGoalsAgainst field.
+func ByAllGoalsAgainst(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAllGoalsAgainst, opts...).ToFunc()
+}
+
+// ByHomePlayed orders the results by the homePlayed field.
+func ByHomePlayed(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldHomePlayed, opts...).ToFunc()
+}
+
+// ByHomeWin orders the results by the homeWin field.
+func ByHomeWin(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldHomeWin, opts...).ToFunc()
+}
+
+// ByHomeDraw orders the results by the homeDraw field.
+func ByHomeDraw(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldHomeDraw, opts...).ToFunc()
+}
+
+// ByHomeLose orders the results by the homeLose field.
+func ByHomeLose(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldHomeLose, opts...).ToFunc()
+}
+
+// ByHomeGoalsFor orders the results by the homeGoalsFor field.
+func ByHomeGoalsFor(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldHomeGoalsFor, opts...).ToFunc()
+}
+
+// ByHomeGoalsAgainst orders the results by the homeGoalsAgainst field.
+func ByHomeGoalsAgainst(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldHomeGoalsAgainst, opts...).ToFunc()
+}
+
+// ByAwayPlayed orders the results by the awayPlayed field.
+func ByAwayPlayed(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAwayPlayed, opts...).ToFunc()
+}
+
+// ByAwayWin orders the results by the awayWin field.
+func ByAwayWin(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAwayWin, opts...).ToFunc()
+}
+
+// ByAwayDraw orders the results by the awayDraw field.
+func ByAwayDraw(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAwayDraw, opts...).ToFunc()
+}
+
+// ByAwayLose orders the results by the awayLose field.
+func ByAwayLose(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAwayLose, opts...).ToFunc()
+}
+
+// ByAwayGoalsFor orders the results by the awayGoalsFor field.
+func ByAwayGoalsFor(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAwayGoalsFor, opts...).ToFunc()
+}
+
+// ByAwayGoalsAgainst orders the results by the awayGoalsAgainst field.
+func ByAwayGoalsAgainst(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldAwayGoalsAgainst, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the LastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // ByTeamField orders the results by team field.
@@ -98,17 +300,24 @@ func ByTeamField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newLeagueStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LeagueInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LeagueTable, LeagueColumn),
-	)
+
+// ByLeagueField orders the results by league field.
+func ByLeagueField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLeagueStep(), sql.OrderByField(field, opts...))
+	}
 }
 func newTeamStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, TeamTable, TeamColumn),
+	)
+}
+func newLeagueStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LeagueInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, LeagueTable, LeagueColumn),
 	)
 }
