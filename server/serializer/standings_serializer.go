@@ -14,10 +14,9 @@ type APIRecord struct {
 }
 
 type APIStanding struct {
-	Rank        int       `json:"rank"`
-	Description string    `json:"description"`
-	League      APILeague `json:"league"`
-	Team        APITeam   `json:"team"`
+	Rank        int     `json:"rank"`
+	Description string  `json:"description"`
+	Team        APITeam `json:"team"`
 
 	Points    int    `json:"points"`
 	GoalsDiff int    `json:"goalsDiff"`
@@ -34,12 +33,6 @@ func SerializeStanding(standings *ent.Standings) *APIStanding {
 	return &APIStanding{
 		Rank:        standings.Rank,
 		Description: standings.Description,
-		League: APILeague{
-			Slug: standings.Edges.League.Slug,
-			Name: standings.Edges.League.Name,
-			Type: standings.Edges.League.Type.String(),
-			Logo: standings.Edges.League.Logo,
-		},
 		Team: APITeam{
 			Slug: standings.Edges.Team.Slug,
 			Name: APITeamName{
