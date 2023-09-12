@@ -1,50 +1,62 @@
-enum SearchType {
+enum APISearchType {
   LEAGUE = "league",
   TEAM = "team",
   PLAYER = "player",
   FIXTURE = "fixture",
 }
 
-interface SearchModel {
+interface APISearch {
   slug: string;
   name: string;
-  type: SearchType;
+  type: APISearchType;
   image: string;
 }
 
-interface CountryModel {
+interface APICountry {
   code: string;
   name: string;
   flag: string;
 }
 
-enum LeagueType {
+enum APILeagueType {
   CUP = "cup",
   LEAGUE = "league",
 }
 
-interface LeagueModel {
+interface APILeague {
   slug: string;
   name: string;
-  type: LeagueType;
+  type: APILeagueType;
   logo: string;
-  country?: CountryModel;
-  leagueStandings?: LeagueStandings;
+  country?: APICountry;
+  leagueStandings?: APIStandings;
 }
 
-interface TeamModel {
+interface APITeamName {
+  long: string;
+  short: string;
+}
+
+interface APITeam {
   slug: string;
-  name: string;
-  logo: string;
-  country?: CountryModel;
-  league?: LeagueModel;
+  name: APITeamName;
+  badge: string;
+  founded?: number;
+  nationalTeam?: boolean;
+  country?: APICountry;
+  competitions?: APICompetitions[];
 }
 
-interface LeagueStandings {
-  standings: TeamStanding[];
+interface APICompetitions {
+  League: APILeague;
+  Current: boolean;
 }
 
-interface TeamRecord {
+interface APIStandings {
+  standings: APIStanding[];
+}
+
+interface APIRecord {
   Played: number;
   Won: number;
   Draw: number;
@@ -53,17 +65,31 @@ interface TeamRecord {
   GoalsAgainst: number;
 }
 
-interface TeamStanding {
+interface APIStanding {
   Rank: number;
   Description: string;
-  League: LeagueModel;
-  Team: TeamModel;
+  League: APILeague;
+  Team: APITeam;
   Points: number;
   GoalsDiff: number;
   Group: string;
   Form: string;
   Status: string;
-  Home: TeamRecord;
-  Away: TeamRecord;
-  Overall: TeamRecord;
+  Home: APIRecord;
+  Away: APIRecord;
+  Overall: APIRecord;
 }
+
+export {
+  APISearchType,
+  APISearch,
+  APICountry,
+  APILeagueType,
+  APILeague,
+  APITeamName,
+  APITeam,
+  APICompetitions,
+  APIStandings,
+  APIRecord,
+  APIStanding
+};

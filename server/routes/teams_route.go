@@ -2,42 +2,47 @@ package routes
 
 import (
 	"context"
+	"fmt"
 	"github.com/gofiber/fiber/v2"
-	"log"
 	"mapeleven/db/ent"
-	"mapeleven/models"
-	"strconv"
+	"mapeleven/serializer"
 )
 
 // SetupTeamsRoutes sets up the routes for managing teams.
 func SetupTeamsRoutes(app *fiber.App, client *ent.Client) {
-	teamModel := models.NewTeamModel(client)
+	teamSerializer := serializer.NewTeamSerializer(client)
 
-	// Get all teams
-	app.Get("/teams", func(c *fiber.Ctx) error {
-		teams, err := teamModel.ListTeams(context.Background())
+	app.Get("/teams", getAllTeams(teamSerializer))
+	app.Get("/teams/:slug", getTeamBySlug(teamSerializer))
+}
+
+func getAllTeams(serializer *serializer.TeamSerializer) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		teams, err := serializer.GetTeams(context.Background())
 		if err != nil {
-			log.Println(err)
-			return fiber.NewError(fiber.StatusInternalServerError, "Failed to get teams")
+			return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+				"error": fmt.Sprintf("Failed to get teams: %v", err),
+			})
 		}
-
 		return c.JSON(teams)
-	})
+	}
+}
 
-	// Get a team by ID
-	app.Get("/teams/:id", func(c *fiber.Ctx) error {
-		id, err := strconv.Atoi(c.Params("id"))
+func getTeamBySlug(serializer *serializer.TeamSerializer) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		slug := c.Params("slug")
+
+		team, err := serializer.GetTeamBySlug(context.Background(), slug)
 		if err != nil {
-			log.Println(err)
-			return fiber.NewError(fiber.StatusBadRequest, "Invalid team ID")
+			if ent.IsNotFound(err) {
+				return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
+					"error": fmt.Sprintf("Team not found: %v", err),
+				})
+			}
+			return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
+				"error": fmt.Sprintf("Failed to get team: %v", err),
+			})
 		}
-
-		team, err := teamModel.GetTeamByID(context.Background(), id)
-		if err != nil {
-			log.Println(err)
-			return fiber.NewError(fiber.StatusNotFound, "Team not found")
-		}
-
 		return c.JSON(team)
-	})
+	}
 }
