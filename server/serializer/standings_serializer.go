@@ -4,7 +4,7 @@ import (
 	"mapeleven/db/ent"
 )
 
-type Record struct {
+type APIRecord struct {
 	Played       int `json:"played"`
 	Won          int `json:"won"`
 	Draw         int `json:"draw"`
@@ -13,11 +13,11 @@ type Record struct {
 	GoalsAgainst int `json:"goalsAgainst"`
 }
 
-type Standing struct {
-	Rank        int            `json:"rank"`
-	Description string         `json:"description"`
-	League      LeagueItem     `json:"league"`
-	Team        TeamSerializer `json:"team"`
+type APIStanding struct {
+	Rank        int       `json:"rank"`
+	Description string    `json:"description"`
+	League      APILeague `json:"league"`
+	Team        APITeam   `json:"team"`
 
 	Points    int    `json:"points"`
 	GoalsDiff int    `json:"goalsDiff"`
@@ -25,24 +25,27 @@ type Standing struct {
 	Form      string `json:"form"`
 	Status    string `json:"status"`
 
-	Home    Record `json:"home"`
-	Away    Record `json:"away"`
-	Overall Record `json:"overall"`
+	Home    APIRecord `json:"home"`
+	Away    APIRecord `json:"away"`
+	Overall APIRecord `json:"overall"`
 }
 
-func SerializeStanding(standings *ent.Standings) *Standing {
-	return &Standing{
+func SerializeStanding(standings *ent.Standings) *APIStanding {
+	return &APIStanding{
 		Rank:        standings.Rank,
 		Description: standings.Description,
-		League: LeagueItem{
+		League: APILeague{
 			Slug: standings.Edges.League.Slug,
 			Name: standings.Edges.League.Name,
 			Type: standings.Edges.League.Type.String(),
 			Logo: standings.Edges.League.Logo,
 		},
-		Team: TeamSerializer{
-			Slug:  standings.Edges.Team.Slug,
-			Name:  standings.Edges.Team.Name,
+		Team: APITeam{
+			Slug: standings.Edges.Team.Slug,
+			Name: APITeamName{
+				Long:  standings.Edges.Team.Name,
+				Short: standings.Edges.Team.Code,
+			},
 			Badge: standings.Edges.Team.Logo,
 		},
 		Points:    standings.Points,
@@ -50,7 +53,7 @@ func SerializeStanding(standings *ent.Standings) *Standing {
 		Group:     standings.Group,
 		Form:      standings.Form,
 		Status:    standings.Status,
-		Home: Record{
+		Home: APIRecord{
 			Played:       standings.HomePlayed,
 			Won:          standings.HomeWin,
 			Draw:         standings.HomeDraw,
@@ -58,7 +61,7 @@ func SerializeStanding(standings *ent.Standings) *Standing {
 			GoalsFor:     standings.HomeGoalsFor,
 			GoalsAgainst: standings.HomeGoalsAgainst,
 		},
-		Away: Record{
+		Away: APIRecord{
 			Played:       standings.AwayPlayed,
 			Won:          standings.AwayWin,
 			Draw:         standings.AwayDraw,
@@ -66,7 +69,7 @@ func SerializeStanding(standings *ent.Standings) *Standing {
 			GoalsFor:     standings.AwayGoalsFor,
 			GoalsAgainst: standings.AwayGoalsAgainst,
 		},
-		Overall: Record{
+		Overall: APIRecord{
 			Played:       standings.AllPlayed,
 			Won:          standings.AllWin,
 			Draw:         standings.AllDraw,
