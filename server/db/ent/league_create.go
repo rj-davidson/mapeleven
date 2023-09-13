@@ -7,11 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/country"
-	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/season"
-	"mapeleven/db/ent/standings"
-	"mapeleven/db/ent/team"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -22,6 +19,12 @@ type LeagueCreate struct {
 	config
 	mutation *LeagueMutation
 	hooks    []Hook
+}
+
+// SetFootballApiId sets the "footballApiId" field.
+func (lc *LeagueCreate) SetFootballApiId(i int) *LeagueCreate {
+	lc.mutation.SetFootballApiId(i)
+	return lc
 }
 
 // SetSlug sets the "slug" field.
@@ -48,61 +51,6 @@ func (lc *LeagueCreate) SetLogo(s string) *LeagueCreate {
 	return lc
 }
 
-// SetID sets the "id" field.
-func (lc *LeagueCreate) SetID(i int) *LeagueCreate {
-	lc.mutation.SetID(i)
-	return lc
-}
-
-// SetSeasonID sets the "season" edge to the Season entity by ID.
-func (lc *LeagueCreate) SetSeasonID(id int) *LeagueCreate {
-	lc.mutation.SetSeasonID(id)
-	return lc
-}
-
-// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
-func (lc *LeagueCreate) SetNillableSeasonID(id *int) *LeagueCreate {
-	if id != nil {
-		lc = lc.SetSeasonID(*id)
-	}
-	return lc
-}
-
-// SetSeason sets the "season" edge to the Season entity.
-func (lc *LeagueCreate) SetSeason(s *Season) *LeagueCreate {
-	return lc.SetSeasonID(s.ID)
-}
-
-// AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
-func (lc *LeagueCreate) AddStandingIDs(ids ...int) *LeagueCreate {
-	lc.mutation.AddStandingIDs(ids...)
-	return lc
-}
-
-// AddStandings adds the "standings" edges to the Standings entity.
-func (lc *LeagueCreate) AddStandings(s ...*Standings) *LeagueCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return lc.AddStandingIDs(ids...)
-}
-
-// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (lc *LeagueCreate) AddTeamIDs(ids ...int) *LeagueCreate {
-	lc.mutation.AddTeamIDs(ids...)
-	return lc
-}
-
-// AddTeams adds the "teams" edges to the Team entity.
-func (lc *LeagueCreate) AddTeams(t ...*Team) *LeagueCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return lc.AddTeamIDs(ids...)
-}
-
 // SetCountryID sets the "country" edge to the Country entity by ID.
 func (lc *LeagueCreate) SetCountryID(id int) *LeagueCreate {
 	lc.mutation.SetCountryID(id)
@@ -122,19 +70,19 @@ func (lc *LeagueCreate) SetCountry(c *Country) *LeagueCreate {
 	return lc.SetCountryID(c.ID)
 }
 
-// AddFixtureIDs adds the "fixtures" edge to the Fixture entity by IDs.
-func (lc *LeagueCreate) AddFixtureIDs(ids ...int) *LeagueCreate {
-	lc.mutation.AddFixtureIDs(ids...)
+// AddSeasonIDs adds the "season" edge to the Season entity by IDs.
+func (lc *LeagueCreate) AddSeasonIDs(ids ...int) *LeagueCreate {
+	lc.mutation.AddSeasonIDs(ids...)
 	return lc
 }
 
-// AddFixtures adds the "fixtures" edges to the Fixture entity.
-func (lc *LeagueCreate) AddFixtures(f ...*Fixture) *LeagueCreate {
-	ids := make([]int, len(f))
-	for i := range f {
-		ids[i] = f[i].ID
+// AddSeason adds the "season" edges to the Season entity.
+func (lc *LeagueCreate) AddSeason(s ...*Season) *LeagueCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
 	}
-	return lc.AddFixtureIDs(ids...)
+	return lc.AddSeasonIDs(ids...)
 }
 
 // Mutation returns the LeagueMutation object of the builder.
@@ -171,6 +119,9 @@ func (lc *LeagueCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (lc *LeagueCreate) check() error {
+	if _, ok := lc.mutation.FootballApiId(); !ok {
+		return &ValidationError{Name: "footballApiId", err: errors.New(`ent: missing required field "League.footballApiId"`)}
+	}
 	if _, ok := lc.mutation.Slug(); !ok {
 		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "League.slug"`)}
 	}
@@ -202,10 +153,8 @@ func (lc *LeagueCreate) sqlSave(ctx context.Context) (*League, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	lc.mutation.id = &_node.ID
 	lc.mutation.done = true
 	return _node, nil
@@ -216,9 +165,9 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 		_node = &League{config: lc.config}
 		_spec = sqlgraph.NewCreateSpec(league.Table, sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt))
 	)
-	if id, ok := lc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
+	if value, ok := lc.mutation.FootballApiId(); ok {
+		_spec.SetField(league.FieldFootballApiId, field.TypeInt, value)
+		_node.FootballApiId = value
 	}
 	if value, ok := lc.mutation.Slug(); ok {
 		_spec.SetField(league.FieldSlug, field.TypeString, value)
@@ -235,55 +184,6 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 	if value, ok := lc.mutation.Logo(); ok {
 		_spec.SetField(league.FieldLogo, field.TypeString, value)
 		_node.Logo = value
-	}
-	if nodes := lc.mutation.SeasonIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
-			Table:   league.SeasonTable,
-			Columns: []string{league.SeasonColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.season_league = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := lc.mutation.StandingsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   league.StandingsTable,
-			Columns: []string{league.StandingsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(standings.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := lc.mutation.TeamsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   league.TeamsTable,
-			Columns: league.TeamsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := lc.mutation.CountryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -302,15 +202,15 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 		_node.country_leagues = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := lc.mutation.FixturesIDs(); len(nodes) > 0 {
+	if nodes := lc.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   league.FixturesTable,
-			Columns: []string{league.FixturesColumn},
+			Table:   league.SeasonTable,
+			Columns: []string{league.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -361,7 +261,7 @@ func (lcb *LeagueCreateBulk) Save(ctx context.Context) ([]*League, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}

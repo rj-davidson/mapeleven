@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/fixture"
-	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/predicate"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/team"
 	"time"
 
@@ -190,36 +190,9 @@ func (fu *FixtureUpdate) ClearAwayTeamScore() *FixtureUpdate {
 	return fu
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (fu *FixtureUpdate) SetLeagueID(id int) *FixtureUpdate {
-	fu.mutation.SetLeagueID(id)
-	return fu
-}
-
-// SetNillableLeagueID sets the "league" edge to the League entity by ID if the given value is not nil.
-func (fu *FixtureUpdate) SetNillableLeagueID(id *int) *FixtureUpdate {
-	if id != nil {
-		fu = fu.SetLeagueID(*id)
-	}
-	return fu
-}
-
-// SetLeague sets the "league" edge to the League entity.
-func (fu *FixtureUpdate) SetLeague(l *League) *FixtureUpdate {
-	return fu.SetLeagueID(l.ID)
-}
-
 // SetHomeTeamID sets the "homeTeam" edge to the Team entity by ID.
 func (fu *FixtureUpdate) SetHomeTeamID(id int) *FixtureUpdate {
 	fu.mutation.SetHomeTeamID(id)
-	return fu
-}
-
-// SetNillableHomeTeamID sets the "homeTeam" edge to the Team entity by ID if the given value is not nil.
-func (fu *FixtureUpdate) SetNillableHomeTeamID(id *int) *FixtureUpdate {
-	if id != nil {
-		fu = fu.SetHomeTeamID(*id)
-	}
 	return fu
 }
 
@@ -234,28 +207,25 @@ func (fu *FixtureUpdate) SetAwayTeamID(id int) *FixtureUpdate {
 	return fu
 }
 
-// SetNillableAwayTeamID sets the "awayTeam" edge to the Team entity by ID if the given value is not nil.
-func (fu *FixtureUpdate) SetNillableAwayTeamID(id *int) *FixtureUpdate {
-	if id != nil {
-		fu = fu.SetAwayTeamID(*id)
-	}
-	return fu
-}
-
 // SetAwayTeam sets the "awayTeam" edge to the Team entity.
 func (fu *FixtureUpdate) SetAwayTeam(t *Team) *FixtureUpdate {
 	return fu.SetAwayTeamID(t.ID)
 }
 
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (fu *FixtureUpdate) SetSeasonID(id int) *FixtureUpdate {
+	fu.mutation.SetSeasonID(id)
+	return fu
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (fu *FixtureUpdate) SetSeason(s *Season) *FixtureUpdate {
+	return fu.SetSeasonID(s.ID)
+}
+
 // Mutation returns the FixtureMutation object of the builder.
 func (fu *FixtureUpdate) Mutation() *FixtureMutation {
 	return fu.mutation
-}
-
-// ClearLeague clears the "league" edge to the League entity.
-func (fu *FixtureUpdate) ClearLeague() *FixtureUpdate {
-	fu.mutation.ClearLeague()
-	return fu
 }
 
 // ClearHomeTeam clears the "homeTeam" edge to the Team entity.
@@ -267,6 +237,12 @@ func (fu *FixtureUpdate) ClearHomeTeam() *FixtureUpdate {
 // ClearAwayTeam clears the "awayTeam" edge to the Team entity.
 func (fu *FixtureUpdate) ClearAwayTeam() *FixtureUpdate {
 	fu.mutation.ClearAwayTeam()
+	return fu
+}
+
+// ClearSeason clears the "season" edge to the Season entity.
+func (fu *FixtureUpdate) ClearSeason() *FixtureUpdate {
+	fu.mutation.ClearSeason()
 	return fu
 }
 
@@ -297,7 +273,24 @@ func (fu *FixtureUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (fu *FixtureUpdate) check() error {
+	if _, ok := fu.mutation.HomeTeamID(); fu.mutation.HomeTeamCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Fixture.homeTeam"`)
+	}
+	if _, ok := fu.mutation.AwayTeamID(); fu.mutation.AwayTeamCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Fixture.awayTeam"`)
+	}
+	if _, ok := fu.mutation.SeasonID(); fu.mutation.SeasonCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Fixture.season"`)
+	}
+	return nil
+}
+
 func (fu *FixtureUpdate) sqlSave(ctx context.Context) (n int, err error) {
+	if err := fu.check(); err != nil {
+		return n, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(fixture.Table, fixture.Columns, sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt))
 	if ps := fu.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
@@ -360,35 +353,6 @@ func (fu *FixtureUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if fu.mutation.AwayTeamScoreCleared() {
 		_spec.ClearField(fixture.FieldAwayTeamScore, field.TypeInt)
 	}
-	if fu.mutation.LeagueCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   fixture.LeagueTable,
-			Columns: []string{fixture.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fu.mutation.LeagueIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   fixture.LeagueTable,
-			Columns: []string{fixture.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if fu.mutation.HomeTeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -440,6 +404,35 @@ func (fu *FixtureUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fu.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixture.SeasonTable,
+			Columns: []string{fixture.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixture.SeasonTable,
+			Columns: []string{fixture.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -627,36 +620,9 @@ func (fuo *FixtureUpdateOne) ClearAwayTeamScore() *FixtureUpdateOne {
 	return fuo
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (fuo *FixtureUpdateOne) SetLeagueID(id int) *FixtureUpdateOne {
-	fuo.mutation.SetLeagueID(id)
-	return fuo
-}
-
-// SetNillableLeagueID sets the "league" edge to the League entity by ID if the given value is not nil.
-func (fuo *FixtureUpdateOne) SetNillableLeagueID(id *int) *FixtureUpdateOne {
-	if id != nil {
-		fuo = fuo.SetLeagueID(*id)
-	}
-	return fuo
-}
-
-// SetLeague sets the "league" edge to the League entity.
-func (fuo *FixtureUpdateOne) SetLeague(l *League) *FixtureUpdateOne {
-	return fuo.SetLeagueID(l.ID)
-}
-
 // SetHomeTeamID sets the "homeTeam" edge to the Team entity by ID.
 func (fuo *FixtureUpdateOne) SetHomeTeamID(id int) *FixtureUpdateOne {
 	fuo.mutation.SetHomeTeamID(id)
-	return fuo
-}
-
-// SetNillableHomeTeamID sets the "homeTeam" edge to the Team entity by ID if the given value is not nil.
-func (fuo *FixtureUpdateOne) SetNillableHomeTeamID(id *int) *FixtureUpdateOne {
-	if id != nil {
-		fuo = fuo.SetHomeTeamID(*id)
-	}
 	return fuo
 }
 
@@ -671,28 +637,25 @@ func (fuo *FixtureUpdateOne) SetAwayTeamID(id int) *FixtureUpdateOne {
 	return fuo
 }
 
-// SetNillableAwayTeamID sets the "awayTeam" edge to the Team entity by ID if the given value is not nil.
-func (fuo *FixtureUpdateOne) SetNillableAwayTeamID(id *int) *FixtureUpdateOne {
-	if id != nil {
-		fuo = fuo.SetAwayTeamID(*id)
-	}
-	return fuo
-}
-
 // SetAwayTeam sets the "awayTeam" edge to the Team entity.
 func (fuo *FixtureUpdateOne) SetAwayTeam(t *Team) *FixtureUpdateOne {
 	return fuo.SetAwayTeamID(t.ID)
 }
 
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (fuo *FixtureUpdateOne) SetSeasonID(id int) *FixtureUpdateOne {
+	fuo.mutation.SetSeasonID(id)
+	return fuo
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (fuo *FixtureUpdateOne) SetSeason(s *Season) *FixtureUpdateOne {
+	return fuo.SetSeasonID(s.ID)
+}
+
 // Mutation returns the FixtureMutation object of the builder.
 func (fuo *FixtureUpdateOne) Mutation() *FixtureMutation {
 	return fuo.mutation
-}
-
-// ClearLeague clears the "league" edge to the League entity.
-func (fuo *FixtureUpdateOne) ClearLeague() *FixtureUpdateOne {
-	fuo.mutation.ClearLeague()
-	return fuo
 }
 
 // ClearHomeTeam clears the "homeTeam" edge to the Team entity.
@@ -704,6 +667,12 @@ func (fuo *FixtureUpdateOne) ClearHomeTeam() *FixtureUpdateOne {
 // ClearAwayTeam clears the "awayTeam" edge to the Team entity.
 func (fuo *FixtureUpdateOne) ClearAwayTeam() *FixtureUpdateOne {
 	fuo.mutation.ClearAwayTeam()
+	return fuo
+}
+
+// ClearSeason clears the "season" edge to the Season entity.
+func (fuo *FixtureUpdateOne) ClearSeason() *FixtureUpdateOne {
+	fuo.mutation.ClearSeason()
 	return fuo
 }
 
@@ -747,7 +716,24 @@ func (fuo *FixtureUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (fuo *FixtureUpdateOne) check() error {
+	if _, ok := fuo.mutation.HomeTeamID(); fuo.mutation.HomeTeamCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Fixture.homeTeam"`)
+	}
+	if _, ok := fuo.mutation.AwayTeamID(); fuo.mutation.AwayTeamCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Fixture.awayTeam"`)
+	}
+	if _, ok := fuo.mutation.SeasonID(); fuo.mutation.SeasonCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Fixture.season"`)
+	}
+	return nil
+}
+
 func (fuo *FixtureUpdateOne) sqlSave(ctx context.Context) (_node *Fixture, err error) {
+	if err := fuo.check(); err != nil {
+		return _node, err
+	}
 	_spec := sqlgraph.NewUpdateSpec(fixture.Table, fixture.Columns, sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt))
 	id, ok := fuo.mutation.ID()
 	if !ok {
@@ -827,35 +813,6 @@ func (fuo *FixtureUpdateOne) sqlSave(ctx context.Context) (_node *Fixture, err e
 	if fuo.mutation.AwayTeamScoreCleared() {
 		_spec.ClearField(fixture.FieldAwayTeamScore, field.TypeInt)
 	}
-	if fuo.mutation.LeagueCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   fixture.LeagueTable,
-			Columns: []string{fixture.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := fuo.mutation.LeagueIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   fixture.LeagueTable,
-			Columns: []string{fixture.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if fuo.mutation.HomeTeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -907,6 +864,35 @@ func (fuo *FixtureUpdateOne) sqlSave(ctx context.Context) (_node *Fixture, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fuo.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixture.SeasonTable,
+			Columns: []string{fixture.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixture.SeasonTable,
+			Columns: []string{fixture.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

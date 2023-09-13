@@ -21,9 +21,6 @@ type League func(*sql.Selector)
 // Player is the predicate function for player builders.
 type Player func(*sql.Selector)
 
-// PlayerTeamSeason is the predicate function for playerteamseason builders.
-type PlayerTeamSeason func(*sql.Selector)
-
 // Season is the predicate function for season builders.
 type Season func(*sql.Selector)
 
@@ -32,6 +29,3 @@ type Standings func(*sql.Selector)
 
 // Team is the predicate function for team builders.
 type Team func(*sql.Selector)
-
-// TeamSeason is the predicate function for teamseason builders.
-type TeamSeason func(*sql.Selector)

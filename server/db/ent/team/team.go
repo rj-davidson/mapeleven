@@ -28,12 +28,6 @@ const (
 	EdgeStandings = "standings"
 	// EdgeCountry holds the string denoting the country edge name in mutations.
 	EdgeCountry = "country"
-	// EdgeLeagues holds the string denoting the leagues edge name in mutations.
-	EdgeLeagues = "leagues"
-	// EdgePlayers holds the string denoting the players edge name in mutations.
-	EdgePlayers = "players"
-	// EdgeTeamSeasons holds the string denoting the teamseasons edge name in mutations.
-	EdgeTeamSeasons = "teamSeasons"
 	// EdgeHomeFixtures holds the string denoting the homefixtures edge name in mutations.
 	EdgeHomeFixtures = "homeFixtures"
 	// EdgeAwayFixtures holds the string denoting the awayfixtures edge name in mutations.
@@ -54,23 +48,6 @@ const (
 	CountryInverseTable = "countries"
 	// CountryColumn is the table column denoting the country relation/edge.
 	CountryColumn = "country_teams"
-	// LeaguesTable is the table that holds the leagues relation/edge. The primary key declared below.
-	LeaguesTable = "league_teams"
-	// LeaguesInverseTable is the table name for the League entity.
-	// It exists in this package in order to avoid circular dependency with the "league" package.
-	LeaguesInverseTable = "leagues"
-	// PlayersTable is the table that holds the players relation/edge. The primary key declared below.
-	PlayersTable = "team_players"
-	// PlayersInverseTable is the table name for the Player entity.
-	// It exists in this package in order to avoid circular dependency with the "player" package.
-	PlayersInverseTable = "players"
-	// TeamSeasonsTable is the table that holds the teamSeasons relation/edge.
-	TeamSeasonsTable = "team_seasons"
-	// TeamSeasonsInverseTable is the table name for the TeamSeason entity.
-	// It exists in this package in order to avoid circular dependency with the "teamseason" package.
-	TeamSeasonsInverseTable = "team_seasons"
-	// TeamSeasonsColumn is the table column denoting the teamSeasons relation/edge.
-	TeamSeasonsColumn = "team_team_seasons"
 	// HomeFixturesTable is the table that holds the homeFixtures relation/edge.
 	HomeFixturesTable = "fixtures"
 	// HomeFixturesInverseTable is the table name for the Fixture entity.
@@ -103,15 +80,6 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"country_teams",
 }
-
-var (
-	// LeaguesPrimaryKey and LeaguesColumn2 are the table columns denoting the
-	// primary key for the leagues relation (M2M).
-	LeaguesPrimaryKey = []string{"league_id", "team_id"}
-	// PlayersPrimaryKey and PlayersColumn2 are the table columns denoting the
-	// primary key for the players relation (M2M).
-	PlayersPrimaryKey = []string{"team_id", "player_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -192,48 +160,6 @@ func ByCountryField(field string, opts ...sql.OrderTermOption) Order {
 	}
 }
 
-// ByLeaguesCount orders the results by leagues count.
-func ByLeaguesCount(opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newLeaguesStep(), opts...)
-	}
-}
-
-// ByLeagues orders the results by leagues terms.
-func ByLeagues(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLeaguesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByPlayersCount orders the results by players count.
-func ByPlayersCount(opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlayersStep(), opts...)
-	}
-}
-
-// ByPlayers orders the results by players terms.
-func ByPlayers(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayersStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByTeamSeasonsCount orders the results by teamSeasons count.
-func ByTeamSeasonsCount(opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTeamSeasonsStep(), opts...)
-	}
-}
-
-// ByTeamSeasons orders the results by teamSeasons terms.
-func ByTeamSeasons(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTeamSeasonsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
 // ByHomeFixturesCount orders the results by homeFixtures count.
 func ByHomeFixturesCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
@@ -273,27 +199,6 @@ func newCountryStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(CountryInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
-	)
-}
-func newLeaguesStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LeaguesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, LeaguesTable, LeaguesPrimaryKey...),
-	)
-}
-func newPlayersStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlayersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PlayersTable, PlayersPrimaryKey...),
-	)
-}
-func newTeamSeasonsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TeamSeasonsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TeamSeasonsTable, TeamSeasonsColumn),
 	)
 }
 func newHomeFixturesStep() *sqlgraph.Step {

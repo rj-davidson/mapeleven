@@ -31,7 +31,7 @@ func NewBirthModel(client *ent.Client) *BirthModel {
 	return &BirthModel{client: client}
 }
 
-// GetBirth retrieves a birth record by ID.
+// GetBirth retrieves a birth record by FootballApiId.
 func (bm *BirthModel) GetBirth(id int) (*ent.Birth, error) {
 	return bm.client.Birth.
 		Get(context.Background(), id)
@@ -52,7 +52,7 @@ func (bm *BirthModel) UpdateBirth(input UpdateBirthInput) (*ent.Birth, error) {
 	return updater.Save(context.Background())
 }
 
-// DeleteBirth deletes a birth record by ID.
+// DeleteBirth deletes a birth record by FootballApiId.
 func (bm *BirthModel) DeleteBirth(id int) error {
 	return bm.client.Birth.
 		DeleteOneID(id).

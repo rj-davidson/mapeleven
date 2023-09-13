@@ -5,16 +5,17 @@ import (
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"mapeleven/utils"
 )
 
 // CreateLeagueInput holds the input data needed to create a new league record.
 type CreateLeagueInput struct {
-	ID      int
-	Name    string
-	Type    league.Type
-	Logo    string
-	Country string
+	FootballApiId int         `json:"id"`
+	Name          string      `json:"name"`
+	Type          league.Type `json:"type"`
+	Logo          string      `json:"logo"`
+	Country       string      `json:"country"`
 }
 
 // UpdateLeagueInput holds the input data needed to update an existing league record.
@@ -26,7 +27,7 @@ type UpdateLeagueInput struct {
 	Country *string
 }
 
-// LeagueModel handles the CRUD operations for the League entity.
+// LeagueModel handles the CRUD operations for the SeasonID entity.
 type LeagueModel struct {
 	client *ent.Client
 }
@@ -38,7 +39,6 @@ func NewLeagueModel(client *ent.Client) *LeagueModel {
 
 // CreateLeague creates a new league record.
 func (lm *LeagueModel) CreateLeague(ctx context.Context, input CreateLeagueInput) (*ent.League, error) {
-	// Find the country by its code
 	c, err := lm.client.Country.
 		Query().
 		Where(country.NameEQ(input.Country)).
@@ -48,10 +48,10 @@ func (lm *LeagueModel) CreateLeague(ctx context.Context, input CreateLeagueInput
 		return nil, err
 	}
 
-	// Use the country's ID instead of the country code
+	// Use the country's FootballApiId instead of the country code
 	return lm.client.League.
 		Create().
-		SetID(input.ID).
+		SetFootballApiId(input.FootballApiId).
 		SetSlug(utils.Slugify(input.Name)).
 		SetName(input.Name).
 		SetType(input.Type).
@@ -89,26 +89,10 @@ func (lm *LeagueModel) UpdateLeague(ctx context.Context, input UpdateLeagueInput
 	return updater.Save(ctx)
 }
 
-// DeleteLeague deletes a league record by ID.
-func (lm *LeagueModel) DeleteLeague(ctx context.Context, id int) error {
-	return lm.client.League.
-		DeleteOneID(id).
-		Exec(ctx)
-}
-
-// GetLeagueByID retrieves a league record by ID.
+// GetLeagueByID retrieves a league record by FootballApiId.
 func (lm *LeagueModel) GetLeagueByID(ctx context.Context, id int) (*ent.League, error) {
 	return lm.client.League.
 		Get(ctx, id)
-}
-
-// GetLeagueSeason retrieves the season of a league.
-func (lm *LeagueModel) GetLeagueSeason(ctx context.Context, leagueID int) (*ent.Season, error) {
-	return lm.client.League.
-		Query().
-		Where(league.ID(leagueID)).
-		QuerySeason().
-		Only(ctx)
 }
 
 // ListLeagues retrieves a list of all leagues.
@@ -116,4 +100,24 @@ func (lm *LeagueModel) ListLeagues(ctx context.Context) ([]*ent.League, error) {
 	return lm.client.League.
 		Query().
 		All(ctx)
+}
+
+// LeagueExistsByFootballApiId checks if a league exists by FootballApiId.
+func (lm *LeagueModel) LeagueExistsByFootballApiId(ctx context.Context, id int) *ent.League {
+	l, _ := lm.client.League.
+		Query().
+		Where(league.FootballApiIdEQ(id)).
+		Only(ctx)
+	return l
+}
+
+// GetCurrentSeasonForLeague retrieves the current season for a league.
+func (lm *LeagueModel) GetCurrentSeasonForLeague(ctx context.Context, l *ent.League) (*ent.Season, error) {
+	return lm.client.Season.
+		Query().
+		Where(
+			season.HasLeagueWith(league.IDEQ(l.ID)),
+			season.CurrentEQ(true),
+		).
+		Only(ctx)
 }

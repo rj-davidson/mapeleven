@@ -6,8 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/predicate"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"time"
@@ -404,15 +404,15 @@ func (su *StandingsUpdate) SetTeam(t *Team) *StandingsUpdate {
 	return su.SetTeamID(t.ID)
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (su *StandingsUpdate) SetLeagueID(id int) *StandingsUpdate {
-	su.mutation.SetLeagueID(id)
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (su *StandingsUpdate) SetSeasonID(id int) *StandingsUpdate {
+	su.mutation.SetSeasonID(id)
 	return su
 }
 
-// SetLeague sets the "league" edge to the League entity.
-func (su *StandingsUpdate) SetLeague(l *League) *StandingsUpdate {
-	return su.SetLeagueID(l.ID)
+// SetSeason sets the "season" edge to the Season entity.
+func (su *StandingsUpdate) SetSeason(s *Season) *StandingsUpdate {
+	return su.SetSeasonID(s.ID)
 }
 
 // Mutation returns the StandingsMutation object of the builder.
@@ -426,9 +426,9 @@ func (su *StandingsUpdate) ClearTeam() *StandingsUpdate {
 	return su
 }
 
-// ClearLeague clears the "league" edge to the League entity.
-func (su *StandingsUpdate) ClearLeague() *StandingsUpdate {
-	su.mutation.ClearLeague()
+// ClearSeason clears the "season" edge to the Season entity.
+func (su *StandingsUpdate) ClearSeason() *StandingsUpdate {
+	su.mutation.ClearSeason()
 	return su
 }
 
@@ -473,8 +473,8 @@ func (su *StandingsUpdate) check() error {
 	if _, ok := su.mutation.TeamID(); su.mutation.TeamCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Standings.team"`)
 	}
-	if _, ok := su.mutation.LeagueID(); su.mutation.LeagueCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Standings.league"`)
+	if _, ok := su.mutation.SeasonID(); su.mutation.SeasonCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Standings.season"`)
 	}
 	return nil
 }
@@ -667,28 +667,28 @@ func (su *StandingsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if su.mutation.LeagueCleared() {
+	if su.mutation.SeasonCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
+			Table:   standings.SeasonTable,
+			Columns: []string{standings.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := su.mutation.LeagueIDs(); len(nodes) > 0 {
+	if nodes := su.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
+			Table:   standings.SeasonTable,
+			Columns: []string{standings.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -1090,15 +1090,15 @@ func (suo *StandingsUpdateOne) SetTeam(t *Team) *StandingsUpdateOne {
 	return suo.SetTeamID(t.ID)
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (suo *StandingsUpdateOne) SetLeagueID(id int) *StandingsUpdateOne {
-	suo.mutation.SetLeagueID(id)
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (suo *StandingsUpdateOne) SetSeasonID(id int) *StandingsUpdateOne {
+	suo.mutation.SetSeasonID(id)
 	return suo
 }
 
-// SetLeague sets the "league" edge to the League entity.
-func (suo *StandingsUpdateOne) SetLeague(l *League) *StandingsUpdateOne {
-	return suo.SetLeagueID(l.ID)
+// SetSeason sets the "season" edge to the Season entity.
+func (suo *StandingsUpdateOne) SetSeason(s *Season) *StandingsUpdateOne {
+	return suo.SetSeasonID(s.ID)
 }
 
 // Mutation returns the StandingsMutation object of the builder.
@@ -1112,9 +1112,9 @@ func (suo *StandingsUpdateOne) ClearTeam() *StandingsUpdateOne {
 	return suo
 }
 
-// ClearLeague clears the "league" edge to the League entity.
-func (suo *StandingsUpdateOne) ClearLeague() *StandingsUpdateOne {
-	suo.mutation.ClearLeague()
+// ClearSeason clears the "season" edge to the Season entity.
+func (suo *StandingsUpdateOne) ClearSeason() *StandingsUpdateOne {
+	suo.mutation.ClearSeason()
 	return suo
 }
 
@@ -1172,8 +1172,8 @@ func (suo *StandingsUpdateOne) check() error {
 	if _, ok := suo.mutation.TeamID(); suo.mutation.TeamCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "Standings.team"`)
 	}
-	if _, ok := suo.mutation.LeagueID(); suo.mutation.LeagueCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Standings.league"`)
+	if _, ok := suo.mutation.SeasonID(); suo.mutation.SeasonCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Standings.season"`)
 	}
 	return nil
 }
@@ -1383,28 +1383,28 @@ func (suo *StandingsUpdateOne) sqlSave(ctx context.Context) (_node *Standings, e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if suo.mutation.LeagueCleared() {
+	if suo.mutation.SeasonCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
+			Table:   standings.SeasonTable,
+			Columns: []string{standings.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := suo.mutation.LeagueIDs(); len(nodes) > 0 {
+	if nodes := suo.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
+			Table:   standings.SeasonTable,
+			Columns: []string{standings.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

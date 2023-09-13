@@ -57,7 +57,7 @@ func (Standings) Edges() []ent.Edge {
 			Ref("standings").
 			Unique().
 			Required(),
-		edge.From("league", League.Type).
+		edge.From("season", Season.Type).
 			Ref("standings").
 			Unique().
 			Required(),

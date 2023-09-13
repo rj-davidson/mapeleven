@@ -42,19 +42,13 @@ type TeamEdges struct {
 	Standings []*Standings `json:"standings,omitempty"`
 	// Country holds the value of the country edge.
 	Country *Country `json:"country,omitempty"`
-	// Leagues holds the value of the leagues edge.
-	Leagues []*League `json:"leagues,omitempty"`
-	// Players holds the value of the players edge.
-	Players []*Player `json:"players,omitempty"`
-	// TeamSeasons holds the value of the teamSeasons edge.
-	TeamSeasons []*TeamSeason `json:"teamSeasons,omitempty"`
 	// HomeFixtures holds the value of the homeFixtures edge.
 	HomeFixtures []*Fixture `json:"homeFixtures,omitempty"`
 	// AwayFixtures holds the value of the awayFixtures edge.
 	AwayFixtures []*Fixture `json:"awayFixtures,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [7]bool
+	loadedTypes [4]bool
 }
 
 // StandingsOrErr returns the Standings value or an error if the edge
@@ -79,37 +73,10 @@ func (e TeamEdges) CountryOrErr() (*Country, error) {
 	return nil, &NotLoadedError{edge: "country"}
 }
 
-// LeaguesOrErr returns the Leagues value or an error if the edge
-// was not loaded in eager-loading.
-func (e TeamEdges) LeaguesOrErr() ([]*League, error) {
-	if e.loadedTypes[2] {
-		return e.Leagues, nil
-	}
-	return nil, &NotLoadedError{edge: "leagues"}
-}
-
-// PlayersOrErr returns the Players value or an error if the edge
-// was not loaded in eager-loading.
-func (e TeamEdges) PlayersOrErr() ([]*Player, error) {
-	if e.loadedTypes[3] {
-		return e.Players, nil
-	}
-	return nil, &NotLoadedError{edge: "players"}
-}
-
-// TeamSeasonsOrErr returns the TeamSeasons value or an error if the edge
-// was not loaded in eager-loading.
-func (e TeamEdges) TeamSeasonsOrErr() ([]*TeamSeason, error) {
-	if e.loadedTypes[4] {
-		return e.TeamSeasons, nil
-	}
-	return nil, &NotLoadedError{edge: "teamSeasons"}
-}
-
 // HomeFixturesOrErr returns the HomeFixtures value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) HomeFixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[2] {
 		return e.HomeFixtures, nil
 	}
 	return nil, &NotLoadedError{edge: "homeFixtures"}
@@ -118,7 +85,7 @@ func (e TeamEdges) HomeFixturesOrErr() ([]*Fixture, error) {
 // AwayFixturesOrErr returns the AwayFixtures value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) AwayFixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[3] {
 		return e.AwayFixtures, nil
 	}
 	return nil, &NotLoadedError{edge: "awayFixtures"}
@@ -222,21 +189,6 @@ func (t *Team) QueryStandings() *StandingsQuery {
 // QueryCountry queries the "country" edge of the Team entity.
 func (t *Team) QueryCountry() *CountryQuery {
 	return NewTeamClient(t.config).QueryCountry(t)
-}
-
-// QueryLeagues queries the "leagues" edge of the Team entity.
-func (t *Team) QueryLeagues() *LeagueQuery {
-	return NewTeamClient(t.config).QueryLeagues(t)
-}
-
-// QueryPlayers queries the "players" edge of the Team entity.
-func (t *Team) QueryPlayers() *PlayerQuery {
-	return NewTeamClient(t.config).QueryPlayers(t)
-}
-
-// QueryTeamSeasons queries the "teamSeasons" edge of the Team entity.
-func (t *Team) QueryTeamSeasons() *TeamSeasonQuery {
-	return NewTeamClient(t.config).QueryTeamSeasons(t)
 }
 
 // QueryHomeFixtures queries the "homeFixtures" edge of the Team entity.

@@ -665,29 +665,6 @@ func AwayTeamScoreNotNil() predicate.Fixture {
 	return predicate.Fixture(sql.FieldNotNull(FieldAwayTeamScore))
 }
 
-// HasLeague applies the HasEdge predicate on the "league" edge.
-func HasLeague() predicate.Fixture {
-	return predicate.Fixture(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LeagueTable, LeagueColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLeagueWith applies the HasEdge predicate on the "league" edge with a given conditions (other predicates).
-func HasLeagueWith(preds ...predicate.League) predicate.Fixture {
-	return predicate.Fixture(func(s *sql.Selector) {
-		step := newLeagueStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasHomeTeam applies the HasEdge predicate on the "homeTeam" edge.
 func HasHomeTeam() predicate.Fixture {
 	return predicate.Fixture(func(s *sql.Selector) {
@@ -726,6 +703,29 @@ func HasAwayTeam() predicate.Fixture {
 func HasAwayTeamWith(preds ...predicate.Team) predicate.Fixture {
 	return predicate.Fixture(func(s *sql.Selector) {
 		step := newAwayTeamStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSeason applies the HasEdge predicate on the "season" edge.
+func HasSeason() predicate.Fixture {
+	return predicate.Fixture(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, SeasonTable, SeasonColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
+func HasSeasonWith(preds ...predicate.Season) predicate.Fixture {
+	return predicate.Fixture(func(s *sql.Selector) {
+		step := newSeasonStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

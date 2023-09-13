@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/player"
@@ -23,7 +24,6 @@ type BirthQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Birth
 	withPlayer *PlayerQuery
-	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -74,7 +74,7 @@ func (bq *BirthQuery) QueryPlayer() *PlayerQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(birth.Table, birth.FieldID, selector),
 			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, birth.PlayerTable, birth.PlayerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, birth.PlayerTable, birth.PlayerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(bq.driver.Dialect(), step)
 		return fromU, nil
@@ -369,18 +369,11 @@ func (bq *BirthQuery) prepareQuery(ctx context.Context) error {
 func (bq *BirthQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Birth, error) {
 	var (
 		nodes       = []*Birth{}
-		withFKs     = bq.withFKs
 		_spec       = bq.querySpec()
 		loadedTypes = [1]bool{
 			bq.withPlayer != nil,
 		}
 	)
-	if bq.withPlayer != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, birth.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*Birth).scanValues(nil, columns)
 	}
@@ -400,8 +393,9 @@ func (bq *BirthQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Birth,
 		return nodes, nil
 	}
 	if query := bq.withPlayer; query != nil {
-		if err := bq.loadPlayer(ctx, query, nodes, nil,
-			func(n *Birth, e *Player) { n.Edges.Player = e }); err != nil {
+		if err := bq.loadPlayer(ctx, query, nodes,
+			func(n *Birth) { n.Edges.Player = []*Player{} },
+			func(n *Birth, e *Player) { n.Edges.Player = append(n.Edges.Player, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -409,34 +403,33 @@ func (bq *BirthQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Birth,
 }
 
 func (bq *BirthQuery) loadPlayer(ctx context.Context, query *PlayerQuery, nodes []*Birth, init func(*Birth), assign func(*Birth, *Player)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Birth)
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Birth)
 	for i := range nodes {
-		if nodes[i].player_birth == nil {
-			continue
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
-		fk := *nodes[i].player_birth
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(player.IDIn(ids...))
+	query.withFKs = true
+	query.Where(predicate.Player(func(s *sql.Selector) {
+		s.Where(sql.InValues(birth.PlayerColumn, fks...))
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		fk := n.birth_player
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "birth_player" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_birth" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "birth_player" returned %v for node %v`, *fk, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

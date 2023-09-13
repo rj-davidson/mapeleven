@@ -30,8 +30,17 @@ func (Fixture) Fields() []ent.Field {
 // Edges of the Fixture.
 func (Fixture) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("league", League.Type).Ref("fixtures").Unique(),
-		edge.From("homeTeam", Team.Type).Ref("homeFixtures").Unique(),
-		edge.From("awayTeam", Team.Type).Ref("awayFixtures").Unique(),
+		edge.From("homeTeam", Team.Type).
+			Ref("homeFixtures").
+			Unique().
+			Required(),
+		edge.From("awayTeam", Team.Type).
+			Ref("awayFixtures").
+			Unique().
+			Required(),
+		edge.From("season", Season.Type).
+			Ref("fixtures").
+			Unique().
+			Required(),
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
-	"mapeleven/db/ent/season"
 	"strings"
 
 	"entgo.io/ent"
@@ -18,6 +17,8 @@ type League struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// FootballApiId holds the value of the "footballApiId" field.
+	FootballApiId int `json:"footballApiId,omitempty"`
 	// Slug holds the value of the "slug" field.
 	Slug string `json:"slug,omitempty"`
 	// Name holds the value of the "name" field.
@@ -30,62 +31,24 @@ type League struct {
 	// The values are being populated by the LeagueQuery when eager-loading is set.
 	Edges           LeagueEdges `json:"edges"`
 	country_leagues *int
-	season_league   *int
 	selectValues    sql.SelectValues
 }
 
 // LeagueEdges holds the relations/edges for other nodes in the graph.
 type LeagueEdges struct {
-	// Season holds the value of the season edge.
-	Season *Season `json:"season,omitempty"`
-	// Standings holds the value of the standings edge.
-	Standings []*Standings `json:"standings,omitempty"`
-	// Teams holds the value of the teams edge.
-	Teams []*Team `json:"teams,omitempty"`
 	// Country holds the value of the country edge.
 	Country *Country `json:"country,omitempty"`
-	// Fixtures holds the value of the fixtures edge.
-	Fixtures []*Fixture `json:"fixtures,omitempty"`
+	// Season holds the value of the season edge.
+	Season []*Season `json:"season,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
-}
-
-// SeasonOrErr returns the Season value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e LeagueEdges) SeasonOrErr() (*Season, error) {
-	if e.loadedTypes[0] {
-		if e.Season == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: season.Label}
-		}
-		return e.Season, nil
-	}
-	return nil, &NotLoadedError{edge: "season"}
-}
-
-// StandingsOrErr returns the Standings value or an error if the edge
-// was not loaded in eager-loading.
-func (e LeagueEdges) StandingsOrErr() ([]*Standings, error) {
-	if e.loadedTypes[1] {
-		return e.Standings, nil
-	}
-	return nil, &NotLoadedError{edge: "standings"}
-}
-
-// TeamsOrErr returns the Teams value or an error if the edge
-// was not loaded in eager-loading.
-func (e LeagueEdges) TeamsOrErr() ([]*Team, error) {
-	if e.loadedTypes[2] {
-		return e.Teams, nil
-	}
-	return nil, &NotLoadedError{edge: "teams"}
+	loadedTypes [2]bool
 }
 
 // CountryOrErr returns the Country value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e LeagueEdges) CountryOrErr() (*Country, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[0] {
 		if e.Country == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: country.Label}
@@ -95,13 +58,13 @@ func (e LeagueEdges) CountryOrErr() (*Country, error) {
 	return nil, &NotLoadedError{edge: "country"}
 }
 
-// FixturesOrErr returns the Fixtures value or an error if the edge
+// SeasonOrErr returns the Season value or an error if the edge
 // was not loaded in eager-loading.
-func (e LeagueEdges) FixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[4] {
-		return e.Fixtures, nil
+func (e LeagueEdges) SeasonOrErr() ([]*Season, error) {
+	if e.loadedTypes[1] {
+		return e.Season, nil
 	}
-	return nil, &NotLoadedError{edge: "fixtures"}
+	return nil, &NotLoadedError{edge: "season"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -109,13 +72,11 @@ func (*League) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case league.FieldID:
+		case league.FieldID, league.FieldFootballApiId:
 			values[i] = new(sql.NullInt64)
 		case league.FieldSlug, league.FieldName, league.FieldType, league.FieldLogo:
 			values[i] = new(sql.NullString)
 		case league.ForeignKeys[0]: // country_leagues
-			values[i] = new(sql.NullInt64)
-		case league.ForeignKeys[1]: // season_league
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -138,6 +99,12 @@ func (l *League) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			l.ID = int(value.Int64)
+		case league.FieldFootballApiId:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field footballApiId", values[i])
+			} else if value.Valid {
+				l.FootballApiId = int(value.Int64)
+			}
 		case league.FieldSlug:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field slug", values[i])
@@ -169,13 +136,6 @@ func (l *League) assignValues(columns []string, values []any) error {
 				l.country_leagues = new(int)
 				*l.country_leagues = int(value.Int64)
 			}
-		case league.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field season_league", value)
-			} else if value.Valid {
-				l.season_league = new(int)
-				*l.season_league = int(value.Int64)
-			}
 		default:
 			l.selectValues.Set(columns[i], values[i])
 		}
@@ -189,29 +149,14 @@ func (l *League) Value(name string) (ent.Value, error) {
 	return l.selectValues.Get(name)
 }
 
-// QuerySeason queries the "season" edge of the League entity.
-func (l *League) QuerySeason() *SeasonQuery {
-	return NewLeagueClient(l.config).QuerySeason(l)
-}
-
-// QueryStandings queries the "standings" edge of the League entity.
-func (l *League) QueryStandings() *StandingsQuery {
-	return NewLeagueClient(l.config).QueryStandings(l)
-}
-
-// QueryTeams queries the "teams" edge of the League entity.
-func (l *League) QueryTeams() *TeamQuery {
-	return NewLeagueClient(l.config).QueryTeams(l)
-}
-
 // QueryCountry queries the "country" edge of the League entity.
 func (l *League) QueryCountry() *CountryQuery {
 	return NewLeagueClient(l.config).QueryCountry(l)
 }
 
-// QueryFixtures queries the "fixtures" edge of the League entity.
-func (l *League) QueryFixtures() *FixtureQuery {
-	return NewLeagueClient(l.config).QueryFixtures(l)
+// QuerySeason queries the "season" edge of the League entity.
+func (l *League) QuerySeason() *SeasonQuery {
+	return NewLeagueClient(l.config).QuerySeason(l)
 }
 
 // Update returns a builder for updating this League.
@@ -237,6 +182,9 @@ func (l *League) String() string {
 	var builder strings.Builder
 	builder.WriteString("League(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", l.ID))
+	builder.WriteString("footballApiId=")
+	builder.WriteString(fmt.Sprintf("%v", l.FootballApiId))
+	builder.WriteString(", ")
 	builder.WriteString("slug=")
 	builder.WriteString(l.Slug)
 	builder.WriteString(", ")

@@ -14,19 +14,19 @@ type Season struct {
 // Fields of the Season.
 func (Season) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("year"),
-		field.Time("start"),
-		field.Time("end"),
-		field.Bool("current").
-			Default(false),
+		field.String("slug").Unique().Immutable(),
+		field.Int("year").Immutable(),
+		field.Time("start_date"),
+		field.Time("end_date"),
+		field.Bool("current"),
 	}
 }
 
 // Edges of the Season.
 func (Season) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("league", League.Type).
-			Unique(),
-		edge.To("teamSeasons", TeamSeason.Type),
+		edge.From("league", League.Type).Ref("season").Unique(),
+		edge.To("fixtures", Fixture.Type),
+		edge.To("standings", Standings.Type),
 	}
 }

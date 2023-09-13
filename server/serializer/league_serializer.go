@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 )
 
 type APILeague struct {
@@ -26,10 +27,14 @@ func NewLeagueSerializer(client *ent.Client) *LeagueSerializer {
 
 func SerializeLeague(league *ent.League) (*APILeague, error) {
 	countryItem, err := SerializeCountry(league.Edges.Country)
-	APIStandings := make([]APIStanding, 0, len(league.Edges.Standings))
-	for _, standing := range league.Edges.Standings {
-		s := SerializeStanding(standing)
-		APIStandings = append(APIStandings, *s)
+	APIStandings := make([]APIStanding, 0, len(league.Edges.Season))
+	for _, s := range league.Edges.Season {
+		if s.Current {
+			for _, standing := range s.Edges.Standings {
+				s := SerializeStanding(standing)
+				APIStandings = append(APIStandings, *s)
+			}
+		}
 	}
 
 	if err != nil {
@@ -47,13 +52,17 @@ func SerializeLeague(league *ent.League) (*APILeague, error) {
 }
 
 func (ls *LeagueSerializer) GetLeagueBySlug(ctx context.Context, slug string) (*APILeague, error) {
-	l, err := ls.client.League.Query().
+	l, err := ls.client.League.
+		Query().
 		Where(league.Slug(slug)).
 		WithCountry().
-		WithStandings(func(q *ent.StandingsQuery) {
-			q.WithLeague().WithTeam()
-		}).
-		First(ctx)
+		WithSeason(
+			func(q *ent.SeasonQuery) {
+				q.Where(season.CurrentEQ(true))
+				q.WithStandings(func(q *ent.StandingsQuery) { q.WithTeam() })
+			},
+		).
+		Only(ctx)
 
 	if err != nil {
 		return nil, err
@@ -62,12 +71,16 @@ func (ls *LeagueSerializer) GetLeagueBySlug(ctx context.Context, slug string) (*
 	return SerializeLeague(l)
 }
 
-func (ls *LeagueSerializer) GetLeagues(ctx context.Context) ([]*APILeague, error) {
-	leagues, err := ls.client.League.Query().
+func (ls *LeagueSerializer) GetCurrentLeagues(ctx context.Context) ([]*APILeague, error) {
+	leagues, err := ls.client.League.
+		Query().
 		WithCountry().
-		WithStandings(func(q *ent.StandingsQuery) {
-			q.WithTeam()
-		}).
+		WithSeason(
+			func(q *ent.SeasonQuery) {
+				q.WithStandings(func(q *ent.StandingsQuery) { q.WithTeam() })
+				q.Where(season.CurrentEQ(true))
+			},
+		).
 		All(ctx)
 
 	if err != nil {

@@ -5,7 +5,6 @@ package ent
 import (
 	"fmt"
 	"mapeleven/db/ent/birth"
-	"mapeleven/db/ent/player"
 	"strings"
 	"time"
 
@@ -27,27 +26,22 @@ type Birth struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the BirthQuery when eager-loading is set.
 	Edges        BirthEdges `json:"edges"`
-	player_birth *int
 	selectValues sql.SelectValues
 }
 
 // BirthEdges holds the relations/edges for other nodes in the graph.
 type BirthEdges struct {
 	// Player holds the value of the player edge.
-	Player *Player `json:"player,omitempty"`
+	Player []*Player `json:"player,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // PlayerOrErr returns the Player value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e BirthEdges) PlayerOrErr() (*Player, error) {
+// was not loaded in eager-loading.
+func (e BirthEdges) PlayerOrErr() ([]*Player, error) {
 	if e.loadedTypes[0] {
-		if e.Player == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: player.Label}
-		}
 		return e.Player, nil
 	}
 	return nil, &NotLoadedError{edge: "player"}
@@ -64,8 +58,6 @@ func (*Birth) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case birth.FieldDate:
 			values[i] = new(sql.NullTime)
-		case birth.ForeignKeys[0]: // player_birth
-			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -104,13 +96,6 @@ func (b *Birth) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field country", values[i])
 			} else if value.Valid {
 				b.Country = value.String
-			}
-		case birth.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_birth", value)
-			} else if value.Valid {
-				b.player_birth = new(int)
-				*b.player_birth = int(value.Int64)
 			}
 		default:
 			b.selectValues.Set(columns[i], values[i])

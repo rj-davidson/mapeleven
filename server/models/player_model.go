@@ -5,7 +5,6 @@ import (
 	"errors"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/team"
 	"mapeleven/utils"
 )
 
@@ -123,7 +122,7 @@ func (m *PlayerModel) DeletePlayer(ctx context.Context, input DeletePlayerInput)
 	return nil
 }
 
-// GetPlayerByID retrieves a player by ID.
+// GetPlayerByID retrieves a player by FootballApiId.
 func (m *PlayerModel) GetPlayerByID(ctx context.Context, id int) (*ent.Player, error) {
 	r, err := m.client.Player.
 		Query().
@@ -166,32 +165,4 @@ func (m *PlayerModel) GetPlayerBirth(ctx context.Context, playerID int) (*ent.Bi
 		return nil, err
 	}
 	return birth, nil
-}
-
-// GetPlayerTeams retrieves the teams of a player.
-func (m *PlayerModel) GetPlayerTeams(ctx context.Context, playerID int) ([]*ent.Team, error) {
-	teams, err := m.client.Player.
-		Query().
-		Where(player.ID(playerID)).
-		QueryTeams().
-		All(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-	return teams, nil
-}
-
-// FilterPlayersByTeams retrieves a list of players who belong to the specified team(s)
-func (m *PlayerModel) FilterPlayersByTeams(ctx context.Context, teamIDs []int) ([]*ent.Player, error) {
-	players, err := m.client.Player.
-		Query().
-		Where(player.HasTeamsWith(team.IDIn(teamIDs...))).
-		All(ctx)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return players, nil
 }

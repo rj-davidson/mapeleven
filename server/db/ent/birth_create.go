@@ -39,23 +39,19 @@ func (bc *BirthCreate) SetCountry(s string) *BirthCreate {
 	return bc
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (bc *BirthCreate) SetPlayerID(id int) *BirthCreate {
-	bc.mutation.SetPlayerID(id)
+// AddPlayerIDs adds the "player" edge to the Player entity by IDs.
+func (bc *BirthCreate) AddPlayerIDs(ids ...int) *BirthCreate {
+	bc.mutation.AddPlayerIDs(ids...)
 	return bc
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (bc *BirthCreate) SetNillablePlayerID(id *int) *BirthCreate {
-	if id != nil {
-		bc = bc.SetPlayerID(*id)
+// AddPlayer adds the "player" edges to the Player entity.
+func (bc *BirthCreate) AddPlayer(p ...*Player) *BirthCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return bc
-}
-
-// SetPlayer sets the "player" edge to the Player entity.
-func (bc *BirthCreate) SetPlayer(p *Player) *BirthCreate {
-	return bc.SetPlayerID(p.ID)
+	return bc.AddPlayerIDs(ids...)
 }
 
 // Mutation returns the BirthMutation object of the builder.
@@ -141,8 +137,8 @@ func (bc *BirthCreate) createSpec() (*Birth, *sqlgraph.CreateSpec) {
 	}
 	if nodes := bc.mutation.PlayerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   birth.PlayerTable,
 			Columns: []string{birth.PlayerColumn},
 			Bidi:    false,
@@ -153,7 +149,6 @@ func (bc *BirthCreate) createSpec() (*Birth, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.player_birth = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

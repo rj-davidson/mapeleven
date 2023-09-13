@@ -23,12 +23,12 @@ const (
 	// Table holds the table name of the birth in the database.
 	Table = "births"
 	// PlayerTable is the table that holds the player relation/edge.
-	PlayerTable = "births"
+	PlayerTable = "players"
 	// PlayerInverseTable is the table name for the Player entity.
 	// It exists in this package in order to avoid circular dependency with the "player" package.
 	PlayerInverseTable = "players"
 	// PlayerColumn is the table column denoting the player relation/edge.
-	PlayerColumn = "player_birth"
+	PlayerColumn = "birth_player"
 )
 
 // Columns holds all SQL columns for birth fields.
@@ -39,21 +39,10 @@ var Columns = []string{
 	FieldCountry,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "births"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"player_birth",
-}
-
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -83,16 +72,23 @@ func ByCountry(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldCountry, opts...).ToFunc()
 }
 
-// ByPlayerField orders the results by player field.
-func ByPlayerField(field string, opts ...sql.OrderTermOption) Order {
+// ByPlayerCount orders the results by player count.
+func ByPlayerCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newPlayerStep(), opts...)
+	}
+}
+
+// ByPlayer orders the results by player terms.
+func ByPlayer(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newPlayerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, true, PlayerTable, PlayerColumn),
+		sqlgraph.Edge(sqlgraph.O2M, false, PlayerTable, PlayerColumn),
 	)
 }

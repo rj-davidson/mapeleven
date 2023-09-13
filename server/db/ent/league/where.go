@@ -54,6 +54,11 @@ func IDLTE(id int) predicate.League {
 	return predicate.League(sql.FieldLTE(FieldID, id))
 }
 
+// FootballApiId applies equality check predicate on the "footballApiId" field. It's identical to FootballApiIdEQ.
+func FootballApiId(v int) predicate.League {
+	return predicate.League(sql.FieldEQ(FieldFootballApiId, v))
+}
+
 // Slug applies equality check predicate on the "slug" field. It's identical to SlugEQ.
 func Slug(v string) predicate.League {
 	return predicate.League(sql.FieldEQ(FieldSlug, v))
@@ -67,6 +72,46 @@ func Name(v string) predicate.League {
 // Logo applies equality check predicate on the "logo" field. It's identical to LogoEQ.
 func Logo(v string) predicate.League {
 	return predicate.League(sql.FieldEQ(FieldLogo, v))
+}
+
+// FootballApiIdEQ applies the EQ predicate on the "footballApiId" field.
+func FootballApiIdEQ(v int) predicate.League {
+	return predicate.League(sql.FieldEQ(FieldFootballApiId, v))
+}
+
+// FootballApiIdNEQ applies the NEQ predicate on the "footballApiId" field.
+func FootballApiIdNEQ(v int) predicate.League {
+	return predicate.League(sql.FieldNEQ(FieldFootballApiId, v))
+}
+
+// FootballApiIdIn applies the In predicate on the "footballApiId" field.
+func FootballApiIdIn(vs ...int) predicate.League {
+	return predicate.League(sql.FieldIn(FieldFootballApiId, vs...))
+}
+
+// FootballApiIdNotIn applies the NotIn predicate on the "footballApiId" field.
+func FootballApiIdNotIn(vs ...int) predicate.League {
+	return predicate.League(sql.FieldNotIn(FieldFootballApiId, vs...))
+}
+
+// FootballApiIdGT applies the GT predicate on the "footballApiId" field.
+func FootballApiIdGT(v int) predicate.League {
+	return predicate.League(sql.FieldGT(FieldFootballApiId, v))
+}
+
+// FootballApiIdGTE applies the GTE predicate on the "footballApiId" field.
+func FootballApiIdGTE(v int) predicate.League {
+	return predicate.League(sql.FieldGTE(FieldFootballApiId, v))
+}
+
+// FootballApiIdLT applies the LT predicate on the "footballApiId" field.
+func FootballApiIdLT(v int) predicate.League {
+	return predicate.League(sql.FieldLT(FieldFootballApiId, v))
+}
+
+// FootballApiIdLTE applies the LTE predicate on the "footballApiId" field.
+func FootballApiIdLTE(v int) predicate.League {
+	return predicate.League(sql.FieldLTE(FieldFootballApiId, v))
 }
 
 // SlugEQ applies the EQ predicate on the "slug" field.
@@ -284,75 +329,6 @@ func LogoContainsFold(v string) predicate.League {
 	return predicate.League(sql.FieldContainsFold(FieldLogo, v))
 }
 
-// HasSeason applies the HasEdge predicate on the "season" edge.
-func HasSeason() predicate.League {
-	return predicate.League(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, SeasonTable, SeasonColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
-func HasSeasonWith(preds ...predicate.Season) predicate.League {
-	return predicate.League(func(s *sql.Selector) {
-		step := newSeasonStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasStandings applies the HasEdge predicate on the "standings" edge.
-func HasStandings() predicate.League {
-	return predicate.League(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, StandingsTable, StandingsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasStandingsWith applies the HasEdge predicate on the "standings" edge with a given conditions (other predicates).
-func HasStandingsWith(preds ...predicate.Standings) predicate.League {
-	return predicate.League(func(s *sql.Selector) {
-		step := newStandingsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasTeams applies the HasEdge predicate on the "teams" edge.
-func HasTeams() predicate.League {
-	return predicate.League(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, TeamsTable, TeamsPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTeamsWith applies the HasEdge predicate on the "teams" edge with a given conditions (other predicates).
-func HasTeamsWith(preds ...predicate.Team) predicate.League {
-	return predicate.League(func(s *sql.Selector) {
-		step := newTeamsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasCountry applies the HasEdge predicate on the "country" edge.
 func HasCountry() predicate.League {
 	return predicate.League(func(s *sql.Selector) {
@@ -376,21 +352,21 @@ func HasCountryWith(preds ...predicate.Country) predicate.League {
 	})
 }
 
-// HasFixtures applies the HasEdge predicate on the "fixtures" edge.
-func HasFixtures() predicate.League {
+// HasSeason applies the HasEdge predicate on the "season" edge.
+func HasSeason() predicate.League {
 	return predicate.League(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, FixturesTable, FixturesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, SeasonTable, SeasonColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasFixturesWith applies the HasEdge predicate on the "fixtures" edge with a given conditions (other predicates).
-func HasFixturesWith(preds ...predicate.Fixture) predicate.League {
+// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
+func HasSeasonWith(preds ...predicate.Season) predicate.League {
 	return predicate.League(func(s *sql.Selector) {
-		step := newFixturesStep()
+		step := newSeasonStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

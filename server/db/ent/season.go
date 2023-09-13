@@ -18,29 +18,34 @@ type Season struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Slug holds the value of the "slug" field.
+	Slug string `json:"slug,omitempty"`
 	// Year holds the value of the "year" field.
 	Year int `json:"year,omitempty"`
-	// Start holds the value of the "start" field.
-	Start time.Time `json:"start,omitempty"`
-	// End holds the value of the "end" field.
-	End time.Time `json:"end,omitempty"`
+	// StartDate holds the value of the "start_date" field.
+	StartDate time.Time `json:"start_date,omitempty"`
+	// EndDate holds the value of the "end_date" field.
+	EndDate time.Time `json:"end_date,omitempty"`
 	// Current holds the value of the "current" field.
 	Current bool `json:"current,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SeasonQuery when eager-loading is set.
-	Edges        SeasonEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges         SeasonEdges `json:"edges"`
+	league_season *int
+	selectValues  sql.SelectValues
 }
 
 // SeasonEdges holds the relations/edges for other nodes in the graph.
 type SeasonEdges struct {
 	// League holds the value of the league edge.
 	League *League `json:"league,omitempty"`
-	// TeamSeasons holds the value of the teamSeasons edge.
-	TeamSeasons []*TeamSeason `json:"teamSeasons,omitempty"`
+	// Fixtures holds the value of the fixtures edge.
+	Fixtures []*Fixture `json:"fixtures,omitempty"`
+	// Standings holds the value of the standings edge.
+	Standings []*Standings `json:"standings,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // LeagueOrErr returns the League value or an error if the edge
@@ -56,13 +61,22 @@ func (e SeasonEdges) LeagueOrErr() (*League, error) {
 	return nil, &NotLoadedError{edge: "league"}
 }
 
-// TeamSeasonsOrErr returns the TeamSeasons value or an error if the edge
+// FixturesOrErr returns the Fixtures value or an error if the edge
 // was not loaded in eager-loading.
-func (e SeasonEdges) TeamSeasonsOrErr() ([]*TeamSeason, error) {
+func (e SeasonEdges) FixturesOrErr() ([]*Fixture, error) {
 	if e.loadedTypes[1] {
-		return e.TeamSeasons, nil
+		return e.Fixtures, nil
 	}
-	return nil, &NotLoadedError{edge: "teamSeasons"}
+	return nil, &NotLoadedError{edge: "fixtures"}
+}
+
+// StandingsOrErr returns the Standings value or an error if the edge
+// was not loaded in eager-loading.
+func (e SeasonEdges) StandingsOrErr() ([]*Standings, error) {
+	if e.loadedTypes[2] {
+		return e.Standings, nil
+	}
+	return nil, &NotLoadedError{edge: "standings"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -74,8 +88,12 @@ func (*Season) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case season.FieldID, season.FieldYear:
 			values[i] = new(sql.NullInt64)
-		case season.FieldStart, season.FieldEnd:
+		case season.FieldSlug:
+			values[i] = new(sql.NullString)
+		case season.FieldStartDate, season.FieldEndDate:
 			values[i] = new(sql.NullTime)
+		case season.ForeignKeys[0]: // league_season
+			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -97,29 +115,42 @@ func (s *Season) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			s.ID = int(value.Int64)
+		case season.FieldSlug:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field slug", values[i])
+			} else if value.Valid {
+				s.Slug = value.String
+			}
 		case season.FieldYear:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field year", values[i])
 			} else if value.Valid {
 				s.Year = int(value.Int64)
 			}
-		case season.FieldStart:
+		case season.FieldStartDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field start", values[i])
+				return fmt.Errorf("unexpected type %T for field start_date", values[i])
 			} else if value.Valid {
-				s.Start = value.Time
+				s.StartDate = value.Time
 			}
-		case season.FieldEnd:
+		case season.FieldEndDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field end", values[i])
+				return fmt.Errorf("unexpected type %T for field end_date", values[i])
 			} else if value.Valid {
-				s.End = value.Time
+				s.EndDate = value.Time
 			}
 		case season.FieldCurrent:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field current", values[i])
 			} else if value.Valid {
 				s.Current = value.Bool
+			}
+		case season.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field league_season", value)
+			} else if value.Valid {
+				s.league_season = new(int)
+				*s.league_season = int(value.Int64)
 			}
 		default:
 			s.selectValues.Set(columns[i], values[i])
@@ -139,9 +170,14 @@ func (s *Season) QueryLeague() *LeagueQuery {
 	return NewSeasonClient(s.config).QueryLeague(s)
 }
 
-// QueryTeamSeasons queries the "teamSeasons" edge of the Season entity.
-func (s *Season) QueryTeamSeasons() *TeamSeasonQuery {
-	return NewSeasonClient(s.config).QueryTeamSeasons(s)
+// QueryFixtures queries the "fixtures" edge of the Season entity.
+func (s *Season) QueryFixtures() *FixtureQuery {
+	return NewSeasonClient(s.config).QueryFixtures(s)
+}
+
+// QueryStandings queries the "standings" edge of the Season entity.
+func (s *Season) QueryStandings() *StandingsQuery {
+	return NewSeasonClient(s.config).QueryStandings(s)
 }
 
 // Update returns a builder for updating this Season.
@@ -167,14 +203,17 @@ func (s *Season) String() string {
 	var builder strings.Builder
 	builder.WriteString("Season(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", s.ID))
+	builder.WriteString("slug=")
+	builder.WriteString(s.Slug)
+	builder.WriteString(", ")
 	builder.WriteString("year=")
 	builder.WriteString(fmt.Sprintf("%v", s.Year))
 	builder.WriteString(", ")
-	builder.WriteString("start=")
-	builder.WriteString(s.Start.Format(time.ANSIC))
+	builder.WriteString("start_date=")
+	builder.WriteString(s.StartDate.Format(time.ANSIC))
 	builder.WriteString(", ")
-	builder.WriteString("end=")
-	builder.WriteString(s.End.Format(time.ANSIC))
+	builder.WriteString("end_date=")
+	builder.WriteString(s.EndDate.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("current=")
 	builder.WriteString(fmt.Sprintf("%v", s.Current))

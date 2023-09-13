@@ -5,18 +5,16 @@ import (
 	"errors"
 	_ "fmt"
 	"mapeleven/db/ent"
-	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 )
-
-var ErrNotFound = errors.New("not found")
 
 // CreateStandingsInput holds the required fields to create a new standings entry.
 type CreateStandingsInput struct {
 	Rank         int
 	Description  string
-	League       int
+	SeasonID     int
 	Team         int
 	Points       int
 	GoalsDiff    int
@@ -51,7 +49,7 @@ type CreateStandingsInput struct {
 type UpdateStandingsInput struct {
 	Rank         *int
 	Description  *string
-	League       *int
+	SeasonID     *int
 	Team         *int
 	Points       *int
 	GoalsDiff    *int
@@ -98,7 +96,7 @@ func NewStandingsModel(client *ent.Client) *StandingsModel {
 }
 
 func (m *StandingsModel) TeamExists(ctx context.Context, teamID int) (bool, error) {
-	// Using Count to determine if a team with the given ID exists
+	// Using Count to determine if a team with the given FootballApiId exists
 	count, err := m.client.Team.
 		Query().
 		Where(team.ID(teamID)).
@@ -118,7 +116,7 @@ func (m *StandingsModel) CreateStandings(ctx context.Context, input CreateStandi
 		Create().
 		SetRank(input.Rank).
 		SetDescription(input.Description).
-		SetLeagueID(input.League).
+		SetSeasonID(input.SeasonID).
 		SetTeamID(input.Team).
 		SetPoints(input.Points).
 		SetGoalsDiff(input.GoalsDiff).
@@ -160,15 +158,15 @@ func (m *StandingsModel) CreateStandings(ctx context.Context, input CreateStandi
 // UpdateStandings updates an existing standings entry.
 //func (m *StandingsModel) UpdateStandings(ctx context.Context, input UpdateStandingsInput) (*ent.Standings, error) {
 //	// Get the standing to update by using team and league IDs
-//	// TODO: Find a better way to find the correct standing. Maybe use Season, Team, League, etc.
+//	// TODO: Find a better way to find the correct standing. Maybe use Season, Team, SeasonID, etc.
 //	update, err := m.client.Standings.
 //		Query().
 //		Where(
 //			standings.HasTeamWith(
-//				team.ID(*input.Team),
+//				team.FootballApiId(*input.Team),
 //			),
 //			standings.HasLeagueWith(
-//				league.ID(*input.League),
+//				league.FootballApiId(*input.SeasonID),
 //			),
 //		).
 //		First(ctx)
@@ -196,7 +194,7 @@ func (m *StandingsModel) DeleteStandings(ctx context.Context, input DeleteStandi
 	return nil
 }
 
-// GetStandingsByID retrieves a standings entry by ID.
+// GetStandingsByID retrieves a standings entry by FootballApiId.
 func (m *StandingsModel) GetStandingsByID(ctx context.Context, id int) (*ent.Standings, error) {
 	stands, err := m.client.Standings.
 		Query().
@@ -224,50 +222,16 @@ func (m *StandingsModel) ListStandings(ctx context.Context) ([]*ent.Standings, e
 	return standingsEntries, nil
 }
 
-// GetStandingsLeague retrieves the league of a standings entry.
-func (m *StandingsModel) GetStandingsLeague(ctx context.Context, standingsID int) (*ent.League, error) {
-	league, err := m.client.Standings.
-		Query().
-		Where(standings.ID(standingsID)).
-		QueryLeague().
-		Only(ctx)
-
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, errors.New("league not found")
-		}
-		return nil, err
-	}
-	return league, nil
-}
-
-// GetStandingsTeam retrieves the team of a standings entry.
-func (m *StandingsModel) GetStandingsTeam(ctx context.Context, standingsID int) (*ent.Team, error) {
-	team, err := m.client.Standings.
-		Query().
-		Where(standings.ID(standingsID)).
-		QueryTeam().
-		Only(ctx)
-
-	if err != nil {
-		if ent.IsNotFound(err) {
-			return nil, errors.New("team not found")
-		}
-		return nil, err
-	}
-	return team, nil
-}
-
 // CheckIfStandingsExist checks if a standings entry exists.
-func (m *StandingsModel) CheckIfStandingsExist(ctx context.Context, teamID, leagueId int) bool {
+func (m *StandingsModel) CheckIfStandingsExist(ctx context.Context, teamID, seasonID int) bool {
 	count, _ := m.client.Standings.
 		Query().
 		Where(
 			standings.HasTeamWith(
 				team.ID(teamID),
 			),
-			standings.HasLeagueWith(
-				league.ID(leagueId),
+			standings.HasSeasonWith(
+				season.ID(seasonID),
 			),
 		).
 		Count(ctx)

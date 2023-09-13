@@ -68,18 +68,6 @@ func (f PlayerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlayerMutation", m)
 }
 
-// The PlayerTeamSeasonFunc type is an adapter to allow the use of ordinary
-// function as PlayerTeamSeason mutator.
-type PlayerTeamSeasonFunc func(context.Context, *ent.PlayerTeamSeasonMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f PlayerTeamSeasonFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.PlayerTeamSeasonMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlayerTeamSeasonMutation", m)
-}
-
 // The SeasonFunc type is an adapter to allow the use of ordinary
 // function as Season mutator.
 type SeasonFunc func(context.Context, *ent.SeasonMutation) (ent.Value, error)
@@ -114,18 +102,6 @@ func (f TeamFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TeamMutation", m)
-}
-
-// The TeamSeasonFunc type is an adapter to allow the use of ordinary
-// function as TeamSeason mutator.
-type TeamSeasonFunc func(context.Context, *ent.TeamSeasonMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f TeamSeasonFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	if mv, ok := m.(*ent.TeamSeasonMutation); ok {
-		return f(ctx, mv)
-	}
-	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TeamSeasonMutation", m)
 }
 
 // Condition is a hook condition function.

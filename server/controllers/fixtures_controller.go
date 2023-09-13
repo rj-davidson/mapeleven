@@ -71,8 +71,10 @@ func (fc *FixtureController) InitializeFixtures(lm *models.LeagueModel, ctx cont
 
 	// Fetch and process fixtures for each league
 	for _, league := range leagues {
+		// Get the current season for the league
+		season, err := lm.GetCurrentSeasonForLeague(ctx, league)
 		fmt.Println("Fetching fixtures for league: ", league.Name)
-		_, err := fc.FetchFixturesByLeague(ctx, league.ID)
+		_, err = fc.fetchFixturesByLeague(ctx, league.FootballApiId, season)
 		if err != nil {
 			log.Printf("Error fetching fixtures for league %d: %v", league.ID, err)
 			continue
@@ -83,8 +85,8 @@ func (fc *FixtureController) InitializeFixtures(lm *models.LeagueModel, ctx cont
 	return nil
 }
 
-func (fc *FixtureController) FetchFixturesByLeague(ctx context.Context, leagueID int) ([]*ent.Fixture, error) {
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/fixtures?league=%d&season=2022", leagueID)
+func (fc *FixtureController) fetchFixturesByLeague(ctx context.Context, leagueID int, season *ent.Season) ([]*ent.Fixture, error) {
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/fixtures?league=%d&season=%d", leagueID, season.Year)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -104,10 +106,10 @@ func (fc *FixtureController) FetchFixturesByLeague(ctx context.Context, leagueID
 		return nil, err
 	}
 
-	return fc.parseFixturesResponse(data)
+	return fc.parseFixturesResponse(data, season)
 }
 
-func (fc *FixtureController) FetchFixturesByIds(ctx context.Context, fixtureIDs []int) ([]*ent.Fixture, error) {
+func (fc *FixtureController) fetchFixturesByIds(ctx context.Context, fixtureIDs []int, season *ent.Season) ([]*ent.Fixture, error) {
 	var fixtures []*ent.Fixture
 	for _, id := range fixtureIDs {
 		url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/fixtures?id=%d", id)
@@ -130,7 +132,7 @@ func (fc *FixtureController) FetchFixturesByIds(ctx context.Context, fixtureIDs 
 			return nil, err
 		}
 
-		res, err := fc.parseFixturesResponse(data)
+		res, err := fc.parseFixturesResponse(data, season)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +142,7 @@ func (fc *FixtureController) FetchFixturesByIds(ctx context.Context, fixtureIDs 
 	return fixtures, nil
 }
 
-func (fc *FixtureController) parseFixturesResponse(data []byte) ([]*ent.Fixture, error) {
+func (fc *FixtureController) parseFixturesResponse(data []byte, season *ent.Season) ([]*ent.Fixture, error) {
 	var response APIFixtureResponse
 	if err := json.Unmarshal(data, &response); err != nil {
 		return nil, err
@@ -162,11 +164,11 @@ func (fc *FixtureController) parseFixturesResponse(data []byte) ([]*ent.Fixture,
 			Status:        res.Fixture.Status.Long,
 			HomeTeamScore: &res.Score.Fulltime.Home,
 			AwayTeamScore: &res.Score.Fulltime.Away,
-			LeagueID:      res.League.ID,
+			Season:        season,
 			HomeTeamID:    res.Teams.Home.ID,
 			AwayTeamID:    res.Teams.Away.ID,
 			Round:         nil,
-			Slug:          utils.Slugify(res.Teams.Home.Name + "-" + res.Teams.Away.Name + "-" + parsedDate.Format("2006-01-02")),
+			Slug:          utils.Slugify(res.Teams.Home.Name + "-" + parsedDate.Format("2006-01-02") + "-" + res.Teams.Away.Name),
 		}
 
 		fixture, err := fc.upsertFixture(context.Background(), &fixtureInput)
@@ -197,7 +199,6 @@ func (fc *FixtureController) upsertFixture(ctx context.Context, fixtureInput *mo
 			Status:        &fixtureInput.Status,
 			HomeTeamScore: fixtureInput.HomeTeamScore,
 			AwayTeamScore: fixtureInput.AwayTeamScore,
-			LeagueID:      &fixtureInput.LeagueID,
 			HomeTeamID:    &fixtureInput.HomeTeamID,
 			AwayTeamID:    &fixtureInput.AwayTeamID,
 		}

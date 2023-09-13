@@ -19,7 +19,7 @@ type CreateFixtureInput struct {
 	Status        string
 	HomeTeamScore *int
 	AwayTeamScore *int
-	LeagueID      int
+	Season        *ent.Season
 	HomeTeamID    int
 	AwayTeamID    int
 }
@@ -36,7 +36,6 @@ type UpdateFixtureInput struct {
 	Status        *string
 	HomeTeamScore *int
 	AwayTeamScore *int
-	LeagueID      *int
 	HomeTeamID    *int
 	AwayTeamID    *int
 }
@@ -64,7 +63,7 @@ func (fm *FixtureModel) CreateFixture(ctx context.Context, input CreateFixtureIn
 		SetNillableAwayTeamScore(input.AwayTeamScore).
 		SetAwayTeamID(input.AwayTeamID).
 		SetHomeTeamID(input.HomeTeamID).
-		SetLeagueID(input.LeagueID).
+		SetSeason(input.Season).
 		Save(ctx)
 }
 
@@ -82,9 +81,6 @@ func (fm *FixtureModel) UpdateFixture(ctx context.Context, input UpdateFixtureIn
 	if input.AwayTeamScore != nil {
 		updater.SetAwayTeamScore(*input.AwayTeamScore)
 	}
-	if input.LeagueID != nil {
-		updater.SetLeagueID(*input.LeagueID)
-	}
 	if input.HomeTeamID != nil {
 		updater.SetHomeTeamID(*input.HomeTeamID)
 	}
@@ -92,12 +88,6 @@ func (fm *FixtureModel) UpdateFixture(ctx context.Context, input UpdateFixtureIn
 		updater.SetAwayTeamID(*input.AwayTeamID)
 	}
 	return updater.Save(ctx)
-}
-
-func (fm *FixtureModel) DeleteFixture(ctx context.Context, id int) error {
-	return fm.client.Fixture.
-		DeleteOneID(id).
-		Exec(ctx)
 }
 
 func (fm *FixtureModel) GetFixtureByApiFootballId(ctx context.Context, apiFootballId int) (*ent.Fixture, error) {

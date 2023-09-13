@@ -245,7 +245,7 @@ func HasPlayer() predicate.Birth {
 	return predicate.Birth(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, PlayerTable, PlayerColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, PlayerTable, PlayerColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

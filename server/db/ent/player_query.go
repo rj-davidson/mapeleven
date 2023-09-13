@@ -4,13 +4,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/playerteamseason"
 	"mapeleven/db/ent/predicate"
-	"mapeleven/db/ent/team"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -21,14 +18,12 @@ import (
 // PlayerQuery is the builder for querying Player entities.
 type PlayerQuery struct {
 	config
-	ctx                   *QueryContext
-	order                 []player.Order
-	inters                []Interceptor
-	predicates            []predicate.Player
-	withBirth             *BirthQuery
-	withTeams             *TeamQuery
-	withPlayerTeamSeasons *PlayerTeamSeasonQuery
-	withFKs               bool
+	ctx        *QueryContext
+	order      []player.Order
+	inters     []Interceptor
+	predicates []predicate.Player
+	withBirth  *BirthQuery
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,51 +74,7 @@ func (pq *PlayerQuery) QueryBirth() *BirthQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(player.Table, player.FieldID, selector),
 			sqlgraph.To(birth.Table, birth.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, player.BirthTable, player.BirthColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryTeams chains the current query on the "teams" edge.
-func (pq *PlayerQuery) QueryTeams() *TeamQuery {
-	query := (&TeamClient{config: pq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, selector),
-			sqlgraph.To(team.Table, team.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, player.TeamsTable, player.TeamsPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPlayerTeamSeasons chains the current query on the "playerTeamSeasons" edge.
-func (pq *PlayerQuery) QueryPlayerTeamSeasons() *PlayerTeamSeasonQuery {
-	query := (&PlayerTeamSeasonClient{config: pq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, selector),
-			sqlgraph.To(playerteamseason.Table, playerteamseason.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, player.PlayerTeamSeasonsTable, player.PlayerTeamSeasonsColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, player.BirthTable, player.BirthColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +269,12 @@ func (pq *PlayerQuery) Clone() *PlayerQuery {
 		return nil
 	}
 	return &PlayerQuery{
-		config:                pq.config,
-		ctx:                   pq.ctx.Clone(),
-		order:                 append([]player.Order{}, pq.order...),
-		inters:                append([]Interceptor{}, pq.inters...),
-		predicates:            append([]predicate.Player{}, pq.predicates...),
-		withBirth:             pq.withBirth.Clone(),
-		withTeams:             pq.withTeams.Clone(),
-		withPlayerTeamSeasons: pq.withPlayerTeamSeasons.Clone(),
+		config:     pq.config,
+		ctx:        pq.ctx.Clone(),
+		order:      append([]player.Order{}, pq.order...),
+		inters:     append([]Interceptor{}, pq.inters...),
+		predicates: append([]predicate.Player{}, pq.predicates...),
+		withBirth:  pq.withBirth.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -340,28 +289,6 @@ func (pq *PlayerQuery) WithBirth(opts ...func(*BirthQuery)) *PlayerQuery {
 		opt(query)
 	}
 	pq.withBirth = query
-	return pq
-}
-
-// WithTeams tells the query-builder to eager-load the nodes that are connected to
-// the "teams" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *PlayerQuery) WithTeams(opts ...func(*TeamQuery)) *PlayerQuery {
-	query := (&TeamClient{config: pq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	pq.withTeams = query
-	return pq
-}
-
-// WithPlayerTeamSeasons tells the query-builder to eager-load the nodes that are connected to
-// the "playerTeamSeasons" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *PlayerQuery) WithPlayerTeamSeasons(opts ...func(*PlayerTeamSeasonQuery)) *PlayerQuery {
-	query := (&PlayerTeamSeasonClient{config: pq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	pq.withPlayerTeamSeasons = query
 	return pq
 }
 
@@ -444,12 +371,13 @@ func (pq *PlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Playe
 		nodes       = []*Player{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [1]bool{
 			pq.withBirth != nil,
-			pq.withTeams != nil,
-			pq.withPlayerTeamSeasons != nil,
 		}
 	)
+	if pq.withBirth != nil {
+		withFKs = true
+	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, player.ForeignKeys...)
 	}
@@ -477,140 +405,38 @@ func (pq *PlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Playe
 			return nil, err
 		}
 	}
-	if query := pq.withTeams; query != nil {
-		if err := pq.loadTeams(ctx, query, nodes,
-			func(n *Player) { n.Edges.Teams = []*Team{} },
-			func(n *Player, e *Team) { n.Edges.Teams = append(n.Edges.Teams, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := pq.withPlayerTeamSeasons; query != nil {
-		if err := pq.loadPlayerTeamSeasons(ctx, query, nodes,
-			func(n *Player) { n.Edges.PlayerTeamSeasons = []*PlayerTeamSeason{} },
-			func(n *Player, e *PlayerTeamSeason) { n.Edges.PlayerTeamSeasons = append(n.Edges.PlayerTeamSeasons, e) }); err != nil {
-			return nil, err
-		}
-	}
 	return nodes, nil
 }
 
 func (pq *PlayerQuery) loadBirth(ctx context.Context, query *BirthQuery, nodes []*Player, init func(*Player), assign func(*Player, *Birth)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Player)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*Player)
 	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
+		if nodes[i].birth_player == nil {
+			continue
+		}
+		fk := *nodes[i].birth_player
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.withFKs = true
-	query.Where(predicate.Birth(func(s *sql.Selector) {
-		s.Where(sql.InValues(player.BirthColumn, fks...))
-	}))
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(birth.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.player_birth
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "player_birth" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_birth" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "birth_player" returned %v`, n.ID)
 		}
-		assign(node, n)
-	}
-	return nil
-}
-func (pq *PlayerQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*Player, init func(*Player), assign func(*Player, *Team)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Player)
-	nids := make(map[int]map[*Player]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(player.TeamsTable)
-		s.Join(joinT).On(s.C(team.FieldID), joinT.C(player.TeamsPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(player.TeamsPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(player.TeamsPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Player]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Team](ctx, query, qr, query.inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "teams" node returned %v`, n.ID)
-		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
-	}
-	return nil
-}
-func (pq *PlayerQuery) loadPlayerTeamSeasons(ctx context.Context, query *PlayerTeamSeasonQuery, nodes []*Player, init func(*Player), assign func(*Player, *PlayerTeamSeason)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Player)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.PlayerTeamSeason(func(s *sql.Selector) {
-		s.Where(sql.InValues(player.PlayerTeamSeasonsColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.player_player_team_seasons
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "player_player_team_seasons" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_player_team_seasons" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
 	}
 	return nil
 }
