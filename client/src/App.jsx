@@ -20,8 +20,11 @@ function App() {
                         <Routes>
                             <Route path='/fixtures/:slug' element={<FixturesPage/>}/>
                             <Route path='/players/:slug' element={<Players/>}/>
+                            <Route path='/players' element={<Players/>}/>
                             <Route path='/clubs/:slug' element={<Clubs/>}/>
+                            <Route path='/clubs' element={<Clubs/>}/>
                             <Route path='/leagues/:slug' element={<LeaguePage/>}/>
+                            <Route path='/leagues' element={<Leagues/>}/>
                             <Route path='/about' element={<About/>}/>
                             <Route path='/' element={<FixturesPage/>}/>
                         </Routes>

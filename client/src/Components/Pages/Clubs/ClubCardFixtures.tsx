@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Card, CardContent, Grid, Typography } from '@mui/material';
+import {Box, Card, CardContent, Grid, Typography} from '@mui/material';
 import { APITeam } from '../../../Models/api_types';
 
 interface ClubCardState {
@@ -38,7 +38,7 @@ class ClubCard extends React.Component<{}, ClubCardState> {
               alt={team.name.long + ' badge'}
               width={32}
               height={32}
-              style={{ borderRadius: '8px', marginRight:'0px', border: '2px solid #D8DEE9' }}
+              style={{ marginRight:'10px'}}
             />
             <Typography variant='h6' component='h2' sx={{ mr: 0 }}>
               {team.name.long}
@@ -49,14 +49,14 @@ class ClubCard extends React.Component<{}, ClubCardState> {
     ));
 
     return (
-      <div>
+      <Box sx={{width: '100%'}}>
         <Typography variant='h4' component='h2' gutterBottom>
           Clubs
         </Typography>
         <Grid container spacing={2} sx={{ justifyContent: 'space-between' }}>
           {clubCards}
         </Grid>
-      </div>
+      </Box>
     );
   }
 }

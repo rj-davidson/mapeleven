@@ -29,12 +29,11 @@ function Players() {
                 </Tile>
             </Grid>
 
-
-            {/*<Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
+            <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                 <Tile>
                     <SpiderChart/>
                 </Tile>
-            </Grid>*/}
+            </Grid>
         </Grid>
     );
 }

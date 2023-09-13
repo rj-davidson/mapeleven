@@ -67,6 +67,21 @@ const customTheme = createTheme({
                 },
             },
         },
+        MuiPaper: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: 'var(--dark0)',
+                    '& .MuiListItem-root': {
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease-in-out', // Add a transition for smooth movement
+                        '&:hover': {
+                            transform: 'translateX(20px)', // Adjust the translation distance as needed
+                            color: 'white'
+                        },
+                    },
+                },
+            },
+        },
         MuiAutocomplete: {
             styleOverrides: {
                 root: {
