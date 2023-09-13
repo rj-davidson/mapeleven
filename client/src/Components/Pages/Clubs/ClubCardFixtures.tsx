@@ -21,7 +21,7 @@ class ClubCard extends React.Component<{}, ClubCardState> {
   }
 
   render() {
-    const clubCards = this.state.clubs.map((team) => (
+    const clubCards = this.state.clubs.slice(0,16).map((team) => (
       <Grid item xs={12} sm={12} md={12} lg={12} key={team.slug}>
         <Card sx={{ height: '100%' }}>
           <CardContent

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Card, CardContent, CardMedia, Grid, Typography } from '@mui/material';
+import { Card, CardContent, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 
 function PlayerCards() {
@@ -20,7 +20,7 @@ function PlayerCards() {
             .catch(error => console.error(error));
     }, []);
 
-    const playerCards = players.map(player => {
+    const playerCards = players.slice(0,15).map(player => {
         return (
             <Grid item xs={12} sm={12} md={12} lg={12} key={player.id} width='100%'>
                 <Card sx={{ height: '100%', width: '100%' }}>
