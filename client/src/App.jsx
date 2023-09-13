@@ -10,6 +10,7 @@ import {ThemeProvider} from '@mui/material';
 import dark from './Components/Theme/MapTheme.tsx';
 import Layout from './Components/Layout/Layout.tsx';
 import LeaguePage from "./Components/Pages/Leagues/LeaguePage.jsx";
+import ClubPage from "./Components/Pages/Clubs/ClubPage.jsx";
 
 function App() {
     return (
@@ -21,7 +22,7 @@ function App() {
                             <Route path='/fixtures/:slug' element={<FixturesPage/>}/>
                             <Route path='/players/:slug' element={<Players/>}/>
                             <Route path='/players' element={<Players/>}/>
-                            <Route path='/clubs/:slug' element={<Clubs/>}/>
+                            <Route path='/clubs/:slug' element={<ClubPage/>}/>
                             <Route path='/clubs' element={<Clubs/>}/>
                             <Route path='/leagues/:slug' element={<LeaguePage/>}/>
                             <Route path='/leagues' element={<Leagues/>}/>
