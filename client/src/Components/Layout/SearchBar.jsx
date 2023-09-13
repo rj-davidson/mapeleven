@@ -2,7 +2,7 @@ import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import {useEffect, useState} from "react";
-import {Paper} from "@mui/material";
+import {createFilterOptions, Paper} from "@mui/material";
 import {styled} from "@mui/material/styles";
 import {useNavigate} from 'react-router-dom';
 import SearchIcon from "@mui/icons-material/Search";
@@ -10,6 +10,7 @@ import SearchIcon from "@mui/icons-material/Search";
 export default function SearchBar() {
 
     const [data, setData] = useState([]);
+    const maxFilter = 6;
 
     useEffect(() => {
         // Send a GET request to the API.
@@ -22,51 +23,41 @@ export default function SearchBar() {
             .catch(error => console.error(error));
     }, []);
 
-    const customRenderInput = (params) => (
-        <TextField
+    const customRenderInput = (params) => (<TextField
             {...params}
             fullWidth
             variant="outlined"
-            label={
-                <div style={{display: 'flex', alignItems: 'center'}}>
-                    <SearchIcon sx={{marginRight: '8px'}}/>
-                    <label>
-                        Search players, teams, or leagues
-                    </label>
-                </div>
-            }
+            label={<div style={{display: 'flex', alignItems: 'center'}}>
+                <SearchIcon sx={{marginRight: '8px'}}/>
+                <label>
+                    Search players, teams, or leagues
+                </label>
+            </div>}
             InputProps={{
-                ...params.InputProps,
-                onKeyDown: (e) => {
+                ...params.InputProps, onKeyDown: (e) => {
                     if (e.key === 'Enter') {
                         e.stopPropagation();
                     }
-                },
-                style: { /* your custom CSS styles for the input field */},
+                }, style: { /* your custom CSS styles for the input field */},
             }}
-        />
-    );
+        />);
 
-    const customRenderOption = (props, option) => (
-        <li {...props} style={{marginBottom: 8}}>
+    const customRenderOption = (props, option) => (<li {...props} style={{marginBottom: 8}}>
             <img
                 src={'http://localhost:8080/' + option.image}
                 alt={option.name}
                 style={{marginRight: '16px', width: '32px', height: '32px', overflow: 'hidden'}}
             />
             {option.name}
-        </li>
-    );
+        </li>);
 
     const CustomPaperComponent = ({children}) => {
-        return (
-            <Paper style={{padding: '8px', backgroundColor: 'var(--dark0)', color: 'var(--light2)'}}>
+        return (<Paper style={{padding: '8px', backgroundColor: 'var(--dark0)', color: 'var(--light2)'}}>
                 {children}
-            </Paper>
-        );
+            </Paper>);
     };
 
-    const GroupHeader = styled('div')(({theme}) => ({
+    const GroupHeader = styled('div')(() => ({
         position: 'sticky',
         top: '-8px',
         padding: '12px 10px',
@@ -103,8 +94,12 @@ export default function SearchBar() {
         }
     }
 
-    return (
-        <Autocomplete
+    const defaultFilterOptions = createFilterOptions();
+    const filterOptions = (options, state) => {
+        return defaultFilterOptions(options, state).slice(0, maxFilter);
+    };
+
+    return (<Autocomplete
             disablePortal
             disableClearable
             options={data}
@@ -114,15 +109,18 @@ export default function SearchBar() {
             onChange={handleSearch}
             noOptionsText="No results"
             popupIcon={""}
+            filterOptions={filterOptions}
             PaperComponent={CustomPaperComponent}
             renderInput={customRenderInput}
             renderOption={customRenderOption}
-            renderGroup={(params) => (
-                <li key={params.key}>
+            renderGroup={(params) => (<li key={params.key}>
                     <GroupHeader>{params.group}</GroupHeader>
                     <GroupItems>{params.children}</GroupItems>
-                </li>
-            )}
-        />
-    );
+                </li>)}
+            ListboxProps={{
+                style: {
+                    maxHeight: '80vh',
+                }
+            }}
+        />);
 }

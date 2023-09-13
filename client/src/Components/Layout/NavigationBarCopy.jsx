@@ -11,7 +11,12 @@ import SearchBar from "./SearchBar.jsx"
 export default function NavBar() {
     return (
         <Box sx={{flexGrow: 1}}>
-            <AppBar position="fixed" sx={{backgroundColor: 'var(--dark1)', color: 'var(--light0)', width: '100%'}}>
+            <AppBar position="fixed" sx={{
+                backgroundColor: 'rgba(0,0,0,0.3)',
+                color: 'var(--light0)',
+                width: '100%',
+                backdropFilter: 'blur(10px)'
+            }}>
                 <Toolbar>
                     <IconButton
                         size="large"

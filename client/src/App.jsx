@@ -9,6 +9,7 @@ import {BrowserRouter as Router, Routes, Route} from 'react-router-dom';
 import {ThemeProvider} from '@mui/material';
 import dark from './Components/Theme/MapTheme.tsx';
 import Layout from './Components/Layout/Layout.tsx';
+import LeaguePage from "./Components/Pages/Leagues/LeaguePage.jsx";
 
 function App() {
     return (
@@ -20,7 +21,7 @@ function App() {
                             <Route path='/fixtures/:slug' element={<FixturesPage/>}/>
                             <Route path='/players/:slug' element={<Players/>}/>
                             <Route path='/clubs/:slug' element={<Clubs/>}/>
-                            <Route path='/leagues/:slug' element={<Leagues/>}/>
+                            <Route path='/leagues/:slug' element={<LeaguePage/>}/>
                             <Route path='/about' element={<About/>}/>
                             <Route path='/' element={<FixturesPage/>}/>
                         </Routes>
