@@ -24,12 +24,12 @@ func SetupPlayersRoutes(app *fiber.App, client *ent.Client) {
 		return c.JSON(players)
 	})
 
-	// Get a player by ID
+	// Get a player by FootballApiId
 	app.Get("/players/:id", func(c *fiber.Ctx) error {
 		id, err := strconv.Atoi(c.Params("id"))
 		if err != nil {
 			log.Println(err)
-			return fiber.NewError(fiber.StatusBadRequest, "Invalid player ID")
+			return fiber.NewError(fiber.StatusBadRequest, "Invalid player FootballApiId")
 		}
 
 		player, err := playerModel.GetPlayerByID(context.Background(), id)
@@ -41,6 +41,6 @@ func SetupPlayersRoutes(app *fiber.App, client *ent.Client) {
 		return c.JSON(player)
 	})
 
-	// Get a player by Team ID
+	// Get a player by Team FootballApiId
 
 }

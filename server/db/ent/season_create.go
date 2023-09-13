@@ -6,9 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/season"
-	"mapeleven/db/ent/teamseason"
+	"mapeleven/db/ent/standings"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -22,35 +23,33 @@ type SeasonCreate struct {
 	hooks    []Hook
 }
 
+// SetSlug sets the "slug" field.
+func (sc *SeasonCreate) SetSlug(s string) *SeasonCreate {
+	sc.mutation.SetSlug(s)
+	return sc
+}
+
 // SetYear sets the "year" field.
 func (sc *SeasonCreate) SetYear(i int) *SeasonCreate {
 	sc.mutation.SetYear(i)
 	return sc
 }
 
-// SetStart sets the "start" field.
-func (sc *SeasonCreate) SetStart(t time.Time) *SeasonCreate {
-	sc.mutation.SetStart(t)
+// SetStartDate sets the "start_date" field.
+func (sc *SeasonCreate) SetStartDate(t time.Time) *SeasonCreate {
+	sc.mutation.SetStartDate(t)
 	return sc
 }
 
-// SetEnd sets the "end" field.
-func (sc *SeasonCreate) SetEnd(t time.Time) *SeasonCreate {
-	sc.mutation.SetEnd(t)
+// SetEndDate sets the "end_date" field.
+func (sc *SeasonCreate) SetEndDate(t time.Time) *SeasonCreate {
+	sc.mutation.SetEndDate(t)
 	return sc
 }
 
 // SetCurrent sets the "current" field.
 func (sc *SeasonCreate) SetCurrent(b bool) *SeasonCreate {
 	sc.mutation.SetCurrent(b)
-	return sc
-}
-
-// SetNillableCurrent sets the "current" field if the given value is not nil.
-func (sc *SeasonCreate) SetNillableCurrent(b *bool) *SeasonCreate {
-	if b != nil {
-		sc.SetCurrent(*b)
-	}
 	return sc
 }
 
@@ -73,19 +72,34 @@ func (sc *SeasonCreate) SetLeague(l *League) *SeasonCreate {
 	return sc.SetLeagueID(l.ID)
 }
 
-// AddTeamSeasonIDs adds the "teamSeasons" edge to the TeamSeason entity by IDs.
-func (sc *SeasonCreate) AddTeamSeasonIDs(ids ...int) *SeasonCreate {
-	sc.mutation.AddTeamSeasonIDs(ids...)
+// AddFixtureIDs adds the "fixtures" edge to the Fixture entity by IDs.
+func (sc *SeasonCreate) AddFixtureIDs(ids ...int) *SeasonCreate {
+	sc.mutation.AddFixtureIDs(ids...)
 	return sc
 }
 
-// AddTeamSeasons adds the "teamSeasons" edges to the TeamSeason entity.
-func (sc *SeasonCreate) AddTeamSeasons(t ...*TeamSeason) *SeasonCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddFixtures adds the "fixtures" edges to the Fixture entity.
+func (sc *SeasonCreate) AddFixtures(f ...*Fixture) *SeasonCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
 	}
-	return sc.AddTeamSeasonIDs(ids...)
+	return sc.AddFixtureIDs(ids...)
+}
+
+// AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
+func (sc *SeasonCreate) AddStandingIDs(ids ...int) *SeasonCreate {
+	sc.mutation.AddStandingIDs(ids...)
+	return sc
+}
+
+// AddStandings adds the "standings" edges to the Standings entity.
+func (sc *SeasonCreate) AddStandings(s ...*Standings) *SeasonCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return sc.AddStandingIDs(ids...)
 }
 
 // Mutation returns the SeasonMutation object of the builder.
@@ -95,7 +109,6 @@ func (sc *SeasonCreate) Mutation() *SeasonMutation {
 
 // Save creates the Season in the database.
 func (sc *SeasonCreate) Save(ctx context.Context) (*Season, error) {
-	sc.defaults()
 	return withHooks[*Season, SeasonMutation](ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
@@ -121,24 +134,19 @@ func (sc *SeasonCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// defaults sets the default values of the builder before save.
-func (sc *SeasonCreate) defaults() {
-	if _, ok := sc.mutation.Current(); !ok {
-		v := season.DefaultCurrent
-		sc.mutation.SetCurrent(v)
-	}
-}
-
 // check runs all checks and user-defined validators on the builder.
 func (sc *SeasonCreate) check() error {
+	if _, ok := sc.mutation.Slug(); !ok {
+		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "Season.slug"`)}
+	}
 	if _, ok := sc.mutation.Year(); !ok {
 		return &ValidationError{Name: "year", err: errors.New(`ent: missing required field "Season.year"`)}
 	}
-	if _, ok := sc.mutation.Start(); !ok {
-		return &ValidationError{Name: "start", err: errors.New(`ent: missing required field "Season.start"`)}
+	if _, ok := sc.mutation.StartDate(); !ok {
+		return &ValidationError{Name: "start_date", err: errors.New(`ent: missing required field "Season.start_date"`)}
 	}
-	if _, ok := sc.mutation.End(); !ok {
-		return &ValidationError{Name: "end", err: errors.New(`ent: missing required field "Season.end"`)}
+	if _, ok := sc.mutation.EndDate(); !ok {
+		return &ValidationError{Name: "end_date", err: errors.New(`ent: missing required field "Season.end_date"`)}
 	}
 	if _, ok := sc.mutation.Current(); !ok {
 		return &ValidationError{Name: "current", err: errors.New(`ent: missing required field "Season.current"`)}
@@ -169,17 +177,21 @@ func (sc *SeasonCreate) createSpec() (*Season, *sqlgraph.CreateSpec) {
 		_node = &Season{config: sc.config}
 		_spec = sqlgraph.NewCreateSpec(season.Table, sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt))
 	)
+	if value, ok := sc.mutation.Slug(); ok {
+		_spec.SetField(season.FieldSlug, field.TypeString, value)
+		_node.Slug = value
+	}
 	if value, ok := sc.mutation.Year(); ok {
 		_spec.SetField(season.FieldYear, field.TypeInt, value)
 		_node.Year = value
 	}
-	if value, ok := sc.mutation.Start(); ok {
-		_spec.SetField(season.FieldStart, field.TypeTime, value)
-		_node.Start = value
+	if value, ok := sc.mutation.StartDate(); ok {
+		_spec.SetField(season.FieldStartDate, field.TypeTime, value)
+		_node.StartDate = value
 	}
-	if value, ok := sc.mutation.End(); ok {
-		_spec.SetField(season.FieldEnd, field.TypeTime, value)
-		_node.End = value
+	if value, ok := sc.mutation.EndDate(); ok {
+		_spec.SetField(season.FieldEndDate, field.TypeTime, value)
+		_node.EndDate = value
 	}
 	if value, ok := sc.mutation.Current(); ok {
 		_spec.SetField(season.FieldCurrent, field.TypeBool, value)
@@ -187,8 +199,8 @@ func (sc *SeasonCreate) createSpec() (*Season, *sqlgraph.CreateSpec) {
 	}
 	if nodes := sc.mutation.LeagueIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   season.LeagueTable,
 			Columns: []string{season.LeagueColumn},
 			Bidi:    false,
@@ -199,17 +211,34 @@ func (sc *SeasonCreate) createSpec() (*Season, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.league_season = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := sc.mutation.TeamSeasonsIDs(); len(nodes) > 0 {
+	if nodes := sc.mutation.FixturesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   season.TeamSeasonsTable,
-			Columns: []string{season.TeamSeasonsColumn},
+			Table:   season.FixturesTable,
+			Columns: []string{season.FixturesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sc.mutation.StandingsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   season.StandingsTable,
+			Columns: []string{season.StandingsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(standings.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -234,7 +263,6 @@ func (scb *SeasonCreateBulk) Save(ctx context.Context) ([]*Season, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
-			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SeasonMutation)
 				if !ok {

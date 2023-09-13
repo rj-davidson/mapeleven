@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/fixture"
-	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/team"
 	"time"
 
@@ -130,36 +130,9 @@ func (fc *FixtureCreate) SetNillableAwayTeamScore(i *int) *FixtureCreate {
 	return fc
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (fc *FixtureCreate) SetLeagueID(id int) *FixtureCreate {
-	fc.mutation.SetLeagueID(id)
-	return fc
-}
-
-// SetNillableLeagueID sets the "league" edge to the League entity by ID if the given value is not nil.
-func (fc *FixtureCreate) SetNillableLeagueID(id *int) *FixtureCreate {
-	if id != nil {
-		fc = fc.SetLeagueID(*id)
-	}
-	return fc
-}
-
-// SetLeague sets the "league" edge to the League entity.
-func (fc *FixtureCreate) SetLeague(l *League) *FixtureCreate {
-	return fc.SetLeagueID(l.ID)
-}
-
 // SetHomeTeamID sets the "homeTeam" edge to the Team entity by ID.
 func (fc *FixtureCreate) SetHomeTeamID(id int) *FixtureCreate {
 	fc.mutation.SetHomeTeamID(id)
-	return fc
-}
-
-// SetNillableHomeTeamID sets the "homeTeam" edge to the Team entity by ID if the given value is not nil.
-func (fc *FixtureCreate) SetNillableHomeTeamID(id *int) *FixtureCreate {
-	if id != nil {
-		fc = fc.SetHomeTeamID(*id)
-	}
 	return fc
 }
 
@@ -174,17 +147,20 @@ func (fc *FixtureCreate) SetAwayTeamID(id int) *FixtureCreate {
 	return fc
 }
 
-// SetNillableAwayTeamID sets the "awayTeam" edge to the Team entity by ID if the given value is not nil.
-func (fc *FixtureCreate) SetNillableAwayTeamID(id *int) *FixtureCreate {
-	if id != nil {
-		fc = fc.SetAwayTeamID(*id)
-	}
-	return fc
-}
-
 // SetAwayTeam sets the "awayTeam" edge to the Team entity.
 func (fc *FixtureCreate) SetAwayTeam(t *Team) *FixtureCreate {
 	return fc.SetAwayTeamID(t.ID)
+}
+
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (fc *FixtureCreate) SetSeasonID(id int) *FixtureCreate {
+	fc.mutation.SetSeasonID(id)
+	return fc
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (fc *FixtureCreate) SetSeason(s *Season) *FixtureCreate {
+	return fc.SetSeasonID(s.ID)
 }
 
 // Mutation returns the FixtureMutation object of the builder.
@@ -232,6 +208,15 @@ func (fc *FixtureCreate) check() error {
 	}
 	if _, ok := fc.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Fixture.status"`)}
+	}
+	if _, ok := fc.mutation.HomeTeamID(); !ok {
+		return &ValidationError{Name: "homeTeam", err: errors.New(`ent: missing required edge "Fixture.homeTeam"`)}
+	}
+	if _, ok := fc.mutation.AwayTeamID(); !ok {
+		return &ValidationError{Name: "awayTeam", err: errors.New(`ent: missing required edge "Fixture.awayTeam"`)}
+	}
+	if _, ok := fc.mutation.SeasonID(); !ok {
+		return &ValidationError{Name: "season", err: errors.New(`ent: missing required edge "Fixture.season"`)}
 	}
 	return nil
 }
@@ -299,23 +284,6 @@ func (fc *FixtureCreate) createSpec() (*Fixture, *sqlgraph.CreateSpec) {
 		_spec.SetField(fixture.FieldAwayTeamScore, field.TypeInt, value)
 		_node.AwayTeamScore = value
 	}
-	if nodes := fc.mutation.LeagueIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   fixture.LeagueTable,
-			Columns: []string{fixture.LeagueColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.league_fixtures = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := fc.mutation.HomeTeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -348,6 +316,23 @@ func (fc *FixtureCreate) createSpec() (*Fixture, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.team_away_fixtures = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fc.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixture.SeasonTable,
+			Columns: []string{fixture.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.season_fixtures = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

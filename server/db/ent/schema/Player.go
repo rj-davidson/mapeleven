@@ -30,10 +30,7 @@ func (Player) Fields() []ent.Field {
 // Edges of the Player.
 func (Player) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("birth", Birth.Type).
-			Unique(),
-		edge.From("teams", Team.Type).
-			Ref("players"),
-		edge.To("playerTeamSeasons", PlayerTeamSeason.Type),
+		edge.From("birth", Birth.Type).
+			Ref("player").Unique(),
 	}
 }

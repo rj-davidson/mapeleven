@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"time"
@@ -245,15 +245,15 @@ func (sc *StandingsCreate) SetTeam(t *Team) *StandingsCreate {
 	return sc.SetTeamID(t.ID)
 }
 
-// SetLeagueID sets the "league" edge to the League entity by ID.
-func (sc *StandingsCreate) SetLeagueID(id int) *StandingsCreate {
-	sc.mutation.SetLeagueID(id)
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (sc *StandingsCreate) SetSeasonID(id int) *StandingsCreate {
+	sc.mutation.SetSeasonID(id)
 	return sc
 }
 
-// SetLeague sets the "league" edge to the League entity.
-func (sc *StandingsCreate) SetLeague(l *League) *StandingsCreate {
-	return sc.SetLeagueID(l.ID)
+// SetSeason sets the "season" edge to the Season entity.
+func (sc *StandingsCreate) SetSeason(s *Season) *StandingsCreate {
+	return sc.SetSeasonID(s.ID)
 }
 
 // Mutation returns the StandingsMutation object of the builder.
@@ -390,8 +390,8 @@ func (sc *StandingsCreate) check() error {
 	if _, ok := sc.mutation.TeamID(); !ok {
 		return &ValidationError{Name: "team", err: errors.New(`ent: missing required edge "Standings.team"`)}
 	}
-	if _, ok := sc.mutation.LeagueID(); !ok {
-		return &ValidationError{Name: "league", err: errors.New(`ent: missing required edge "Standings.league"`)}
+	if _, ok := sc.mutation.SeasonID(); !ok {
+		return &ValidationError{Name: "season", err: errors.New(`ent: missing required edge "Standings.season"`)}
 	}
 	return nil
 }
@@ -540,21 +540,21 @@ func (sc *StandingsCreate) createSpec() (*Standings, *sqlgraph.CreateSpec) {
 		_node.team_standings = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := sc.mutation.LeagueIDs(); len(nodes) > 0 {
+	if nodes := sc.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   standings.LeagueTable,
-			Columns: []string{standings.LeagueColumn},
+			Table:   standings.SeasonTable,
+			Columns: []string{standings.SeasonColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.league_standings = &nodes[0]
+		_node.season_standings = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

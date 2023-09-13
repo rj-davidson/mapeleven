@@ -8,11 +8,8 @@ import (
 	"fmt"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/fixture"
-	"mapeleven/db/ent/league"
-	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
-	"mapeleven/db/ent/teamseason"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -99,51 +96,6 @@ func (tc *TeamCreate) SetNillableCountryID(id *int) *TeamCreate {
 // SetCountry sets the "country" edge to the Country entity.
 func (tc *TeamCreate) SetCountry(c *Country) *TeamCreate {
 	return tc.SetCountryID(c.ID)
-}
-
-// AddLeagueIDs adds the "leagues" edge to the League entity by IDs.
-func (tc *TeamCreate) AddLeagueIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddLeagueIDs(ids...)
-	return tc
-}
-
-// AddLeagues adds the "leagues" edges to the League entity.
-func (tc *TeamCreate) AddLeagues(l ...*League) *TeamCreate {
-	ids := make([]int, len(l))
-	for i := range l {
-		ids[i] = l[i].ID
-	}
-	return tc.AddLeagueIDs(ids...)
-}
-
-// AddPlayerIDs adds the "players" edge to the Player entity by IDs.
-func (tc *TeamCreate) AddPlayerIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddPlayerIDs(ids...)
-	return tc
-}
-
-// AddPlayers adds the "players" edges to the Player entity.
-func (tc *TeamCreate) AddPlayers(p ...*Player) *TeamCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tc.AddPlayerIDs(ids...)
-}
-
-// AddTeamSeasonIDs adds the "teamSeasons" edge to the TeamSeason entity by IDs.
-func (tc *TeamCreate) AddTeamSeasonIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddTeamSeasonIDs(ids...)
-	return tc
-}
-
-// AddTeamSeasons adds the "teamSeasons" edges to the TeamSeason entity.
-func (tc *TeamCreate) AddTeamSeasons(t ...*TeamSeason) *TeamCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return tc.AddTeamSeasonIDs(ids...)
 }
 
 // AddHomeFixtureIDs adds the "homeFixtures" edge to the Fixture entity by IDs.
@@ -320,54 +272,6 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.country_teams = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.LeaguesIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   team.LeaguesTable,
-			Columns: team.LeaguesPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(league.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.PlayersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   team.PlayersTable,
-			Columns: team.PlayersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.TeamSeasonsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.TeamSeasonsTable,
-			Columns: []string{team.TeamSeasonsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(teamseason.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.HomeFixturesIDs(); len(nodes) > 0 {

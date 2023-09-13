@@ -31,10 +31,6 @@ func (Team) Edges() []ent.Edge {
 		edge.From("country", Country.Type).
 			Ref("teams").
 			Unique(),
-		edge.From("leagues", League.Type).
-			Ref("teams"),
-		edge.To("players", Player.Type),
-		edge.To("teamSeasons", TeamSeason.Type),
 		edge.To("homeFixtures", Fixture.Type),
 		edge.To("awayFixtures", Fixture.Type),
 	}

@@ -32,21 +32,14 @@ const (
 	FieldHomeTeamScore = "home_team_score"
 	// FieldAwayTeamScore holds the string denoting the awayteamscore field in the database.
 	FieldAwayTeamScore = "away_team_score"
-	// EdgeLeague holds the string denoting the league edge name in mutations.
-	EdgeLeague = "league"
 	// EdgeHomeTeam holds the string denoting the hometeam edge name in mutations.
 	EdgeHomeTeam = "homeTeam"
 	// EdgeAwayTeam holds the string denoting the awayteam edge name in mutations.
 	EdgeAwayTeam = "awayTeam"
+	// EdgeSeason holds the string denoting the season edge name in mutations.
+	EdgeSeason = "season"
 	// Table holds the table name of the fixture in the database.
 	Table = "fixtures"
-	// LeagueTable is the table that holds the league relation/edge.
-	LeagueTable = "fixtures"
-	// LeagueInverseTable is the table name for the League entity.
-	// It exists in this package in order to avoid circular dependency with the "league" package.
-	LeagueInverseTable = "leagues"
-	// LeagueColumn is the table column denoting the league relation/edge.
-	LeagueColumn = "league_fixtures"
 	// HomeTeamTable is the table that holds the homeTeam relation/edge.
 	HomeTeamTable = "fixtures"
 	// HomeTeamInverseTable is the table name for the Team entity.
@@ -61,6 +54,13 @@ const (
 	AwayTeamInverseTable = "teams"
 	// AwayTeamColumn is the table column denoting the awayTeam relation/edge.
 	AwayTeamColumn = "team_away_fixtures"
+	// SeasonTable is the table that holds the season relation/edge.
+	SeasonTable = "fixtures"
+	// SeasonInverseTable is the table name for the Season entity.
+	// It exists in this package in order to avoid circular dependency with the "season" package.
+	SeasonInverseTable = "seasons"
+	// SeasonColumn is the table column denoting the season relation/edge.
+	SeasonColumn = "season_fixtures"
 )
 
 // Columns holds all SQL columns for fixture fields.
@@ -81,7 +81,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "fixtures"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"league_fixtures",
+	"season_fixtures",
 	"team_home_fixtures",
 	"team_away_fixtures",
 }
@@ -159,13 +159,6 @@ func ByAwayTeamScore(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldAwayTeamScore, opts...).ToFunc()
 }
 
-// ByLeagueField orders the results by league field.
-func ByLeagueField(field string, opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLeagueStep(), sql.OrderByField(field, opts...))
-	}
-}
-
 // ByHomeTeamField orders the results by homeTeam field.
 func ByHomeTeamField(field string, opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
@@ -179,12 +172,12 @@ func ByAwayTeamField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newAwayTeamStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newLeagueStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LeagueInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LeagueTable, LeagueColumn),
-	)
+
+// BySeasonField orders the results by season field.
+func BySeasonField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSeasonStep(), sql.OrderByField(field, opts...))
+	}
 }
 func newHomeTeamStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
@@ -198,5 +191,12 @@ func newAwayTeamStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AwayTeamInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, AwayTeamTable, AwayTeamColumn),
+	)
+}
+func newSeasonStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SeasonInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, SeasonTable, SeasonColumn),
 	)
 }

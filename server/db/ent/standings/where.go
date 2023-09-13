@@ -1368,21 +1368,21 @@ func HasTeamWith(preds ...predicate.Team) predicate.Standings {
 	})
 }
 
-// HasLeague applies the HasEdge predicate on the "league" edge.
-func HasLeague() predicate.Standings {
+// HasSeason applies the HasEdge predicate on the "season" edge.
+func HasSeason() predicate.Standings {
 	return predicate.Standings(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, LeagueTable, LeagueColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, SeasonTable, SeasonColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasLeagueWith applies the HasEdge predicate on the "league" edge with a given conditions (other predicates).
-func HasLeagueWith(preds ...predicate.League) predicate.Standings {
+// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
+func HasSeasonWith(preds ...predicate.Season) predicate.Standings {
 	return predicate.Standings(func(s *sql.Selector) {
-		step := newLeagueStep()
+		step := newSeasonStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

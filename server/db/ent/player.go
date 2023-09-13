@@ -38,6 +38,7 @@ type Player struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlayerQuery when eager-loading is set.
 	Edges           PlayerEdges `json:"edges"`
+	birth_player    *int
 	country_players *int
 	selectValues    sql.SelectValues
 }
@@ -46,13 +47,9 @@ type Player struct {
 type PlayerEdges struct {
 	// Birth holds the value of the birth edge.
 	Birth *Birth `json:"birth,omitempty"`
-	// Teams holds the value of the teams edge.
-	Teams []*Team `json:"teams,omitempty"`
-	// PlayerTeamSeasons holds the value of the playerTeamSeasons edge.
-	PlayerTeamSeasons []*PlayerTeamSeason `json:"playerTeamSeasons,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [1]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -68,24 +65,6 @@ func (e PlayerEdges) BirthOrErr() (*Birth, error) {
 	return nil, &NotLoadedError{edge: "birth"}
 }
 
-// TeamsOrErr returns the Teams value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerEdges) TeamsOrErr() ([]*Team, error) {
-	if e.loadedTypes[1] {
-		return e.Teams, nil
-	}
-	return nil, &NotLoadedError{edge: "teams"}
-}
-
-// PlayerTeamSeasonsOrErr returns the PlayerTeamSeasons value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerEdges) PlayerTeamSeasonsOrErr() ([]*PlayerTeamSeason, error) {
-	if e.loadedTypes[2] {
-		return e.PlayerTeamSeasons, nil
-	}
-	return nil, &NotLoadedError{edge: "playerTeamSeasons"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Player) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -99,7 +78,9 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldPhoto:
 			values[i] = new(sql.NullString)
-		case player.ForeignKeys[0]: // country_players
+		case player.ForeignKeys[0]: // birth_player
+			values[i] = new(sql.NullInt64)
+		case player.ForeignKeys[1]: // country_players
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -178,6 +159,13 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 			}
 		case player.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field birth_player", value)
+			} else if value.Valid {
+				pl.birth_player = new(int)
+				*pl.birth_player = int(value.Int64)
+			}
+		case player.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field country_players", value)
 			} else if value.Valid {
 				pl.country_players = new(int)
@@ -199,16 +187,6 @@ func (pl *Player) Value(name string) (ent.Value, error) {
 // QueryBirth queries the "birth" edge of the Player entity.
 func (pl *Player) QueryBirth() *BirthQuery {
 	return NewPlayerClient(pl.config).QueryBirth(pl)
-}
-
-// QueryTeams queries the "teams" edge of the Player entity.
-func (pl *Player) QueryTeams() *TeamQuery {
-	return NewPlayerClient(pl.config).QueryTeams(pl)
-}
-
-// QueryPlayerTeamSeasons queries the "playerTeamSeasons" edge of the Player entity.
-func (pl *Player) QueryPlayerTeamSeasons() *PlayerTeamSeasonQuery {
-	return NewPlayerClient(pl.config).QueryPlayerTeamSeasons(pl)
 }
 
 // Update returns a builder for updating this Player.

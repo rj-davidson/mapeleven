@@ -23,8 +23,6 @@ func (Birth) Fields() []ent.Field {
 // Edges of the Birth.
 func (Birth) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("player", Player.Type).
-			Ref("birth").
-			Unique(),
+		edge.To("player", Player.Type),
 	}
 }

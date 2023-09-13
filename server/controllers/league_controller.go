@@ -12,18 +12,20 @@ import (
 	"mapeleven/utils"
 	"net/http"
 	"path/filepath"
+	"strconv"
 )
 
 type LeagueController struct {
-	client            *http.Client
-	leagueModel       *models.LeagueModel
-	countryController *CountryController
+	client      *http.Client
+	leagueModel *models.LeagueModel
+	seasonModel *models.SeasonModel
 }
 
 type APILeagueResponse struct {
 	Response []struct {
-		League  models.CreateLeagueInput  `json:"league"`
-		Country models.CreateCountryInput `json:"country"`
+		League  models.CreateLeagueInput   `json:"league"`
+		Country models.CreateCountryInput  `json:"country"`
+		Seasons []models.CreateSeasonInput `json:"seasons"`
 	} `json:"response"`
 }
 
@@ -34,148 +36,133 @@ type APILeague struct {
 	Logo string      `json:"logo"`
 }
 
-func NewLeagueController(leagueModel *models.LeagueModel) *LeagueController {
+func NewLeagueController(leagueModel *models.LeagueModel, seasonModel *models.SeasonModel) *LeagueController {
 	return &LeagueController{
 		client:      &http.Client{},
 		leagueModel: leagueModel,
+		seasonModel: seasonModel,
 	}
 }
 
-func (lc *LeagueController) FetchLeagueData(data []byte) (models.CreateLeagueInput, models.CreateCountryInput, error) {
-	var response struct {
-		Response []struct {
-			League  json.RawMessage `json:"league"`
-			Country json.RawMessage `json:"country"`
-		} `json:"response"`
+func (lc *LeagueController) InitializeLeagues(leagueIDs []int, ctx context.Context) error {
+	fmt.Println("Initializing leagues...")
+	for _, leagueID := range leagueIDs {
+		fmt.Println("Initializing league with FootballApiId: ", leagueID)
+		err := lc.fetchLeagueByID(ctx, leagueID)
+		if err != nil {
+			fmt.Errorf("fetch league with FootballApiId %d: %w", leagueID, err)
+		}
 	}
-
-	if err := json.Unmarshal(data, &response); err != nil {
-		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
-	}
-
-	lg := APILeague{}
-	if err := json.Unmarshal(response.Response[0].League, &lg); err != nil {
-		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
-	}
-	leagueInput := models.CreateLeagueInput{
-		ID:   lg.ID,
-		Name: lg.Name,
-		Type: lg.Type,
-		Logo: lg.Logo,
-	}
-
-	co := models.CreateCountryInput{}
-	if err := json.Unmarshal(response.Response[0].Country, &co); err != nil {
-		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
-	}
-
-	return leagueInput, co, nil
+	fmt.Println("[ Finished initializing leagues ]")
+	return nil
 }
 
-func (lc *LeagueController) UpsertLeague(ctx context.Context, leagueID int) (*ent.League, error) {
-	// Construct the API URL with the leagueID
-	url := fmt.Sprintf("https://api-football-v3.p.rapidapi.com/v3/leagues?id=%d", leagueID)
+func (lc *LeagueController) fetchLeagueByID(ctx context.Context, leagueID int) error {
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/leagues?id=%d", leagueID)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
 	resp, err := lc.client.Do(req)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	// Parse the league and country data from the API response
-	leagueInput, inputCountry, err := lc.parseLeagueData(data)
-	if err != nil {
-		return nil, err
-	}
-
-	// Use the country's name for inputData
-	leagueInput.Country = inputCountry.Name
-
-	// Download the logo and set the logoLocation
-	err = lc.downloadLeagueLogoIfNeeded(&leagueInput)
-	if err != nil {
-		return nil, err
-	}
-
-	// Check if the league exists, and either create or update it accordingly
-	existingLeague, err := lc.leagueModel.GetLeagueByID(context.Background(), leagueInput.ID)
-	if existingLeague == nil {
-		return lc.createLeague(&leagueInput)
-	} else {
-		return lc.updateLeague(&leagueInput)
-	}
+	return lc.parseLeagueResponse(ctx, data)
 }
 
-func (lc *LeagueController) parseLeagueData(data []byte) (models.CreateLeagueInput, models.CreateCountryInput, error) {
+func (lc *LeagueController) parseLeagueResponse(ctx context.Context, data []byte) error {
 	var response APILeagueResponse
 	if err := json.Unmarshal(data, &response); err != nil {
-		return models.CreateLeagueInput{}, models.CreateCountryInput{}, err
+		return err
 	}
 
-	leag := response.Response[0].League
-	country := response.Response[0].Country
-	return leag, country, nil
+	leagueInput := response.Response[0].League
+	leagueInput.Country = response.Response[0].Country.Name
+	var seasonInputs []models.CreateSeasonInput
+	for _, season := range response.Response[0].Seasons {
+		seasonInputs = append(seasonInputs, season)
+	}
+
+	// Download the logo and set the logoLocation
+	err := lc.downloadLeagueLogoIfNeeded(&leagueInput)
+	if err != nil {
+		return err
+	}
+
+	l, err := lc.upsertLeague(ctx, &leagueInput)
+	if err != nil {
+		return err
+	}
+
+	for _, seasonInput := range seasonInputs {
+		_, err := lc.upsertSeason(ctx, &seasonInput,
+			utils.Slugify(leagueInput.Name+"-"+strconv.Itoa(seasonInput.Year)),
+			l.ID)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (lc *LeagueController) upsertLeague(ctx context.Context, leagueInput *models.CreateLeagueInput) (*ent.League, error) {
+	existingLeague := lc.leagueModel.LeagueExistsByFootballApiId(ctx, leagueInput.FootballApiId)
+	var l *ent.League
+	err := error(nil)
+	if existingLeague == nil {
+		l, err = lc.leagueModel.CreateLeague(ctx, *leagueInput)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		l, err = lc.leagueModel.UpdateLeague(ctx, models.UpdateLeagueInput{
+			ID:   existingLeague.ID,
+			Name: &leagueInput.Name,
+			Type: &leagueInput.Type,
+			Logo: &leagueInput.Logo,
+		})
+		if err != nil {
+			return nil, err
+		}
+	}
+	return l, nil
+}
+
+func (lc *LeagueController) upsertSeason(ctx context.Context, seasonInput *models.CreateSeasonInput, slug string, leagueID int) (*ent.Season, error) {
+	existingSeason := lc.seasonModel.SeasonExistsByLeagueIdAndYear(ctx, leagueID, seasonInput.Year)
+	if existingSeason == nil {
+		return lc.seasonModel.CreateSeason(ctx, *seasonInput, slug, leagueID)
+	} else {
+		return lc.seasonModel.UpdateSeason(ctx, models.UpdateSeasonInput{
+			ID:      existingSeason.ID,
+			Start:   seasonInput.Start,
+			End:     seasonInput.End,
+			Current: seasonInput.Current,
+		})
+	}
 }
 
 func (lc *LeagueController) downloadLeagueLogoIfNeeded(leagueInput *models.CreateLeagueInput) error {
 	if leagueInput.Logo != "" {
 		logoLocation, err := utils.DownloadImageIfNeeded(
 			leagueInput.Logo,
-			fmt.Sprintf("images/leagues/%d%s", leagueInput.ID, filepath.Ext(leagueInput.Logo)),
+			fmt.Sprintf("images/leagues/%d%s", leagueInput.FootballApiId, filepath.Ext(leagueInput.Logo)),
 		)
 		if err != nil {
 			return err
 		}
 		leagueInput.Logo = logoLocation
 	}
-	return nil
-}
-
-func (lc *LeagueController) createLeague(leagueInput *models.CreateLeagueInput) (*ent.League, error) {
-	newLeague, err := lc.leagueModel.CreateLeague(context.Background(), *leagueInput)
-	if err != nil {
-		return nil, err
-	}
-	return newLeague, nil
-}
-
-func (lc *LeagueController) updateLeague(leagueInput *models.CreateLeagueInput) (*ent.League, error) {
-	updateInput := models.UpdateLeagueInput{
-		ID:      leagueInput.ID,
-		Name:    &leagueInput.Name,
-		Type:    &leagueInput.Type,
-		Logo:    &leagueInput.Logo,
-		Country: &leagueInput.Country,
-	}
-	updatedLeague, err := lc.leagueModel.UpdateLeague(context.Background(), updateInput)
-	if err != nil {
-		return nil, err
-	}
-	return updatedLeague, nil
-}
-
-func (lc *LeagueController) InitializeLeagues(leagueIDs []int) error {
-	// Fetch and upsert leagues
-	for _, id := range leagueIDs {
-		leag, err := lc.UpsertLeague(context.Background(), id)
-		if err != nil {
-			return fmt.Errorf("failed to upsert league with ID %d: %v", id, err)
-		}
-		fmt.Printf("Upserted league with ID %d: %+v\n", id, leag)
-	}
-
-	fmt.Println("Leagues loaded")
 	return nil
 }

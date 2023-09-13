@@ -68,8 +68,8 @@ const (
 	FieldLastUpdated = "last_updated"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
-	// EdgeLeague holds the string denoting the league edge name in mutations.
-	EdgeLeague = "league"
+	// EdgeSeason holds the string denoting the season edge name in mutations.
+	EdgeSeason = "season"
 	// Table holds the table name of the standings in the database.
 	Table = "standings"
 	// TeamTable is the table that holds the team relation/edge.
@@ -79,13 +79,13 @@ const (
 	TeamInverseTable = "teams"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "team_standings"
-	// LeagueTable is the table that holds the league relation/edge.
-	LeagueTable = "standings"
-	// LeagueInverseTable is the table name for the League entity.
-	// It exists in this package in order to avoid circular dependency with the "league" package.
-	LeagueInverseTable = "leagues"
-	// LeagueColumn is the table column denoting the league relation/edge.
-	LeagueColumn = "league_standings"
+	// SeasonTable is the table that holds the season relation/edge.
+	SeasonTable = "standings"
+	// SeasonInverseTable is the table name for the Season entity.
+	// It exists in this package in order to avoid circular dependency with the "season" package.
+	SeasonInverseTable = "seasons"
+	// SeasonColumn is the table column denoting the season relation/edge.
+	SeasonColumn = "season_standings"
 )
 
 // Columns holds all SQL columns for standings fields.
@@ -122,7 +122,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "standings"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"league_standings",
+	"season_standings",
 	"team_standings",
 }
 
@@ -301,10 +301,10 @@ func ByTeamField(field string, opts ...sql.OrderTermOption) Order {
 	}
 }
 
-// ByLeagueField orders the results by league field.
-func ByLeagueField(field string, opts ...sql.OrderTermOption) Order {
+// BySeasonField orders the results by season field.
+func BySeasonField(field string, opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newLeagueStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newSeasonStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newTeamStep() *sqlgraph.Step {
@@ -314,10 +314,10 @@ func newTeamStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, TeamTable, TeamColumn),
 	)
 }
-func newLeagueStep() *sqlgraph.Step {
+func newSeasonStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(LeagueInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, LeagueTable, LeagueColumn),
+		sqlgraph.To(SeasonInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, SeasonTable, SeasonColumn),
 	)
 }

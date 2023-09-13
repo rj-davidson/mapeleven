@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"strings"
@@ -74,7 +74,7 @@ type Standings struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the StandingsQuery when eager-loading is set.
 	Edges            StandingsEdges `json:"edges"`
-	league_standings *int
+	season_standings *int
 	team_standings   *int
 	selectValues     sql.SelectValues
 }
@@ -83,8 +83,8 @@ type Standings struct {
 type StandingsEdges struct {
 	// Team holds the value of the team edge.
 	Team *Team `json:"team,omitempty"`
-	// League holds the value of the league edge.
-	League *League `json:"league,omitempty"`
+	// Season holds the value of the season edge.
+	Season *Season `json:"season,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -103,17 +103,17 @@ func (e StandingsEdges) TeamOrErr() (*Team, error) {
 	return nil, &NotLoadedError{edge: "team"}
 }
 
-// LeagueOrErr returns the League value or an error if the edge
+// SeasonOrErr returns the Season value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e StandingsEdges) LeagueOrErr() (*League, error) {
+func (e StandingsEdges) SeasonOrErr() (*Season, error) {
 	if e.loadedTypes[1] {
-		if e.League == nil {
+		if e.Season == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: league.Label}
+			return nil, &NotFoundError{label: season.Label}
 		}
-		return e.League, nil
+		return e.Season, nil
 	}
-	return nil, &NotLoadedError{edge: "league"}
+	return nil, &NotLoadedError{edge: "season"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -127,7 +127,7 @@ func (*Standings) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case standings.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
-		case standings.ForeignKeys[0]: // league_standings
+		case standings.ForeignKeys[0]: // season_standings
 			values[i] = new(sql.NullInt64)
 		case standings.ForeignKeys[1]: // team_standings
 			values[i] = new(sql.NullInt64)
@@ -310,10 +310,10 @@ func (s *Standings) assignValues(columns []string, values []any) error {
 			}
 		case standings.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field league_standings", value)
+				return fmt.Errorf("unexpected type %T for edge-field season_standings", value)
 			} else if value.Valid {
-				s.league_standings = new(int)
-				*s.league_standings = int(value.Int64)
+				s.season_standings = new(int)
+				*s.season_standings = int(value.Int64)
 			}
 		case standings.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -340,9 +340,9 @@ func (s *Standings) QueryTeam() *TeamQuery {
 	return NewStandingsClient(s.config).QueryTeam(s)
 }
 
-// QueryLeague queries the "league" edge of the Standings entity.
-func (s *Standings) QueryLeague() *LeagueQuery {
-	return NewStandingsClient(s.config).QueryLeague(s)
+// QuerySeason queries the "season" edge of the Standings entity.
+func (s *Standings) QuerySeason() *SeasonQuery {
+	return NewStandingsClient(s.config).QuerySeason(s)
 }
 
 // Update returns a builder for updating this Standings.

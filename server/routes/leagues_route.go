@@ -17,7 +17,7 @@ func SetupLeaguesRoutes(app *fiber.App, client *ent.Client) {
 
 func getAllLeagues(serializer *serializer.LeagueSerializer) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		leagues, err := serializer.GetLeagues(context.Background())
+		leagues, err := serializer.GetCurrentLeagues(context.Background())
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
 				"error": fmt.Sprintf("Failed to get leagues: %v", err),
@@ -35,7 +35,7 @@ func getLeagueBySlug(serializer *serializer.LeagueSerializer) fiber.Handler {
 		if err != nil {
 			if ent.IsNotFound(err) {
 				return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
-					"error": fmt.Sprintf("League not found: %v", err),
+					"error": fmt.Sprintf("SeasonID not found: %v", err),
 				})
 			}
 			return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{

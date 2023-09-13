@@ -32,31 +32,15 @@ const (
 	FieldPhoto = "photo"
 	// EdgeBirth holds the string denoting the birth edge name in mutations.
 	EdgeBirth = "birth"
-	// EdgeTeams holds the string denoting the teams edge name in mutations.
-	EdgeTeams = "teams"
-	// EdgePlayerTeamSeasons holds the string denoting the playerteamseasons edge name in mutations.
-	EdgePlayerTeamSeasons = "playerTeamSeasons"
 	// Table holds the table name of the player in the database.
 	Table = "players"
 	// BirthTable is the table that holds the birth relation/edge.
-	BirthTable = "births"
+	BirthTable = "players"
 	// BirthInverseTable is the table name for the Birth entity.
 	// It exists in this package in order to avoid circular dependency with the "birth" package.
 	BirthInverseTable = "births"
 	// BirthColumn is the table column denoting the birth relation/edge.
-	BirthColumn = "player_birth"
-	// TeamsTable is the table that holds the teams relation/edge. The primary key declared below.
-	TeamsTable = "team_players"
-	// TeamsInverseTable is the table name for the Team entity.
-	// It exists in this package in order to avoid circular dependency with the "team" package.
-	TeamsInverseTable = "teams"
-	// PlayerTeamSeasonsTable is the table that holds the playerTeamSeasons relation/edge.
-	PlayerTeamSeasonsTable = "player_team_seasons"
-	// PlayerTeamSeasonsInverseTable is the table name for the PlayerTeamSeason entity.
-	// It exists in this package in order to avoid circular dependency with the "playerteamseason" package.
-	PlayerTeamSeasonsInverseTable = "player_team_seasons"
-	// PlayerTeamSeasonsColumn is the table column denoting the playerTeamSeasons relation/edge.
-	PlayerTeamSeasonsColumn = "player_player_team_seasons"
+	BirthColumn = "birth_player"
 )
 
 // Columns holds all SQL columns for player fields.
@@ -76,14 +60,9 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "players"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"birth_player",
 	"country_players",
 }
-
-var (
-	// TeamsPrimaryKey and TeamsColumn2 are the table columns denoting the
-	// primary key for the teams relation (M2M).
-	TeamsPrimaryKey = []string{"team_id", "player_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -159,52 +138,10 @@ func ByBirthField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newBirthStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByTeamsCount orders the results by teams count.
-func ByTeamsCount(opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTeamsStep(), opts...)
-	}
-}
-
-// ByTeams orders the results by teams terms.
-func ByTeams(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTeamsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByPlayerTeamSeasonsCount orders the results by playerTeamSeasons count.
-func ByPlayerTeamSeasonsCount(opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlayerTeamSeasonsStep(), opts...)
-	}
-}
-
-// ByPlayerTeamSeasons orders the results by playerTeamSeasons terms.
-func ByPlayerTeamSeasons(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerTeamSeasonsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newBirthStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BirthInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2O, false, BirthTable, BirthColumn),
-	)
-}
-func newTeamsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TeamsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, TeamsTable, TeamsPrimaryKey...),
-	)
-}
-func newPlayerTeamSeasonsStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlayerTeamSeasonsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PlayerTeamSeasonsTable, PlayerTeamSeasonsColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, BirthTable, BirthColumn),
 	)
 }

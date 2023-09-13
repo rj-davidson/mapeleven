@@ -7,12 +7,9 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"mapeleven/db/ent/country"
-	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
-	"mapeleven/db/ent/standings"
-	"mapeleven/db/ent/team"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -23,16 +20,13 @@ import (
 // LeagueQuery is the builder for querying League entities.
 type LeagueQuery struct {
 	config
-	ctx           *QueryContext
-	order         []league.Order
-	inters        []Interceptor
-	predicates    []predicate.League
-	withSeason    *SeasonQuery
-	withStandings *StandingsQuery
-	withTeams     *TeamQuery
-	withCountry   *CountryQuery
-	withFixtures  *FixtureQuery
-	withFKs       bool
+	ctx         *QueryContext
+	order       []league.Order
+	inters      []Interceptor
+	predicates  []predicate.League
+	withCountry *CountryQuery
+	withSeason  *SeasonQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -69,72 +63,6 @@ func (lq *LeagueQuery) Order(o ...league.Order) *LeagueQuery {
 	return lq
 }
 
-// QuerySeason chains the current query on the "season" edge.
-func (lq *LeagueQuery) QuerySeason() *SeasonQuery {
-	query := (&SeasonClient{config: lq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := lq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := lq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(league.Table, league.FieldID, selector),
-			sqlgraph.To(season.Table, season.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, league.SeasonTable, league.SeasonColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryStandings chains the current query on the "standings" edge.
-func (lq *LeagueQuery) QueryStandings() *StandingsQuery {
-	query := (&StandingsClient{config: lq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := lq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := lq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(league.Table, league.FieldID, selector),
-			sqlgraph.To(standings.Table, standings.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, league.StandingsTable, league.StandingsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryTeams chains the current query on the "teams" edge.
-func (lq *LeagueQuery) QueryTeams() *TeamQuery {
-	query := (&TeamClient{config: lq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := lq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := lq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(league.Table, league.FieldID, selector),
-			sqlgraph.To(team.Table, team.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, league.TeamsTable, league.TeamsPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryCountry chains the current query on the "country" edge.
 func (lq *LeagueQuery) QueryCountry() *CountryQuery {
 	query := (&CountryClient{config: lq.config}).Query()
@@ -157,9 +85,9 @@ func (lq *LeagueQuery) QueryCountry() *CountryQuery {
 	return query
 }
 
-// QueryFixtures chains the current query on the "fixtures" edge.
-func (lq *LeagueQuery) QueryFixtures() *FixtureQuery {
-	query := (&FixtureClient{config: lq.config}).Query()
+// QuerySeason chains the current query on the "season" edge.
+func (lq *LeagueQuery) QuerySeason() *SeasonQuery {
+	query := (&SeasonClient{config: lq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := lq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -170,8 +98,8 @@ func (lq *LeagueQuery) QueryFixtures() *FixtureQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(league.Table, league.FieldID, selector),
-			sqlgraph.To(fixture.Table, fixture.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, league.FixturesTable, league.FixturesColumn),
+			sqlgraph.To(season.Table, season.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, league.SeasonTable, league.SeasonColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(lq.driver.Dialect(), step)
 		return fromU, nil
@@ -366,53 +294,17 @@ func (lq *LeagueQuery) Clone() *LeagueQuery {
 		return nil
 	}
 	return &LeagueQuery{
-		config:        lq.config,
-		ctx:           lq.ctx.Clone(),
-		order:         append([]league.Order{}, lq.order...),
-		inters:        append([]Interceptor{}, lq.inters...),
-		predicates:    append([]predicate.League{}, lq.predicates...),
-		withSeason:    lq.withSeason.Clone(),
-		withStandings: lq.withStandings.Clone(),
-		withTeams:     lq.withTeams.Clone(),
-		withCountry:   lq.withCountry.Clone(),
-		withFixtures:  lq.withFixtures.Clone(),
+		config:      lq.config,
+		ctx:         lq.ctx.Clone(),
+		order:       append([]league.Order{}, lq.order...),
+		inters:      append([]Interceptor{}, lq.inters...),
+		predicates:  append([]predicate.League{}, lq.predicates...),
+		withCountry: lq.withCountry.Clone(),
+		withSeason:  lq.withSeason.Clone(),
 		// clone intermediate query.
 		sql:  lq.sql.Clone(),
 		path: lq.path,
 	}
-}
-
-// WithSeason tells the query-builder to eager-load the nodes that are connected to
-// the "season" edge. The optional arguments are used to configure the query builder of the edge.
-func (lq *LeagueQuery) WithSeason(opts ...func(*SeasonQuery)) *LeagueQuery {
-	query := (&SeasonClient{config: lq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	lq.withSeason = query
-	return lq
-}
-
-// WithStandings tells the query-builder to eager-load the nodes that are connected to
-// the "standings" edge. The optional arguments are used to configure the query builder of the edge.
-func (lq *LeagueQuery) WithStandings(opts ...func(*StandingsQuery)) *LeagueQuery {
-	query := (&StandingsClient{config: lq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	lq.withStandings = query
-	return lq
-}
-
-// WithTeams tells the query-builder to eager-load the nodes that are connected to
-// the "teams" edge. The optional arguments are used to configure the query builder of the edge.
-func (lq *LeagueQuery) WithTeams(opts ...func(*TeamQuery)) *LeagueQuery {
-	query := (&TeamClient{config: lq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	lq.withTeams = query
-	return lq
 }
 
 // WithCountry tells the query-builder to eager-load the nodes that are connected to
@@ -426,14 +318,14 @@ func (lq *LeagueQuery) WithCountry(opts ...func(*CountryQuery)) *LeagueQuery {
 	return lq
 }
 
-// WithFixtures tells the query-builder to eager-load the nodes that are connected to
-// the "fixtures" edge. The optional arguments are used to configure the query builder of the edge.
-func (lq *LeagueQuery) WithFixtures(opts ...func(*FixtureQuery)) *LeagueQuery {
-	query := (&FixtureClient{config: lq.config}).Query()
+// WithSeason tells the query-builder to eager-load the nodes that are connected to
+// the "season" edge. The optional arguments are used to configure the query builder of the edge.
+func (lq *LeagueQuery) WithSeason(opts ...func(*SeasonQuery)) *LeagueQuery {
+	query := (&SeasonClient{config: lq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	lq.withFixtures = query
+	lq.withSeason = query
 	return lq
 }
 
@@ -443,12 +335,12 @@ func (lq *LeagueQuery) WithFixtures(opts ...func(*FixtureQuery)) *LeagueQuery {
 // Example:
 //
 //	var v []struct {
-//		Slug string `json:"slug,omitempty"`
+//		FootballApiId int `json:"footballApiId,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.League.Query().
-//		GroupBy(league.FieldSlug).
+//		GroupBy(league.FieldFootballApiId).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (lq *LeagueQuery) GroupBy(field string, fields ...string) *LeagueGroupBy {
@@ -466,11 +358,11 @@ func (lq *LeagueQuery) GroupBy(field string, fields ...string) *LeagueGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Slug string `json:"slug,omitempty"`
+//		FootballApiId int `json:"footballApiId,omitempty"`
 //	}
 //
 //	client.League.Query().
-//		Select(league.FieldSlug).
+//		Select(league.FieldFootballApiId).
 //		Scan(ctx, &v)
 func (lq *LeagueQuery) Select(fields ...string) *LeagueSelect {
 	lq.ctx.Fields = append(lq.ctx.Fields, fields...)
@@ -516,15 +408,12 @@ func (lq *LeagueQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Leagu
 		nodes       = []*League{}
 		withFKs     = lq.withFKs
 		_spec       = lq.querySpec()
-		loadedTypes = [5]bool{
-			lq.withSeason != nil,
-			lq.withStandings != nil,
-			lq.withTeams != nil,
+		loadedTypes = [2]bool{
 			lq.withCountry != nil,
-			lq.withFixtures != nil,
+			lq.withSeason != nil,
 		}
 	)
-	if lq.withSeason != nil || lq.withCountry != nil {
+	if lq.withCountry != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -548,166 +437,22 @@ func (lq *LeagueQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Leagu
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := lq.withSeason; query != nil {
-		if err := lq.loadSeason(ctx, query, nodes, nil,
-			func(n *League, e *Season) { n.Edges.Season = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := lq.withStandings; query != nil {
-		if err := lq.loadStandings(ctx, query, nodes,
-			func(n *League) { n.Edges.Standings = []*Standings{} },
-			func(n *League, e *Standings) { n.Edges.Standings = append(n.Edges.Standings, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := lq.withTeams; query != nil {
-		if err := lq.loadTeams(ctx, query, nodes,
-			func(n *League) { n.Edges.Teams = []*Team{} },
-			func(n *League, e *Team) { n.Edges.Teams = append(n.Edges.Teams, e) }); err != nil {
-			return nil, err
-		}
-	}
 	if query := lq.withCountry; query != nil {
 		if err := lq.loadCountry(ctx, query, nodes, nil,
 			func(n *League, e *Country) { n.Edges.Country = e }); err != nil {
 			return nil, err
 		}
 	}
-	if query := lq.withFixtures; query != nil {
-		if err := lq.loadFixtures(ctx, query, nodes,
-			func(n *League) { n.Edges.Fixtures = []*Fixture{} },
-			func(n *League, e *Fixture) { n.Edges.Fixtures = append(n.Edges.Fixtures, e) }); err != nil {
+	if query := lq.withSeason; query != nil {
+		if err := lq.loadSeason(ctx, query, nodes,
+			func(n *League) { n.Edges.Season = []*Season{} },
+			func(n *League, e *Season) { n.Edges.Season = append(n.Edges.Season, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (lq *LeagueQuery) loadSeason(ctx context.Context, query *SeasonQuery, nodes []*League, init func(*League), assign func(*League, *Season)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*League)
-	for i := range nodes {
-		if nodes[i].season_league == nil {
-			continue
-		}
-		fk := *nodes[i].season_league
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
-	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(season.IDIn(ids...))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "season_league" returned %v`, n.ID)
-		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (lq *LeagueQuery) loadStandings(ctx context.Context, query *StandingsQuery, nodes []*League, init func(*League), assign func(*League, *Standings)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*League)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Standings(func(s *sql.Selector) {
-		s.Where(sql.InValues(league.StandingsColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.league_standings
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "league_standings" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "league_standings" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (lq *LeagueQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*League, init func(*League), assign func(*League, *Team)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*League)
-	nids := make(map[int]map[*League]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(league.TeamsTable)
-		s.Join(joinT).On(s.C(team.FieldID), joinT.C(league.TeamsPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(league.TeamsPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(league.TeamsPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*League]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Team](ctx, query, qr, query.inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "teams" node returned %v`, n.ID)
-		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
-	}
-	return nil
-}
 func (lq *LeagueQuery) loadCountry(ctx context.Context, query *CountryQuery, nodes []*League, init func(*League), assign func(*League, *Country)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*League)
@@ -740,7 +485,7 @@ func (lq *LeagueQuery) loadCountry(ctx context.Context, query *CountryQuery, nod
 	}
 	return nil
 }
-func (lq *LeagueQuery) loadFixtures(ctx context.Context, query *FixtureQuery, nodes []*League, init func(*League), assign func(*League, *Fixture)) error {
+func (lq *LeagueQuery) loadSeason(ctx context.Context, query *SeasonQuery, nodes []*League, init func(*League), assign func(*League, *Season)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*League)
 	for i := range nodes {
@@ -751,21 +496,21 @@ func (lq *LeagueQuery) loadFixtures(ctx context.Context, query *FixtureQuery, no
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Fixture(func(s *sql.Selector) {
-		s.Where(sql.InValues(league.FixturesColumn, fks...))
+	query.Where(predicate.Season(func(s *sql.Selector) {
+		s.Where(sql.InValues(league.SeasonColumn, fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.league_fixtures
+		fk := n.league_season
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "league_fixtures" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "league_season" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "league_fixtures" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "league_season" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -108,7 +108,7 @@ func (m *TeamModel) DeleteTeam(ctx context.Context, teamID int) error {
 		Exec(ctx)
 }
 
-// GetTeamByID retrieves a team by ID.
+// GetTeamByID retrieves a team by FootballApiId.
 func (m *TeamModel) GetTeamByID(ctx context.Context, teamID int) (*ent.Team, error) {
 	return m.client.Team.
 		Get(ctx, teamID)
@@ -130,15 +130,6 @@ func (m *TeamModel) GetTeamCountry(ctx context.Context, teamID int) (*ent.Countr
 		Only(ctx)
 }
 
-// GetTeamLeagues retrieves the leagues of a team.
-func (m *TeamModel) GetTeamLeagues(ctx context.Context, teamID int) ([]*ent.League, error) {
-	return m.client.Team.
-		Query().
-		Where(team.ID(teamID)).
-		QueryLeagues().
-		All(ctx)
-}
-
 // GetTeamStandings retrieves the standings of a team.
 func (m *TeamModel) GetTeamStandings(ctx context.Context, teamID int) ([]*ent.Standings, error) {
 	return m.client.Team.
@@ -148,14 +139,6 @@ func (m *TeamModel) GetTeamStandings(ctx context.Context, teamID int) ([]*ent.St
 		All(ctx)
 }
 
-// GetTeamPlayers retrieves the players of a team.
-func (m *TeamModel) GetTeamPlayers(ctx context.Context, teamID int) ([]*ent.Player, error) {
-	return m.client.Team.
-		Query().
-		Where(team.ID(teamID)).
-		QueryPlayers().
-		All(ctx)
-}
 func (m *TeamModel) Exists(ctx context.Context, teamID int) (bool, error) {
 	count, err := m.client.Team.
 		Query().

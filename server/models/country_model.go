@@ -82,7 +82,7 @@ func (cm *CountryModel) GetCountryByName(name string) (*ent.Country, error) {
 		First(context.Background())
 }
 
-// GetCountryByID retrieves a country record by country ID.
+// GetCountryByID retrieves a country record by country FootballApiId.
 func (cm *CountryModel) GetCountryByID(id int) (*ent.Country, error) {
 	return cm.client.Country.
 		Query().

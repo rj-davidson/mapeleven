@@ -5,7 +5,6 @@ package ent
 import (
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/schema"
-	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"time"
@@ -21,12 +20,6 @@ func init() {
 	countryDescCode := countryFields[0].Descriptor()
 	// country.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	country.CodeValidator = countryDescCode.Validators[0].(func(string) error)
-	seasonFields := schema.Season{}.Fields()
-	_ = seasonFields
-	// seasonDescCurrent is the schema descriptor for current field.
-	seasonDescCurrent := seasonFields[3].Descriptor()
-	// season.DefaultCurrent holds the default value on creation for the current field.
-	season.DefaultCurrent = seasonDescCurrent.Default.(bool)
 	standingsFields := schema.Standings{}.Fields()
 	_ = standingsFields
 	// standingsDescPoints is the schema descriptor for points field.

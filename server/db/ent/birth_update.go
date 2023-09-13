@@ -47,23 +47,19 @@ func (bu *BirthUpdate) SetCountry(s string) *BirthUpdate {
 	return bu
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (bu *BirthUpdate) SetPlayerID(id int) *BirthUpdate {
-	bu.mutation.SetPlayerID(id)
+// AddPlayerIDs adds the "player" edge to the Player entity by IDs.
+func (bu *BirthUpdate) AddPlayerIDs(ids ...int) *BirthUpdate {
+	bu.mutation.AddPlayerIDs(ids...)
 	return bu
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (bu *BirthUpdate) SetNillablePlayerID(id *int) *BirthUpdate {
-	if id != nil {
-		bu = bu.SetPlayerID(*id)
+// AddPlayer adds the "player" edges to the Player entity.
+func (bu *BirthUpdate) AddPlayer(p ...*Player) *BirthUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return bu
-}
-
-// SetPlayer sets the "player" edge to the Player entity.
-func (bu *BirthUpdate) SetPlayer(p *Player) *BirthUpdate {
-	return bu.SetPlayerID(p.ID)
+	return bu.AddPlayerIDs(ids...)
 }
 
 // Mutation returns the BirthMutation object of the builder.
@@ -71,10 +67,25 @@ func (bu *BirthUpdate) Mutation() *BirthMutation {
 	return bu.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
+// ClearPlayer clears all "player" edges to the Player entity.
 func (bu *BirthUpdate) ClearPlayer() *BirthUpdate {
 	bu.mutation.ClearPlayer()
 	return bu
+}
+
+// RemovePlayerIDs removes the "player" edge to Player entities by IDs.
+func (bu *BirthUpdate) RemovePlayerIDs(ids ...int) *BirthUpdate {
+	bu.mutation.RemovePlayerIDs(ids...)
+	return bu
+}
+
+// RemovePlayer removes "player" edges to Player entities.
+func (bu *BirthUpdate) RemovePlayer(p ...*Player) *BirthUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return bu.RemovePlayerIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -124,8 +135,8 @@ func (bu *BirthUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if bu.mutation.PlayerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   birth.PlayerTable,
 			Columns: []string{birth.PlayerColumn},
 			Bidi:    false,
@@ -135,10 +146,26 @@ func (bu *BirthUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := bu.mutation.RemovedPlayerIDs(); len(nodes) > 0 && !bu.mutation.PlayerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   birth.PlayerTable,
+			Columns: []string{birth.PlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := bu.mutation.PlayerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   birth.PlayerTable,
 			Columns: []string{birth.PlayerColumn},
 			Bidi:    false,
@@ -189,23 +216,19 @@ func (buo *BirthUpdateOne) SetCountry(s string) *BirthUpdateOne {
 	return buo
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (buo *BirthUpdateOne) SetPlayerID(id int) *BirthUpdateOne {
-	buo.mutation.SetPlayerID(id)
+// AddPlayerIDs adds the "player" edge to the Player entity by IDs.
+func (buo *BirthUpdateOne) AddPlayerIDs(ids ...int) *BirthUpdateOne {
+	buo.mutation.AddPlayerIDs(ids...)
 	return buo
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (buo *BirthUpdateOne) SetNillablePlayerID(id *int) *BirthUpdateOne {
-	if id != nil {
-		buo = buo.SetPlayerID(*id)
+// AddPlayer adds the "player" edges to the Player entity.
+func (buo *BirthUpdateOne) AddPlayer(p ...*Player) *BirthUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return buo
-}
-
-// SetPlayer sets the "player" edge to the Player entity.
-func (buo *BirthUpdateOne) SetPlayer(p *Player) *BirthUpdateOne {
-	return buo.SetPlayerID(p.ID)
+	return buo.AddPlayerIDs(ids...)
 }
 
 // Mutation returns the BirthMutation object of the builder.
@@ -213,10 +236,25 @@ func (buo *BirthUpdateOne) Mutation() *BirthMutation {
 	return buo.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
+// ClearPlayer clears all "player" edges to the Player entity.
 func (buo *BirthUpdateOne) ClearPlayer() *BirthUpdateOne {
 	buo.mutation.ClearPlayer()
 	return buo
+}
+
+// RemovePlayerIDs removes the "player" edge to Player entities by IDs.
+func (buo *BirthUpdateOne) RemovePlayerIDs(ids ...int) *BirthUpdateOne {
+	buo.mutation.RemovePlayerIDs(ids...)
+	return buo
+}
+
+// RemovePlayer removes "player" edges to Player entities.
+func (buo *BirthUpdateOne) RemovePlayer(p ...*Player) *BirthUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return buo.RemovePlayerIDs(ids...)
 }
 
 // Where appends a list predicates to the BirthUpdate builder.
@@ -296,8 +334,8 @@ func (buo *BirthUpdateOne) sqlSave(ctx context.Context) (_node *Birth, err error
 	}
 	if buo.mutation.PlayerCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   birth.PlayerTable,
 			Columns: []string{birth.PlayerColumn},
 			Bidi:    false,
@@ -307,10 +345,26 @@ func (buo *BirthUpdateOne) sqlSave(ctx context.Context) (_node *Birth, err error
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := buo.mutation.RemovedPlayerIDs(); len(nodes) > 0 && !buo.mutation.PlayerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   birth.PlayerTable,
+			Columns: []string{birth.PlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := buo.mutation.PlayerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   birth.PlayerTable,
 			Columns: []string{birth.PlayerColumn},
 			Bidi:    false,

@@ -5,7 +5,7 @@ package ent
 import (
 	"fmt"
 	"mapeleven/db/ent/fixture"
-	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/team"
 	"strings"
 	"time"
@@ -42,7 +42,7 @@ type Fixture struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FixtureQuery when eager-loading is set.
 	Edges              FixtureEdges `json:"edges"`
-	league_fixtures    *int
+	season_fixtures    *int
 	team_home_fixtures *int
 	team_away_fixtures *int
 	selectValues       sql.SelectValues
@@ -50,34 +50,21 @@ type Fixture struct {
 
 // FixtureEdges holds the relations/edges for other nodes in the graph.
 type FixtureEdges struct {
-	// League holds the value of the league edge.
-	League *League `json:"league,omitempty"`
 	// HomeTeam holds the value of the homeTeam edge.
 	HomeTeam *Team `json:"homeTeam,omitempty"`
 	// AwayTeam holds the value of the awayTeam edge.
 	AwayTeam *Team `json:"awayTeam,omitempty"`
+	// Season holds the value of the season edge.
+	Season *Season `json:"season,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
 }
 
-// LeagueOrErr returns the League value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e FixtureEdges) LeagueOrErr() (*League, error) {
-	if e.loadedTypes[0] {
-		if e.League == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: league.Label}
-		}
-		return e.League, nil
-	}
-	return nil, &NotLoadedError{edge: "league"}
-}
-
 // HomeTeamOrErr returns the HomeTeam value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e FixtureEdges) HomeTeamOrErr() (*Team, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		if e.HomeTeam == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: team.Label}
@@ -90,7 +77,7 @@ func (e FixtureEdges) HomeTeamOrErr() (*Team, error) {
 // AwayTeamOrErr returns the AwayTeam value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e FixtureEdges) AwayTeamOrErr() (*Team, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[1] {
 		if e.AwayTeam == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: team.Label}
@@ -98,6 +85,19 @@ func (e FixtureEdges) AwayTeamOrErr() (*Team, error) {
 		return e.AwayTeam, nil
 	}
 	return nil, &NotLoadedError{edge: "awayTeam"}
+}
+
+// SeasonOrErr returns the Season value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e FixtureEdges) SeasonOrErr() (*Season, error) {
+	if e.loadedTypes[2] {
+		if e.Season == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: season.Label}
+		}
+		return e.Season, nil
+	}
+	return nil, &NotLoadedError{edge: "season"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -111,7 +111,7 @@ func (*Fixture) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case fixture.FieldDate:
 			values[i] = new(sql.NullTime)
-		case fixture.ForeignKeys[0]: // league_fixtures
+		case fixture.ForeignKeys[0]: // season_fixtures
 			values[i] = new(sql.NullInt64)
 		case fixture.ForeignKeys[1]: // team_home_fixtures
 			values[i] = new(sql.NullInt64)
@@ -200,10 +200,10 @@ func (f *Fixture) assignValues(columns []string, values []any) error {
 			}
 		case fixture.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field league_fixtures", value)
+				return fmt.Errorf("unexpected type %T for edge-field season_fixtures", value)
 			} else if value.Valid {
-				f.league_fixtures = new(int)
-				*f.league_fixtures = int(value.Int64)
+				f.season_fixtures = new(int)
+				*f.season_fixtures = int(value.Int64)
 			}
 		case fixture.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -232,11 +232,6 @@ func (f *Fixture) Value(name string) (ent.Value, error) {
 	return f.selectValues.Get(name)
 }
 
-// QueryLeague queries the "league" edge of the Fixture entity.
-func (f *Fixture) QueryLeague() *LeagueQuery {
-	return NewFixtureClient(f.config).QueryLeague(f)
-}
-
 // QueryHomeTeam queries the "homeTeam" edge of the Fixture entity.
 func (f *Fixture) QueryHomeTeam() *TeamQuery {
 	return NewFixtureClient(f.config).QueryHomeTeam(f)
@@ -245,6 +240,11 @@ func (f *Fixture) QueryHomeTeam() *TeamQuery {
 // QueryAwayTeam queries the "awayTeam" edge of the Fixture entity.
 func (f *Fixture) QueryAwayTeam() *TeamQuery {
 	return NewFixtureClient(f.config).QueryAwayTeam(f)
+}
+
+// QuerySeason queries the "season" edge of the Fixture entity.
+func (f *Fixture) QuerySeason() *SeasonQuery {
+	return NewFixtureClient(f.config).QuerySeason(f)
 }
 
 // Update returns a builder for updating this Fixture.
