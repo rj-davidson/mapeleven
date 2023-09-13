@@ -7,8 +7,22 @@ import Typography from '@mui/material/Typography';
 import MenuIcon from '@mui/icons-material/Menu';
 import {Link} from "react-router-dom";
 import SearchBar from "./SearchBar.jsx"
+import {useState} from "react";
+import {Drawer, List, ListItem, ListItemText} from "@mui/material";
+import {FormatListNumbered, Groups, Home, Person} from "@mui/icons-material";
 
 export default function NavBar() {
+
+    const [drawerOpen, setDrawerOpen] = useState(false);
+
+    const handleDrawerOpen = () => {
+        setDrawerOpen(true);
+    };
+
+    const handleDrawerClose = () => {
+        setDrawerOpen(false);
+    };
+
     return (
         <Box sx={{flexGrow: 1}}>
             <AppBar position="fixed" sx={{
@@ -23,10 +37,44 @@ export default function NavBar() {
                         edge="start"
                         color="inherit"
                         aria-label="open drawer"
+                        onClick={handleDrawerOpen}
                         sx={{mr: 2}}
                     >
                         <MenuIcon/>
                     </IconButton>
+                    <Drawer
+                        anchor="left"
+                        open={drawerOpen}
+                        onClose={handleDrawerClose}
+
+                    >
+                        <List sx={{width: '200px'}}>
+                            <Link to='/'>
+                                <ListItem onClick={handleDrawerClose}>
+                                    <Home sx={{marginRight: '8px'}}/>
+                                    <ListItemText primary="Home" primaryTypographyProps={{fontSize: '24px'}}/>
+                                </ListItem>
+                            </Link>
+                            <Link to='/players'>
+                                <ListItem onClick={handleDrawerClose}>
+                                    <Person sx={{marginRight: '8px'}}/>
+                                    <ListItemText primary="Players" primaryTypographyProps={{fontSize: '24px'}}/>
+                                </ListItem>
+                            </Link>
+                            <Link to='/clubs'>
+                                <ListItem onClick={handleDrawerClose}>
+                                    <Groups sx={{marginRight: '8px'}}/>
+                                    <ListItemText primary="Teams" primaryTypographyProps={{fontSize: '24px'}}/>
+                                </ListItem>
+                            </Link>
+                            <Link to='/leagues'>
+                                <ListItem onClick={handleDrawerClose}>
+                                    <FormatListNumbered sx={{marginRight: '8px'}}/>
+                                    <ListItemText primary="Leagues" primaryTypographyProps={{fontSize: '24px'}}/>
+                                </ListItem>
+                            </Link>
+                        </List>
+                    </Drawer>
                     <Typography
                         variant="body"
                         noWrap
