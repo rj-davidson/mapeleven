@@ -27,9 +27,9 @@ func SearchSerializer(client *ent.Client) ([]APISearch, error) {
 		})
 	}
 
-	teamModel := models.NewTeamModel(client)
-	teams, err := teamModel.ListTeams(context.Background())
-	for _, team := range teams {
+	clubModel := models.NewClubModel(client)
+	clubs, err := clubModel.ListAll(context.Background())
+	for _, team := range clubs {
 		searchItems = append(searchItems, APISearch{
 			Slug:  team.Slug,
 			Name:  team.Name,

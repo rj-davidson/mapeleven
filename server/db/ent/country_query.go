@@ -6,11 +6,11 @@ import (
 	"context"
 	"database/sql/driver"
 	"fmt"
+	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
-	"mapeleven/db/ent/team"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -27,7 +27,7 @@ type CountryQuery struct {
 	predicates  []predicate.Country
 	withPlayers *PlayerQuery
 	withLeagues *LeagueQuery
-	withTeams   *TeamQuery
+	withClubs   *ClubQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -108,9 +108,9 @@ func (cq *CountryQuery) QueryLeagues() *LeagueQuery {
 	return query
 }
 
-// QueryTeams chains the current query on the "teams" edge.
-func (cq *CountryQuery) QueryTeams() *TeamQuery {
-	query := (&TeamClient{config: cq.config}).Query()
+// QueryClubs chains the current query on the "clubs" edge.
+func (cq *CountryQuery) QueryClubs() *ClubQuery {
+	query := (&ClubClient{config: cq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -121,8 +121,8 @@ func (cq *CountryQuery) QueryTeams() *TeamQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(country.Table, country.FieldID, selector),
-			sqlgraph.To(team.Table, team.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, country.TeamsTable, country.TeamsColumn),
+			sqlgraph.To(club.Table, club.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, country.ClubsTable, country.ClubsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -324,7 +324,7 @@ func (cq *CountryQuery) Clone() *CountryQuery {
 		predicates:  append([]predicate.Country{}, cq.predicates...),
 		withPlayers: cq.withPlayers.Clone(),
 		withLeagues: cq.withLeagues.Clone(),
-		withTeams:   cq.withTeams.Clone(),
+		withClubs:   cq.withClubs.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -353,14 +353,14 @@ func (cq *CountryQuery) WithLeagues(opts ...func(*LeagueQuery)) *CountryQuery {
 	return cq
 }
 
-// WithTeams tells the query-builder to eager-load the nodes that are connected to
-// the "teams" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *CountryQuery) WithTeams(opts ...func(*TeamQuery)) *CountryQuery {
-	query := (&TeamClient{config: cq.config}).Query()
+// WithClubs tells the query-builder to eager-load the nodes that are connected to
+// the "clubs" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CountryQuery) WithClubs(opts ...func(*ClubQuery)) *CountryQuery {
+	query := (&ClubClient{config: cq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	cq.withTeams = query
+	cq.withClubs = query
 	return cq
 }
 
@@ -445,7 +445,7 @@ func (cq *CountryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Coun
 		loadedTypes = [3]bool{
 			cq.withPlayers != nil,
 			cq.withLeagues != nil,
-			cq.withTeams != nil,
+			cq.withClubs != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]any, error) {
@@ -480,10 +480,10 @@ func (cq *CountryQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Coun
 			return nil, err
 		}
 	}
-	if query := cq.withTeams; query != nil {
-		if err := cq.loadTeams(ctx, query, nodes,
-			func(n *Country) { n.Edges.Teams = []*Team{} },
-			func(n *Country, e *Team) { n.Edges.Teams = append(n.Edges.Teams, e) }); err != nil {
+	if query := cq.withClubs; query != nil {
+		if err := cq.loadClubs(ctx, query, nodes,
+			func(n *Country) { n.Edges.Clubs = []*Club{} },
+			func(n *Country, e *Club) { n.Edges.Clubs = append(n.Edges.Clubs, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -552,7 +552,7 @@ func (cq *CountryQuery) loadLeagues(ctx context.Context, query *LeagueQuery, nod
 	}
 	return nil
 }
-func (cq *CountryQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []*Country, init func(*Country), assign func(*Country, *Team)) error {
+func (cq *CountryQuery) loadClubs(ctx context.Context, query *ClubQuery, nodes []*Country, init func(*Country), assign func(*Country, *Club)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Country)
 	for i := range nodes {
@@ -563,21 +563,21 @@ func (cq *CountryQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes [
 		}
 	}
 	query.withFKs = true
-	query.Where(predicate.Team(func(s *sql.Selector) {
-		s.Where(sql.InValues(country.TeamsColumn, fks...))
+	query.Where(predicate.Club(func(s *sql.Selector) {
+		s.Where(sql.InValues(country.ClubsColumn, fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.country_teams
+		fk := n.country_clubs
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "country_teams" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "country_clubs" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "country_teams" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "country_clubs" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

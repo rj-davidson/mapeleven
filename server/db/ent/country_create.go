@@ -6,10 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/team"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -70,19 +70,19 @@ func (cc *CountryCreate) AddLeagues(l ...*League) *CountryCreate {
 	return cc.AddLeagueIDs(ids...)
 }
 
-// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (cc *CountryCreate) AddTeamIDs(ids ...int) *CountryCreate {
-	cc.mutation.AddTeamIDs(ids...)
+// AddClubIDs adds the "clubs" edge to the Club entity by IDs.
+func (cc *CountryCreate) AddClubIDs(ids ...int) *CountryCreate {
+	cc.mutation.AddClubIDs(ids...)
 	return cc
 }
 
-// AddTeams adds the "teams" edges to the Team entity.
-func (cc *CountryCreate) AddTeams(t ...*Team) *CountryCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddClubs adds the "clubs" edges to the Club entity.
+func (cc *CountryCreate) AddClubs(c ...*Club) *CountryCreate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return cc.AddTeamIDs(ids...)
+	return cc.AddClubIDs(ids...)
 }
 
 // Mutation returns the CountryMutation object of the builder.
@@ -203,15 +203,15 @@ func (cc *CountryCreate) createSpec() (*Country, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cc.mutation.TeamsIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.ClubsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   country.TeamsTable,
-			Columns: []string{country.TeamsColumn},
+			Table:   country.ClubsTable,
+			Columns: []string{country.ClubsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

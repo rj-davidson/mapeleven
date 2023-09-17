@@ -47,9 +47,11 @@ type Player struct {
 type PlayerEdges struct {
 	// Birth holds the value of the birth edge.
 	Birth *Birth `json:"birth,omitempty"`
+	// Team holds the value of the team edge.
+	Team []*Team `json:"team,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -63,6 +65,15 @@ func (e PlayerEdges) BirthOrErr() (*Birth, error) {
 		return e.Birth, nil
 	}
 	return nil, &NotLoadedError{edge: "birth"}
+}
+
+// TeamOrErr returns the Team value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) TeamOrErr() ([]*Team, error) {
+	if e.loadedTypes[1] {
+		return e.Team, nil
+	}
+	return nil, &NotLoadedError{edge: "team"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -187,6 +198,11 @@ func (pl *Player) Value(name string) (ent.Value, error) {
 // QueryBirth queries the "birth" edge of the Player entity.
 func (pl *Player) QueryBirth() *BirthQuery {
 	return NewPlayerClient(pl.config).QueryBirth(pl)
+}
+
+// QueryTeam queries the "team" edge of the Player entity.
+func (pl *Player) QueryTeam() *TeamQuery {
+	return NewPlayerClient(pl.config).QueryTeam(pl)
 }
 
 // Update returns a builder for updating this Player.

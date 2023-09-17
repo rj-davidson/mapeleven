@@ -14,8 +14,12 @@ type Player struct {
 // Fields of the Player.
 func (Player) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").Unique().Immutable(),
-		field.String("slug").Unique().Immutable(),
+		field.Int("id").
+			Unique().
+			Immutable(),
+		field.String("slug").
+			Unique().
+			Immutable(),
 		field.String("name"),
 		field.String("firstname"),
 		field.String("lastname"),
@@ -31,6 +35,10 @@ func (Player) Fields() []ent.Field {
 func (Player) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("birth", Birth.Type).
-			Ref("player").Unique(),
+			Ref("player").
+			Unique(),
+		edge.From("team", Team.Type).
+			Ref("players").
+			Required(),
 	}
 }

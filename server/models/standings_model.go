@@ -95,29 +95,15 @@ func NewStandingsModel(client *ent.Client) *StandingsModel {
 	return &StandingsModel{client: client}
 }
 
-func (m *StandingsModel) TeamExists(ctx context.Context, teamID int) (bool, error) {
-	// Using Count to determine if a team with the given FootballApiId exists
-	count, err := m.client.Team.
-		Query().
-		Where(team.ID(teamID)).
-		Count(ctx)
-
-	if err != nil {
-		return false, err
-	}
-
-	// If count is greater than 0, the team exists
-	return count > 0, nil
-}
-
 // CreateStandings creates a new standings entry.
-func (m *StandingsModel) CreateStandings(ctx context.Context, input CreateStandingsInput) (*ent.Standings, error) {
+func (m *StandingsModel) CreateStandings(ctx context.Context, input CreateStandingsInput, team *ent.Team) (*ent.Standings, error) {
+
 	stands, err := m.client.Standings.
 		Create().
 		SetRank(input.Rank).
 		SetDescription(input.Description).
 		SetSeasonID(input.SeasonID).
-		SetTeamID(input.Team).
+		SetTeam(team).
 		SetPoints(input.Points).
 		SetGoalsDiff(input.GoalsDiff).
 		SetGroup(input.Group).
@@ -154,30 +140,6 @@ func (m *StandingsModel) CreateStandings(ctx context.Context, input CreateStandi
 	}
 	return stands, nil
 }
-
-// UpdateStandings updates an existing standings entry.
-//func (m *StandingsModel) UpdateStandings(ctx context.Context, input UpdateStandingsInput) (*ent.Standings, error) {
-//	// Get the standing to update by using team and league IDs
-//	// TODO: Find a better way to find the correct standing. Maybe use Season, Team, SeasonID, etc.
-//	update, err := m.client.Standings.
-//		Query().
-//		Where(
-//			standings.HasTeamWith(
-//				team.FootballApiId(*input.Team),
-//			),
-//			standings.HasLeagueWith(
-//				league.FootballApiId(*input.SeasonID),
-//			),
-//		).
-//		First(ctx)
-//
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	// Update the standing with the new values
-//
-//}
 
 // DeleteStandings deletes a standings entry.
 func (m *StandingsModel) DeleteStandings(ctx context.Context, input DeleteStandingsInput) error {

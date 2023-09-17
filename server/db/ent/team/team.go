@@ -12,28 +12,34 @@ const (
 	Label = "team"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldSlug holds the string denoting the slug field in the database.
-	FieldSlug = "slug"
-	// FieldName holds the string denoting the name field in the database.
-	FieldName = "name"
-	// FieldCode holds the string denoting the code field in the database.
-	FieldCode = "code"
-	// FieldFounded holds the string denoting the founded field in the database.
-	FieldFounded = "founded"
-	// FieldNational holds the string denoting the national field in the database.
-	FieldNational = "national"
-	// FieldLogo holds the string denoting the logo field in the database.
-	FieldLogo = "logo"
+	// EdgeSeason holds the string denoting the season edge name in mutations.
+	EdgeSeason = "season"
+	// EdgeClub holds the string denoting the club edge name in mutations.
+	EdgeClub = "club"
 	// EdgeStandings holds the string denoting the standings edge name in mutations.
 	EdgeStandings = "standings"
-	// EdgeCountry holds the string denoting the country edge name in mutations.
-	EdgeCountry = "country"
 	// EdgeHomeFixtures holds the string denoting the homefixtures edge name in mutations.
 	EdgeHomeFixtures = "homeFixtures"
 	// EdgeAwayFixtures holds the string denoting the awayfixtures edge name in mutations.
 	EdgeAwayFixtures = "awayFixtures"
+	// EdgePlayers holds the string denoting the players edge name in mutations.
+	EdgePlayers = "players"
 	// Table holds the table name of the team in the database.
 	Table = "teams"
+	// SeasonTable is the table that holds the season relation/edge.
+	SeasonTable = "teams"
+	// SeasonInverseTable is the table name for the Season entity.
+	// It exists in this package in order to avoid circular dependency with the "season" package.
+	SeasonInverseTable = "seasons"
+	// SeasonColumn is the table column denoting the season relation/edge.
+	SeasonColumn = "season_teams"
+	// ClubTable is the table that holds the club relation/edge.
+	ClubTable = "teams"
+	// ClubInverseTable is the table name for the Club entity.
+	// It exists in this package in order to avoid circular dependency with the "club" package.
+	ClubInverseTable = "clubs"
+	// ClubColumn is the table column denoting the club relation/edge.
+	ClubColumn = "club_team"
 	// StandingsTable is the table that holds the standings relation/edge.
 	StandingsTable = "standings"
 	// StandingsInverseTable is the table name for the Standings entity.
@@ -41,13 +47,6 @@ const (
 	StandingsInverseTable = "standings"
 	// StandingsColumn is the table column denoting the standings relation/edge.
 	StandingsColumn = "team_standings"
-	// CountryTable is the table that holds the country relation/edge.
-	CountryTable = "teams"
-	// CountryInverseTable is the table name for the Country entity.
-	// It exists in this package in order to avoid circular dependency with the "country" package.
-	CountryInverseTable = "countries"
-	// CountryColumn is the table column denoting the country relation/edge.
-	CountryColumn = "country_teams"
 	// HomeFixturesTable is the table that holds the homeFixtures relation/edge.
 	HomeFixturesTable = "fixtures"
 	// HomeFixturesInverseTable is the table name for the Fixture entity.
@@ -62,24 +61,30 @@ const (
 	AwayFixturesInverseTable = "fixtures"
 	// AwayFixturesColumn is the table column denoting the awayFixtures relation/edge.
 	AwayFixturesColumn = "team_away_fixtures"
+	// PlayersTable is the table that holds the players relation/edge. The primary key declared below.
+	PlayersTable = "team_players"
+	// PlayersInverseTable is the table name for the Player entity.
+	// It exists in this package in order to avoid circular dependency with the "player" package.
+	PlayersInverseTable = "players"
 )
 
 // Columns holds all SQL columns for team fields.
 var Columns = []string{
 	FieldID,
-	FieldSlug,
-	FieldName,
-	FieldCode,
-	FieldFounded,
-	FieldNational,
-	FieldLogo,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "teams"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"country_teams",
+	"club_team",
+	"season_teams",
 }
+
+var (
+	// PlayersPrimaryKey and PlayersColumn2 are the table columns denoting the
+	// primary key for the players relation (M2M).
+	PlayersPrimaryKey = []string{"team_id", "player_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -96,11 +101,6 @@ func ValidColumn(column string) bool {
 	return false
 }
 
-var (
-	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	CodeValidator func(string) error
-)
-
 // Order defines the ordering method for the Team queries.
 type Order func(*sql.Selector)
 
@@ -109,34 +109,18 @@ func ByID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// BySlug orders the results by the slug field.
-func BySlug(opts ...sql.OrderTermOption) Order {
-	return sql.OrderByField(FieldSlug, opts...).ToFunc()
+// BySeasonField orders the results by season field.
+func BySeasonField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSeasonStep(), sql.OrderByField(field, opts...))
+	}
 }
 
-// ByName orders the results by the name field.
-func ByName(opts ...sql.OrderTermOption) Order {
-	return sql.OrderByField(FieldName, opts...).ToFunc()
-}
-
-// ByCode orders the results by the code field.
-func ByCode(opts ...sql.OrderTermOption) Order {
-	return sql.OrderByField(FieldCode, opts...).ToFunc()
-}
-
-// ByFounded orders the results by the founded field.
-func ByFounded(opts ...sql.OrderTermOption) Order {
-	return sql.OrderByField(FieldFounded, opts...).ToFunc()
-}
-
-// ByNational orders the results by the national field.
-func ByNational(opts ...sql.OrderTermOption) Order {
-	return sql.OrderByField(FieldNational, opts...).ToFunc()
-}
-
-// ByLogo orders the results by the logo field.
-func ByLogo(opts ...sql.OrderTermOption) Order {
-	return sql.OrderByField(FieldLogo, opts...).ToFunc()
+// ByClubField orders the results by club field.
+func ByClubField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newClubStep(), sql.OrderByField(field, opts...))
+	}
 }
 
 // ByStandingsCount orders the results by standings count.
@@ -150,13 +134,6 @@ func ByStandingsCount(opts ...sql.OrderTermOption) Order {
 func ByStandings(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newStandingsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByCountryField orders the results by country field.
-func ByCountryField(field string, opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newCountryStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -187,18 +164,39 @@ func ByAwayFixtures(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 		sqlgraph.OrderByNeighborTerms(s, newAwayFixturesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPlayersCount orders the results by players count.
+func ByPlayersCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPlayersStep(), opts...)
+	}
+}
+
+// ByPlayers orders the results by players terms.
+func ByPlayers(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayersStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newSeasonStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SeasonInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, SeasonTable, SeasonColumn),
+	)
+}
+func newClubStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(ClubInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, ClubTable, ClubColumn),
+	)
+}
 func newStandingsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(StandingsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, StandingsTable, StandingsColumn),
-	)
-}
-func newCountryStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(CountryInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
 	)
 }
 func newHomeFixturesStep() *sqlgraph.Step {
@@ -213,5 +211,12 @@ func newAwayFixturesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AwayFixturesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AwayFixturesTable, AwayFixturesColumn),
+	)
+}
+func newPlayersStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayersInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, PlayersTable, PlayersPrimaryKey...),
 	)
 }

@@ -14,6 +14,8 @@ type Tx struct {
 	config
 	// Birth is the client for interacting with the Birth builders.
 	Birth *BirthClient
+	// Club is the client for interacting with the Club builders.
+	Club *ClubClient
 	// Country is the client for interacting with the Country builders.
 	Country *CountryClient
 	// Fixture is the client for interacting with the Fixture builders.
@@ -160,6 +162,7 @@ func (tx *Tx) Client() *Client {
 
 func (tx *Tx) init() {
 	tx.Birth = NewBirthClient(tx.config)
+	tx.Club = NewClubClient(tx.config)
 	tx.Country = NewCountryClient(tx.config)
 	tx.Fixture = NewFixtureClient(tx.config)
 	tx.League = NewLeagueClient(tx.config)

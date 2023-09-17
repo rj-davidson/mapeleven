@@ -9,6 +9,9 @@ import (
 // Birth is the predicate function for birth builders.
 type Birth func(*sql.Selector)
 
+// Club is the predicate function for club builders.
+type Club func(*sql.Selector)
+
 // Country is the predicate function for country builders.
 type Country func(*sql.Selector)
 

@@ -11,6 +11,7 @@ import (
 	"mapeleven/db/ent/migrate"
 
 	"mapeleven/db/ent/birth"
+	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
@@ -32,6 +33,8 @@ type Client struct {
 	Schema *migrate.Schema
 	// Birth is the client for interacting with the Birth builders.
 	Birth *BirthClient
+	// Club is the client for interacting with the Club builders.
+	Club *ClubClient
 	// Country is the client for interacting with the Country builders.
 	Country *CountryClient
 	// Fixture is the client for interacting with the Fixture builders.
@@ -60,6 +63,7 @@ func NewClient(opts ...Option) *Client {
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Birth = NewBirthClient(c.config)
+	c.Club = NewClubClient(c.config)
 	c.Country = NewCountryClient(c.config)
 	c.Fixture = NewFixtureClient(c.config)
 	c.League = NewLeagueClient(c.config)
@@ -150,6 +154,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		ctx:       ctx,
 		config:    cfg,
 		Birth:     NewBirthClient(cfg),
+		Club:      NewClubClient(cfg),
 		Country:   NewCountryClient(cfg),
 		Fixture:   NewFixtureClient(cfg),
 		League:    NewLeagueClient(cfg),
@@ -177,6 +182,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		ctx:       ctx,
 		config:    cfg,
 		Birth:     NewBirthClient(cfg),
+		Club:      NewClubClient(cfg),
 		Country:   NewCountryClient(cfg),
 		Fixture:   NewFixtureClient(cfg),
 		League:    NewLeagueClient(cfg),
@@ -213,8 +219,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Birth, c.Country, c.Fixture, c.League, c.Player, c.Season, c.Standings,
-		c.Team,
+		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.Season,
+		c.Standings, c.Team,
 	} {
 		n.Use(hooks...)
 	}
@@ -224,8 +230,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Birth, c.Country, c.Fixture, c.League, c.Player, c.Season, c.Standings,
-		c.Team,
+		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.Season,
+		c.Standings, c.Team,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -236,6 +242,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 	switch m := m.(type) {
 	case *BirthMutation:
 		return c.Birth.mutate(ctx, m)
+	case *ClubMutation:
+		return c.Club.mutate(ctx, m)
 	case *CountryMutation:
 		return c.Country.mutate(ctx, m)
 	case *FixtureMutation:
@@ -389,6 +397,156 @@ func (c *BirthClient) mutate(ctx context.Context, m *BirthMutation) (Value, erro
 	}
 }
 
+// ClubClient is a client for the Club schema.
+type ClubClient struct {
+	config
+}
+
+// NewClubClient returns a client for the Club from the given config.
+func NewClubClient(c config) *ClubClient {
+	return &ClubClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `club.Hooks(f(g(h())))`.
+func (c *ClubClient) Use(hooks ...Hook) {
+	c.hooks.Club = append(c.hooks.Club, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `club.Intercept(f(g(h())))`.
+func (c *ClubClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Club = append(c.inters.Club, interceptors...)
+}
+
+// Create returns a builder for creating a Club entity.
+func (c *ClubClient) Create() *ClubCreate {
+	mutation := newClubMutation(c.config, OpCreate)
+	return &ClubCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Club entities.
+func (c *ClubClient) CreateBulk(builders ...*ClubCreate) *ClubCreateBulk {
+	return &ClubCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Club.
+func (c *ClubClient) Update() *ClubUpdate {
+	mutation := newClubMutation(c.config, OpUpdate)
+	return &ClubUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *ClubClient) UpdateOne(cl *Club) *ClubUpdateOne {
+	mutation := newClubMutation(c.config, OpUpdateOne, withClub(cl))
+	return &ClubUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *ClubClient) UpdateOneID(id int) *ClubUpdateOne {
+	mutation := newClubMutation(c.config, OpUpdateOne, withClubID(id))
+	return &ClubUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Club.
+func (c *ClubClient) Delete() *ClubDelete {
+	mutation := newClubMutation(c.config, OpDelete)
+	return &ClubDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *ClubClient) DeleteOne(cl *Club) *ClubDeleteOne {
+	return c.DeleteOneID(cl.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *ClubClient) DeleteOneID(id int) *ClubDeleteOne {
+	builder := c.Delete().Where(club.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &ClubDeleteOne{builder}
+}
+
+// Query returns a query builder for Club.
+func (c *ClubClient) Query() *ClubQuery {
+	return &ClubQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeClub},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Club entity by its id.
+func (c *ClubClient) Get(ctx context.Context, id int) (*Club, error) {
+	return c.Query().Where(club.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *ClubClient) GetX(ctx context.Context, id int) *Club {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryCountry queries the country edge of a Club.
+func (c *ClubClient) QueryCountry(cl *Club) *CountryQuery {
+	query := (&CountryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(club.Table, club.FieldID, id),
+			sqlgraph.To(country.Table, country.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, club.CountryTable, club.CountryColumn),
+		)
+		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTeam queries the team edge of a Club.
+func (c *ClubClient) QueryTeam(cl *Club) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := cl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(club.Table, club.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, club.TeamTable, club.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *ClubClient) Hooks() []Hook {
+	return c.hooks.Club
+}
+
+// Interceptors returns the client interceptors.
+func (c *ClubClient) Interceptors() []Interceptor {
+	return c.inters.Club
+}
+
+func (c *ClubClient) mutate(ctx context.Context, m *ClubMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&ClubCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&ClubUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&ClubUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&ClubDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Club mutation op: %q", m.Op())
+	}
+}
+
 // CountryClient is a client for the Country schema.
 type CountryClient struct {
 	config
@@ -514,15 +672,15 @@ func (c *CountryClient) QueryLeagues(co *Country) *LeagueQuery {
 	return query
 }
 
-// QueryTeams queries the teams edge of a Country.
-func (c *CountryClient) QueryTeams(co *Country) *TeamQuery {
-	query := (&TeamClient{config: c.config}).Query()
+// QueryClubs queries the clubs edge of a Country.
+func (c *CountryClient) QueryClubs(co *Country) *ClubQuery {
+	query := (&ClubClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := co.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(country.Table, country.FieldID, id),
-			sqlgraph.To(team.Table, team.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, country.TeamsTable, country.TeamsColumn),
+			sqlgraph.To(club.Table, club.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, country.ClubsTable, country.ClubsColumn),
 		)
 		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
 		return fromV, nil
@@ -980,6 +1138,22 @@ func (c *PlayerClient) QueryBirth(pl *Player) *BirthQuery {
 	return query
 }
 
+// QueryTeam queries the team edge of a Player.
+func (c *PlayerClient) QueryTeam(pl *Player) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, player.TeamTable, player.TeamPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PlayerClient) Hooks() []Hook {
 	return c.hooks.Player
@@ -1139,6 +1313,22 @@ func (c *SeasonClient) QueryStandings(s *Season) *StandingsQuery {
 			sqlgraph.From(season.Table, season.FieldID, id),
 			sqlgraph.To(standings.Table, standings.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, season.StandingsTable, season.StandingsColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTeams queries the teams edge of a Season.
+func (c *SeasonClient) QueryTeams(s *Season) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(season.Table, season.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, season.TeamsTable, season.TeamsColumn),
 		)
 		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil
@@ -1414,6 +1604,38 @@ func (c *TeamClient) GetX(ctx context.Context, id int) *Team {
 	return obj
 }
 
+// QuerySeason queries the season edge of a Team.
+func (c *TeamClient) QuerySeason(t *Team) *SeasonQuery {
+	query := (&SeasonClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(season.Table, season.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, team.SeasonTable, team.SeasonColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryClub queries the club edge of a Team.
+func (c *TeamClient) QueryClub(t *Team) *ClubQuery {
+	query := (&ClubClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(club.Table, club.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, team.ClubTable, team.ClubColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryStandings queries the standings edge of a Team.
 func (c *TeamClient) QueryStandings(t *Team) *StandingsQuery {
 	query := (&StandingsClient{config: c.config}).Query()
@@ -1423,22 +1645,6 @@ func (c *TeamClient) QueryStandings(t *Team) *StandingsQuery {
 			sqlgraph.From(team.Table, team.FieldID, id),
 			sqlgraph.To(standings.Table, standings.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, team.StandingsTable, team.StandingsColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryCountry queries the country edge of a Team.
-func (c *TeamClient) QueryCountry(t *Team) *CountryQuery {
-	query := (&CountryClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(team.Table, team.FieldID, id),
-			sqlgraph.To(country.Table, country.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, team.CountryTable, team.CountryColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -1478,6 +1684,22 @@ func (c *TeamClient) QueryAwayFixtures(t *Team) *FixtureQuery {
 	return query
 }
 
+// QueryPlayers queries the players edge of a Team.
+func (c *TeamClient) QueryPlayers(t *Team) *PlayerQuery {
+	query := (&PlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(player.Table, player.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, team.PlayersTable, team.PlayersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TeamClient) Hooks() []Hook {
 	return c.hooks.Team
@@ -1506,10 +1728,11 @@ func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Birth, Country, Fixture, League, Player, Season, Standings, Team []ent.Hook
+		Birth, Club, Country, Fixture, League, Player, Season, Standings,
+		Team []ent.Hook
 	}
 	inters struct {
-		Birth, Country, Fixture, League, Player, Season, Standings,
+		Birth, Club, Country, Fixture, League, Player, Season, Standings,
 		Team []ent.Interceptor
 	}
 )

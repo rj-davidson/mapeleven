@@ -6,11 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
-	"mapeleven/db/ent/team"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -78,19 +78,19 @@ func (cu *CountryUpdate) AddLeagues(l ...*League) *CountryUpdate {
 	return cu.AddLeagueIDs(ids...)
 }
 
-// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (cu *CountryUpdate) AddTeamIDs(ids ...int) *CountryUpdate {
-	cu.mutation.AddTeamIDs(ids...)
+// AddClubIDs adds the "clubs" edge to the Club entity by IDs.
+func (cu *CountryUpdate) AddClubIDs(ids ...int) *CountryUpdate {
+	cu.mutation.AddClubIDs(ids...)
 	return cu
 }
 
-// AddTeams adds the "teams" edges to the Team entity.
-func (cu *CountryUpdate) AddTeams(t ...*Team) *CountryUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddClubs adds the "clubs" edges to the Club entity.
+func (cu *CountryUpdate) AddClubs(c ...*Club) *CountryUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return cu.AddTeamIDs(ids...)
+	return cu.AddClubIDs(ids...)
 }
 
 // Mutation returns the CountryMutation object of the builder.
@@ -140,25 +140,25 @@ func (cu *CountryUpdate) RemoveLeagues(l ...*League) *CountryUpdate {
 	return cu.RemoveLeagueIDs(ids...)
 }
 
-// ClearTeams clears all "teams" edges to the Team entity.
-func (cu *CountryUpdate) ClearTeams() *CountryUpdate {
-	cu.mutation.ClearTeams()
+// ClearClubs clears all "clubs" edges to the Club entity.
+func (cu *CountryUpdate) ClearClubs() *CountryUpdate {
+	cu.mutation.ClearClubs()
 	return cu
 }
 
-// RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
-func (cu *CountryUpdate) RemoveTeamIDs(ids ...int) *CountryUpdate {
-	cu.mutation.RemoveTeamIDs(ids...)
+// RemoveClubIDs removes the "clubs" edge to Club entities by IDs.
+func (cu *CountryUpdate) RemoveClubIDs(ids ...int) *CountryUpdate {
+	cu.mutation.RemoveClubIDs(ids...)
 	return cu
 }
 
-// RemoveTeams removes "teams" edges to Team entities.
-func (cu *CountryUpdate) RemoveTeams(t ...*Team) *CountryUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// RemoveClubs removes "clubs" edges to Club entities.
+func (cu *CountryUpdate) RemoveClubs(c ...*Club) *CountryUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return cu.RemoveTeamIDs(ids...)
+	return cu.RemoveClubIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -309,28 +309,28 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cu.mutation.TeamsCleared() {
+	if cu.mutation.ClubsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   country.TeamsTable,
-			Columns: []string{country.TeamsColumn},
+			Table:   country.ClubsTable,
+			Columns: []string{country.ClubsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !cu.mutation.TeamsCleared() {
+	if nodes := cu.mutation.RemovedClubsIDs(); len(nodes) > 0 && !cu.mutation.ClubsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   country.TeamsTable,
-			Columns: []string{country.TeamsColumn},
+			Table:   country.ClubsTable,
+			Columns: []string{country.ClubsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -338,15 +338,15 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.TeamsIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.ClubsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   country.TeamsTable,
-			Columns: []string{country.TeamsColumn},
+			Table:   country.ClubsTable,
+			Columns: []string{country.ClubsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -422,19 +422,19 @@ func (cuo *CountryUpdateOne) AddLeagues(l ...*League) *CountryUpdateOne {
 	return cuo.AddLeagueIDs(ids...)
 }
 
-// AddTeamIDs adds the "teams" edge to the Team entity by IDs.
-func (cuo *CountryUpdateOne) AddTeamIDs(ids ...int) *CountryUpdateOne {
-	cuo.mutation.AddTeamIDs(ids...)
+// AddClubIDs adds the "clubs" edge to the Club entity by IDs.
+func (cuo *CountryUpdateOne) AddClubIDs(ids ...int) *CountryUpdateOne {
+	cuo.mutation.AddClubIDs(ids...)
 	return cuo
 }
 
-// AddTeams adds the "teams" edges to the Team entity.
-func (cuo *CountryUpdateOne) AddTeams(t ...*Team) *CountryUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// AddClubs adds the "clubs" edges to the Club entity.
+func (cuo *CountryUpdateOne) AddClubs(c ...*Club) *CountryUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return cuo.AddTeamIDs(ids...)
+	return cuo.AddClubIDs(ids...)
 }
 
 // Mutation returns the CountryMutation object of the builder.
@@ -484,25 +484,25 @@ func (cuo *CountryUpdateOne) RemoveLeagues(l ...*League) *CountryUpdateOne {
 	return cuo.RemoveLeagueIDs(ids...)
 }
 
-// ClearTeams clears all "teams" edges to the Team entity.
-func (cuo *CountryUpdateOne) ClearTeams() *CountryUpdateOne {
-	cuo.mutation.ClearTeams()
+// ClearClubs clears all "clubs" edges to the Club entity.
+func (cuo *CountryUpdateOne) ClearClubs() *CountryUpdateOne {
+	cuo.mutation.ClearClubs()
 	return cuo
 }
 
-// RemoveTeamIDs removes the "teams" edge to Team entities by IDs.
-func (cuo *CountryUpdateOne) RemoveTeamIDs(ids ...int) *CountryUpdateOne {
-	cuo.mutation.RemoveTeamIDs(ids...)
+// RemoveClubIDs removes the "clubs" edge to Club entities by IDs.
+func (cuo *CountryUpdateOne) RemoveClubIDs(ids ...int) *CountryUpdateOne {
+	cuo.mutation.RemoveClubIDs(ids...)
 	return cuo
 }
 
-// RemoveTeams removes "teams" edges to Team entities.
-func (cuo *CountryUpdateOne) RemoveTeams(t ...*Team) *CountryUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// RemoveClubs removes "clubs" edges to Club entities.
+func (cuo *CountryUpdateOne) RemoveClubs(c ...*Club) *CountryUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
 	}
-	return cuo.RemoveTeamIDs(ids...)
+	return cuo.RemoveClubIDs(ids...)
 }
 
 // Where appends a list predicates to the CountryUpdate builder.
@@ -683,28 +683,28 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cuo.mutation.TeamsCleared() {
+	if cuo.mutation.ClubsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   country.TeamsTable,
-			Columns: []string{country.TeamsColumn},
+			Table:   country.ClubsTable,
+			Columns: []string{country.ClubsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RemovedTeamsIDs(); len(nodes) > 0 && !cuo.mutation.TeamsCleared() {
+	if nodes := cuo.mutation.RemovedClubsIDs(); len(nodes) > 0 && !cuo.mutation.ClubsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   country.TeamsTable,
-			Columns: []string{country.TeamsColumn},
+			Table:   country.ClubsTable,
+			Columns: []string{country.ClubsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -712,15 +712,15 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.TeamsIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.ClubsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   country.TeamsTable,
-			Columns: []string{country.TeamsColumn},
+			Table:   country.ClubsTable,
+			Columns: []string{country.ClubsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

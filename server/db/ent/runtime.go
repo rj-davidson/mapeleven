@@ -3,10 +3,10 @@
 package ent
 
 import (
+	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/schema"
 	"mapeleven/db/ent/standings"
-	"mapeleven/db/ent/team"
 	"time"
 )
 
@@ -14,6 +14,12 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	clubFields := schema.Club{}.Fields()
+	_ = clubFields
+	// clubDescCode is the schema descriptor for code field.
+	clubDescCode := clubFields[3].Descriptor()
+	// club.CodeValidator is a validator for the "code" field. It is called by the builders before save.
+	club.CodeValidator = clubDescCode.Validators[0].(func(string) error)
 	countryFields := schema.Country{}.Fields()
 	_ = countryFields
 	// countryDescCode is the schema descriptor for code field.
@@ -44,10 +50,4 @@ func init() {
 	standings.DefaultLastUpdated = standingsDescLastUpdated.Default.(func() time.Time)
 	// standings.UpdateDefaultLastUpdated holds the default value on update for the LastUpdated field.
 	standings.UpdateDefaultLastUpdated = standingsDescLastUpdated.UpdateDefault.(func() time.Time)
-	teamFields := schema.Team{}.Fields()
-	_ = teamFields
-	// teamDescCode is the schema descriptor for code field.
-	teamDescCode := teamFields[3].Descriptor()
-	// team.CodeValidator is a validator for the "code" field. It is called by the builders before save.
-	team.CodeValidator = teamDescCode.Validators[0].(func(string) error)
 }

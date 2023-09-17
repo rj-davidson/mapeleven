@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/player"
+	"mapeleven/db/ent/team"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -99,6 +100,21 @@ func (pc *PlayerCreate) SetBirth(b *Birth) *PlayerCreate {
 	return pc.SetBirthID(b.ID)
 }
 
+// AddTeamIDs adds the "team" edge to the Team entity by IDs.
+func (pc *PlayerCreate) AddTeamIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddTeamIDs(ids...)
+	return pc
+}
+
+// AddTeam adds the "team" edges to the Team entity.
+func (pc *PlayerCreate) AddTeam(t ...*Team) *PlayerCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return pc.AddTeamIDs(ids...)
+}
+
 // Mutation returns the PlayerMutation object of the builder.
 func (pc *PlayerCreate) Mutation() *PlayerMutation {
 	return pc.mutation
@@ -159,6 +175,9 @@ func (pc *PlayerCreate) check() error {
 	}
 	if _, ok := pc.mutation.Photo(); !ok {
 		return &ValidationError{Name: "photo", err: errors.New(`ent: missing required field "Player.photo"`)}
+	}
+	if len(pc.mutation.TeamIDs()) == 0 {
+		return &ValidationError{Name: "team", err: errors.New(`ent: missing required edge "Player.team"`)}
 	}
 	return nil
 }
@@ -243,6 +262,22 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.birth_player = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.TeamIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   player.TeamTable,
+			Columns: player.TeamPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

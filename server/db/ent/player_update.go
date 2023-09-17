@@ -9,6 +9,7 @@ import (
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
+	"mapeleven/db/ent/team"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -116,6 +117,21 @@ func (pu *PlayerUpdate) SetBirth(b *Birth) *PlayerUpdate {
 	return pu.SetBirthID(b.ID)
 }
 
+// AddTeamIDs adds the "team" edge to the Team entity by IDs.
+func (pu *PlayerUpdate) AddTeamIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.AddTeamIDs(ids...)
+	return pu
+}
+
+// AddTeam adds the "team" edges to the Team entity.
+func (pu *PlayerUpdate) AddTeam(t ...*Team) *PlayerUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return pu.AddTeamIDs(ids...)
+}
+
 // Mutation returns the PlayerMutation object of the builder.
 func (pu *PlayerUpdate) Mutation() *PlayerMutation {
 	return pu.mutation
@@ -125,6 +141,27 @@ func (pu *PlayerUpdate) Mutation() *PlayerMutation {
 func (pu *PlayerUpdate) ClearBirth() *PlayerUpdate {
 	pu.mutation.ClearBirth()
 	return pu
+}
+
+// ClearTeam clears all "team" edges to the Team entity.
+func (pu *PlayerUpdate) ClearTeam() *PlayerUpdate {
+	pu.mutation.ClearTeam()
+	return pu
+}
+
+// RemoveTeamIDs removes the "team" edge to Team entities by IDs.
+func (pu *PlayerUpdate) RemoveTeamIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.RemoveTeamIDs(ids...)
+	return pu
+}
+
+// RemoveTeam removes "team" edges to Team entities.
+func (pu *PlayerUpdate) RemoveTeam(t ...*Team) *PlayerUpdate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return pu.RemoveTeamIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -218,6 +255,51 @@ func (pu *PlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(birth.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pu.mutation.TeamCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   player.TeamTable,
+			Columns: player.TeamPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedTeamIDs(); len(nodes) > 0 && !pu.mutation.TeamCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   player.TeamTable,
+			Columns: player.TeamPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.TeamIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   player.TeamTable,
+			Columns: player.TeamPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -333,6 +415,21 @@ func (puo *PlayerUpdateOne) SetBirth(b *Birth) *PlayerUpdateOne {
 	return puo.SetBirthID(b.ID)
 }
 
+// AddTeamIDs adds the "team" edge to the Team entity by IDs.
+func (puo *PlayerUpdateOne) AddTeamIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.AddTeamIDs(ids...)
+	return puo
+}
+
+// AddTeam adds the "team" edges to the Team entity.
+func (puo *PlayerUpdateOne) AddTeam(t ...*Team) *PlayerUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return puo.AddTeamIDs(ids...)
+}
+
 // Mutation returns the PlayerMutation object of the builder.
 func (puo *PlayerUpdateOne) Mutation() *PlayerMutation {
 	return puo.mutation
@@ -342,6 +439,27 @@ func (puo *PlayerUpdateOne) Mutation() *PlayerMutation {
 func (puo *PlayerUpdateOne) ClearBirth() *PlayerUpdateOne {
 	puo.mutation.ClearBirth()
 	return puo
+}
+
+// ClearTeam clears all "team" edges to the Team entity.
+func (puo *PlayerUpdateOne) ClearTeam() *PlayerUpdateOne {
+	puo.mutation.ClearTeam()
+	return puo
+}
+
+// RemoveTeamIDs removes the "team" edge to Team entities by IDs.
+func (puo *PlayerUpdateOne) RemoveTeamIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.RemoveTeamIDs(ids...)
+	return puo
+}
+
+// RemoveTeam removes "team" edges to Team entities.
+func (puo *PlayerUpdateOne) RemoveTeam(t ...*Team) *PlayerUpdateOne {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return puo.RemoveTeamIDs(ids...)
 }
 
 // Where appends a list predicates to the PlayerUpdate builder.
@@ -465,6 +583,51 @@ func (puo *PlayerUpdateOne) sqlSave(ctx context.Context) (_node *Player, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(birth.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.TeamCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   player.TeamTable,
+			Columns: player.TeamPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedTeamIDs(); len(nodes) > 0 && !puo.mutation.TeamCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   player.TeamTable,
+			Columns: player.TeamPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.TeamIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   player.TeamTable,
+			Columns: player.TeamPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

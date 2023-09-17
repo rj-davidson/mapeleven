@@ -34,12 +34,12 @@ func SerializeStanding(standing *ent.Standings) *APIStanding {
 		Rank:        standing.Rank,
 		Description: standing.Description,
 		Team: APITeam{
-			Slug: standing.Edges.Team.Slug,
+			Slug: standing.Edges.Team.Edges.Club.Slug,
 			Name: APITeamName{
-				Long:  standing.Edges.Team.Name,
-				Short: standing.Edges.Team.Code,
+				Long:  standing.Edges.Team.Edges.Club.Name,
+				Short: standing.Edges.Team.Edges.Club.Code,
 			},
-			Badge: standing.Edges.Team.Logo,
+			Badge: standing.Edges.Team.Edges.Club.Logo,
 		},
 		Points:    standing.Points,
 		GoalsDiff: standing.GoalsDiff,

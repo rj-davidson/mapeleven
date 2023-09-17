@@ -22,8 +22,8 @@ const (
 	EdgePlayers = "players"
 	// EdgeLeagues holds the string denoting the leagues edge name in mutations.
 	EdgeLeagues = "leagues"
-	// EdgeTeams holds the string denoting the teams edge name in mutations.
-	EdgeTeams = "teams"
+	// EdgeClubs holds the string denoting the clubs edge name in mutations.
+	EdgeClubs = "clubs"
 	// Table holds the table name of the country in the database.
 	Table = "countries"
 	// PlayersTable is the table that holds the players relation/edge.
@@ -40,13 +40,13 @@ const (
 	LeaguesInverseTable = "leagues"
 	// LeaguesColumn is the table column denoting the leagues relation/edge.
 	LeaguesColumn = "country_leagues"
-	// TeamsTable is the table that holds the teams relation/edge.
-	TeamsTable = "teams"
-	// TeamsInverseTable is the table name for the Team entity.
-	// It exists in this package in order to avoid circular dependency with the "team" package.
-	TeamsInverseTable = "teams"
-	// TeamsColumn is the table column denoting the teams relation/edge.
-	TeamsColumn = "country_teams"
+	// ClubsTable is the table that holds the clubs relation/edge.
+	ClubsTable = "clubs"
+	// ClubsInverseTable is the table name for the Club entity.
+	// It exists in this package in order to avoid circular dependency with the "club" package.
+	ClubsInverseTable = "clubs"
+	// ClubsColumn is the table column denoting the clubs relation/edge.
+	ClubsColumn = "country_clubs"
 )
 
 // Columns holds all SQL columns for country fields.
@@ -123,17 +123,17 @@ func ByLeagues(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 	}
 }
 
-// ByTeamsCount orders the results by teams count.
-func ByTeamsCount(opts ...sql.OrderTermOption) Order {
+// ByClubsCount orders the results by clubs count.
+func ByClubsCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTeamsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newClubsStep(), opts...)
 	}
 }
 
-// ByTeams orders the results by teams terms.
-func ByTeams(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+// ByClubs orders the results by clubs terms.
+func ByClubs(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTeamsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newClubsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newPlayersStep() *sqlgraph.Step {
@@ -150,10 +150,10 @@ func newLeaguesStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, LeaguesTable, LeaguesColumn),
 	)
 }
-func newTeamsStep() *sqlgraph.Step {
+func newClubsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TeamsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TeamsTable, TeamsColumn),
+		sqlgraph.To(ClubsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, ClubsTable, ClubsColumn),
 	)
 }
