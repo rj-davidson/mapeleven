@@ -34,8 +34,8 @@ type CountryEdges struct {
 	Players []*Player `json:"players,omitempty"`
 	// Leagues holds the value of the leagues edge.
 	Leagues []*League `json:"leagues,omitempty"`
-	// Teams holds the value of the teams edge.
-	Teams []*Team `json:"teams,omitempty"`
+	// Clubs holds the value of the clubs edge.
+	Clubs []*Club `json:"clubs,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -59,13 +59,13 @@ func (e CountryEdges) LeaguesOrErr() ([]*League, error) {
 	return nil, &NotLoadedError{edge: "leagues"}
 }
 
-// TeamsOrErr returns the Teams value or an error if the edge
+// ClubsOrErr returns the Clubs value or an error if the edge
 // was not loaded in eager-loading.
-func (e CountryEdges) TeamsOrErr() ([]*Team, error) {
+func (e CountryEdges) ClubsOrErr() ([]*Club, error) {
 	if e.loadedTypes[2] {
-		return e.Teams, nil
+		return e.Clubs, nil
 	}
-	return nil, &NotLoadedError{edge: "teams"}
+	return nil, &NotLoadedError{edge: "clubs"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -139,9 +139,9 @@ func (c *Country) QueryLeagues() *LeagueQuery {
 	return NewCountryClient(c.config).QueryLeagues(c)
 }
 
-// QueryTeams queries the "teams" edge of the Country entity.
-func (c *Country) QueryTeams() *TeamQuery {
-	return NewCountryClient(c.config).QueryTeams(c)
+// QueryClubs queries the "clubs" edge of the Country entity.
+func (c *Country) QueryClubs() *ClubQuery {
+	return NewCountryClient(c.config).QueryClubs(c)
 }
 
 // Update returns a builder for updating this Country.

@@ -21,6 +21,32 @@ var (
 		Columns:    BirthsColumns,
 		PrimaryKey: []*schema.Column{BirthsColumns[0]},
 	}
+	// ClubsColumns holds the columns for the "clubs" table.
+	ClubsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "api_football_id", Type: field.TypeInt, Unique: true},
+		{Name: "slug", Type: field.TypeString, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "code", Type: field.TypeString, Size: 3},
+		{Name: "founded", Type: field.TypeInt},
+		{Name: "national", Type: field.TypeBool},
+		{Name: "logo", Type: field.TypeString},
+		{Name: "country_clubs", Type: field.TypeInt, Nullable: true},
+	}
+	// ClubsTable holds the schema information for the "clubs" table.
+	ClubsTable = &schema.Table{
+		Name:       "clubs",
+		Columns:    ClubsColumns,
+		PrimaryKey: []*schema.Column{ClubsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "clubs_countries_clubs",
+				Columns:    []*schema.Column{ClubsColumns[8]},
+				RefColumns: []*schema.Column{CountriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// CountriesColumns holds the columns for the "countries" table.
 	CountriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -215,13 +241,8 @@ var (
 	// TeamsColumns holds the columns for the "teams" table.
 	TeamsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "slug", Type: field.TypeString, Unique: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "code", Type: field.TypeString, Size: 3},
-		{Name: "founded", Type: field.TypeInt},
-		{Name: "national", Type: field.TypeBool},
-		{Name: "logo", Type: field.TypeString},
-		{Name: "country_teams", Type: field.TypeInt, Nullable: true},
+		{Name: "club_team", Type: field.TypeInt},
+		{Name: "season_teams", Type: field.TypeInt, Nullable: true},
 	}
 	// TeamsTable holds the schema information for the "teams" table.
 	TeamsTable = &schema.Table{
@@ -230,16 +251,48 @@ var (
 		PrimaryKey: []*schema.Column{TeamsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "teams_countries_teams",
-				Columns:    []*schema.Column{TeamsColumns[7]},
-				RefColumns: []*schema.Column{CountriesColumns[0]},
+				Symbol:     "teams_clubs_team",
+				Columns:    []*schema.Column{TeamsColumns[1]},
+				RefColumns: []*schema.Column{ClubsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "teams_seasons_teams",
+				Columns:    []*schema.Column{TeamsColumns[2]},
+				RefColumns: []*schema.Column{SeasonsColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// TeamPlayersColumns holds the columns for the "team_players" table.
+	TeamPlayersColumns = []*schema.Column{
+		{Name: "team_id", Type: field.TypeInt},
+		{Name: "player_id", Type: field.TypeInt},
+	}
+	// TeamPlayersTable holds the schema information for the "team_players" table.
+	TeamPlayersTable = &schema.Table{
+		Name:       "team_players",
+		Columns:    TeamPlayersColumns,
+		PrimaryKey: []*schema.Column{TeamPlayersColumns[0], TeamPlayersColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "team_players_team_id",
+				Columns:    []*schema.Column{TeamPlayersColumns[0]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "team_players_player_id",
+				Columns:    []*schema.Column{TeamPlayersColumns[1]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		BirthsTable,
+		ClubsTable,
 		CountriesTable,
 		FixturesTable,
 		LeaguesTable,
@@ -247,10 +300,12 @@ var (
 		SeasonsTable,
 		StandingsTable,
 		TeamsTable,
+		TeamPlayersTable,
 	}
 )
 
 func init() {
+	ClubsTable.ForeignKeys[0].RefTable = CountriesTable
 	FixturesTable.ForeignKeys[0].RefTable = SeasonsTable
 	FixturesTable.ForeignKeys[1].RefTable = TeamsTable
 	FixturesTable.ForeignKeys[2].RefTable = TeamsTable
@@ -260,5 +315,8 @@ func init() {
 	SeasonsTable.ForeignKeys[0].RefTable = LeaguesTable
 	StandingsTable.ForeignKeys[0].RefTable = SeasonsTable
 	StandingsTable.ForeignKeys[1].RefTable = TeamsTable
-	TeamsTable.ForeignKeys[0].RefTable = CountriesTable
+	TeamsTable.ForeignKeys[0].RefTable = ClubsTable
+	TeamsTable.ForeignKeys[1].RefTable = SeasonsTable
+	TeamPlayersTable.ForeignKeys[0].RefTable = TeamsTable
+	TeamPlayersTable.ForeignKeys[1].RefTable = PlayersTable
 }

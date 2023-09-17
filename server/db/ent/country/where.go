@@ -310,21 +310,21 @@ func HasLeaguesWith(preds ...predicate.League) predicate.Country {
 	})
 }
 
-// HasTeams applies the HasEdge predicate on the "teams" edge.
-func HasTeams() predicate.Country {
+// HasClubs applies the HasEdge predicate on the "clubs" edge.
+func HasClubs() predicate.Country {
 	return predicate.Country(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TeamsTable, TeamsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, ClubsTable, ClubsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasTeamsWith applies the HasEdge predicate on the "teams" edge with a given conditions (other predicates).
-func HasTeamsWith(preds ...predicate.Team) predicate.Country {
+// HasClubsWith applies the HasEdge predicate on the "clubs" edge with a given conditions (other predicates).
+func HasClubsWith(preds ...predicate.Club) predicate.Country {
 	return predicate.Country(func(s *sql.Selector) {
-		step := newTeamsStep()
+		step := newClubsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

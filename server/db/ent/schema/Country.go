@@ -27,6 +27,6 @@ func (Country) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("players", Player.Type),
 		edge.To("leagues", League.Type),
-		edge.To("teams", Team.Type),
+		edge.To("clubs", Club.Type),
 	}
 }

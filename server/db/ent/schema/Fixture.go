@@ -14,16 +14,26 @@ type Fixture struct {
 // Fields of the Fixture.
 func (Fixture) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("slug").Unique().Immutable(),
-		field.Int("apiFootballId").Unique().Immutable(),
-		field.String("referee").Optional(),
-		field.String("timezone").Optional(),
+		field.String("slug").
+			Unique().
+			Immutable(),
+		field.Int("apiFootballId").
+			Unique().
+			Immutable(),
+		field.String("referee").
+			Optional(),
+		field.String("timezone").
+			Optional(),
 		field.Time("date"),
-		field.Int("elapsed").Optional(),
-		field.Int("round").Optional(),
+		field.Int("elapsed").
+			Optional(),
+		field.Int("round").
+			Optional(),
 		field.String("status"),
-		field.Int("homeTeamScore").Optional(),
-		field.Int("awayTeamScore").Optional(),
+		field.Int("homeTeamScore").
+			Optional(),
+		field.Int("awayTeamScore").
+			Optional(),
 	}
 }
 

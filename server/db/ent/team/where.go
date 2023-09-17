@@ -54,344 +54,50 @@ func IDLTE(id int) predicate.Team {
 	return predicate.Team(sql.FieldLTE(FieldID, id))
 }
 
-// Slug applies equality check predicate on the "slug" field. It's identical to SlugEQ.
-func Slug(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldSlug, v))
-}
-
-// Name applies equality check predicate on the "name" field. It's identical to NameEQ.
-func Name(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldName, v))
-}
-
-// Code applies equality check predicate on the "code" field. It's identical to CodeEQ.
-func Code(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldCode, v))
-}
-
-// Founded applies equality check predicate on the "founded" field. It's identical to FoundedEQ.
-func Founded(v int) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldFounded, v))
-}
-
-// National applies equality check predicate on the "national" field. It's identical to NationalEQ.
-func National(v bool) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldNational, v))
-}
-
-// Logo applies equality check predicate on the "logo" field. It's identical to LogoEQ.
-func Logo(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldLogo, v))
-}
-
-// SlugEQ applies the EQ predicate on the "slug" field.
-func SlugEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldSlug, v))
-}
-
-// SlugNEQ applies the NEQ predicate on the "slug" field.
-func SlugNEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldNEQ(FieldSlug, v))
-}
-
-// SlugIn applies the In predicate on the "slug" field.
-func SlugIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldIn(FieldSlug, vs...))
-}
-
-// SlugNotIn applies the NotIn predicate on the "slug" field.
-func SlugNotIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldNotIn(FieldSlug, vs...))
-}
-
-// SlugGT applies the GT predicate on the "slug" field.
-func SlugGT(v string) predicate.Team {
-	return predicate.Team(sql.FieldGT(FieldSlug, v))
-}
-
-// SlugGTE applies the GTE predicate on the "slug" field.
-func SlugGTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldGTE(FieldSlug, v))
-}
-
-// SlugLT applies the LT predicate on the "slug" field.
-func SlugLT(v string) predicate.Team {
-	return predicate.Team(sql.FieldLT(FieldSlug, v))
-}
-
-// SlugLTE applies the LTE predicate on the "slug" field.
-func SlugLTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldLTE(FieldSlug, v))
-}
-
-// SlugContains applies the Contains predicate on the "slug" field.
-func SlugContains(v string) predicate.Team {
-	return predicate.Team(sql.FieldContains(FieldSlug, v))
-}
-
-// SlugHasPrefix applies the HasPrefix predicate on the "slug" field.
-func SlugHasPrefix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasPrefix(FieldSlug, v))
-}
-
-// SlugHasSuffix applies the HasSuffix predicate on the "slug" field.
-func SlugHasSuffix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasSuffix(FieldSlug, v))
-}
-
-// SlugEqualFold applies the EqualFold predicate on the "slug" field.
-func SlugEqualFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldEqualFold(FieldSlug, v))
-}
-
-// SlugContainsFold applies the ContainsFold predicate on the "slug" field.
-func SlugContainsFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldContainsFold(FieldSlug, v))
-}
-
-// NameEQ applies the EQ predicate on the "name" field.
-func NameEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldName, v))
-}
-
-// NameNEQ applies the NEQ predicate on the "name" field.
-func NameNEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldNEQ(FieldName, v))
-}
-
-// NameIn applies the In predicate on the "name" field.
-func NameIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldIn(FieldName, vs...))
-}
-
-// NameNotIn applies the NotIn predicate on the "name" field.
-func NameNotIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldNotIn(FieldName, vs...))
-}
-
-// NameGT applies the GT predicate on the "name" field.
-func NameGT(v string) predicate.Team {
-	return predicate.Team(sql.FieldGT(FieldName, v))
-}
-
-// NameGTE applies the GTE predicate on the "name" field.
-func NameGTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldGTE(FieldName, v))
-}
-
-// NameLT applies the LT predicate on the "name" field.
-func NameLT(v string) predicate.Team {
-	return predicate.Team(sql.FieldLT(FieldName, v))
-}
-
-// NameLTE applies the LTE predicate on the "name" field.
-func NameLTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldLTE(FieldName, v))
-}
-
-// NameContains applies the Contains predicate on the "name" field.
-func NameContains(v string) predicate.Team {
-	return predicate.Team(sql.FieldContains(FieldName, v))
-}
-
-// NameHasPrefix applies the HasPrefix predicate on the "name" field.
-func NameHasPrefix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasPrefix(FieldName, v))
-}
-
-// NameHasSuffix applies the HasSuffix predicate on the "name" field.
-func NameHasSuffix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasSuffix(FieldName, v))
-}
-
-// NameEqualFold applies the EqualFold predicate on the "name" field.
-func NameEqualFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldEqualFold(FieldName, v))
-}
-
-// NameContainsFold applies the ContainsFold predicate on the "name" field.
-func NameContainsFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldContainsFold(FieldName, v))
-}
-
-// CodeEQ applies the EQ predicate on the "code" field.
-func CodeEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldCode, v))
-}
-
-// CodeNEQ applies the NEQ predicate on the "code" field.
-func CodeNEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldNEQ(FieldCode, v))
-}
-
-// CodeIn applies the In predicate on the "code" field.
-func CodeIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldIn(FieldCode, vs...))
-}
-
-// CodeNotIn applies the NotIn predicate on the "code" field.
-func CodeNotIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldNotIn(FieldCode, vs...))
-}
-
-// CodeGT applies the GT predicate on the "code" field.
-func CodeGT(v string) predicate.Team {
-	return predicate.Team(sql.FieldGT(FieldCode, v))
-}
-
-// CodeGTE applies the GTE predicate on the "code" field.
-func CodeGTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldGTE(FieldCode, v))
-}
-
-// CodeLT applies the LT predicate on the "code" field.
-func CodeLT(v string) predicate.Team {
-	return predicate.Team(sql.FieldLT(FieldCode, v))
-}
-
-// CodeLTE applies the LTE predicate on the "code" field.
-func CodeLTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldLTE(FieldCode, v))
-}
-
-// CodeContains applies the Contains predicate on the "code" field.
-func CodeContains(v string) predicate.Team {
-	return predicate.Team(sql.FieldContains(FieldCode, v))
-}
-
-// CodeHasPrefix applies the HasPrefix predicate on the "code" field.
-func CodeHasPrefix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasPrefix(FieldCode, v))
-}
-
-// CodeHasSuffix applies the HasSuffix predicate on the "code" field.
-func CodeHasSuffix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasSuffix(FieldCode, v))
-}
-
-// CodeEqualFold applies the EqualFold predicate on the "code" field.
-func CodeEqualFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldEqualFold(FieldCode, v))
-}
-
-// CodeContainsFold applies the ContainsFold predicate on the "code" field.
-func CodeContainsFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldContainsFold(FieldCode, v))
-}
-
-// FoundedEQ applies the EQ predicate on the "founded" field.
-func FoundedEQ(v int) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldFounded, v))
-}
-
-// FoundedNEQ applies the NEQ predicate on the "founded" field.
-func FoundedNEQ(v int) predicate.Team {
-	return predicate.Team(sql.FieldNEQ(FieldFounded, v))
-}
-
-// FoundedIn applies the In predicate on the "founded" field.
-func FoundedIn(vs ...int) predicate.Team {
-	return predicate.Team(sql.FieldIn(FieldFounded, vs...))
-}
-
-// FoundedNotIn applies the NotIn predicate on the "founded" field.
-func FoundedNotIn(vs ...int) predicate.Team {
-	return predicate.Team(sql.FieldNotIn(FieldFounded, vs...))
-}
-
-// FoundedGT applies the GT predicate on the "founded" field.
-func FoundedGT(v int) predicate.Team {
-	return predicate.Team(sql.FieldGT(FieldFounded, v))
-}
-
-// FoundedGTE applies the GTE predicate on the "founded" field.
-func FoundedGTE(v int) predicate.Team {
-	return predicate.Team(sql.FieldGTE(FieldFounded, v))
-}
-
-// FoundedLT applies the LT predicate on the "founded" field.
-func FoundedLT(v int) predicate.Team {
-	return predicate.Team(sql.FieldLT(FieldFounded, v))
-}
-
-// FoundedLTE applies the LTE predicate on the "founded" field.
-func FoundedLTE(v int) predicate.Team {
-	return predicate.Team(sql.FieldLTE(FieldFounded, v))
-}
-
-// NationalEQ applies the EQ predicate on the "national" field.
-func NationalEQ(v bool) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldNational, v))
-}
-
-// NationalNEQ applies the NEQ predicate on the "national" field.
-func NationalNEQ(v bool) predicate.Team {
-	return predicate.Team(sql.FieldNEQ(FieldNational, v))
-}
-
-// LogoEQ applies the EQ predicate on the "logo" field.
-func LogoEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldEQ(FieldLogo, v))
-}
-
-// LogoNEQ applies the NEQ predicate on the "logo" field.
-func LogoNEQ(v string) predicate.Team {
-	return predicate.Team(sql.FieldNEQ(FieldLogo, v))
-}
-
-// LogoIn applies the In predicate on the "logo" field.
-func LogoIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldIn(FieldLogo, vs...))
-}
-
-// LogoNotIn applies the NotIn predicate on the "logo" field.
-func LogoNotIn(vs ...string) predicate.Team {
-	return predicate.Team(sql.FieldNotIn(FieldLogo, vs...))
-}
-
-// LogoGT applies the GT predicate on the "logo" field.
-func LogoGT(v string) predicate.Team {
-	return predicate.Team(sql.FieldGT(FieldLogo, v))
-}
-
-// LogoGTE applies the GTE predicate on the "logo" field.
-func LogoGTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldGTE(FieldLogo, v))
-}
-
-// LogoLT applies the LT predicate on the "logo" field.
-func LogoLT(v string) predicate.Team {
-	return predicate.Team(sql.FieldLT(FieldLogo, v))
-}
-
-// LogoLTE applies the LTE predicate on the "logo" field.
-func LogoLTE(v string) predicate.Team {
-	return predicate.Team(sql.FieldLTE(FieldLogo, v))
-}
-
-// LogoContains applies the Contains predicate on the "logo" field.
-func LogoContains(v string) predicate.Team {
-	return predicate.Team(sql.FieldContains(FieldLogo, v))
-}
-
-// LogoHasPrefix applies the HasPrefix predicate on the "logo" field.
-func LogoHasPrefix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasPrefix(FieldLogo, v))
-}
-
-// LogoHasSuffix applies the HasSuffix predicate on the "logo" field.
-func LogoHasSuffix(v string) predicate.Team {
-	return predicate.Team(sql.FieldHasSuffix(FieldLogo, v))
-}
-
-// LogoEqualFold applies the EqualFold predicate on the "logo" field.
-func LogoEqualFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldEqualFold(FieldLogo, v))
-}
-
-// LogoContainsFold applies the ContainsFold predicate on the "logo" field.
-func LogoContainsFold(v string) predicate.Team {
-	return predicate.Team(sql.FieldContainsFold(FieldLogo, v))
+// HasSeason applies the HasEdge predicate on the "season" edge.
+func HasSeason() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, SeasonTable, SeasonColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
+func HasSeasonWith(preds ...predicate.Season) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newSeasonStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasClub applies the HasEdge predicate on the "club" edge.
+func HasClub() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, ClubTable, ClubColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasClubWith applies the HasEdge predicate on the "club" edge with a given conditions (other predicates).
+func HasClubWith(preds ...predicate.Club) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newClubStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
 }
 
 // HasStandings applies the HasEdge predicate on the "standings" edge.
@@ -409,29 +115,6 @@ func HasStandings() predicate.Team {
 func HasStandingsWith(preds ...predicate.Standings) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		step := newStandingsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasCountry applies the HasEdge predicate on the "country" edge.
-func HasCountry() predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, CountryTable, CountryColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasCountryWith applies the HasEdge predicate on the "country" edge with a given conditions (other predicates).
-func HasCountryWith(preds ...predicate.Country) predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := newCountryStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -478,6 +161,29 @@ func HasAwayFixtures() predicate.Team {
 func HasAwayFixturesWith(preds ...predicate.Fixture) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		step := newAwayFixturesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPlayers applies the HasEdge predicate on the "players" edge.
+func HasPlayers() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, PlayersTable, PlayersPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPlayersWith applies the HasEdge predicate on the "players" edge with a given conditions (other predicates).
+func HasPlayersWith(preds ...predicate.Player) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newPlayersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -14,8 +14,12 @@ type League struct {
 // Fields of the League.
 func (League) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("footballApiId").Unique().Immutable(),
-		field.String("slug").Unique().Immutable(),
+		field.Int("footballApiId").
+			Unique().
+			Immutable(),
+		field.String("slug").
+			Unique().
+			Immutable(),
 		field.String("name"),
 		field.Enum("type").
 			Values("League", "Cup", "Tournament", "Friendly"),

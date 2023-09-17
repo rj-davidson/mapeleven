@@ -3,7 +3,10 @@ package models
 import (
 	"context"
 	"mapeleven/db/ent"
+	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/team"
 	"time"
 )
 
@@ -48,7 +51,29 @@ func NewFixtureModel(client *ent.Client) *FixtureModel {
 	return &FixtureModel{client: client}
 }
 
+func (fm *FixtureModel) getTeam(ctx context.Context, seasonID, apiFootabllClubId int) (*ent.Team, error) {
+	return fm.client.Team.
+		Query().
+		Where(
+			team.HasSeasonWith(
+				season.IDEQ(seasonID),
+			),
+			team.HasClubWith(
+				club.ApiFootballIdEQ(apiFootabllClubId),
+			),
+		).
+		Only(ctx)
+}
+
 func (fm *FixtureModel) CreateFixture(ctx context.Context, input CreateFixtureInput) (*ent.Fixture, error) {
+	awayTeam, err := fm.getTeam(ctx, input.Season.ID, input.AwayTeamID)
+	if err != nil {
+		return nil, err
+	}
+	homeTeam, err := fm.getTeam(ctx, input.Season.ID, input.HomeTeamID)
+	if err != nil {
+		return nil, err
+	}
 	return fm.client.Fixture.
 		Create().
 		SetSlug(input.Slug).
@@ -61,8 +86,8 @@ func (fm *FixtureModel) CreateFixture(ctx context.Context, input CreateFixtureIn
 		SetNillableRound(input.Round).
 		SetNillableHomeTeamScore(input.HomeTeamScore).
 		SetNillableAwayTeamScore(input.AwayTeamScore).
-		SetAwayTeamID(input.AwayTeamID).
-		SetHomeTeamID(input.HomeTeamID).
+		SetAwayTeam(awayTeam).
+		SetHomeTeam(homeTeam).
 		SetSeason(input.Season).
 		Save(ctx)
 }
@@ -80,12 +105,6 @@ func (fm *FixtureModel) UpdateFixture(ctx context.Context, input UpdateFixtureIn
 	}
 	if input.AwayTeamScore != nil {
 		updater.SetAwayTeamScore(*input.AwayTeamScore)
-	}
-	if input.HomeTeamID != nil {
-		updater.SetHomeTeamID(*input.HomeTeamID)
-	}
-	if input.AwayTeamID != nil {
-		updater.SetAwayTeamID(*input.AwayTeamID)
 	}
 	return updater.Save(ctx)
 }

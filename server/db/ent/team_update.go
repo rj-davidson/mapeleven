@@ -6,9 +6,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 
@@ -30,41 +32,34 @@ func (tu *TeamUpdate) Where(ps ...predicate.Team) *TeamUpdate {
 	return tu
 }
 
-// SetName sets the "name" field.
-func (tu *TeamUpdate) SetName(s string) *TeamUpdate {
-	tu.mutation.SetName(s)
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (tu *TeamUpdate) SetSeasonID(id int) *TeamUpdate {
+	tu.mutation.SetSeasonID(id)
 	return tu
 }
 
-// SetCode sets the "code" field.
-func (tu *TeamUpdate) SetCode(s string) *TeamUpdate {
-	tu.mutation.SetCode(s)
+// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
+func (tu *TeamUpdate) SetNillableSeasonID(id *int) *TeamUpdate {
+	if id != nil {
+		tu = tu.SetSeasonID(*id)
+	}
 	return tu
 }
 
-// SetFounded sets the "founded" field.
-func (tu *TeamUpdate) SetFounded(i int) *TeamUpdate {
-	tu.mutation.ResetFounded()
-	tu.mutation.SetFounded(i)
+// SetSeason sets the "season" edge to the Season entity.
+func (tu *TeamUpdate) SetSeason(s *Season) *TeamUpdate {
+	return tu.SetSeasonID(s.ID)
+}
+
+// SetClubID sets the "club" edge to the Club entity by ID.
+func (tu *TeamUpdate) SetClubID(id int) *TeamUpdate {
+	tu.mutation.SetClubID(id)
 	return tu
 }
 
-// AddFounded adds i to the "founded" field.
-func (tu *TeamUpdate) AddFounded(i int) *TeamUpdate {
-	tu.mutation.AddFounded(i)
-	return tu
-}
-
-// SetNational sets the "national" field.
-func (tu *TeamUpdate) SetNational(b bool) *TeamUpdate {
-	tu.mutation.SetNational(b)
-	return tu
-}
-
-// SetLogo sets the "logo" field.
-func (tu *TeamUpdate) SetLogo(s string) *TeamUpdate {
-	tu.mutation.SetLogo(s)
-	return tu
+// SetClub sets the "club" edge to the Club entity.
+func (tu *TeamUpdate) SetClub(c *Club) *TeamUpdate {
+	return tu.SetClubID(c.ID)
 }
 
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
@@ -80,25 +75,6 @@ func (tu *TeamUpdate) AddStandings(s ...*Standings) *TeamUpdate {
 		ids[i] = s[i].ID
 	}
 	return tu.AddStandingIDs(ids...)
-}
-
-// SetCountryID sets the "country" edge to the Country entity by ID.
-func (tu *TeamUpdate) SetCountryID(id int) *TeamUpdate {
-	tu.mutation.SetCountryID(id)
-	return tu
-}
-
-// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
-func (tu *TeamUpdate) SetNillableCountryID(id *int) *TeamUpdate {
-	if id != nil {
-		tu = tu.SetCountryID(*id)
-	}
-	return tu
-}
-
-// SetCountry sets the "country" edge to the Country entity.
-func (tu *TeamUpdate) SetCountry(c *Country) *TeamUpdate {
-	return tu.SetCountryID(c.ID)
 }
 
 // AddHomeFixtureIDs adds the "homeFixtures" edge to the Fixture entity by IDs.
@@ -131,9 +107,36 @@ func (tu *TeamUpdate) AddAwayFixtures(f ...*Fixture) *TeamUpdate {
 	return tu.AddAwayFixtureIDs(ids...)
 }
 
+// AddPlayerIDs adds the "players" edge to the Player entity by IDs.
+func (tu *TeamUpdate) AddPlayerIDs(ids ...int) *TeamUpdate {
+	tu.mutation.AddPlayerIDs(ids...)
+	return tu
+}
+
+// AddPlayers adds the "players" edges to the Player entity.
+func (tu *TeamUpdate) AddPlayers(p ...*Player) *TeamUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tu.AddPlayerIDs(ids...)
+}
+
 // Mutation returns the TeamMutation object of the builder.
 func (tu *TeamUpdate) Mutation() *TeamMutation {
 	return tu.mutation
+}
+
+// ClearSeason clears the "season" edge to the Season entity.
+func (tu *TeamUpdate) ClearSeason() *TeamUpdate {
+	tu.mutation.ClearSeason()
+	return tu
+}
+
+// ClearClub clears the "club" edge to the Club entity.
+func (tu *TeamUpdate) ClearClub() *TeamUpdate {
+	tu.mutation.ClearClub()
+	return tu
 }
 
 // ClearStandings clears all "standings" edges to the Standings entity.
@@ -155,12 +158,6 @@ func (tu *TeamUpdate) RemoveStandings(s ...*Standings) *TeamUpdate {
 		ids[i] = s[i].ID
 	}
 	return tu.RemoveStandingIDs(ids...)
-}
-
-// ClearCountry clears the "country" edge to the Country entity.
-func (tu *TeamUpdate) ClearCountry() *TeamUpdate {
-	tu.mutation.ClearCountry()
-	return tu
 }
 
 // ClearHomeFixtures clears all "homeFixtures" edges to the Fixture entity.
@@ -205,6 +202,27 @@ func (tu *TeamUpdate) RemoveAwayFixtures(f ...*Fixture) *TeamUpdate {
 	return tu.RemoveAwayFixtureIDs(ids...)
 }
 
+// ClearPlayers clears all "players" edges to the Player entity.
+func (tu *TeamUpdate) ClearPlayers() *TeamUpdate {
+	tu.mutation.ClearPlayers()
+	return tu
+}
+
+// RemovePlayerIDs removes the "players" edge to Player entities by IDs.
+func (tu *TeamUpdate) RemovePlayerIDs(ids ...int) *TeamUpdate {
+	tu.mutation.RemovePlayerIDs(ids...)
+	return tu
+}
+
+// RemovePlayers removes "players" edges to Player entities.
+func (tu *TeamUpdate) RemovePlayers(p ...*Player) *TeamUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tu.RemovePlayerIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (tu *TeamUpdate) Save(ctx context.Context) (int, error) {
 	return withHooks[int, TeamMutation](ctx, tu.sqlSave, tu.mutation, tu.hooks)
@@ -234,10 +252,8 @@ func (tu *TeamUpdate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tu *TeamUpdate) check() error {
-	if v, ok := tu.mutation.Code(); ok {
-		if err := team.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "Team.code": %w`, err)}
-		}
+	if _, ok := tu.mutation.ClubID(); tu.mutation.ClubCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Team.club"`)
 	}
 	return nil
 }
@@ -254,23 +270,63 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := tu.mutation.Name(); ok {
-		_spec.SetField(team.FieldName, field.TypeString, value)
+	if tu.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.SeasonTable,
+			Columns: []string{team.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if value, ok := tu.mutation.Code(); ok {
-		_spec.SetField(team.FieldCode, field.TypeString, value)
+	if nodes := tu.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.SeasonTable,
+			Columns: []string{team.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if value, ok := tu.mutation.Founded(); ok {
-		_spec.SetField(team.FieldFounded, field.TypeInt, value)
+	if tu.mutation.ClubCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.ClubTable,
+			Columns: []string{team.ClubColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if value, ok := tu.mutation.AddedFounded(); ok {
-		_spec.AddField(team.FieldFounded, field.TypeInt, value)
-	}
-	if value, ok := tu.mutation.National(); ok {
-		_spec.SetField(team.FieldNational, field.TypeBool, value)
-	}
-	if value, ok := tu.mutation.Logo(); ok {
-		_spec.SetField(team.FieldLogo, field.TypeString, value)
+	if nodes := tu.mutation.ClubIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.ClubTable,
+			Columns: []string{team.ClubColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if tu.mutation.StandingsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -310,35 +366,6 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(standings.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tu.mutation.CountryCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   team.CountryTable,
-			Columns: []string{team.CountryColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.CountryIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   team.CountryTable,
-			Columns: []string{team.CountryColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -436,6 +463,51 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tu.mutation.PlayersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   team.PlayersTable,
+			Columns: team.PlayersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedPlayersIDs(); len(nodes) > 0 && !tu.mutation.PlayersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   team.PlayersTable,
+			Columns: team.PlayersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.PlayersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   team.PlayersTable,
+			Columns: team.PlayersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{team.Label}
@@ -456,41 +528,34 @@ type TeamUpdateOne struct {
 	mutation *TeamMutation
 }
 
-// SetName sets the "name" field.
-func (tuo *TeamUpdateOne) SetName(s string) *TeamUpdateOne {
-	tuo.mutation.SetName(s)
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (tuo *TeamUpdateOne) SetSeasonID(id int) *TeamUpdateOne {
+	tuo.mutation.SetSeasonID(id)
 	return tuo
 }
 
-// SetCode sets the "code" field.
-func (tuo *TeamUpdateOne) SetCode(s string) *TeamUpdateOne {
-	tuo.mutation.SetCode(s)
+// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
+func (tuo *TeamUpdateOne) SetNillableSeasonID(id *int) *TeamUpdateOne {
+	if id != nil {
+		tuo = tuo.SetSeasonID(*id)
+	}
 	return tuo
 }
 
-// SetFounded sets the "founded" field.
-func (tuo *TeamUpdateOne) SetFounded(i int) *TeamUpdateOne {
-	tuo.mutation.ResetFounded()
-	tuo.mutation.SetFounded(i)
+// SetSeason sets the "season" edge to the Season entity.
+func (tuo *TeamUpdateOne) SetSeason(s *Season) *TeamUpdateOne {
+	return tuo.SetSeasonID(s.ID)
+}
+
+// SetClubID sets the "club" edge to the Club entity by ID.
+func (tuo *TeamUpdateOne) SetClubID(id int) *TeamUpdateOne {
+	tuo.mutation.SetClubID(id)
 	return tuo
 }
 
-// AddFounded adds i to the "founded" field.
-func (tuo *TeamUpdateOne) AddFounded(i int) *TeamUpdateOne {
-	tuo.mutation.AddFounded(i)
-	return tuo
-}
-
-// SetNational sets the "national" field.
-func (tuo *TeamUpdateOne) SetNational(b bool) *TeamUpdateOne {
-	tuo.mutation.SetNational(b)
-	return tuo
-}
-
-// SetLogo sets the "logo" field.
-func (tuo *TeamUpdateOne) SetLogo(s string) *TeamUpdateOne {
-	tuo.mutation.SetLogo(s)
-	return tuo
+// SetClub sets the "club" edge to the Club entity.
+func (tuo *TeamUpdateOne) SetClub(c *Club) *TeamUpdateOne {
+	return tuo.SetClubID(c.ID)
 }
 
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
@@ -506,25 +571,6 @@ func (tuo *TeamUpdateOne) AddStandings(s ...*Standings) *TeamUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return tuo.AddStandingIDs(ids...)
-}
-
-// SetCountryID sets the "country" edge to the Country entity by ID.
-func (tuo *TeamUpdateOne) SetCountryID(id int) *TeamUpdateOne {
-	tuo.mutation.SetCountryID(id)
-	return tuo
-}
-
-// SetNillableCountryID sets the "country" edge to the Country entity by ID if the given value is not nil.
-func (tuo *TeamUpdateOne) SetNillableCountryID(id *int) *TeamUpdateOne {
-	if id != nil {
-		tuo = tuo.SetCountryID(*id)
-	}
-	return tuo
-}
-
-// SetCountry sets the "country" edge to the Country entity.
-func (tuo *TeamUpdateOne) SetCountry(c *Country) *TeamUpdateOne {
-	return tuo.SetCountryID(c.ID)
 }
 
 // AddHomeFixtureIDs adds the "homeFixtures" edge to the Fixture entity by IDs.
@@ -557,9 +603,36 @@ func (tuo *TeamUpdateOne) AddAwayFixtures(f ...*Fixture) *TeamUpdateOne {
 	return tuo.AddAwayFixtureIDs(ids...)
 }
 
+// AddPlayerIDs adds the "players" edge to the Player entity by IDs.
+func (tuo *TeamUpdateOne) AddPlayerIDs(ids ...int) *TeamUpdateOne {
+	tuo.mutation.AddPlayerIDs(ids...)
+	return tuo
+}
+
+// AddPlayers adds the "players" edges to the Player entity.
+func (tuo *TeamUpdateOne) AddPlayers(p ...*Player) *TeamUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tuo.AddPlayerIDs(ids...)
+}
+
 // Mutation returns the TeamMutation object of the builder.
 func (tuo *TeamUpdateOne) Mutation() *TeamMutation {
 	return tuo.mutation
+}
+
+// ClearSeason clears the "season" edge to the Season entity.
+func (tuo *TeamUpdateOne) ClearSeason() *TeamUpdateOne {
+	tuo.mutation.ClearSeason()
+	return tuo
+}
+
+// ClearClub clears the "club" edge to the Club entity.
+func (tuo *TeamUpdateOne) ClearClub() *TeamUpdateOne {
+	tuo.mutation.ClearClub()
+	return tuo
 }
 
 // ClearStandings clears all "standings" edges to the Standings entity.
@@ -581,12 +654,6 @@ func (tuo *TeamUpdateOne) RemoveStandings(s ...*Standings) *TeamUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return tuo.RemoveStandingIDs(ids...)
-}
-
-// ClearCountry clears the "country" edge to the Country entity.
-func (tuo *TeamUpdateOne) ClearCountry() *TeamUpdateOne {
-	tuo.mutation.ClearCountry()
-	return tuo
 }
 
 // ClearHomeFixtures clears all "homeFixtures" edges to the Fixture entity.
@@ -631,6 +698,27 @@ func (tuo *TeamUpdateOne) RemoveAwayFixtures(f ...*Fixture) *TeamUpdateOne {
 	return tuo.RemoveAwayFixtureIDs(ids...)
 }
 
+// ClearPlayers clears all "players" edges to the Player entity.
+func (tuo *TeamUpdateOne) ClearPlayers() *TeamUpdateOne {
+	tuo.mutation.ClearPlayers()
+	return tuo
+}
+
+// RemovePlayerIDs removes the "players" edge to Player entities by IDs.
+func (tuo *TeamUpdateOne) RemovePlayerIDs(ids ...int) *TeamUpdateOne {
+	tuo.mutation.RemovePlayerIDs(ids...)
+	return tuo
+}
+
+// RemovePlayers removes "players" edges to Player entities.
+func (tuo *TeamUpdateOne) RemovePlayers(p ...*Player) *TeamUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tuo.RemovePlayerIDs(ids...)
+}
+
 // Where appends a list predicates to the TeamUpdate builder.
 func (tuo *TeamUpdateOne) Where(ps ...predicate.Team) *TeamUpdateOne {
 	tuo.mutation.Where(ps...)
@@ -673,10 +761,8 @@ func (tuo *TeamUpdateOne) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (tuo *TeamUpdateOne) check() error {
-	if v, ok := tuo.mutation.Code(); ok {
-		if err := team.CodeValidator(v); err != nil {
-			return &ValidationError{Name: "code", err: fmt.Errorf(`ent: validator failed for field "Team.code": %w`, err)}
-		}
+	if _, ok := tuo.mutation.ClubID(); tuo.mutation.ClubCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "Team.club"`)
 	}
 	return nil
 }
@@ -710,23 +796,63 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 			}
 		}
 	}
-	if value, ok := tuo.mutation.Name(); ok {
-		_spec.SetField(team.FieldName, field.TypeString, value)
+	if tuo.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.SeasonTable,
+			Columns: []string{team.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if value, ok := tuo.mutation.Code(); ok {
-		_spec.SetField(team.FieldCode, field.TypeString, value)
+	if nodes := tuo.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.SeasonTable,
+			Columns: []string{team.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if value, ok := tuo.mutation.Founded(); ok {
-		_spec.SetField(team.FieldFounded, field.TypeInt, value)
+	if tuo.mutation.ClubCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.ClubTable,
+			Columns: []string{team.ClubColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if value, ok := tuo.mutation.AddedFounded(); ok {
-		_spec.AddField(team.FieldFounded, field.TypeInt, value)
-	}
-	if value, ok := tuo.mutation.National(); ok {
-		_spec.SetField(team.FieldNational, field.TypeBool, value)
-	}
-	if value, ok := tuo.mutation.Logo(); ok {
-		_spec.SetField(team.FieldLogo, field.TypeString, value)
+	if nodes := tuo.mutation.ClubIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.ClubTable,
+			Columns: []string{team.ClubColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(club.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if tuo.mutation.StandingsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -766,35 +892,6 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(standings.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tuo.mutation.CountryCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   team.CountryTable,
-			Columns: []string{team.CountryColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.CountryIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
-			Table:   team.CountryTable,
-			Columns: []string{team.CountryColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -885,6 +982,51 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if tuo.mutation.PlayersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   team.PlayersTable,
+			Columns: team.PlayersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedPlayersIDs(); len(nodes) > 0 && !tuo.mutation.PlayersCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   team.PlayersTable,
+			Columns: team.PlayersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.PlayersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   team.PlayersTable,
+			Columns: team.PlayersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

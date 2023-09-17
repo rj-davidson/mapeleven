@@ -20,6 +20,18 @@ func (f BirthFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.BirthMutation", m)
 }
 
+// The ClubFunc type is an adapter to allow the use of ordinary
+// function as Club mutator.
+type ClubFunc func(context.Context, *ent.ClubMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f ClubFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.ClubMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ClubMutation", m)
+}
+
 // The CountryFunc type is an adapter to allow the use of ordinary
 // function as Country mutator.
 type CountryFunc func(context.Context, *ent.CountryMutation) (ent.Value, error)

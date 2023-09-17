@@ -4,7 +4,8 @@ package ent
 
 import (
 	"fmt"
-	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/club"
+	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/team"
 	"strings"
 
@@ -14,69 +15,75 @@ import (
 
 // Team is the model entity for the Team schema.
 type Team struct {
-	config `json:"-"`
+	config
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Slug holds the value of the "slug" field.
-	Slug string `json:"slug,omitempty"`
-	// Name holds the value of the "name" field.
-	Name string `json:"name,omitempty"`
-	// Code holds the value of the "code" field.
-	Code string `json:"code,omitempty"`
-	// Founded holds the value of the "founded" field.
-	Founded int `json:"founded,omitempty"`
-	// National holds the value of the "national" field.
-	National bool `json:"national,omitempty"`
-	// Logo holds the value of the "logo" field.
-	Logo string `json:"logo,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TeamQuery when eager-loading is set.
-	Edges         TeamEdges `json:"edges"`
-	country_teams *int
-	selectValues  sql.SelectValues
+	Edges        TeamEdges `json:"edges"`
+	club_team    *int
+	season_teams *int
+	selectValues sql.SelectValues
 }
 
 // TeamEdges holds the relations/edges for other nodes in the graph.
 type TeamEdges struct {
+	// Season holds the value of the season edge.
+	Season *Season `json:"season,omitempty"`
+	// Club holds the value of the club edge.
+	Club *Club `json:"club,omitempty"`
 	// Standings holds the value of the standings edge.
 	Standings []*Standings `json:"standings,omitempty"`
-	// Country holds the value of the country edge.
-	Country *Country `json:"country,omitempty"`
 	// HomeFixtures holds the value of the homeFixtures edge.
 	HomeFixtures []*Fixture `json:"homeFixtures,omitempty"`
 	// AwayFixtures holds the value of the awayFixtures edge.
 	AwayFixtures []*Fixture `json:"awayFixtures,omitempty"`
+	// Players holds the value of the players edge.
+	Players []*Player `json:"players,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [6]bool
+}
+
+// SeasonOrErr returns the Season value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) SeasonOrErr() (*Season, error) {
+	if e.loadedTypes[0] {
+		if e.Season == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: season.Label}
+		}
+		return e.Season, nil
+	}
+	return nil, &NotLoadedError{edge: "season"}
+}
+
+// ClubOrErr returns the Club value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) ClubOrErr() (*Club, error) {
+	if e.loadedTypes[1] {
+		if e.Club == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: club.Label}
+		}
+		return e.Club, nil
+	}
+	return nil, &NotLoadedError{edge: "club"}
 }
 
 // StandingsOrErr returns the Standings value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) StandingsOrErr() ([]*Standings, error) {
-	if e.loadedTypes[0] {
+	if e.loadedTypes[2] {
 		return e.Standings, nil
 	}
 	return nil, &NotLoadedError{edge: "standings"}
 }
 
-// CountryOrErr returns the Country value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TeamEdges) CountryOrErr() (*Country, error) {
-	if e.loadedTypes[1] {
-		if e.Country == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: country.Label}
-		}
-		return e.Country, nil
-	}
-	return nil, &NotLoadedError{edge: "country"}
-}
-
 // HomeFixturesOrErr returns the HomeFixtures value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) HomeFixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.HomeFixtures, nil
 	}
 	return nil, &NotLoadedError{edge: "homeFixtures"}
@@ -85,10 +92,19 @@ func (e TeamEdges) HomeFixturesOrErr() ([]*Fixture, error) {
 // AwayFixturesOrErr returns the AwayFixtures value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) AwayFixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.AwayFixtures, nil
 	}
 	return nil, &NotLoadedError{edge: "awayFixtures"}
+}
+
+// PlayersOrErr returns the Players value or an error if the edge
+// was not loaded in eager-loading.
+func (e TeamEdges) PlayersOrErr() ([]*Player, error) {
+	if e.loadedTypes[5] {
+		return e.Players, nil
+	}
+	return nil, &NotLoadedError{edge: "players"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -96,13 +112,11 @@ func (*Team) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case team.FieldNational:
-			values[i] = new(sql.NullBool)
-		case team.FieldID, team.FieldFounded:
+		case team.FieldID:
 			values[i] = new(sql.NullInt64)
-		case team.FieldSlug, team.FieldName, team.FieldCode, team.FieldLogo:
-			values[i] = new(sql.NullString)
-		case team.ForeignKeys[0]: // country_teams
+		case team.ForeignKeys[0]: // club_team
+			values[i] = new(sql.NullInt64)
+		case team.ForeignKeys[1]: // season_teams
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -125,48 +139,19 @@ func (t *Team) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			t.ID = int(value.Int64)
-		case team.FieldSlug:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field slug", values[i])
-			} else if value.Valid {
-				t.Slug = value.String
-			}
-		case team.FieldName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field name", values[i])
-			} else if value.Valid {
-				t.Name = value.String
-			}
-		case team.FieldCode:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field code", values[i])
-			} else if value.Valid {
-				t.Code = value.String
-			}
-		case team.FieldFounded:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field founded", values[i])
-			} else if value.Valid {
-				t.Founded = int(value.Int64)
-			}
-		case team.FieldNational:
-			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field national", values[i])
-			} else if value.Valid {
-				t.National = value.Bool
-			}
-		case team.FieldLogo:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field logo", values[i])
-			} else if value.Valid {
-				t.Logo = value.String
-			}
 		case team.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field country_teams", value)
+				return fmt.Errorf("unexpected type %T for edge-field club_team", value)
 			} else if value.Valid {
-				t.country_teams = new(int)
-				*t.country_teams = int(value.Int64)
+				t.club_team = new(int)
+				*t.club_team = int(value.Int64)
+			}
+		case team.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field season_teams", value)
+			} else if value.Valid {
+				t.season_teams = new(int)
+				*t.season_teams = int(value.Int64)
 			}
 		default:
 			t.selectValues.Set(columns[i], values[i])
@@ -181,14 +166,19 @@ func (t *Team) Value(name string) (ent.Value, error) {
 	return t.selectValues.Get(name)
 }
 
+// QuerySeason queries the "season" edge of the Team entity.
+func (t *Team) QuerySeason() *SeasonQuery {
+	return NewTeamClient(t.config).QuerySeason(t)
+}
+
+// QueryClub queries the "club" edge of the Team entity.
+func (t *Team) QueryClub() *ClubQuery {
+	return NewTeamClient(t.config).QueryClub(t)
+}
+
 // QueryStandings queries the "standings" edge of the Team entity.
 func (t *Team) QueryStandings() *StandingsQuery {
 	return NewTeamClient(t.config).QueryStandings(t)
-}
-
-// QueryCountry queries the "country" edge of the Team entity.
-func (t *Team) QueryCountry() *CountryQuery {
-	return NewTeamClient(t.config).QueryCountry(t)
 }
 
 // QueryHomeFixtures queries the "homeFixtures" edge of the Team entity.
@@ -199,6 +189,11 @@ func (t *Team) QueryHomeFixtures() *FixtureQuery {
 // QueryAwayFixtures queries the "awayFixtures" edge of the Team entity.
 func (t *Team) QueryAwayFixtures() *FixtureQuery {
 	return NewTeamClient(t.config).QueryAwayFixtures(t)
+}
+
+// QueryPlayers queries the "players" edge of the Team entity.
+func (t *Team) QueryPlayers() *PlayerQuery {
+	return NewTeamClient(t.config).QueryPlayers(t)
 }
 
 // Update returns a builder for updating this Team.
@@ -223,24 +218,7 @@ func (t *Team) Unwrap() *Team {
 func (t *Team) String() string {
 	var builder strings.Builder
 	builder.WriteString("Team(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
-	builder.WriteString("slug=")
-	builder.WriteString(t.Slug)
-	builder.WriteString(", ")
-	builder.WriteString("name=")
-	builder.WriteString(t.Name)
-	builder.WriteString(", ")
-	builder.WriteString("code=")
-	builder.WriteString(t.Code)
-	builder.WriteString(", ")
-	builder.WriteString("founded=")
-	builder.WriteString(fmt.Sprintf("%v", t.Founded))
-	builder.WriteString(", ")
-	builder.WriteString("national=")
-	builder.WriteString(fmt.Sprintf("%v", t.National))
-	builder.WriteString(", ")
-	builder.WriteString("logo=")
-	builder.WriteString(t.Logo)
+	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
 	builder.WriteByte(')')
 	return builder.String()
 }

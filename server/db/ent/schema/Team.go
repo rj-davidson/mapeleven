@@ -3,7 +3,6 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
-	"entgo.io/ent/schema/field"
 )
 
 // Team holds the schema definition for the Team entity.
@@ -13,25 +12,22 @@ type Team struct {
 
 // Fields of the Team.
 func (Team) Fields() []ent.Field {
-	return []ent.Field{
-		field.Int("id").Unique().Immutable(),
-		field.String("slug").Unique().Immutable(),
-		field.String("name"),
-		field.String("code").MaxLen(3),
-		field.Int("founded"),
-		field.Bool("national"),
-		field.String("logo"),
-	}
+	return []ent.Field{}
 }
 
 // Edges of the Team.
 func (Team) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("standings", Standings.Type),
-		edge.From("country", Country.Type).
+		edge.From("season", Season.Type).
 			Ref("teams").
 			Unique(),
+		edge.From("club", Club.Type).
+			Ref("team").
+			Unique().
+			Required(),
+		edge.To("standings", Standings.Type),
 		edge.To("homeFixtures", Fixture.Type),
 		edge.To("awayFixtures", Fixture.Type),
+		edge.To("players", Player.Type),
 	}
 }

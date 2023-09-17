@@ -3,7 +3,7 @@ package serializer
 import (
 	"context"
 	"mapeleven/db/ent"
-	"mapeleven/db/ent/team"
+	"mapeleven/db/ent/club"
 )
 
 type APITeamName struct {
@@ -34,24 +34,24 @@ func NewTeamSerializer(client *ent.Client) *TeamSerializer {
 	return &TeamSerializer{client: client}
 }
 
-func SerializeTeam(team *ent.Team) *APITeam {
+func SerializeTeam(club *ent.Club) *APITeam {
 	return &APITeam{
-		Slug:         team.Slug,
-		Name:         APITeamName{Long: team.Name, Short: team.Code},
-		Badge:        team.Logo,
-		Founded:      team.Founded,
-		NationalTeam: team.National,
+		Slug:         club.Slug,
+		Name:         APITeamName{Long: club.Name, Short: club.Code},
+		Badge:        club.Logo,
+		Founded:      club.Founded,
+		NationalTeam: club.National,
 		Country: APICountry{
-			Code: team.Edges.Country.Code,
-			Name: team.Edges.Country.Name,
-			Flag: team.Edges.Country.Flag,
+			Code: club.Edges.Country.Code,
+			Name: club.Edges.Country.Name,
+			Flag: club.Edges.Country.Flag,
 		},
 	}
 }
 
 func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string) (*APITeam, error) {
-	t, err := ts.client.Team.Query().
-		Where(team.Slug(slug)).
+	t, err := ts.client.Club.Query().
+		Where(club.Slug(slug)).
 		WithCountry().
 		First(ctx)
 
@@ -63,7 +63,7 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string) (*APIT
 }
 
 func (ts *TeamSerializer) GetTeams(ctx context.Context) ([]*APITeam, error) {
-	teams, err := ts.client.Team.Query().
+	teams, err := ts.client.Club.Query().
 		WithCountry().
 		All(ctx)
 

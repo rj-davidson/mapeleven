@@ -32,6 +32,8 @@ const (
 	FieldPhoto = "photo"
 	// EdgeBirth holds the string denoting the birth edge name in mutations.
 	EdgeBirth = "birth"
+	// EdgeTeam holds the string denoting the team edge name in mutations.
+	EdgeTeam = "team"
 	// Table holds the table name of the player in the database.
 	Table = "players"
 	// BirthTable is the table that holds the birth relation/edge.
@@ -41,6 +43,11 @@ const (
 	BirthInverseTable = "births"
 	// BirthColumn is the table column denoting the birth relation/edge.
 	BirthColumn = "birth_player"
+	// TeamTable is the table that holds the team relation/edge. The primary key declared below.
+	TeamTable = "team_players"
+	// TeamInverseTable is the table name for the Team entity.
+	// It exists in this package in order to avoid circular dependency with the "team" package.
+	TeamInverseTable = "teams"
 )
 
 // Columns holds all SQL columns for player fields.
@@ -63,6 +70,12 @@ var ForeignKeys = []string{
 	"birth_player",
 	"country_players",
 }
+
+var (
+	// TeamPrimaryKey and TeamColumn2 are the table columns denoting the
+	// primary key for the team relation (M2M).
+	TeamPrimaryKey = []string{"team_id", "player_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -138,10 +151,31 @@ func ByBirthField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newBirthStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTeamCount orders the results by team count.
+func ByTeamCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTeamStep(), opts...)
+	}
+}
+
+// ByTeam orders the results by team terms.
+func ByTeam(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newBirthStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BirthInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, BirthTable, BirthColumn),
+	)
+}
+func newTeamStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TeamInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, TeamTable, TeamPrimaryKey...),
 	)
 }

@@ -59,7 +59,7 @@ func (ls *LeagueSerializer) GetLeagueBySlug(ctx context.Context, slug string) (*
 		WithSeason(
 			func(q *ent.SeasonQuery) {
 				q.Where(season.CurrentEQ(true))
-				q.WithStandings(func(q *ent.StandingsQuery) { q.WithTeam() })
+				q.WithStandings(func(q *ent.StandingsQuery) { q.WithTeam(func(q *ent.TeamQuery) { q.WithClub() }) })
 			},
 		).
 		Only(ctx)
@@ -77,7 +77,7 @@ func (ls *LeagueSerializer) GetCurrentLeagues(ctx context.Context) ([]*APILeague
 		WithCountry().
 		WithSeason(
 			func(q *ent.SeasonQuery) {
-				q.WithStandings(func(q *ent.StandingsQuery) { q.WithTeam() })
+				q.WithStandings(func(q *ent.StandingsQuery) { q.WithTeam(func(q *ent.TeamQuery) { q.WithClub() }) })
 				q.Where(season.CurrentEQ(true))
 			},
 		).

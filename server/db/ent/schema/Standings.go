@@ -15,12 +15,18 @@ type Standings struct {
 func (Standings) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("rank"),
-		field.Int("points").Default(0),
-		field.Int("goalsDiff").Default(0),
-		field.String("group").Default(""),
-		field.String("form").Default(""),
-		field.String("status").Optional(),
-		field.String("description").Optional(),
+		field.Int("points").
+			Default(0),
+		field.Int("goalsDiff").
+			Default(0),
+		field.String("group").
+			Default(""),
+		field.String("form").
+			Default(""),
+		field.String("status").
+			Optional(),
+		field.String("description").
+			Optional(),
 
 		// All
 		field.Int("allPlayed"),
@@ -46,7 +52,9 @@ func (Standings) Fields() []ent.Field {
 		field.Int("awayGoalsFor"),
 		field.Int("awayGoalsAgainst"),
 
-		field.Time("LastUpdated").Default(time.Now).UpdateDefault(time.Now),
+		field.Time("LastUpdated").
+			Default(time.Now).
+			UpdateDefault(time.Now),
 	}
 }
 

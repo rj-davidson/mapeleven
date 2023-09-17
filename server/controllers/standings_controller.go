@@ -73,12 +73,16 @@ type APIStandingsResponse struct {
 type StandingsController struct {
 	client         *http.Client
 	standingsModel *models.StandingsModel
+	clubController *ClubController
+	teamController *TeamController
 }
 
-func NewStandingsController(standingsModel *models.StandingsModel) *StandingsController {
+func NewStandingsController(standingsModel *models.StandingsModel, clubController *ClubController, teamController *TeamController) *StandingsController {
 	return &StandingsController{
 		client:         &http.Client{},
 		standingsModel: standingsModel,
+		clubController: clubController,
+		teamController: teamController,
 	}
 }
 
@@ -134,10 +138,20 @@ func (sc *StandingsController) parseStandingsResponse(data []byte, s *ent.Season
 		return nil, err
 	}
 
+	// TODO: Add Club Controller to fetch club data
+
 	var leagueStandings []*ent.Standings
 	for _, res := range response.Response {
 		for _, standings := range res.League.Standings {
 			for _, standing := range standings {
+				err := sc.clubController.EnsureClubExists(context.Background(), standing.Team.ID)
+				if err != nil {
+					fmt.Println("Error ensuring club exists: ", err)
+				}
+				err = sc.teamController.EnsureTeamExists(context.Background(), s.Year, res.League.ID, standing.Team.ID)
+				if err != nil {
+					fmt.Println("Error ensuring team exists: ", err)
+				}
 				standingsInput := models.CreateStandingsInput{
 					Rank:             standing.Rank,
 					Description:      standing.Description,
@@ -168,7 +182,7 @@ func (sc *StandingsController) parseStandingsResponse(data []byte, s *ent.Season
 					AwayGoalsAgainst: standing.Away.Goals.Against,
 				}
 
-				standing, err := sc.upsertStandings(context.Background(), &standingsInput)
+				standing, err := sc.upsertStandings(context.Background(), &standingsInput, s.Year, res.League.ID, standing.Team.ID)
 				if err != nil {
 					fmt.Println("Error upserting standings: ", standingsInput.Team, " - ", err)
 				}
@@ -179,11 +193,15 @@ func (sc *StandingsController) parseStandingsResponse(data []byte, s *ent.Season
 	return leagueStandings, nil
 }
 
-func (sc *StandingsController) upsertStandings(ctx context.Context, standingsInput *models.CreateStandingsInput) (*ent.Standings, error) {
-	existingStanding := standingsModel.CheckIfStandingsExist(ctx, standingsInput.Team, standingsInput.SeasonID)
+func (sc *StandingsController) upsertStandings(ctx context.Context, standingsInput *models.CreateStandingsInput, year, apiFootballLeagueId, apiFootballClubId int) (*ent.Standings, error) {
+	existingStanding := sc.standingsModel.CheckIfStandingsExist(ctx, standingsInput.Team, standingsInput.SeasonID)
 
 	if !existingStanding {
-		return sc.standingsModel.CreateStandings(ctx, *standingsInput)
+		t, err := sc.teamController.GetTeam(ctx, year, apiFootballLeagueId, apiFootballClubId)
+		if err != nil {
+			return nil, err
+		}
+		return sc.standingsModel.CreateStandings(ctx, *standingsInput, t)
 	} else {
 		// TODO Implement update
 
