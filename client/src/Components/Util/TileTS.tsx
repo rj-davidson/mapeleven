@@ -1,12 +1,11 @@
-
 import { ReactNode, CSSProperties } from 'react';
 
 interface TileProps {
     children: ReactNode;
-    style?: CSSProperties;
+    sx?: CSSProperties;
 }
 
-export const Tile: React.FC<TileProps> = ({ children, style }) => {
+export const Tile: React.FC<TileProps> = ({ children, sx }) => {
     const tileStyle: CSSProperties = {
         display: 'flex',
         overflow: 'hidden',
@@ -15,7 +14,7 @@ export const Tile: React.FC<TileProps> = ({ children, style }) => {
         borderRadius: '12px',
         padding: '24px',
         width: '100%',
-        ...style,
+        ...sx,
     };
 
     return <div style={tileStyle}>{children}</div>;

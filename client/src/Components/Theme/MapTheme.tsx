@@ -1,4 +1,4 @@
-import {CommonColors, createTheme} from '@mui/material/styles';
+import { CommonColors, createTheme } from '@mui/material/styles';
 
 interface CustomColors extends CommonColors {
     dark0: string;
@@ -47,9 +47,17 @@ const customTheme = createTheme({
         } as CustomColors,
     },
     typography: {
-        fontFamily: 'Poppins'
+        fontFamily: 'Poppins',
     },
     components: {
+        MuiTypography: {
+            styleOverrides: {
+                root: {
+                    fontFamily: 'Poppins',
+                    marginBottom: '0px',
+                },
+            },
+        },
         MuiCard: {
             styleOverrides: {
                 root: {
@@ -64,6 +72,9 @@ const customTheme = createTheme({
                         border: '3px solid var(--focus)',
                         backgroundColor: 'var(--dark2)',
                     },
+                    '& .MuiCardContent-root:last-child': {
+                        paddingBottom: '8px',
+                    },
                 },
             },
         },
@@ -76,7 +87,7 @@ const customTheme = createTheme({
                         transition: 'transform 0.2s ease-in-out', // Add a transition for smooth movement
                         '&:hover': {
                             transform: 'translateX(20px)', // Adjust the translation distance as needed
-                            color: 'white'
+                            color: 'white',
                         },
                     },
                 },
