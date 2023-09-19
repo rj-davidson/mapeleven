@@ -28,6 +28,22 @@ type Tx struct {
 	Season *SeasonClient
 	// Standings is the client for interacting with the Standings builders.
 	Standings *StandingsClient
+	// TSBiggest is the client for interacting with the TSBiggest builders.
+	TSBiggest *TSBiggestClient
+	// TSCards is the client for interacting with the TSCards builders.
+	TSCards *TSCardsClient
+	// TSCleanSheet is the client for interacting with the TSCleanSheet builders.
+	TSCleanSheet *TSCleanSheetClient
+	// TSFailedToScore is the client for interacting with the TSFailedToScore builders.
+	TSFailedToScore *TSFailedToScoreClient
+	// TSFixtures is the client for interacting with the TSFixtures builders.
+	TSFixtures *TSFixturesClient
+	// TSGoals is the client for interacting with the TSGoals builders.
+	TSGoals *TSGoalsClient
+	// TSLineups is the client for interacting with the TSLineups builders.
+	TSLineups *TSLineupsClient
+	// TSPenalty is the client for interacting with the TSPenalty builders.
+	TSPenalty *TSPenaltyClient
 	// Team is the client for interacting with the Team builders.
 	Team *TeamClient
 
@@ -169,6 +185,14 @@ func (tx *Tx) init() {
 	tx.Player = NewPlayerClient(tx.config)
 	tx.Season = NewSeasonClient(tx.config)
 	tx.Standings = NewStandingsClient(tx.config)
+	tx.TSBiggest = NewTSBiggestClient(tx.config)
+	tx.TSCards = NewTSCardsClient(tx.config)
+	tx.TSCleanSheet = NewTSCleanSheetClient(tx.config)
+	tx.TSFailedToScore = NewTSFailedToScoreClient(tx.config)
+	tx.TSFixtures = NewTSFixturesClient(tx.config)
+	tx.TSGoals = NewTSGoalsClient(tx.config)
+	tx.TSLineups = NewTSLineupsClient(tx.config)
+	tx.TSPenalty = NewTSPenaltyClient(tx.config)
 	tx.Team = NewTeamClient(tx.config)
 }
 

@@ -4,6 +4,7 @@ package team
 
 import (
 	"mapeleven/db/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -52,6 +53,141 @@ func IDLT(id int) predicate.Team {
 // IDLTE applies the LTE predicate on the ID field.
 func IDLTE(id int) predicate.Team {
 	return predicate.Team(sql.FieldLTE(FieldID, id))
+}
+
+// Form applies equality check predicate on the "form" field. It's identical to FormEQ.
+func Form(v string) predicate.Team {
+	return predicate.Team(sql.FieldEQ(FieldForm, v))
+}
+
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.Team {
+	return predicate.Team(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// FormEQ applies the EQ predicate on the "form" field.
+func FormEQ(v string) predicate.Team {
+	return predicate.Team(sql.FieldEQ(FieldForm, v))
+}
+
+// FormNEQ applies the NEQ predicate on the "form" field.
+func FormNEQ(v string) predicate.Team {
+	return predicate.Team(sql.FieldNEQ(FieldForm, v))
+}
+
+// FormIn applies the In predicate on the "form" field.
+func FormIn(vs ...string) predicate.Team {
+	return predicate.Team(sql.FieldIn(FieldForm, vs...))
+}
+
+// FormNotIn applies the NotIn predicate on the "form" field.
+func FormNotIn(vs ...string) predicate.Team {
+	return predicate.Team(sql.FieldNotIn(FieldForm, vs...))
+}
+
+// FormGT applies the GT predicate on the "form" field.
+func FormGT(v string) predicate.Team {
+	return predicate.Team(sql.FieldGT(FieldForm, v))
+}
+
+// FormGTE applies the GTE predicate on the "form" field.
+func FormGTE(v string) predicate.Team {
+	return predicate.Team(sql.FieldGTE(FieldForm, v))
+}
+
+// FormLT applies the LT predicate on the "form" field.
+func FormLT(v string) predicate.Team {
+	return predicate.Team(sql.FieldLT(FieldForm, v))
+}
+
+// FormLTE applies the LTE predicate on the "form" field.
+func FormLTE(v string) predicate.Team {
+	return predicate.Team(sql.FieldLTE(FieldForm, v))
+}
+
+// FormContains applies the Contains predicate on the "form" field.
+func FormContains(v string) predicate.Team {
+	return predicate.Team(sql.FieldContains(FieldForm, v))
+}
+
+// FormHasPrefix applies the HasPrefix predicate on the "form" field.
+func FormHasPrefix(v string) predicate.Team {
+	return predicate.Team(sql.FieldHasPrefix(FieldForm, v))
+}
+
+// FormHasSuffix applies the HasSuffix predicate on the "form" field.
+func FormHasSuffix(v string) predicate.Team {
+	return predicate.Team(sql.FieldHasSuffix(FieldForm, v))
+}
+
+// FormIsNil applies the IsNil predicate on the "form" field.
+func FormIsNil() predicate.Team {
+	return predicate.Team(sql.FieldIsNull(FieldForm))
+}
+
+// FormNotNil applies the NotNil predicate on the "form" field.
+func FormNotNil() predicate.Team {
+	return predicate.Team(sql.FieldNotNull(FieldForm))
+}
+
+// FormEqualFold applies the EqualFold predicate on the "form" field.
+func FormEqualFold(v string) predicate.Team {
+	return predicate.Team(sql.FieldEqualFold(FieldForm, v))
+}
+
+// FormContainsFold applies the ContainsFold predicate on the "form" field.
+func FormContainsFold(v string) predicate.Team {
+	return predicate.Team(sql.FieldContainsFold(FieldForm, v))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.Team {
+	return predicate.Team(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.Team {
+	return predicate.Team(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.Team {
+	return predicate.Team(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.Team {
+	return predicate.Team(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.Team {
+	return predicate.Team(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.Team {
+	return predicate.Team(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.Team {
+	return predicate.Team(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.Team {
+	return predicate.Team(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.Team {
+	return predicate.Team(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.Team {
+	return predicate.Team(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasSeason applies the HasEdge predicate on the "season" edge.
@@ -184,6 +320,190 @@ func HasPlayers() predicate.Team {
 func HasPlayersWith(preds ...predicate.Player) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		step := newPlayersStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasBiggestStats applies the HasEdge predicate on the "biggest_stats" edge.
+func HasBiggestStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, BiggestStatsTable, BiggestStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasBiggestStatsWith applies the HasEdge predicate on the "biggest_stats" edge with a given conditions (other predicates).
+func HasBiggestStatsWith(preds ...predicate.TSBiggest) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newBiggestStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCardsStats applies the HasEdge predicate on the "cards_stats" edge.
+func HasCardsStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, CardsStatsTable, CardsStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCardsStatsWith applies the HasEdge predicate on the "cards_stats" edge with a given conditions (other predicates).
+func HasCardsStatsWith(preds ...predicate.TSCards) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newCardsStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasCleanSheetStats applies the HasEdge predicate on the "clean_sheet_stats" edge.
+func HasCleanSheetStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, CleanSheetStatsTable, CleanSheetStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasCleanSheetStatsWith applies the HasEdge predicate on the "clean_sheet_stats" edge with a given conditions (other predicates).
+func HasCleanSheetStatsWith(preds ...predicate.TSCleanSheet) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newCleanSheetStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFailedToScoreStats applies the HasEdge predicate on the "failed_to_score_stats" edge.
+func HasFailedToScoreStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, FailedToScoreStatsTable, FailedToScoreStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFailedToScoreStatsWith applies the HasEdge predicate on the "failed_to_score_stats" edge with a given conditions (other predicates).
+func HasFailedToScoreStatsWith(preds ...predicate.TSFailedToScore) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newFailedToScoreStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFixturesStats applies the HasEdge predicate on the "fixtures_stats" edge.
+func HasFixturesStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, FixturesStatsTable, FixturesStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFixturesStatsWith applies the HasEdge predicate on the "fixtures_stats" edge with a given conditions (other predicates).
+func HasFixturesStatsWith(preds ...predicate.TSFixtures) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newFixturesStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasGoalsStats applies the HasEdge predicate on the "goals_stats" edge.
+func HasGoalsStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, GoalsStatsTable, GoalsStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasGoalsStatsWith applies the HasEdge predicate on the "goals_stats" edge with a given conditions (other predicates).
+func HasGoalsStatsWith(preds ...predicate.TSGoals) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newGoalsStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasLineups applies the HasEdge predicate on the "lineups" edge.
+func HasLineups() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LineupsTable, LineupsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLineupsWith applies the HasEdge predicate on the "lineups" edge with a given conditions (other predicates).
+func HasLineupsWith(preds ...predicate.TSLineups) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newLineupsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPenaltyStats applies the HasEdge predicate on the "penalty_stats" edge.
+func HasPenaltyStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, PenaltyStatsTable, PenaltyStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPenaltyStatsWith applies the HasEdge predicate on the "penalty_stats" edge with a given conditions (other predicates).
+func HasPenaltyStatsWith(preds ...predicate.TSPenalty) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newPenaltyStatsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

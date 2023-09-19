@@ -3,7 +3,7 @@ package controllers
 import (
 	"context"
 	"mapeleven/db/ent"
-	"mapeleven/models"
+	"mapeleven/models/team_models"
 	"net/http"
 )
 
@@ -15,10 +15,10 @@ type TeamIdPackage struct {
 
 type TeamController struct {
 	client    *http.Client
-	teamModel *models.TeamModel
+	teamModel *team_models.TeamModel
 }
 
-func NewTeamController(teamModel *models.TeamModel) *TeamController {
+func NewTeamController(teamModel *team_models.TeamModel) *TeamController {
 	return &TeamController{
 		client:    &http.Client{},
 		teamModel: teamModel,

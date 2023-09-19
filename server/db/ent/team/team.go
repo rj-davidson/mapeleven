@@ -3,6 +3,8 @@
 package team
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -12,6 +14,10 @@ const (
 	Label = "team"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldForm holds the string denoting the form field in the database.
+	FieldForm = "form"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgeSeason holds the string denoting the season edge name in mutations.
 	EdgeSeason = "season"
 	// EdgeClub holds the string denoting the club edge name in mutations.
@@ -24,6 +30,22 @@ const (
 	EdgeAwayFixtures = "awayFixtures"
 	// EdgePlayers holds the string denoting the players edge name in mutations.
 	EdgePlayers = "players"
+	// EdgeBiggestStats holds the string denoting the biggest_stats edge name in mutations.
+	EdgeBiggestStats = "biggest_stats"
+	// EdgeCardsStats holds the string denoting the cards_stats edge name in mutations.
+	EdgeCardsStats = "cards_stats"
+	// EdgeCleanSheetStats holds the string denoting the clean_sheet_stats edge name in mutations.
+	EdgeCleanSheetStats = "clean_sheet_stats"
+	// EdgeFailedToScoreStats holds the string denoting the failed_to_score_stats edge name in mutations.
+	EdgeFailedToScoreStats = "failed_to_score_stats"
+	// EdgeFixturesStats holds the string denoting the fixtures_stats edge name in mutations.
+	EdgeFixturesStats = "fixtures_stats"
+	// EdgeGoalsStats holds the string denoting the goals_stats edge name in mutations.
+	EdgeGoalsStats = "goals_stats"
+	// EdgeLineups holds the string denoting the lineups edge name in mutations.
+	EdgeLineups = "lineups"
+	// EdgePenaltyStats holds the string denoting the penalty_stats edge name in mutations.
+	EdgePenaltyStats = "penalty_stats"
 	// Table holds the table name of the team in the database.
 	Table = "teams"
 	// SeasonTable is the table that holds the season relation/edge.
@@ -66,11 +88,69 @@ const (
 	// PlayersInverseTable is the table name for the Player entity.
 	// It exists in this package in order to avoid circular dependency with the "player" package.
 	PlayersInverseTable = "players"
+	// BiggestStatsTable is the table that holds the biggest_stats relation/edge.
+	BiggestStatsTable = "ts_biggests"
+	// BiggestStatsInverseTable is the table name for the TSBiggest entity.
+	// It exists in this package in order to avoid circular dependency with the "tsbiggest" package.
+	BiggestStatsInverseTable = "ts_biggests"
+	// BiggestStatsColumn is the table column denoting the biggest_stats relation/edge.
+	BiggestStatsColumn = "team_biggest_stats"
+	// CardsStatsTable is the table that holds the cards_stats relation/edge.
+	CardsStatsTable = "ts_cards"
+	// CardsStatsInverseTable is the table name for the TSCards entity.
+	// It exists in this package in order to avoid circular dependency with the "tscards" package.
+	CardsStatsInverseTable = "ts_cards"
+	// CardsStatsColumn is the table column denoting the cards_stats relation/edge.
+	CardsStatsColumn = "team_cards_stats"
+	// CleanSheetStatsTable is the table that holds the clean_sheet_stats relation/edge.
+	CleanSheetStatsTable = "ts_clean_sheets"
+	// CleanSheetStatsInverseTable is the table name for the TSCleanSheet entity.
+	// It exists in this package in order to avoid circular dependency with the "tscleansheet" package.
+	CleanSheetStatsInverseTable = "ts_clean_sheets"
+	// CleanSheetStatsColumn is the table column denoting the clean_sheet_stats relation/edge.
+	CleanSheetStatsColumn = "team_clean_sheet_stats"
+	// FailedToScoreStatsTable is the table that holds the failed_to_score_stats relation/edge.
+	FailedToScoreStatsTable = "ts_failed_to_scores"
+	// FailedToScoreStatsInverseTable is the table name for the TSFailedToScore entity.
+	// It exists in this package in order to avoid circular dependency with the "tsfailedtoscore" package.
+	FailedToScoreStatsInverseTable = "ts_failed_to_scores"
+	// FailedToScoreStatsColumn is the table column denoting the failed_to_score_stats relation/edge.
+	FailedToScoreStatsColumn = "team_failed_to_score_stats"
+	// FixturesStatsTable is the table that holds the fixtures_stats relation/edge.
+	FixturesStatsTable = "ts_fixtures"
+	// FixturesStatsInverseTable is the table name for the TSFixtures entity.
+	// It exists in this package in order to avoid circular dependency with the "tsfixtures" package.
+	FixturesStatsInverseTable = "ts_fixtures"
+	// FixturesStatsColumn is the table column denoting the fixtures_stats relation/edge.
+	FixturesStatsColumn = "team_fixtures_stats"
+	// GoalsStatsTable is the table that holds the goals_stats relation/edge.
+	GoalsStatsTable = "ts_goals"
+	// GoalsStatsInverseTable is the table name for the TSGoals entity.
+	// It exists in this package in order to avoid circular dependency with the "tsgoals" package.
+	GoalsStatsInverseTable = "ts_goals"
+	// GoalsStatsColumn is the table column denoting the goals_stats relation/edge.
+	GoalsStatsColumn = "team_goals_stats"
+	// LineupsTable is the table that holds the lineups relation/edge.
+	LineupsTable = "ts_lineups"
+	// LineupsInverseTable is the table name for the TSLineups entity.
+	// It exists in this package in order to avoid circular dependency with the "tslineups" package.
+	LineupsInverseTable = "ts_lineups"
+	// LineupsColumn is the table column denoting the lineups relation/edge.
+	LineupsColumn = "team_id"
+	// PenaltyStatsTable is the table that holds the penalty_stats relation/edge.
+	PenaltyStatsTable = "ts_penalties"
+	// PenaltyStatsInverseTable is the table name for the TSPenalty entity.
+	// It exists in this package in order to avoid circular dependency with the "tspenalty" package.
+	PenaltyStatsInverseTable = "ts_penalties"
+	// PenaltyStatsColumn is the table column denoting the penalty_stats relation/edge.
+	PenaltyStatsColumn = "team_penalty_stats"
 )
 
 // Columns holds all SQL columns for team fields.
 var Columns = []string{
 	FieldID,
+	FieldForm,
+	FieldLastUpdated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "teams"
@@ -101,12 +181,29 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
+)
+
 // Order defines the ordering method for the Team queries.
 type Order func(*sql.Selector)
 
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
+}
+
+// ByForm orders the results by the form field.
+func ByForm(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldForm, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // BySeasonField orders the results by season field.
@@ -178,6 +275,69 @@ func ByPlayers(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 		sqlgraph.OrderByNeighborTerms(s, newPlayersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByBiggestStatsField orders the results by biggest_stats field.
+func ByBiggestStatsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newBiggestStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByCardsStatsField orders the results by cards_stats field.
+func ByCardsStatsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCardsStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByCleanSheetStatsField orders the results by clean_sheet_stats field.
+func ByCleanSheetStatsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newCleanSheetStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByFailedToScoreStatsField orders the results by failed_to_score_stats field.
+func ByFailedToScoreStatsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFailedToScoreStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByFixturesStatsField orders the results by fixtures_stats field.
+func ByFixturesStatsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFixturesStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByGoalsStatsField orders the results by goals_stats field.
+func ByGoalsStatsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newGoalsStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByLineupsCount orders the results by lineups count.
+func ByLineupsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLineupsStep(), opts...)
+	}
+}
+
+// ByLineups orders the results by lineups terms.
+func ByLineups(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLineupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPenaltyStatsField orders the results by penalty_stats field.
+func ByPenaltyStatsField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPenaltyStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newSeasonStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -218,5 +378,61 @@ func newPlayersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, PlayersTable, PlayersPrimaryKey...),
+	)
+}
+func newBiggestStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(BiggestStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, BiggestStatsTable, BiggestStatsColumn),
+	)
+}
+func newCardsStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CardsStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, CardsStatsTable, CardsStatsColumn),
+	)
+}
+func newCleanSheetStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(CleanSheetStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, CleanSheetStatsTable, CleanSheetStatsColumn),
+	)
+}
+func newFailedToScoreStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FailedToScoreStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, FailedToScoreStatsTable, FailedToScoreStatsColumn),
+	)
+}
+func newFixturesStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FixturesStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, FixturesStatsTable, FixturesStatsColumn),
+	)
+}
+func newGoalsStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(GoalsStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, GoalsStatsTable, GoalsStatsColumn),
+	)
+}
+func newLineupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LineupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LineupsTable, LineupsColumn),
+	)
+}
+func newPenaltyStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PenaltyStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2O, false, PenaltyStatsTable, PenaltyStatsColumn),
 	)
 }

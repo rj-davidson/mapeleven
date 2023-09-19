@@ -7,7 +7,15 @@ import (
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/team"
+	"mapeleven/db/ent/tsbiggest"
+	"mapeleven/db/ent/tscards"
+	"mapeleven/db/ent/tscleansheet"
+	"mapeleven/db/ent/tsfailedtoscore"
+	"mapeleven/db/ent/tsfixtures"
+	"mapeleven/db/ent/tsgoals"
+	"mapeleven/db/ent/tspenalty"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -15,9 +23,13 @@ import (
 
 // Team is the model entity for the Team schema.
 type Team struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Form holds the value of the "form" field.
+	Form string `json:"form,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TeamQuery when eager-loading is set.
 	Edges        TeamEdges `json:"edges"`
@@ -40,9 +52,25 @@ type TeamEdges struct {
 	AwayFixtures []*Fixture `json:"awayFixtures,omitempty"`
 	// Players holds the value of the players edge.
 	Players []*Player `json:"players,omitempty"`
+	// BiggestStats holds the value of the biggest_stats edge.
+	BiggestStats *TSBiggest `json:"biggest_stats,omitempty"`
+	// CardsStats holds the value of the cards_stats edge.
+	CardsStats *TSCards `json:"cards_stats,omitempty"`
+	// CleanSheetStats holds the value of the clean_sheet_stats edge.
+	CleanSheetStats *TSCleanSheet `json:"clean_sheet_stats,omitempty"`
+	// FailedToScoreStats holds the value of the failed_to_score_stats edge.
+	FailedToScoreStats *TSFailedToScore `json:"failed_to_score_stats,omitempty"`
+	// FixturesStats holds the value of the fixtures_stats edge.
+	FixturesStats *TSFixtures `json:"fixtures_stats,omitempty"`
+	// GoalsStats holds the value of the goals_stats edge.
+	GoalsStats *TSGoals `json:"goals_stats,omitempty"`
+	// Lineups holds the value of the lineups edge.
+	Lineups []*TSLineups `json:"lineups,omitempty"`
+	// PenaltyStats holds the value of the penalty_stats edge.
+	PenaltyStats *TSPenalty `json:"penalty_stats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [14]bool
 }
 
 // SeasonOrErr returns the Season value or an error if the edge
@@ -107,6 +135,106 @@ func (e TeamEdges) PlayersOrErr() ([]*Player, error) {
 	return nil, &NotLoadedError{edge: "players"}
 }
 
+// BiggestStatsOrErr returns the BiggestStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) BiggestStatsOrErr() (*TSBiggest, error) {
+	if e.loadedTypes[6] {
+		if e.BiggestStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tsbiggest.Label}
+		}
+		return e.BiggestStats, nil
+	}
+	return nil, &NotLoadedError{edge: "biggest_stats"}
+}
+
+// CardsStatsOrErr returns the CardsStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) CardsStatsOrErr() (*TSCards, error) {
+	if e.loadedTypes[7] {
+		if e.CardsStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tscards.Label}
+		}
+		return e.CardsStats, nil
+	}
+	return nil, &NotLoadedError{edge: "cards_stats"}
+}
+
+// CleanSheetStatsOrErr returns the CleanSheetStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) CleanSheetStatsOrErr() (*TSCleanSheet, error) {
+	if e.loadedTypes[8] {
+		if e.CleanSheetStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tscleansheet.Label}
+		}
+		return e.CleanSheetStats, nil
+	}
+	return nil, &NotLoadedError{edge: "clean_sheet_stats"}
+}
+
+// FailedToScoreStatsOrErr returns the FailedToScoreStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) FailedToScoreStatsOrErr() (*TSFailedToScore, error) {
+	if e.loadedTypes[9] {
+		if e.FailedToScoreStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tsfailedtoscore.Label}
+		}
+		return e.FailedToScoreStats, nil
+	}
+	return nil, &NotLoadedError{edge: "failed_to_score_stats"}
+}
+
+// FixturesStatsOrErr returns the FixturesStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) FixturesStatsOrErr() (*TSFixtures, error) {
+	if e.loadedTypes[10] {
+		if e.FixturesStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tsfixtures.Label}
+		}
+		return e.FixturesStats, nil
+	}
+	return nil, &NotLoadedError{edge: "fixtures_stats"}
+}
+
+// GoalsStatsOrErr returns the GoalsStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) GoalsStatsOrErr() (*TSGoals, error) {
+	if e.loadedTypes[11] {
+		if e.GoalsStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tsgoals.Label}
+		}
+		return e.GoalsStats, nil
+	}
+	return nil, &NotLoadedError{edge: "goals_stats"}
+}
+
+// LineupsOrErr returns the Lineups value or an error if the edge
+// was not loaded in eager-loading.
+func (e TeamEdges) LineupsOrErr() ([]*TSLineups, error) {
+	if e.loadedTypes[12] {
+		return e.Lineups, nil
+	}
+	return nil, &NotLoadedError{edge: "lineups"}
+}
+
+// PenaltyStatsOrErr returns the PenaltyStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e TeamEdges) PenaltyStatsOrErr() (*TSPenalty, error) {
+	if e.loadedTypes[13] {
+		if e.PenaltyStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: tspenalty.Label}
+		}
+		return e.PenaltyStats, nil
+	}
+	return nil, &NotLoadedError{edge: "penalty_stats"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Team) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -114,6 +242,10 @@ func (*Team) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case team.FieldID:
 			values[i] = new(sql.NullInt64)
+		case team.FieldForm:
+			values[i] = new(sql.NullString)
+		case team.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
 		case team.ForeignKeys[0]: // club_team
 			values[i] = new(sql.NullInt64)
 		case team.ForeignKeys[1]: // season_teams
@@ -139,6 +271,18 @@ func (t *Team) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			t.ID = int(value.Int64)
+		case team.FieldForm:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field form", values[i])
+			} else if value.Valid {
+				t.Form = value.String
+			}
+		case team.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				t.LastUpdated = value.Time
+			}
 		case team.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field club_team", value)
@@ -196,6 +340,46 @@ func (t *Team) QueryPlayers() *PlayerQuery {
 	return NewTeamClient(t.config).QueryPlayers(t)
 }
 
+// QueryBiggestStats queries the "biggest_stats" edge of the Team entity.
+func (t *Team) QueryBiggestStats() *TSBiggestQuery {
+	return NewTeamClient(t.config).QueryBiggestStats(t)
+}
+
+// QueryCardsStats queries the "cards_stats" edge of the Team entity.
+func (t *Team) QueryCardsStats() *TSCardsQuery {
+	return NewTeamClient(t.config).QueryCardsStats(t)
+}
+
+// QueryCleanSheetStats queries the "clean_sheet_stats" edge of the Team entity.
+func (t *Team) QueryCleanSheetStats() *TSCleanSheetQuery {
+	return NewTeamClient(t.config).QueryCleanSheetStats(t)
+}
+
+// QueryFailedToScoreStats queries the "failed_to_score_stats" edge of the Team entity.
+func (t *Team) QueryFailedToScoreStats() *TSFailedToScoreQuery {
+	return NewTeamClient(t.config).QueryFailedToScoreStats(t)
+}
+
+// QueryFixturesStats queries the "fixtures_stats" edge of the Team entity.
+func (t *Team) QueryFixturesStats() *TSFixturesQuery {
+	return NewTeamClient(t.config).QueryFixturesStats(t)
+}
+
+// QueryGoalsStats queries the "goals_stats" edge of the Team entity.
+func (t *Team) QueryGoalsStats() *TSGoalsQuery {
+	return NewTeamClient(t.config).QueryGoalsStats(t)
+}
+
+// QueryLineups queries the "lineups" edge of the Team entity.
+func (t *Team) QueryLineups() *TSLineupsQuery {
+	return NewTeamClient(t.config).QueryLineups(t)
+}
+
+// QueryPenaltyStats queries the "penalty_stats" edge of the Team entity.
+func (t *Team) QueryPenaltyStats() *TSPenaltyQuery {
+	return NewTeamClient(t.config).QueryPenaltyStats(t)
+}
+
 // Update returns a builder for updating this Team.
 // Note that you need to call Team.Unwrap() before calling this method if this Team
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -218,7 +402,12 @@ func (t *Team) Unwrap() *Team {
 func (t *Team) String() string {
 	var builder strings.Builder
 	builder.WriteString("Team(")
-	builder.WriteString(fmt.Sprintf("id=%v", t.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", t.ID))
+	builder.WriteString("form=")
+	builder.WriteString(t.Form)
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(t.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

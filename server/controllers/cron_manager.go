@@ -6,6 +6,8 @@ import (
 	"log"
 	"mapeleven/db/ent"
 	"mapeleven/models"
+	"mapeleven/models/team_models"
+	"mapeleven/models/team_models/team_stats"
 	"time"
 )
 
@@ -18,7 +20,8 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	countryModel := models.NewCountryModel(client)
 	leagueModel := models.NewLeagueModel(client)
 	clubModel := models.NewClubModel(client)
-	teamModel := models.NewTeamModel(client)
+	teamModel := team_models.NewTeamModel(client)
+	teamStatsModel := team_stats.NewTeamStatsModel(client)
 	standingsModel := models.NewStandingsModel(client)
 	fixturesModel := models.NewFixtureModel(client)
 
@@ -34,6 +37,9 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 		// Fixtures Initialization
 		fetchFixtures(fixturesModel, leagueModel)
+
+		// Team Stats Initialization
+		fetchTeamStats(teamModel, teamStatsModel)
 	}
 
 	if runScheduler {
@@ -42,11 +48,10 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 		s.Every(14).Days().At("00:00").Do(fetchLeagues, leagueModel)
 		s.Every(14).Days().At("00:00").Do(fetchStandings, standingsModel, clubModel)
 		s.Every(14).Days().At("00:00").Do(fetchFixtures, fixturesModel)
-		//s.Every(14).Days().At("00:00").Do(fetchTeamSeasons, teamSeasonsModel)
+		s.Every(14).Days().At("00:00").Do(fetchTeamStats, teamModel, teamStatsModel)
 	}
 
 	if devRun {
-
 	}
 }
 
@@ -78,7 +83,7 @@ func fetchLeagues(leagueModel *models.LeagueModel, seasonModel *models.SeasonMod
 }
 
 // Fetches standings from API and saves them to the database
-func fetchStandings(standingsModel *models.StandingsModel, clubModel *models.ClubModel, leagueModel *models.LeagueModel, teamModel *models.TeamModel) {
+func fetchStandings(standingsModel *models.StandingsModel, clubModel *models.ClubModel, leagueModel *models.LeagueModel, teamModel *team_models.TeamModel) {
 	clubController := NewClubController(clubModel)
 	teamController := NewTeamController(teamModel)
 	standingsController := NewStandingsController(standingsModel, clubController, teamController)
@@ -94,5 +99,18 @@ func fetchFixtures(fixturesModel *models.FixtureModel, leagueModel *models.Leagu
 	err := fixtureController.InitializeFixtures(leagueModel, context.Background())
 	if err != nil {
 		log.Printf("error initializing fixtures: %v", err)
+	}
+}
+
+func fetchTeamStats(teamModel *team_models.TeamModel, teamStatsModel *team_stats.TeamStatsModel) {
+	teamStatsController := NewTeamStatsController(teamStatsModel)
+	teams, err := teamModel.ListAll(context.Background())
+	if err != nil {
+		log.Printf("error fetching teams: %v", err)
+		return
+	}
+	err = teamStatsController.InitializeFixtures(teams, context.Background())
+	if err != nil {
+		log.Printf("error initializing team stats: %v", err)
 	}
 }

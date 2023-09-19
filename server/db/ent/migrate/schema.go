@@ -238,9 +238,283 @@ var (
 			},
 		},
 	}
+	// TsBiggestsColumns holds the columns for the "ts_biggests" table.
+	TsBiggestsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "streak_wins", Type: field.TypeInt, Nullable: true},
+		{Name: "streak_losses", Type: field.TypeInt, Nullable: true},
+		{Name: "streak_draws", Type: field.TypeInt, Nullable: true},
+		{Name: "wins_home", Type: field.TypeString, Nullable: true},
+		{Name: "wins_away", Type: field.TypeString, Nullable: true},
+		{Name: "losses_home", Type: field.TypeString, Nullable: true},
+		{Name: "losses_away", Type: field.TypeString, Nullable: true},
+		{Name: "goals_for_home", Type: field.TypeInt, Nullable: true},
+		{Name: "goals_for_away", Type: field.TypeInt, Nullable: true},
+		{Name: "goals_against_home", Type: field.TypeInt, Nullable: true},
+		{Name: "goals_against_away", Type: field.TypeInt, Nullable: true},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_biggest_stats", Type: field.TypeInt, Unique: true},
+	}
+	// TsBiggestsTable holds the schema information for the "ts_biggests" table.
+	TsBiggestsTable = &schema.Table{
+		Name:       "ts_biggests",
+		Columns:    TsBiggestsColumns,
+		PrimaryKey: []*schema.Column{TsBiggestsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ts_biggests_teams_biggest_stats",
+				Columns:    []*schema.Column{TsBiggestsColumns[13]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TsCardsColumns holds the columns for the "ts_cards" table.
+	TsCardsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "yellow0to15total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "yellow0to15percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "yellow16to30total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "yellow16to30percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "yellow31to45total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "yellow31to45percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "yellow46to60total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "yellow46to60percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "yellow61to75total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "yellow61to75percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "yellow76to90total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "yellow76to90percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "yellow91to105total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "yellow91to105percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "yellow106to120total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "yellow106to120percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "red0to15total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "red0to15percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "red16to30total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "red16to30percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "red31to45total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "red31to45percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "red46to60total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "red46to60percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "red61to75total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "red61to75percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "red76to90total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "red76to90percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "red91to105total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "red91to105percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "red106to120total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "red106to120percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_cards_stats", Type: field.TypeInt, Unique: true},
+	}
+	// TsCardsTable holds the schema information for the "ts_cards" table.
+	TsCardsTable = &schema.Table{
+		Name:       "ts_cards",
+		Columns:    TsCardsColumns,
+		PrimaryKey: []*schema.Column{TsCardsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ts_cards_teams_cards_stats",
+				Columns:    []*schema.Column{TsCardsColumns[34]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TsCleanSheetsColumns holds the columns for the "ts_clean_sheets" table.
+	TsCleanSheetsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "home", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "away", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_clean_sheet_stats", Type: field.TypeInt, Unique: true},
+	}
+	// TsCleanSheetsTable holds the schema information for the "ts_clean_sheets" table.
+	TsCleanSheetsTable = &schema.Table{
+		Name:       "ts_clean_sheets",
+		Columns:    TsCleanSheetsColumns,
+		PrimaryKey: []*schema.Column{TsCleanSheetsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ts_clean_sheets_teams_clean_sheet_stats",
+				Columns:    []*schema.Column{TsCleanSheetsColumns[5]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TsFailedToScoresColumns holds the columns for the "ts_failed_to_scores" table.
+	TsFailedToScoresColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "home", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "away", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_failed_to_score_stats", Type: field.TypeInt, Unique: true},
+	}
+	// TsFailedToScoresTable holds the schema information for the "ts_failed_to_scores" table.
+	TsFailedToScoresTable = &schema.Table{
+		Name:       "ts_failed_to_scores",
+		Columns:    TsFailedToScoresColumns,
+		PrimaryKey: []*schema.Column{TsFailedToScoresColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ts_failed_to_scores_teams_failed_to_score_stats",
+				Columns:    []*schema.Column{TsFailedToScoresColumns[5]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TsFixturesColumns holds the columns for the "ts_fixtures" table.
+	TsFixturesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "played_home", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "played_away", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "played_total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "wins_home", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "wins_away", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "wins_total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "draws_home", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "draws_away", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "draws_total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "losses_home", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "losses_away", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "losses_total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_fixtures_stats", Type: field.TypeInt, Unique: true},
+	}
+	// TsFixturesTable holds the schema information for the "ts_fixtures" table.
+	TsFixturesTable = &schema.Table{
+		Name:       "ts_fixtures",
+		Columns:    TsFixturesColumns,
+		PrimaryKey: []*schema.Column{TsFixturesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ts_fixtures_teams_fixtures_stats",
+				Columns:    []*schema.Column{TsFixturesColumns[14]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TsGoalsColumns holds the columns for the "ts_goals" table.
+	TsGoalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "goals_for_total_home", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_total_away", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_average_home", Type: field.TypeString, Nullable: true, Default: "0.00"},
+		{Name: "goals_for_average_away", Type: field.TypeString, Nullable: true, Default: "0.00"},
+		{Name: "goals_for_average_total", Type: field.TypeString, Nullable: true, Default: "0.00"},
+		{Name: "goals_for_minute0to15total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_minute0to15percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_for_minute16to30total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_minute16to30percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_for_minute31to45total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_minute31to45percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_for_minute46to60total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_minute46to60percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_for_minute61to75total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_minute61to75percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_for_minute76to90total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_minute76to90percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_for_minute91to105total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_minute91to105percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_for_minute106to120total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_for_minute106to120percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_against_total_home", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_total_away", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_average_home", Type: field.TypeString, Nullable: true, Default: "0.00"},
+		{Name: "goals_against_average_away", Type: field.TypeString, Nullable: true, Default: "0.00"},
+		{Name: "goals_against_average_total", Type: field.TypeString, Nullable: true, Default: "0.00"},
+		{Name: "goals_against_minute0to15total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_minute0to15percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_against_minute16to30total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_minute16to30percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_against_minute31to45total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_minute31to45percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_against_minute46to60total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_minute46to60percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_against_minute61to75total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_minute61to75percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_against_minute76to90total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_minute76to90percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_against_minute91to105total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_minute91to105percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "goals_against_minute106to120total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "goals_against_minute106to120percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_goals_stats", Type: field.TypeInt, Unique: true},
+	}
+	// TsGoalsTable holds the schema information for the "ts_goals" table.
+	TsGoalsTable = &schema.Table{
+		Name:       "ts_goals",
+		Columns:    TsGoalsColumns,
+		PrimaryKey: []*schema.Column{TsGoalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ts_goals_teams_goals_stats",
+				Columns:    []*schema.Column{TsGoalsColumns[46]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TsLineupsColumns holds the columns for the "ts_lineups" table.
+	TsLineupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "formation", Type: field.TypeString},
+		{Name: "played", Type: field.TypeInt},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_id", Type: field.TypeInt},
+	}
+	// TsLineupsTable holds the schema information for the "ts_lineups" table.
+	TsLineupsTable = &schema.Table{
+		Name:       "ts_lineups",
+		Columns:    TsLineupsColumns,
+		PrimaryKey: []*schema.Column{TsLineupsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ts_lineups_teams_lineups",
+				Columns:    []*schema.Column{TsLineupsColumns[4]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// TsPenaltiesColumns holds the columns for the "ts_penalties" table.
+	TsPenaltiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "scored_total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "missed_total", Type: field.TypeInt, Nullable: true, Default: 0},
+		{Name: "scored_percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "missed_percentage", Type: field.TypeString, Nullable: true, Default: "0%"},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_penalty_stats", Type: field.TypeInt, Unique: true},
+	}
+	// TsPenaltiesTable holds the schema information for the "ts_penalties" table.
+	TsPenaltiesTable = &schema.Table{
+		Name:       "ts_penalties",
+		Columns:    TsPenaltiesColumns,
+		PrimaryKey: []*schema.Column{TsPenaltiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ts_penalties_teams_penalty_stats",
+				Columns:    []*schema.Column{TsPenaltiesColumns[7]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// TeamsColumns holds the columns for the "teams" table.
 	TeamsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "form", Type: field.TypeString, Nullable: true},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "club_team", Type: field.TypeInt},
 		{Name: "season_teams", Type: field.TypeInt, Nullable: true},
 	}
@@ -252,13 +526,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "teams_clubs_team",
-				Columns:    []*schema.Column{TeamsColumns[1]},
+				Columns:    []*schema.Column{TeamsColumns[3]},
 				RefColumns: []*schema.Column{ClubsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "teams_seasons_teams",
-				Columns:    []*schema.Column{TeamsColumns[2]},
+				Columns:    []*schema.Column{TeamsColumns[4]},
 				RefColumns: []*schema.Column{SeasonsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -299,6 +573,14 @@ var (
 		PlayersTable,
 		SeasonsTable,
 		StandingsTable,
+		TsBiggestsTable,
+		TsCardsTable,
+		TsCleanSheetsTable,
+		TsFailedToScoresTable,
+		TsFixturesTable,
+		TsGoalsTable,
+		TsLineupsTable,
+		TsPenaltiesTable,
 		TeamsTable,
 		TeamPlayersTable,
 	}
@@ -315,6 +597,14 @@ func init() {
 	SeasonsTable.ForeignKeys[0].RefTable = LeaguesTable
 	StandingsTable.ForeignKeys[0].RefTable = SeasonsTable
 	StandingsTable.ForeignKeys[1].RefTable = TeamsTable
+	TsBiggestsTable.ForeignKeys[0].RefTable = TeamsTable
+	TsCardsTable.ForeignKeys[0].RefTable = TeamsTable
+	TsCleanSheetsTable.ForeignKeys[0].RefTable = TeamsTable
+	TsFailedToScoresTable.ForeignKeys[0].RefTable = TeamsTable
+	TsFixturesTable.ForeignKeys[0].RefTable = TeamsTable
+	TsGoalsTable.ForeignKeys[0].RefTable = TeamsTable
+	TsLineupsTable.ForeignKeys[0].RefTable = TeamsTable
+	TsPenaltiesTable.ForeignKeys[0].RefTable = TeamsTable
 	TeamsTable.ForeignKeys[0].RefTable = ClubsTable
 	TeamsTable.ForeignKeys[1].RefTable = SeasonsTable
 	TeamPlayersTable.ForeignKeys[0].RefTable = TeamsTable

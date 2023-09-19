@@ -12,6 +12,15 @@ import (
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
+	"mapeleven/db/ent/tsbiggest"
+	"mapeleven/db/ent/tscards"
+	"mapeleven/db/ent/tscleansheet"
+	"mapeleven/db/ent/tsfailedtoscore"
+	"mapeleven/db/ent/tsfixtures"
+	"mapeleven/db/ent/tsgoals"
+	"mapeleven/db/ent/tslineups"
+	"mapeleven/db/ent/tspenalty"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -22,6 +31,34 @@ type TeamCreate struct {
 	config
 	mutation *TeamMutation
 	hooks    []Hook
+}
+
+// SetForm sets the "form" field.
+func (tc *TeamCreate) SetForm(s string) *TeamCreate {
+	tc.mutation.SetForm(s)
+	return tc
+}
+
+// SetNillableForm sets the "form" field if the given value is not nil.
+func (tc *TeamCreate) SetNillableForm(s *string) *TeamCreate {
+	if s != nil {
+		tc.SetForm(*s)
+	}
+	return tc
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (tc *TeamCreate) SetLastUpdated(t time.Time) *TeamCreate {
+	tc.mutation.SetLastUpdated(t)
+	return tc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (tc *TeamCreate) SetNillableLastUpdated(t *time.Time) *TeamCreate {
+	if t != nil {
+		tc.SetLastUpdated(*t)
+	}
+	return tc
 }
 
 // SetSeasonID sets the "season" edge to the Season entity by ID.
@@ -114,6 +151,154 @@ func (tc *TeamCreate) AddPlayers(p ...*Player) *TeamCreate {
 	return tc.AddPlayerIDs(ids...)
 }
 
+// SetBiggestStatsID sets the "biggest_stats" edge to the TSBiggest entity by ID.
+func (tc *TeamCreate) SetBiggestStatsID(id int) *TeamCreate {
+	tc.mutation.SetBiggestStatsID(id)
+	return tc
+}
+
+// SetNillableBiggestStatsID sets the "biggest_stats" edge to the TSBiggest entity by ID if the given value is not nil.
+func (tc *TeamCreate) SetNillableBiggestStatsID(id *int) *TeamCreate {
+	if id != nil {
+		tc = tc.SetBiggestStatsID(*id)
+	}
+	return tc
+}
+
+// SetBiggestStats sets the "biggest_stats" edge to the TSBiggest entity.
+func (tc *TeamCreate) SetBiggestStats(t *TSBiggest) *TeamCreate {
+	return tc.SetBiggestStatsID(t.ID)
+}
+
+// SetCardsStatsID sets the "cards_stats" edge to the TSCards entity by ID.
+func (tc *TeamCreate) SetCardsStatsID(id int) *TeamCreate {
+	tc.mutation.SetCardsStatsID(id)
+	return tc
+}
+
+// SetNillableCardsStatsID sets the "cards_stats" edge to the TSCards entity by ID if the given value is not nil.
+func (tc *TeamCreate) SetNillableCardsStatsID(id *int) *TeamCreate {
+	if id != nil {
+		tc = tc.SetCardsStatsID(*id)
+	}
+	return tc
+}
+
+// SetCardsStats sets the "cards_stats" edge to the TSCards entity.
+func (tc *TeamCreate) SetCardsStats(t *TSCards) *TeamCreate {
+	return tc.SetCardsStatsID(t.ID)
+}
+
+// SetCleanSheetStatsID sets the "clean_sheet_stats" edge to the TSCleanSheet entity by ID.
+func (tc *TeamCreate) SetCleanSheetStatsID(id int) *TeamCreate {
+	tc.mutation.SetCleanSheetStatsID(id)
+	return tc
+}
+
+// SetNillableCleanSheetStatsID sets the "clean_sheet_stats" edge to the TSCleanSheet entity by ID if the given value is not nil.
+func (tc *TeamCreate) SetNillableCleanSheetStatsID(id *int) *TeamCreate {
+	if id != nil {
+		tc = tc.SetCleanSheetStatsID(*id)
+	}
+	return tc
+}
+
+// SetCleanSheetStats sets the "clean_sheet_stats" edge to the TSCleanSheet entity.
+func (tc *TeamCreate) SetCleanSheetStats(t *TSCleanSheet) *TeamCreate {
+	return tc.SetCleanSheetStatsID(t.ID)
+}
+
+// SetFailedToScoreStatsID sets the "failed_to_score_stats" edge to the TSFailedToScore entity by ID.
+func (tc *TeamCreate) SetFailedToScoreStatsID(id int) *TeamCreate {
+	tc.mutation.SetFailedToScoreStatsID(id)
+	return tc
+}
+
+// SetNillableFailedToScoreStatsID sets the "failed_to_score_stats" edge to the TSFailedToScore entity by ID if the given value is not nil.
+func (tc *TeamCreate) SetNillableFailedToScoreStatsID(id *int) *TeamCreate {
+	if id != nil {
+		tc = tc.SetFailedToScoreStatsID(*id)
+	}
+	return tc
+}
+
+// SetFailedToScoreStats sets the "failed_to_score_stats" edge to the TSFailedToScore entity.
+func (tc *TeamCreate) SetFailedToScoreStats(t *TSFailedToScore) *TeamCreate {
+	return tc.SetFailedToScoreStatsID(t.ID)
+}
+
+// SetFixturesStatsID sets the "fixtures_stats" edge to the TSFixtures entity by ID.
+func (tc *TeamCreate) SetFixturesStatsID(id int) *TeamCreate {
+	tc.mutation.SetFixturesStatsID(id)
+	return tc
+}
+
+// SetNillableFixturesStatsID sets the "fixtures_stats" edge to the TSFixtures entity by ID if the given value is not nil.
+func (tc *TeamCreate) SetNillableFixturesStatsID(id *int) *TeamCreate {
+	if id != nil {
+		tc = tc.SetFixturesStatsID(*id)
+	}
+	return tc
+}
+
+// SetFixturesStats sets the "fixtures_stats" edge to the TSFixtures entity.
+func (tc *TeamCreate) SetFixturesStats(t *TSFixtures) *TeamCreate {
+	return tc.SetFixturesStatsID(t.ID)
+}
+
+// SetGoalsStatsID sets the "goals_stats" edge to the TSGoals entity by ID.
+func (tc *TeamCreate) SetGoalsStatsID(id int) *TeamCreate {
+	tc.mutation.SetGoalsStatsID(id)
+	return tc
+}
+
+// SetNillableGoalsStatsID sets the "goals_stats" edge to the TSGoals entity by ID if the given value is not nil.
+func (tc *TeamCreate) SetNillableGoalsStatsID(id *int) *TeamCreate {
+	if id != nil {
+		tc = tc.SetGoalsStatsID(*id)
+	}
+	return tc
+}
+
+// SetGoalsStats sets the "goals_stats" edge to the TSGoals entity.
+func (tc *TeamCreate) SetGoalsStats(t *TSGoals) *TeamCreate {
+	return tc.SetGoalsStatsID(t.ID)
+}
+
+// AddLineupIDs adds the "lineups" edge to the TSLineups entity by IDs.
+func (tc *TeamCreate) AddLineupIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddLineupIDs(ids...)
+	return tc
+}
+
+// AddLineups adds the "lineups" edges to the TSLineups entity.
+func (tc *TeamCreate) AddLineups(t ...*TSLineups) *TeamCreate {
+	ids := make([]int, len(t))
+	for i := range t {
+		ids[i] = t[i].ID
+	}
+	return tc.AddLineupIDs(ids...)
+}
+
+// SetPenaltyStatsID sets the "penalty_stats" edge to the TSPenalty entity by ID.
+func (tc *TeamCreate) SetPenaltyStatsID(id int) *TeamCreate {
+	tc.mutation.SetPenaltyStatsID(id)
+	return tc
+}
+
+// SetNillablePenaltyStatsID sets the "penalty_stats" edge to the TSPenalty entity by ID if the given value is not nil.
+func (tc *TeamCreate) SetNillablePenaltyStatsID(id *int) *TeamCreate {
+	if id != nil {
+		tc = tc.SetPenaltyStatsID(*id)
+	}
+	return tc
+}
+
+// SetPenaltyStats sets the "penalty_stats" edge to the TSPenalty entity.
+func (tc *TeamCreate) SetPenaltyStats(t *TSPenalty) *TeamCreate {
+	return tc.SetPenaltyStatsID(t.ID)
+}
+
 // Mutation returns the TeamMutation object of the builder.
 func (tc *TeamCreate) Mutation() *TeamMutation {
 	return tc.mutation
@@ -121,6 +306,7 @@ func (tc *TeamCreate) Mutation() *TeamMutation {
 
 // Save creates the Team in the database.
 func (tc *TeamCreate) Save(ctx context.Context) (*Team, error) {
+	tc.defaults()
 	return withHooks[*Team, TeamMutation](ctx, tc.sqlSave, tc.mutation, tc.hooks)
 }
 
@@ -143,6 +329,14 @@ func (tc *TeamCreate) Exec(ctx context.Context) error {
 func (tc *TeamCreate) ExecX(ctx context.Context) {
 	if err := tc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (tc *TeamCreate) defaults() {
+	if _, ok := tc.mutation.LastUpdated(); !ok {
+		v := team.DefaultLastUpdated()
+		tc.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -177,6 +371,14 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 		_node = &Team{config: tc.config}
 		_spec = sqlgraph.NewCreateSpec(team.Table, sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt))
 	)
+	if value, ok := tc.mutation.Form(); ok {
+		_spec.SetField(team.FieldForm, field.TypeString, value)
+		_node.Form = value
+	}
+	if value, ok := tc.mutation.LastUpdated(); ok {
+		_spec.SetField(team.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
+	}
 	if nodes := tc.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -275,6 +477,134 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := tc.mutation.BiggestStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   team.BiggestStatsTable,
+			Columns: []string{team.BiggestStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tsbiggest.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.CardsStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   team.CardsStatsTable,
+			Columns: []string{team.CardsStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tscards.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.CleanSheetStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   team.CleanSheetStatsTable,
+			Columns: []string{team.CleanSheetStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tscleansheet.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.FailedToScoreStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   team.FailedToScoreStatsTable,
+			Columns: []string{team.FailedToScoreStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tsfailedtoscore.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.FixturesStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   team.FixturesStatsTable,
+			Columns: []string{team.FixturesStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tsfixtures.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.GoalsStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   team.GoalsStatsTable,
+			Columns: []string{team.GoalsStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tsgoals.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.LineupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.LineupsTable,
+			Columns: []string{team.LineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tslineups.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.PenaltyStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   team.PenaltyStatsTable,
+			Columns: []string{team.PenaltyStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(tspenalty.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	return _node, _spec
 }
 
@@ -292,6 +622,7 @@ func (tcb *TeamCreateBulk) Save(ctx context.Context) ([]*Team, error) {
 	for i := range tcb.builders {
 		func(i int, root context.Context) {
 			builder := tcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*TeamMutation)
 				if !ok {

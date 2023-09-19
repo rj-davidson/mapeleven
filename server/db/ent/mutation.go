@@ -16,6 +16,14 @@ import (
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
+	"mapeleven/db/ent/tsbiggest"
+	"mapeleven/db/ent/tscards"
+	"mapeleven/db/ent/tscleansheet"
+	"mapeleven/db/ent/tsfailedtoscore"
+	"mapeleven/db/ent/tsfixtures"
+	"mapeleven/db/ent/tsgoals"
+	"mapeleven/db/ent/tslineups"
+	"mapeleven/db/ent/tspenalty"
 	"sync"
 	"time"
 
@@ -32,15 +40,23 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeBirth     = "Birth"
-	TypeClub      = "Club"
-	TypeCountry   = "Country"
-	TypeFixture   = "Fixture"
-	TypeLeague    = "League"
-	TypePlayer    = "Player"
-	TypeSeason    = "Season"
-	TypeStandings = "Standings"
-	TypeTeam      = "Team"
+	TypeBirth           = "Birth"
+	TypeClub            = "Club"
+	TypeCountry         = "Country"
+	TypeFixture         = "Fixture"
+	TypeLeague          = "League"
+	TypePlayer          = "Player"
+	TypeSeason          = "Season"
+	TypeStandings       = "Standings"
+	TypeTSBiggest       = "TSBiggest"
+	TypeTSCards         = "TSCards"
+	TypeTSCleanSheet    = "TSCleanSheet"
+	TypeTSFailedToScore = "TSFailedToScore"
+	TypeTSFixtures      = "TSFixtures"
+	TypeTSGoals         = "TSGoals"
+	TypeTSLineups       = "TSLineups"
+	TypeTSPenalty       = "TSPenalty"
+	TypeTeam            = "Team"
 )
 
 // BirthMutation represents an operation that mutates the Birth nodes in the graph.
@@ -8603,32 +8619,13850 @@ func (m *StandingsMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Standings edge %s", name)
 }
 
-// TeamMutation represents an operation that mutates the Team nodes in the graph.
-type TeamMutation struct {
+// TSBiggestMutation represents an operation that mutates the TSBiggest nodes in the graph.
+type TSBiggestMutation struct {
 	config
 	op                  Op
 	typ                 string
 	id                  *int
+	streakWins          *int
+	addstreakWins       *int
+	streakLosses        *int
+	addstreakLosses     *int
+	streakDraws         *int
+	addstreakDraws      *int
+	winsHome            *string
+	winsAway            *string
+	lossesHome          *string
+	lossesAway          *string
+	goalsForHome        *int
+	addgoalsForHome     *int
+	goalsForAway        *int
+	addgoalsForAway     *int
+	goalsAgainstHome    *int
+	addgoalsAgainstHome *int
+	goalsAgainstAway    *int
+	addgoalsAgainstAway *int
+	lastUpdated         *time.Time
 	clearedFields       map[string]struct{}
-	season              *int
-	clearedseason       bool
-	club                *int
-	clearedclub         bool
-	standings           map[int]struct{}
-	removedstandings    map[int]struct{}
-	clearedstandings    bool
-	homeFixtures        map[int]struct{}
-	removedhomeFixtures map[int]struct{}
-	clearedhomeFixtures bool
-	awayFixtures        map[int]struct{}
-	removedawayFixtures map[int]struct{}
-	clearedawayFixtures bool
-	players             map[int]struct{}
-	removedplayers      map[int]struct{}
-	clearedplayers      bool
+	team                *int
+	clearedteam         bool
 	done                bool
-	oldValue            func(context.Context) (*Team, error)
-	predicates          []predicate.Team
+	oldValue            func(context.Context) (*TSBiggest, error)
+	predicates          []predicate.TSBiggest
+}
+
+var _ ent.Mutation = (*TSBiggestMutation)(nil)
+
+// tsbiggestOption allows management of the mutation configuration using functional options.
+type tsbiggestOption func(*TSBiggestMutation)
+
+// newTSBiggestMutation creates new mutation for the TSBiggest entity.
+func newTSBiggestMutation(c config, op Op, opts ...tsbiggestOption) *TSBiggestMutation {
+	m := &TSBiggestMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTSBiggest,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTSBiggestID sets the ID field of the mutation.
+func withTSBiggestID(id int) tsbiggestOption {
+	return func(m *TSBiggestMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TSBiggest
+		)
+		m.oldValue = func(ctx context.Context) (*TSBiggest, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TSBiggest.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTSBiggest sets the old TSBiggest of the mutation.
+func withTSBiggest(node *TSBiggest) tsbiggestOption {
+	return func(m *TSBiggestMutation) {
+		m.oldValue = func(context.Context) (*TSBiggest, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TSBiggestMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TSBiggestMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TSBiggestMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TSBiggestMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TSBiggest.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetStreakWins sets the "streakWins" field.
+func (m *TSBiggestMutation) SetStreakWins(i int) {
+	m.streakWins = &i
+	m.addstreakWins = nil
+}
+
+// StreakWins returns the value of the "streakWins" field in the mutation.
+func (m *TSBiggestMutation) StreakWins() (r int, exists bool) {
+	v := m.streakWins
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStreakWins returns the old "streakWins" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldStreakWins(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStreakWins is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStreakWins requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStreakWins: %w", err)
+	}
+	return oldValue.StreakWins, nil
+}
+
+// AddStreakWins adds i to the "streakWins" field.
+func (m *TSBiggestMutation) AddStreakWins(i int) {
+	if m.addstreakWins != nil {
+		*m.addstreakWins += i
+	} else {
+		m.addstreakWins = &i
+	}
+}
+
+// AddedStreakWins returns the value that was added to the "streakWins" field in this mutation.
+func (m *TSBiggestMutation) AddedStreakWins() (r int, exists bool) {
+	v := m.addstreakWins
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStreakWins clears the value of the "streakWins" field.
+func (m *TSBiggestMutation) ClearStreakWins() {
+	m.streakWins = nil
+	m.addstreakWins = nil
+	m.clearedFields[tsbiggest.FieldStreakWins] = struct{}{}
+}
+
+// StreakWinsCleared returns if the "streakWins" field was cleared in this mutation.
+func (m *TSBiggestMutation) StreakWinsCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldStreakWins]
+	return ok
+}
+
+// ResetStreakWins resets all changes to the "streakWins" field.
+func (m *TSBiggestMutation) ResetStreakWins() {
+	m.streakWins = nil
+	m.addstreakWins = nil
+	delete(m.clearedFields, tsbiggest.FieldStreakWins)
+}
+
+// SetStreakLosses sets the "streakLosses" field.
+func (m *TSBiggestMutation) SetStreakLosses(i int) {
+	m.streakLosses = &i
+	m.addstreakLosses = nil
+}
+
+// StreakLosses returns the value of the "streakLosses" field in the mutation.
+func (m *TSBiggestMutation) StreakLosses() (r int, exists bool) {
+	v := m.streakLosses
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStreakLosses returns the old "streakLosses" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldStreakLosses(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStreakLosses is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStreakLosses requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStreakLosses: %w", err)
+	}
+	return oldValue.StreakLosses, nil
+}
+
+// AddStreakLosses adds i to the "streakLosses" field.
+func (m *TSBiggestMutation) AddStreakLosses(i int) {
+	if m.addstreakLosses != nil {
+		*m.addstreakLosses += i
+	} else {
+		m.addstreakLosses = &i
+	}
+}
+
+// AddedStreakLosses returns the value that was added to the "streakLosses" field in this mutation.
+func (m *TSBiggestMutation) AddedStreakLosses() (r int, exists bool) {
+	v := m.addstreakLosses
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStreakLosses clears the value of the "streakLosses" field.
+func (m *TSBiggestMutation) ClearStreakLosses() {
+	m.streakLosses = nil
+	m.addstreakLosses = nil
+	m.clearedFields[tsbiggest.FieldStreakLosses] = struct{}{}
+}
+
+// StreakLossesCleared returns if the "streakLosses" field was cleared in this mutation.
+func (m *TSBiggestMutation) StreakLossesCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldStreakLosses]
+	return ok
+}
+
+// ResetStreakLosses resets all changes to the "streakLosses" field.
+func (m *TSBiggestMutation) ResetStreakLosses() {
+	m.streakLosses = nil
+	m.addstreakLosses = nil
+	delete(m.clearedFields, tsbiggest.FieldStreakLosses)
+}
+
+// SetStreakDraws sets the "streakDraws" field.
+func (m *TSBiggestMutation) SetStreakDraws(i int) {
+	m.streakDraws = &i
+	m.addstreakDraws = nil
+}
+
+// StreakDraws returns the value of the "streakDraws" field in the mutation.
+func (m *TSBiggestMutation) StreakDraws() (r int, exists bool) {
+	v := m.streakDraws
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStreakDraws returns the old "streakDraws" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldStreakDraws(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStreakDraws is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStreakDraws requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStreakDraws: %w", err)
+	}
+	return oldValue.StreakDraws, nil
+}
+
+// AddStreakDraws adds i to the "streakDraws" field.
+func (m *TSBiggestMutation) AddStreakDraws(i int) {
+	if m.addstreakDraws != nil {
+		*m.addstreakDraws += i
+	} else {
+		m.addstreakDraws = &i
+	}
+}
+
+// AddedStreakDraws returns the value that was added to the "streakDraws" field in this mutation.
+func (m *TSBiggestMutation) AddedStreakDraws() (r int, exists bool) {
+	v := m.addstreakDraws
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearStreakDraws clears the value of the "streakDraws" field.
+func (m *TSBiggestMutation) ClearStreakDraws() {
+	m.streakDraws = nil
+	m.addstreakDraws = nil
+	m.clearedFields[tsbiggest.FieldStreakDraws] = struct{}{}
+}
+
+// StreakDrawsCleared returns if the "streakDraws" field was cleared in this mutation.
+func (m *TSBiggestMutation) StreakDrawsCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldStreakDraws]
+	return ok
+}
+
+// ResetStreakDraws resets all changes to the "streakDraws" field.
+func (m *TSBiggestMutation) ResetStreakDraws() {
+	m.streakDraws = nil
+	m.addstreakDraws = nil
+	delete(m.clearedFields, tsbiggest.FieldStreakDraws)
+}
+
+// SetWinsHome sets the "winsHome" field.
+func (m *TSBiggestMutation) SetWinsHome(s string) {
+	m.winsHome = &s
+}
+
+// WinsHome returns the value of the "winsHome" field in the mutation.
+func (m *TSBiggestMutation) WinsHome() (r string, exists bool) {
+	v := m.winsHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWinsHome returns the old "winsHome" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldWinsHome(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWinsHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWinsHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWinsHome: %w", err)
+	}
+	return oldValue.WinsHome, nil
+}
+
+// ClearWinsHome clears the value of the "winsHome" field.
+func (m *TSBiggestMutation) ClearWinsHome() {
+	m.winsHome = nil
+	m.clearedFields[tsbiggest.FieldWinsHome] = struct{}{}
+}
+
+// WinsHomeCleared returns if the "winsHome" field was cleared in this mutation.
+func (m *TSBiggestMutation) WinsHomeCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldWinsHome]
+	return ok
+}
+
+// ResetWinsHome resets all changes to the "winsHome" field.
+func (m *TSBiggestMutation) ResetWinsHome() {
+	m.winsHome = nil
+	delete(m.clearedFields, tsbiggest.FieldWinsHome)
+}
+
+// SetWinsAway sets the "winsAway" field.
+func (m *TSBiggestMutation) SetWinsAway(s string) {
+	m.winsAway = &s
+}
+
+// WinsAway returns the value of the "winsAway" field in the mutation.
+func (m *TSBiggestMutation) WinsAway() (r string, exists bool) {
+	v := m.winsAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWinsAway returns the old "winsAway" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldWinsAway(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWinsAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWinsAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWinsAway: %w", err)
+	}
+	return oldValue.WinsAway, nil
+}
+
+// ClearWinsAway clears the value of the "winsAway" field.
+func (m *TSBiggestMutation) ClearWinsAway() {
+	m.winsAway = nil
+	m.clearedFields[tsbiggest.FieldWinsAway] = struct{}{}
+}
+
+// WinsAwayCleared returns if the "winsAway" field was cleared in this mutation.
+func (m *TSBiggestMutation) WinsAwayCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldWinsAway]
+	return ok
+}
+
+// ResetWinsAway resets all changes to the "winsAway" field.
+func (m *TSBiggestMutation) ResetWinsAway() {
+	m.winsAway = nil
+	delete(m.clearedFields, tsbiggest.FieldWinsAway)
+}
+
+// SetLossesHome sets the "lossesHome" field.
+func (m *TSBiggestMutation) SetLossesHome(s string) {
+	m.lossesHome = &s
+}
+
+// LossesHome returns the value of the "lossesHome" field in the mutation.
+func (m *TSBiggestMutation) LossesHome() (r string, exists bool) {
+	v := m.lossesHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLossesHome returns the old "lossesHome" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldLossesHome(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLossesHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLossesHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLossesHome: %w", err)
+	}
+	return oldValue.LossesHome, nil
+}
+
+// ClearLossesHome clears the value of the "lossesHome" field.
+func (m *TSBiggestMutation) ClearLossesHome() {
+	m.lossesHome = nil
+	m.clearedFields[tsbiggest.FieldLossesHome] = struct{}{}
+}
+
+// LossesHomeCleared returns if the "lossesHome" field was cleared in this mutation.
+func (m *TSBiggestMutation) LossesHomeCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldLossesHome]
+	return ok
+}
+
+// ResetLossesHome resets all changes to the "lossesHome" field.
+func (m *TSBiggestMutation) ResetLossesHome() {
+	m.lossesHome = nil
+	delete(m.clearedFields, tsbiggest.FieldLossesHome)
+}
+
+// SetLossesAway sets the "lossesAway" field.
+func (m *TSBiggestMutation) SetLossesAway(s string) {
+	m.lossesAway = &s
+}
+
+// LossesAway returns the value of the "lossesAway" field in the mutation.
+func (m *TSBiggestMutation) LossesAway() (r string, exists bool) {
+	v := m.lossesAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLossesAway returns the old "lossesAway" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldLossesAway(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLossesAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLossesAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLossesAway: %w", err)
+	}
+	return oldValue.LossesAway, nil
+}
+
+// ClearLossesAway clears the value of the "lossesAway" field.
+func (m *TSBiggestMutation) ClearLossesAway() {
+	m.lossesAway = nil
+	m.clearedFields[tsbiggest.FieldLossesAway] = struct{}{}
+}
+
+// LossesAwayCleared returns if the "lossesAway" field was cleared in this mutation.
+func (m *TSBiggestMutation) LossesAwayCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldLossesAway]
+	return ok
+}
+
+// ResetLossesAway resets all changes to the "lossesAway" field.
+func (m *TSBiggestMutation) ResetLossesAway() {
+	m.lossesAway = nil
+	delete(m.clearedFields, tsbiggest.FieldLossesAway)
+}
+
+// SetGoalsForHome sets the "goalsForHome" field.
+func (m *TSBiggestMutation) SetGoalsForHome(i int) {
+	m.goalsForHome = &i
+	m.addgoalsForHome = nil
+}
+
+// GoalsForHome returns the value of the "goalsForHome" field in the mutation.
+func (m *TSBiggestMutation) GoalsForHome() (r int, exists bool) {
+	v := m.goalsForHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForHome returns the old "goalsForHome" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldGoalsForHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForHome: %w", err)
+	}
+	return oldValue.GoalsForHome, nil
+}
+
+// AddGoalsForHome adds i to the "goalsForHome" field.
+func (m *TSBiggestMutation) AddGoalsForHome(i int) {
+	if m.addgoalsForHome != nil {
+		*m.addgoalsForHome += i
+	} else {
+		m.addgoalsForHome = &i
+	}
+}
+
+// AddedGoalsForHome returns the value that was added to the "goalsForHome" field in this mutation.
+func (m *TSBiggestMutation) AddedGoalsForHome() (r int, exists bool) {
+	v := m.addgoalsForHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForHome clears the value of the "goalsForHome" field.
+func (m *TSBiggestMutation) ClearGoalsForHome() {
+	m.goalsForHome = nil
+	m.addgoalsForHome = nil
+	m.clearedFields[tsbiggest.FieldGoalsForHome] = struct{}{}
+}
+
+// GoalsForHomeCleared returns if the "goalsForHome" field was cleared in this mutation.
+func (m *TSBiggestMutation) GoalsForHomeCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldGoalsForHome]
+	return ok
+}
+
+// ResetGoalsForHome resets all changes to the "goalsForHome" field.
+func (m *TSBiggestMutation) ResetGoalsForHome() {
+	m.goalsForHome = nil
+	m.addgoalsForHome = nil
+	delete(m.clearedFields, tsbiggest.FieldGoalsForHome)
+}
+
+// SetGoalsForAway sets the "goalsForAway" field.
+func (m *TSBiggestMutation) SetGoalsForAway(i int) {
+	m.goalsForAway = &i
+	m.addgoalsForAway = nil
+}
+
+// GoalsForAway returns the value of the "goalsForAway" field in the mutation.
+func (m *TSBiggestMutation) GoalsForAway() (r int, exists bool) {
+	v := m.goalsForAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForAway returns the old "goalsForAway" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldGoalsForAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForAway: %w", err)
+	}
+	return oldValue.GoalsForAway, nil
+}
+
+// AddGoalsForAway adds i to the "goalsForAway" field.
+func (m *TSBiggestMutation) AddGoalsForAway(i int) {
+	if m.addgoalsForAway != nil {
+		*m.addgoalsForAway += i
+	} else {
+		m.addgoalsForAway = &i
+	}
+}
+
+// AddedGoalsForAway returns the value that was added to the "goalsForAway" field in this mutation.
+func (m *TSBiggestMutation) AddedGoalsForAway() (r int, exists bool) {
+	v := m.addgoalsForAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForAway clears the value of the "goalsForAway" field.
+func (m *TSBiggestMutation) ClearGoalsForAway() {
+	m.goalsForAway = nil
+	m.addgoalsForAway = nil
+	m.clearedFields[tsbiggest.FieldGoalsForAway] = struct{}{}
+}
+
+// GoalsForAwayCleared returns if the "goalsForAway" field was cleared in this mutation.
+func (m *TSBiggestMutation) GoalsForAwayCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldGoalsForAway]
+	return ok
+}
+
+// ResetGoalsForAway resets all changes to the "goalsForAway" field.
+func (m *TSBiggestMutation) ResetGoalsForAway() {
+	m.goalsForAway = nil
+	m.addgoalsForAway = nil
+	delete(m.clearedFields, tsbiggest.FieldGoalsForAway)
+}
+
+// SetGoalsAgainstHome sets the "goalsAgainstHome" field.
+func (m *TSBiggestMutation) SetGoalsAgainstHome(i int) {
+	m.goalsAgainstHome = &i
+	m.addgoalsAgainstHome = nil
+}
+
+// GoalsAgainstHome returns the value of the "goalsAgainstHome" field in the mutation.
+func (m *TSBiggestMutation) GoalsAgainstHome() (r int, exists bool) {
+	v := m.goalsAgainstHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstHome returns the old "goalsAgainstHome" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldGoalsAgainstHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstHome: %w", err)
+	}
+	return oldValue.GoalsAgainstHome, nil
+}
+
+// AddGoalsAgainstHome adds i to the "goalsAgainstHome" field.
+func (m *TSBiggestMutation) AddGoalsAgainstHome(i int) {
+	if m.addgoalsAgainstHome != nil {
+		*m.addgoalsAgainstHome += i
+	} else {
+		m.addgoalsAgainstHome = &i
+	}
+}
+
+// AddedGoalsAgainstHome returns the value that was added to the "goalsAgainstHome" field in this mutation.
+func (m *TSBiggestMutation) AddedGoalsAgainstHome() (r int, exists bool) {
+	v := m.addgoalsAgainstHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstHome clears the value of the "goalsAgainstHome" field.
+func (m *TSBiggestMutation) ClearGoalsAgainstHome() {
+	m.goalsAgainstHome = nil
+	m.addgoalsAgainstHome = nil
+	m.clearedFields[tsbiggest.FieldGoalsAgainstHome] = struct{}{}
+}
+
+// GoalsAgainstHomeCleared returns if the "goalsAgainstHome" field was cleared in this mutation.
+func (m *TSBiggestMutation) GoalsAgainstHomeCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldGoalsAgainstHome]
+	return ok
+}
+
+// ResetGoalsAgainstHome resets all changes to the "goalsAgainstHome" field.
+func (m *TSBiggestMutation) ResetGoalsAgainstHome() {
+	m.goalsAgainstHome = nil
+	m.addgoalsAgainstHome = nil
+	delete(m.clearedFields, tsbiggest.FieldGoalsAgainstHome)
+}
+
+// SetGoalsAgainstAway sets the "goalsAgainstAway" field.
+func (m *TSBiggestMutation) SetGoalsAgainstAway(i int) {
+	m.goalsAgainstAway = &i
+	m.addgoalsAgainstAway = nil
+}
+
+// GoalsAgainstAway returns the value of the "goalsAgainstAway" field in the mutation.
+func (m *TSBiggestMutation) GoalsAgainstAway() (r int, exists bool) {
+	v := m.goalsAgainstAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstAway returns the old "goalsAgainstAway" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldGoalsAgainstAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstAway: %w", err)
+	}
+	return oldValue.GoalsAgainstAway, nil
+}
+
+// AddGoalsAgainstAway adds i to the "goalsAgainstAway" field.
+func (m *TSBiggestMutation) AddGoalsAgainstAway(i int) {
+	if m.addgoalsAgainstAway != nil {
+		*m.addgoalsAgainstAway += i
+	} else {
+		m.addgoalsAgainstAway = &i
+	}
+}
+
+// AddedGoalsAgainstAway returns the value that was added to the "goalsAgainstAway" field in this mutation.
+func (m *TSBiggestMutation) AddedGoalsAgainstAway() (r int, exists bool) {
+	v := m.addgoalsAgainstAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstAway clears the value of the "goalsAgainstAway" field.
+func (m *TSBiggestMutation) ClearGoalsAgainstAway() {
+	m.goalsAgainstAway = nil
+	m.addgoalsAgainstAway = nil
+	m.clearedFields[tsbiggest.FieldGoalsAgainstAway] = struct{}{}
+}
+
+// GoalsAgainstAwayCleared returns if the "goalsAgainstAway" field was cleared in this mutation.
+func (m *TSBiggestMutation) GoalsAgainstAwayCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldGoalsAgainstAway]
+	return ok
+}
+
+// ResetGoalsAgainstAway resets all changes to the "goalsAgainstAway" field.
+func (m *TSBiggestMutation) ResetGoalsAgainstAway() {
+	m.goalsAgainstAway = nil
+	m.addgoalsAgainstAway = nil
+	delete(m.clearedFields, tsbiggest.FieldGoalsAgainstAway)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TSBiggestMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TSBiggestMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the TSBiggest entity.
+// If the TSBiggest object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSBiggestMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TSBiggestMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[tsbiggest.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TSBiggestMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[tsbiggest.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TSBiggestMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, tsbiggest.FieldLastUpdated)
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *TSBiggestMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *TSBiggestMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *TSBiggestMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *TSBiggestMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *TSBiggestMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *TSBiggestMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the TSBiggestMutation builder.
+func (m *TSBiggestMutation) Where(ps ...predicate.TSBiggest) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TSBiggestMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TSBiggestMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TSBiggest, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TSBiggestMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TSBiggestMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TSBiggest).
+func (m *TSBiggestMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TSBiggestMutation) Fields() []string {
+	fields := make([]string, 0, 12)
+	if m.streakWins != nil {
+		fields = append(fields, tsbiggest.FieldStreakWins)
+	}
+	if m.streakLosses != nil {
+		fields = append(fields, tsbiggest.FieldStreakLosses)
+	}
+	if m.streakDraws != nil {
+		fields = append(fields, tsbiggest.FieldStreakDraws)
+	}
+	if m.winsHome != nil {
+		fields = append(fields, tsbiggest.FieldWinsHome)
+	}
+	if m.winsAway != nil {
+		fields = append(fields, tsbiggest.FieldWinsAway)
+	}
+	if m.lossesHome != nil {
+		fields = append(fields, tsbiggest.FieldLossesHome)
+	}
+	if m.lossesAway != nil {
+		fields = append(fields, tsbiggest.FieldLossesAway)
+	}
+	if m.goalsForHome != nil {
+		fields = append(fields, tsbiggest.FieldGoalsForHome)
+	}
+	if m.goalsForAway != nil {
+		fields = append(fields, tsbiggest.FieldGoalsForAway)
+	}
+	if m.goalsAgainstHome != nil {
+		fields = append(fields, tsbiggest.FieldGoalsAgainstHome)
+	}
+	if m.goalsAgainstAway != nil {
+		fields = append(fields, tsbiggest.FieldGoalsAgainstAway)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, tsbiggest.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TSBiggestMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tsbiggest.FieldStreakWins:
+		return m.StreakWins()
+	case tsbiggest.FieldStreakLosses:
+		return m.StreakLosses()
+	case tsbiggest.FieldStreakDraws:
+		return m.StreakDraws()
+	case tsbiggest.FieldWinsHome:
+		return m.WinsHome()
+	case tsbiggest.FieldWinsAway:
+		return m.WinsAway()
+	case tsbiggest.FieldLossesHome:
+		return m.LossesHome()
+	case tsbiggest.FieldLossesAway:
+		return m.LossesAway()
+	case tsbiggest.FieldGoalsForHome:
+		return m.GoalsForHome()
+	case tsbiggest.FieldGoalsForAway:
+		return m.GoalsForAway()
+	case tsbiggest.FieldGoalsAgainstHome:
+		return m.GoalsAgainstHome()
+	case tsbiggest.FieldGoalsAgainstAway:
+		return m.GoalsAgainstAway()
+	case tsbiggest.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TSBiggestMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tsbiggest.FieldStreakWins:
+		return m.OldStreakWins(ctx)
+	case tsbiggest.FieldStreakLosses:
+		return m.OldStreakLosses(ctx)
+	case tsbiggest.FieldStreakDraws:
+		return m.OldStreakDraws(ctx)
+	case tsbiggest.FieldWinsHome:
+		return m.OldWinsHome(ctx)
+	case tsbiggest.FieldWinsAway:
+		return m.OldWinsAway(ctx)
+	case tsbiggest.FieldLossesHome:
+		return m.OldLossesHome(ctx)
+	case tsbiggest.FieldLossesAway:
+		return m.OldLossesAway(ctx)
+	case tsbiggest.FieldGoalsForHome:
+		return m.OldGoalsForHome(ctx)
+	case tsbiggest.FieldGoalsForAway:
+		return m.OldGoalsForAway(ctx)
+	case tsbiggest.FieldGoalsAgainstHome:
+		return m.OldGoalsAgainstHome(ctx)
+	case tsbiggest.FieldGoalsAgainstAway:
+		return m.OldGoalsAgainstAway(ctx)
+	case tsbiggest.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TSBiggest field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSBiggestMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tsbiggest.FieldStreakWins:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStreakWins(v)
+		return nil
+	case tsbiggest.FieldStreakLosses:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStreakLosses(v)
+		return nil
+	case tsbiggest.FieldStreakDraws:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStreakDraws(v)
+		return nil
+	case tsbiggest.FieldWinsHome:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWinsHome(v)
+		return nil
+	case tsbiggest.FieldWinsAway:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWinsAway(v)
+		return nil
+	case tsbiggest.FieldLossesHome:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLossesHome(v)
+		return nil
+	case tsbiggest.FieldLossesAway:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLossesAway(v)
+		return nil
+	case tsbiggest.FieldGoalsForHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForHome(v)
+		return nil
+	case tsbiggest.FieldGoalsForAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForAway(v)
+		return nil
+	case tsbiggest.FieldGoalsAgainstHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstHome(v)
+		return nil
+	case tsbiggest.FieldGoalsAgainstAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstAway(v)
+		return nil
+	case tsbiggest.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSBiggest field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TSBiggestMutation) AddedFields() []string {
+	var fields []string
+	if m.addstreakWins != nil {
+		fields = append(fields, tsbiggest.FieldStreakWins)
+	}
+	if m.addstreakLosses != nil {
+		fields = append(fields, tsbiggest.FieldStreakLosses)
+	}
+	if m.addstreakDraws != nil {
+		fields = append(fields, tsbiggest.FieldStreakDraws)
+	}
+	if m.addgoalsForHome != nil {
+		fields = append(fields, tsbiggest.FieldGoalsForHome)
+	}
+	if m.addgoalsForAway != nil {
+		fields = append(fields, tsbiggest.FieldGoalsForAway)
+	}
+	if m.addgoalsAgainstHome != nil {
+		fields = append(fields, tsbiggest.FieldGoalsAgainstHome)
+	}
+	if m.addgoalsAgainstAway != nil {
+		fields = append(fields, tsbiggest.FieldGoalsAgainstAway)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TSBiggestMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tsbiggest.FieldStreakWins:
+		return m.AddedStreakWins()
+	case tsbiggest.FieldStreakLosses:
+		return m.AddedStreakLosses()
+	case tsbiggest.FieldStreakDraws:
+		return m.AddedStreakDraws()
+	case tsbiggest.FieldGoalsForHome:
+		return m.AddedGoalsForHome()
+	case tsbiggest.FieldGoalsForAway:
+		return m.AddedGoalsForAway()
+	case tsbiggest.FieldGoalsAgainstHome:
+		return m.AddedGoalsAgainstHome()
+	case tsbiggest.FieldGoalsAgainstAway:
+		return m.AddedGoalsAgainstAway()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSBiggestMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tsbiggest.FieldStreakWins:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStreakWins(v)
+		return nil
+	case tsbiggest.FieldStreakLosses:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStreakLosses(v)
+		return nil
+	case tsbiggest.FieldStreakDraws:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddStreakDraws(v)
+		return nil
+	case tsbiggest.FieldGoalsForHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForHome(v)
+		return nil
+	case tsbiggest.FieldGoalsForAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForAway(v)
+		return nil
+	case tsbiggest.FieldGoalsAgainstHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstHome(v)
+		return nil
+	case tsbiggest.FieldGoalsAgainstAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstAway(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSBiggest numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TSBiggestMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tsbiggest.FieldStreakWins) {
+		fields = append(fields, tsbiggest.FieldStreakWins)
+	}
+	if m.FieldCleared(tsbiggest.FieldStreakLosses) {
+		fields = append(fields, tsbiggest.FieldStreakLosses)
+	}
+	if m.FieldCleared(tsbiggest.FieldStreakDraws) {
+		fields = append(fields, tsbiggest.FieldStreakDraws)
+	}
+	if m.FieldCleared(tsbiggest.FieldWinsHome) {
+		fields = append(fields, tsbiggest.FieldWinsHome)
+	}
+	if m.FieldCleared(tsbiggest.FieldWinsAway) {
+		fields = append(fields, tsbiggest.FieldWinsAway)
+	}
+	if m.FieldCleared(tsbiggest.FieldLossesHome) {
+		fields = append(fields, tsbiggest.FieldLossesHome)
+	}
+	if m.FieldCleared(tsbiggest.FieldLossesAway) {
+		fields = append(fields, tsbiggest.FieldLossesAway)
+	}
+	if m.FieldCleared(tsbiggest.FieldGoalsForHome) {
+		fields = append(fields, tsbiggest.FieldGoalsForHome)
+	}
+	if m.FieldCleared(tsbiggest.FieldGoalsForAway) {
+		fields = append(fields, tsbiggest.FieldGoalsForAway)
+	}
+	if m.FieldCleared(tsbiggest.FieldGoalsAgainstHome) {
+		fields = append(fields, tsbiggest.FieldGoalsAgainstHome)
+	}
+	if m.FieldCleared(tsbiggest.FieldGoalsAgainstAway) {
+		fields = append(fields, tsbiggest.FieldGoalsAgainstAway)
+	}
+	if m.FieldCleared(tsbiggest.FieldLastUpdated) {
+		fields = append(fields, tsbiggest.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TSBiggestMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TSBiggestMutation) ClearField(name string) error {
+	switch name {
+	case tsbiggest.FieldStreakWins:
+		m.ClearStreakWins()
+		return nil
+	case tsbiggest.FieldStreakLosses:
+		m.ClearStreakLosses()
+		return nil
+	case tsbiggest.FieldStreakDraws:
+		m.ClearStreakDraws()
+		return nil
+	case tsbiggest.FieldWinsHome:
+		m.ClearWinsHome()
+		return nil
+	case tsbiggest.FieldWinsAway:
+		m.ClearWinsAway()
+		return nil
+	case tsbiggest.FieldLossesHome:
+		m.ClearLossesHome()
+		return nil
+	case tsbiggest.FieldLossesAway:
+		m.ClearLossesAway()
+		return nil
+	case tsbiggest.FieldGoalsForHome:
+		m.ClearGoalsForHome()
+		return nil
+	case tsbiggest.FieldGoalsForAway:
+		m.ClearGoalsForAway()
+		return nil
+	case tsbiggest.FieldGoalsAgainstHome:
+		m.ClearGoalsAgainstHome()
+		return nil
+	case tsbiggest.FieldGoalsAgainstAway:
+		m.ClearGoalsAgainstAway()
+		return nil
+	case tsbiggest.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSBiggest nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TSBiggestMutation) ResetField(name string) error {
+	switch name {
+	case tsbiggest.FieldStreakWins:
+		m.ResetStreakWins()
+		return nil
+	case tsbiggest.FieldStreakLosses:
+		m.ResetStreakLosses()
+		return nil
+	case tsbiggest.FieldStreakDraws:
+		m.ResetStreakDraws()
+		return nil
+	case tsbiggest.FieldWinsHome:
+		m.ResetWinsHome()
+		return nil
+	case tsbiggest.FieldWinsAway:
+		m.ResetWinsAway()
+		return nil
+	case tsbiggest.FieldLossesHome:
+		m.ResetLossesHome()
+		return nil
+	case tsbiggest.FieldLossesAway:
+		m.ResetLossesAway()
+		return nil
+	case tsbiggest.FieldGoalsForHome:
+		m.ResetGoalsForHome()
+		return nil
+	case tsbiggest.FieldGoalsForAway:
+		m.ResetGoalsForAway()
+		return nil
+	case tsbiggest.FieldGoalsAgainstHome:
+		m.ResetGoalsAgainstHome()
+		return nil
+	case tsbiggest.FieldGoalsAgainstAway:
+		m.ResetGoalsAgainstAway()
+		return nil
+	case tsbiggest.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSBiggest field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TSBiggestMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.team != nil {
+		edges = append(edges, tsbiggest.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TSBiggestMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tsbiggest.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TSBiggestMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TSBiggestMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TSBiggestMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedteam {
+		edges = append(edges, tsbiggest.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TSBiggestMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tsbiggest.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TSBiggestMutation) ClearEdge(name string) error {
+	switch name {
+	case tsbiggest.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSBiggest unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TSBiggestMutation) ResetEdge(name string) error {
+	switch name {
+	case tsbiggest.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSBiggest edge %s", name)
+}
+
+// TSCardsMutation represents an operation that mutates the TSCards nodes in the graph.
+type TSCardsMutation struct {
+	config
+	op                       Op
+	typ                      string
+	id                       *int
+	yellow0To15Total         *int
+	addyellow0To15Total      *int
+	yellow0To15Percentage    *string
+	yellow16To30Total        *int
+	addyellow16To30Total     *int
+	yellow16To30Percentage   *string
+	yellow31To45Total        *int
+	addyellow31To45Total     *int
+	yellow31To45Percentage   *string
+	yellow46To60Total        *int
+	addyellow46To60Total     *int
+	yellow46To60Percentage   *string
+	yellow61To75Total        *int
+	addyellow61To75Total     *int
+	yellow61To75Percentage   *string
+	yellow76To90Total        *int
+	addyellow76To90Total     *int
+	yellow76To90Percentage   *string
+	yellow91to105Total       *int
+	addyellow91to105Total    *int
+	yellow91to105Percentage  *string
+	yellow106To120Total      *int
+	addyellow106To120Total   *int
+	yellow106To120Percentage *string
+	red0To15Total            *int
+	addred0To15Total         *int
+	red0To15Percentage       *string
+	red16To30Total           *int
+	addred16To30Total        *int
+	red16To30Percentage      *string
+	red31To45Total           *int
+	addred31To45Total        *int
+	red31To45Percentage      *string
+	red46To60Total           *int
+	addred46To60Total        *int
+	red46To60Percentage      *string
+	red61To75Total           *int
+	addred61To75Total        *int
+	red61To75Percentage      *string
+	red76To90Total           *int
+	addred76To90Total        *int
+	red76To90Percentage      *string
+	red91to105Total          *int
+	addred91to105Total       *int
+	red91to105Percentage     *string
+	red106To120Total         *int
+	addred106To120Total      *int
+	red106To120Percentage    *string
+	lastUpdated              *time.Time
+	clearedFields            map[string]struct{}
+	team                     *int
+	clearedteam              bool
+	done                     bool
+	oldValue                 func(context.Context) (*TSCards, error)
+	predicates               []predicate.TSCards
+}
+
+var _ ent.Mutation = (*TSCardsMutation)(nil)
+
+// tscardsOption allows management of the mutation configuration using functional options.
+type tscardsOption func(*TSCardsMutation)
+
+// newTSCardsMutation creates new mutation for the TSCards entity.
+func newTSCardsMutation(c config, op Op, opts ...tscardsOption) *TSCardsMutation {
+	m := &TSCardsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTSCards,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTSCardsID sets the ID field of the mutation.
+func withTSCardsID(id int) tscardsOption {
+	return func(m *TSCardsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TSCards
+		)
+		m.oldValue = func(ctx context.Context) (*TSCards, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TSCards.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTSCards sets the old TSCards of the mutation.
+func withTSCards(node *TSCards) tscardsOption {
+	return func(m *TSCardsMutation) {
+		m.oldValue = func(context.Context) (*TSCards, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TSCardsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TSCardsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TSCardsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TSCardsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TSCards.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetYellow0To15Total sets the "yellow0To15Total" field.
+func (m *TSCardsMutation) SetYellow0To15Total(i int) {
+	m.yellow0To15Total = &i
+	m.addyellow0To15Total = nil
+}
+
+// Yellow0To15Total returns the value of the "yellow0To15Total" field in the mutation.
+func (m *TSCardsMutation) Yellow0To15Total() (r int, exists bool) {
+	v := m.yellow0To15Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow0To15Total returns the old "yellow0To15Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow0To15Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow0To15Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow0To15Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow0To15Total: %w", err)
+	}
+	return oldValue.Yellow0To15Total, nil
+}
+
+// AddYellow0To15Total adds i to the "yellow0To15Total" field.
+func (m *TSCardsMutation) AddYellow0To15Total(i int) {
+	if m.addyellow0To15Total != nil {
+		*m.addyellow0To15Total += i
+	} else {
+		m.addyellow0To15Total = &i
+	}
+}
+
+// AddedYellow0To15Total returns the value that was added to the "yellow0To15Total" field in this mutation.
+func (m *TSCardsMutation) AddedYellow0To15Total() (r int, exists bool) {
+	v := m.addyellow0To15Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearYellow0To15Total clears the value of the "yellow0To15Total" field.
+func (m *TSCardsMutation) ClearYellow0To15Total() {
+	m.yellow0To15Total = nil
+	m.addyellow0To15Total = nil
+	m.clearedFields[tscards.FieldYellow0To15Total] = struct{}{}
+}
+
+// Yellow0To15TotalCleared returns if the "yellow0To15Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow0To15TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow0To15Total]
+	return ok
+}
+
+// ResetYellow0To15Total resets all changes to the "yellow0To15Total" field.
+func (m *TSCardsMutation) ResetYellow0To15Total() {
+	m.yellow0To15Total = nil
+	m.addyellow0To15Total = nil
+	delete(m.clearedFields, tscards.FieldYellow0To15Total)
+}
+
+// SetYellow0To15Percentage sets the "yellow0To15Percentage" field.
+func (m *TSCardsMutation) SetYellow0To15Percentage(s string) {
+	m.yellow0To15Percentage = &s
+}
+
+// Yellow0To15Percentage returns the value of the "yellow0To15Percentage" field in the mutation.
+func (m *TSCardsMutation) Yellow0To15Percentage() (r string, exists bool) {
+	v := m.yellow0To15Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow0To15Percentage returns the old "yellow0To15Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow0To15Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow0To15Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow0To15Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow0To15Percentage: %w", err)
+	}
+	return oldValue.Yellow0To15Percentage, nil
+}
+
+// ClearYellow0To15Percentage clears the value of the "yellow0To15Percentage" field.
+func (m *TSCardsMutation) ClearYellow0To15Percentage() {
+	m.yellow0To15Percentage = nil
+	m.clearedFields[tscards.FieldYellow0To15Percentage] = struct{}{}
+}
+
+// Yellow0To15PercentageCleared returns if the "yellow0To15Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow0To15PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow0To15Percentage]
+	return ok
+}
+
+// ResetYellow0To15Percentage resets all changes to the "yellow0To15Percentage" field.
+func (m *TSCardsMutation) ResetYellow0To15Percentage() {
+	m.yellow0To15Percentage = nil
+	delete(m.clearedFields, tscards.FieldYellow0To15Percentage)
+}
+
+// SetYellow16To30Total sets the "yellow16To30Total" field.
+func (m *TSCardsMutation) SetYellow16To30Total(i int) {
+	m.yellow16To30Total = &i
+	m.addyellow16To30Total = nil
+}
+
+// Yellow16To30Total returns the value of the "yellow16To30Total" field in the mutation.
+func (m *TSCardsMutation) Yellow16To30Total() (r int, exists bool) {
+	v := m.yellow16To30Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow16To30Total returns the old "yellow16To30Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow16To30Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow16To30Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow16To30Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow16To30Total: %w", err)
+	}
+	return oldValue.Yellow16To30Total, nil
+}
+
+// AddYellow16To30Total adds i to the "yellow16To30Total" field.
+func (m *TSCardsMutation) AddYellow16To30Total(i int) {
+	if m.addyellow16To30Total != nil {
+		*m.addyellow16To30Total += i
+	} else {
+		m.addyellow16To30Total = &i
+	}
+}
+
+// AddedYellow16To30Total returns the value that was added to the "yellow16To30Total" field in this mutation.
+func (m *TSCardsMutation) AddedYellow16To30Total() (r int, exists bool) {
+	v := m.addyellow16To30Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearYellow16To30Total clears the value of the "yellow16To30Total" field.
+func (m *TSCardsMutation) ClearYellow16To30Total() {
+	m.yellow16To30Total = nil
+	m.addyellow16To30Total = nil
+	m.clearedFields[tscards.FieldYellow16To30Total] = struct{}{}
+}
+
+// Yellow16To30TotalCleared returns if the "yellow16To30Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow16To30TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow16To30Total]
+	return ok
+}
+
+// ResetYellow16To30Total resets all changes to the "yellow16To30Total" field.
+func (m *TSCardsMutation) ResetYellow16To30Total() {
+	m.yellow16To30Total = nil
+	m.addyellow16To30Total = nil
+	delete(m.clearedFields, tscards.FieldYellow16To30Total)
+}
+
+// SetYellow16To30Percentage sets the "yellow16To30Percentage" field.
+func (m *TSCardsMutation) SetYellow16To30Percentage(s string) {
+	m.yellow16To30Percentage = &s
+}
+
+// Yellow16To30Percentage returns the value of the "yellow16To30Percentage" field in the mutation.
+func (m *TSCardsMutation) Yellow16To30Percentage() (r string, exists bool) {
+	v := m.yellow16To30Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow16To30Percentage returns the old "yellow16To30Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow16To30Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow16To30Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow16To30Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow16To30Percentage: %w", err)
+	}
+	return oldValue.Yellow16To30Percentage, nil
+}
+
+// ClearYellow16To30Percentage clears the value of the "yellow16To30Percentage" field.
+func (m *TSCardsMutation) ClearYellow16To30Percentage() {
+	m.yellow16To30Percentage = nil
+	m.clearedFields[tscards.FieldYellow16To30Percentage] = struct{}{}
+}
+
+// Yellow16To30PercentageCleared returns if the "yellow16To30Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow16To30PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow16To30Percentage]
+	return ok
+}
+
+// ResetYellow16To30Percentage resets all changes to the "yellow16To30Percentage" field.
+func (m *TSCardsMutation) ResetYellow16To30Percentage() {
+	m.yellow16To30Percentage = nil
+	delete(m.clearedFields, tscards.FieldYellow16To30Percentage)
+}
+
+// SetYellow31To45Total sets the "yellow31To45Total" field.
+func (m *TSCardsMutation) SetYellow31To45Total(i int) {
+	m.yellow31To45Total = &i
+	m.addyellow31To45Total = nil
+}
+
+// Yellow31To45Total returns the value of the "yellow31To45Total" field in the mutation.
+func (m *TSCardsMutation) Yellow31To45Total() (r int, exists bool) {
+	v := m.yellow31To45Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow31To45Total returns the old "yellow31To45Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow31To45Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow31To45Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow31To45Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow31To45Total: %w", err)
+	}
+	return oldValue.Yellow31To45Total, nil
+}
+
+// AddYellow31To45Total adds i to the "yellow31To45Total" field.
+func (m *TSCardsMutation) AddYellow31To45Total(i int) {
+	if m.addyellow31To45Total != nil {
+		*m.addyellow31To45Total += i
+	} else {
+		m.addyellow31To45Total = &i
+	}
+}
+
+// AddedYellow31To45Total returns the value that was added to the "yellow31To45Total" field in this mutation.
+func (m *TSCardsMutation) AddedYellow31To45Total() (r int, exists bool) {
+	v := m.addyellow31To45Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearYellow31To45Total clears the value of the "yellow31To45Total" field.
+func (m *TSCardsMutation) ClearYellow31To45Total() {
+	m.yellow31To45Total = nil
+	m.addyellow31To45Total = nil
+	m.clearedFields[tscards.FieldYellow31To45Total] = struct{}{}
+}
+
+// Yellow31To45TotalCleared returns if the "yellow31To45Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow31To45TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow31To45Total]
+	return ok
+}
+
+// ResetYellow31To45Total resets all changes to the "yellow31To45Total" field.
+func (m *TSCardsMutation) ResetYellow31To45Total() {
+	m.yellow31To45Total = nil
+	m.addyellow31To45Total = nil
+	delete(m.clearedFields, tscards.FieldYellow31To45Total)
+}
+
+// SetYellow31To45Percentage sets the "yellow31To45Percentage" field.
+func (m *TSCardsMutation) SetYellow31To45Percentage(s string) {
+	m.yellow31To45Percentage = &s
+}
+
+// Yellow31To45Percentage returns the value of the "yellow31To45Percentage" field in the mutation.
+func (m *TSCardsMutation) Yellow31To45Percentage() (r string, exists bool) {
+	v := m.yellow31To45Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow31To45Percentage returns the old "yellow31To45Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow31To45Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow31To45Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow31To45Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow31To45Percentage: %w", err)
+	}
+	return oldValue.Yellow31To45Percentage, nil
+}
+
+// ClearYellow31To45Percentage clears the value of the "yellow31To45Percentage" field.
+func (m *TSCardsMutation) ClearYellow31To45Percentage() {
+	m.yellow31To45Percentage = nil
+	m.clearedFields[tscards.FieldYellow31To45Percentage] = struct{}{}
+}
+
+// Yellow31To45PercentageCleared returns if the "yellow31To45Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow31To45PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow31To45Percentage]
+	return ok
+}
+
+// ResetYellow31To45Percentage resets all changes to the "yellow31To45Percentage" field.
+func (m *TSCardsMutation) ResetYellow31To45Percentage() {
+	m.yellow31To45Percentage = nil
+	delete(m.clearedFields, tscards.FieldYellow31To45Percentage)
+}
+
+// SetYellow46To60Total sets the "yellow46To60Total" field.
+func (m *TSCardsMutation) SetYellow46To60Total(i int) {
+	m.yellow46To60Total = &i
+	m.addyellow46To60Total = nil
+}
+
+// Yellow46To60Total returns the value of the "yellow46To60Total" field in the mutation.
+func (m *TSCardsMutation) Yellow46To60Total() (r int, exists bool) {
+	v := m.yellow46To60Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow46To60Total returns the old "yellow46To60Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow46To60Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow46To60Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow46To60Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow46To60Total: %w", err)
+	}
+	return oldValue.Yellow46To60Total, nil
+}
+
+// AddYellow46To60Total adds i to the "yellow46To60Total" field.
+func (m *TSCardsMutation) AddYellow46To60Total(i int) {
+	if m.addyellow46To60Total != nil {
+		*m.addyellow46To60Total += i
+	} else {
+		m.addyellow46To60Total = &i
+	}
+}
+
+// AddedYellow46To60Total returns the value that was added to the "yellow46To60Total" field in this mutation.
+func (m *TSCardsMutation) AddedYellow46To60Total() (r int, exists bool) {
+	v := m.addyellow46To60Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearYellow46To60Total clears the value of the "yellow46To60Total" field.
+func (m *TSCardsMutation) ClearYellow46To60Total() {
+	m.yellow46To60Total = nil
+	m.addyellow46To60Total = nil
+	m.clearedFields[tscards.FieldYellow46To60Total] = struct{}{}
+}
+
+// Yellow46To60TotalCleared returns if the "yellow46To60Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow46To60TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow46To60Total]
+	return ok
+}
+
+// ResetYellow46To60Total resets all changes to the "yellow46To60Total" field.
+func (m *TSCardsMutation) ResetYellow46To60Total() {
+	m.yellow46To60Total = nil
+	m.addyellow46To60Total = nil
+	delete(m.clearedFields, tscards.FieldYellow46To60Total)
+}
+
+// SetYellow46To60Percentage sets the "yellow46To60Percentage" field.
+func (m *TSCardsMutation) SetYellow46To60Percentage(s string) {
+	m.yellow46To60Percentage = &s
+}
+
+// Yellow46To60Percentage returns the value of the "yellow46To60Percentage" field in the mutation.
+func (m *TSCardsMutation) Yellow46To60Percentage() (r string, exists bool) {
+	v := m.yellow46To60Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow46To60Percentage returns the old "yellow46To60Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow46To60Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow46To60Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow46To60Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow46To60Percentage: %w", err)
+	}
+	return oldValue.Yellow46To60Percentage, nil
+}
+
+// ClearYellow46To60Percentage clears the value of the "yellow46To60Percentage" field.
+func (m *TSCardsMutation) ClearYellow46To60Percentage() {
+	m.yellow46To60Percentage = nil
+	m.clearedFields[tscards.FieldYellow46To60Percentage] = struct{}{}
+}
+
+// Yellow46To60PercentageCleared returns if the "yellow46To60Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow46To60PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow46To60Percentage]
+	return ok
+}
+
+// ResetYellow46To60Percentage resets all changes to the "yellow46To60Percentage" field.
+func (m *TSCardsMutation) ResetYellow46To60Percentage() {
+	m.yellow46To60Percentage = nil
+	delete(m.clearedFields, tscards.FieldYellow46To60Percentage)
+}
+
+// SetYellow61To75Total sets the "yellow61To75Total" field.
+func (m *TSCardsMutation) SetYellow61To75Total(i int) {
+	m.yellow61To75Total = &i
+	m.addyellow61To75Total = nil
+}
+
+// Yellow61To75Total returns the value of the "yellow61To75Total" field in the mutation.
+func (m *TSCardsMutation) Yellow61To75Total() (r int, exists bool) {
+	v := m.yellow61To75Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow61To75Total returns the old "yellow61To75Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow61To75Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow61To75Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow61To75Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow61To75Total: %w", err)
+	}
+	return oldValue.Yellow61To75Total, nil
+}
+
+// AddYellow61To75Total adds i to the "yellow61To75Total" field.
+func (m *TSCardsMutation) AddYellow61To75Total(i int) {
+	if m.addyellow61To75Total != nil {
+		*m.addyellow61To75Total += i
+	} else {
+		m.addyellow61To75Total = &i
+	}
+}
+
+// AddedYellow61To75Total returns the value that was added to the "yellow61To75Total" field in this mutation.
+func (m *TSCardsMutation) AddedYellow61To75Total() (r int, exists bool) {
+	v := m.addyellow61To75Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearYellow61To75Total clears the value of the "yellow61To75Total" field.
+func (m *TSCardsMutation) ClearYellow61To75Total() {
+	m.yellow61To75Total = nil
+	m.addyellow61To75Total = nil
+	m.clearedFields[tscards.FieldYellow61To75Total] = struct{}{}
+}
+
+// Yellow61To75TotalCleared returns if the "yellow61To75Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow61To75TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow61To75Total]
+	return ok
+}
+
+// ResetYellow61To75Total resets all changes to the "yellow61To75Total" field.
+func (m *TSCardsMutation) ResetYellow61To75Total() {
+	m.yellow61To75Total = nil
+	m.addyellow61To75Total = nil
+	delete(m.clearedFields, tscards.FieldYellow61To75Total)
+}
+
+// SetYellow61To75Percentage sets the "yellow61To75Percentage" field.
+func (m *TSCardsMutation) SetYellow61To75Percentage(s string) {
+	m.yellow61To75Percentage = &s
+}
+
+// Yellow61To75Percentage returns the value of the "yellow61To75Percentage" field in the mutation.
+func (m *TSCardsMutation) Yellow61To75Percentage() (r string, exists bool) {
+	v := m.yellow61To75Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow61To75Percentage returns the old "yellow61To75Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow61To75Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow61To75Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow61To75Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow61To75Percentage: %w", err)
+	}
+	return oldValue.Yellow61To75Percentage, nil
+}
+
+// ClearYellow61To75Percentage clears the value of the "yellow61To75Percentage" field.
+func (m *TSCardsMutation) ClearYellow61To75Percentage() {
+	m.yellow61To75Percentage = nil
+	m.clearedFields[tscards.FieldYellow61To75Percentage] = struct{}{}
+}
+
+// Yellow61To75PercentageCleared returns if the "yellow61To75Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow61To75PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow61To75Percentage]
+	return ok
+}
+
+// ResetYellow61To75Percentage resets all changes to the "yellow61To75Percentage" field.
+func (m *TSCardsMutation) ResetYellow61To75Percentage() {
+	m.yellow61To75Percentage = nil
+	delete(m.clearedFields, tscards.FieldYellow61To75Percentage)
+}
+
+// SetYellow76To90Total sets the "yellow76To90Total" field.
+func (m *TSCardsMutation) SetYellow76To90Total(i int) {
+	m.yellow76To90Total = &i
+	m.addyellow76To90Total = nil
+}
+
+// Yellow76To90Total returns the value of the "yellow76To90Total" field in the mutation.
+func (m *TSCardsMutation) Yellow76To90Total() (r int, exists bool) {
+	v := m.yellow76To90Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow76To90Total returns the old "yellow76To90Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow76To90Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow76To90Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow76To90Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow76To90Total: %w", err)
+	}
+	return oldValue.Yellow76To90Total, nil
+}
+
+// AddYellow76To90Total adds i to the "yellow76To90Total" field.
+func (m *TSCardsMutation) AddYellow76To90Total(i int) {
+	if m.addyellow76To90Total != nil {
+		*m.addyellow76To90Total += i
+	} else {
+		m.addyellow76To90Total = &i
+	}
+}
+
+// AddedYellow76To90Total returns the value that was added to the "yellow76To90Total" field in this mutation.
+func (m *TSCardsMutation) AddedYellow76To90Total() (r int, exists bool) {
+	v := m.addyellow76To90Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearYellow76To90Total clears the value of the "yellow76To90Total" field.
+func (m *TSCardsMutation) ClearYellow76To90Total() {
+	m.yellow76To90Total = nil
+	m.addyellow76To90Total = nil
+	m.clearedFields[tscards.FieldYellow76To90Total] = struct{}{}
+}
+
+// Yellow76To90TotalCleared returns if the "yellow76To90Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow76To90TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow76To90Total]
+	return ok
+}
+
+// ResetYellow76To90Total resets all changes to the "yellow76To90Total" field.
+func (m *TSCardsMutation) ResetYellow76To90Total() {
+	m.yellow76To90Total = nil
+	m.addyellow76To90Total = nil
+	delete(m.clearedFields, tscards.FieldYellow76To90Total)
+}
+
+// SetYellow76To90Percentage sets the "yellow76To90Percentage" field.
+func (m *TSCardsMutation) SetYellow76To90Percentage(s string) {
+	m.yellow76To90Percentage = &s
+}
+
+// Yellow76To90Percentage returns the value of the "yellow76To90Percentage" field in the mutation.
+func (m *TSCardsMutation) Yellow76To90Percentage() (r string, exists bool) {
+	v := m.yellow76To90Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow76To90Percentage returns the old "yellow76To90Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow76To90Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow76To90Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow76To90Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow76To90Percentage: %w", err)
+	}
+	return oldValue.Yellow76To90Percentage, nil
+}
+
+// ClearYellow76To90Percentage clears the value of the "yellow76To90Percentage" field.
+func (m *TSCardsMutation) ClearYellow76To90Percentage() {
+	m.yellow76To90Percentage = nil
+	m.clearedFields[tscards.FieldYellow76To90Percentage] = struct{}{}
+}
+
+// Yellow76To90PercentageCleared returns if the "yellow76To90Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow76To90PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow76To90Percentage]
+	return ok
+}
+
+// ResetYellow76To90Percentage resets all changes to the "yellow76To90Percentage" field.
+func (m *TSCardsMutation) ResetYellow76To90Percentage() {
+	m.yellow76To90Percentage = nil
+	delete(m.clearedFields, tscards.FieldYellow76To90Percentage)
+}
+
+// SetYellow91to105Total sets the "yellow91to105Total" field.
+func (m *TSCardsMutation) SetYellow91to105Total(i int) {
+	m.yellow91to105Total = &i
+	m.addyellow91to105Total = nil
+}
+
+// Yellow91to105Total returns the value of the "yellow91to105Total" field in the mutation.
+func (m *TSCardsMutation) Yellow91to105Total() (r int, exists bool) {
+	v := m.yellow91to105Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow91to105Total returns the old "yellow91to105Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow91to105Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow91to105Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow91to105Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow91to105Total: %w", err)
+	}
+	return oldValue.Yellow91to105Total, nil
+}
+
+// AddYellow91to105Total adds i to the "yellow91to105Total" field.
+func (m *TSCardsMutation) AddYellow91to105Total(i int) {
+	if m.addyellow91to105Total != nil {
+		*m.addyellow91to105Total += i
+	} else {
+		m.addyellow91to105Total = &i
+	}
+}
+
+// AddedYellow91to105Total returns the value that was added to the "yellow91to105Total" field in this mutation.
+func (m *TSCardsMutation) AddedYellow91to105Total() (r int, exists bool) {
+	v := m.addyellow91to105Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearYellow91to105Total clears the value of the "yellow91to105Total" field.
+func (m *TSCardsMutation) ClearYellow91to105Total() {
+	m.yellow91to105Total = nil
+	m.addyellow91to105Total = nil
+	m.clearedFields[tscards.FieldYellow91to105Total] = struct{}{}
+}
+
+// Yellow91to105TotalCleared returns if the "yellow91to105Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow91to105TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow91to105Total]
+	return ok
+}
+
+// ResetYellow91to105Total resets all changes to the "yellow91to105Total" field.
+func (m *TSCardsMutation) ResetYellow91to105Total() {
+	m.yellow91to105Total = nil
+	m.addyellow91to105Total = nil
+	delete(m.clearedFields, tscards.FieldYellow91to105Total)
+}
+
+// SetYellow91to105Percentage sets the "yellow91to105Percentage" field.
+func (m *TSCardsMutation) SetYellow91to105Percentage(s string) {
+	m.yellow91to105Percentage = &s
+}
+
+// Yellow91to105Percentage returns the value of the "yellow91to105Percentage" field in the mutation.
+func (m *TSCardsMutation) Yellow91to105Percentage() (r string, exists bool) {
+	v := m.yellow91to105Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow91to105Percentage returns the old "yellow91to105Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow91to105Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow91to105Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow91to105Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow91to105Percentage: %w", err)
+	}
+	return oldValue.Yellow91to105Percentage, nil
+}
+
+// ClearYellow91to105Percentage clears the value of the "yellow91to105Percentage" field.
+func (m *TSCardsMutation) ClearYellow91to105Percentage() {
+	m.yellow91to105Percentage = nil
+	m.clearedFields[tscards.FieldYellow91to105Percentage] = struct{}{}
+}
+
+// Yellow91to105PercentageCleared returns if the "yellow91to105Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow91to105PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow91to105Percentage]
+	return ok
+}
+
+// ResetYellow91to105Percentage resets all changes to the "yellow91to105Percentage" field.
+func (m *TSCardsMutation) ResetYellow91to105Percentage() {
+	m.yellow91to105Percentage = nil
+	delete(m.clearedFields, tscards.FieldYellow91to105Percentage)
+}
+
+// SetYellow106To120Total sets the "yellow106To120Total" field.
+func (m *TSCardsMutation) SetYellow106To120Total(i int) {
+	m.yellow106To120Total = &i
+	m.addyellow106To120Total = nil
+}
+
+// Yellow106To120Total returns the value of the "yellow106To120Total" field in the mutation.
+func (m *TSCardsMutation) Yellow106To120Total() (r int, exists bool) {
+	v := m.yellow106To120Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow106To120Total returns the old "yellow106To120Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow106To120Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow106To120Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow106To120Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow106To120Total: %w", err)
+	}
+	return oldValue.Yellow106To120Total, nil
+}
+
+// AddYellow106To120Total adds i to the "yellow106To120Total" field.
+func (m *TSCardsMutation) AddYellow106To120Total(i int) {
+	if m.addyellow106To120Total != nil {
+		*m.addyellow106To120Total += i
+	} else {
+		m.addyellow106To120Total = &i
+	}
+}
+
+// AddedYellow106To120Total returns the value that was added to the "yellow106To120Total" field in this mutation.
+func (m *TSCardsMutation) AddedYellow106To120Total() (r int, exists bool) {
+	v := m.addyellow106To120Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearYellow106To120Total clears the value of the "yellow106To120Total" field.
+func (m *TSCardsMutation) ClearYellow106To120Total() {
+	m.yellow106To120Total = nil
+	m.addyellow106To120Total = nil
+	m.clearedFields[tscards.FieldYellow106To120Total] = struct{}{}
+}
+
+// Yellow106To120TotalCleared returns if the "yellow106To120Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow106To120TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow106To120Total]
+	return ok
+}
+
+// ResetYellow106To120Total resets all changes to the "yellow106To120Total" field.
+func (m *TSCardsMutation) ResetYellow106To120Total() {
+	m.yellow106To120Total = nil
+	m.addyellow106To120Total = nil
+	delete(m.clearedFields, tscards.FieldYellow106To120Total)
+}
+
+// SetYellow106To120Percentage sets the "yellow106To120Percentage" field.
+func (m *TSCardsMutation) SetYellow106To120Percentage(s string) {
+	m.yellow106To120Percentage = &s
+}
+
+// Yellow106To120Percentage returns the value of the "yellow106To120Percentage" field in the mutation.
+func (m *TSCardsMutation) Yellow106To120Percentage() (r string, exists bool) {
+	v := m.yellow106To120Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow106To120Percentage returns the old "yellow106To120Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldYellow106To120Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow106To120Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow106To120Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow106To120Percentage: %w", err)
+	}
+	return oldValue.Yellow106To120Percentage, nil
+}
+
+// ClearYellow106To120Percentage clears the value of the "yellow106To120Percentage" field.
+func (m *TSCardsMutation) ClearYellow106To120Percentage() {
+	m.yellow106To120Percentage = nil
+	m.clearedFields[tscards.FieldYellow106To120Percentage] = struct{}{}
+}
+
+// Yellow106To120PercentageCleared returns if the "yellow106To120Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Yellow106To120PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldYellow106To120Percentage]
+	return ok
+}
+
+// ResetYellow106To120Percentage resets all changes to the "yellow106To120Percentage" field.
+func (m *TSCardsMutation) ResetYellow106To120Percentage() {
+	m.yellow106To120Percentage = nil
+	delete(m.clearedFields, tscards.FieldYellow106To120Percentage)
+}
+
+// SetRed0To15Total sets the "red0To15Total" field.
+func (m *TSCardsMutation) SetRed0To15Total(i int) {
+	m.red0To15Total = &i
+	m.addred0To15Total = nil
+}
+
+// Red0To15Total returns the value of the "red0To15Total" field in the mutation.
+func (m *TSCardsMutation) Red0To15Total() (r int, exists bool) {
+	v := m.red0To15Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed0To15Total returns the old "red0To15Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed0To15Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed0To15Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed0To15Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed0To15Total: %w", err)
+	}
+	return oldValue.Red0To15Total, nil
+}
+
+// AddRed0To15Total adds i to the "red0To15Total" field.
+func (m *TSCardsMutation) AddRed0To15Total(i int) {
+	if m.addred0To15Total != nil {
+		*m.addred0To15Total += i
+	} else {
+		m.addred0To15Total = &i
+	}
+}
+
+// AddedRed0To15Total returns the value that was added to the "red0To15Total" field in this mutation.
+func (m *TSCardsMutation) AddedRed0To15Total() (r int, exists bool) {
+	v := m.addred0To15Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRed0To15Total clears the value of the "red0To15Total" field.
+func (m *TSCardsMutation) ClearRed0To15Total() {
+	m.red0To15Total = nil
+	m.addred0To15Total = nil
+	m.clearedFields[tscards.FieldRed0To15Total] = struct{}{}
+}
+
+// Red0To15TotalCleared returns if the "red0To15Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Red0To15TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed0To15Total]
+	return ok
+}
+
+// ResetRed0To15Total resets all changes to the "red0To15Total" field.
+func (m *TSCardsMutation) ResetRed0To15Total() {
+	m.red0To15Total = nil
+	m.addred0To15Total = nil
+	delete(m.clearedFields, tscards.FieldRed0To15Total)
+}
+
+// SetRed0To15Percentage sets the "red0To15Percentage" field.
+func (m *TSCardsMutation) SetRed0To15Percentage(s string) {
+	m.red0To15Percentage = &s
+}
+
+// Red0To15Percentage returns the value of the "red0To15Percentage" field in the mutation.
+func (m *TSCardsMutation) Red0To15Percentage() (r string, exists bool) {
+	v := m.red0To15Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed0To15Percentage returns the old "red0To15Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed0To15Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed0To15Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed0To15Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed0To15Percentage: %w", err)
+	}
+	return oldValue.Red0To15Percentage, nil
+}
+
+// ClearRed0To15Percentage clears the value of the "red0To15Percentage" field.
+func (m *TSCardsMutation) ClearRed0To15Percentage() {
+	m.red0To15Percentage = nil
+	m.clearedFields[tscards.FieldRed0To15Percentage] = struct{}{}
+}
+
+// Red0To15PercentageCleared returns if the "red0To15Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Red0To15PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed0To15Percentage]
+	return ok
+}
+
+// ResetRed0To15Percentage resets all changes to the "red0To15Percentage" field.
+func (m *TSCardsMutation) ResetRed0To15Percentage() {
+	m.red0To15Percentage = nil
+	delete(m.clearedFields, tscards.FieldRed0To15Percentage)
+}
+
+// SetRed16To30Total sets the "red16To30Total" field.
+func (m *TSCardsMutation) SetRed16To30Total(i int) {
+	m.red16To30Total = &i
+	m.addred16To30Total = nil
+}
+
+// Red16To30Total returns the value of the "red16To30Total" field in the mutation.
+func (m *TSCardsMutation) Red16To30Total() (r int, exists bool) {
+	v := m.red16To30Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed16To30Total returns the old "red16To30Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed16To30Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed16To30Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed16To30Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed16To30Total: %w", err)
+	}
+	return oldValue.Red16To30Total, nil
+}
+
+// AddRed16To30Total adds i to the "red16To30Total" field.
+func (m *TSCardsMutation) AddRed16To30Total(i int) {
+	if m.addred16To30Total != nil {
+		*m.addred16To30Total += i
+	} else {
+		m.addred16To30Total = &i
+	}
+}
+
+// AddedRed16To30Total returns the value that was added to the "red16To30Total" field in this mutation.
+func (m *TSCardsMutation) AddedRed16To30Total() (r int, exists bool) {
+	v := m.addred16To30Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRed16To30Total clears the value of the "red16To30Total" field.
+func (m *TSCardsMutation) ClearRed16To30Total() {
+	m.red16To30Total = nil
+	m.addred16To30Total = nil
+	m.clearedFields[tscards.FieldRed16To30Total] = struct{}{}
+}
+
+// Red16To30TotalCleared returns if the "red16To30Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Red16To30TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed16To30Total]
+	return ok
+}
+
+// ResetRed16To30Total resets all changes to the "red16To30Total" field.
+func (m *TSCardsMutation) ResetRed16To30Total() {
+	m.red16To30Total = nil
+	m.addred16To30Total = nil
+	delete(m.clearedFields, tscards.FieldRed16To30Total)
+}
+
+// SetRed16To30Percentage sets the "red16To30Percentage" field.
+func (m *TSCardsMutation) SetRed16To30Percentage(s string) {
+	m.red16To30Percentage = &s
+}
+
+// Red16To30Percentage returns the value of the "red16To30Percentage" field in the mutation.
+func (m *TSCardsMutation) Red16To30Percentage() (r string, exists bool) {
+	v := m.red16To30Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed16To30Percentage returns the old "red16To30Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed16To30Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed16To30Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed16To30Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed16To30Percentage: %w", err)
+	}
+	return oldValue.Red16To30Percentage, nil
+}
+
+// ClearRed16To30Percentage clears the value of the "red16To30Percentage" field.
+func (m *TSCardsMutation) ClearRed16To30Percentage() {
+	m.red16To30Percentage = nil
+	m.clearedFields[tscards.FieldRed16To30Percentage] = struct{}{}
+}
+
+// Red16To30PercentageCleared returns if the "red16To30Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Red16To30PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed16To30Percentage]
+	return ok
+}
+
+// ResetRed16To30Percentage resets all changes to the "red16To30Percentage" field.
+func (m *TSCardsMutation) ResetRed16To30Percentage() {
+	m.red16To30Percentage = nil
+	delete(m.clearedFields, tscards.FieldRed16To30Percentage)
+}
+
+// SetRed31To45Total sets the "red31To45Total" field.
+func (m *TSCardsMutation) SetRed31To45Total(i int) {
+	m.red31To45Total = &i
+	m.addred31To45Total = nil
+}
+
+// Red31To45Total returns the value of the "red31To45Total" field in the mutation.
+func (m *TSCardsMutation) Red31To45Total() (r int, exists bool) {
+	v := m.red31To45Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed31To45Total returns the old "red31To45Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed31To45Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed31To45Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed31To45Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed31To45Total: %w", err)
+	}
+	return oldValue.Red31To45Total, nil
+}
+
+// AddRed31To45Total adds i to the "red31To45Total" field.
+func (m *TSCardsMutation) AddRed31To45Total(i int) {
+	if m.addred31To45Total != nil {
+		*m.addred31To45Total += i
+	} else {
+		m.addred31To45Total = &i
+	}
+}
+
+// AddedRed31To45Total returns the value that was added to the "red31To45Total" field in this mutation.
+func (m *TSCardsMutation) AddedRed31To45Total() (r int, exists bool) {
+	v := m.addred31To45Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRed31To45Total clears the value of the "red31To45Total" field.
+func (m *TSCardsMutation) ClearRed31To45Total() {
+	m.red31To45Total = nil
+	m.addred31To45Total = nil
+	m.clearedFields[tscards.FieldRed31To45Total] = struct{}{}
+}
+
+// Red31To45TotalCleared returns if the "red31To45Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Red31To45TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed31To45Total]
+	return ok
+}
+
+// ResetRed31To45Total resets all changes to the "red31To45Total" field.
+func (m *TSCardsMutation) ResetRed31To45Total() {
+	m.red31To45Total = nil
+	m.addred31To45Total = nil
+	delete(m.clearedFields, tscards.FieldRed31To45Total)
+}
+
+// SetRed31To45Percentage sets the "red31To45Percentage" field.
+func (m *TSCardsMutation) SetRed31To45Percentage(s string) {
+	m.red31To45Percentage = &s
+}
+
+// Red31To45Percentage returns the value of the "red31To45Percentage" field in the mutation.
+func (m *TSCardsMutation) Red31To45Percentage() (r string, exists bool) {
+	v := m.red31To45Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed31To45Percentage returns the old "red31To45Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed31To45Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed31To45Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed31To45Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed31To45Percentage: %w", err)
+	}
+	return oldValue.Red31To45Percentage, nil
+}
+
+// ClearRed31To45Percentage clears the value of the "red31To45Percentage" field.
+func (m *TSCardsMutation) ClearRed31To45Percentage() {
+	m.red31To45Percentage = nil
+	m.clearedFields[tscards.FieldRed31To45Percentage] = struct{}{}
+}
+
+// Red31To45PercentageCleared returns if the "red31To45Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Red31To45PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed31To45Percentage]
+	return ok
+}
+
+// ResetRed31To45Percentage resets all changes to the "red31To45Percentage" field.
+func (m *TSCardsMutation) ResetRed31To45Percentage() {
+	m.red31To45Percentage = nil
+	delete(m.clearedFields, tscards.FieldRed31To45Percentage)
+}
+
+// SetRed46To60Total sets the "red46To60Total" field.
+func (m *TSCardsMutation) SetRed46To60Total(i int) {
+	m.red46To60Total = &i
+	m.addred46To60Total = nil
+}
+
+// Red46To60Total returns the value of the "red46To60Total" field in the mutation.
+func (m *TSCardsMutation) Red46To60Total() (r int, exists bool) {
+	v := m.red46To60Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed46To60Total returns the old "red46To60Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed46To60Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed46To60Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed46To60Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed46To60Total: %w", err)
+	}
+	return oldValue.Red46To60Total, nil
+}
+
+// AddRed46To60Total adds i to the "red46To60Total" field.
+func (m *TSCardsMutation) AddRed46To60Total(i int) {
+	if m.addred46To60Total != nil {
+		*m.addred46To60Total += i
+	} else {
+		m.addred46To60Total = &i
+	}
+}
+
+// AddedRed46To60Total returns the value that was added to the "red46To60Total" field in this mutation.
+func (m *TSCardsMutation) AddedRed46To60Total() (r int, exists bool) {
+	v := m.addred46To60Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRed46To60Total clears the value of the "red46To60Total" field.
+func (m *TSCardsMutation) ClearRed46To60Total() {
+	m.red46To60Total = nil
+	m.addred46To60Total = nil
+	m.clearedFields[tscards.FieldRed46To60Total] = struct{}{}
+}
+
+// Red46To60TotalCleared returns if the "red46To60Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Red46To60TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed46To60Total]
+	return ok
+}
+
+// ResetRed46To60Total resets all changes to the "red46To60Total" field.
+func (m *TSCardsMutation) ResetRed46To60Total() {
+	m.red46To60Total = nil
+	m.addred46To60Total = nil
+	delete(m.clearedFields, tscards.FieldRed46To60Total)
+}
+
+// SetRed46To60Percentage sets the "red46To60Percentage" field.
+func (m *TSCardsMutation) SetRed46To60Percentage(s string) {
+	m.red46To60Percentage = &s
+}
+
+// Red46To60Percentage returns the value of the "red46To60Percentage" field in the mutation.
+func (m *TSCardsMutation) Red46To60Percentage() (r string, exists bool) {
+	v := m.red46To60Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed46To60Percentage returns the old "red46To60Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed46To60Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed46To60Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed46To60Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed46To60Percentage: %w", err)
+	}
+	return oldValue.Red46To60Percentage, nil
+}
+
+// ClearRed46To60Percentage clears the value of the "red46To60Percentage" field.
+func (m *TSCardsMutation) ClearRed46To60Percentage() {
+	m.red46To60Percentage = nil
+	m.clearedFields[tscards.FieldRed46To60Percentage] = struct{}{}
+}
+
+// Red46To60PercentageCleared returns if the "red46To60Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Red46To60PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed46To60Percentage]
+	return ok
+}
+
+// ResetRed46To60Percentage resets all changes to the "red46To60Percentage" field.
+func (m *TSCardsMutation) ResetRed46To60Percentage() {
+	m.red46To60Percentage = nil
+	delete(m.clearedFields, tscards.FieldRed46To60Percentage)
+}
+
+// SetRed61To75Total sets the "red61To75Total" field.
+func (m *TSCardsMutation) SetRed61To75Total(i int) {
+	m.red61To75Total = &i
+	m.addred61To75Total = nil
+}
+
+// Red61To75Total returns the value of the "red61To75Total" field in the mutation.
+func (m *TSCardsMutation) Red61To75Total() (r int, exists bool) {
+	v := m.red61To75Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed61To75Total returns the old "red61To75Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed61To75Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed61To75Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed61To75Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed61To75Total: %w", err)
+	}
+	return oldValue.Red61To75Total, nil
+}
+
+// AddRed61To75Total adds i to the "red61To75Total" field.
+func (m *TSCardsMutation) AddRed61To75Total(i int) {
+	if m.addred61To75Total != nil {
+		*m.addred61To75Total += i
+	} else {
+		m.addred61To75Total = &i
+	}
+}
+
+// AddedRed61To75Total returns the value that was added to the "red61To75Total" field in this mutation.
+func (m *TSCardsMutation) AddedRed61To75Total() (r int, exists bool) {
+	v := m.addred61To75Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRed61To75Total clears the value of the "red61To75Total" field.
+func (m *TSCardsMutation) ClearRed61To75Total() {
+	m.red61To75Total = nil
+	m.addred61To75Total = nil
+	m.clearedFields[tscards.FieldRed61To75Total] = struct{}{}
+}
+
+// Red61To75TotalCleared returns if the "red61To75Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Red61To75TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed61To75Total]
+	return ok
+}
+
+// ResetRed61To75Total resets all changes to the "red61To75Total" field.
+func (m *TSCardsMutation) ResetRed61To75Total() {
+	m.red61To75Total = nil
+	m.addred61To75Total = nil
+	delete(m.clearedFields, tscards.FieldRed61To75Total)
+}
+
+// SetRed61To75Percentage sets the "red61To75Percentage" field.
+func (m *TSCardsMutation) SetRed61To75Percentage(s string) {
+	m.red61To75Percentage = &s
+}
+
+// Red61To75Percentage returns the value of the "red61To75Percentage" field in the mutation.
+func (m *TSCardsMutation) Red61To75Percentage() (r string, exists bool) {
+	v := m.red61To75Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed61To75Percentage returns the old "red61To75Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed61To75Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed61To75Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed61To75Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed61To75Percentage: %w", err)
+	}
+	return oldValue.Red61To75Percentage, nil
+}
+
+// ClearRed61To75Percentage clears the value of the "red61To75Percentage" field.
+func (m *TSCardsMutation) ClearRed61To75Percentage() {
+	m.red61To75Percentage = nil
+	m.clearedFields[tscards.FieldRed61To75Percentage] = struct{}{}
+}
+
+// Red61To75PercentageCleared returns if the "red61To75Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Red61To75PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed61To75Percentage]
+	return ok
+}
+
+// ResetRed61To75Percentage resets all changes to the "red61To75Percentage" field.
+func (m *TSCardsMutation) ResetRed61To75Percentage() {
+	m.red61To75Percentage = nil
+	delete(m.clearedFields, tscards.FieldRed61To75Percentage)
+}
+
+// SetRed76To90Total sets the "red76To90Total" field.
+func (m *TSCardsMutation) SetRed76To90Total(i int) {
+	m.red76To90Total = &i
+	m.addred76To90Total = nil
+}
+
+// Red76To90Total returns the value of the "red76To90Total" field in the mutation.
+func (m *TSCardsMutation) Red76To90Total() (r int, exists bool) {
+	v := m.red76To90Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed76To90Total returns the old "red76To90Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed76To90Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed76To90Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed76To90Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed76To90Total: %w", err)
+	}
+	return oldValue.Red76To90Total, nil
+}
+
+// AddRed76To90Total adds i to the "red76To90Total" field.
+func (m *TSCardsMutation) AddRed76To90Total(i int) {
+	if m.addred76To90Total != nil {
+		*m.addred76To90Total += i
+	} else {
+		m.addred76To90Total = &i
+	}
+}
+
+// AddedRed76To90Total returns the value that was added to the "red76To90Total" field in this mutation.
+func (m *TSCardsMutation) AddedRed76To90Total() (r int, exists bool) {
+	v := m.addred76To90Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRed76To90Total clears the value of the "red76To90Total" field.
+func (m *TSCardsMutation) ClearRed76To90Total() {
+	m.red76To90Total = nil
+	m.addred76To90Total = nil
+	m.clearedFields[tscards.FieldRed76To90Total] = struct{}{}
+}
+
+// Red76To90TotalCleared returns if the "red76To90Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Red76To90TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed76To90Total]
+	return ok
+}
+
+// ResetRed76To90Total resets all changes to the "red76To90Total" field.
+func (m *TSCardsMutation) ResetRed76To90Total() {
+	m.red76To90Total = nil
+	m.addred76To90Total = nil
+	delete(m.clearedFields, tscards.FieldRed76To90Total)
+}
+
+// SetRed76To90Percentage sets the "red76To90Percentage" field.
+func (m *TSCardsMutation) SetRed76To90Percentage(s string) {
+	m.red76To90Percentage = &s
+}
+
+// Red76To90Percentage returns the value of the "red76To90Percentage" field in the mutation.
+func (m *TSCardsMutation) Red76To90Percentage() (r string, exists bool) {
+	v := m.red76To90Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed76To90Percentage returns the old "red76To90Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed76To90Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed76To90Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed76To90Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed76To90Percentage: %w", err)
+	}
+	return oldValue.Red76To90Percentage, nil
+}
+
+// ClearRed76To90Percentage clears the value of the "red76To90Percentage" field.
+func (m *TSCardsMutation) ClearRed76To90Percentage() {
+	m.red76To90Percentage = nil
+	m.clearedFields[tscards.FieldRed76To90Percentage] = struct{}{}
+}
+
+// Red76To90PercentageCleared returns if the "red76To90Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Red76To90PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed76To90Percentage]
+	return ok
+}
+
+// ResetRed76To90Percentage resets all changes to the "red76To90Percentage" field.
+func (m *TSCardsMutation) ResetRed76To90Percentage() {
+	m.red76To90Percentage = nil
+	delete(m.clearedFields, tscards.FieldRed76To90Percentage)
+}
+
+// SetRed91to105Total sets the "red91to105Total" field.
+func (m *TSCardsMutation) SetRed91to105Total(i int) {
+	m.red91to105Total = &i
+	m.addred91to105Total = nil
+}
+
+// Red91to105Total returns the value of the "red91to105Total" field in the mutation.
+func (m *TSCardsMutation) Red91to105Total() (r int, exists bool) {
+	v := m.red91to105Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed91to105Total returns the old "red91to105Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed91to105Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed91to105Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed91to105Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed91to105Total: %w", err)
+	}
+	return oldValue.Red91to105Total, nil
+}
+
+// AddRed91to105Total adds i to the "red91to105Total" field.
+func (m *TSCardsMutation) AddRed91to105Total(i int) {
+	if m.addred91to105Total != nil {
+		*m.addred91to105Total += i
+	} else {
+		m.addred91to105Total = &i
+	}
+}
+
+// AddedRed91to105Total returns the value that was added to the "red91to105Total" field in this mutation.
+func (m *TSCardsMutation) AddedRed91to105Total() (r int, exists bool) {
+	v := m.addred91to105Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRed91to105Total clears the value of the "red91to105Total" field.
+func (m *TSCardsMutation) ClearRed91to105Total() {
+	m.red91to105Total = nil
+	m.addred91to105Total = nil
+	m.clearedFields[tscards.FieldRed91to105Total] = struct{}{}
+}
+
+// Red91to105TotalCleared returns if the "red91to105Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Red91to105TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed91to105Total]
+	return ok
+}
+
+// ResetRed91to105Total resets all changes to the "red91to105Total" field.
+func (m *TSCardsMutation) ResetRed91to105Total() {
+	m.red91to105Total = nil
+	m.addred91to105Total = nil
+	delete(m.clearedFields, tscards.FieldRed91to105Total)
+}
+
+// SetRed91to105Percentage sets the "red91to105Percentage" field.
+func (m *TSCardsMutation) SetRed91to105Percentage(s string) {
+	m.red91to105Percentage = &s
+}
+
+// Red91to105Percentage returns the value of the "red91to105Percentage" field in the mutation.
+func (m *TSCardsMutation) Red91to105Percentage() (r string, exists bool) {
+	v := m.red91to105Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed91to105Percentage returns the old "red91to105Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed91to105Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed91to105Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed91to105Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed91to105Percentage: %w", err)
+	}
+	return oldValue.Red91to105Percentage, nil
+}
+
+// ClearRed91to105Percentage clears the value of the "red91to105Percentage" field.
+func (m *TSCardsMutation) ClearRed91to105Percentage() {
+	m.red91to105Percentage = nil
+	m.clearedFields[tscards.FieldRed91to105Percentage] = struct{}{}
+}
+
+// Red91to105PercentageCleared returns if the "red91to105Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Red91to105PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed91to105Percentage]
+	return ok
+}
+
+// ResetRed91to105Percentage resets all changes to the "red91to105Percentage" field.
+func (m *TSCardsMutation) ResetRed91to105Percentage() {
+	m.red91to105Percentage = nil
+	delete(m.clearedFields, tscards.FieldRed91to105Percentage)
+}
+
+// SetRed106To120Total sets the "red106To120Total" field.
+func (m *TSCardsMutation) SetRed106To120Total(i int) {
+	m.red106To120Total = &i
+	m.addred106To120Total = nil
+}
+
+// Red106To120Total returns the value of the "red106To120Total" field in the mutation.
+func (m *TSCardsMutation) Red106To120Total() (r int, exists bool) {
+	v := m.red106To120Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed106To120Total returns the old "red106To120Total" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed106To120Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed106To120Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed106To120Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed106To120Total: %w", err)
+	}
+	return oldValue.Red106To120Total, nil
+}
+
+// AddRed106To120Total adds i to the "red106To120Total" field.
+func (m *TSCardsMutation) AddRed106To120Total(i int) {
+	if m.addred106To120Total != nil {
+		*m.addred106To120Total += i
+	} else {
+		m.addred106To120Total = &i
+	}
+}
+
+// AddedRed106To120Total returns the value that was added to the "red106To120Total" field in this mutation.
+func (m *TSCardsMutation) AddedRed106To120Total() (r int, exists bool) {
+	v := m.addred106To120Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearRed106To120Total clears the value of the "red106To120Total" field.
+func (m *TSCardsMutation) ClearRed106To120Total() {
+	m.red106To120Total = nil
+	m.addred106To120Total = nil
+	m.clearedFields[tscards.FieldRed106To120Total] = struct{}{}
+}
+
+// Red106To120TotalCleared returns if the "red106To120Total" field was cleared in this mutation.
+func (m *TSCardsMutation) Red106To120TotalCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed106To120Total]
+	return ok
+}
+
+// ResetRed106To120Total resets all changes to the "red106To120Total" field.
+func (m *TSCardsMutation) ResetRed106To120Total() {
+	m.red106To120Total = nil
+	m.addred106To120Total = nil
+	delete(m.clearedFields, tscards.FieldRed106To120Total)
+}
+
+// SetRed106To120Percentage sets the "red106To120Percentage" field.
+func (m *TSCardsMutation) SetRed106To120Percentage(s string) {
+	m.red106To120Percentage = &s
+}
+
+// Red106To120Percentage returns the value of the "red106To120Percentage" field in the mutation.
+func (m *TSCardsMutation) Red106To120Percentage() (r string, exists bool) {
+	v := m.red106To120Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed106To120Percentage returns the old "red106To120Percentage" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldRed106To120Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed106To120Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed106To120Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed106To120Percentage: %w", err)
+	}
+	return oldValue.Red106To120Percentage, nil
+}
+
+// ClearRed106To120Percentage clears the value of the "red106To120Percentage" field.
+func (m *TSCardsMutation) ClearRed106To120Percentage() {
+	m.red106To120Percentage = nil
+	m.clearedFields[tscards.FieldRed106To120Percentage] = struct{}{}
+}
+
+// Red106To120PercentageCleared returns if the "red106To120Percentage" field was cleared in this mutation.
+func (m *TSCardsMutation) Red106To120PercentageCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldRed106To120Percentage]
+	return ok
+}
+
+// ResetRed106To120Percentage resets all changes to the "red106To120Percentage" field.
+func (m *TSCardsMutation) ResetRed106To120Percentage() {
+	m.red106To120Percentage = nil
+	delete(m.clearedFields, tscards.FieldRed106To120Percentage)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TSCardsMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TSCardsMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the TSCards entity.
+// If the TSCards object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCardsMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TSCardsMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[tscards.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TSCardsMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[tscards.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TSCardsMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, tscards.FieldLastUpdated)
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *TSCardsMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *TSCardsMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *TSCardsMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *TSCardsMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *TSCardsMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *TSCardsMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the TSCardsMutation builder.
+func (m *TSCardsMutation) Where(ps ...predicate.TSCards) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TSCardsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TSCardsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TSCards, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TSCardsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TSCardsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TSCards).
+func (m *TSCardsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TSCardsMutation) Fields() []string {
+	fields := make([]string, 0, 33)
+	if m.yellow0To15Total != nil {
+		fields = append(fields, tscards.FieldYellow0To15Total)
+	}
+	if m.yellow0To15Percentage != nil {
+		fields = append(fields, tscards.FieldYellow0To15Percentage)
+	}
+	if m.yellow16To30Total != nil {
+		fields = append(fields, tscards.FieldYellow16To30Total)
+	}
+	if m.yellow16To30Percentage != nil {
+		fields = append(fields, tscards.FieldYellow16To30Percentage)
+	}
+	if m.yellow31To45Total != nil {
+		fields = append(fields, tscards.FieldYellow31To45Total)
+	}
+	if m.yellow31To45Percentage != nil {
+		fields = append(fields, tscards.FieldYellow31To45Percentage)
+	}
+	if m.yellow46To60Total != nil {
+		fields = append(fields, tscards.FieldYellow46To60Total)
+	}
+	if m.yellow46To60Percentage != nil {
+		fields = append(fields, tscards.FieldYellow46To60Percentage)
+	}
+	if m.yellow61To75Total != nil {
+		fields = append(fields, tscards.FieldYellow61To75Total)
+	}
+	if m.yellow61To75Percentage != nil {
+		fields = append(fields, tscards.FieldYellow61To75Percentage)
+	}
+	if m.yellow76To90Total != nil {
+		fields = append(fields, tscards.FieldYellow76To90Total)
+	}
+	if m.yellow76To90Percentage != nil {
+		fields = append(fields, tscards.FieldYellow76To90Percentage)
+	}
+	if m.yellow91to105Total != nil {
+		fields = append(fields, tscards.FieldYellow91to105Total)
+	}
+	if m.yellow91to105Percentage != nil {
+		fields = append(fields, tscards.FieldYellow91to105Percentage)
+	}
+	if m.yellow106To120Total != nil {
+		fields = append(fields, tscards.FieldYellow106To120Total)
+	}
+	if m.yellow106To120Percentage != nil {
+		fields = append(fields, tscards.FieldYellow106To120Percentage)
+	}
+	if m.red0To15Total != nil {
+		fields = append(fields, tscards.FieldRed0To15Total)
+	}
+	if m.red0To15Percentage != nil {
+		fields = append(fields, tscards.FieldRed0To15Percentage)
+	}
+	if m.red16To30Total != nil {
+		fields = append(fields, tscards.FieldRed16To30Total)
+	}
+	if m.red16To30Percentage != nil {
+		fields = append(fields, tscards.FieldRed16To30Percentage)
+	}
+	if m.red31To45Total != nil {
+		fields = append(fields, tscards.FieldRed31To45Total)
+	}
+	if m.red31To45Percentage != nil {
+		fields = append(fields, tscards.FieldRed31To45Percentage)
+	}
+	if m.red46To60Total != nil {
+		fields = append(fields, tscards.FieldRed46To60Total)
+	}
+	if m.red46To60Percentage != nil {
+		fields = append(fields, tscards.FieldRed46To60Percentage)
+	}
+	if m.red61To75Total != nil {
+		fields = append(fields, tscards.FieldRed61To75Total)
+	}
+	if m.red61To75Percentage != nil {
+		fields = append(fields, tscards.FieldRed61To75Percentage)
+	}
+	if m.red76To90Total != nil {
+		fields = append(fields, tscards.FieldRed76To90Total)
+	}
+	if m.red76To90Percentage != nil {
+		fields = append(fields, tscards.FieldRed76To90Percentage)
+	}
+	if m.red91to105Total != nil {
+		fields = append(fields, tscards.FieldRed91to105Total)
+	}
+	if m.red91to105Percentage != nil {
+		fields = append(fields, tscards.FieldRed91to105Percentage)
+	}
+	if m.red106To120Total != nil {
+		fields = append(fields, tscards.FieldRed106To120Total)
+	}
+	if m.red106To120Percentage != nil {
+		fields = append(fields, tscards.FieldRed106To120Percentage)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, tscards.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TSCardsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tscards.FieldYellow0To15Total:
+		return m.Yellow0To15Total()
+	case tscards.FieldYellow0To15Percentage:
+		return m.Yellow0To15Percentage()
+	case tscards.FieldYellow16To30Total:
+		return m.Yellow16To30Total()
+	case tscards.FieldYellow16To30Percentage:
+		return m.Yellow16To30Percentage()
+	case tscards.FieldYellow31To45Total:
+		return m.Yellow31To45Total()
+	case tscards.FieldYellow31To45Percentage:
+		return m.Yellow31To45Percentage()
+	case tscards.FieldYellow46To60Total:
+		return m.Yellow46To60Total()
+	case tscards.FieldYellow46To60Percentage:
+		return m.Yellow46To60Percentage()
+	case tscards.FieldYellow61To75Total:
+		return m.Yellow61To75Total()
+	case tscards.FieldYellow61To75Percentage:
+		return m.Yellow61To75Percentage()
+	case tscards.FieldYellow76To90Total:
+		return m.Yellow76To90Total()
+	case tscards.FieldYellow76To90Percentage:
+		return m.Yellow76To90Percentage()
+	case tscards.FieldYellow91to105Total:
+		return m.Yellow91to105Total()
+	case tscards.FieldYellow91to105Percentage:
+		return m.Yellow91to105Percentage()
+	case tscards.FieldYellow106To120Total:
+		return m.Yellow106To120Total()
+	case tscards.FieldYellow106To120Percentage:
+		return m.Yellow106To120Percentage()
+	case tscards.FieldRed0To15Total:
+		return m.Red0To15Total()
+	case tscards.FieldRed0To15Percentage:
+		return m.Red0To15Percentage()
+	case tscards.FieldRed16To30Total:
+		return m.Red16To30Total()
+	case tscards.FieldRed16To30Percentage:
+		return m.Red16To30Percentage()
+	case tscards.FieldRed31To45Total:
+		return m.Red31To45Total()
+	case tscards.FieldRed31To45Percentage:
+		return m.Red31To45Percentage()
+	case tscards.FieldRed46To60Total:
+		return m.Red46To60Total()
+	case tscards.FieldRed46To60Percentage:
+		return m.Red46To60Percentage()
+	case tscards.FieldRed61To75Total:
+		return m.Red61To75Total()
+	case tscards.FieldRed61To75Percentage:
+		return m.Red61To75Percentage()
+	case tscards.FieldRed76To90Total:
+		return m.Red76To90Total()
+	case tscards.FieldRed76To90Percentage:
+		return m.Red76To90Percentage()
+	case tscards.FieldRed91to105Total:
+		return m.Red91to105Total()
+	case tscards.FieldRed91to105Percentage:
+		return m.Red91to105Percentage()
+	case tscards.FieldRed106To120Total:
+		return m.Red106To120Total()
+	case tscards.FieldRed106To120Percentage:
+		return m.Red106To120Percentage()
+	case tscards.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TSCardsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tscards.FieldYellow0To15Total:
+		return m.OldYellow0To15Total(ctx)
+	case tscards.FieldYellow0To15Percentage:
+		return m.OldYellow0To15Percentage(ctx)
+	case tscards.FieldYellow16To30Total:
+		return m.OldYellow16To30Total(ctx)
+	case tscards.FieldYellow16To30Percentage:
+		return m.OldYellow16To30Percentage(ctx)
+	case tscards.FieldYellow31To45Total:
+		return m.OldYellow31To45Total(ctx)
+	case tscards.FieldYellow31To45Percentage:
+		return m.OldYellow31To45Percentage(ctx)
+	case tscards.FieldYellow46To60Total:
+		return m.OldYellow46To60Total(ctx)
+	case tscards.FieldYellow46To60Percentage:
+		return m.OldYellow46To60Percentage(ctx)
+	case tscards.FieldYellow61To75Total:
+		return m.OldYellow61To75Total(ctx)
+	case tscards.FieldYellow61To75Percentage:
+		return m.OldYellow61To75Percentage(ctx)
+	case tscards.FieldYellow76To90Total:
+		return m.OldYellow76To90Total(ctx)
+	case tscards.FieldYellow76To90Percentage:
+		return m.OldYellow76To90Percentage(ctx)
+	case tscards.FieldYellow91to105Total:
+		return m.OldYellow91to105Total(ctx)
+	case tscards.FieldYellow91to105Percentage:
+		return m.OldYellow91to105Percentage(ctx)
+	case tscards.FieldYellow106To120Total:
+		return m.OldYellow106To120Total(ctx)
+	case tscards.FieldYellow106To120Percentage:
+		return m.OldYellow106To120Percentage(ctx)
+	case tscards.FieldRed0To15Total:
+		return m.OldRed0To15Total(ctx)
+	case tscards.FieldRed0To15Percentage:
+		return m.OldRed0To15Percentage(ctx)
+	case tscards.FieldRed16To30Total:
+		return m.OldRed16To30Total(ctx)
+	case tscards.FieldRed16To30Percentage:
+		return m.OldRed16To30Percentage(ctx)
+	case tscards.FieldRed31To45Total:
+		return m.OldRed31To45Total(ctx)
+	case tscards.FieldRed31To45Percentage:
+		return m.OldRed31To45Percentage(ctx)
+	case tscards.FieldRed46To60Total:
+		return m.OldRed46To60Total(ctx)
+	case tscards.FieldRed46To60Percentage:
+		return m.OldRed46To60Percentage(ctx)
+	case tscards.FieldRed61To75Total:
+		return m.OldRed61To75Total(ctx)
+	case tscards.FieldRed61To75Percentage:
+		return m.OldRed61To75Percentage(ctx)
+	case tscards.FieldRed76To90Total:
+		return m.OldRed76To90Total(ctx)
+	case tscards.FieldRed76To90Percentage:
+		return m.OldRed76To90Percentage(ctx)
+	case tscards.FieldRed91to105Total:
+		return m.OldRed91to105Total(ctx)
+	case tscards.FieldRed91to105Percentage:
+		return m.OldRed91to105Percentage(ctx)
+	case tscards.FieldRed106To120Total:
+		return m.OldRed106To120Total(ctx)
+	case tscards.FieldRed106To120Percentage:
+		return m.OldRed106To120Percentage(ctx)
+	case tscards.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TSCards field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSCardsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tscards.FieldYellow0To15Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow0To15Total(v)
+		return nil
+	case tscards.FieldYellow0To15Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow0To15Percentage(v)
+		return nil
+	case tscards.FieldYellow16To30Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow16To30Total(v)
+		return nil
+	case tscards.FieldYellow16To30Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow16To30Percentage(v)
+		return nil
+	case tscards.FieldYellow31To45Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow31To45Total(v)
+		return nil
+	case tscards.FieldYellow31To45Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow31To45Percentage(v)
+		return nil
+	case tscards.FieldYellow46To60Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow46To60Total(v)
+		return nil
+	case tscards.FieldYellow46To60Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow46To60Percentage(v)
+		return nil
+	case tscards.FieldYellow61To75Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow61To75Total(v)
+		return nil
+	case tscards.FieldYellow61To75Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow61To75Percentage(v)
+		return nil
+	case tscards.FieldYellow76To90Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow76To90Total(v)
+		return nil
+	case tscards.FieldYellow76To90Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow76To90Percentage(v)
+		return nil
+	case tscards.FieldYellow91to105Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow91to105Total(v)
+		return nil
+	case tscards.FieldYellow91to105Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow91to105Percentage(v)
+		return nil
+	case tscards.FieldYellow106To120Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow106To120Total(v)
+		return nil
+	case tscards.FieldYellow106To120Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow106To120Percentage(v)
+		return nil
+	case tscards.FieldRed0To15Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed0To15Total(v)
+		return nil
+	case tscards.FieldRed0To15Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed0To15Percentage(v)
+		return nil
+	case tscards.FieldRed16To30Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed16To30Total(v)
+		return nil
+	case tscards.FieldRed16To30Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed16To30Percentage(v)
+		return nil
+	case tscards.FieldRed31To45Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed31To45Total(v)
+		return nil
+	case tscards.FieldRed31To45Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed31To45Percentage(v)
+		return nil
+	case tscards.FieldRed46To60Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed46To60Total(v)
+		return nil
+	case tscards.FieldRed46To60Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed46To60Percentage(v)
+		return nil
+	case tscards.FieldRed61To75Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed61To75Total(v)
+		return nil
+	case tscards.FieldRed61To75Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed61To75Percentage(v)
+		return nil
+	case tscards.FieldRed76To90Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed76To90Total(v)
+		return nil
+	case tscards.FieldRed76To90Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed76To90Percentage(v)
+		return nil
+	case tscards.FieldRed91to105Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed91to105Total(v)
+		return nil
+	case tscards.FieldRed91to105Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed91to105Percentage(v)
+		return nil
+	case tscards.FieldRed106To120Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed106To120Total(v)
+		return nil
+	case tscards.FieldRed106To120Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed106To120Percentage(v)
+		return nil
+	case tscards.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSCards field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TSCardsMutation) AddedFields() []string {
+	var fields []string
+	if m.addyellow0To15Total != nil {
+		fields = append(fields, tscards.FieldYellow0To15Total)
+	}
+	if m.addyellow16To30Total != nil {
+		fields = append(fields, tscards.FieldYellow16To30Total)
+	}
+	if m.addyellow31To45Total != nil {
+		fields = append(fields, tscards.FieldYellow31To45Total)
+	}
+	if m.addyellow46To60Total != nil {
+		fields = append(fields, tscards.FieldYellow46To60Total)
+	}
+	if m.addyellow61To75Total != nil {
+		fields = append(fields, tscards.FieldYellow61To75Total)
+	}
+	if m.addyellow76To90Total != nil {
+		fields = append(fields, tscards.FieldYellow76To90Total)
+	}
+	if m.addyellow91to105Total != nil {
+		fields = append(fields, tscards.FieldYellow91to105Total)
+	}
+	if m.addyellow106To120Total != nil {
+		fields = append(fields, tscards.FieldYellow106To120Total)
+	}
+	if m.addred0To15Total != nil {
+		fields = append(fields, tscards.FieldRed0To15Total)
+	}
+	if m.addred16To30Total != nil {
+		fields = append(fields, tscards.FieldRed16To30Total)
+	}
+	if m.addred31To45Total != nil {
+		fields = append(fields, tscards.FieldRed31To45Total)
+	}
+	if m.addred46To60Total != nil {
+		fields = append(fields, tscards.FieldRed46To60Total)
+	}
+	if m.addred61To75Total != nil {
+		fields = append(fields, tscards.FieldRed61To75Total)
+	}
+	if m.addred76To90Total != nil {
+		fields = append(fields, tscards.FieldRed76To90Total)
+	}
+	if m.addred91to105Total != nil {
+		fields = append(fields, tscards.FieldRed91to105Total)
+	}
+	if m.addred106To120Total != nil {
+		fields = append(fields, tscards.FieldRed106To120Total)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TSCardsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tscards.FieldYellow0To15Total:
+		return m.AddedYellow0To15Total()
+	case tscards.FieldYellow16To30Total:
+		return m.AddedYellow16To30Total()
+	case tscards.FieldYellow31To45Total:
+		return m.AddedYellow31To45Total()
+	case tscards.FieldYellow46To60Total:
+		return m.AddedYellow46To60Total()
+	case tscards.FieldYellow61To75Total:
+		return m.AddedYellow61To75Total()
+	case tscards.FieldYellow76To90Total:
+		return m.AddedYellow76To90Total()
+	case tscards.FieldYellow91to105Total:
+		return m.AddedYellow91to105Total()
+	case tscards.FieldYellow106To120Total:
+		return m.AddedYellow106To120Total()
+	case tscards.FieldRed0To15Total:
+		return m.AddedRed0To15Total()
+	case tscards.FieldRed16To30Total:
+		return m.AddedRed16To30Total()
+	case tscards.FieldRed31To45Total:
+		return m.AddedRed31To45Total()
+	case tscards.FieldRed46To60Total:
+		return m.AddedRed46To60Total()
+	case tscards.FieldRed61To75Total:
+		return m.AddedRed61To75Total()
+	case tscards.FieldRed76To90Total:
+		return m.AddedRed76To90Total()
+	case tscards.FieldRed91to105Total:
+		return m.AddedRed91to105Total()
+	case tscards.FieldRed106To120Total:
+		return m.AddedRed106To120Total()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSCardsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tscards.FieldYellow0To15Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow0To15Total(v)
+		return nil
+	case tscards.FieldYellow16To30Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow16To30Total(v)
+		return nil
+	case tscards.FieldYellow31To45Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow31To45Total(v)
+		return nil
+	case tscards.FieldYellow46To60Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow46To60Total(v)
+		return nil
+	case tscards.FieldYellow61To75Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow61To75Total(v)
+		return nil
+	case tscards.FieldYellow76To90Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow76To90Total(v)
+		return nil
+	case tscards.FieldYellow91to105Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow91to105Total(v)
+		return nil
+	case tscards.FieldYellow106To120Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow106To120Total(v)
+		return nil
+	case tscards.FieldRed0To15Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed0To15Total(v)
+		return nil
+	case tscards.FieldRed16To30Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed16To30Total(v)
+		return nil
+	case tscards.FieldRed31To45Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed31To45Total(v)
+		return nil
+	case tscards.FieldRed46To60Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed46To60Total(v)
+		return nil
+	case tscards.FieldRed61To75Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed61To75Total(v)
+		return nil
+	case tscards.FieldRed76To90Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed76To90Total(v)
+		return nil
+	case tscards.FieldRed91to105Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed91to105Total(v)
+		return nil
+	case tscards.FieldRed106To120Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed106To120Total(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSCards numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TSCardsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tscards.FieldYellow0To15Total) {
+		fields = append(fields, tscards.FieldYellow0To15Total)
+	}
+	if m.FieldCleared(tscards.FieldYellow0To15Percentage) {
+		fields = append(fields, tscards.FieldYellow0To15Percentage)
+	}
+	if m.FieldCleared(tscards.FieldYellow16To30Total) {
+		fields = append(fields, tscards.FieldYellow16To30Total)
+	}
+	if m.FieldCleared(tscards.FieldYellow16To30Percentage) {
+		fields = append(fields, tscards.FieldYellow16To30Percentage)
+	}
+	if m.FieldCleared(tscards.FieldYellow31To45Total) {
+		fields = append(fields, tscards.FieldYellow31To45Total)
+	}
+	if m.FieldCleared(tscards.FieldYellow31To45Percentage) {
+		fields = append(fields, tscards.FieldYellow31To45Percentage)
+	}
+	if m.FieldCleared(tscards.FieldYellow46To60Total) {
+		fields = append(fields, tscards.FieldYellow46To60Total)
+	}
+	if m.FieldCleared(tscards.FieldYellow46To60Percentage) {
+		fields = append(fields, tscards.FieldYellow46To60Percentage)
+	}
+	if m.FieldCleared(tscards.FieldYellow61To75Total) {
+		fields = append(fields, tscards.FieldYellow61To75Total)
+	}
+	if m.FieldCleared(tscards.FieldYellow61To75Percentage) {
+		fields = append(fields, tscards.FieldYellow61To75Percentage)
+	}
+	if m.FieldCleared(tscards.FieldYellow76To90Total) {
+		fields = append(fields, tscards.FieldYellow76To90Total)
+	}
+	if m.FieldCleared(tscards.FieldYellow76To90Percentage) {
+		fields = append(fields, tscards.FieldYellow76To90Percentage)
+	}
+	if m.FieldCleared(tscards.FieldYellow91to105Total) {
+		fields = append(fields, tscards.FieldYellow91to105Total)
+	}
+	if m.FieldCleared(tscards.FieldYellow91to105Percentage) {
+		fields = append(fields, tscards.FieldYellow91to105Percentage)
+	}
+	if m.FieldCleared(tscards.FieldYellow106To120Total) {
+		fields = append(fields, tscards.FieldYellow106To120Total)
+	}
+	if m.FieldCleared(tscards.FieldYellow106To120Percentage) {
+		fields = append(fields, tscards.FieldYellow106To120Percentage)
+	}
+	if m.FieldCleared(tscards.FieldRed0To15Total) {
+		fields = append(fields, tscards.FieldRed0To15Total)
+	}
+	if m.FieldCleared(tscards.FieldRed0To15Percentage) {
+		fields = append(fields, tscards.FieldRed0To15Percentage)
+	}
+	if m.FieldCleared(tscards.FieldRed16To30Total) {
+		fields = append(fields, tscards.FieldRed16To30Total)
+	}
+	if m.FieldCleared(tscards.FieldRed16To30Percentage) {
+		fields = append(fields, tscards.FieldRed16To30Percentage)
+	}
+	if m.FieldCleared(tscards.FieldRed31To45Total) {
+		fields = append(fields, tscards.FieldRed31To45Total)
+	}
+	if m.FieldCleared(tscards.FieldRed31To45Percentage) {
+		fields = append(fields, tscards.FieldRed31To45Percentage)
+	}
+	if m.FieldCleared(tscards.FieldRed46To60Total) {
+		fields = append(fields, tscards.FieldRed46To60Total)
+	}
+	if m.FieldCleared(tscards.FieldRed46To60Percentage) {
+		fields = append(fields, tscards.FieldRed46To60Percentage)
+	}
+	if m.FieldCleared(tscards.FieldRed61To75Total) {
+		fields = append(fields, tscards.FieldRed61To75Total)
+	}
+	if m.FieldCleared(tscards.FieldRed61To75Percentage) {
+		fields = append(fields, tscards.FieldRed61To75Percentage)
+	}
+	if m.FieldCleared(tscards.FieldRed76To90Total) {
+		fields = append(fields, tscards.FieldRed76To90Total)
+	}
+	if m.FieldCleared(tscards.FieldRed76To90Percentage) {
+		fields = append(fields, tscards.FieldRed76To90Percentage)
+	}
+	if m.FieldCleared(tscards.FieldRed91to105Total) {
+		fields = append(fields, tscards.FieldRed91to105Total)
+	}
+	if m.FieldCleared(tscards.FieldRed91to105Percentage) {
+		fields = append(fields, tscards.FieldRed91to105Percentage)
+	}
+	if m.FieldCleared(tscards.FieldRed106To120Total) {
+		fields = append(fields, tscards.FieldRed106To120Total)
+	}
+	if m.FieldCleared(tscards.FieldRed106To120Percentage) {
+		fields = append(fields, tscards.FieldRed106To120Percentage)
+	}
+	if m.FieldCleared(tscards.FieldLastUpdated) {
+		fields = append(fields, tscards.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TSCardsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TSCardsMutation) ClearField(name string) error {
+	switch name {
+	case tscards.FieldYellow0To15Total:
+		m.ClearYellow0To15Total()
+		return nil
+	case tscards.FieldYellow0To15Percentage:
+		m.ClearYellow0To15Percentage()
+		return nil
+	case tscards.FieldYellow16To30Total:
+		m.ClearYellow16To30Total()
+		return nil
+	case tscards.FieldYellow16To30Percentage:
+		m.ClearYellow16To30Percentage()
+		return nil
+	case tscards.FieldYellow31To45Total:
+		m.ClearYellow31To45Total()
+		return nil
+	case tscards.FieldYellow31To45Percentage:
+		m.ClearYellow31To45Percentage()
+		return nil
+	case tscards.FieldYellow46To60Total:
+		m.ClearYellow46To60Total()
+		return nil
+	case tscards.FieldYellow46To60Percentage:
+		m.ClearYellow46To60Percentage()
+		return nil
+	case tscards.FieldYellow61To75Total:
+		m.ClearYellow61To75Total()
+		return nil
+	case tscards.FieldYellow61To75Percentage:
+		m.ClearYellow61To75Percentage()
+		return nil
+	case tscards.FieldYellow76To90Total:
+		m.ClearYellow76To90Total()
+		return nil
+	case tscards.FieldYellow76To90Percentage:
+		m.ClearYellow76To90Percentage()
+		return nil
+	case tscards.FieldYellow91to105Total:
+		m.ClearYellow91to105Total()
+		return nil
+	case tscards.FieldYellow91to105Percentage:
+		m.ClearYellow91to105Percentage()
+		return nil
+	case tscards.FieldYellow106To120Total:
+		m.ClearYellow106To120Total()
+		return nil
+	case tscards.FieldYellow106To120Percentage:
+		m.ClearYellow106To120Percentage()
+		return nil
+	case tscards.FieldRed0To15Total:
+		m.ClearRed0To15Total()
+		return nil
+	case tscards.FieldRed0To15Percentage:
+		m.ClearRed0To15Percentage()
+		return nil
+	case tscards.FieldRed16To30Total:
+		m.ClearRed16To30Total()
+		return nil
+	case tscards.FieldRed16To30Percentage:
+		m.ClearRed16To30Percentage()
+		return nil
+	case tscards.FieldRed31To45Total:
+		m.ClearRed31To45Total()
+		return nil
+	case tscards.FieldRed31To45Percentage:
+		m.ClearRed31To45Percentage()
+		return nil
+	case tscards.FieldRed46To60Total:
+		m.ClearRed46To60Total()
+		return nil
+	case tscards.FieldRed46To60Percentage:
+		m.ClearRed46To60Percentage()
+		return nil
+	case tscards.FieldRed61To75Total:
+		m.ClearRed61To75Total()
+		return nil
+	case tscards.FieldRed61To75Percentage:
+		m.ClearRed61To75Percentage()
+		return nil
+	case tscards.FieldRed76To90Total:
+		m.ClearRed76To90Total()
+		return nil
+	case tscards.FieldRed76To90Percentage:
+		m.ClearRed76To90Percentage()
+		return nil
+	case tscards.FieldRed91to105Total:
+		m.ClearRed91to105Total()
+		return nil
+	case tscards.FieldRed91to105Percentage:
+		m.ClearRed91to105Percentage()
+		return nil
+	case tscards.FieldRed106To120Total:
+		m.ClearRed106To120Total()
+		return nil
+	case tscards.FieldRed106To120Percentage:
+		m.ClearRed106To120Percentage()
+		return nil
+	case tscards.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSCards nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TSCardsMutation) ResetField(name string) error {
+	switch name {
+	case tscards.FieldYellow0To15Total:
+		m.ResetYellow0To15Total()
+		return nil
+	case tscards.FieldYellow0To15Percentage:
+		m.ResetYellow0To15Percentage()
+		return nil
+	case tscards.FieldYellow16To30Total:
+		m.ResetYellow16To30Total()
+		return nil
+	case tscards.FieldYellow16To30Percentage:
+		m.ResetYellow16To30Percentage()
+		return nil
+	case tscards.FieldYellow31To45Total:
+		m.ResetYellow31To45Total()
+		return nil
+	case tscards.FieldYellow31To45Percentage:
+		m.ResetYellow31To45Percentage()
+		return nil
+	case tscards.FieldYellow46To60Total:
+		m.ResetYellow46To60Total()
+		return nil
+	case tscards.FieldYellow46To60Percentage:
+		m.ResetYellow46To60Percentage()
+		return nil
+	case tscards.FieldYellow61To75Total:
+		m.ResetYellow61To75Total()
+		return nil
+	case tscards.FieldYellow61To75Percentage:
+		m.ResetYellow61To75Percentage()
+		return nil
+	case tscards.FieldYellow76To90Total:
+		m.ResetYellow76To90Total()
+		return nil
+	case tscards.FieldYellow76To90Percentage:
+		m.ResetYellow76To90Percentage()
+		return nil
+	case tscards.FieldYellow91to105Total:
+		m.ResetYellow91to105Total()
+		return nil
+	case tscards.FieldYellow91to105Percentage:
+		m.ResetYellow91to105Percentage()
+		return nil
+	case tscards.FieldYellow106To120Total:
+		m.ResetYellow106To120Total()
+		return nil
+	case tscards.FieldYellow106To120Percentage:
+		m.ResetYellow106To120Percentage()
+		return nil
+	case tscards.FieldRed0To15Total:
+		m.ResetRed0To15Total()
+		return nil
+	case tscards.FieldRed0To15Percentage:
+		m.ResetRed0To15Percentage()
+		return nil
+	case tscards.FieldRed16To30Total:
+		m.ResetRed16To30Total()
+		return nil
+	case tscards.FieldRed16To30Percentage:
+		m.ResetRed16To30Percentage()
+		return nil
+	case tscards.FieldRed31To45Total:
+		m.ResetRed31To45Total()
+		return nil
+	case tscards.FieldRed31To45Percentage:
+		m.ResetRed31To45Percentage()
+		return nil
+	case tscards.FieldRed46To60Total:
+		m.ResetRed46To60Total()
+		return nil
+	case tscards.FieldRed46To60Percentage:
+		m.ResetRed46To60Percentage()
+		return nil
+	case tscards.FieldRed61To75Total:
+		m.ResetRed61To75Total()
+		return nil
+	case tscards.FieldRed61To75Percentage:
+		m.ResetRed61To75Percentage()
+		return nil
+	case tscards.FieldRed76To90Total:
+		m.ResetRed76To90Total()
+		return nil
+	case tscards.FieldRed76To90Percentage:
+		m.ResetRed76To90Percentage()
+		return nil
+	case tscards.FieldRed91to105Total:
+		m.ResetRed91to105Total()
+		return nil
+	case tscards.FieldRed91to105Percentage:
+		m.ResetRed91to105Percentage()
+		return nil
+	case tscards.FieldRed106To120Total:
+		m.ResetRed106To120Total()
+		return nil
+	case tscards.FieldRed106To120Percentage:
+		m.ResetRed106To120Percentage()
+		return nil
+	case tscards.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSCards field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TSCardsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.team != nil {
+		edges = append(edges, tscards.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TSCardsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tscards.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TSCardsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TSCardsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TSCardsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedteam {
+		edges = append(edges, tscards.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TSCardsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tscards.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TSCardsMutation) ClearEdge(name string) error {
+	switch name {
+	case tscards.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSCards unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TSCardsMutation) ResetEdge(name string) error {
+	switch name {
+	case tscards.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSCards edge %s", name)
+}
+
+// TSCleanSheetMutation represents an operation that mutates the TSCleanSheet nodes in the graph.
+type TSCleanSheetMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	home          *int
+	addhome       *int
+	away          *int
+	addaway       *int
+	total         *int
+	addtotal      *int
+	lastUpdated   *time.Time
+	clearedFields map[string]struct{}
+	team          *int
+	clearedteam   bool
+	done          bool
+	oldValue      func(context.Context) (*TSCleanSheet, error)
+	predicates    []predicate.TSCleanSheet
+}
+
+var _ ent.Mutation = (*TSCleanSheetMutation)(nil)
+
+// tscleansheetOption allows management of the mutation configuration using functional options.
+type tscleansheetOption func(*TSCleanSheetMutation)
+
+// newTSCleanSheetMutation creates new mutation for the TSCleanSheet entity.
+func newTSCleanSheetMutation(c config, op Op, opts ...tscleansheetOption) *TSCleanSheetMutation {
+	m := &TSCleanSheetMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTSCleanSheet,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTSCleanSheetID sets the ID field of the mutation.
+func withTSCleanSheetID(id int) tscleansheetOption {
+	return func(m *TSCleanSheetMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TSCleanSheet
+		)
+		m.oldValue = func(ctx context.Context) (*TSCleanSheet, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TSCleanSheet.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTSCleanSheet sets the old TSCleanSheet of the mutation.
+func withTSCleanSheet(node *TSCleanSheet) tscleansheetOption {
+	return func(m *TSCleanSheetMutation) {
+		m.oldValue = func(context.Context) (*TSCleanSheet, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TSCleanSheetMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TSCleanSheetMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TSCleanSheetMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TSCleanSheetMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TSCleanSheet.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetHome sets the "home" field.
+func (m *TSCleanSheetMutation) SetHome(i int) {
+	m.home = &i
+	m.addhome = nil
+}
+
+// Home returns the value of the "home" field in the mutation.
+func (m *TSCleanSheetMutation) Home() (r int, exists bool) {
+	v := m.home
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHome returns the old "home" field's value of the TSCleanSheet entity.
+// If the TSCleanSheet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCleanSheetMutation) OldHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHome: %w", err)
+	}
+	return oldValue.Home, nil
+}
+
+// AddHome adds i to the "home" field.
+func (m *TSCleanSheetMutation) AddHome(i int) {
+	if m.addhome != nil {
+		*m.addhome += i
+	} else {
+		m.addhome = &i
+	}
+}
+
+// AddedHome returns the value that was added to the "home" field in this mutation.
+func (m *TSCleanSheetMutation) AddedHome() (r int, exists bool) {
+	v := m.addhome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearHome clears the value of the "home" field.
+func (m *TSCleanSheetMutation) ClearHome() {
+	m.home = nil
+	m.addhome = nil
+	m.clearedFields[tscleansheet.FieldHome] = struct{}{}
+}
+
+// HomeCleared returns if the "home" field was cleared in this mutation.
+func (m *TSCleanSheetMutation) HomeCleared() bool {
+	_, ok := m.clearedFields[tscleansheet.FieldHome]
+	return ok
+}
+
+// ResetHome resets all changes to the "home" field.
+func (m *TSCleanSheetMutation) ResetHome() {
+	m.home = nil
+	m.addhome = nil
+	delete(m.clearedFields, tscleansheet.FieldHome)
+}
+
+// SetAway sets the "away" field.
+func (m *TSCleanSheetMutation) SetAway(i int) {
+	m.away = &i
+	m.addaway = nil
+}
+
+// Away returns the value of the "away" field in the mutation.
+func (m *TSCleanSheetMutation) Away() (r int, exists bool) {
+	v := m.away
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAway returns the old "away" field's value of the TSCleanSheet entity.
+// If the TSCleanSheet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCleanSheetMutation) OldAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAway: %w", err)
+	}
+	return oldValue.Away, nil
+}
+
+// AddAway adds i to the "away" field.
+func (m *TSCleanSheetMutation) AddAway(i int) {
+	if m.addaway != nil {
+		*m.addaway += i
+	} else {
+		m.addaway = &i
+	}
+}
+
+// AddedAway returns the value that was added to the "away" field in this mutation.
+func (m *TSCleanSheetMutation) AddedAway() (r int, exists bool) {
+	v := m.addaway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAway clears the value of the "away" field.
+func (m *TSCleanSheetMutation) ClearAway() {
+	m.away = nil
+	m.addaway = nil
+	m.clearedFields[tscleansheet.FieldAway] = struct{}{}
+}
+
+// AwayCleared returns if the "away" field was cleared in this mutation.
+func (m *TSCleanSheetMutation) AwayCleared() bool {
+	_, ok := m.clearedFields[tscleansheet.FieldAway]
+	return ok
+}
+
+// ResetAway resets all changes to the "away" field.
+func (m *TSCleanSheetMutation) ResetAway() {
+	m.away = nil
+	m.addaway = nil
+	delete(m.clearedFields, tscleansheet.FieldAway)
+}
+
+// SetTotal sets the "total" field.
+func (m *TSCleanSheetMutation) SetTotal(i int) {
+	m.total = &i
+	m.addtotal = nil
+}
+
+// Total returns the value of the "total" field in the mutation.
+func (m *TSCleanSheetMutation) Total() (r int, exists bool) {
+	v := m.total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTotal returns the old "total" field's value of the TSCleanSheet entity.
+// If the TSCleanSheet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCleanSheetMutation) OldTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTotal: %w", err)
+	}
+	return oldValue.Total, nil
+}
+
+// AddTotal adds i to the "total" field.
+func (m *TSCleanSheetMutation) AddTotal(i int) {
+	if m.addtotal != nil {
+		*m.addtotal += i
+	} else {
+		m.addtotal = &i
+	}
+}
+
+// AddedTotal returns the value that was added to the "total" field in this mutation.
+func (m *TSCleanSheetMutation) AddedTotal() (r int, exists bool) {
+	v := m.addtotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTotal clears the value of the "total" field.
+func (m *TSCleanSheetMutation) ClearTotal() {
+	m.total = nil
+	m.addtotal = nil
+	m.clearedFields[tscleansheet.FieldTotal] = struct{}{}
+}
+
+// TotalCleared returns if the "total" field was cleared in this mutation.
+func (m *TSCleanSheetMutation) TotalCleared() bool {
+	_, ok := m.clearedFields[tscleansheet.FieldTotal]
+	return ok
+}
+
+// ResetTotal resets all changes to the "total" field.
+func (m *TSCleanSheetMutation) ResetTotal() {
+	m.total = nil
+	m.addtotal = nil
+	delete(m.clearedFields, tscleansheet.FieldTotal)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TSCleanSheetMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TSCleanSheetMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the TSCleanSheet entity.
+// If the TSCleanSheet object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSCleanSheetMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TSCleanSheetMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[tscleansheet.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TSCleanSheetMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[tscleansheet.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TSCleanSheetMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, tscleansheet.FieldLastUpdated)
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *TSCleanSheetMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *TSCleanSheetMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *TSCleanSheetMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *TSCleanSheetMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *TSCleanSheetMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *TSCleanSheetMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the TSCleanSheetMutation builder.
+func (m *TSCleanSheetMutation) Where(ps ...predicate.TSCleanSheet) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TSCleanSheetMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TSCleanSheetMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TSCleanSheet, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TSCleanSheetMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TSCleanSheetMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TSCleanSheet).
+func (m *TSCleanSheetMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TSCleanSheetMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.home != nil {
+		fields = append(fields, tscleansheet.FieldHome)
+	}
+	if m.away != nil {
+		fields = append(fields, tscleansheet.FieldAway)
+	}
+	if m.total != nil {
+		fields = append(fields, tscleansheet.FieldTotal)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, tscleansheet.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TSCleanSheetMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tscleansheet.FieldHome:
+		return m.Home()
+	case tscleansheet.FieldAway:
+		return m.Away()
+	case tscleansheet.FieldTotal:
+		return m.Total()
+	case tscleansheet.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TSCleanSheetMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tscleansheet.FieldHome:
+		return m.OldHome(ctx)
+	case tscleansheet.FieldAway:
+		return m.OldAway(ctx)
+	case tscleansheet.FieldTotal:
+		return m.OldTotal(ctx)
+	case tscleansheet.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TSCleanSheet field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSCleanSheetMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tscleansheet.FieldHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHome(v)
+		return nil
+	case tscleansheet.FieldAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAway(v)
+		return nil
+	case tscleansheet.FieldTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTotal(v)
+		return nil
+	case tscleansheet.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSCleanSheet field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TSCleanSheetMutation) AddedFields() []string {
+	var fields []string
+	if m.addhome != nil {
+		fields = append(fields, tscleansheet.FieldHome)
+	}
+	if m.addaway != nil {
+		fields = append(fields, tscleansheet.FieldAway)
+	}
+	if m.addtotal != nil {
+		fields = append(fields, tscleansheet.FieldTotal)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TSCleanSheetMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tscleansheet.FieldHome:
+		return m.AddedHome()
+	case tscleansheet.FieldAway:
+		return m.AddedAway()
+	case tscleansheet.FieldTotal:
+		return m.AddedTotal()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSCleanSheetMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tscleansheet.FieldHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHome(v)
+		return nil
+	case tscleansheet.FieldAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAway(v)
+		return nil
+	case tscleansheet.FieldTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTotal(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSCleanSheet numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TSCleanSheetMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tscleansheet.FieldHome) {
+		fields = append(fields, tscleansheet.FieldHome)
+	}
+	if m.FieldCleared(tscleansheet.FieldAway) {
+		fields = append(fields, tscleansheet.FieldAway)
+	}
+	if m.FieldCleared(tscleansheet.FieldTotal) {
+		fields = append(fields, tscleansheet.FieldTotal)
+	}
+	if m.FieldCleared(tscleansheet.FieldLastUpdated) {
+		fields = append(fields, tscleansheet.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TSCleanSheetMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TSCleanSheetMutation) ClearField(name string) error {
+	switch name {
+	case tscleansheet.FieldHome:
+		m.ClearHome()
+		return nil
+	case tscleansheet.FieldAway:
+		m.ClearAway()
+		return nil
+	case tscleansheet.FieldTotal:
+		m.ClearTotal()
+		return nil
+	case tscleansheet.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSCleanSheet nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TSCleanSheetMutation) ResetField(name string) error {
+	switch name {
+	case tscleansheet.FieldHome:
+		m.ResetHome()
+		return nil
+	case tscleansheet.FieldAway:
+		m.ResetAway()
+		return nil
+	case tscleansheet.FieldTotal:
+		m.ResetTotal()
+		return nil
+	case tscleansheet.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSCleanSheet field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TSCleanSheetMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.team != nil {
+		edges = append(edges, tscleansheet.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TSCleanSheetMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tscleansheet.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TSCleanSheetMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TSCleanSheetMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TSCleanSheetMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedteam {
+		edges = append(edges, tscleansheet.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TSCleanSheetMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tscleansheet.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TSCleanSheetMutation) ClearEdge(name string) error {
+	switch name {
+	case tscleansheet.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSCleanSheet unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TSCleanSheetMutation) ResetEdge(name string) error {
+	switch name {
+	case tscleansheet.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSCleanSheet edge %s", name)
+}
+
+// TSFailedToScoreMutation represents an operation that mutates the TSFailedToScore nodes in the graph.
+type TSFailedToScoreMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	home          *int
+	addhome       *int
+	away          *int
+	addaway       *int
+	total         *int
+	addtotal      *int
+	lastUpdated   *time.Time
+	clearedFields map[string]struct{}
+	team          *int
+	clearedteam   bool
+	done          bool
+	oldValue      func(context.Context) (*TSFailedToScore, error)
+	predicates    []predicate.TSFailedToScore
+}
+
+var _ ent.Mutation = (*TSFailedToScoreMutation)(nil)
+
+// tsfailedtoscoreOption allows management of the mutation configuration using functional options.
+type tsfailedtoscoreOption func(*TSFailedToScoreMutation)
+
+// newTSFailedToScoreMutation creates new mutation for the TSFailedToScore entity.
+func newTSFailedToScoreMutation(c config, op Op, opts ...tsfailedtoscoreOption) *TSFailedToScoreMutation {
+	m := &TSFailedToScoreMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTSFailedToScore,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTSFailedToScoreID sets the ID field of the mutation.
+func withTSFailedToScoreID(id int) tsfailedtoscoreOption {
+	return func(m *TSFailedToScoreMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TSFailedToScore
+		)
+		m.oldValue = func(ctx context.Context) (*TSFailedToScore, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TSFailedToScore.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTSFailedToScore sets the old TSFailedToScore of the mutation.
+func withTSFailedToScore(node *TSFailedToScore) tsfailedtoscoreOption {
+	return func(m *TSFailedToScoreMutation) {
+		m.oldValue = func(context.Context) (*TSFailedToScore, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TSFailedToScoreMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TSFailedToScoreMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TSFailedToScoreMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TSFailedToScoreMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TSFailedToScore.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetHome sets the "home" field.
+func (m *TSFailedToScoreMutation) SetHome(i int) {
+	m.home = &i
+	m.addhome = nil
+}
+
+// Home returns the value of the "home" field in the mutation.
+func (m *TSFailedToScoreMutation) Home() (r int, exists bool) {
+	v := m.home
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldHome returns the old "home" field's value of the TSFailedToScore entity.
+// If the TSFailedToScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFailedToScoreMutation) OldHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldHome: %w", err)
+	}
+	return oldValue.Home, nil
+}
+
+// AddHome adds i to the "home" field.
+func (m *TSFailedToScoreMutation) AddHome(i int) {
+	if m.addhome != nil {
+		*m.addhome += i
+	} else {
+		m.addhome = &i
+	}
+}
+
+// AddedHome returns the value that was added to the "home" field in this mutation.
+func (m *TSFailedToScoreMutation) AddedHome() (r int, exists bool) {
+	v := m.addhome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearHome clears the value of the "home" field.
+func (m *TSFailedToScoreMutation) ClearHome() {
+	m.home = nil
+	m.addhome = nil
+	m.clearedFields[tsfailedtoscore.FieldHome] = struct{}{}
+}
+
+// HomeCleared returns if the "home" field was cleared in this mutation.
+func (m *TSFailedToScoreMutation) HomeCleared() bool {
+	_, ok := m.clearedFields[tsfailedtoscore.FieldHome]
+	return ok
+}
+
+// ResetHome resets all changes to the "home" field.
+func (m *TSFailedToScoreMutation) ResetHome() {
+	m.home = nil
+	m.addhome = nil
+	delete(m.clearedFields, tsfailedtoscore.FieldHome)
+}
+
+// SetAway sets the "away" field.
+func (m *TSFailedToScoreMutation) SetAway(i int) {
+	m.away = &i
+	m.addaway = nil
+}
+
+// Away returns the value of the "away" field in the mutation.
+func (m *TSFailedToScoreMutation) Away() (r int, exists bool) {
+	v := m.away
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAway returns the old "away" field's value of the TSFailedToScore entity.
+// If the TSFailedToScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFailedToScoreMutation) OldAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAway: %w", err)
+	}
+	return oldValue.Away, nil
+}
+
+// AddAway adds i to the "away" field.
+func (m *TSFailedToScoreMutation) AddAway(i int) {
+	if m.addaway != nil {
+		*m.addaway += i
+	} else {
+		m.addaway = &i
+	}
+}
+
+// AddedAway returns the value that was added to the "away" field in this mutation.
+func (m *TSFailedToScoreMutation) AddedAway() (r int, exists bool) {
+	v := m.addaway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearAway clears the value of the "away" field.
+func (m *TSFailedToScoreMutation) ClearAway() {
+	m.away = nil
+	m.addaway = nil
+	m.clearedFields[tsfailedtoscore.FieldAway] = struct{}{}
+}
+
+// AwayCleared returns if the "away" field was cleared in this mutation.
+func (m *TSFailedToScoreMutation) AwayCleared() bool {
+	_, ok := m.clearedFields[tsfailedtoscore.FieldAway]
+	return ok
+}
+
+// ResetAway resets all changes to the "away" field.
+func (m *TSFailedToScoreMutation) ResetAway() {
+	m.away = nil
+	m.addaway = nil
+	delete(m.clearedFields, tsfailedtoscore.FieldAway)
+}
+
+// SetTotal sets the "total" field.
+func (m *TSFailedToScoreMutation) SetTotal(i int) {
+	m.total = &i
+	m.addtotal = nil
+}
+
+// Total returns the value of the "total" field in the mutation.
+func (m *TSFailedToScoreMutation) Total() (r int, exists bool) {
+	v := m.total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTotal returns the old "total" field's value of the TSFailedToScore entity.
+// If the TSFailedToScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFailedToScoreMutation) OldTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTotal: %w", err)
+	}
+	return oldValue.Total, nil
+}
+
+// AddTotal adds i to the "total" field.
+func (m *TSFailedToScoreMutation) AddTotal(i int) {
+	if m.addtotal != nil {
+		*m.addtotal += i
+	} else {
+		m.addtotal = &i
+	}
+}
+
+// AddedTotal returns the value that was added to the "total" field in this mutation.
+func (m *TSFailedToScoreMutation) AddedTotal() (r int, exists bool) {
+	v := m.addtotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTotal clears the value of the "total" field.
+func (m *TSFailedToScoreMutation) ClearTotal() {
+	m.total = nil
+	m.addtotal = nil
+	m.clearedFields[tsfailedtoscore.FieldTotal] = struct{}{}
+}
+
+// TotalCleared returns if the "total" field was cleared in this mutation.
+func (m *TSFailedToScoreMutation) TotalCleared() bool {
+	_, ok := m.clearedFields[tsfailedtoscore.FieldTotal]
+	return ok
+}
+
+// ResetTotal resets all changes to the "total" field.
+func (m *TSFailedToScoreMutation) ResetTotal() {
+	m.total = nil
+	m.addtotal = nil
+	delete(m.clearedFields, tsfailedtoscore.FieldTotal)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TSFailedToScoreMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TSFailedToScoreMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the TSFailedToScore entity.
+// If the TSFailedToScore object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFailedToScoreMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TSFailedToScoreMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[tsfailedtoscore.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TSFailedToScoreMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[tsfailedtoscore.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TSFailedToScoreMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, tsfailedtoscore.FieldLastUpdated)
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *TSFailedToScoreMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *TSFailedToScoreMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *TSFailedToScoreMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *TSFailedToScoreMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *TSFailedToScoreMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *TSFailedToScoreMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the TSFailedToScoreMutation builder.
+func (m *TSFailedToScoreMutation) Where(ps ...predicate.TSFailedToScore) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TSFailedToScoreMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TSFailedToScoreMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TSFailedToScore, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TSFailedToScoreMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TSFailedToScoreMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TSFailedToScore).
+func (m *TSFailedToScoreMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TSFailedToScoreMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.home != nil {
+		fields = append(fields, tsfailedtoscore.FieldHome)
+	}
+	if m.away != nil {
+		fields = append(fields, tsfailedtoscore.FieldAway)
+	}
+	if m.total != nil {
+		fields = append(fields, tsfailedtoscore.FieldTotal)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, tsfailedtoscore.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TSFailedToScoreMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tsfailedtoscore.FieldHome:
+		return m.Home()
+	case tsfailedtoscore.FieldAway:
+		return m.Away()
+	case tsfailedtoscore.FieldTotal:
+		return m.Total()
+	case tsfailedtoscore.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TSFailedToScoreMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tsfailedtoscore.FieldHome:
+		return m.OldHome(ctx)
+	case tsfailedtoscore.FieldAway:
+		return m.OldAway(ctx)
+	case tsfailedtoscore.FieldTotal:
+		return m.OldTotal(ctx)
+	case tsfailedtoscore.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TSFailedToScore field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSFailedToScoreMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tsfailedtoscore.FieldHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetHome(v)
+		return nil
+	case tsfailedtoscore.FieldAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAway(v)
+		return nil
+	case tsfailedtoscore.FieldTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTotal(v)
+		return nil
+	case tsfailedtoscore.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSFailedToScore field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TSFailedToScoreMutation) AddedFields() []string {
+	var fields []string
+	if m.addhome != nil {
+		fields = append(fields, tsfailedtoscore.FieldHome)
+	}
+	if m.addaway != nil {
+		fields = append(fields, tsfailedtoscore.FieldAway)
+	}
+	if m.addtotal != nil {
+		fields = append(fields, tsfailedtoscore.FieldTotal)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TSFailedToScoreMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tsfailedtoscore.FieldHome:
+		return m.AddedHome()
+	case tsfailedtoscore.FieldAway:
+		return m.AddedAway()
+	case tsfailedtoscore.FieldTotal:
+		return m.AddedTotal()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSFailedToScoreMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tsfailedtoscore.FieldHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddHome(v)
+		return nil
+	case tsfailedtoscore.FieldAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAway(v)
+		return nil
+	case tsfailedtoscore.FieldTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTotal(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSFailedToScore numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TSFailedToScoreMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tsfailedtoscore.FieldHome) {
+		fields = append(fields, tsfailedtoscore.FieldHome)
+	}
+	if m.FieldCleared(tsfailedtoscore.FieldAway) {
+		fields = append(fields, tsfailedtoscore.FieldAway)
+	}
+	if m.FieldCleared(tsfailedtoscore.FieldTotal) {
+		fields = append(fields, tsfailedtoscore.FieldTotal)
+	}
+	if m.FieldCleared(tsfailedtoscore.FieldLastUpdated) {
+		fields = append(fields, tsfailedtoscore.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TSFailedToScoreMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TSFailedToScoreMutation) ClearField(name string) error {
+	switch name {
+	case tsfailedtoscore.FieldHome:
+		m.ClearHome()
+		return nil
+	case tsfailedtoscore.FieldAway:
+		m.ClearAway()
+		return nil
+	case tsfailedtoscore.FieldTotal:
+		m.ClearTotal()
+		return nil
+	case tsfailedtoscore.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSFailedToScore nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TSFailedToScoreMutation) ResetField(name string) error {
+	switch name {
+	case tsfailedtoscore.FieldHome:
+		m.ResetHome()
+		return nil
+	case tsfailedtoscore.FieldAway:
+		m.ResetAway()
+		return nil
+	case tsfailedtoscore.FieldTotal:
+		m.ResetTotal()
+		return nil
+	case tsfailedtoscore.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSFailedToScore field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TSFailedToScoreMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.team != nil {
+		edges = append(edges, tsfailedtoscore.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TSFailedToScoreMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tsfailedtoscore.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TSFailedToScoreMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TSFailedToScoreMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TSFailedToScoreMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedteam {
+		edges = append(edges, tsfailedtoscore.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TSFailedToScoreMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tsfailedtoscore.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TSFailedToScoreMutation) ClearEdge(name string) error {
+	switch name {
+	case tsfailedtoscore.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSFailedToScore unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TSFailedToScoreMutation) ResetEdge(name string) error {
+	switch name {
+	case tsfailedtoscore.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSFailedToScore edge %s", name)
+}
+
+// TSFixturesMutation represents an operation that mutates the TSFixtures nodes in the graph.
+type TSFixturesMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	playedHome     *int
+	addplayedHome  *int
+	playedAway     *int
+	addplayedAway  *int
+	playedTotal    *int
+	addplayedTotal *int
+	winsHome       *int
+	addwinsHome    *int
+	winsAway       *int
+	addwinsAway    *int
+	winsTotal      *int
+	addwinsTotal   *int
+	drawsHome      *int
+	adddrawsHome   *int
+	drawsAway      *int
+	adddrawsAway   *int
+	drawsTotal     *int
+	adddrawsTotal  *int
+	lossesHome     *int
+	addlossesHome  *int
+	lossesAway     *int
+	addlossesAway  *int
+	lossesTotal    *int
+	addlossesTotal *int
+	lastUpdated    *time.Time
+	clearedFields  map[string]struct{}
+	team           *int
+	clearedteam    bool
+	done           bool
+	oldValue       func(context.Context) (*TSFixtures, error)
+	predicates     []predicate.TSFixtures
+}
+
+var _ ent.Mutation = (*TSFixturesMutation)(nil)
+
+// tsfixturesOption allows management of the mutation configuration using functional options.
+type tsfixturesOption func(*TSFixturesMutation)
+
+// newTSFixturesMutation creates new mutation for the TSFixtures entity.
+func newTSFixturesMutation(c config, op Op, opts ...tsfixturesOption) *TSFixturesMutation {
+	m := &TSFixturesMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTSFixtures,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTSFixturesID sets the ID field of the mutation.
+func withTSFixturesID(id int) tsfixturesOption {
+	return func(m *TSFixturesMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TSFixtures
+		)
+		m.oldValue = func(ctx context.Context) (*TSFixtures, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TSFixtures.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTSFixtures sets the old TSFixtures of the mutation.
+func withTSFixtures(node *TSFixtures) tsfixturesOption {
+	return func(m *TSFixturesMutation) {
+		m.oldValue = func(context.Context) (*TSFixtures, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TSFixturesMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TSFixturesMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TSFixturesMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TSFixturesMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TSFixtures.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPlayedHome sets the "playedHome" field.
+func (m *TSFixturesMutation) SetPlayedHome(i int) {
+	m.playedHome = &i
+	m.addplayedHome = nil
+}
+
+// PlayedHome returns the value of the "playedHome" field in the mutation.
+func (m *TSFixturesMutation) PlayedHome() (r int, exists bool) {
+	v := m.playedHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlayedHome returns the old "playedHome" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldPlayedHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlayedHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlayedHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlayedHome: %w", err)
+	}
+	return oldValue.PlayedHome, nil
+}
+
+// AddPlayedHome adds i to the "playedHome" field.
+func (m *TSFixturesMutation) AddPlayedHome(i int) {
+	if m.addplayedHome != nil {
+		*m.addplayedHome += i
+	} else {
+		m.addplayedHome = &i
+	}
+}
+
+// AddedPlayedHome returns the value that was added to the "playedHome" field in this mutation.
+func (m *TSFixturesMutation) AddedPlayedHome() (r int, exists bool) {
+	v := m.addplayedHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPlayedHome clears the value of the "playedHome" field.
+func (m *TSFixturesMutation) ClearPlayedHome() {
+	m.playedHome = nil
+	m.addplayedHome = nil
+	m.clearedFields[tsfixtures.FieldPlayedHome] = struct{}{}
+}
+
+// PlayedHomeCleared returns if the "playedHome" field was cleared in this mutation.
+func (m *TSFixturesMutation) PlayedHomeCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldPlayedHome]
+	return ok
+}
+
+// ResetPlayedHome resets all changes to the "playedHome" field.
+func (m *TSFixturesMutation) ResetPlayedHome() {
+	m.playedHome = nil
+	m.addplayedHome = nil
+	delete(m.clearedFields, tsfixtures.FieldPlayedHome)
+}
+
+// SetPlayedAway sets the "playedAway" field.
+func (m *TSFixturesMutation) SetPlayedAway(i int) {
+	m.playedAway = &i
+	m.addplayedAway = nil
+}
+
+// PlayedAway returns the value of the "playedAway" field in the mutation.
+func (m *TSFixturesMutation) PlayedAway() (r int, exists bool) {
+	v := m.playedAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlayedAway returns the old "playedAway" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldPlayedAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlayedAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlayedAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlayedAway: %w", err)
+	}
+	return oldValue.PlayedAway, nil
+}
+
+// AddPlayedAway adds i to the "playedAway" field.
+func (m *TSFixturesMutation) AddPlayedAway(i int) {
+	if m.addplayedAway != nil {
+		*m.addplayedAway += i
+	} else {
+		m.addplayedAway = &i
+	}
+}
+
+// AddedPlayedAway returns the value that was added to the "playedAway" field in this mutation.
+func (m *TSFixturesMutation) AddedPlayedAway() (r int, exists bool) {
+	v := m.addplayedAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPlayedAway clears the value of the "playedAway" field.
+func (m *TSFixturesMutation) ClearPlayedAway() {
+	m.playedAway = nil
+	m.addplayedAway = nil
+	m.clearedFields[tsfixtures.FieldPlayedAway] = struct{}{}
+}
+
+// PlayedAwayCleared returns if the "playedAway" field was cleared in this mutation.
+func (m *TSFixturesMutation) PlayedAwayCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldPlayedAway]
+	return ok
+}
+
+// ResetPlayedAway resets all changes to the "playedAway" field.
+func (m *TSFixturesMutation) ResetPlayedAway() {
+	m.playedAway = nil
+	m.addplayedAway = nil
+	delete(m.clearedFields, tsfixtures.FieldPlayedAway)
+}
+
+// SetPlayedTotal sets the "playedTotal" field.
+func (m *TSFixturesMutation) SetPlayedTotal(i int) {
+	m.playedTotal = &i
+	m.addplayedTotal = nil
+}
+
+// PlayedTotal returns the value of the "playedTotal" field in the mutation.
+func (m *TSFixturesMutation) PlayedTotal() (r int, exists bool) {
+	v := m.playedTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlayedTotal returns the old "playedTotal" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldPlayedTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlayedTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlayedTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlayedTotal: %w", err)
+	}
+	return oldValue.PlayedTotal, nil
+}
+
+// AddPlayedTotal adds i to the "playedTotal" field.
+func (m *TSFixturesMutation) AddPlayedTotal(i int) {
+	if m.addplayedTotal != nil {
+		*m.addplayedTotal += i
+	} else {
+		m.addplayedTotal = &i
+	}
+}
+
+// AddedPlayedTotal returns the value that was added to the "playedTotal" field in this mutation.
+func (m *TSFixturesMutation) AddedPlayedTotal() (r int, exists bool) {
+	v := m.addplayedTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearPlayedTotal clears the value of the "playedTotal" field.
+func (m *TSFixturesMutation) ClearPlayedTotal() {
+	m.playedTotal = nil
+	m.addplayedTotal = nil
+	m.clearedFields[tsfixtures.FieldPlayedTotal] = struct{}{}
+}
+
+// PlayedTotalCleared returns if the "playedTotal" field was cleared in this mutation.
+func (m *TSFixturesMutation) PlayedTotalCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldPlayedTotal]
+	return ok
+}
+
+// ResetPlayedTotal resets all changes to the "playedTotal" field.
+func (m *TSFixturesMutation) ResetPlayedTotal() {
+	m.playedTotal = nil
+	m.addplayedTotal = nil
+	delete(m.clearedFields, tsfixtures.FieldPlayedTotal)
+}
+
+// SetWinsHome sets the "winsHome" field.
+func (m *TSFixturesMutation) SetWinsHome(i int) {
+	m.winsHome = &i
+	m.addwinsHome = nil
+}
+
+// WinsHome returns the value of the "winsHome" field in the mutation.
+func (m *TSFixturesMutation) WinsHome() (r int, exists bool) {
+	v := m.winsHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWinsHome returns the old "winsHome" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldWinsHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWinsHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWinsHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWinsHome: %w", err)
+	}
+	return oldValue.WinsHome, nil
+}
+
+// AddWinsHome adds i to the "winsHome" field.
+func (m *TSFixturesMutation) AddWinsHome(i int) {
+	if m.addwinsHome != nil {
+		*m.addwinsHome += i
+	} else {
+		m.addwinsHome = &i
+	}
+}
+
+// AddedWinsHome returns the value that was added to the "winsHome" field in this mutation.
+func (m *TSFixturesMutation) AddedWinsHome() (r int, exists bool) {
+	v := m.addwinsHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWinsHome clears the value of the "winsHome" field.
+func (m *TSFixturesMutation) ClearWinsHome() {
+	m.winsHome = nil
+	m.addwinsHome = nil
+	m.clearedFields[tsfixtures.FieldWinsHome] = struct{}{}
+}
+
+// WinsHomeCleared returns if the "winsHome" field was cleared in this mutation.
+func (m *TSFixturesMutation) WinsHomeCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldWinsHome]
+	return ok
+}
+
+// ResetWinsHome resets all changes to the "winsHome" field.
+func (m *TSFixturesMutation) ResetWinsHome() {
+	m.winsHome = nil
+	m.addwinsHome = nil
+	delete(m.clearedFields, tsfixtures.FieldWinsHome)
+}
+
+// SetWinsAway sets the "winsAway" field.
+func (m *TSFixturesMutation) SetWinsAway(i int) {
+	m.winsAway = &i
+	m.addwinsAway = nil
+}
+
+// WinsAway returns the value of the "winsAway" field in the mutation.
+func (m *TSFixturesMutation) WinsAway() (r int, exists bool) {
+	v := m.winsAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWinsAway returns the old "winsAway" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldWinsAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWinsAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWinsAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWinsAway: %w", err)
+	}
+	return oldValue.WinsAway, nil
+}
+
+// AddWinsAway adds i to the "winsAway" field.
+func (m *TSFixturesMutation) AddWinsAway(i int) {
+	if m.addwinsAway != nil {
+		*m.addwinsAway += i
+	} else {
+		m.addwinsAway = &i
+	}
+}
+
+// AddedWinsAway returns the value that was added to the "winsAway" field in this mutation.
+func (m *TSFixturesMutation) AddedWinsAway() (r int, exists bool) {
+	v := m.addwinsAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWinsAway clears the value of the "winsAway" field.
+func (m *TSFixturesMutation) ClearWinsAway() {
+	m.winsAway = nil
+	m.addwinsAway = nil
+	m.clearedFields[tsfixtures.FieldWinsAway] = struct{}{}
+}
+
+// WinsAwayCleared returns if the "winsAway" field was cleared in this mutation.
+func (m *TSFixturesMutation) WinsAwayCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldWinsAway]
+	return ok
+}
+
+// ResetWinsAway resets all changes to the "winsAway" field.
+func (m *TSFixturesMutation) ResetWinsAway() {
+	m.winsAway = nil
+	m.addwinsAway = nil
+	delete(m.clearedFields, tsfixtures.FieldWinsAway)
+}
+
+// SetWinsTotal sets the "winsTotal" field.
+func (m *TSFixturesMutation) SetWinsTotal(i int) {
+	m.winsTotal = &i
+	m.addwinsTotal = nil
+}
+
+// WinsTotal returns the value of the "winsTotal" field in the mutation.
+func (m *TSFixturesMutation) WinsTotal() (r int, exists bool) {
+	v := m.winsTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldWinsTotal returns the old "winsTotal" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldWinsTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldWinsTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldWinsTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldWinsTotal: %w", err)
+	}
+	return oldValue.WinsTotal, nil
+}
+
+// AddWinsTotal adds i to the "winsTotal" field.
+func (m *TSFixturesMutation) AddWinsTotal(i int) {
+	if m.addwinsTotal != nil {
+		*m.addwinsTotal += i
+	} else {
+		m.addwinsTotal = &i
+	}
+}
+
+// AddedWinsTotal returns the value that was added to the "winsTotal" field in this mutation.
+func (m *TSFixturesMutation) AddedWinsTotal() (r int, exists bool) {
+	v := m.addwinsTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearWinsTotal clears the value of the "winsTotal" field.
+func (m *TSFixturesMutation) ClearWinsTotal() {
+	m.winsTotal = nil
+	m.addwinsTotal = nil
+	m.clearedFields[tsfixtures.FieldWinsTotal] = struct{}{}
+}
+
+// WinsTotalCleared returns if the "winsTotal" field was cleared in this mutation.
+func (m *TSFixturesMutation) WinsTotalCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldWinsTotal]
+	return ok
+}
+
+// ResetWinsTotal resets all changes to the "winsTotal" field.
+func (m *TSFixturesMutation) ResetWinsTotal() {
+	m.winsTotal = nil
+	m.addwinsTotal = nil
+	delete(m.clearedFields, tsfixtures.FieldWinsTotal)
+}
+
+// SetDrawsHome sets the "drawsHome" field.
+func (m *TSFixturesMutation) SetDrawsHome(i int) {
+	m.drawsHome = &i
+	m.adddrawsHome = nil
+}
+
+// DrawsHome returns the value of the "drawsHome" field in the mutation.
+func (m *TSFixturesMutation) DrawsHome() (r int, exists bool) {
+	v := m.drawsHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDrawsHome returns the old "drawsHome" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldDrawsHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDrawsHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDrawsHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDrawsHome: %w", err)
+	}
+	return oldValue.DrawsHome, nil
+}
+
+// AddDrawsHome adds i to the "drawsHome" field.
+func (m *TSFixturesMutation) AddDrawsHome(i int) {
+	if m.adddrawsHome != nil {
+		*m.adddrawsHome += i
+	} else {
+		m.adddrawsHome = &i
+	}
+}
+
+// AddedDrawsHome returns the value that was added to the "drawsHome" field in this mutation.
+func (m *TSFixturesMutation) AddedDrawsHome() (r int, exists bool) {
+	v := m.adddrawsHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDrawsHome clears the value of the "drawsHome" field.
+func (m *TSFixturesMutation) ClearDrawsHome() {
+	m.drawsHome = nil
+	m.adddrawsHome = nil
+	m.clearedFields[tsfixtures.FieldDrawsHome] = struct{}{}
+}
+
+// DrawsHomeCleared returns if the "drawsHome" field was cleared in this mutation.
+func (m *TSFixturesMutation) DrawsHomeCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldDrawsHome]
+	return ok
+}
+
+// ResetDrawsHome resets all changes to the "drawsHome" field.
+func (m *TSFixturesMutation) ResetDrawsHome() {
+	m.drawsHome = nil
+	m.adddrawsHome = nil
+	delete(m.clearedFields, tsfixtures.FieldDrawsHome)
+}
+
+// SetDrawsAway sets the "drawsAway" field.
+func (m *TSFixturesMutation) SetDrawsAway(i int) {
+	m.drawsAway = &i
+	m.adddrawsAway = nil
+}
+
+// DrawsAway returns the value of the "drawsAway" field in the mutation.
+func (m *TSFixturesMutation) DrawsAway() (r int, exists bool) {
+	v := m.drawsAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDrawsAway returns the old "drawsAway" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldDrawsAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDrawsAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDrawsAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDrawsAway: %w", err)
+	}
+	return oldValue.DrawsAway, nil
+}
+
+// AddDrawsAway adds i to the "drawsAway" field.
+func (m *TSFixturesMutation) AddDrawsAway(i int) {
+	if m.adddrawsAway != nil {
+		*m.adddrawsAway += i
+	} else {
+		m.adddrawsAway = &i
+	}
+}
+
+// AddedDrawsAway returns the value that was added to the "drawsAway" field in this mutation.
+func (m *TSFixturesMutation) AddedDrawsAway() (r int, exists bool) {
+	v := m.adddrawsAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDrawsAway clears the value of the "drawsAway" field.
+func (m *TSFixturesMutation) ClearDrawsAway() {
+	m.drawsAway = nil
+	m.adddrawsAway = nil
+	m.clearedFields[tsfixtures.FieldDrawsAway] = struct{}{}
+}
+
+// DrawsAwayCleared returns if the "drawsAway" field was cleared in this mutation.
+func (m *TSFixturesMutation) DrawsAwayCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldDrawsAway]
+	return ok
+}
+
+// ResetDrawsAway resets all changes to the "drawsAway" field.
+func (m *TSFixturesMutation) ResetDrawsAway() {
+	m.drawsAway = nil
+	m.adddrawsAway = nil
+	delete(m.clearedFields, tsfixtures.FieldDrawsAway)
+}
+
+// SetDrawsTotal sets the "drawsTotal" field.
+func (m *TSFixturesMutation) SetDrawsTotal(i int) {
+	m.drawsTotal = &i
+	m.adddrawsTotal = nil
+}
+
+// DrawsTotal returns the value of the "drawsTotal" field in the mutation.
+func (m *TSFixturesMutation) DrawsTotal() (r int, exists bool) {
+	v := m.drawsTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDrawsTotal returns the old "drawsTotal" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldDrawsTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDrawsTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDrawsTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDrawsTotal: %w", err)
+	}
+	return oldValue.DrawsTotal, nil
+}
+
+// AddDrawsTotal adds i to the "drawsTotal" field.
+func (m *TSFixturesMutation) AddDrawsTotal(i int) {
+	if m.adddrawsTotal != nil {
+		*m.adddrawsTotal += i
+	} else {
+		m.adddrawsTotal = &i
+	}
+}
+
+// AddedDrawsTotal returns the value that was added to the "drawsTotal" field in this mutation.
+func (m *TSFixturesMutation) AddedDrawsTotal() (r int, exists bool) {
+	v := m.adddrawsTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearDrawsTotal clears the value of the "drawsTotal" field.
+func (m *TSFixturesMutation) ClearDrawsTotal() {
+	m.drawsTotal = nil
+	m.adddrawsTotal = nil
+	m.clearedFields[tsfixtures.FieldDrawsTotal] = struct{}{}
+}
+
+// DrawsTotalCleared returns if the "drawsTotal" field was cleared in this mutation.
+func (m *TSFixturesMutation) DrawsTotalCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldDrawsTotal]
+	return ok
+}
+
+// ResetDrawsTotal resets all changes to the "drawsTotal" field.
+func (m *TSFixturesMutation) ResetDrawsTotal() {
+	m.drawsTotal = nil
+	m.adddrawsTotal = nil
+	delete(m.clearedFields, tsfixtures.FieldDrawsTotal)
+}
+
+// SetLossesHome sets the "lossesHome" field.
+func (m *TSFixturesMutation) SetLossesHome(i int) {
+	m.lossesHome = &i
+	m.addlossesHome = nil
+}
+
+// LossesHome returns the value of the "lossesHome" field in the mutation.
+func (m *TSFixturesMutation) LossesHome() (r int, exists bool) {
+	v := m.lossesHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLossesHome returns the old "lossesHome" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldLossesHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLossesHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLossesHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLossesHome: %w", err)
+	}
+	return oldValue.LossesHome, nil
+}
+
+// AddLossesHome adds i to the "lossesHome" field.
+func (m *TSFixturesMutation) AddLossesHome(i int) {
+	if m.addlossesHome != nil {
+		*m.addlossesHome += i
+	} else {
+		m.addlossesHome = &i
+	}
+}
+
+// AddedLossesHome returns the value that was added to the "lossesHome" field in this mutation.
+func (m *TSFixturesMutation) AddedLossesHome() (r int, exists bool) {
+	v := m.addlossesHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLossesHome clears the value of the "lossesHome" field.
+func (m *TSFixturesMutation) ClearLossesHome() {
+	m.lossesHome = nil
+	m.addlossesHome = nil
+	m.clearedFields[tsfixtures.FieldLossesHome] = struct{}{}
+}
+
+// LossesHomeCleared returns if the "lossesHome" field was cleared in this mutation.
+func (m *TSFixturesMutation) LossesHomeCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldLossesHome]
+	return ok
+}
+
+// ResetLossesHome resets all changes to the "lossesHome" field.
+func (m *TSFixturesMutation) ResetLossesHome() {
+	m.lossesHome = nil
+	m.addlossesHome = nil
+	delete(m.clearedFields, tsfixtures.FieldLossesHome)
+}
+
+// SetLossesAway sets the "lossesAway" field.
+func (m *TSFixturesMutation) SetLossesAway(i int) {
+	m.lossesAway = &i
+	m.addlossesAway = nil
+}
+
+// LossesAway returns the value of the "lossesAway" field in the mutation.
+func (m *TSFixturesMutation) LossesAway() (r int, exists bool) {
+	v := m.lossesAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLossesAway returns the old "lossesAway" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldLossesAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLossesAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLossesAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLossesAway: %w", err)
+	}
+	return oldValue.LossesAway, nil
+}
+
+// AddLossesAway adds i to the "lossesAway" field.
+func (m *TSFixturesMutation) AddLossesAway(i int) {
+	if m.addlossesAway != nil {
+		*m.addlossesAway += i
+	} else {
+		m.addlossesAway = &i
+	}
+}
+
+// AddedLossesAway returns the value that was added to the "lossesAway" field in this mutation.
+func (m *TSFixturesMutation) AddedLossesAway() (r int, exists bool) {
+	v := m.addlossesAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLossesAway clears the value of the "lossesAway" field.
+func (m *TSFixturesMutation) ClearLossesAway() {
+	m.lossesAway = nil
+	m.addlossesAway = nil
+	m.clearedFields[tsfixtures.FieldLossesAway] = struct{}{}
+}
+
+// LossesAwayCleared returns if the "lossesAway" field was cleared in this mutation.
+func (m *TSFixturesMutation) LossesAwayCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldLossesAway]
+	return ok
+}
+
+// ResetLossesAway resets all changes to the "lossesAway" field.
+func (m *TSFixturesMutation) ResetLossesAway() {
+	m.lossesAway = nil
+	m.addlossesAway = nil
+	delete(m.clearedFields, tsfixtures.FieldLossesAway)
+}
+
+// SetLossesTotal sets the "lossesTotal" field.
+func (m *TSFixturesMutation) SetLossesTotal(i int) {
+	m.lossesTotal = &i
+	m.addlossesTotal = nil
+}
+
+// LossesTotal returns the value of the "lossesTotal" field in the mutation.
+func (m *TSFixturesMutation) LossesTotal() (r int, exists bool) {
+	v := m.lossesTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLossesTotal returns the old "lossesTotal" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldLossesTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLossesTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLossesTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLossesTotal: %w", err)
+	}
+	return oldValue.LossesTotal, nil
+}
+
+// AddLossesTotal adds i to the "lossesTotal" field.
+func (m *TSFixturesMutation) AddLossesTotal(i int) {
+	if m.addlossesTotal != nil {
+		*m.addlossesTotal += i
+	} else {
+		m.addlossesTotal = &i
+	}
+}
+
+// AddedLossesTotal returns the value that was added to the "lossesTotal" field in this mutation.
+func (m *TSFixturesMutation) AddedLossesTotal() (r int, exists bool) {
+	v := m.addlossesTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearLossesTotal clears the value of the "lossesTotal" field.
+func (m *TSFixturesMutation) ClearLossesTotal() {
+	m.lossesTotal = nil
+	m.addlossesTotal = nil
+	m.clearedFields[tsfixtures.FieldLossesTotal] = struct{}{}
+}
+
+// LossesTotalCleared returns if the "lossesTotal" field was cleared in this mutation.
+func (m *TSFixturesMutation) LossesTotalCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldLossesTotal]
+	return ok
+}
+
+// ResetLossesTotal resets all changes to the "lossesTotal" field.
+func (m *TSFixturesMutation) ResetLossesTotal() {
+	m.lossesTotal = nil
+	m.addlossesTotal = nil
+	delete(m.clearedFields, tsfixtures.FieldLossesTotal)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TSFixturesMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TSFixturesMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the TSFixtures entity.
+// If the TSFixtures object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSFixturesMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TSFixturesMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[tsfixtures.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TSFixturesMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[tsfixtures.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TSFixturesMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, tsfixtures.FieldLastUpdated)
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *TSFixturesMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *TSFixturesMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *TSFixturesMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *TSFixturesMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *TSFixturesMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *TSFixturesMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the TSFixturesMutation builder.
+func (m *TSFixturesMutation) Where(ps ...predicate.TSFixtures) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TSFixturesMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TSFixturesMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TSFixtures, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TSFixturesMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TSFixturesMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TSFixtures).
+func (m *TSFixturesMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TSFixturesMutation) Fields() []string {
+	fields := make([]string, 0, 13)
+	if m.playedHome != nil {
+		fields = append(fields, tsfixtures.FieldPlayedHome)
+	}
+	if m.playedAway != nil {
+		fields = append(fields, tsfixtures.FieldPlayedAway)
+	}
+	if m.playedTotal != nil {
+		fields = append(fields, tsfixtures.FieldPlayedTotal)
+	}
+	if m.winsHome != nil {
+		fields = append(fields, tsfixtures.FieldWinsHome)
+	}
+	if m.winsAway != nil {
+		fields = append(fields, tsfixtures.FieldWinsAway)
+	}
+	if m.winsTotal != nil {
+		fields = append(fields, tsfixtures.FieldWinsTotal)
+	}
+	if m.drawsHome != nil {
+		fields = append(fields, tsfixtures.FieldDrawsHome)
+	}
+	if m.drawsAway != nil {
+		fields = append(fields, tsfixtures.FieldDrawsAway)
+	}
+	if m.drawsTotal != nil {
+		fields = append(fields, tsfixtures.FieldDrawsTotal)
+	}
+	if m.lossesHome != nil {
+		fields = append(fields, tsfixtures.FieldLossesHome)
+	}
+	if m.lossesAway != nil {
+		fields = append(fields, tsfixtures.FieldLossesAway)
+	}
+	if m.lossesTotal != nil {
+		fields = append(fields, tsfixtures.FieldLossesTotal)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, tsfixtures.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TSFixturesMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tsfixtures.FieldPlayedHome:
+		return m.PlayedHome()
+	case tsfixtures.FieldPlayedAway:
+		return m.PlayedAway()
+	case tsfixtures.FieldPlayedTotal:
+		return m.PlayedTotal()
+	case tsfixtures.FieldWinsHome:
+		return m.WinsHome()
+	case tsfixtures.FieldWinsAway:
+		return m.WinsAway()
+	case tsfixtures.FieldWinsTotal:
+		return m.WinsTotal()
+	case tsfixtures.FieldDrawsHome:
+		return m.DrawsHome()
+	case tsfixtures.FieldDrawsAway:
+		return m.DrawsAway()
+	case tsfixtures.FieldDrawsTotal:
+		return m.DrawsTotal()
+	case tsfixtures.FieldLossesHome:
+		return m.LossesHome()
+	case tsfixtures.FieldLossesAway:
+		return m.LossesAway()
+	case tsfixtures.FieldLossesTotal:
+		return m.LossesTotal()
+	case tsfixtures.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TSFixturesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tsfixtures.FieldPlayedHome:
+		return m.OldPlayedHome(ctx)
+	case tsfixtures.FieldPlayedAway:
+		return m.OldPlayedAway(ctx)
+	case tsfixtures.FieldPlayedTotal:
+		return m.OldPlayedTotal(ctx)
+	case tsfixtures.FieldWinsHome:
+		return m.OldWinsHome(ctx)
+	case tsfixtures.FieldWinsAway:
+		return m.OldWinsAway(ctx)
+	case tsfixtures.FieldWinsTotal:
+		return m.OldWinsTotal(ctx)
+	case tsfixtures.FieldDrawsHome:
+		return m.OldDrawsHome(ctx)
+	case tsfixtures.FieldDrawsAway:
+		return m.OldDrawsAway(ctx)
+	case tsfixtures.FieldDrawsTotal:
+		return m.OldDrawsTotal(ctx)
+	case tsfixtures.FieldLossesHome:
+		return m.OldLossesHome(ctx)
+	case tsfixtures.FieldLossesAway:
+		return m.OldLossesAway(ctx)
+	case tsfixtures.FieldLossesTotal:
+		return m.OldLossesTotal(ctx)
+	case tsfixtures.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TSFixtures field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSFixturesMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tsfixtures.FieldPlayedHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlayedHome(v)
+		return nil
+	case tsfixtures.FieldPlayedAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlayedAway(v)
+		return nil
+	case tsfixtures.FieldPlayedTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlayedTotal(v)
+		return nil
+	case tsfixtures.FieldWinsHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWinsHome(v)
+		return nil
+	case tsfixtures.FieldWinsAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWinsAway(v)
+		return nil
+	case tsfixtures.FieldWinsTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetWinsTotal(v)
+		return nil
+	case tsfixtures.FieldDrawsHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDrawsHome(v)
+		return nil
+	case tsfixtures.FieldDrawsAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDrawsAway(v)
+		return nil
+	case tsfixtures.FieldDrawsTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDrawsTotal(v)
+		return nil
+	case tsfixtures.FieldLossesHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLossesHome(v)
+		return nil
+	case tsfixtures.FieldLossesAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLossesAway(v)
+		return nil
+	case tsfixtures.FieldLossesTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLossesTotal(v)
+		return nil
+	case tsfixtures.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSFixtures field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TSFixturesMutation) AddedFields() []string {
+	var fields []string
+	if m.addplayedHome != nil {
+		fields = append(fields, tsfixtures.FieldPlayedHome)
+	}
+	if m.addplayedAway != nil {
+		fields = append(fields, tsfixtures.FieldPlayedAway)
+	}
+	if m.addplayedTotal != nil {
+		fields = append(fields, tsfixtures.FieldPlayedTotal)
+	}
+	if m.addwinsHome != nil {
+		fields = append(fields, tsfixtures.FieldWinsHome)
+	}
+	if m.addwinsAway != nil {
+		fields = append(fields, tsfixtures.FieldWinsAway)
+	}
+	if m.addwinsTotal != nil {
+		fields = append(fields, tsfixtures.FieldWinsTotal)
+	}
+	if m.adddrawsHome != nil {
+		fields = append(fields, tsfixtures.FieldDrawsHome)
+	}
+	if m.adddrawsAway != nil {
+		fields = append(fields, tsfixtures.FieldDrawsAway)
+	}
+	if m.adddrawsTotal != nil {
+		fields = append(fields, tsfixtures.FieldDrawsTotal)
+	}
+	if m.addlossesHome != nil {
+		fields = append(fields, tsfixtures.FieldLossesHome)
+	}
+	if m.addlossesAway != nil {
+		fields = append(fields, tsfixtures.FieldLossesAway)
+	}
+	if m.addlossesTotal != nil {
+		fields = append(fields, tsfixtures.FieldLossesTotal)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TSFixturesMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tsfixtures.FieldPlayedHome:
+		return m.AddedPlayedHome()
+	case tsfixtures.FieldPlayedAway:
+		return m.AddedPlayedAway()
+	case tsfixtures.FieldPlayedTotal:
+		return m.AddedPlayedTotal()
+	case tsfixtures.FieldWinsHome:
+		return m.AddedWinsHome()
+	case tsfixtures.FieldWinsAway:
+		return m.AddedWinsAway()
+	case tsfixtures.FieldWinsTotal:
+		return m.AddedWinsTotal()
+	case tsfixtures.FieldDrawsHome:
+		return m.AddedDrawsHome()
+	case tsfixtures.FieldDrawsAway:
+		return m.AddedDrawsAway()
+	case tsfixtures.FieldDrawsTotal:
+		return m.AddedDrawsTotal()
+	case tsfixtures.FieldLossesHome:
+		return m.AddedLossesHome()
+	case tsfixtures.FieldLossesAway:
+		return m.AddedLossesAway()
+	case tsfixtures.FieldLossesTotal:
+		return m.AddedLossesTotal()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSFixturesMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tsfixtures.FieldPlayedHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPlayedHome(v)
+		return nil
+	case tsfixtures.FieldPlayedAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPlayedAway(v)
+		return nil
+	case tsfixtures.FieldPlayedTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPlayedTotal(v)
+		return nil
+	case tsfixtures.FieldWinsHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWinsHome(v)
+		return nil
+	case tsfixtures.FieldWinsAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWinsAway(v)
+		return nil
+	case tsfixtures.FieldWinsTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddWinsTotal(v)
+		return nil
+	case tsfixtures.FieldDrawsHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDrawsHome(v)
+		return nil
+	case tsfixtures.FieldDrawsAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDrawsAway(v)
+		return nil
+	case tsfixtures.FieldDrawsTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDrawsTotal(v)
+		return nil
+	case tsfixtures.FieldLossesHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLossesHome(v)
+		return nil
+	case tsfixtures.FieldLossesAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLossesAway(v)
+		return nil
+	case tsfixtures.FieldLossesTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLossesTotal(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSFixtures numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TSFixturesMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tsfixtures.FieldPlayedHome) {
+		fields = append(fields, tsfixtures.FieldPlayedHome)
+	}
+	if m.FieldCleared(tsfixtures.FieldPlayedAway) {
+		fields = append(fields, tsfixtures.FieldPlayedAway)
+	}
+	if m.FieldCleared(tsfixtures.FieldPlayedTotal) {
+		fields = append(fields, tsfixtures.FieldPlayedTotal)
+	}
+	if m.FieldCleared(tsfixtures.FieldWinsHome) {
+		fields = append(fields, tsfixtures.FieldWinsHome)
+	}
+	if m.FieldCleared(tsfixtures.FieldWinsAway) {
+		fields = append(fields, tsfixtures.FieldWinsAway)
+	}
+	if m.FieldCleared(tsfixtures.FieldWinsTotal) {
+		fields = append(fields, tsfixtures.FieldWinsTotal)
+	}
+	if m.FieldCleared(tsfixtures.FieldDrawsHome) {
+		fields = append(fields, tsfixtures.FieldDrawsHome)
+	}
+	if m.FieldCleared(tsfixtures.FieldDrawsAway) {
+		fields = append(fields, tsfixtures.FieldDrawsAway)
+	}
+	if m.FieldCleared(tsfixtures.FieldDrawsTotal) {
+		fields = append(fields, tsfixtures.FieldDrawsTotal)
+	}
+	if m.FieldCleared(tsfixtures.FieldLossesHome) {
+		fields = append(fields, tsfixtures.FieldLossesHome)
+	}
+	if m.FieldCleared(tsfixtures.FieldLossesAway) {
+		fields = append(fields, tsfixtures.FieldLossesAway)
+	}
+	if m.FieldCleared(tsfixtures.FieldLossesTotal) {
+		fields = append(fields, tsfixtures.FieldLossesTotal)
+	}
+	if m.FieldCleared(tsfixtures.FieldLastUpdated) {
+		fields = append(fields, tsfixtures.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TSFixturesMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TSFixturesMutation) ClearField(name string) error {
+	switch name {
+	case tsfixtures.FieldPlayedHome:
+		m.ClearPlayedHome()
+		return nil
+	case tsfixtures.FieldPlayedAway:
+		m.ClearPlayedAway()
+		return nil
+	case tsfixtures.FieldPlayedTotal:
+		m.ClearPlayedTotal()
+		return nil
+	case tsfixtures.FieldWinsHome:
+		m.ClearWinsHome()
+		return nil
+	case tsfixtures.FieldWinsAway:
+		m.ClearWinsAway()
+		return nil
+	case tsfixtures.FieldWinsTotal:
+		m.ClearWinsTotal()
+		return nil
+	case tsfixtures.FieldDrawsHome:
+		m.ClearDrawsHome()
+		return nil
+	case tsfixtures.FieldDrawsAway:
+		m.ClearDrawsAway()
+		return nil
+	case tsfixtures.FieldDrawsTotal:
+		m.ClearDrawsTotal()
+		return nil
+	case tsfixtures.FieldLossesHome:
+		m.ClearLossesHome()
+		return nil
+	case tsfixtures.FieldLossesAway:
+		m.ClearLossesAway()
+		return nil
+	case tsfixtures.FieldLossesTotal:
+		m.ClearLossesTotal()
+		return nil
+	case tsfixtures.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSFixtures nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TSFixturesMutation) ResetField(name string) error {
+	switch name {
+	case tsfixtures.FieldPlayedHome:
+		m.ResetPlayedHome()
+		return nil
+	case tsfixtures.FieldPlayedAway:
+		m.ResetPlayedAway()
+		return nil
+	case tsfixtures.FieldPlayedTotal:
+		m.ResetPlayedTotal()
+		return nil
+	case tsfixtures.FieldWinsHome:
+		m.ResetWinsHome()
+		return nil
+	case tsfixtures.FieldWinsAway:
+		m.ResetWinsAway()
+		return nil
+	case tsfixtures.FieldWinsTotal:
+		m.ResetWinsTotal()
+		return nil
+	case tsfixtures.FieldDrawsHome:
+		m.ResetDrawsHome()
+		return nil
+	case tsfixtures.FieldDrawsAway:
+		m.ResetDrawsAway()
+		return nil
+	case tsfixtures.FieldDrawsTotal:
+		m.ResetDrawsTotal()
+		return nil
+	case tsfixtures.FieldLossesHome:
+		m.ResetLossesHome()
+		return nil
+	case tsfixtures.FieldLossesAway:
+		m.ResetLossesAway()
+		return nil
+	case tsfixtures.FieldLossesTotal:
+		m.ResetLossesTotal()
+		return nil
+	case tsfixtures.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSFixtures field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TSFixturesMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.team != nil {
+		edges = append(edges, tsfixtures.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TSFixturesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tsfixtures.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TSFixturesMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TSFixturesMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TSFixturesMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedteam {
+		edges = append(edges, tsfixtures.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TSFixturesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tsfixtures.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TSFixturesMutation) ClearEdge(name string) error {
+	switch name {
+	case tsfixtures.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSFixtures unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TSFixturesMutation) ResetEdge(name string) error {
+	switch name {
+	case tsfixtures.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSFixtures edge %s", name)
+}
+
+// TSGoalsMutation represents an operation that mutates the TSGoals nodes in the graph.
+type TSGoalsMutation struct {
+	config
+	op                                   Op
+	typ                                  string
+	id                                   *int
+	goalsForTotalHome                    *int
+	addgoalsForTotalHome                 *int
+	goalsForTotalAway                    *int
+	addgoalsForTotalAway                 *int
+	goalsForTotal                        *int
+	addgoalsForTotal                     *int
+	goalsForAverageHome                  *string
+	goalsForAverageAway                  *string
+	goalsForAverageTotal                 *string
+	goalsForMinute0To15Total             *int
+	addgoalsForMinute0To15Total          *int
+	goalsForMinute0To15Percentage        *string
+	goalsForMinute16To30Total            *int
+	addgoalsForMinute16To30Total         *int
+	goalsForMinute16To30Percentage       *string
+	goalsForMinute31To45Total            *int
+	addgoalsForMinute31To45Total         *int
+	goalsForMinute31To45Percentage       *string
+	goalsForMinute46To60Total            *int
+	addgoalsForMinute46To60Total         *int
+	goalsForMinute46To60Percentage       *string
+	goalsForMinute61To75Total            *int
+	addgoalsForMinute61To75Total         *int
+	goalsForMinute61To75Percentage       *string
+	goalsForMinute76To90Total            *int
+	addgoalsForMinute76To90Total         *int
+	goalsForMinute76To90Percentage       *string
+	goalsForMinute91To105Total           *int
+	addgoalsForMinute91To105Total        *int
+	goalsForMinute91To105Percentage      *string
+	goalsForMinute106To120Total          *int
+	addgoalsForMinute106To120Total       *int
+	goalsForMinute106To120Percentage     *string
+	goalsAgainstTotalHome                *int
+	addgoalsAgainstTotalHome             *int
+	goalsAgainstTotalAway                *int
+	addgoalsAgainstTotalAway             *int
+	goalsAgainstTotal                    *int
+	addgoalsAgainstTotal                 *int
+	goalsAgainstAverageHome              *string
+	goalsAgainstAverageAway              *string
+	goalsAgainstAverageTotal             *string
+	goalsAgainstMinute0To15Total         *int
+	addgoalsAgainstMinute0To15Total      *int
+	goalsAgainstMinute0To15Percentage    *string
+	goalsAgainstMinute16To30Total        *int
+	addgoalsAgainstMinute16To30Total     *int
+	goalsAgainstMinute16To30Percentage   *string
+	goalsAgainstMinute31To45Total        *int
+	addgoalsAgainstMinute31To45Total     *int
+	goalsAgainstMinute31To45Percentage   *string
+	goalsAgainstMinute46To60Total        *int
+	addgoalsAgainstMinute46To60Total     *int
+	goalsAgainstMinute46To60Percentage   *string
+	goalsAgainstMinute61To75Total        *int
+	addgoalsAgainstMinute61To75Total     *int
+	goalsAgainstMinute61To75Percentage   *string
+	goalsAgainstMinute76To90Total        *int
+	addgoalsAgainstMinute76To90Total     *int
+	goalsAgainstMinute76To90Percentage   *string
+	goalsAgainstMinute91To105Total       *int
+	addgoalsAgainstMinute91To105Total    *int
+	goalsAgainstMinute91To105Percentage  *string
+	goalsAgainstMinute106To120Total      *int
+	addgoalsAgainstMinute106To120Total   *int
+	goalsAgainstMinute106To120Percentage *string
+	lastUpdated                          *time.Time
+	clearedFields                        map[string]struct{}
+	team                                 *int
+	clearedteam                          bool
+	done                                 bool
+	oldValue                             func(context.Context) (*TSGoals, error)
+	predicates                           []predicate.TSGoals
+}
+
+var _ ent.Mutation = (*TSGoalsMutation)(nil)
+
+// tsgoalsOption allows management of the mutation configuration using functional options.
+type tsgoalsOption func(*TSGoalsMutation)
+
+// newTSGoalsMutation creates new mutation for the TSGoals entity.
+func newTSGoalsMutation(c config, op Op, opts ...tsgoalsOption) *TSGoalsMutation {
+	m := &TSGoalsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTSGoals,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTSGoalsID sets the ID field of the mutation.
+func withTSGoalsID(id int) tsgoalsOption {
+	return func(m *TSGoalsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TSGoals
+		)
+		m.oldValue = func(ctx context.Context) (*TSGoals, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TSGoals.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTSGoals sets the old TSGoals of the mutation.
+func withTSGoals(node *TSGoals) tsgoalsOption {
+	return func(m *TSGoalsMutation) {
+		m.oldValue = func(context.Context) (*TSGoals, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TSGoalsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TSGoalsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TSGoalsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TSGoalsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TSGoals.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetGoalsForTotalHome sets the "goalsForTotalHome" field.
+func (m *TSGoalsMutation) SetGoalsForTotalHome(i int) {
+	m.goalsForTotalHome = &i
+	m.addgoalsForTotalHome = nil
+}
+
+// GoalsForTotalHome returns the value of the "goalsForTotalHome" field in the mutation.
+func (m *TSGoalsMutation) GoalsForTotalHome() (r int, exists bool) {
+	v := m.goalsForTotalHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForTotalHome returns the old "goalsForTotalHome" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForTotalHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForTotalHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForTotalHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForTotalHome: %w", err)
+	}
+	return oldValue.GoalsForTotalHome, nil
+}
+
+// AddGoalsForTotalHome adds i to the "goalsForTotalHome" field.
+func (m *TSGoalsMutation) AddGoalsForTotalHome(i int) {
+	if m.addgoalsForTotalHome != nil {
+		*m.addgoalsForTotalHome += i
+	} else {
+		m.addgoalsForTotalHome = &i
+	}
+}
+
+// AddedGoalsForTotalHome returns the value that was added to the "goalsForTotalHome" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForTotalHome() (r int, exists bool) {
+	v := m.addgoalsForTotalHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForTotalHome clears the value of the "goalsForTotalHome" field.
+func (m *TSGoalsMutation) ClearGoalsForTotalHome() {
+	m.goalsForTotalHome = nil
+	m.addgoalsForTotalHome = nil
+	m.clearedFields[tsgoals.FieldGoalsForTotalHome] = struct{}{}
+}
+
+// GoalsForTotalHomeCleared returns if the "goalsForTotalHome" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForTotalHomeCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForTotalHome]
+	return ok
+}
+
+// ResetGoalsForTotalHome resets all changes to the "goalsForTotalHome" field.
+func (m *TSGoalsMutation) ResetGoalsForTotalHome() {
+	m.goalsForTotalHome = nil
+	m.addgoalsForTotalHome = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForTotalHome)
+}
+
+// SetGoalsForTotalAway sets the "goalsForTotalAway" field.
+func (m *TSGoalsMutation) SetGoalsForTotalAway(i int) {
+	m.goalsForTotalAway = &i
+	m.addgoalsForTotalAway = nil
+}
+
+// GoalsForTotalAway returns the value of the "goalsForTotalAway" field in the mutation.
+func (m *TSGoalsMutation) GoalsForTotalAway() (r int, exists bool) {
+	v := m.goalsForTotalAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForTotalAway returns the old "goalsForTotalAway" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForTotalAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForTotalAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForTotalAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForTotalAway: %w", err)
+	}
+	return oldValue.GoalsForTotalAway, nil
+}
+
+// AddGoalsForTotalAway adds i to the "goalsForTotalAway" field.
+func (m *TSGoalsMutation) AddGoalsForTotalAway(i int) {
+	if m.addgoalsForTotalAway != nil {
+		*m.addgoalsForTotalAway += i
+	} else {
+		m.addgoalsForTotalAway = &i
+	}
+}
+
+// AddedGoalsForTotalAway returns the value that was added to the "goalsForTotalAway" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForTotalAway() (r int, exists bool) {
+	v := m.addgoalsForTotalAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForTotalAway clears the value of the "goalsForTotalAway" field.
+func (m *TSGoalsMutation) ClearGoalsForTotalAway() {
+	m.goalsForTotalAway = nil
+	m.addgoalsForTotalAway = nil
+	m.clearedFields[tsgoals.FieldGoalsForTotalAway] = struct{}{}
+}
+
+// GoalsForTotalAwayCleared returns if the "goalsForTotalAway" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForTotalAwayCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForTotalAway]
+	return ok
+}
+
+// ResetGoalsForTotalAway resets all changes to the "goalsForTotalAway" field.
+func (m *TSGoalsMutation) ResetGoalsForTotalAway() {
+	m.goalsForTotalAway = nil
+	m.addgoalsForTotalAway = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForTotalAway)
+}
+
+// SetGoalsForTotal sets the "goalsForTotal" field.
+func (m *TSGoalsMutation) SetGoalsForTotal(i int) {
+	m.goalsForTotal = &i
+	m.addgoalsForTotal = nil
+}
+
+// GoalsForTotal returns the value of the "goalsForTotal" field in the mutation.
+func (m *TSGoalsMutation) GoalsForTotal() (r int, exists bool) {
+	v := m.goalsForTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForTotal returns the old "goalsForTotal" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForTotal: %w", err)
+	}
+	return oldValue.GoalsForTotal, nil
+}
+
+// AddGoalsForTotal adds i to the "goalsForTotal" field.
+func (m *TSGoalsMutation) AddGoalsForTotal(i int) {
+	if m.addgoalsForTotal != nil {
+		*m.addgoalsForTotal += i
+	} else {
+		m.addgoalsForTotal = &i
+	}
+}
+
+// AddedGoalsForTotal returns the value that was added to the "goalsForTotal" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForTotal() (r int, exists bool) {
+	v := m.addgoalsForTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForTotal clears the value of the "goalsForTotal" field.
+func (m *TSGoalsMutation) ClearGoalsForTotal() {
+	m.goalsForTotal = nil
+	m.addgoalsForTotal = nil
+	m.clearedFields[tsgoals.FieldGoalsForTotal] = struct{}{}
+}
+
+// GoalsForTotalCleared returns if the "goalsForTotal" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForTotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForTotal]
+	return ok
+}
+
+// ResetGoalsForTotal resets all changes to the "goalsForTotal" field.
+func (m *TSGoalsMutation) ResetGoalsForTotal() {
+	m.goalsForTotal = nil
+	m.addgoalsForTotal = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForTotal)
+}
+
+// SetGoalsForAverageHome sets the "goalsForAverageHome" field.
+func (m *TSGoalsMutation) SetGoalsForAverageHome(s string) {
+	m.goalsForAverageHome = &s
+}
+
+// GoalsForAverageHome returns the value of the "goalsForAverageHome" field in the mutation.
+func (m *TSGoalsMutation) GoalsForAverageHome() (r string, exists bool) {
+	v := m.goalsForAverageHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForAverageHome returns the old "goalsForAverageHome" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForAverageHome(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForAverageHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForAverageHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForAverageHome: %w", err)
+	}
+	return oldValue.GoalsForAverageHome, nil
+}
+
+// ClearGoalsForAverageHome clears the value of the "goalsForAverageHome" field.
+func (m *TSGoalsMutation) ClearGoalsForAverageHome() {
+	m.goalsForAverageHome = nil
+	m.clearedFields[tsgoals.FieldGoalsForAverageHome] = struct{}{}
+}
+
+// GoalsForAverageHomeCleared returns if the "goalsForAverageHome" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForAverageHomeCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForAverageHome]
+	return ok
+}
+
+// ResetGoalsForAverageHome resets all changes to the "goalsForAverageHome" field.
+func (m *TSGoalsMutation) ResetGoalsForAverageHome() {
+	m.goalsForAverageHome = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForAverageHome)
+}
+
+// SetGoalsForAverageAway sets the "goalsForAverageAway" field.
+func (m *TSGoalsMutation) SetGoalsForAverageAway(s string) {
+	m.goalsForAverageAway = &s
+}
+
+// GoalsForAverageAway returns the value of the "goalsForAverageAway" field in the mutation.
+func (m *TSGoalsMutation) GoalsForAverageAway() (r string, exists bool) {
+	v := m.goalsForAverageAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForAverageAway returns the old "goalsForAverageAway" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForAverageAway(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForAverageAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForAverageAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForAverageAway: %w", err)
+	}
+	return oldValue.GoalsForAverageAway, nil
+}
+
+// ClearGoalsForAverageAway clears the value of the "goalsForAverageAway" field.
+func (m *TSGoalsMutation) ClearGoalsForAverageAway() {
+	m.goalsForAverageAway = nil
+	m.clearedFields[tsgoals.FieldGoalsForAverageAway] = struct{}{}
+}
+
+// GoalsForAverageAwayCleared returns if the "goalsForAverageAway" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForAverageAwayCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForAverageAway]
+	return ok
+}
+
+// ResetGoalsForAverageAway resets all changes to the "goalsForAverageAway" field.
+func (m *TSGoalsMutation) ResetGoalsForAverageAway() {
+	m.goalsForAverageAway = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForAverageAway)
+}
+
+// SetGoalsForAverageTotal sets the "goalsForAverageTotal" field.
+func (m *TSGoalsMutation) SetGoalsForAverageTotal(s string) {
+	m.goalsForAverageTotal = &s
+}
+
+// GoalsForAverageTotal returns the value of the "goalsForAverageTotal" field in the mutation.
+func (m *TSGoalsMutation) GoalsForAverageTotal() (r string, exists bool) {
+	v := m.goalsForAverageTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForAverageTotal returns the old "goalsForAverageTotal" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForAverageTotal(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForAverageTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForAverageTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForAverageTotal: %w", err)
+	}
+	return oldValue.GoalsForAverageTotal, nil
+}
+
+// ClearGoalsForAverageTotal clears the value of the "goalsForAverageTotal" field.
+func (m *TSGoalsMutation) ClearGoalsForAverageTotal() {
+	m.goalsForAverageTotal = nil
+	m.clearedFields[tsgoals.FieldGoalsForAverageTotal] = struct{}{}
+}
+
+// GoalsForAverageTotalCleared returns if the "goalsForAverageTotal" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForAverageTotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForAverageTotal]
+	return ok
+}
+
+// ResetGoalsForAverageTotal resets all changes to the "goalsForAverageTotal" field.
+func (m *TSGoalsMutation) ResetGoalsForAverageTotal() {
+	m.goalsForAverageTotal = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForAverageTotal)
+}
+
+// SetGoalsForMinute0To15Total sets the "goalsForMinute0To15Total" field.
+func (m *TSGoalsMutation) SetGoalsForMinute0To15Total(i int) {
+	m.goalsForMinute0To15Total = &i
+	m.addgoalsForMinute0To15Total = nil
+}
+
+// GoalsForMinute0To15Total returns the value of the "goalsForMinute0To15Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute0To15Total() (r int, exists bool) {
+	v := m.goalsForMinute0To15Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute0To15Total returns the old "goalsForMinute0To15Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute0To15Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute0To15Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute0To15Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute0To15Total: %w", err)
+	}
+	return oldValue.GoalsForMinute0To15Total, nil
+}
+
+// AddGoalsForMinute0To15Total adds i to the "goalsForMinute0To15Total" field.
+func (m *TSGoalsMutation) AddGoalsForMinute0To15Total(i int) {
+	if m.addgoalsForMinute0To15Total != nil {
+		*m.addgoalsForMinute0To15Total += i
+	} else {
+		m.addgoalsForMinute0To15Total = &i
+	}
+}
+
+// AddedGoalsForMinute0To15Total returns the value that was added to the "goalsForMinute0To15Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForMinute0To15Total() (r int, exists bool) {
+	v := m.addgoalsForMinute0To15Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForMinute0To15Total clears the value of the "goalsForMinute0To15Total" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute0To15Total() {
+	m.goalsForMinute0To15Total = nil
+	m.addgoalsForMinute0To15Total = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute0To15Total] = struct{}{}
+}
+
+// GoalsForMinute0To15TotalCleared returns if the "goalsForMinute0To15Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute0To15TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute0To15Total]
+	return ok
+}
+
+// ResetGoalsForMinute0To15Total resets all changes to the "goalsForMinute0To15Total" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute0To15Total() {
+	m.goalsForMinute0To15Total = nil
+	m.addgoalsForMinute0To15Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute0To15Total)
+}
+
+// SetGoalsForMinute0To15Percentage sets the "goalsForMinute0To15Percentage" field.
+func (m *TSGoalsMutation) SetGoalsForMinute0To15Percentage(s string) {
+	m.goalsForMinute0To15Percentage = &s
+}
+
+// GoalsForMinute0To15Percentage returns the value of the "goalsForMinute0To15Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute0To15Percentage() (r string, exists bool) {
+	v := m.goalsForMinute0To15Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute0To15Percentage returns the old "goalsForMinute0To15Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute0To15Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute0To15Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute0To15Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute0To15Percentage: %w", err)
+	}
+	return oldValue.GoalsForMinute0To15Percentage, nil
+}
+
+// ClearGoalsForMinute0To15Percentage clears the value of the "goalsForMinute0To15Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute0To15Percentage() {
+	m.goalsForMinute0To15Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute0To15Percentage] = struct{}{}
+}
+
+// GoalsForMinute0To15PercentageCleared returns if the "goalsForMinute0To15Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute0To15PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute0To15Percentage]
+	return ok
+}
+
+// ResetGoalsForMinute0To15Percentage resets all changes to the "goalsForMinute0To15Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute0To15Percentage() {
+	m.goalsForMinute0To15Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute0To15Percentage)
+}
+
+// SetGoalsForMinute16To30Total sets the "goalsForMinute16To30Total" field.
+func (m *TSGoalsMutation) SetGoalsForMinute16To30Total(i int) {
+	m.goalsForMinute16To30Total = &i
+	m.addgoalsForMinute16To30Total = nil
+}
+
+// GoalsForMinute16To30Total returns the value of the "goalsForMinute16To30Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute16To30Total() (r int, exists bool) {
+	v := m.goalsForMinute16To30Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute16To30Total returns the old "goalsForMinute16To30Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute16To30Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute16To30Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute16To30Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute16To30Total: %w", err)
+	}
+	return oldValue.GoalsForMinute16To30Total, nil
+}
+
+// AddGoalsForMinute16To30Total adds i to the "goalsForMinute16To30Total" field.
+func (m *TSGoalsMutation) AddGoalsForMinute16To30Total(i int) {
+	if m.addgoalsForMinute16To30Total != nil {
+		*m.addgoalsForMinute16To30Total += i
+	} else {
+		m.addgoalsForMinute16To30Total = &i
+	}
+}
+
+// AddedGoalsForMinute16To30Total returns the value that was added to the "goalsForMinute16To30Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForMinute16To30Total() (r int, exists bool) {
+	v := m.addgoalsForMinute16To30Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForMinute16To30Total clears the value of the "goalsForMinute16To30Total" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute16To30Total() {
+	m.goalsForMinute16To30Total = nil
+	m.addgoalsForMinute16To30Total = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute16To30Total] = struct{}{}
+}
+
+// GoalsForMinute16To30TotalCleared returns if the "goalsForMinute16To30Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute16To30TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute16To30Total]
+	return ok
+}
+
+// ResetGoalsForMinute16To30Total resets all changes to the "goalsForMinute16To30Total" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute16To30Total() {
+	m.goalsForMinute16To30Total = nil
+	m.addgoalsForMinute16To30Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute16To30Total)
+}
+
+// SetGoalsForMinute16To30Percentage sets the "goalsForMinute16To30Percentage" field.
+func (m *TSGoalsMutation) SetGoalsForMinute16To30Percentage(s string) {
+	m.goalsForMinute16To30Percentage = &s
+}
+
+// GoalsForMinute16To30Percentage returns the value of the "goalsForMinute16To30Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute16To30Percentage() (r string, exists bool) {
+	v := m.goalsForMinute16To30Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute16To30Percentage returns the old "goalsForMinute16To30Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute16To30Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute16To30Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute16To30Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute16To30Percentage: %w", err)
+	}
+	return oldValue.GoalsForMinute16To30Percentage, nil
+}
+
+// ClearGoalsForMinute16To30Percentage clears the value of the "goalsForMinute16To30Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute16To30Percentage() {
+	m.goalsForMinute16To30Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute16To30Percentage] = struct{}{}
+}
+
+// GoalsForMinute16To30PercentageCleared returns if the "goalsForMinute16To30Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute16To30PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute16To30Percentage]
+	return ok
+}
+
+// ResetGoalsForMinute16To30Percentage resets all changes to the "goalsForMinute16To30Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute16To30Percentage() {
+	m.goalsForMinute16To30Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute16To30Percentage)
+}
+
+// SetGoalsForMinute31To45Total sets the "goalsForMinute31To45Total" field.
+func (m *TSGoalsMutation) SetGoalsForMinute31To45Total(i int) {
+	m.goalsForMinute31To45Total = &i
+	m.addgoalsForMinute31To45Total = nil
+}
+
+// GoalsForMinute31To45Total returns the value of the "goalsForMinute31To45Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute31To45Total() (r int, exists bool) {
+	v := m.goalsForMinute31To45Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute31To45Total returns the old "goalsForMinute31To45Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute31To45Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute31To45Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute31To45Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute31To45Total: %w", err)
+	}
+	return oldValue.GoalsForMinute31To45Total, nil
+}
+
+// AddGoalsForMinute31To45Total adds i to the "goalsForMinute31To45Total" field.
+func (m *TSGoalsMutation) AddGoalsForMinute31To45Total(i int) {
+	if m.addgoalsForMinute31To45Total != nil {
+		*m.addgoalsForMinute31To45Total += i
+	} else {
+		m.addgoalsForMinute31To45Total = &i
+	}
+}
+
+// AddedGoalsForMinute31To45Total returns the value that was added to the "goalsForMinute31To45Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForMinute31To45Total() (r int, exists bool) {
+	v := m.addgoalsForMinute31To45Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForMinute31To45Total clears the value of the "goalsForMinute31To45Total" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute31To45Total() {
+	m.goalsForMinute31To45Total = nil
+	m.addgoalsForMinute31To45Total = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute31To45Total] = struct{}{}
+}
+
+// GoalsForMinute31To45TotalCleared returns if the "goalsForMinute31To45Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute31To45TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute31To45Total]
+	return ok
+}
+
+// ResetGoalsForMinute31To45Total resets all changes to the "goalsForMinute31To45Total" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute31To45Total() {
+	m.goalsForMinute31To45Total = nil
+	m.addgoalsForMinute31To45Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute31To45Total)
+}
+
+// SetGoalsForMinute31To45Percentage sets the "goalsForMinute31To45Percentage" field.
+func (m *TSGoalsMutation) SetGoalsForMinute31To45Percentage(s string) {
+	m.goalsForMinute31To45Percentage = &s
+}
+
+// GoalsForMinute31To45Percentage returns the value of the "goalsForMinute31To45Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute31To45Percentage() (r string, exists bool) {
+	v := m.goalsForMinute31To45Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute31To45Percentage returns the old "goalsForMinute31To45Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute31To45Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute31To45Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute31To45Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute31To45Percentage: %w", err)
+	}
+	return oldValue.GoalsForMinute31To45Percentage, nil
+}
+
+// ClearGoalsForMinute31To45Percentage clears the value of the "goalsForMinute31To45Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute31To45Percentage() {
+	m.goalsForMinute31To45Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute31To45Percentage] = struct{}{}
+}
+
+// GoalsForMinute31To45PercentageCleared returns if the "goalsForMinute31To45Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute31To45PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute31To45Percentage]
+	return ok
+}
+
+// ResetGoalsForMinute31To45Percentage resets all changes to the "goalsForMinute31To45Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute31To45Percentage() {
+	m.goalsForMinute31To45Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute31To45Percentage)
+}
+
+// SetGoalsForMinute46To60Total sets the "goalsForMinute46To60Total" field.
+func (m *TSGoalsMutation) SetGoalsForMinute46To60Total(i int) {
+	m.goalsForMinute46To60Total = &i
+	m.addgoalsForMinute46To60Total = nil
+}
+
+// GoalsForMinute46To60Total returns the value of the "goalsForMinute46To60Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute46To60Total() (r int, exists bool) {
+	v := m.goalsForMinute46To60Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute46To60Total returns the old "goalsForMinute46To60Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute46To60Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute46To60Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute46To60Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute46To60Total: %w", err)
+	}
+	return oldValue.GoalsForMinute46To60Total, nil
+}
+
+// AddGoalsForMinute46To60Total adds i to the "goalsForMinute46To60Total" field.
+func (m *TSGoalsMutation) AddGoalsForMinute46To60Total(i int) {
+	if m.addgoalsForMinute46To60Total != nil {
+		*m.addgoalsForMinute46To60Total += i
+	} else {
+		m.addgoalsForMinute46To60Total = &i
+	}
+}
+
+// AddedGoalsForMinute46To60Total returns the value that was added to the "goalsForMinute46To60Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForMinute46To60Total() (r int, exists bool) {
+	v := m.addgoalsForMinute46To60Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForMinute46To60Total clears the value of the "goalsForMinute46To60Total" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute46To60Total() {
+	m.goalsForMinute46To60Total = nil
+	m.addgoalsForMinute46To60Total = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute46To60Total] = struct{}{}
+}
+
+// GoalsForMinute46To60TotalCleared returns if the "goalsForMinute46To60Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute46To60TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute46To60Total]
+	return ok
+}
+
+// ResetGoalsForMinute46To60Total resets all changes to the "goalsForMinute46To60Total" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute46To60Total() {
+	m.goalsForMinute46To60Total = nil
+	m.addgoalsForMinute46To60Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute46To60Total)
+}
+
+// SetGoalsForMinute46To60Percentage sets the "goalsForMinute46To60Percentage" field.
+func (m *TSGoalsMutation) SetGoalsForMinute46To60Percentage(s string) {
+	m.goalsForMinute46To60Percentage = &s
+}
+
+// GoalsForMinute46To60Percentage returns the value of the "goalsForMinute46To60Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute46To60Percentage() (r string, exists bool) {
+	v := m.goalsForMinute46To60Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute46To60Percentage returns the old "goalsForMinute46To60Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute46To60Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute46To60Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute46To60Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute46To60Percentage: %w", err)
+	}
+	return oldValue.GoalsForMinute46To60Percentage, nil
+}
+
+// ClearGoalsForMinute46To60Percentage clears the value of the "goalsForMinute46To60Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute46To60Percentage() {
+	m.goalsForMinute46To60Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute46To60Percentage] = struct{}{}
+}
+
+// GoalsForMinute46To60PercentageCleared returns if the "goalsForMinute46To60Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute46To60PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute46To60Percentage]
+	return ok
+}
+
+// ResetGoalsForMinute46To60Percentage resets all changes to the "goalsForMinute46To60Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute46To60Percentage() {
+	m.goalsForMinute46To60Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute46To60Percentage)
+}
+
+// SetGoalsForMinute61To75Total sets the "goalsForMinute61To75Total" field.
+func (m *TSGoalsMutation) SetGoalsForMinute61To75Total(i int) {
+	m.goalsForMinute61To75Total = &i
+	m.addgoalsForMinute61To75Total = nil
+}
+
+// GoalsForMinute61To75Total returns the value of the "goalsForMinute61To75Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute61To75Total() (r int, exists bool) {
+	v := m.goalsForMinute61To75Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute61To75Total returns the old "goalsForMinute61To75Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute61To75Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute61To75Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute61To75Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute61To75Total: %w", err)
+	}
+	return oldValue.GoalsForMinute61To75Total, nil
+}
+
+// AddGoalsForMinute61To75Total adds i to the "goalsForMinute61To75Total" field.
+func (m *TSGoalsMutation) AddGoalsForMinute61To75Total(i int) {
+	if m.addgoalsForMinute61To75Total != nil {
+		*m.addgoalsForMinute61To75Total += i
+	} else {
+		m.addgoalsForMinute61To75Total = &i
+	}
+}
+
+// AddedGoalsForMinute61To75Total returns the value that was added to the "goalsForMinute61To75Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForMinute61To75Total() (r int, exists bool) {
+	v := m.addgoalsForMinute61To75Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForMinute61To75Total clears the value of the "goalsForMinute61To75Total" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute61To75Total() {
+	m.goalsForMinute61To75Total = nil
+	m.addgoalsForMinute61To75Total = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute61To75Total] = struct{}{}
+}
+
+// GoalsForMinute61To75TotalCleared returns if the "goalsForMinute61To75Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute61To75TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute61To75Total]
+	return ok
+}
+
+// ResetGoalsForMinute61To75Total resets all changes to the "goalsForMinute61To75Total" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute61To75Total() {
+	m.goalsForMinute61To75Total = nil
+	m.addgoalsForMinute61To75Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute61To75Total)
+}
+
+// SetGoalsForMinute61To75Percentage sets the "goalsForMinute61To75Percentage" field.
+func (m *TSGoalsMutation) SetGoalsForMinute61To75Percentage(s string) {
+	m.goalsForMinute61To75Percentage = &s
+}
+
+// GoalsForMinute61To75Percentage returns the value of the "goalsForMinute61To75Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute61To75Percentage() (r string, exists bool) {
+	v := m.goalsForMinute61To75Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute61To75Percentage returns the old "goalsForMinute61To75Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute61To75Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute61To75Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute61To75Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute61To75Percentage: %w", err)
+	}
+	return oldValue.GoalsForMinute61To75Percentage, nil
+}
+
+// ClearGoalsForMinute61To75Percentage clears the value of the "goalsForMinute61To75Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute61To75Percentage() {
+	m.goalsForMinute61To75Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute61To75Percentage] = struct{}{}
+}
+
+// GoalsForMinute61To75PercentageCleared returns if the "goalsForMinute61To75Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute61To75PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute61To75Percentage]
+	return ok
+}
+
+// ResetGoalsForMinute61To75Percentage resets all changes to the "goalsForMinute61To75Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute61To75Percentage() {
+	m.goalsForMinute61To75Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute61To75Percentage)
+}
+
+// SetGoalsForMinute76To90Total sets the "goalsForMinute76To90Total" field.
+func (m *TSGoalsMutation) SetGoalsForMinute76To90Total(i int) {
+	m.goalsForMinute76To90Total = &i
+	m.addgoalsForMinute76To90Total = nil
+}
+
+// GoalsForMinute76To90Total returns the value of the "goalsForMinute76To90Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute76To90Total() (r int, exists bool) {
+	v := m.goalsForMinute76To90Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute76To90Total returns the old "goalsForMinute76To90Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute76To90Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute76To90Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute76To90Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute76To90Total: %w", err)
+	}
+	return oldValue.GoalsForMinute76To90Total, nil
+}
+
+// AddGoalsForMinute76To90Total adds i to the "goalsForMinute76To90Total" field.
+func (m *TSGoalsMutation) AddGoalsForMinute76To90Total(i int) {
+	if m.addgoalsForMinute76To90Total != nil {
+		*m.addgoalsForMinute76To90Total += i
+	} else {
+		m.addgoalsForMinute76To90Total = &i
+	}
+}
+
+// AddedGoalsForMinute76To90Total returns the value that was added to the "goalsForMinute76To90Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForMinute76To90Total() (r int, exists bool) {
+	v := m.addgoalsForMinute76To90Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForMinute76To90Total clears the value of the "goalsForMinute76To90Total" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute76To90Total() {
+	m.goalsForMinute76To90Total = nil
+	m.addgoalsForMinute76To90Total = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute76To90Total] = struct{}{}
+}
+
+// GoalsForMinute76To90TotalCleared returns if the "goalsForMinute76To90Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute76To90TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute76To90Total]
+	return ok
+}
+
+// ResetGoalsForMinute76To90Total resets all changes to the "goalsForMinute76To90Total" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute76To90Total() {
+	m.goalsForMinute76To90Total = nil
+	m.addgoalsForMinute76To90Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute76To90Total)
+}
+
+// SetGoalsForMinute76To90Percentage sets the "goalsForMinute76To90Percentage" field.
+func (m *TSGoalsMutation) SetGoalsForMinute76To90Percentage(s string) {
+	m.goalsForMinute76To90Percentage = &s
+}
+
+// GoalsForMinute76To90Percentage returns the value of the "goalsForMinute76To90Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute76To90Percentage() (r string, exists bool) {
+	v := m.goalsForMinute76To90Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute76To90Percentage returns the old "goalsForMinute76To90Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute76To90Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute76To90Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute76To90Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute76To90Percentage: %w", err)
+	}
+	return oldValue.GoalsForMinute76To90Percentage, nil
+}
+
+// ClearGoalsForMinute76To90Percentage clears the value of the "goalsForMinute76To90Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute76To90Percentage() {
+	m.goalsForMinute76To90Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute76To90Percentage] = struct{}{}
+}
+
+// GoalsForMinute76To90PercentageCleared returns if the "goalsForMinute76To90Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute76To90PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute76To90Percentage]
+	return ok
+}
+
+// ResetGoalsForMinute76To90Percentage resets all changes to the "goalsForMinute76To90Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute76To90Percentage() {
+	m.goalsForMinute76To90Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute76To90Percentage)
+}
+
+// SetGoalsForMinute91To105Total sets the "goalsForMinute91To105Total" field.
+func (m *TSGoalsMutation) SetGoalsForMinute91To105Total(i int) {
+	m.goalsForMinute91To105Total = &i
+	m.addgoalsForMinute91To105Total = nil
+}
+
+// GoalsForMinute91To105Total returns the value of the "goalsForMinute91To105Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute91To105Total() (r int, exists bool) {
+	v := m.goalsForMinute91To105Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute91To105Total returns the old "goalsForMinute91To105Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute91To105Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute91To105Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute91To105Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute91To105Total: %w", err)
+	}
+	return oldValue.GoalsForMinute91To105Total, nil
+}
+
+// AddGoalsForMinute91To105Total adds i to the "goalsForMinute91To105Total" field.
+func (m *TSGoalsMutation) AddGoalsForMinute91To105Total(i int) {
+	if m.addgoalsForMinute91To105Total != nil {
+		*m.addgoalsForMinute91To105Total += i
+	} else {
+		m.addgoalsForMinute91To105Total = &i
+	}
+}
+
+// AddedGoalsForMinute91To105Total returns the value that was added to the "goalsForMinute91To105Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForMinute91To105Total() (r int, exists bool) {
+	v := m.addgoalsForMinute91To105Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForMinute91To105Total clears the value of the "goalsForMinute91To105Total" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute91To105Total() {
+	m.goalsForMinute91To105Total = nil
+	m.addgoalsForMinute91To105Total = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute91To105Total] = struct{}{}
+}
+
+// GoalsForMinute91To105TotalCleared returns if the "goalsForMinute91To105Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute91To105TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute91To105Total]
+	return ok
+}
+
+// ResetGoalsForMinute91To105Total resets all changes to the "goalsForMinute91To105Total" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute91To105Total() {
+	m.goalsForMinute91To105Total = nil
+	m.addgoalsForMinute91To105Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute91To105Total)
+}
+
+// SetGoalsForMinute91To105Percentage sets the "goalsForMinute91To105Percentage" field.
+func (m *TSGoalsMutation) SetGoalsForMinute91To105Percentage(s string) {
+	m.goalsForMinute91To105Percentage = &s
+}
+
+// GoalsForMinute91To105Percentage returns the value of the "goalsForMinute91To105Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute91To105Percentage() (r string, exists bool) {
+	v := m.goalsForMinute91To105Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute91To105Percentage returns the old "goalsForMinute91To105Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute91To105Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute91To105Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute91To105Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute91To105Percentage: %w", err)
+	}
+	return oldValue.GoalsForMinute91To105Percentage, nil
+}
+
+// ClearGoalsForMinute91To105Percentage clears the value of the "goalsForMinute91To105Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute91To105Percentage() {
+	m.goalsForMinute91To105Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute91To105Percentage] = struct{}{}
+}
+
+// GoalsForMinute91To105PercentageCleared returns if the "goalsForMinute91To105Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute91To105PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute91To105Percentage]
+	return ok
+}
+
+// ResetGoalsForMinute91To105Percentage resets all changes to the "goalsForMinute91To105Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute91To105Percentage() {
+	m.goalsForMinute91To105Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute91To105Percentage)
+}
+
+// SetGoalsForMinute106To120Total sets the "goalsForMinute106To120Total" field.
+func (m *TSGoalsMutation) SetGoalsForMinute106To120Total(i int) {
+	m.goalsForMinute106To120Total = &i
+	m.addgoalsForMinute106To120Total = nil
+}
+
+// GoalsForMinute106To120Total returns the value of the "goalsForMinute106To120Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute106To120Total() (r int, exists bool) {
+	v := m.goalsForMinute106To120Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute106To120Total returns the old "goalsForMinute106To120Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute106To120Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute106To120Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute106To120Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute106To120Total: %w", err)
+	}
+	return oldValue.GoalsForMinute106To120Total, nil
+}
+
+// AddGoalsForMinute106To120Total adds i to the "goalsForMinute106To120Total" field.
+func (m *TSGoalsMutation) AddGoalsForMinute106To120Total(i int) {
+	if m.addgoalsForMinute106To120Total != nil {
+		*m.addgoalsForMinute106To120Total += i
+	} else {
+		m.addgoalsForMinute106To120Total = &i
+	}
+}
+
+// AddedGoalsForMinute106To120Total returns the value that was added to the "goalsForMinute106To120Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsForMinute106To120Total() (r int, exists bool) {
+	v := m.addgoalsForMinute106To120Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsForMinute106To120Total clears the value of the "goalsForMinute106To120Total" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute106To120Total() {
+	m.goalsForMinute106To120Total = nil
+	m.addgoalsForMinute106To120Total = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute106To120Total] = struct{}{}
+}
+
+// GoalsForMinute106To120TotalCleared returns if the "goalsForMinute106To120Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute106To120TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute106To120Total]
+	return ok
+}
+
+// ResetGoalsForMinute106To120Total resets all changes to the "goalsForMinute106To120Total" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute106To120Total() {
+	m.goalsForMinute106To120Total = nil
+	m.addgoalsForMinute106To120Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute106To120Total)
+}
+
+// SetGoalsForMinute106To120Percentage sets the "goalsForMinute106To120Percentage" field.
+func (m *TSGoalsMutation) SetGoalsForMinute106To120Percentage(s string) {
+	m.goalsForMinute106To120Percentage = &s
+}
+
+// GoalsForMinute106To120Percentage returns the value of the "goalsForMinute106To120Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsForMinute106To120Percentage() (r string, exists bool) {
+	v := m.goalsForMinute106To120Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsForMinute106To120Percentage returns the old "goalsForMinute106To120Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsForMinute106To120Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsForMinute106To120Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsForMinute106To120Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsForMinute106To120Percentage: %w", err)
+	}
+	return oldValue.GoalsForMinute106To120Percentage, nil
+}
+
+// ClearGoalsForMinute106To120Percentage clears the value of the "goalsForMinute106To120Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsForMinute106To120Percentage() {
+	m.goalsForMinute106To120Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsForMinute106To120Percentage] = struct{}{}
+}
+
+// GoalsForMinute106To120PercentageCleared returns if the "goalsForMinute106To120Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsForMinute106To120PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsForMinute106To120Percentage]
+	return ok
+}
+
+// ResetGoalsForMinute106To120Percentage resets all changes to the "goalsForMinute106To120Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsForMinute106To120Percentage() {
+	m.goalsForMinute106To120Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsForMinute106To120Percentage)
+}
+
+// SetGoalsAgainstTotalHome sets the "goalsAgainstTotalHome" field.
+func (m *TSGoalsMutation) SetGoalsAgainstTotalHome(i int) {
+	m.goalsAgainstTotalHome = &i
+	m.addgoalsAgainstTotalHome = nil
+}
+
+// GoalsAgainstTotalHome returns the value of the "goalsAgainstTotalHome" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstTotalHome() (r int, exists bool) {
+	v := m.goalsAgainstTotalHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstTotalHome returns the old "goalsAgainstTotalHome" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstTotalHome(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstTotalHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstTotalHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstTotalHome: %w", err)
+	}
+	return oldValue.GoalsAgainstTotalHome, nil
+}
+
+// AddGoalsAgainstTotalHome adds i to the "goalsAgainstTotalHome" field.
+func (m *TSGoalsMutation) AddGoalsAgainstTotalHome(i int) {
+	if m.addgoalsAgainstTotalHome != nil {
+		*m.addgoalsAgainstTotalHome += i
+	} else {
+		m.addgoalsAgainstTotalHome = &i
+	}
+}
+
+// AddedGoalsAgainstTotalHome returns the value that was added to the "goalsAgainstTotalHome" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstTotalHome() (r int, exists bool) {
+	v := m.addgoalsAgainstTotalHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstTotalHome clears the value of the "goalsAgainstTotalHome" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstTotalHome() {
+	m.goalsAgainstTotalHome = nil
+	m.addgoalsAgainstTotalHome = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstTotalHome] = struct{}{}
+}
+
+// GoalsAgainstTotalHomeCleared returns if the "goalsAgainstTotalHome" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstTotalHomeCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstTotalHome]
+	return ok
+}
+
+// ResetGoalsAgainstTotalHome resets all changes to the "goalsAgainstTotalHome" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstTotalHome() {
+	m.goalsAgainstTotalHome = nil
+	m.addgoalsAgainstTotalHome = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstTotalHome)
+}
+
+// SetGoalsAgainstTotalAway sets the "goalsAgainstTotalAway" field.
+func (m *TSGoalsMutation) SetGoalsAgainstTotalAway(i int) {
+	m.goalsAgainstTotalAway = &i
+	m.addgoalsAgainstTotalAway = nil
+}
+
+// GoalsAgainstTotalAway returns the value of the "goalsAgainstTotalAway" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstTotalAway() (r int, exists bool) {
+	v := m.goalsAgainstTotalAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstTotalAway returns the old "goalsAgainstTotalAway" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstTotalAway(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstTotalAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstTotalAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstTotalAway: %w", err)
+	}
+	return oldValue.GoalsAgainstTotalAway, nil
+}
+
+// AddGoalsAgainstTotalAway adds i to the "goalsAgainstTotalAway" field.
+func (m *TSGoalsMutation) AddGoalsAgainstTotalAway(i int) {
+	if m.addgoalsAgainstTotalAway != nil {
+		*m.addgoalsAgainstTotalAway += i
+	} else {
+		m.addgoalsAgainstTotalAway = &i
+	}
+}
+
+// AddedGoalsAgainstTotalAway returns the value that was added to the "goalsAgainstTotalAway" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstTotalAway() (r int, exists bool) {
+	v := m.addgoalsAgainstTotalAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstTotalAway clears the value of the "goalsAgainstTotalAway" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstTotalAway() {
+	m.goalsAgainstTotalAway = nil
+	m.addgoalsAgainstTotalAway = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstTotalAway] = struct{}{}
+}
+
+// GoalsAgainstTotalAwayCleared returns if the "goalsAgainstTotalAway" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstTotalAwayCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstTotalAway]
+	return ok
+}
+
+// ResetGoalsAgainstTotalAway resets all changes to the "goalsAgainstTotalAway" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstTotalAway() {
+	m.goalsAgainstTotalAway = nil
+	m.addgoalsAgainstTotalAway = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstTotalAway)
+}
+
+// SetGoalsAgainstTotal sets the "goalsAgainstTotal" field.
+func (m *TSGoalsMutation) SetGoalsAgainstTotal(i int) {
+	m.goalsAgainstTotal = &i
+	m.addgoalsAgainstTotal = nil
+}
+
+// GoalsAgainstTotal returns the value of the "goalsAgainstTotal" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstTotal() (r int, exists bool) {
+	v := m.goalsAgainstTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstTotal returns the old "goalsAgainstTotal" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstTotal: %w", err)
+	}
+	return oldValue.GoalsAgainstTotal, nil
+}
+
+// AddGoalsAgainstTotal adds i to the "goalsAgainstTotal" field.
+func (m *TSGoalsMutation) AddGoalsAgainstTotal(i int) {
+	if m.addgoalsAgainstTotal != nil {
+		*m.addgoalsAgainstTotal += i
+	} else {
+		m.addgoalsAgainstTotal = &i
+	}
+}
+
+// AddedGoalsAgainstTotal returns the value that was added to the "goalsAgainstTotal" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstTotal() (r int, exists bool) {
+	v := m.addgoalsAgainstTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstTotal clears the value of the "goalsAgainstTotal" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstTotal() {
+	m.goalsAgainstTotal = nil
+	m.addgoalsAgainstTotal = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstTotal] = struct{}{}
+}
+
+// GoalsAgainstTotalCleared returns if the "goalsAgainstTotal" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstTotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstTotal]
+	return ok
+}
+
+// ResetGoalsAgainstTotal resets all changes to the "goalsAgainstTotal" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstTotal() {
+	m.goalsAgainstTotal = nil
+	m.addgoalsAgainstTotal = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstTotal)
+}
+
+// SetGoalsAgainstAverageHome sets the "goalsAgainstAverageHome" field.
+func (m *TSGoalsMutation) SetGoalsAgainstAverageHome(s string) {
+	m.goalsAgainstAverageHome = &s
+}
+
+// GoalsAgainstAverageHome returns the value of the "goalsAgainstAverageHome" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstAverageHome() (r string, exists bool) {
+	v := m.goalsAgainstAverageHome
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstAverageHome returns the old "goalsAgainstAverageHome" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstAverageHome(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstAverageHome is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstAverageHome requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstAverageHome: %w", err)
+	}
+	return oldValue.GoalsAgainstAverageHome, nil
+}
+
+// ClearGoalsAgainstAverageHome clears the value of the "goalsAgainstAverageHome" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstAverageHome() {
+	m.goalsAgainstAverageHome = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstAverageHome] = struct{}{}
+}
+
+// GoalsAgainstAverageHomeCleared returns if the "goalsAgainstAverageHome" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstAverageHomeCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstAverageHome]
+	return ok
+}
+
+// ResetGoalsAgainstAverageHome resets all changes to the "goalsAgainstAverageHome" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstAverageHome() {
+	m.goalsAgainstAverageHome = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstAverageHome)
+}
+
+// SetGoalsAgainstAverageAway sets the "goalsAgainstAverageAway" field.
+func (m *TSGoalsMutation) SetGoalsAgainstAverageAway(s string) {
+	m.goalsAgainstAverageAway = &s
+}
+
+// GoalsAgainstAverageAway returns the value of the "goalsAgainstAverageAway" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstAverageAway() (r string, exists bool) {
+	v := m.goalsAgainstAverageAway
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstAverageAway returns the old "goalsAgainstAverageAway" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstAverageAway(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstAverageAway is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstAverageAway requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstAverageAway: %w", err)
+	}
+	return oldValue.GoalsAgainstAverageAway, nil
+}
+
+// ClearGoalsAgainstAverageAway clears the value of the "goalsAgainstAverageAway" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstAverageAway() {
+	m.goalsAgainstAverageAway = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstAverageAway] = struct{}{}
+}
+
+// GoalsAgainstAverageAwayCleared returns if the "goalsAgainstAverageAway" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstAverageAwayCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstAverageAway]
+	return ok
+}
+
+// ResetGoalsAgainstAverageAway resets all changes to the "goalsAgainstAverageAway" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstAverageAway() {
+	m.goalsAgainstAverageAway = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstAverageAway)
+}
+
+// SetGoalsAgainstAverageTotal sets the "goalsAgainstAverageTotal" field.
+func (m *TSGoalsMutation) SetGoalsAgainstAverageTotal(s string) {
+	m.goalsAgainstAverageTotal = &s
+}
+
+// GoalsAgainstAverageTotal returns the value of the "goalsAgainstAverageTotal" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstAverageTotal() (r string, exists bool) {
+	v := m.goalsAgainstAverageTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstAverageTotal returns the old "goalsAgainstAverageTotal" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstAverageTotal(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstAverageTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstAverageTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstAverageTotal: %w", err)
+	}
+	return oldValue.GoalsAgainstAverageTotal, nil
+}
+
+// ClearGoalsAgainstAverageTotal clears the value of the "goalsAgainstAverageTotal" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstAverageTotal() {
+	m.goalsAgainstAverageTotal = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstAverageTotal] = struct{}{}
+}
+
+// GoalsAgainstAverageTotalCleared returns if the "goalsAgainstAverageTotal" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstAverageTotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstAverageTotal]
+	return ok
+}
+
+// ResetGoalsAgainstAverageTotal resets all changes to the "goalsAgainstAverageTotal" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstAverageTotal() {
+	m.goalsAgainstAverageTotal = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstAverageTotal)
+}
+
+// SetGoalsAgainstMinute0To15Total sets the "goalsAgainstMinute0To15Total" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute0To15Total(i int) {
+	m.goalsAgainstMinute0To15Total = &i
+	m.addgoalsAgainstMinute0To15Total = nil
+}
+
+// GoalsAgainstMinute0To15Total returns the value of the "goalsAgainstMinute0To15Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute0To15Total() (r int, exists bool) {
+	v := m.goalsAgainstMinute0To15Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute0To15Total returns the old "goalsAgainstMinute0To15Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute0To15Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute0To15Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute0To15Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute0To15Total: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute0To15Total, nil
+}
+
+// AddGoalsAgainstMinute0To15Total adds i to the "goalsAgainstMinute0To15Total" field.
+func (m *TSGoalsMutation) AddGoalsAgainstMinute0To15Total(i int) {
+	if m.addgoalsAgainstMinute0To15Total != nil {
+		*m.addgoalsAgainstMinute0To15Total += i
+	} else {
+		m.addgoalsAgainstMinute0To15Total = &i
+	}
+}
+
+// AddedGoalsAgainstMinute0To15Total returns the value that was added to the "goalsAgainstMinute0To15Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstMinute0To15Total() (r int, exists bool) {
+	v := m.addgoalsAgainstMinute0To15Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstMinute0To15Total clears the value of the "goalsAgainstMinute0To15Total" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute0To15Total() {
+	m.goalsAgainstMinute0To15Total = nil
+	m.addgoalsAgainstMinute0To15Total = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute0To15Total] = struct{}{}
+}
+
+// GoalsAgainstMinute0To15TotalCleared returns if the "goalsAgainstMinute0To15Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute0To15TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute0To15Total]
+	return ok
+}
+
+// ResetGoalsAgainstMinute0To15Total resets all changes to the "goalsAgainstMinute0To15Total" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute0To15Total() {
+	m.goalsAgainstMinute0To15Total = nil
+	m.addgoalsAgainstMinute0To15Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute0To15Total)
+}
+
+// SetGoalsAgainstMinute0To15Percentage sets the "goalsAgainstMinute0To15Percentage" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute0To15Percentage(s string) {
+	m.goalsAgainstMinute0To15Percentage = &s
+}
+
+// GoalsAgainstMinute0To15Percentage returns the value of the "goalsAgainstMinute0To15Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute0To15Percentage() (r string, exists bool) {
+	v := m.goalsAgainstMinute0To15Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute0To15Percentage returns the old "goalsAgainstMinute0To15Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute0To15Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute0To15Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute0To15Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute0To15Percentage: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute0To15Percentage, nil
+}
+
+// ClearGoalsAgainstMinute0To15Percentage clears the value of the "goalsAgainstMinute0To15Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute0To15Percentage() {
+	m.goalsAgainstMinute0To15Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute0To15Percentage] = struct{}{}
+}
+
+// GoalsAgainstMinute0To15PercentageCleared returns if the "goalsAgainstMinute0To15Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute0To15PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute0To15Percentage]
+	return ok
+}
+
+// ResetGoalsAgainstMinute0To15Percentage resets all changes to the "goalsAgainstMinute0To15Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute0To15Percentage() {
+	m.goalsAgainstMinute0To15Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute0To15Percentage)
+}
+
+// SetGoalsAgainstMinute16To30Total sets the "goalsAgainstMinute16To30Total" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute16To30Total(i int) {
+	m.goalsAgainstMinute16To30Total = &i
+	m.addgoalsAgainstMinute16To30Total = nil
+}
+
+// GoalsAgainstMinute16To30Total returns the value of the "goalsAgainstMinute16To30Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute16To30Total() (r int, exists bool) {
+	v := m.goalsAgainstMinute16To30Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute16To30Total returns the old "goalsAgainstMinute16To30Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute16To30Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute16To30Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute16To30Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute16To30Total: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute16To30Total, nil
+}
+
+// AddGoalsAgainstMinute16To30Total adds i to the "goalsAgainstMinute16To30Total" field.
+func (m *TSGoalsMutation) AddGoalsAgainstMinute16To30Total(i int) {
+	if m.addgoalsAgainstMinute16To30Total != nil {
+		*m.addgoalsAgainstMinute16To30Total += i
+	} else {
+		m.addgoalsAgainstMinute16To30Total = &i
+	}
+}
+
+// AddedGoalsAgainstMinute16To30Total returns the value that was added to the "goalsAgainstMinute16To30Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstMinute16To30Total() (r int, exists bool) {
+	v := m.addgoalsAgainstMinute16To30Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstMinute16To30Total clears the value of the "goalsAgainstMinute16To30Total" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute16To30Total() {
+	m.goalsAgainstMinute16To30Total = nil
+	m.addgoalsAgainstMinute16To30Total = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute16To30Total] = struct{}{}
+}
+
+// GoalsAgainstMinute16To30TotalCleared returns if the "goalsAgainstMinute16To30Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute16To30TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute16To30Total]
+	return ok
+}
+
+// ResetGoalsAgainstMinute16To30Total resets all changes to the "goalsAgainstMinute16To30Total" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute16To30Total() {
+	m.goalsAgainstMinute16To30Total = nil
+	m.addgoalsAgainstMinute16To30Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute16To30Total)
+}
+
+// SetGoalsAgainstMinute16To30Percentage sets the "goalsAgainstMinute16To30Percentage" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute16To30Percentage(s string) {
+	m.goalsAgainstMinute16To30Percentage = &s
+}
+
+// GoalsAgainstMinute16To30Percentage returns the value of the "goalsAgainstMinute16To30Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute16To30Percentage() (r string, exists bool) {
+	v := m.goalsAgainstMinute16To30Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute16To30Percentage returns the old "goalsAgainstMinute16To30Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute16To30Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute16To30Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute16To30Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute16To30Percentage: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute16To30Percentage, nil
+}
+
+// ClearGoalsAgainstMinute16To30Percentage clears the value of the "goalsAgainstMinute16To30Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute16To30Percentage() {
+	m.goalsAgainstMinute16To30Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute16To30Percentage] = struct{}{}
+}
+
+// GoalsAgainstMinute16To30PercentageCleared returns if the "goalsAgainstMinute16To30Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute16To30PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute16To30Percentage]
+	return ok
+}
+
+// ResetGoalsAgainstMinute16To30Percentage resets all changes to the "goalsAgainstMinute16To30Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute16To30Percentage() {
+	m.goalsAgainstMinute16To30Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute16To30Percentage)
+}
+
+// SetGoalsAgainstMinute31To45Total sets the "goalsAgainstMinute31To45Total" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute31To45Total(i int) {
+	m.goalsAgainstMinute31To45Total = &i
+	m.addgoalsAgainstMinute31To45Total = nil
+}
+
+// GoalsAgainstMinute31To45Total returns the value of the "goalsAgainstMinute31To45Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute31To45Total() (r int, exists bool) {
+	v := m.goalsAgainstMinute31To45Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute31To45Total returns the old "goalsAgainstMinute31To45Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute31To45Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute31To45Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute31To45Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute31To45Total: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute31To45Total, nil
+}
+
+// AddGoalsAgainstMinute31To45Total adds i to the "goalsAgainstMinute31To45Total" field.
+func (m *TSGoalsMutation) AddGoalsAgainstMinute31To45Total(i int) {
+	if m.addgoalsAgainstMinute31To45Total != nil {
+		*m.addgoalsAgainstMinute31To45Total += i
+	} else {
+		m.addgoalsAgainstMinute31To45Total = &i
+	}
+}
+
+// AddedGoalsAgainstMinute31To45Total returns the value that was added to the "goalsAgainstMinute31To45Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstMinute31To45Total() (r int, exists bool) {
+	v := m.addgoalsAgainstMinute31To45Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstMinute31To45Total clears the value of the "goalsAgainstMinute31To45Total" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute31To45Total() {
+	m.goalsAgainstMinute31To45Total = nil
+	m.addgoalsAgainstMinute31To45Total = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute31To45Total] = struct{}{}
+}
+
+// GoalsAgainstMinute31To45TotalCleared returns if the "goalsAgainstMinute31To45Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute31To45TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute31To45Total]
+	return ok
+}
+
+// ResetGoalsAgainstMinute31To45Total resets all changes to the "goalsAgainstMinute31To45Total" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute31To45Total() {
+	m.goalsAgainstMinute31To45Total = nil
+	m.addgoalsAgainstMinute31To45Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute31To45Total)
+}
+
+// SetGoalsAgainstMinute31To45Percentage sets the "goalsAgainstMinute31To45Percentage" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute31To45Percentage(s string) {
+	m.goalsAgainstMinute31To45Percentage = &s
+}
+
+// GoalsAgainstMinute31To45Percentage returns the value of the "goalsAgainstMinute31To45Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute31To45Percentage() (r string, exists bool) {
+	v := m.goalsAgainstMinute31To45Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute31To45Percentage returns the old "goalsAgainstMinute31To45Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute31To45Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute31To45Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute31To45Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute31To45Percentage: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute31To45Percentage, nil
+}
+
+// ClearGoalsAgainstMinute31To45Percentage clears the value of the "goalsAgainstMinute31To45Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute31To45Percentage() {
+	m.goalsAgainstMinute31To45Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute31To45Percentage] = struct{}{}
+}
+
+// GoalsAgainstMinute31To45PercentageCleared returns if the "goalsAgainstMinute31To45Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute31To45PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute31To45Percentage]
+	return ok
+}
+
+// ResetGoalsAgainstMinute31To45Percentage resets all changes to the "goalsAgainstMinute31To45Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute31To45Percentage() {
+	m.goalsAgainstMinute31To45Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute31To45Percentage)
+}
+
+// SetGoalsAgainstMinute46To60Total sets the "goalsAgainstMinute46To60Total" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute46To60Total(i int) {
+	m.goalsAgainstMinute46To60Total = &i
+	m.addgoalsAgainstMinute46To60Total = nil
+}
+
+// GoalsAgainstMinute46To60Total returns the value of the "goalsAgainstMinute46To60Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute46To60Total() (r int, exists bool) {
+	v := m.goalsAgainstMinute46To60Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute46To60Total returns the old "goalsAgainstMinute46To60Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute46To60Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute46To60Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute46To60Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute46To60Total: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute46To60Total, nil
+}
+
+// AddGoalsAgainstMinute46To60Total adds i to the "goalsAgainstMinute46To60Total" field.
+func (m *TSGoalsMutation) AddGoalsAgainstMinute46To60Total(i int) {
+	if m.addgoalsAgainstMinute46To60Total != nil {
+		*m.addgoalsAgainstMinute46To60Total += i
+	} else {
+		m.addgoalsAgainstMinute46To60Total = &i
+	}
+}
+
+// AddedGoalsAgainstMinute46To60Total returns the value that was added to the "goalsAgainstMinute46To60Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstMinute46To60Total() (r int, exists bool) {
+	v := m.addgoalsAgainstMinute46To60Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstMinute46To60Total clears the value of the "goalsAgainstMinute46To60Total" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute46To60Total() {
+	m.goalsAgainstMinute46To60Total = nil
+	m.addgoalsAgainstMinute46To60Total = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute46To60Total] = struct{}{}
+}
+
+// GoalsAgainstMinute46To60TotalCleared returns if the "goalsAgainstMinute46To60Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute46To60TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute46To60Total]
+	return ok
+}
+
+// ResetGoalsAgainstMinute46To60Total resets all changes to the "goalsAgainstMinute46To60Total" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute46To60Total() {
+	m.goalsAgainstMinute46To60Total = nil
+	m.addgoalsAgainstMinute46To60Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute46To60Total)
+}
+
+// SetGoalsAgainstMinute46To60Percentage sets the "goalsAgainstMinute46To60Percentage" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute46To60Percentage(s string) {
+	m.goalsAgainstMinute46To60Percentage = &s
+}
+
+// GoalsAgainstMinute46To60Percentage returns the value of the "goalsAgainstMinute46To60Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute46To60Percentage() (r string, exists bool) {
+	v := m.goalsAgainstMinute46To60Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute46To60Percentage returns the old "goalsAgainstMinute46To60Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute46To60Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute46To60Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute46To60Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute46To60Percentage: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute46To60Percentage, nil
+}
+
+// ClearGoalsAgainstMinute46To60Percentage clears the value of the "goalsAgainstMinute46To60Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute46To60Percentage() {
+	m.goalsAgainstMinute46To60Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute46To60Percentage] = struct{}{}
+}
+
+// GoalsAgainstMinute46To60PercentageCleared returns if the "goalsAgainstMinute46To60Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute46To60PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute46To60Percentage]
+	return ok
+}
+
+// ResetGoalsAgainstMinute46To60Percentage resets all changes to the "goalsAgainstMinute46To60Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute46To60Percentage() {
+	m.goalsAgainstMinute46To60Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute46To60Percentage)
+}
+
+// SetGoalsAgainstMinute61To75Total sets the "goalsAgainstMinute61To75Total" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute61To75Total(i int) {
+	m.goalsAgainstMinute61To75Total = &i
+	m.addgoalsAgainstMinute61To75Total = nil
+}
+
+// GoalsAgainstMinute61To75Total returns the value of the "goalsAgainstMinute61To75Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute61To75Total() (r int, exists bool) {
+	v := m.goalsAgainstMinute61To75Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute61To75Total returns the old "goalsAgainstMinute61To75Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute61To75Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute61To75Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute61To75Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute61To75Total: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute61To75Total, nil
+}
+
+// AddGoalsAgainstMinute61To75Total adds i to the "goalsAgainstMinute61To75Total" field.
+func (m *TSGoalsMutation) AddGoalsAgainstMinute61To75Total(i int) {
+	if m.addgoalsAgainstMinute61To75Total != nil {
+		*m.addgoalsAgainstMinute61To75Total += i
+	} else {
+		m.addgoalsAgainstMinute61To75Total = &i
+	}
+}
+
+// AddedGoalsAgainstMinute61To75Total returns the value that was added to the "goalsAgainstMinute61To75Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstMinute61To75Total() (r int, exists bool) {
+	v := m.addgoalsAgainstMinute61To75Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstMinute61To75Total clears the value of the "goalsAgainstMinute61To75Total" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute61To75Total() {
+	m.goalsAgainstMinute61To75Total = nil
+	m.addgoalsAgainstMinute61To75Total = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute61To75Total] = struct{}{}
+}
+
+// GoalsAgainstMinute61To75TotalCleared returns if the "goalsAgainstMinute61To75Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute61To75TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute61To75Total]
+	return ok
+}
+
+// ResetGoalsAgainstMinute61To75Total resets all changes to the "goalsAgainstMinute61To75Total" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute61To75Total() {
+	m.goalsAgainstMinute61To75Total = nil
+	m.addgoalsAgainstMinute61To75Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute61To75Total)
+}
+
+// SetGoalsAgainstMinute61To75Percentage sets the "goalsAgainstMinute61To75Percentage" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute61To75Percentage(s string) {
+	m.goalsAgainstMinute61To75Percentage = &s
+}
+
+// GoalsAgainstMinute61To75Percentage returns the value of the "goalsAgainstMinute61To75Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute61To75Percentage() (r string, exists bool) {
+	v := m.goalsAgainstMinute61To75Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute61To75Percentage returns the old "goalsAgainstMinute61To75Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute61To75Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute61To75Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute61To75Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute61To75Percentage: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute61To75Percentage, nil
+}
+
+// ClearGoalsAgainstMinute61To75Percentage clears the value of the "goalsAgainstMinute61To75Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute61To75Percentage() {
+	m.goalsAgainstMinute61To75Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute61To75Percentage] = struct{}{}
+}
+
+// GoalsAgainstMinute61To75PercentageCleared returns if the "goalsAgainstMinute61To75Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute61To75PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute61To75Percentage]
+	return ok
+}
+
+// ResetGoalsAgainstMinute61To75Percentage resets all changes to the "goalsAgainstMinute61To75Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute61To75Percentage() {
+	m.goalsAgainstMinute61To75Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute61To75Percentage)
+}
+
+// SetGoalsAgainstMinute76To90Total sets the "goalsAgainstMinute76To90Total" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute76To90Total(i int) {
+	m.goalsAgainstMinute76To90Total = &i
+	m.addgoalsAgainstMinute76To90Total = nil
+}
+
+// GoalsAgainstMinute76To90Total returns the value of the "goalsAgainstMinute76To90Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute76To90Total() (r int, exists bool) {
+	v := m.goalsAgainstMinute76To90Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute76To90Total returns the old "goalsAgainstMinute76To90Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute76To90Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute76To90Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute76To90Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute76To90Total: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute76To90Total, nil
+}
+
+// AddGoalsAgainstMinute76To90Total adds i to the "goalsAgainstMinute76To90Total" field.
+func (m *TSGoalsMutation) AddGoalsAgainstMinute76To90Total(i int) {
+	if m.addgoalsAgainstMinute76To90Total != nil {
+		*m.addgoalsAgainstMinute76To90Total += i
+	} else {
+		m.addgoalsAgainstMinute76To90Total = &i
+	}
+}
+
+// AddedGoalsAgainstMinute76To90Total returns the value that was added to the "goalsAgainstMinute76To90Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstMinute76To90Total() (r int, exists bool) {
+	v := m.addgoalsAgainstMinute76To90Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstMinute76To90Total clears the value of the "goalsAgainstMinute76To90Total" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute76To90Total() {
+	m.goalsAgainstMinute76To90Total = nil
+	m.addgoalsAgainstMinute76To90Total = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute76To90Total] = struct{}{}
+}
+
+// GoalsAgainstMinute76To90TotalCleared returns if the "goalsAgainstMinute76To90Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute76To90TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute76To90Total]
+	return ok
+}
+
+// ResetGoalsAgainstMinute76To90Total resets all changes to the "goalsAgainstMinute76To90Total" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute76To90Total() {
+	m.goalsAgainstMinute76To90Total = nil
+	m.addgoalsAgainstMinute76To90Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute76To90Total)
+}
+
+// SetGoalsAgainstMinute76To90Percentage sets the "goalsAgainstMinute76To90Percentage" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute76To90Percentage(s string) {
+	m.goalsAgainstMinute76To90Percentage = &s
+}
+
+// GoalsAgainstMinute76To90Percentage returns the value of the "goalsAgainstMinute76To90Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute76To90Percentage() (r string, exists bool) {
+	v := m.goalsAgainstMinute76To90Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute76To90Percentage returns the old "goalsAgainstMinute76To90Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute76To90Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute76To90Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute76To90Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute76To90Percentage: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute76To90Percentage, nil
+}
+
+// ClearGoalsAgainstMinute76To90Percentage clears the value of the "goalsAgainstMinute76To90Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute76To90Percentage() {
+	m.goalsAgainstMinute76To90Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute76To90Percentage] = struct{}{}
+}
+
+// GoalsAgainstMinute76To90PercentageCleared returns if the "goalsAgainstMinute76To90Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute76To90PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute76To90Percentage]
+	return ok
+}
+
+// ResetGoalsAgainstMinute76To90Percentage resets all changes to the "goalsAgainstMinute76To90Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute76To90Percentage() {
+	m.goalsAgainstMinute76To90Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute76To90Percentage)
+}
+
+// SetGoalsAgainstMinute91To105Total sets the "goalsAgainstMinute91To105Total" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute91To105Total(i int) {
+	m.goalsAgainstMinute91To105Total = &i
+	m.addgoalsAgainstMinute91To105Total = nil
+}
+
+// GoalsAgainstMinute91To105Total returns the value of the "goalsAgainstMinute91To105Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute91To105Total() (r int, exists bool) {
+	v := m.goalsAgainstMinute91To105Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute91To105Total returns the old "goalsAgainstMinute91To105Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute91To105Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute91To105Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute91To105Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute91To105Total: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute91To105Total, nil
+}
+
+// AddGoalsAgainstMinute91To105Total adds i to the "goalsAgainstMinute91To105Total" field.
+func (m *TSGoalsMutation) AddGoalsAgainstMinute91To105Total(i int) {
+	if m.addgoalsAgainstMinute91To105Total != nil {
+		*m.addgoalsAgainstMinute91To105Total += i
+	} else {
+		m.addgoalsAgainstMinute91To105Total = &i
+	}
+}
+
+// AddedGoalsAgainstMinute91To105Total returns the value that was added to the "goalsAgainstMinute91To105Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstMinute91To105Total() (r int, exists bool) {
+	v := m.addgoalsAgainstMinute91To105Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstMinute91To105Total clears the value of the "goalsAgainstMinute91To105Total" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute91To105Total() {
+	m.goalsAgainstMinute91To105Total = nil
+	m.addgoalsAgainstMinute91To105Total = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute91To105Total] = struct{}{}
+}
+
+// GoalsAgainstMinute91To105TotalCleared returns if the "goalsAgainstMinute91To105Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute91To105TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute91To105Total]
+	return ok
+}
+
+// ResetGoalsAgainstMinute91To105Total resets all changes to the "goalsAgainstMinute91To105Total" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute91To105Total() {
+	m.goalsAgainstMinute91To105Total = nil
+	m.addgoalsAgainstMinute91To105Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute91To105Total)
+}
+
+// SetGoalsAgainstMinute91To105Percentage sets the "goalsAgainstMinute91To105Percentage" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute91To105Percentage(s string) {
+	m.goalsAgainstMinute91To105Percentage = &s
+}
+
+// GoalsAgainstMinute91To105Percentage returns the value of the "goalsAgainstMinute91To105Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute91To105Percentage() (r string, exists bool) {
+	v := m.goalsAgainstMinute91To105Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute91To105Percentage returns the old "goalsAgainstMinute91To105Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute91To105Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute91To105Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute91To105Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute91To105Percentage: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute91To105Percentage, nil
+}
+
+// ClearGoalsAgainstMinute91To105Percentage clears the value of the "goalsAgainstMinute91To105Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute91To105Percentage() {
+	m.goalsAgainstMinute91To105Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute91To105Percentage] = struct{}{}
+}
+
+// GoalsAgainstMinute91To105PercentageCleared returns if the "goalsAgainstMinute91To105Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute91To105PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute91To105Percentage]
+	return ok
+}
+
+// ResetGoalsAgainstMinute91To105Percentage resets all changes to the "goalsAgainstMinute91To105Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute91To105Percentage() {
+	m.goalsAgainstMinute91To105Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute91To105Percentage)
+}
+
+// SetGoalsAgainstMinute106To120Total sets the "goalsAgainstMinute106To120Total" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute106To120Total(i int) {
+	m.goalsAgainstMinute106To120Total = &i
+	m.addgoalsAgainstMinute106To120Total = nil
+}
+
+// GoalsAgainstMinute106To120Total returns the value of the "goalsAgainstMinute106To120Total" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute106To120Total() (r int, exists bool) {
+	v := m.goalsAgainstMinute106To120Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute106To120Total returns the old "goalsAgainstMinute106To120Total" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute106To120Total(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute106To120Total is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute106To120Total requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute106To120Total: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute106To120Total, nil
+}
+
+// AddGoalsAgainstMinute106To120Total adds i to the "goalsAgainstMinute106To120Total" field.
+func (m *TSGoalsMutation) AddGoalsAgainstMinute106To120Total(i int) {
+	if m.addgoalsAgainstMinute106To120Total != nil {
+		*m.addgoalsAgainstMinute106To120Total += i
+	} else {
+		m.addgoalsAgainstMinute106To120Total = &i
+	}
+}
+
+// AddedGoalsAgainstMinute106To120Total returns the value that was added to the "goalsAgainstMinute106To120Total" field in this mutation.
+func (m *TSGoalsMutation) AddedGoalsAgainstMinute106To120Total() (r int, exists bool) {
+	v := m.addgoalsAgainstMinute106To120Total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearGoalsAgainstMinute106To120Total clears the value of the "goalsAgainstMinute106To120Total" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute106To120Total() {
+	m.goalsAgainstMinute106To120Total = nil
+	m.addgoalsAgainstMinute106To120Total = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute106To120Total] = struct{}{}
+}
+
+// GoalsAgainstMinute106To120TotalCleared returns if the "goalsAgainstMinute106To120Total" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute106To120TotalCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute106To120Total]
+	return ok
+}
+
+// ResetGoalsAgainstMinute106To120Total resets all changes to the "goalsAgainstMinute106To120Total" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute106To120Total() {
+	m.goalsAgainstMinute106To120Total = nil
+	m.addgoalsAgainstMinute106To120Total = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute106To120Total)
+}
+
+// SetGoalsAgainstMinute106To120Percentage sets the "goalsAgainstMinute106To120Percentage" field.
+func (m *TSGoalsMutation) SetGoalsAgainstMinute106To120Percentage(s string) {
+	m.goalsAgainstMinute106To120Percentage = &s
+}
+
+// GoalsAgainstMinute106To120Percentage returns the value of the "goalsAgainstMinute106To120Percentage" field in the mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute106To120Percentage() (r string, exists bool) {
+	v := m.goalsAgainstMinute106To120Percentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalsAgainstMinute106To120Percentage returns the old "goalsAgainstMinute106To120Percentage" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldGoalsAgainstMinute106To120Percentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoalsAgainstMinute106To120Percentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoalsAgainstMinute106To120Percentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalsAgainstMinute106To120Percentage: %w", err)
+	}
+	return oldValue.GoalsAgainstMinute106To120Percentage, nil
+}
+
+// ClearGoalsAgainstMinute106To120Percentage clears the value of the "goalsAgainstMinute106To120Percentage" field.
+func (m *TSGoalsMutation) ClearGoalsAgainstMinute106To120Percentage() {
+	m.goalsAgainstMinute106To120Percentage = nil
+	m.clearedFields[tsgoals.FieldGoalsAgainstMinute106To120Percentage] = struct{}{}
+}
+
+// GoalsAgainstMinute106To120PercentageCleared returns if the "goalsAgainstMinute106To120Percentage" field was cleared in this mutation.
+func (m *TSGoalsMutation) GoalsAgainstMinute106To120PercentageCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldGoalsAgainstMinute106To120Percentage]
+	return ok
+}
+
+// ResetGoalsAgainstMinute106To120Percentage resets all changes to the "goalsAgainstMinute106To120Percentage" field.
+func (m *TSGoalsMutation) ResetGoalsAgainstMinute106To120Percentage() {
+	m.goalsAgainstMinute106To120Percentage = nil
+	delete(m.clearedFields, tsgoals.FieldGoalsAgainstMinute106To120Percentage)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TSGoalsMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TSGoalsMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the TSGoals entity.
+// If the TSGoals object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSGoalsMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TSGoalsMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[tsgoals.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TSGoalsMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[tsgoals.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TSGoalsMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, tsgoals.FieldLastUpdated)
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *TSGoalsMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *TSGoalsMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *TSGoalsMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *TSGoalsMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *TSGoalsMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *TSGoalsMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the TSGoalsMutation builder.
+func (m *TSGoalsMutation) Where(ps ...predicate.TSGoals) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TSGoalsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TSGoalsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TSGoals, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TSGoalsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TSGoalsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TSGoals).
+func (m *TSGoalsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TSGoalsMutation) Fields() []string {
+	fields := make([]string, 0, 45)
+	if m.goalsForTotalHome != nil {
+		fields = append(fields, tsgoals.FieldGoalsForTotalHome)
+	}
+	if m.goalsForTotalAway != nil {
+		fields = append(fields, tsgoals.FieldGoalsForTotalAway)
+	}
+	if m.goalsForTotal != nil {
+		fields = append(fields, tsgoals.FieldGoalsForTotal)
+	}
+	if m.goalsForAverageHome != nil {
+		fields = append(fields, tsgoals.FieldGoalsForAverageHome)
+	}
+	if m.goalsForAverageAway != nil {
+		fields = append(fields, tsgoals.FieldGoalsForAverageAway)
+	}
+	if m.goalsForAverageTotal != nil {
+		fields = append(fields, tsgoals.FieldGoalsForAverageTotal)
+	}
+	if m.goalsForMinute0To15Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute0To15Total)
+	}
+	if m.goalsForMinute0To15Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute0To15Percentage)
+	}
+	if m.goalsForMinute16To30Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute16To30Total)
+	}
+	if m.goalsForMinute16To30Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute16To30Percentage)
+	}
+	if m.goalsForMinute31To45Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute31To45Total)
+	}
+	if m.goalsForMinute31To45Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute31To45Percentage)
+	}
+	if m.goalsForMinute46To60Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute46To60Total)
+	}
+	if m.goalsForMinute46To60Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute46To60Percentage)
+	}
+	if m.goalsForMinute61To75Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute61To75Total)
+	}
+	if m.goalsForMinute61To75Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute61To75Percentage)
+	}
+	if m.goalsForMinute76To90Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute76To90Total)
+	}
+	if m.goalsForMinute76To90Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute76To90Percentage)
+	}
+	if m.goalsForMinute91To105Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute91To105Total)
+	}
+	if m.goalsForMinute91To105Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute91To105Percentage)
+	}
+	if m.goalsForMinute106To120Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute106To120Total)
+	}
+	if m.goalsForMinute106To120Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute106To120Percentage)
+	}
+	if m.goalsAgainstTotalHome != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotalHome)
+	}
+	if m.goalsAgainstTotalAway != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotalAway)
+	}
+	if m.goalsAgainstTotal != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotal)
+	}
+	if m.goalsAgainstAverageHome != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstAverageHome)
+	}
+	if m.goalsAgainstAverageAway != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstAverageAway)
+	}
+	if m.goalsAgainstAverageTotal != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstAverageTotal)
+	}
+	if m.goalsAgainstMinute0To15Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute0To15Total)
+	}
+	if m.goalsAgainstMinute0To15Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute0To15Percentage)
+	}
+	if m.goalsAgainstMinute16To30Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute16To30Total)
+	}
+	if m.goalsAgainstMinute16To30Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute16To30Percentage)
+	}
+	if m.goalsAgainstMinute31To45Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute31To45Total)
+	}
+	if m.goalsAgainstMinute31To45Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute31To45Percentage)
+	}
+	if m.goalsAgainstMinute46To60Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute46To60Total)
+	}
+	if m.goalsAgainstMinute46To60Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute46To60Percentage)
+	}
+	if m.goalsAgainstMinute61To75Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute61To75Total)
+	}
+	if m.goalsAgainstMinute61To75Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute61To75Percentage)
+	}
+	if m.goalsAgainstMinute76To90Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute76To90Total)
+	}
+	if m.goalsAgainstMinute76To90Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute76To90Percentage)
+	}
+	if m.goalsAgainstMinute91To105Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute91To105Total)
+	}
+	if m.goalsAgainstMinute91To105Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute91To105Percentage)
+	}
+	if m.goalsAgainstMinute106To120Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute106To120Total)
+	}
+	if m.goalsAgainstMinute106To120Percentage != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute106To120Percentage)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, tsgoals.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TSGoalsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tsgoals.FieldGoalsForTotalHome:
+		return m.GoalsForTotalHome()
+	case tsgoals.FieldGoalsForTotalAway:
+		return m.GoalsForTotalAway()
+	case tsgoals.FieldGoalsForTotal:
+		return m.GoalsForTotal()
+	case tsgoals.FieldGoalsForAverageHome:
+		return m.GoalsForAverageHome()
+	case tsgoals.FieldGoalsForAverageAway:
+		return m.GoalsForAverageAway()
+	case tsgoals.FieldGoalsForAverageTotal:
+		return m.GoalsForAverageTotal()
+	case tsgoals.FieldGoalsForMinute0To15Total:
+		return m.GoalsForMinute0To15Total()
+	case tsgoals.FieldGoalsForMinute0To15Percentage:
+		return m.GoalsForMinute0To15Percentage()
+	case tsgoals.FieldGoalsForMinute16To30Total:
+		return m.GoalsForMinute16To30Total()
+	case tsgoals.FieldGoalsForMinute16To30Percentage:
+		return m.GoalsForMinute16To30Percentage()
+	case tsgoals.FieldGoalsForMinute31To45Total:
+		return m.GoalsForMinute31To45Total()
+	case tsgoals.FieldGoalsForMinute31To45Percentage:
+		return m.GoalsForMinute31To45Percentage()
+	case tsgoals.FieldGoalsForMinute46To60Total:
+		return m.GoalsForMinute46To60Total()
+	case tsgoals.FieldGoalsForMinute46To60Percentage:
+		return m.GoalsForMinute46To60Percentage()
+	case tsgoals.FieldGoalsForMinute61To75Total:
+		return m.GoalsForMinute61To75Total()
+	case tsgoals.FieldGoalsForMinute61To75Percentage:
+		return m.GoalsForMinute61To75Percentage()
+	case tsgoals.FieldGoalsForMinute76To90Total:
+		return m.GoalsForMinute76To90Total()
+	case tsgoals.FieldGoalsForMinute76To90Percentage:
+		return m.GoalsForMinute76To90Percentage()
+	case tsgoals.FieldGoalsForMinute91To105Total:
+		return m.GoalsForMinute91To105Total()
+	case tsgoals.FieldGoalsForMinute91To105Percentage:
+		return m.GoalsForMinute91To105Percentage()
+	case tsgoals.FieldGoalsForMinute106To120Total:
+		return m.GoalsForMinute106To120Total()
+	case tsgoals.FieldGoalsForMinute106To120Percentage:
+		return m.GoalsForMinute106To120Percentage()
+	case tsgoals.FieldGoalsAgainstTotalHome:
+		return m.GoalsAgainstTotalHome()
+	case tsgoals.FieldGoalsAgainstTotalAway:
+		return m.GoalsAgainstTotalAway()
+	case tsgoals.FieldGoalsAgainstTotal:
+		return m.GoalsAgainstTotal()
+	case tsgoals.FieldGoalsAgainstAverageHome:
+		return m.GoalsAgainstAverageHome()
+	case tsgoals.FieldGoalsAgainstAverageAway:
+		return m.GoalsAgainstAverageAway()
+	case tsgoals.FieldGoalsAgainstAverageTotal:
+		return m.GoalsAgainstAverageTotal()
+	case tsgoals.FieldGoalsAgainstMinute0To15Total:
+		return m.GoalsAgainstMinute0To15Total()
+	case tsgoals.FieldGoalsAgainstMinute0To15Percentage:
+		return m.GoalsAgainstMinute0To15Percentage()
+	case tsgoals.FieldGoalsAgainstMinute16To30Total:
+		return m.GoalsAgainstMinute16To30Total()
+	case tsgoals.FieldGoalsAgainstMinute16To30Percentage:
+		return m.GoalsAgainstMinute16To30Percentage()
+	case tsgoals.FieldGoalsAgainstMinute31To45Total:
+		return m.GoalsAgainstMinute31To45Total()
+	case tsgoals.FieldGoalsAgainstMinute31To45Percentage:
+		return m.GoalsAgainstMinute31To45Percentage()
+	case tsgoals.FieldGoalsAgainstMinute46To60Total:
+		return m.GoalsAgainstMinute46To60Total()
+	case tsgoals.FieldGoalsAgainstMinute46To60Percentage:
+		return m.GoalsAgainstMinute46To60Percentage()
+	case tsgoals.FieldGoalsAgainstMinute61To75Total:
+		return m.GoalsAgainstMinute61To75Total()
+	case tsgoals.FieldGoalsAgainstMinute61To75Percentage:
+		return m.GoalsAgainstMinute61To75Percentage()
+	case tsgoals.FieldGoalsAgainstMinute76To90Total:
+		return m.GoalsAgainstMinute76To90Total()
+	case tsgoals.FieldGoalsAgainstMinute76To90Percentage:
+		return m.GoalsAgainstMinute76To90Percentage()
+	case tsgoals.FieldGoalsAgainstMinute91To105Total:
+		return m.GoalsAgainstMinute91To105Total()
+	case tsgoals.FieldGoalsAgainstMinute91To105Percentage:
+		return m.GoalsAgainstMinute91To105Percentage()
+	case tsgoals.FieldGoalsAgainstMinute106To120Total:
+		return m.GoalsAgainstMinute106To120Total()
+	case tsgoals.FieldGoalsAgainstMinute106To120Percentage:
+		return m.GoalsAgainstMinute106To120Percentage()
+	case tsgoals.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TSGoalsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tsgoals.FieldGoalsForTotalHome:
+		return m.OldGoalsForTotalHome(ctx)
+	case tsgoals.FieldGoalsForTotalAway:
+		return m.OldGoalsForTotalAway(ctx)
+	case tsgoals.FieldGoalsForTotal:
+		return m.OldGoalsForTotal(ctx)
+	case tsgoals.FieldGoalsForAverageHome:
+		return m.OldGoalsForAverageHome(ctx)
+	case tsgoals.FieldGoalsForAverageAway:
+		return m.OldGoalsForAverageAway(ctx)
+	case tsgoals.FieldGoalsForAverageTotal:
+		return m.OldGoalsForAverageTotal(ctx)
+	case tsgoals.FieldGoalsForMinute0To15Total:
+		return m.OldGoalsForMinute0To15Total(ctx)
+	case tsgoals.FieldGoalsForMinute0To15Percentage:
+		return m.OldGoalsForMinute0To15Percentage(ctx)
+	case tsgoals.FieldGoalsForMinute16To30Total:
+		return m.OldGoalsForMinute16To30Total(ctx)
+	case tsgoals.FieldGoalsForMinute16To30Percentage:
+		return m.OldGoalsForMinute16To30Percentage(ctx)
+	case tsgoals.FieldGoalsForMinute31To45Total:
+		return m.OldGoalsForMinute31To45Total(ctx)
+	case tsgoals.FieldGoalsForMinute31To45Percentage:
+		return m.OldGoalsForMinute31To45Percentage(ctx)
+	case tsgoals.FieldGoalsForMinute46To60Total:
+		return m.OldGoalsForMinute46To60Total(ctx)
+	case tsgoals.FieldGoalsForMinute46To60Percentage:
+		return m.OldGoalsForMinute46To60Percentage(ctx)
+	case tsgoals.FieldGoalsForMinute61To75Total:
+		return m.OldGoalsForMinute61To75Total(ctx)
+	case tsgoals.FieldGoalsForMinute61To75Percentage:
+		return m.OldGoalsForMinute61To75Percentage(ctx)
+	case tsgoals.FieldGoalsForMinute76To90Total:
+		return m.OldGoalsForMinute76To90Total(ctx)
+	case tsgoals.FieldGoalsForMinute76To90Percentage:
+		return m.OldGoalsForMinute76To90Percentage(ctx)
+	case tsgoals.FieldGoalsForMinute91To105Total:
+		return m.OldGoalsForMinute91To105Total(ctx)
+	case tsgoals.FieldGoalsForMinute91To105Percentage:
+		return m.OldGoalsForMinute91To105Percentage(ctx)
+	case tsgoals.FieldGoalsForMinute106To120Total:
+		return m.OldGoalsForMinute106To120Total(ctx)
+	case tsgoals.FieldGoalsForMinute106To120Percentage:
+		return m.OldGoalsForMinute106To120Percentage(ctx)
+	case tsgoals.FieldGoalsAgainstTotalHome:
+		return m.OldGoalsAgainstTotalHome(ctx)
+	case tsgoals.FieldGoalsAgainstTotalAway:
+		return m.OldGoalsAgainstTotalAway(ctx)
+	case tsgoals.FieldGoalsAgainstTotal:
+		return m.OldGoalsAgainstTotal(ctx)
+	case tsgoals.FieldGoalsAgainstAverageHome:
+		return m.OldGoalsAgainstAverageHome(ctx)
+	case tsgoals.FieldGoalsAgainstAverageAway:
+		return m.OldGoalsAgainstAverageAway(ctx)
+	case tsgoals.FieldGoalsAgainstAverageTotal:
+		return m.OldGoalsAgainstAverageTotal(ctx)
+	case tsgoals.FieldGoalsAgainstMinute0To15Total:
+		return m.OldGoalsAgainstMinute0To15Total(ctx)
+	case tsgoals.FieldGoalsAgainstMinute0To15Percentage:
+		return m.OldGoalsAgainstMinute0To15Percentage(ctx)
+	case tsgoals.FieldGoalsAgainstMinute16To30Total:
+		return m.OldGoalsAgainstMinute16To30Total(ctx)
+	case tsgoals.FieldGoalsAgainstMinute16To30Percentage:
+		return m.OldGoalsAgainstMinute16To30Percentage(ctx)
+	case tsgoals.FieldGoalsAgainstMinute31To45Total:
+		return m.OldGoalsAgainstMinute31To45Total(ctx)
+	case tsgoals.FieldGoalsAgainstMinute31To45Percentage:
+		return m.OldGoalsAgainstMinute31To45Percentage(ctx)
+	case tsgoals.FieldGoalsAgainstMinute46To60Total:
+		return m.OldGoalsAgainstMinute46To60Total(ctx)
+	case tsgoals.FieldGoalsAgainstMinute46To60Percentage:
+		return m.OldGoalsAgainstMinute46To60Percentage(ctx)
+	case tsgoals.FieldGoalsAgainstMinute61To75Total:
+		return m.OldGoalsAgainstMinute61To75Total(ctx)
+	case tsgoals.FieldGoalsAgainstMinute61To75Percentage:
+		return m.OldGoalsAgainstMinute61To75Percentage(ctx)
+	case tsgoals.FieldGoalsAgainstMinute76To90Total:
+		return m.OldGoalsAgainstMinute76To90Total(ctx)
+	case tsgoals.FieldGoalsAgainstMinute76To90Percentage:
+		return m.OldGoalsAgainstMinute76To90Percentage(ctx)
+	case tsgoals.FieldGoalsAgainstMinute91To105Total:
+		return m.OldGoalsAgainstMinute91To105Total(ctx)
+	case tsgoals.FieldGoalsAgainstMinute91To105Percentage:
+		return m.OldGoalsAgainstMinute91To105Percentage(ctx)
+	case tsgoals.FieldGoalsAgainstMinute106To120Total:
+		return m.OldGoalsAgainstMinute106To120Total(ctx)
+	case tsgoals.FieldGoalsAgainstMinute106To120Percentage:
+		return m.OldGoalsAgainstMinute106To120Percentage(ctx)
+	case tsgoals.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TSGoals field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSGoalsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tsgoals.FieldGoalsForTotalHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForTotalHome(v)
+		return nil
+	case tsgoals.FieldGoalsForTotalAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForTotalAway(v)
+		return nil
+	case tsgoals.FieldGoalsForTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForTotal(v)
+		return nil
+	case tsgoals.FieldGoalsForAverageHome:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForAverageHome(v)
+		return nil
+	case tsgoals.FieldGoalsForAverageAway:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForAverageAway(v)
+		return nil
+	case tsgoals.FieldGoalsForAverageTotal:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForAverageTotal(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute0To15Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute0To15Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute0To15Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute0To15Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute16To30Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute16To30Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute16To30Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute16To30Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute31To45Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute31To45Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute31To45Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute31To45Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute46To60Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute46To60Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute46To60Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute46To60Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute61To75Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute61To75Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute61To75Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute61To75Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute76To90Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute76To90Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute76To90Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute76To90Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute91To105Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute91To105Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute91To105Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute91To105Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute106To120Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute106To120Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute106To120Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsForMinute106To120Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstTotalHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstTotalHome(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstTotalAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstTotalAway(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstTotal(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageHome:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstAverageHome(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageAway:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstAverageAway(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageTotal:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstAverageTotal(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute0To15Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute0To15Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute0To15Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute0To15Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute16To30Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute16To30Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute16To30Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute16To30Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute31To45Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute31To45Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute31To45Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute31To45Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute46To60Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute46To60Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute46To60Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute46To60Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute61To75Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute61To75Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute61To75Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute61To75Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute76To90Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute76To90Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute76To90Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute76To90Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute91To105Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute91To105Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute91To105Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute91To105Percentage(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute106To120Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute106To120Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute106To120Percentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalsAgainstMinute106To120Percentage(v)
+		return nil
+	case tsgoals.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSGoals field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TSGoalsMutation) AddedFields() []string {
+	var fields []string
+	if m.addgoalsForTotalHome != nil {
+		fields = append(fields, tsgoals.FieldGoalsForTotalHome)
+	}
+	if m.addgoalsForTotalAway != nil {
+		fields = append(fields, tsgoals.FieldGoalsForTotalAway)
+	}
+	if m.addgoalsForTotal != nil {
+		fields = append(fields, tsgoals.FieldGoalsForTotal)
+	}
+	if m.addgoalsForMinute0To15Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute0To15Total)
+	}
+	if m.addgoalsForMinute16To30Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute16To30Total)
+	}
+	if m.addgoalsForMinute31To45Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute31To45Total)
+	}
+	if m.addgoalsForMinute46To60Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute46To60Total)
+	}
+	if m.addgoalsForMinute61To75Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute61To75Total)
+	}
+	if m.addgoalsForMinute76To90Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute76To90Total)
+	}
+	if m.addgoalsForMinute91To105Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute91To105Total)
+	}
+	if m.addgoalsForMinute106To120Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsForMinute106To120Total)
+	}
+	if m.addgoalsAgainstTotalHome != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotalHome)
+	}
+	if m.addgoalsAgainstTotalAway != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotalAway)
+	}
+	if m.addgoalsAgainstTotal != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotal)
+	}
+	if m.addgoalsAgainstMinute0To15Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute0To15Total)
+	}
+	if m.addgoalsAgainstMinute16To30Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute16To30Total)
+	}
+	if m.addgoalsAgainstMinute31To45Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute31To45Total)
+	}
+	if m.addgoalsAgainstMinute46To60Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute46To60Total)
+	}
+	if m.addgoalsAgainstMinute61To75Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute61To75Total)
+	}
+	if m.addgoalsAgainstMinute76To90Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute76To90Total)
+	}
+	if m.addgoalsAgainstMinute91To105Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute91To105Total)
+	}
+	if m.addgoalsAgainstMinute106To120Total != nil {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute106To120Total)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TSGoalsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tsgoals.FieldGoalsForTotalHome:
+		return m.AddedGoalsForTotalHome()
+	case tsgoals.FieldGoalsForTotalAway:
+		return m.AddedGoalsForTotalAway()
+	case tsgoals.FieldGoalsForTotal:
+		return m.AddedGoalsForTotal()
+	case tsgoals.FieldGoalsForMinute0To15Total:
+		return m.AddedGoalsForMinute0To15Total()
+	case tsgoals.FieldGoalsForMinute16To30Total:
+		return m.AddedGoalsForMinute16To30Total()
+	case tsgoals.FieldGoalsForMinute31To45Total:
+		return m.AddedGoalsForMinute31To45Total()
+	case tsgoals.FieldGoalsForMinute46To60Total:
+		return m.AddedGoalsForMinute46To60Total()
+	case tsgoals.FieldGoalsForMinute61To75Total:
+		return m.AddedGoalsForMinute61To75Total()
+	case tsgoals.FieldGoalsForMinute76To90Total:
+		return m.AddedGoalsForMinute76To90Total()
+	case tsgoals.FieldGoalsForMinute91To105Total:
+		return m.AddedGoalsForMinute91To105Total()
+	case tsgoals.FieldGoalsForMinute106To120Total:
+		return m.AddedGoalsForMinute106To120Total()
+	case tsgoals.FieldGoalsAgainstTotalHome:
+		return m.AddedGoalsAgainstTotalHome()
+	case tsgoals.FieldGoalsAgainstTotalAway:
+		return m.AddedGoalsAgainstTotalAway()
+	case tsgoals.FieldGoalsAgainstTotal:
+		return m.AddedGoalsAgainstTotal()
+	case tsgoals.FieldGoalsAgainstMinute0To15Total:
+		return m.AddedGoalsAgainstMinute0To15Total()
+	case tsgoals.FieldGoalsAgainstMinute16To30Total:
+		return m.AddedGoalsAgainstMinute16To30Total()
+	case tsgoals.FieldGoalsAgainstMinute31To45Total:
+		return m.AddedGoalsAgainstMinute31To45Total()
+	case tsgoals.FieldGoalsAgainstMinute46To60Total:
+		return m.AddedGoalsAgainstMinute46To60Total()
+	case tsgoals.FieldGoalsAgainstMinute61To75Total:
+		return m.AddedGoalsAgainstMinute61To75Total()
+	case tsgoals.FieldGoalsAgainstMinute76To90Total:
+		return m.AddedGoalsAgainstMinute76To90Total()
+	case tsgoals.FieldGoalsAgainstMinute91To105Total:
+		return m.AddedGoalsAgainstMinute91To105Total()
+	case tsgoals.FieldGoalsAgainstMinute106To120Total:
+		return m.AddedGoalsAgainstMinute106To120Total()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSGoalsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tsgoals.FieldGoalsForTotalHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForTotalHome(v)
+		return nil
+	case tsgoals.FieldGoalsForTotalAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForTotalAway(v)
+		return nil
+	case tsgoals.FieldGoalsForTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForTotal(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute0To15Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForMinute0To15Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute16To30Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForMinute16To30Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute31To45Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForMinute31To45Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute46To60Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForMinute46To60Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute61To75Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForMinute61To75Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute76To90Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForMinute76To90Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute91To105Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForMinute91To105Total(v)
+		return nil
+	case tsgoals.FieldGoalsForMinute106To120Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsForMinute106To120Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstTotalHome:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstTotalHome(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstTotalAway:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstTotalAway(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstTotal(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute0To15Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstMinute0To15Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute16To30Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstMinute16To30Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute31To45Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstMinute31To45Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute46To60Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstMinute46To60Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute61To75Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstMinute61To75Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute76To90Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstMinute76To90Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute91To105Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstMinute91To105Total(v)
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute106To120Total:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalsAgainstMinute106To120Total(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSGoals numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TSGoalsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tsgoals.FieldGoalsForTotalHome) {
+		fields = append(fields, tsgoals.FieldGoalsForTotalHome)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForTotalAway) {
+		fields = append(fields, tsgoals.FieldGoalsForTotalAway)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForTotal) {
+		fields = append(fields, tsgoals.FieldGoalsForTotal)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForAverageHome) {
+		fields = append(fields, tsgoals.FieldGoalsForAverageHome)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForAverageAway) {
+		fields = append(fields, tsgoals.FieldGoalsForAverageAway)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForAverageTotal) {
+		fields = append(fields, tsgoals.FieldGoalsForAverageTotal)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute0To15Total) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute0To15Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute0To15Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute0To15Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute16To30Total) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute16To30Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute16To30Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute16To30Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute31To45Total) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute31To45Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute31To45Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute31To45Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute46To60Total) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute46To60Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute46To60Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute46To60Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute61To75Total) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute61To75Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute61To75Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute61To75Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute76To90Total) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute76To90Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute76To90Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute76To90Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute91To105Total) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute91To105Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute91To105Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute91To105Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute106To120Total) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute106To120Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsForMinute106To120Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsForMinute106To120Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstTotalHome) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotalHome)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstTotalAway) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotalAway)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstTotal) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstTotal)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstAverageHome) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstAverageHome)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstAverageAway) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstAverageAway)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstAverageTotal) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstAverageTotal)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute0To15Total) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute0To15Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute0To15Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute0To15Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute16To30Total) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute16To30Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute16To30Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute16To30Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute31To45Total) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute31To45Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute31To45Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute31To45Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute46To60Total) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute46To60Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute46To60Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute46To60Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute61To75Total) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute61To75Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute61To75Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute61To75Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute76To90Total) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute76To90Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute76To90Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute76To90Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute91To105Total) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute91To105Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute91To105Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute91To105Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute106To120Total) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute106To120Total)
+	}
+	if m.FieldCleared(tsgoals.FieldGoalsAgainstMinute106To120Percentage) {
+		fields = append(fields, tsgoals.FieldGoalsAgainstMinute106To120Percentage)
+	}
+	if m.FieldCleared(tsgoals.FieldLastUpdated) {
+		fields = append(fields, tsgoals.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TSGoalsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TSGoalsMutation) ClearField(name string) error {
+	switch name {
+	case tsgoals.FieldGoalsForTotalHome:
+		m.ClearGoalsForTotalHome()
+		return nil
+	case tsgoals.FieldGoalsForTotalAway:
+		m.ClearGoalsForTotalAway()
+		return nil
+	case tsgoals.FieldGoalsForTotal:
+		m.ClearGoalsForTotal()
+		return nil
+	case tsgoals.FieldGoalsForAverageHome:
+		m.ClearGoalsForAverageHome()
+		return nil
+	case tsgoals.FieldGoalsForAverageAway:
+		m.ClearGoalsForAverageAway()
+		return nil
+	case tsgoals.FieldGoalsForAverageTotal:
+		m.ClearGoalsForAverageTotal()
+		return nil
+	case tsgoals.FieldGoalsForMinute0To15Total:
+		m.ClearGoalsForMinute0To15Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute0To15Percentage:
+		m.ClearGoalsForMinute0To15Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute16To30Total:
+		m.ClearGoalsForMinute16To30Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute16To30Percentage:
+		m.ClearGoalsForMinute16To30Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute31To45Total:
+		m.ClearGoalsForMinute31To45Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute31To45Percentage:
+		m.ClearGoalsForMinute31To45Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute46To60Total:
+		m.ClearGoalsForMinute46To60Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute46To60Percentage:
+		m.ClearGoalsForMinute46To60Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute61To75Total:
+		m.ClearGoalsForMinute61To75Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute61To75Percentage:
+		m.ClearGoalsForMinute61To75Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute76To90Total:
+		m.ClearGoalsForMinute76To90Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute76To90Percentage:
+		m.ClearGoalsForMinute76To90Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute91To105Total:
+		m.ClearGoalsForMinute91To105Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute91To105Percentage:
+		m.ClearGoalsForMinute91To105Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute106To120Total:
+		m.ClearGoalsForMinute106To120Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute106To120Percentage:
+		m.ClearGoalsForMinute106To120Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstTotalHome:
+		m.ClearGoalsAgainstTotalHome()
+		return nil
+	case tsgoals.FieldGoalsAgainstTotalAway:
+		m.ClearGoalsAgainstTotalAway()
+		return nil
+	case tsgoals.FieldGoalsAgainstTotal:
+		m.ClearGoalsAgainstTotal()
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageHome:
+		m.ClearGoalsAgainstAverageHome()
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageAway:
+		m.ClearGoalsAgainstAverageAway()
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageTotal:
+		m.ClearGoalsAgainstAverageTotal()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute0To15Total:
+		m.ClearGoalsAgainstMinute0To15Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute0To15Percentage:
+		m.ClearGoalsAgainstMinute0To15Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute16To30Total:
+		m.ClearGoalsAgainstMinute16To30Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute16To30Percentage:
+		m.ClearGoalsAgainstMinute16To30Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute31To45Total:
+		m.ClearGoalsAgainstMinute31To45Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute31To45Percentage:
+		m.ClearGoalsAgainstMinute31To45Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute46To60Total:
+		m.ClearGoalsAgainstMinute46To60Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute46To60Percentage:
+		m.ClearGoalsAgainstMinute46To60Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute61To75Total:
+		m.ClearGoalsAgainstMinute61To75Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute61To75Percentage:
+		m.ClearGoalsAgainstMinute61To75Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute76To90Total:
+		m.ClearGoalsAgainstMinute76To90Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute76To90Percentage:
+		m.ClearGoalsAgainstMinute76To90Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute91To105Total:
+		m.ClearGoalsAgainstMinute91To105Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute91To105Percentage:
+		m.ClearGoalsAgainstMinute91To105Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute106To120Total:
+		m.ClearGoalsAgainstMinute106To120Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute106To120Percentage:
+		m.ClearGoalsAgainstMinute106To120Percentage()
+		return nil
+	case tsgoals.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSGoals nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TSGoalsMutation) ResetField(name string) error {
+	switch name {
+	case tsgoals.FieldGoalsForTotalHome:
+		m.ResetGoalsForTotalHome()
+		return nil
+	case tsgoals.FieldGoalsForTotalAway:
+		m.ResetGoalsForTotalAway()
+		return nil
+	case tsgoals.FieldGoalsForTotal:
+		m.ResetGoalsForTotal()
+		return nil
+	case tsgoals.FieldGoalsForAverageHome:
+		m.ResetGoalsForAverageHome()
+		return nil
+	case tsgoals.FieldGoalsForAverageAway:
+		m.ResetGoalsForAverageAway()
+		return nil
+	case tsgoals.FieldGoalsForAverageTotal:
+		m.ResetGoalsForAverageTotal()
+		return nil
+	case tsgoals.FieldGoalsForMinute0To15Total:
+		m.ResetGoalsForMinute0To15Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute0To15Percentage:
+		m.ResetGoalsForMinute0To15Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute16To30Total:
+		m.ResetGoalsForMinute16To30Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute16To30Percentage:
+		m.ResetGoalsForMinute16To30Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute31To45Total:
+		m.ResetGoalsForMinute31To45Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute31To45Percentage:
+		m.ResetGoalsForMinute31To45Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute46To60Total:
+		m.ResetGoalsForMinute46To60Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute46To60Percentage:
+		m.ResetGoalsForMinute46To60Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute61To75Total:
+		m.ResetGoalsForMinute61To75Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute61To75Percentage:
+		m.ResetGoalsForMinute61To75Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute76To90Total:
+		m.ResetGoalsForMinute76To90Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute76To90Percentage:
+		m.ResetGoalsForMinute76To90Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute91To105Total:
+		m.ResetGoalsForMinute91To105Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute91To105Percentage:
+		m.ResetGoalsForMinute91To105Percentage()
+		return nil
+	case tsgoals.FieldGoalsForMinute106To120Total:
+		m.ResetGoalsForMinute106To120Total()
+		return nil
+	case tsgoals.FieldGoalsForMinute106To120Percentage:
+		m.ResetGoalsForMinute106To120Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstTotalHome:
+		m.ResetGoalsAgainstTotalHome()
+		return nil
+	case tsgoals.FieldGoalsAgainstTotalAway:
+		m.ResetGoalsAgainstTotalAway()
+		return nil
+	case tsgoals.FieldGoalsAgainstTotal:
+		m.ResetGoalsAgainstTotal()
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageHome:
+		m.ResetGoalsAgainstAverageHome()
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageAway:
+		m.ResetGoalsAgainstAverageAway()
+		return nil
+	case tsgoals.FieldGoalsAgainstAverageTotal:
+		m.ResetGoalsAgainstAverageTotal()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute0To15Total:
+		m.ResetGoalsAgainstMinute0To15Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute0To15Percentage:
+		m.ResetGoalsAgainstMinute0To15Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute16To30Total:
+		m.ResetGoalsAgainstMinute16To30Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute16To30Percentage:
+		m.ResetGoalsAgainstMinute16To30Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute31To45Total:
+		m.ResetGoalsAgainstMinute31To45Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute31To45Percentage:
+		m.ResetGoalsAgainstMinute31To45Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute46To60Total:
+		m.ResetGoalsAgainstMinute46To60Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute46To60Percentage:
+		m.ResetGoalsAgainstMinute46To60Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute61To75Total:
+		m.ResetGoalsAgainstMinute61To75Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute61To75Percentage:
+		m.ResetGoalsAgainstMinute61To75Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute76To90Total:
+		m.ResetGoalsAgainstMinute76To90Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute76To90Percentage:
+		m.ResetGoalsAgainstMinute76To90Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute91To105Total:
+		m.ResetGoalsAgainstMinute91To105Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute91To105Percentage:
+		m.ResetGoalsAgainstMinute91To105Percentage()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute106To120Total:
+		m.ResetGoalsAgainstMinute106To120Total()
+		return nil
+	case tsgoals.FieldGoalsAgainstMinute106To120Percentage:
+		m.ResetGoalsAgainstMinute106To120Percentage()
+		return nil
+	case tsgoals.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSGoals field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TSGoalsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.team != nil {
+		edges = append(edges, tsgoals.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TSGoalsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tsgoals.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TSGoalsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TSGoalsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TSGoalsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedteam {
+		edges = append(edges, tsgoals.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TSGoalsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tsgoals.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TSGoalsMutation) ClearEdge(name string) error {
+	switch name {
+	case tsgoals.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSGoals unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TSGoalsMutation) ResetEdge(name string) error {
+	switch name {
+	case tsgoals.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSGoals edge %s", name)
+}
+
+// TSLineupsMutation represents an operation that mutates the TSLineups nodes in the graph.
+type TSLineupsMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	formation     *string
+	played        *int
+	addplayed     *int
+	lastUpdated   *time.Time
+	clearedFields map[string]struct{}
+	team          *int
+	clearedteam   bool
+	done          bool
+	oldValue      func(context.Context) (*TSLineups, error)
+	predicates    []predicate.TSLineups
+}
+
+var _ ent.Mutation = (*TSLineupsMutation)(nil)
+
+// tslineupsOption allows management of the mutation configuration using functional options.
+type tslineupsOption func(*TSLineupsMutation)
+
+// newTSLineupsMutation creates new mutation for the TSLineups entity.
+func newTSLineupsMutation(c config, op Op, opts ...tslineupsOption) *TSLineupsMutation {
+	m := &TSLineupsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTSLineups,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTSLineupsID sets the ID field of the mutation.
+func withTSLineupsID(id int) tslineupsOption {
+	return func(m *TSLineupsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TSLineups
+		)
+		m.oldValue = func(ctx context.Context) (*TSLineups, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TSLineups.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTSLineups sets the old TSLineups of the mutation.
+func withTSLineups(node *TSLineups) tslineupsOption {
+	return func(m *TSLineupsMutation) {
+		m.oldValue = func(context.Context) (*TSLineups, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TSLineupsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TSLineupsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TSLineupsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TSLineupsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TSLineups.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFormation sets the "formation" field.
+func (m *TSLineupsMutation) SetFormation(s string) {
+	m.formation = &s
+}
+
+// Formation returns the value of the "formation" field in the mutation.
+func (m *TSLineupsMutation) Formation() (r string, exists bool) {
+	v := m.formation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFormation returns the old "formation" field's value of the TSLineups entity.
+// If the TSLineups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSLineupsMutation) OldFormation(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFormation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFormation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFormation: %w", err)
+	}
+	return oldValue.Formation, nil
+}
+
+// ResetFormation resets all changes to the "formation" field.
+func (m *TSLineupsMutation) ResetFormation() {
+	m.formation = nil
+}
+
+// SetPlayed sets the "played" field.
+func (m *TSLineupsMutation) SetPlayed(i int) {
+	m.played = &i
+	m.addplayed = nil
+}
+
+// Played returns the value of the "played" field in the mutation.
+func (m *TSLineupsMutation) Played() (r int, exists bool) {
+	v := m.played
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlayed returns the old "played" field's value of the TSLineups entity.
+// If the TSLineups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSLineupsMutation) OldPlayed(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlayed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlayed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlayed: %w", err)
+	}
+	return oldValue.Played, nil
+}
+
+// AddPlayed adds i to the "played" field.
+func (m *TSLineupsMutation) AddPlayed(i int) {
+	if m.addplayed != nil {
+		*m.addplayed += i
+	} else {
+		m.addplayed = &i
+	}
+}
+
+// AddedPlayed returns the value that was added to the "played" field in this mutation.
+func (m *TSLineupsMutation) AddedPlayed() (r int, exists bool) {
+	v := m.addplayed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPlayed resets all changes to the "played" field.
+func (m *TSLineupsMutation) ResetPlayed() {
+	m.played = nil
+	m.addplayed = nil
+}
+
+// SetTeamID sets the "team_id" field.
+func (m *TSLineupsMutation) SetTeamID(i int) {
+	m.team = &i
+}
+
+// TeamID returns the value of the "team_id" field in the mutation.
+func (m *TSLineupsMutation) TeamID() (r int, exists bool) {
+	v := m.team
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTeamID returns the old "team_id" field's value of the TSLineups entity.
+// If the TSLineups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSLineupsMutation) OldTeamID(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTeamID is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTeamID requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTeamID: %w", err)
+	}
+	return oldValue.TeamID, nil
+}
+
+// ResetTeamID resets all changes to the "team_id" field.
+func (m *TSLineupsMutation) ResetTeamID() {
+	m.team = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TSLineupsMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TSLineupsMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the TSLineups entity.
+// If the TSLineups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSLineupsMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TSLineupsMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[tslineups.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TSLineupsMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[tslineups.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TSLineupsMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, tslineups.FieldLastUpdated)
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *TSLineupsMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *TSLineupsMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *TSLineupsMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *TSLineupsMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the TSLineupsMutation builder.
+func (m *TSLineupsMutation) Where(ps ...predicate.TSLineups) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TSLineupsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TSLineupsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TSLineups, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TSLineupsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TSLineupsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TSLineups).
+func (m *TSLineupsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TSLineupsMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.formation != nil {
+		fields = append(fields, tslineups.FieldFormation)
+	}
+	if m.played != nil {
+		fields = append(fields, tslineups.FieldPlayed)
+	}
+	if m.team != nil {
+		fields = append(fields, tslineups.FieldTeamID)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, tslineups.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TSLineupsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tslineups.FieldFormation:
+		return m.Formation()
+	case tslineups.FieldPlayed:
+		return m.Played()
+	case tslineups.FieldTeamID:
+		return m.TeamID()
+	case tslineups.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TSLineupsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tslineups.FieldFormation:
+		return m.OldFormation(ctx)
+	case tslineups.FieldPlayed:
+		return m.OldPlayed(ctx)
+	case tslineups.FieldTeamID:
+		return m.OldTeamID(ctx)
+	case tslineups.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TSLineups field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSLineupsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tslineups.FieldFormation:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFormation(v)
+		return nil
+	case tslineups.FieldPlayed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlayed(v)
+		return nil
+	case tslineups.FieldTeamID:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTeamID(v)
+		return nil
+	case tslineups.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSLineups field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TSLineupsMutation) AddedFields() []string {
+	var fields []string
+	if m.addplayed != nil {
+		fields = append(fields, tslineups.FieldPlayed)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TSLineupsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tslineups.FieldPlayed:
+		return m.AddedPlayed()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSLineupsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tslineups.FieldPlayed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPlayed(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSLineups numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TSLineupsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tslineups.FieldLastUpdated) {
+		fields = append(fields, tslineups.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TSLineupsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TSLineupsMutation) ClearField(name string) error {
+	switch name {
+	case tslineups.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSLineups nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TSLineupsMutation) ResetField(name string) error {
+	switch name {
+	case tslineups.FieldFormation:
+		m.ResetFormation()
+		return nil
+	case tslineups.FieldPlayed:
+		m.ResetPlayed()
+		return nil
+	case tslineups.FieldTeamID:
+		m.ResetTeamID()
+		return nil
+	case tslineups.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSLineups field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TSLineupsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.team != nil {
+		edges = append(edges, tslineups.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TSLineupsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tslineups.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TSLineupsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TSLineupsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TSLineupsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedteam {
+		edges = append(edges, tslineups.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TSLineupsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tslineups.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TSLineupsMutation) ClearEdge(name string) error {
+	switch name {
+	case tslineups.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSLineups unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TSLineupsMutation) ResetEdge(name string) error {
+	switch name {
+	case tslineups.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSLineups edge %s", name)
+}
+
+// TSPenaltyMutation represents an operation that mutates the TSPenalty nodes in the graph.
+type TSPenaltyMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	total            *int
+	addtotal         *int
+	scoredTotal      *int
+	addscoredTotal   *int
+	missedTotal      *int
+	addmissedTotal   *int
+	scoredPercentage *string
+	missedPercentage *string
+	lastUpdated      *time.Time
+	clearedFields    map[string]struct{}
+	team             *int
+	clearedteam      bool
+	done             bool
+	oldValue         func(context.Context) (*TSPenalty, error)
+	predicates       []predicate.TSPenalty
+}
+
+var _ ent.Mutation = (*TSPenaltyMutation)(nil)
+
+// tspenaltyOption allows management of the mutation configuration using functional options.
+type tspenaltyOption func(*TSPenaltyMutation)
+
+// newTSPenaltyMutation creates new mutation for the TSPenalty entity.
+func newTSPenaltyMutation(c config, op Op, opts ...tspenaltyOption) *TSPenaltyMutation {
+	m := &TSPenaltyMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeTSPenalty,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withTSPenaltyID sets the ID field of the mutation.
+func withTSPenaltyID(id int) tspenaltyOption {
+	return func(m *TSPenaltyMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *TSPenalty
+		)
+		m.oldValue = func(ctx context.Context) (*TSPenalty, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().TSPenalty.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withTSPenalty sets the old TSPenalty of the mutation.
+func withTSPenalty(node *TSPenalty) tspenaltyOption {
+	return func(m *TSPenaltyMutation) {
+		m.oldValue = func(context.Context) (*TSPenalty, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m TSPenaltyMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m TSPenaltyMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *TSPenaltyMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *TSPenaltyMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().TSPenalty.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTotal sets the "total" field.
+func (m *TSPenaltyMutation) SetTotal(i int) {
+	m.total = &i
+	m.addtotal = nil
+}
+
+// Total returns the value of the "total" field in the mutation.
+func (m *TSPenaltyMutation) Total() (r int, exists bool) {
+	v := m.total
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTotal returns the old "total" field's value of the TSPenalty entity.
+// If the TSPenalty object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSPenaltyMutation) OldTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTotal: %w", err)
+	}
+	return oldValue.Total, nil
+}
+
+// AddTotal adds i to the "total" field.
+func (m *TSPenaltyMutation) AddTotal(i int) {
+	if m.addtotal != nil {
+		*m.addtotal += i
+	} else {
+		m.addtotal = &i
+	}
+}
+
+// AddedTotal returns the value that was added to the "total" field in this mutation.
+func (m *TSPenaltyMutation) AddedTotal() (r int, exists bool) {
+	v := m.addtotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearTotal clears the value of the "total" field.
+func (m *TSPenaltyMutation) ClearTotal() {
+	m.total = nil
+	m.addtotal = nil
+	m.clearedFields[tspenalty.FieldTotal] = struct{}{}
+}
+
+// TotalCleared returns if the "total" field was cleared in this mutation.
+func (m *TSPenaltyMutation) TotalCleared() bool {
+	_, ok := m.clearedFields[tspenalty.FieldTotal]
+	return ok
+}
+
+// ResetTotal resets all changes to the "total" field.
+func (m *TSPenaltyMutation) ResetTotal() {
+	m.total = nil
+	m.addtotal = nil
+	delete(m.clearedFields, tspenalty.FieldTotal)
+}
+
+// SetScoredTotal sets the "scoredTotal" field.
+func (m *TSPenaltyMutation) SetScoredTotal(i int) {
+	m.scoredTotal = &i
+	m.addscoredTotal = nil
+}
+
+// ScoredTotal returns the value of the "scoredTotal" field in the mutation.
+func (m *TSPenaltyMutation) ScoredTotal() (r int, exists bool) {
+	v := m.scoredTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScoredTotal returns the old "scoredTotal" field's value of the TSPenalty entity.
+// If the TSPenalty object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSPenaltyMutation) OldScoredTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScoredTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScoredTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScoredTotal: %w", err)
+	}
+	return oldValue.ScoredTotal, nil
+}
+
+// AddScoredTotal adds i to the "scoredTotal" field.
+func (m *TSPenaltyMutation) AddScoredTotal(i int) {
+	if m.addscoredTotal != nil {
+		*m.addscoredTotal += i
+	} else {
+		m.addscoredTotal = &i
+	}
+}
+
+// AddedScoredTotal returns the value that was added to the "scoredTotal" field in this mutation.
+func (m *TSPenaltyMutation) AddedScoredTotal() (r int, exists bool) {
+	v := m.addscoredTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearScoredTotal clears the value of the "scoredTotal" field.
+func (m *TSPenaltyMutation) ClearScoredTotal() {
+	m.scoredTotal = nil
+	m.addscoredTotal = nil
+	m.clearedFields[tspenalty.FieldScoredTotal] = struct{}{}
+}
+
+// ScoredTotalCleared returns if the "scoredTotal" field was cleared in this mutation.
+func (m *TSPenaltyMutation) ScoredTotalCleared() bool {
+	_, ok := m.clearedFields[tspenalty.FieldScoredTotal]
+	return ok
+}
+
+// ResetScoredTotal resets all changes to the "scoredTotal" field.
+func (m *TSPenaltyMutation) ResetScoredTotal() {
+	m.scoredTotal = nil
+	m.addscoredTotal = nil
+	delete(m.clearedFields, tspenalty.FieldScoredTotal)
+}
+
+// SetMissedTotal sets the "missedTotal" field.
+func (m *TSPenaltyMutation) SetMissedTotal(i int) {
+	m.missedTotal = &i
+	m.addmissedTotal = nil
+}
+
+// MissedTotal returns the value of the "missedTotal" field in the mutation.
+func (m *TSPenaltyMutation) MissedTotal() (r int, exists bool) {
+	v := m.missedTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMissedTotal returns the old "missedTotal" field's value of the TSPenalty entity.
+// If the TSPenalty object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSPenaltyMutation) OldMissedTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMissedTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMissedTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMissedTotal: %w", err)
+	}
+	return oldValue.MissedTotal, nil
+}
+
+// AddMissedTotal adds i to the "missedTotal" field.
+func (m *TSPenaltyMutation) AddMissedTotal(i int) {
+	if m.addmissedTotal != nil {
+		*m.addmissedTotal += i
+	} else {
+		m.addmissedTotal = &i
+	}
+}
+
+// AddedMissedTotal returns the value that was added to the "missedTotal" field in this mutation.
+func (m *TSPenaltyMutation) AddedMissedTotal() (r int, exists bool) {
+	v := m.addmissedTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearMissedTotal clears the value of the "missedTotal" field.
+func (m *TSPenaltyMutation) ClearMissedTotal() {
+	m.missedTotal = nil
+	m.addmissedTotal = nil
+	m.clearedFields[tspenalty.FieldMissedTotal] = struct{}{}
+}
+
+// MissedTotalCleared returns if the "missedTotal" field was cleared in this mutation.
+func (m *TSPenaltyMutation) MissedTotalCleared() bool {
+	_, ok := m.clearedFields[tspenalty.FieldMissedTotal]
+	return ok
+}
+
+// ResetMissedTotal resets all changes to the "missedTotal" field.
+func (m *TSPenaltyMutation) ResetMissedTotal() {
+	m.missedTotal = nil
+	m.addmissedTotal = nil
+	delete(m.clearedFields, tspenalty.FieldMissedTotal)
+}
+
+// SetScoredPercentage sets the "scoredPercentage" field.
+func (m *TSPenaltyMutation) SetScoredPercentage(s string) {
+	m.scoredPercentage = &s
+}
+
+// ScoredPercentage returns the value of the "scoredPercentage" field in the mutation.
+func (m *TSPenaltyMutation) ScoredPercentage() (r string, exists bool) {
+	v := m.scoredPercentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldScoredPercentage returns the old "scoredPercentage" field's value of the TSPenalty entity.
+// If the TSPenalty object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSPenaltyMutation) OldScoredPercentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldScoredPercentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldScoredPercentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldScoredPercentage: %w", err)
+	}
+	return oldValue.ScoredPercentage, nil
+}
+
+// ClearScoredPercentage clears the value of the "scoredPercentage" field.
+func (m *TSPenaltyMutation) ClearScoredPercentage() {
+	m.scoredPercentage = nil
+	m.clearedFields[tspenalty.FieldScoredPercentage] = struct{}{}
+}
+
+// ScoredPercentageCleared returns if the "scoredPercentage" field was cleared in this mutation.
+func (m *TSPenaltyMutation) ScoredPercentageCleared() bool {
+	_, ok := m.clearedFields[tspenalty.FieldScoredPercentage]
+	return ok
+}
+
+// ResetScoredPercentage resets all changes to the "scoredPercentage" field.
+func (m *TSPenaltyMutation) ResetScoredPercentage() {
+	m.scoredPercentage = nil
+	delete(m.clearedFields, tspenalty.FieldScoredPercentage)
+}
+
+// SetMissedPercentage sets the "missedPercentage" field.
+func (m *TSPenaltyMutation) SetMissedPercentage(s string) {
+	m.missedPercentage = &s
+}
+
+// MissedPercentage returns the value of the "missedPercentage" field in the mutation.
+func (m *TSPenaltyMutation) MissedPercentage() (r string, exists bool) {
+	v := m.missedPercentage
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMissedPercentage returns the old "missedPercentage" field's value of the TSPenalty entity.
+// If the TSPenalty object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSPenaltyMutation) OldMissedPercentage(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMissedPercentage is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMissedPercentage requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMissedPercentage: %w", err)
+	}
+	return oldValue.MissedPercentage, nil
+}
+
+// ClearMissedPercentage clears the value of the "missedPercentage" field.
+func (m *TSPenaltyMutation) ClearMissedPercentage() {
+	m.missedPercentage = nil
+	m.clearedFields[tspenalty.FieldMissedPercentage] = struct{}{}
+}
+
+// MissedPercentageCleared returns if the "missedPercentage" field was cleared in this mutation.
+func (m *TSPenaltyMutation) MissedPercentageCleared() bool {
+	_, ok := m.clearedFields[tspenalty.FieldMissedPercentage]
+	return ok
+}
+
+// ResetMissedPercentage resets all changes to the "missedPercentage" field.
+func (m *TSPenaltyMutation) ResetMissedPercentage() {
+	m.missedPercentage = nil
+	delete(m.clearedFields, tspenalty.FieldMissedPercentage)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TSPenaltyMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TSPenaltyMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the TSPenalty entity.
+// If the TSPenalty object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TSPenaltyMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TSPenaltyMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[tspenalty.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TSPenaltyMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[tspenalty.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TSPenaltyMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, tspenalty.FieldLastUpdated)
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *TSPenaltyMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *TSPenaltyMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *TSPenaltyMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *TSPenaltyMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *TSPenaltyMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *TSPenaltyMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the TSPenaltyMutation builder.
+func (m *TSPenaltyMutation) Where(ps ...predicate.TSPenalty) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the TSPenaltyMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *TSPenaltyMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.TSPenalty, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *TSPenaltyMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *TSPenaltyMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (TSPenalty).
+func (m *TSPenaltyMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *TSPenaltyMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.total != nil {
+		fields = append(fields, tspenalty.FieldTotal)
+	}
+	if m.scoredTotal != nil {
+		fields = append(fields, tspenalty.FieldScoredTotal)
+	}
+	if m.missedTotal != nil {
+		fields = append(fields, tspenalty.FieldMissedTotal)
+	}
+	if m.scoredPercentage != nil {
+		fields = append(fields, tspenalty.FieldScoredPercentage)
+	}
+	if m.missedPercentage != nil {
+		fields = append(fields, tspenalty.FieldMissedPercentage)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, tspenalty.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *TSPenaltyMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case tspenalty.FieldTotal:
+		return m.Total()
+	case tspenalty.FieldScoredTotal:
+		return m.ScoredTotal()
+	case tspenalty.FieldMissedTotal:
+		return m.MissedTotal()
+	case tspenalty.FieldScoredPercentage:
+		return m.ScoredPercentage()
+	case tspenalty.FieldMissedPercentage:
+		return m.MissedPercentage()
+	case tspenalty.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *TSPenaltyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case tspenalty.FieldTotal:
+		return m.OldTotal(ctx)
+	case tspenalty.FieldScoredTotal:
+		return m.OldScoredTotal(ctx)
+	case tspenalty.FieldMissedTotal:
+		return m.OldMissedTotal(ctx)
+	case tspenalty.FieldScoredPercentage:
+		return m.OldScoredPercentage(ctx)
+	case tspenalty.FieldMissedPercentage:
+		return m.OldMissedPercentage(ctx)
+	case tspenalty.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown TSPenalty field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSPenaltyMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case tspenalty.FieldTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTotal(v)
+		return nil
+	case tspenalty.FieldScoredTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScoredTotal(v)
+		return nil
+	case tspenalty.FieldMissedTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMissedTotal(v)
+		return nil
+	case tspenalty.FieldScoredPercentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetScoredPercentage(v)
+		return nil
+	case tspenalty.FieldMissedPercentage:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMissedPercentage(v)
+		return nil
+	case tspenalty.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSPenalty field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *TSPenaltyMutation) AddedFields() []string {
+	var fields []string
+	if m.addtotal != nil {
+		fields = append(fields, tspenalty.FieldTotal)
+	}
+	if m.addscoredTotal != nil {
+		fields = append(fields, tspenalty.FieldScoredTotal)
+	}
+	if m.addmissedTotal != nil {
+		fields = append(fields, tspenalty.FieldMissedTotal)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *TSPenaltyMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case tspenalty.FieldTotal:
+		return m.AddedTotal()
+	case tspenalty.FieldScoredTotal:
+		return m.AddedScoredTotal()
+	case tspenalty.FieldMissedTotal:
+		return m.AddedMissedTotal()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *TSPenaltyMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case tspenalty.FieldTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddTotal(v)
+		return nil
+	case tspenalty.FieldScoredTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddScoredTotal(v)
+		return nil
+	case tspenalty.FieldMissedTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddMissedTotal(v)
+		return nil
+	}
+	return fmt.Errorf("unknown TSPenalty numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *TSPenaltyMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(tspenalty.FieldTotal) {
+		fields = append(fields, tspenalty.FieldTotal)
+	}
+	if m.FieldCleared(tspenalty.FieldScoredTotal) {
+		fields = append(fields, tspenalty.FieldScoredTotal)
+	}
+	if m.FieldCleared(tspenalty.FieldMissedTotal) {
+		fields = append(fields, tspenalty.FieldMissedTotal)
+	}
+	if m.FieldCleared(tspenalty.FieldScoredPercentage) {
+		fields = append(fields, tspenalty.FieldScoredPercentage)
+	}
+	if m.FieldCleared(tspenalty.FieldMissedPercentage) {
+		fields = append(fields, tspenalty.FieldMissedPercentage)
+	}
+	if m.FieldCleared(tspenalty.FieldLastUpdated) {
+		fields = append(fields, tspenalty.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *TSPenaltyMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *TSPenaltyMutation) ClearField(name string) error {
+	switch name {
+	case tspenalty.FieldTotal:
+		m.ClearTotal()
+		return nil
+	case tspenalty.FieldScoredTotal:
+		m.ClearScoredTotal()
+		return nil
+	case tspenalty.FieldMissedTotal:
+		m.ClearMissedTotal()
+		return nil
+	case tspenalty.FieldScoredPercentage:
+		m.ClearScoredPercentage()
+		return nil
+	case tspenalty.FieldMissedPercentage:
+		m.ClearMissedPercentage()
+		return nil
+	case tspenalty.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSPenalty nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *TSPenaltyMutation) ResetField(name string) error {
+	switch name {
+	case tspenalty.FieldTotal:
+		m.ResetTotal()
+		return nil
+	case tspenalty.FieldScoredTotal:
+		m.ResetScoredTotal()
+		return nil
+	case tspenalty.FieldMissedTotal:
+		m.ResetMissedTotal()
+		return nil
+	case tspenalty.FieldScoredPercentage:
+		m.ResetScoredPercentage()
+		return nil
+	case tspenalty.FieldMissedPercentage:
+		m.ResetMissedPercentage()
+		return nil
+	case tspenalty.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown TSPenalty field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *TSPenaltyMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.team != nil {
+		edges = append(edges, tspenalty.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *TSPenaltyMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case tspenalty.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *TSPenaltyMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *TSPenaltyMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *TSPenaltyMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedteam {
+		edges = append(edges, tspenalty.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *TSPenaltyMutation) EdgeCleared(name string) bool {
+	switch name {
+	case tspenalty.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *TSPenaltyMutation) ClearEdge(name string) error {
+	switch name {
+	case tspenalty.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSPenalty unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *TSPenaltyMutation) ResetEdge(name string) error {
+	switch name {
+	case tspenalty.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown TSPenalty edge %s", name)
+}
+
+// TeamMutation represents an operation that mutates the Team nodes in the graph.
+type TeamMutation struct {
+	config
+	op                           Op
+	typ                          string
+	id                           *int
+	form                         *string
+	lastUpdated                  *time.Time
+	clearedFields                map[string]struct{}
+	season                       *int
+	clearedseason                bool
+	club                         *int
+	clearedclub                  bool
+	standings                    map[int]struct{}
+	removedstandings             map[int]struct{}
+	clearedstandings             bool
+	homeFixtures                 map[int]struct{}
+	removedhomeFixtures          map[int]struct{}
+	clearedhomeFixtures          bool
+	awayFixtures                 map[int]struct{}
+	removedawayFixtures          map[int]struct{}
+	clearedawayFixtures          bool
+	players                      map[int]struct{}
+	removedplayers               map[int]struct{}
+	clearedplayers               bool
+	biggest_stats                *int
+	clearedbiggest_stats         bool
+	cards_stats                  *int
+	clearedcards_stats           bool
+	clean_sheet_stats            *int
+	clearedclean_sheet_stats     bool
+	failed_to_score_stats        *int
+	clearedfailed_to_score_stats bool
+	fixtures_stats               *int
+	clearedfixtures_stats        bool
+	goals_stats                  *int
+	clearedgoals_stats           bool
+	lineups                      map[int]struct{}
+	removedlineups               map[int]struct{}
+	clearedlineups               bool
+	penalty_stats                *int
+	clearedpenalty_stats         bool
+	done                         bool
+	oldValue                     func(context.Context) (*Team, error)
+	predicates                   []predicate.Team
 }
 
 var _ ent.Mutation = (*TeamMutation)(nil)
@@ -8727,6 +22561,104 @@ func (m *TeamMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
+}
+
+// SetForm sets the "form" field.
+func (m *TeamMutation) SetForm(s string) {
+	m.form = &s
+}
+
+// Form returns the value of the "form" field in the mutation.
+func (m *TeamMutation) Form() (r string, exists bool) {
+	v := m.form
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldForm returns the old "form" field's value of the Team entity.
+// If the Team object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TeamMutation) OldForm(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldForm is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldForm requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldForm: %w", err)
+	}
+	return oldValue.Form, nil
+}
+
+// ClearForm clears the value of the "form" field.
+func (m *TeamMutation) ClearForm() {
+	m.form = nil
+	m.clearedFields[team.FieldForm] = struct{}{}
+}
+
+// FormCleared returns if the "form" field was cleared in this mutation.
+func (m *TeamMutation) FormCleared() bool {
+	_, ok := m.clearedFields[team.FieldForm]
+	return ok
+}
+
+// ResetForm resets all changes to the "form" field.
+func (m *TeamMutation) ResetForm() {
+	m.form = nil
+	delete(m.clearedFields, team.FieldForm)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *TeamMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *TeamMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the Team entity.
+// If the Team object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TeamMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *TeamMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[team.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *TeamMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[team.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *TeamMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, team.FieldLastUpdated)
 }
 
 // SetSeasonID sets the "season" edge to the Season entity by id.
@@ -9023,6 +22955,333 @@ func (m *TeamMutation) ResetPlayers() {
 	m.removedplayers = nil
 }
 
+// SetBiggestStatsID sets the "biggest_stats" edge to the TSBiggest entity by id.
+func (m *TeamMutation) SetBiggestStatsID(id int) {
+	m.biggest_stats = &id
+}
+
+// ClearBiggestStats clears the "biggest_stats" edge to the TSBiggest entity.
+func (m *TeamMutation) ClearBiggestStats() {
+	m.clearedbiggest_stats = true
+}
+
+// BiggestStatsCleared reports if the "biggest_stats" edge to the TSBiggest entity was cleared.
+func (m *TeamMutation) BiggestStatsCleared() bool {
+	return m.clearedbiggest_stats
+}
+
+// BiggestStatsID returns the "biggest_stats" edge ID in the mutation.
+func (m *TeamMutation) BiggestStatsID() (id int, exists bool) {
+	if m.biggest_stats != nil {
+		return *m.biggest_stats, true
+	}
+	return
+}
+
+// BiggestStatsIDs returns the "biggest_stats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// BiggestStatsID instead. It exists only for internal usage by the builders.
+func (m *TeamMutation) BiggestStatsIDs() (ids []int) {
+	if id := m.biggest_stats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetBiggestStats resets all changes to the "biggest_stats" edge.
+func (m *TeamMutation) ResetBiggestStats() {
+	m.biggest_stats = nil
+	m.clearedbiggest_stats = false
+}
+
+// SetCardsStatsID sets the "cards_stats" edge to the TSCards entity by id.
+func (m *TeamMutation) SetCardsStatsID(id int) {
+	m.cards_stats = &id
+}
+
+// ClearCardsStats clears the "cards_stats" edge to the TSCards entity.
+func (m *TeamMutation) ClearCardsStats() {
+	m.clearedcards_stats = true
+}
+
+// CardsStatsCleared reports if the "cards_stats" edge to the TSCards entity was cleared.
+func (m *TeamMutation) CardsStatsCleared() bool {
+	return m.clearedcards_stats
+}
+
+// CardsStatsID returns the "cards_stats" edge ID in the mutation.
+func (m *TeamMutation) CardsStatsID() (id int, exists bool) {
+	if m.cards_stats != nil {
+		return *m.cards_stats, true
+	}
+	return
+}
+
+// CardsStatsIDs returns the "cards_stats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CardsStatsID instead. It exists only for internal usage by the builders.
+func (m *TeamMutation) CardsStatsIDs() (ids []int) {
+	if id := m.cards_stats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCardsStats resets all changes to the "cards_stats" edge.
+func (m *TeamMutation) ResetCardsStats() {
+	m.cards_stats = nil
+	m.clearedcards_stats = false
+}
+
+// SetCleanSheetStatsID sets the "clean_sheet_stats" edge to the TSCleanSheet entity by id.
+func (m *TeamMutation) SetCleanSheetStatsID(id int) {
+	m.clean_sheet_stats = &id
+}
+
+// ClearCleanSheetStats clears the "clean_sheet_stats" edge to the TSCleanSheet entity.
+func (m *TeamMutation) ClearCleanSheetStats() {
+	m.clearedclean_sheet_stats = true
+}
+
+// CleanSheetStatsCleared reports if the "clean_sheet_stats" edge to the TSCleanSheet entity was cleared.
+func (m *TeamMutation) CleanSheetStatsCleared() bool {
+	return m.clearedclean_sheet_stats
+}
+
+// CleanSheetStatsID returns the "clean_sheet_stats" edge ID in the mutation.
+func (m *TeamMutation) CleanSheetStatsID() (id int, exists bool) {
+	if m.clean_sheet_stats != nil {
+		return *m.clean_sheet_stats, true
+	}
+	return
+}
+
+// CleanSheetStatsIDs returns the "clean_sheet_stats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// CleanSheetStatsID instead. It exists only for internal usage by the builders.
+func (m *TeamMutation) CleanSheetStatsIDs() (ids []int) {
+	if id := m.clean_sheet_stats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetCleanSheetStats resets all changes to the "clean_sheet_stats" edge.
+func (m *TeamMutation) ResetCleanSheetStats() {
+	m.clean_sheet_stats = nil
+	m.clearedclean_sheet_stats = false
+}
+
+// SetFailedToScoreStatsID sets the "failed_to_score_stats" edge to the TSFailedToScore entity by id.
+func (m *TeamMutation) SetFailedToScoreStatsID(id int) {
+	m.failed_to_score_stats = &id
+}
+
+// ClearFailedToScoreStats clears the "failed_to_score_stats" edge to the TSFailedToScore entity.
+func (m *TeamMutation) ClearFailedToScoreStats() {
+	m.clearedfailed_to_score_stats = true
+}
+
+// FailedToScoreStatsCleared reports if the "failed_to_score_stats" edge to the TSFailedToScore entity was cleared.
+func (m *TeamMutation) FailedToScoreStatsCleared() bool {
+	return m.clearedfailed_to_score_stats
+}
+
+// FailedToScoreStatsID returns the "failed_to_score_stats" edge ID in the mutation.
+func (m *TeamMutation) FailedToScoreStatsID() (id int, exists bool) {
+	if m.failed_to_score_stats != nil {
+		return *m.failed_to_score_stats, true
+	}
+	return
+}
+
+// FailedToScoreStatsIDs returns the "failed_to_score_stats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FailedToScoreStatsID instead. It exists only for internal usage by the builders.
+func (m *TeamMutation) FailedToScoreStatsIDs() (ids []int) {
+	if id := m.failed_to_score_stats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFailedToScoreStats resets all changes to the "failed_to_score_stats" edge.
+func (m *TeamMutation) ResetFailedToScoreStats() {
+	m.failed_to_score_stats = nil
+	m.clearedfailed_to_score_stats = false
+}
+
+// SetFixturesStatsID sets the "fixtures_stats" edge to the TSFixtures entity by id.
+func (m *TeamMutation) SetFixturesStatsID(id int) {
+	m.fixtures_stats = &id
+}
+
+// ClearFixturesStats clears the "fixtures_stats" edge to the TSFixtures entity.
+func (m *TeamMutation) ClearFixturesStats() {
+	m.clearedfixtures_stats = true
+}
+
+// FixturesStatsCleared reports if the "fixtures_stats" edge to the TSFixtures entity was cleared.
+func (m *TeamMutation) FixturesStatsCleared() bool {
+	return m.clearedfixtures_stats
+}
+
+// FixturesStatsID returns the "fixtures_stats" edge ID in the mutation.
+func (m *TeamMutation) FixturesStatsID() (id int, exists bool) {
+	if m.fixtures_stats != nil {
+		return *m.fixtures_stats, true
+	}
+	return
+}
+
+// FixturesStatsIDs returns the "fixtures_stats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FixturesStatsID instead. It exists only for internal usage by the builders.
+func (m *TeamMutation) FixturesStatsIDs() (ids []int) {
+	if id := m.fixtures_stats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFixturesStats resets all changes to the "fixtures_stats" edge.
+func (m *TeamMutation) ResetFixturesStats() {
+	m.fixtures_stats = nil
+	m.clearedfixtures_stats = false
+}
+
+// SetGoalsStatsID sets the "goals_stats" edge to the TSGoals entity by id.
+func (m *TeamMutation) SetGoalsStatsID(id int) {
+	m.goals_stats = &id
+}
+
+// ClearGoalsStats clears the "goals_stats" edge to the TSGoals entity.
+func (m *TeamMutation) ClearGoalsStats() {
+	m.clearedgoals_stats = true
+}
+
+// GoalsStatsCleared reports if the "goals_stats" edge to the TSGoals entity was cleared.
+func (m *TeamMutation) GoalsStatsCleared() bool {
+	return m.clearedgoals_stats
+}
+
+// GoalsStatsID returns the "goals_stats" edge ID in the mutation.
+func (m *TeamMutation) GoalsStatsID() (id int, exists bool) {
+	if m.goals_stats != nil {
+		return *m.goals_stats, true
+	}
+	return
+}
+
+// GoalsStatsIDs returns the "goals_stats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// GoalsStatsID instead. It exists only for internal usage by the builders.
+func (m *TeamMutation) GoalsStatsIDs() (ids []int) {
+	if id := m.goals_stats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetGoalsStats resets all changes to the "goals_stats" edge.
+func (m *TeamMutation) ResetGoalsStats() {
+	m.goals_stats = nil
+	m.clearedgoals_stats = false
+}
+
+// AddLineupIDs adds the "lineups" edge to the TSLineups entity by ids.
+func (m *TeamMutation) AddLineupIDs(ids ...int) {
+	if m.lineups == nil {
+		m.lineups = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lineups[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLineups clears the "lineups" edge to the TSLineups entity.
+func (m *TeamMutation) ClearLineups() {
+	m.clearedlineups = true
+}
+
+// LineupsCleared reports if the "lineups" edge to the TSLineups entity was cleared.
+func (m *TeamMutation) LineupsCleared() bool {
+	return m.clearedlineups
+}
+
+// RemoveLineupIDs removes the "lineups" edge to the TSLineups entity by IDs.
+func (m *TeamMutation) RemoveLineupIDs(ids ...int) {
+	if m.removedlineups == nil {
+		m.removedlineups = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lineups, ids[i])
+		m.removedlineups[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLineups returns the removed IDs of the "lineups" edge to the TSLineups entity.
+func (m *TeamMutation) RemovedLineupsIDs() (ids []int) {
+	for id := range m.removedlineups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LineupsIDs returns the "lineups" edge IDs in the mutation.
+func (m *TeamMutation) LineupsIDs() (ids []int) {
+	for id := range m.lineups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLineups resets all changes to the "lineups" edge.
+func (m *TeamMutation) ResetLineups() {
+	m.lineups = nil
+	m.clearedlineups = false
+	m.removedlineups = nil
+}
+
+// SetPenaltyStatsID sets the "penalty_stats" edge to the TSPenalty entity by id.
+func (m *TeamMutation) SetPenaltyStatsID(id int) {
+	m.penalty_stats = &id
+}
+
+// ClearPenaltyStats clears the "penalty_stats" edge to the TSPenalty entity.
+func (m *TeamMutation) ClearPenaltyStats() {
+	m.clearedpenalty_stats = true
+}
+
+// PenaltyStatsCleared reports if the "penalty_stats" edge to the TSPenalty entity was cleared.
+func (m *TeamMutation) PenaltyStatsCleared() bool {
+	return m.clearedpenalty_stats
+}
+
+// PenaltyStatsID returns the "penalty_stats" edge ID in the mutation.
+func (m *TeamMutation) PenaltyStatsID() (id int, exists bool) {
+	if m.penalty_stats != nil {
+		return *m.penalty_stats, true
+	}
+	return
+}
+
+// PenaltyStatsIDs returns the "penalty_stats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PenaltyStatsID instead. It exists only for internal usage by the builders.
+func (m *TeamMutation) PenaltyStatsIDs() (ids []int) {
+	if id := m.penalty_stats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPenaltyStats resets all changes to the "penalty_stats" edge.
+func (m *TeamMutation) ResetPenaltyStats() {
+	m.penalty_stats = nil
+	m.clearedpenalty_stats = false
+}
+
 // Where appends a list predicates to the TeamMutation builder.
 func (m *TeamMutation) Where(ps ...predicate.Team) {
 	m.predicates = append(m.predicates, ps...)
@@ -9057,7 +23316,13 @@ func (m *TeamMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TeamMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 2)
+	if m.form != nil {
+		fields = append(fields, team.FieldForm)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, team.FieldLastUpdated)
+	}
 	return fields
 }
 
@@ -9065,6 +23330,12 @@ func (m *TeamMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *TeamMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case team.FieldForm:
+		return m.Form()
+	case team.FieldLastUpdated:
+		return m.LastUpdated()
+	}
 	return nil, false
 }
 
@@ -9072,6 +23343,12 @@ func (m *TeamMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *TeamMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case team.FieldForm:
+		return m.OldForm(ctx)
+	case team.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
 	return nil, fmt.Errorf("unknown Team field %s", name)
 }
 
@@ -9080,6 +23357,20 @@ func (m *TeamMutation) OldField(ctx context.Context, name string) (ent.Value, er
 // type.
 func (m *TeamMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case team.FieldForm:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetForm(v)
+		return nil
+	case team.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Team field %s", name)
 }
@@ -9101,13 +23392,22 @@ func (m *TeamMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *TeamMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Team numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *TeamMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(team.FieldForm) {
+		fields = append(fields, team.FieldForm)
+	}
+	if m.FieldCleared(team.FieldLastUpdated) {
+		fields = append(fields, team.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -9120,18 +23420,34 @@ func (m *TeamMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *TeamMutation) ClearField(name string) error {
+	switch name {
+	case team.FieldForm:
+		m.ClearForm()
+		return nil
+	case team.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown Team nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *TeamMutation) ResetField(name string) error {
+	switch name {
+	case team.FieldForm:
+		m.ResetForm()
+		return nil
+	case team.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown Team field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TeamMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 14)
 	if m.season != nil {
 		edges = append(edges, team.EdgeSeason)
 	}
@@ -9149,6 +23465,30 @@ func (m *TeamMutation) AddedEdges() []string {
 	}
 	if m.players != nil {
 		edges = append(edges, team.EdgePlayers)
+	}
+	if m.biggest_stats != nil {
+		edges = append(edges, team.EdgeBiggestStats)
+	}
+	if m.cards_stats != nil {
+		edges = append(edges, team.EdgeCardsStats)
+	}
+	if m.clean_sheet_stats != nil {
+		edges = append(edges, team.EdgeCleanSheetStats)
+	}
+	if m.failed_to_score_stats != nil {
+		edges = append(edges, team.EdgeFailedToScoreStats)
+	}
+	if m.fixtures_stats != nil {
+		edges = append(edges, team.EdgeFixturesStats)
+	}
+	if m.goals_stats != nil {
+		edges = append(edges, team.EdgeGoalsStats)
+	}
+	if m.lineups != nil {
+		edges = append(edges, team.EdgeLineups)
+	}
+	if m.penalty_stats != nil {
+		edges = append(edges, team.EdgePenaltyStats)
 	}
 	return edges
 }
@@ -9189,13 +23529,47 @@ func (m *TeamMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case team.EdgeBiggestStats:
+		if id := m.biggest_stats; id != nil {
+			return []ent.Value{*id}
+		}
+	case team.EdgeCardsStats:
+		if id := m.cards_stats; id != nil {
+			return []ent.Value{*id}
+		}
+	case team.EdgeCleanSheetStats:
+		if id := m.clean_sheet_stats; id != nil {
+			return []ent.Value{*id}
+		}
+	case team.EdgeFailedToScoreStats:
+		if id := m.failed_to_score_stats; id != nil {
+			return []ent.Value{*id}
+		}
+	case team.EdgeFixturesStats:
+		if id := m.fixtures_stats; id != nil {
+			return []ent.Value{*id}
+		}
+	case team.EdgeGoalsStats:
+		if id := m.goals_stats; id != nil {
+			return []ent.Value{*id}
+		}
+	case team.EdgeLineups:
+		ids := make([]ent.Value, 0, len(m.lineups))
+		for id := range m.lineups {
+			ids = append(ids, id)
+		}
+		return ids
+	case team.EdgePenaltyStats:
+		if id := m.penalty_stats; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TeamMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 14)
 	if m.removedstandings != nil {
 		edges = append(edges, team.EdgeStandings)
 	}
@@ -9207,6 +23581,9 @@ func (m *TeamMutation) RemovedEdges() []string {
 	}
 	if m.removedplayers != nil {
 		edges = append(edges, team.EdgePlayers)
+	}
+	if m.removedlineups != nil {
+		edges = append(edges, team.EdgeLineups)
 	}
 	return edges
 }
@@ -9239,13 +23616,19 @@ func (m *TeamMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case team.EdgeLineups:
+		ids := make([]ent.Value, 0, len(m.removedlineups))
+		for id := range m.removedlineups {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TeamMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 14)
 	if m.clearedseason {
 		edges = append(edges, team.EdgeSeason)
 	}
@@ -9263,6 +23646,30 @@ func (m *TeamMutation) ClearedEdges() []string {
 	}
 	if m.clearedplayers {
 		edges = append(edges, team.EdgePlayers)
+	}
+	if m.clearedbiggest_stats {
+		edges = append(edges, team.EdgeBiggestStats)
+	}
+	if m.clearedcards_stats {
+		edges = append(edges, team.EdgeCardsStats)
+	}
+	if m.clearedclean_sheet_stats {
+		edges = append(edges, team.EdgeCleanSheetStats)
+	}
+	if m.clearedfailed_to_score_stats {
+		edges = append(edges, team.EdgeFailedToScoreStats)
+	}
+	if m.clearedfixtures_stats {
+		edges = append(edges, team.EdgeFixturesStats)
+	}
+	if m.clearedgoals_stats {
+		edges = append(edges, team.EdgeGoalsStats)
+	}
+	if m.clearedlineups {
+		edges = append(edges, team.EdgeLineups)
+	}
+	if m.clearedpenalty_stats {
+		edges = append(edges, team.EdgePenaltyStats)
 	}
 	return edges
 }
@@ -9283,6 +23690,22 @@ func (m *TeamMutation) EdgeCleared(name string) bool {
 		return m.clearedawayFixtures
 	case team.EdgePlayers:
 		return m.clearedplayers
+	case team.EdgeBiggestStats:
+		return m.clearedbiggest_stats
+	case team.EdgeCardsStats:
+		return m.clearedcards_stats
+	case team.EdgeCleanSheetStats:
+		return m.clearedclean_sheet_stats
+	case team.EdgeFailedToScoreStats:
+		return m.clearedfailed_to_score_stats
+	case team.EdgeFixturesStats:
+		return m.clearedfixtures_stats
+	case team.EdgeGoalsStats:
+		return m.clearedgoals_stats
+	case team.EdgeLineups:
+		return m.clearedlineups
+	case team.EdgePenaltyStats:
+		return m.clearedpenalty_stats
 	}
 	return false
 }
@@ -9296,6 +23719,27 @@ func (m *TeamMutation) ClearEdge(name string) error {
 		return nil
 	case team.EdgeClub:
 		m.ClearClub()
+		return nil
+	case team.EdgeBiggestStats:
+		m.ClearBiggestStats()
+		return nil
+	case team.EdgeCardsStats:
+		m.ClearCardsStats()
+		return nil
+	case team.EdgeCleanSheetStats:
+		m.ClearCleanSheetStats()
+		return nil
+	case team.EdgeFailedToScoreStats:
+		m.ClearFailedToScoreStats()
+		return nil
+	case team.EdgeFixturesStats:
+		m.ClearFixturesStats()
+		return nil
+	case team.EdgeGoalsStats:
+		m.ClearGoalsStats()
+		return nil
+	case team.EdgePenaltyStats:
+		m.ClearPenaltyStats()
 		return nil
 	}
 	return fmt.Errorf("unknown Team unique edge %s", name)
@@ -9322,6 +23766,30 @@ func (m *TeamMutation) ResetEdge(name string) error {
 		return nil
 	case team.EdgePlayers:
 		m.ResetPlayers()
+		return nil
+	case team.EdgeBiggestStats:
+		m.ResetBiggestStats()
+		return nil
+	case team.EdgeCardsStats:
+		m.ResetCardsStats()
+		return nil
+	case team.EdgeCleanSheetStats:
+		m.ResetCleanSheetStats()
+		return nil
+	case team.EdgeFailedToScoreStats:
+		m.ResetFailedToScoreStats()
+		return nil
+	case team.EdgeFixturesStats:
+		m.ResetFixturesStats()
+		return nil
+	case team.EdgeGoalsStats:
+		m.ResetGoalsStats()
+		return nil
+	case team.EdgeLineups:
+		m.ResetLineups()
+		return nil
+	case team.EdgePenaltyStats:
+		m.ResetPenaltyStats()
 		return nil
 	}
 	return fmt.Errorf("unknown Team edge %s", name)

@@ -30,5 +30,29 @@ type Season func(*sql.Selector)
 // Standings is the predicate function for standings builders.
 type Standings func(*sql.Selector)
 
+// TSBiggest is the predicate function for tsbiggest builders.
+type TSBiggest func(*sql.Selector)
+
+// TSCards is the predicate function for tscards builders.
+type TSCards func(*sql.Selector)
+
+// TSCleanSheet is the predicate function for tscleansheet builders.
+type TSCleanSheet func(*sql.Selector)
+
+// TSFailedToScore is the predicate function for tsfailedtoscore builders.
+type TSFailedToScore func(*sql.Selector)
+
+// TSFixtures is the predicate function for tsfixtures builders.
+type TSFixtures func(*sql.Selector)
+
+// TSGoals is the predicate function for tsgoals builders.
+type TSGoals func(*sql.Selector)
+
+// TSLineups is the predicate function for tslineups builders.
+type TSLineups func(*sql.Selector)
+
+// TSPenalty is the predicate function for tspenalty builders.
+type TSPenalty func(*sql.Selector)
+
 // Team is the predicate function for team builders.
 type Team func(*sql.Selector)

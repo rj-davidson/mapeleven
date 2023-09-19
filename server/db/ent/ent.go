@@ -15,6 +15,14 @@ import (
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
+	"mapeleven/db/ent/tsbiggest"
+	"mapeleven/db/ent/tscards"
+	"mapeleven/db/ent/tscleansheet"
+	"mapeleven/db/ent/tsfailedtoscore"
+	"mapeleven/db/ent/tsfixtures"
+	"mapeleven/db/ent/tsgoals"
+	"mapeleven/db/ent/tslineups"
+	"mapeleven/db/ent/tspenalty"
 	"reflect"
 	"sync"
 
@@ -81,15 +89,23 @@ var (
 func checkColumn(table, column string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			birth.Table:     birth.ValidColumn,
-			club.Table:      club.ValidColumn,
-			country.Table:   country.ValidColumn,
-			fixture.Table:   fixture.ValidColumn,
-			league.Table:    league.ValidColumn,
-			player.Table:    player.ValidColumn,
-			season.Table:    season.ValidColumn,
-			standings.Table: standings.ValidColumn,
-			team.Table:      team.ValidColumn,
+			birth.Table:           birth.ValidColumn,
+			club.Table:            club.ValidColumn,
+			country.Table:         country.ValidColumn,
+			fixture.Table:         fixture.ValidColumn,
+			league.Table:          league.ValidColumn,
+			player.Table:          player.ValidColumn,
+			season.Table:          season.ValidColumn,
+			standings.Table:       standings.ValidColumn,
+			tsbiggest.Table:       tsbiggest.ValidColumn,
+			tscards.Table:         tscards.ValidColumn,
+			tscleansheet.Table:    tscleansheet.ValidColumn,
+			tsfailedtoscore.Table: tsfailedtoscore.ValidColumn,
+			tsfixtures.Table:      tsfixtures.ValidColumn,
+			tsgoals.Table:         tsgoals.ValidColumn,
+			tslineups.Table:       tslineups.ValidColumn,
+			tspenalty.Table:       tspenalty.ValidColumn,
+			team.Table:            team.ValidColumn,
 		})
 	})
 	return columnCheck(table, column)
