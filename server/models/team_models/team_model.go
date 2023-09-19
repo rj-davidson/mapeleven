@@ -1,4 +1,4 @@
-package models
+package team_models
 
 import (
 	"context"
@@ -78,8 +78,15 @@ func (m *TeamModel) UpdateTeam(ctx context.Context, year, apiFootballLeagueId, a
 }
 
 // ListAll returns a list of all teams.
-func (m *TeamModel) ListAll() ([]*ent.Team, error) {
-	return m.client.Team.Query().All(context.Background())
+func (m *TeamModel) ListAll(ctx context.Context) ([]*ent.Team, error) {
+	return m.client.Team.
+		Query().
+		WithSeason(
+			func(s *ent.SeasonQuery) {
+				s.WithLeague()
+			}).
+		WithClub().
+		All(ctx)
 }
 
 // Exists checks if a team exists.

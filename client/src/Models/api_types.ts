@@ -45,7 +45,94 @@ interface APITeam {
   nationalTeam?: boolean;
   country?: APICountry;
   competitions?: APICompetitions[];
+  Stats?: APITeamStats;
 }
+
+export interface APITeamStats {
+  form: string;
+  biggest: APITeamStatsBiggest;
+  cards: APITSCards;
+  clean_sheet: APITSResult;
+  failed_to_score: APITSResult;
+  fixtures: APITSFixtures;
+  goals: APITSGoals;
+  lineups: APITSFormation[];
+  penalty: APITSPenalty;
+}
+
+export interface APITeamStatsBiggest {
+  streak: APITSStreak;
+  wins: APITSScore;
+  loses: APITSScore;
+  goals: APITSGoals;
+}
+
+export interface APITSStreak {
+  wins: number;
+  draws: number;
+  loses: number;
+}
+
+export interface APITSScore {
+  home: string;
+  away: string;
+}
+
+export interface APITSGoals {
+  for: APITSGoalDetail;
+  against: APITSGoalDetail;
+}
+
+export interface APITSGoalDetail {
+  home: number;
+  away: number;
+}
+
+export interface APITSCards {
+  yellow: APITSGoalMinuteSplit;
+  red: APITSGoalMinuteSplit;
+}
+
+export interface APITSGoalMinuteSplit {
+  "0-15": APITSGoalValueSplit;
+  "16-30": APITSGoalValueSplit;
+  "31-45": APITSGoalValueSplit;
+  "46-60": APITSGoalValueSplit;
+  "61-75": APITSGoalValueSplit;
+  "76-90": APITSGoalValueSplit;
+  "91-105": APITSGoalValueSplit;
+  "106-120": APITSGoalValueSplit;
+}
+
+export interface APITSGoalValueSplit {
+  total: number;
+  percentage: string;
+}
+
+export interface APITSResult {
+  home: number;
+  away: number;
+  total: number;
+}
+
+export interface APITSFixtures {
+  played: APITSResult;
+  wins: APITSResult;
+  draws: APITSResult;
+  loses: APITSResult;
+}
+
+export interface APITSFormation {
+  formation: string;
+  played: number;
+}
+
+export interface APITSPenalty {
+  scored: APITSGoalValueSplit;
+  missed: APITSGoalValueSplit;
+  total: number;
+}
+
 
 interface APICompetitions {
   League: APILeague;

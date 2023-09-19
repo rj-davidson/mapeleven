@@ -19,6 +19,14 @@ import (
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
+	"mapeleven/db/ent/tsbiggest"
+	"mapeleven/db/ent/tscards"
+	"mapeleven/db/ent/tscleansheet"
+	"mapeleven/db/ent/tsfailedtoscore"
+	"mapeleven/db/ent/tsfixtures"
+	"mapeleven/db/ent/tsgoals"
+	"mapeleven/db/ent/tslineups"
+	"mapeleven/db/ent/tspenalty"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
@@ -47,6 +55,22 @@ type Client struct {
 	Season *SeasonClient
 	// Standings is the client for interacting with the Standings builders.
 	Standings *StandingsClient
+	// TSBiggest is the client for interacting with the TSBiggest builders.
+	TSBiggest *TSBiggestClient
+	// TSCards is the client for interacting with the TSCards builders.
+	TSCards *TSCardsClient
+	// TSCleanSheet is the client for interacting with the TSCleanSheet builders.
+	TSCleanSheet *TSCleanSheetClient
+	// TSFailedToScore is the client for interacting with the TSFailedToScore builders.
+	TSFailedToScore *TSFailedToScoreClient
+	// TSFixtures is the client for interacting with the TSFixtures builders.
+	TSFixtures *TSFixturesClient
+	// TSGoals is the client for interacting with the TSGoals builders.
+	TSGoals *TSGoalsClient
+	// TSLineups is the client for interacting with the TSLineups builders.
+	TSLineups *TSLineupsClient
+	// TSPenalty is the client for interacting with the TSPenalty builders.
+	TSPenalty *TSPenaltyClient
 	// Team is the client for interacting with the Team builders.
 	Team *TeamClient
 }
@@ -70,6 +94,14 @@ func (c *Client) init() {
 	c.Player = NewPlayerClient(c.config)
 	c.Season = NewSeasonClient(c.config)
 	c.Standings = NewStandingsClient(c.config)
+	c.TSBiggest = NewTSBiggestClient(c.config)
+	c.TSCards = NewTSCardsClient(c.config)
+	c.TSCleanSheet = NewTSCleanSheetClient(c.config)
+	c.TSFailedToScore = NewTSFailedToScoreClient(c.config)
+	c.TSFixtures = NewTSFixturesClient(c.config)
+	c.TSGoals = NewTSGoalsClient(c.config)
+	c.TSLineups = NewTSLineupsClient(c.config)
+	c.TSPenalty = NewTSPenaltyClient(c.config)
 	c.Team = NewTeamClient(c.config)
 }
 
@@ -151,17 +183,25 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Birth:     NewBirthClient(cfg),
-		Club:      NewClubClient(cfg),
-		Country:   NewCountryClient(cfg),
-		Fixture:   NewFixtureClient(cfg),
-		League:    NewLeagueClient(cfg),
-		Player:    NewPlayerClient(cfg),
-		Season:    NewSeasonClient(cfg),
-		Standings: NewStandingsClient(cfg),
-		Team:      NewTeamClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		Birth:           NewBirthClient(cfg),
+		Club:            NewClubClient(cfg),
+		Country:         NewCountryClient(cfg),
+		Fixture:         NewFixtureClient(cfg),
+		League:          NewLeagueClient(cfg),
+		Player:          NewPlayerClient(cfg),
+		Season:          NewSeasonClient(cfg),
+		Standings:       NewStandingsClient(cfg),
+		TSBiggest:       NewTSBiggestClient(cfg),
+		TSCards:         NewTSCardsClient(cfg),
+		TSCleanSheet:    NewTSCleanSheetClient(cfg),
+		TSFailedToScore: NewTSFailedToScoreClient(cfg),
+		TSFixtures:      NewTSFixturesClient(cfg),
+		TSGoals:         NewTSGoalsClient(cfg),
+		TSLineups:       NewTSLineupsClient(cfg),
+		TSPenalty:       NewTSPenaltyClient(cfg),
+		Team:            NewTeamClient(cfg),
 	}, nil
 }
 
@@ -179,17 +219,25 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:       ctx,
-		config:    cfg,
-		Birth:     NewBirthClient(cfg),
-		Club:      NewClubClient(cfg),
-		Country:   NewCountryClient(cfg),
-		Fixture:   NewFixtureClient(cfg),
-		League:    NewLeagueClient(cfg),
-		Player:    NewPlayerClient(cfg),
-		Season:    NewSeasonClient(cfg),
-		Standings: NewStandingsClient(cfg),
-		Team:      NewTeamClient(cfg),
+		ctx:             ctx,
+		config:          cfg,
+		Birth:           NewBirthClient(cfg),
+		Club:            NewClubClient(cfg),
+		Country:         NewCountryClient(cfg),
+		Fixture:         NewFixtureClient(cfg),
+		League:          NewLeagueClient(cfg),
+		Player:          NewPlayerClient(cfg),
+		Season:          NewSeasonClient(cfg),
+		Standings:       NewStandingsClient(cfg),
+		TSBiggest:       NewTSBiggestClient(cfg),
+		TSCards:         NewTSCardsClient(cfg),
+		TSCleanSheet:    NewTSCleanSheetClient(cfg),
+		TSFailedToScore: NewTSFailedToScoreClient(cfg),
+		TSFixtures:      NewTSFixturesClient(cfg),
+		TSGoals:         NewTSGoalsClient(cfg),
+		TSLineups:       NewTSLineupsClient(cfg),
+		TSPenalty:       NewTSPenaltyClient(cfg),
+		Team:            NewTeamClient(cfg),
 	}, nil
 }
 
@@ -220,7 +268,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.Season,
-		c.Standings, c.Team,
+		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
+		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
 	} {
 		n.Use(hooks...)
 	}
@@ -231,7 +280,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.Season,
-		c.Standings, c.Team,
+		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
+		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -256,6 +306,22 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Season.mutate(ctx, m)
 	case *StandingsMutation:
 		return c.Standings.mutate(ctx, m)
+	case *TSBiggestMutation:
+		return c.TSBiggest.mutate(ctx, m)
+	case *TSCardsMutation:
+		return c.TSCards.mutate(ctx, m)
+	case *TSCleanSheetMutation:
+		return c.TSCleanSheet.mutate(ctx, m)
+	case *TSFailedToScoreMutation:
+		return c.TSFailedToScore.mutate(ctx, m)
+	case *TSFixturesMutation:
+		return c.TSFixtures.mutate(ctx, m)
+	case *TSGoalsMutation:
+		return c.TSGoals.mutate(ctx, m)
+	case *TSLineupsMutation:
+		return c.TSLineups.mutate(ctx, m)
+	case *TSPenaltyMutation:
+		return c.TSPenalty.mutate(ctx, m)
 	case *TeamMutation:
 		return c.Team.mutate(ctx, m)
 	default:
@@ -1511,6 +1577,1078 @@ func (c *StandingsClient) mutate(ctx context.Context, m *StandingsMutation) (Val
 	}
 }
 
+// TSBiggestClient is a client for the TSBiggest schema.
+type TSBiggestClient struct {
+	config
+}
+
+// NewTSBiggestClient returns a client for the TSBiggest from the given config.
+func NewTSBiggestClient(c config) *TSBiggestClient {
+	return &TSBiggestClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tsbiggest.Hooks(f(g(h())))`.
+func (c *TSBiggestClient) Use(hooks ...Hook) {
+	c.hooks.TSBiggest = append(c.hooks.TSBiggest, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tsbiggest.Intercept(f(g(h())))`.
+func (c *TSBiggestClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TSBiggest = append(c.inters.TSBiggest, interceptors...)
+}
+
+// Create returns a builder for creating a TSBiggest entity.
+func (c *TSBiggestClient) Create() *TSBiggestCreate {
+	mutation := newTSBiggestMutation(c.config, OpCreate)
+	return &TSBiggestCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TSBiggest entities.
+func (c *TSBiggestClient) CreateBulk(builders ...*TSBiggestCreate) *TSBiggestCreateBulk {
+	return &TSBiggestCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TSBiggest.
+func (c *TSBiggestClient) Update() *TSBiggestUpdate {
+	mutation := newTSBiggestMutation(c.config, OpUpdate)
+	return &TSBiggestUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TSBiggestClient) UpdateOne(tb *TSBiggest) *TSBiggestUpdateOne {
+	mutation := newTSBiggestMutation(c.config, OpUpdateOne, withTSBiggest(tb))
+	return &TSBiggestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TSBiggestClient) UpdateOneID(id int) *TSBiggestUpdateOne {
+	mutation := newTSBiggestMutation(c.config, OpUpdateOne, withTSBiggestID(id))
+	return &TSBiggestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TSBiggest.
+func (c *TSBiggestClient) Delete() *TSBiggestDelete {
+	mutation := newTSBiggestMutation(c.config, OpDelete)
+	return &TSBiggestDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TSBiggestClient) DeleteOne(tb *TSBiggest) *TSBiggestDeleteOne {
+	return c.DeleteOneID(tb.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TSBiggestClient) DeleteOneID(id int) *TSBiggestDeleteOne {
+	builder := c.Delete().Where(tsbiggest.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TSBiggestDeleteOne{builder}
+}
+
+// Query returns a query builder for TSBiggest.
+func (c *TSBiggestClient) Query() *TSBiggestQuery {
+	return &TSBiggestQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTSBiggest},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TSBiggest entity by its id.
+func (c *TSBiggestClient) Get(ctx context.Context, id int) (*TSBiggest, error) {
+	return c.Query().Where(tsbiggest.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TSBiggestClient) GetX(ctx context.Context, id int) *TSBiggest {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a TSBiggest.
+func (c *TSBiggestClient) QueryTeam(tb *TSBiggest) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tb.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tsbiggest.Table, tsbiggest.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, tsbiggest.TeamTable, tsbiggest.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(tb.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TSBiggestClient) Hooks() []Hook {
+	return c.hooks.TSBiggest
+}
+
+// Interceptors returns the client interceptors.
+func (c *TSBiggestClient) Interceptors() []Interceptor {
+	return c.inters.TSBiggest
+}
+
+func (c *TSBiggestClient) mutate(ctx context.Context, m *TSBiggestMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TSBiggestCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TSBiggestUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TSBiggestUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TSBiggestDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TSBiggest mutation op: %q", m.Op())
+	}
+}
+
+// TSCardsClient is a client for the TSCards schema.
+type TSCardsClient struct {
+	config
+}
+
+// NewTSCardsClient returns a client for the TSCards from the given config.
+func NewTSCardsClient(c config) *TSCardsClient {
+	return &TSCardsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tscards.Hooks(f(g(h())))`.
+func (c *TSCardsClient) Use(hooks ...Hook) {
+	c.hooks.TSCards = append(c.hooks.TSCards, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tscards.Intercept(f(g(h())))`.
+func (c *TSCardsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TSCards = append(c.inters.TSCards, interceptors...)
+}
+
+// Create returns a builder for creating a TSCards entity.
+func (c *TSCardsClient) Create() *TSCardsCreate {
+	mutation := newTSCardsMutation(c.config, OpCreate)
+	return &TSCardsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TSCards entities.
+func (c *TSCardsClient) CreateBulk(builders ...*TSCardsCreate) *TSCardsCreateBulk {
+	return &TSCardsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TSCards.
+func (c *TSCardsClient) Update() *TSCardsUpdate {
+	mutation := newTSCardsMutation(c.config, OpUpdate)
+	return &TSCardsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TSCardsClient) UpdateOne(tc *TSCards) *TSCardsUpdateOne {
+	mutation := newTSCardsMutation(c.config, OpUpdateOne, withTSCards(tc))
+	return &TSCardsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TSCardsClient) UpdateOneID(id int) *TSCardsUpdateOne {
+	mutation := newTSCardsMutation(c.config, OpUpdateOne, withTSCardsID(id))
+	return &TSCardsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TSCards.
+func (c *TSCardsClient) Delete() *TSCardsDelete {
+	mutation := newTSCardsMutation(c.config, OpDelete)
+	return &TSCardsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TSCardsClient) DeleteOne(tc *TSCards) *TSCardsDeleteOne {
+	return c.DeleteOneID(tc.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TSCardsClient) DeleteOneID(id int) *TSCardsDeleteOne {
+	builder := c.Delete().Where(tscards.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TSCardsDeleteOne{builder}
+}
+
+// Query returns a query builder for TSCards.
+func (c *TSCardsClient) Query() *TSCardsQuery {
+	return &TSCardsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTSCards},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TSCards entity by its id.
+func (c *TSCardsClient) Get(ctx context.Context, id int) (*TSCards, error) {
+	return c.Query().Where(tscards.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TSCardsClient) GetX(ctx context.Context, id int) *TSCards {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a TSCards.
+func (c *TSCardsClient) QueryTeam(tc *TSCards) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tc.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tscards.Table, tscards.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, tscards.TeamTable, tscards.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(tc.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TSCardsClient) Hooks() []Hook {
+	return c.hooks.TSCards
+}
+
+// Interceptors returns the client interceptors.
+func (c *TSCardsClient) Interceptors() []Interceptor {
+	return c.inters.TSCards
+}
+
+func (c *TSCardsClient) mutate(ctx context.Context, m *TSCardsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TSCardsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TSCardsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TSCardsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TSCardsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TSCards mutation op: %q", m.Op())
+	}
+}
+
+// TSCleanSheetClient is a client for the TSCleanSheet schema.
+type TSCleanSheetClient struct {
+	config
+}
+
+// NewTSCleanSheetClient returns a client for the TSCleanSheet from the given config.
+func NewTSCleanSheetClient(c config) *TSCleanSheetClient {
+	return &TSCleanSheetClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tscleansheet.Hooks(f(g(h())))`.
+func (c *TSCleanSheetClient) Use(hooks ...Hook) {
+	c.hooks.TSCleanSheet = append(c.hooks.TSCleanSheet, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tscleansheet.Intercept(f(g(h())))`.
+func (c *TSCleanSheetClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TSCleanSheet = append(c.inters.TSCleanSheet, interceptors...)
+}
+
+// Create returns a builder for creating a TSCleanSheet entity.
+func (c *TSCleanSheetClient) Create() *TSCleanSheetCreate {
+	mutation := newTSCleanSheetMutation(c.config, OpCreate)
+	return &TSCleanSheetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TSCleanSheet entities.
+func (c *TSCleanSheetClient) CreateBulk(builders ...*TSCleanSheetCreate) *TSCleanSheetCreateBulk {
+	return &TSCleanSheetCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TSCleanSheet.
+func (c *TSCleanSheetClient) Update() *TSCleanSheetUpdate {
+	mutation := newTSCleanSheetMutation(c.config, OpUpdate)
+	return &TSCleanSheetUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TSCleanSheetClient) UpdateOne(tcs *TSCleanSheet) *TSCleanSheetUpdateOne {
+	mutation := newTSCleanSheetMutation(c.config, OpUpdateOne, withTSCleanSheet(tcs))
+	return &TSCleanSheetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TSCleanSheetClient) UpdateOneID(id int) *TSCleanSheetUpdateOne {
+	mutation := newTSCleanSheetMutation(c.config, OpUpdateOne, withTSCleanSheetID(id))
+	return &TSCleanSheetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TSCleanSheet.
+func (c *TSCleanSheetClient) Delete() *TSCleanSheetDelete {
+	mutation := newTSCleanSheetMutation(c.config, OpDelete)
+	return &TSCleanSheetDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TSCleanSheetClient) DeleteOne(tcs *TSCleanSheet) *TSCleanSheetDeleteOne {
+	return c.DeleteOneID(tcs.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TSCleanSheetClient) DeleteOneID(id int) *TSCleanSheetDeleteOne {
+	builder := c.Delete().Where(tscleansheet.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TSCleanSheetDeleteOne{builder}
+}
+
+// Query returns a query builder for TSCleanSheet.
+func (c *TSCleanSheetClient) Query() *TSCleanSheetQuery {
+	return &TSCleanSheetQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTSCleanSheet},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TSCleanSheet entity by its id.
+func (c *TSCleanSheetClient) Get(ctx context.Context, id int) (*TSCleanSheet, error) {
+	return c.Query().Where(tscleansheet.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TSCleanSheetClient) GetX(ctx context.Context, id int) *TSCleanSheet {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a TSCleanSheet.
+func (c *TSCleanSheetClient) QueryTeam(tcs *TSCleanSheet) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tcs.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tscleansheet.Table, tscleansheet.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, tscleansheet.TeamTable, tscleansheet.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(tcs.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TSCleanSheetClient) Hooks() []Hook {
+	return c.hooks.TSCleanSheet
+}
+
+// Interceptors returns the client interceptors.
+func (c *TSCleanSheetClient) Interceptors() []Interceptor {
+	return c.inters.TSCleanSheet
+}
+
+func (c *TSCleanSheetClient) mutate(ctx context.Context, m *TSCleanSheetMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TSCleanSheetCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TSCleanSheetUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TSCleanSheetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TSCleanSheetDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TSCleanSheet mutation op: %q", m.Op())
+	}
+}
+
+// TSFailedToScoreClient is a client for the TSFailedToScore schema.
+type TSFailedToScoreClient struct {
+	config
+}
+
+// NewTSFailedToScoreClient returns a client for the TSFailedToScore from the given config.
+func NewTSFailedToScoreClient(c config) *TSFailedToScoreClient {
+	return &TSFailedToScoreClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tsfailedtoscore.Hooks(f(g(h())))`.
+func (c *TSFailedToScoreClient) Use(hooks ...Hook) {
+	c.hooks.TSFailedToScore = append(c.hooks.TSFailedToScore, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tsfailedtoscore.Intercept(f(g(h())))`.
+func (c *TSFailedToScoreClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TSFailedToScore = append(c.inters.TSFailedToScore, interceptors...)
+}
+
+// Create returns a builder for creating a TSFailedToScore entity.
+func (c *TSFailedToScoreClient) Create() *TSFailedToScoreCreate {
+	mutation := newTSFailedToScoreMutation(c.config, OpCreate)
+	return &TSFailedToScoreCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TSFailedToScore entities.
+func (c *TSFailedToScoreClient) CreateBulk(builders ...*TSFailedToScoreCreate) *TSFailedToScoreCreateBulk {
+	return &TSFailedToScoreCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TSFailedToScore.
+func (c *TSFailedToScoreClient) Update() *TSFailedToScoreUpdate {
+	mutation := newTSFailedToScoreMutation(c.config, OpUpdate)
+	return &TSFailedToScoreUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TSFailedToScoreClient) UpdateOne(tfts *TSFailedToScore) *TSFailedToScoreUpdateOne {
+	mutation := newTSFailedToScoreMutation(c.config, OpUpdateOne, withTSFailedToScore(tfts))
+	return &TSFailedToScoreUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TSFailedToScoreClient) UpdateOneID(id int) *TSFailedToScoreUpdateOne {
+	mutation := newTSFailedToScoreMutation(c.config, OpUpdateOne, withTSFailedToScoreID(id))
+	return &TSFailedToScoreUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TSFailedToScore.
+func (c *TSFailedToScoreClient) Delete() *TSFailedToScoreDelete {
+	mutation := newTSFailedToScoreMutation(c.config, OpDelete)
+	return &TSFailedToScoreDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TSFailedToScoreClient) DeleteOne(tfts *TSFailedToScore) *TSFailedToScoreDeleteOne {
+	return c.DeleteOneID(tfts.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TSFailedToScoreClient) DeleteOneID(id int) *TSFailedToScoreDeleteOne {
+	builder := c.Delete().Where(tsfailedtoscore.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TSFailedToScoreDeleteOne{builder}
+}
+
+// Query returns a query builder for TSFailedToScore.
+func (c *TSFailedToScoreClient) Query() *TSFailedToScoreQuery {
+	return &TSFailedToScoreQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTSFailedToScore},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TSFailedToScore entity by its id.
+func (c *TSFailedToScoreClient) Get(ctx context.Context, id int) (*TSFailedToScore, error) {
+	return c.Query().Where(tsfailedtoscore.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TSFailedToScoreClient) GetX(ctx context.Context, id int) *TSFailedToScore {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a TSFailedToScore.
+func (c *TSFailedToScoreClient) QueryTeam(tfts *TSFailedToScore) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tfts.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tsfailedtoscore.Table, tsfailedtoscore.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, tsfailedtoscore.TeamTable, tsfailedtoscore.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(tfts.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TSFailedToScoreClient) Hooks() []Hook {
+	return c.hooks.TSFailedToScore
+}
+
+// Interceptors returns the client interceptors.
+func (c *TSFailedToScoreClient) Interceptors() []Interceptor {
+	return c.inters.TSFailedToScore
+}
+
+func (c *TSFailedToScoreClient) mutate(ctx context.Context, m *TSFailedToScoreMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TSFailedToScoreCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TSFailedToScoreUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TSFailedToScoreUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TSFailedToScoreDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TSFailedToScore mutation op: %q", m.Op())
+	}
+}
+
+// TSFixturesClient is a client for the TSFixtures schema.
+type TSFixturesClient struct {
+	config
+}
+
+// NewTSFixturesClient returns a client for the TSFixtures from the given config.
+func NewTSFixturesClient(c config) *TSFixturesClient {
+	return &TSFixturesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tsfixtures.Hooks(f(g(h())))`.
+func (c *TSFixturesClient) Use(hooks ...Hook) {
+	c.hooks.TSFixtures = append(c.hooks.TSFixtures, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tsfixtures.Intercept(f(g(h())))`.
+func (c *TSFixturesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TSFixtures = append(c.inters.TSFixtures, interceptors...)
+}
+
+// Create returns a builder for creating a TSFixtures entity.
+func (c *TSFixturesClient) Create() *TSFixturesCreate {
+	mutation := newTSFixturesMutation(c.config, OpCreate)
+	return &TSFixturesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TSFixtures entities.
+func (c *TSFixturesClient) CreateBulk(builders ...*TSFixturesCreate) *TSFixturesCreateBulk {
+	return &TSFixturesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TSFixtures.
+func (c *TSFixturesClient) Update() *TSFixturesUpdate {
+	mutation := newTSFixturesMutation(c.config, OpUpdate)
+	return &TSFixturesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TSFixturesClient) UpdateOne(tf *TSFixtures) *TSFixturesUpdateOne {
+	mutation := newTSFixturesMutation(c.config, OpUpdateOne, withTSFixtures(tf))
+	return &TSFixturesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TSFixturesClient) UpdateOneID(id int) *TSFixturesUpdateOne {
+	mutation := newTSFixturesMutation(c.config, OpUpdateOne, withTSFixturesID(id))
+	return &TSFixturesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TSFixtures.
+func (c *TSFixturesClient) Delete() *TSFixturesDelete {
+	mutation := newTSFixturesMutation(c.config, OpDelete)
+	return &TSFixturesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TSFixturesClient) DeleteOne(tf *TSFixtures) *TSFixturesDeleteOne {
+	return c.DeleteOneID(tf.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TSFixturesClient) DeleteOneID(id int) *TSFixturesDeleteOne {
+	builder := c.Delete().Where(tsfixtures.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TSFixturesDeleteOne{builder}
+}
+
+// Query returns a query builder for TSFixtures.
+func (c *TSFixturesClient) Query() *TSFixturesQuery {
+	return &TSFixturesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTSFixtures},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TSFixtures entity by its id.
+func (c *TSFixturesClient) Get(ctx context.Context, id int) (*TSFixtures, error) {
+	return c.Query().Where(tsfixtures.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TSFixturesClient) GetX(ctx context.Context, id int) *TSFixtures {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a TSFixtures.
+func (c *TSFixturesClient) QueryTeam(tf *TSFixtures) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tf.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tsfixtures.Table, tsfixtures.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, tsfixtures.TeamTable, tsfixtures.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(tf.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TSFixturesClient) Hooks() []Hook {
+	return c.hooks.TSFixtures
+}
+
+// Interceptors returns the client interceptors.
+func (c *TSFixturesClient) Interceptors() []Interceptor {
+	return c.inters.TSFixtures
+}
+
+func (c *TSFixturesClient) mutate(ctx context.Context, m *TSFixturesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TSFixturesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TSFixturesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TSFixturesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TSFixturesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TSFixtures mutation op: %q", m.Op())
+	}
+}
+
+// TSGoalsClient is a client for the TSGoals schema.
+type TSGoalsClient struct {
+	config
+}
+
+// NewTSGoalsClient returns a client for the TSGoals from the given config.
+func NewTSGoalsClient(c config) *TSGoalsClient {
+	return &TSGoalsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tsgoals.Hooks(f(g(h())))`.
+func (c *TSGoalsClient) Use(hooks ...Hook) {
+	c.hooks.TSGoals = append(c.hooks.TSGoals, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tsgoals.Intercept(f(g(h())))`.
+func (c *TSGoalsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TSGoals = append(c.inters.TSGoals, interceptors...)
+}
+
+// Create returns a builder for creating a TSGoals entity.
+func (c *TSGoalsClient) Create() *TSGoalsCreate {
+	mutation := newTSGoalsMutation(c.config, OpCreate)
+	return &TSGoalsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TSGoals entities.
+func (c *TSGoalsClient) CreateBulk(builders ...*TSGoalsCreate) *TSGoalsCreateBulk {
+	return &TSGoalsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TSGoals.
+func (c *TSGoalsClient) Update() *TSGoalsUpdate {
+	mutation := newTSGoalsMutation(c.config, OpUpdate)
+	return &TSGoalsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TSGoalsClient) UpdateOne(tg *TSGoals) *TSGoalsUpdateOne {
+	mutation := newTSGoalsMutation(c.config, OpUpdateOne, withTSGoals(tg))
+	return &TSGoalsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TSGoalsClient) UpdateOneID(id int) *TSGoalsUpdateOne {
+	mutation := newTSGoalsMutation(c.config, OpUpdateOne, withTSGoalsID(id))
+	return &TSGoalsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TSGoals.
+func (c *TSGoalsClient) Delete() *TSGoalsDelete {
+	mutation := newTSGoalsMutation(c.config, OpDelete)
+	return &TSGoalsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TSGoalsClient) DeleteOne(tg *TSGoals) *TSGoalsDeleteOne {
+	return c.DeleteOneID(tg.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TSGoalsClient) DeleteOneID(id int) *TSGoalsDeleteOne {
+	builder := c.Delete().Where(tsgoals.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TSGoalsDeleteOne{builder}
+}
+
+// Query returns a query builder for TSGoals.
+func (c *TSGoalsClient) Query() *TSGoalsQuery {
+	return &TSGoalsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTSGoals},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TSGoals entity by its id.
+func (c *TSGoalsClient) Get(ctx context.Context, id int) (*TSGoals, error) {
+	return c.Query().Where(tsgoals.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TSGoalsClient) GetX(ctx context.Context, id int) *TSGoals {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a TSGoals.
+func (c *TSGoalsClient) QueryTeam(tg *TSGoals) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tg.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tsgoals.Table, tsgoals.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, tsgoals.TeamTable, tsgoals.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(tg.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TSGoalsClient) Hooks() []Hook {
+	return c.hooks.TSGoals
+}
+
+// Interceptors returns the client interceptors.
+func (c *TSGoalsClient) Interceptors() []Interceptor {
+	return c.inters.TSGoals
+}
+
+func (c *TSGoalsClient) mutate(ctx context.Context, m *TSGoalsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TSGoalsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TSGoalsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TSGoalsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TSGoalsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TSGoals mutation op: %q", m.Op())
+	}
+}
+
+// TSLineupsClient is a client for the TSLineups schema.
+type TSLineupsClient struct {
+	config
+}
+
+// NewTSLineupsClient returns a client for the TSLineups from the given config.
+func NewTSLineupsClient(c config) *TSLineupsClient {
+	return &TSLineupsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tslineups.Hooks(f(g(h())))`.
+func (c *TSLineupsClient) Use(hooks ...Hook) {
+	c.hooks.TSLineups = append(c.hooks.TSLineups, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tslineups.Intercept(f(g(h())))`.
+func (c *TSLineupsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TSLineups = append(c.inters.TSLineups, interceptors...)
+}
+
+// Create returns a builder for creating a TSLineups entity.
+func (c *TSLineupsClient) Create() *TSLineupsCreate {
+	mutation := newTSLineupsMutation(c.config, OpCreate)
+	return &TSLineupsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TSLineups entities.
+func (c *TSLineupsClient) CreateBulk(builders ...*TSLineupsCreate) *TSLineupsCreateBulk {
+	return &TSLineupsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TSLineups.
+func (c *TSLineupsClient) Update() *TSLineupsUpdate {
+	mutation := newTSLineupsMutation(c.config, OpUpdate)
+	return &TSLineupsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TSLineupsClient) UpdateOne(tl *TSLineups) *TSLineupsUpdateOne {
+	mutation := newTSLineupsMutation(c.config, OpUpdateOne, withTSLineups(tl))
+	return &TSLineupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TSLineupsClient) UpdateOneID(id int) *TSLineupsUpdateOne {
+	mutation := newTSLineupsMutation(c.config, OpUpdateOne, withTSLineupsID(id))
+	return &TSLineupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TSLineups.
+func (c *TSLineupsClient) Delete() *TSLineupsDelete {
+	mutation := newTSLineupsMutation(c.config, OpDelete)
+	return &TSLineupsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TSLineupsClient) DeleteOne(tl *TSLineups) *TSLineupsDeleteOne {
+	return c.DeleteOneID(tl.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TSLineupsClient) DeleteOneID(id int) *TSLineupsDeleteOne {
+	builder := c.Delete().Where(tslineups.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TSLineupsDeleteOne{builder}
+}
+
+// Query returns a query builder for TSLineups.
+func (c *TSLineupsClient) Query() *TSLineupsQuery {
+	return &TSLineupsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTSLineups},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TSLineups entity by its id.
+func (c *TSLineupsClient) Get(ctx context.Context, id int) (*TSLineups, error) {
+	return c.Query().Where(tslineups.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TSLineupsClient) GetX(ctx context.Context, id int) *TSLineups {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a TSLineups.
+func (c *TSLineupsClient) QueryTeam(tl *TSLineups) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tslineups.Table, tslineups.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, tslineups.TeamTable, tslineups.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(tl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TSLineupsClient) Hooks() []Hook {
+	return c.hooks.TSLineups
+}
+
+// Interceptors returns the client interceptors.
+func (c *TSLineupsClient) Interceptors() []Interceptor {
+	return c.inters.TSLineups
+}
+
+func (c *TSLineupsClient) mutate(ctx context.Context, m *TSLineupsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TSLineupsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TSLineupsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TSLineupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TSLineupsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TSLineups mutation op: %q", m.Op())
+	}
+}
+
+// TSPenaltyClient is a client for the TSPenalty schema.
+type TSPenaltyClient struct {
+	config
+}
+
+// NewTSPenaltyClient returns a client for the TSPenalty from the given config.
+func NewTSPenaltyClient(c config) *TSPenaltyClient {
+	return &TSPenaltyClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `tspenalty.Hooks(f(g(h())))`.
+func (c *TSPenaltyClient) Use(hooks ...Hook) {
+	c.hooks.TSPenalty = append(c.hooks.TSPenalty, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `tspenalty.Intercept(f(g(h())))`.
+func (c *TSPenaltyClient) Intercept(interceptors ...Interceptor) {
+	c.inters.TSPenalty = append(c.inters.TSPenalty, interceptors...)
+}
+
+// Create returns a builder for creating a TSPenalty entity.
+func (c *TSPenaltyClient) Create() *TSPenaltyCreate {
+	mutation := newTSPenaltyMutation(c.config, OpCreate)
+	return &TSPenaltyCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of TSPenalty entities.
+func (c *TSPenaltyClient) CreateBulk(builders ...*TSPenaltyCreate) *TSPenaltyCreateBulk {
+	return &TSPenaltyCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for TSPenalty.
+func (c *TSPenaltyClient) Update() *TSPenaltyUpdate {
+	mutation := newTSPenaltyMutation(c.config, OpUpdate)
+	return &TSPenaltyUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *TSPenaltyClient) UpdateOne(tp *TSPenalty) *TSPenaltyUpdateOne {
+	mutation := newTSPenaltyMutation(c.config, OpUpdateOne, withTSPenalty(tp))
+	return &TSPenaltyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *TSPenaltyClient) UpdateOneID(id int) *TSPenaltyUpdateOne {
+	mutation := newTSPenaltyMutation(c.config, OpUpdateOne, withTSPenaltyID(id))
+	return &TSPenaltyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for TSPenalty.
+func (c *TSPenaltyClient) Delete() *TSPenaltyDelete {
+	mutation := newTSPenaltyMutation(c.config, OpDelete)
+	return &TSPenaltyDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *TSPenaltyClient) DeleteOne(tp *TSPenalty) *TSPenaltyDeleteOne {
+	return c.DeleteOneID(tp.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *TSPenaltyClient) DeleteOneID(id int) *TSPenaltyDeleteOne {
+	builder := c.Delete().Where(tspenalty.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &TSPenaltyDeleteOne{builder}
+}
+
+// Query returns a query builder for TSPenalty.
+func (c *TSPenaltyClient) Query() *TSPenaltyQuery {
+	return &TSPenaltyQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeTSPenalty},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a TSPenalty entity by its id.
+func (c *TSPenaltyClient) Get(ctx context.Context, id int) (*TSPenalty, error) {
+	return c.Query().Where(tspenalty.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *TSPenaltyClient) GetX(ctx context.Context, id int) *TSPenalty {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a TSPenalty.
+func (c *TSPenaltyClient) QueryTeam(tp *TSPenalty) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := tp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(tspenalty.Table, tspenalty.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, tspenalty.TeamTable, tspenalty.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(tp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *TSPenaltyClient) Hooks() []Hook {
+	return c.hooks.TSPenalty
+}
+
+// Interceptors returns the client interceptors.
+func (c *TSPenaltyClient) Interceptors() []Interceptor {
+	return c.inters.TSPenalty
+}
+
+func (c *TSPenaltyClient) mutate(ctx context.Context, m *TSPenaltyMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&TSPenaltyCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&TSPenaltyUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&TSPenaltyUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&TSPenaltyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown TSPenalty mutation op: %q", m.Op())
+	}
+}
+
 // TeamClient is a client for the Team schema.
 type TeamClient struct {
 	config
@@ -1700,6 +2838,134 @@ func (c *TeamClient) QueryPlayers(t *Team) *PlayerQuery {
 	return query
 }
 
+// QueryBiggestStats queries the biggest_stats edge of a Team.
+func (c *TeamClient) QueryBiggestStats(t *Team) *TSBiggestQuery {
+	query := (&TSBiggestClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(tsbiggest.Table, tsbiggest.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, team.BiggestStatsTable, team.BiggestStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCardsStats queries the cards_stats edge of a Team.
+func (c *TeamClient) QueryCardsStats(t *Team) *TSCardsQuery {
+	query := (&TSCardsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(tscards.Table, tscards.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, team.CardsStatsTable, team.CardsStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryCleanSheetStats queries the clean_sheet_stats edge of a Team.
+func (c *TeamClient) QueryCleanSheetStats(t *Team) *TSCleanSheetQuery {
+	query := (&TSCleanSheetClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(tscleansheet.Table, tscleansheet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, team.CleanSheetStatsTable, team.CleanSheetStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFailedToScoreStats queries the failed_to_score_stats edge of a Team.
+func (c *TeamClient) QueryFailedToScoreStats(t *Team) *TSFailedToScoreQuery {
+	query := (&TSFailedToScoreClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(tsfailedtoscore.Table, tsfailedtoscore.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, team.FailedToScoreStatsTable, team.FailedToScoreStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFixturesStats queries the fixtures_stats edge of a Team.
+func (c *TeamClient) QueryFixturesStats(t *Team) *TSFixturesQuery {
+	query := (&TSFixturesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(tsfixtures.Table, tsfixtures.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, team.FixturesStatsTable, team.FixturesStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryGoalsStats queries the goals_stats edge of a Team.
+func (c *TeamClient) QueryGoalsStats(t *Team) *TSGoalsQuery {
+	query := (&TSGoalsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(tsgoals.Table, tsgoals.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, team.GoalsStatsTable, team.GoalsStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLineups queries the lineups edge of a Team.
+func (c *TeamClient) QueryLineups(t *Team) *TSLineupsQuery {
+	query := (&TSLineupsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(tslineups.Table, tslineups.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, team.LineupsTable, team.LineupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPenaltyStats queries the penalty_stats edge of a Team.
+func (c *TeamClient) QueryPenaltyStats(t *Team) *TSPenaltyQuery {
+	query := (&TSPenaltyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(tspenalty.Table, tspenalty.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, team.PenaltyStatsTable, team.PenaltyStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *TeamClient) Hooks() []Hook {
 	return c.hooks.Team
@@ -1728,11 +2994,13 @@ func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Birth, Club, Country, Fixture, League, Player, Season, Standings,
-		Team []ent.Hook
+		Birth, Club, Country, Fixture, League, Player, Season, Standings, TSBiggest,
+		TSCards, TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals, TSLineups,
+		TSPenalty, Team []ent.Hook
 	}
 	inters struct {
-		Birth, Club, Country, Fixture, League, Player, Season, Standings,
-		Team []ent.Interceptor
+		Birth, Club, Country, Fixture, League, Player, Season, Standings, TSBiggest,
+		TSCards, TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals, TSLineups,
+		TSPenalty, Team []ent.Interceptor
 	}
 )

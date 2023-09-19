@@ -104,6 +104,102 @@ func (f StandingsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, e
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.StandingsMutation", m)
 }
 
+// The TSBiggestFunc type is an adapter to allow the use of ordinary
+// function as TSBiggest mutator.
+type TSBiggestFunc func(context.Context, *ent.TSBiggestMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TSBiggestFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TSBiggestMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TSBiggestMutation", m)
+}
+
+// The TSCardsFunc type is an adapter to allow the use of ordinary
+// function as TSCards mutator.
+type TSCardsFunc func(context.Context, *ent.TSCardsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TSCardsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TSCardsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TSCardsMutation", m)
+}
+
+// The TSCleanSheetFunc type is an adapter to allow the use of ordinary
+// function as TSCleanSheet mutator.
+type TSCleanSheetFunc func(context.Context, *ent.TSCleanSheetMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TSCleanSheetFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TSCleanSheetMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TSCleanSheetMutation", m)
+}
+
+// The TSFailedToScoreFunc type is an adapter to allow the use of ordinary
+// function as TSFailedToScore mutator.
+type TSFailedToScoreFunc func(context.Context, *ent.TSFailedToScoreMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TSFailedToScoreFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TSFailedToScoreMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TSFailedToScoreMutation", m)
+}
+
+// The TSFixturesFunc type is an adapter to allow the use of ordinary
+// function as TSFixtures mutator.
+type TSFixturesFunc func(context.Context, *ent.TSFixturesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TSFixturesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TSFixturesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TSFixturesMutation", m)
+}
+
+// The TSGoalsFunc type is an adapter to allow the use of ordinary
+// function as TSGoals mutator.
+type TSGoalsFunc func(context.Context, *ent.TSGoalsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TSGoalsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TSGoalsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TSGoalsMutation", m)
+}
+
+// The TSLineupsFunc type is an adapter to allow the use of ordinary
+// function as TSLineups mutator.
+type TSLineupsFunc func(context.Context, *ent.TSLineupsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TSLineupsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TSLineupsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TSLineupsMutation", m)
+}
+
+// The TSPenaltyFunc type is an adapter to allow the use of ordinary
+// function as TSPenalty mutator.
+type TSPenaltyFunc func(context.Context, *ent.TSPenaltyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f TSPenaltyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.TSPenaltyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.TSPenaltyMutation", m)
+}
+
 // The TeamFunc type is an adapter to allow the use of ordinary
 // function as Team mutator.
 type TeamFunc func(context.Context, *ent.TeamMutation) (ent.Value, error)
