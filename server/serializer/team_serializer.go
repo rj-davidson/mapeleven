@@ -6,6 +6,7 @@ import (
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/season"
 	"mapeleven/serializer/teamstats_serializer"
+	"time"
 )
 
 type APITeamName struct {
@@ -79,7 +80,12 @@ func SerializeTeam(club *ent.Club) *APITeam {
 	}
 }
 
-func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string) (*APITeam, error) {
+func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, seasonStr string) (*APITeam, error) {
+	year, err := time.Parse("2006", seasonStr)
+	if err != nil {
+		year = time.Now()
+	}
+
 	t, err := ts.client.Club.Query().
 		Where(club.Slug(slug)).
 		WithCountry().
@@ -87,7 +93,7 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string) (*APIT
 			func(q *ent.TeamQuery) {
 				q.WithSeason(
 					func(q *ent.SeasonQuery) {
-						q.Where(season.Current(true))
+						q.Where(season.YearEQ(year.Year()))
 					},
 				)
 				q.WithBiggestStats()
@@ -98,6 +104,7 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string) (*APIT
 				q.WithGoalsStats()
 				q.WithLineups()
 				q.WithPenaltyStats()
+
 			},
 		).
 		First(ctx)
@@ -109,14 +116,19 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string) (*APIT
 	return SerializeTeam(t), nil
 }
 
-func (ts *TeamSerializer) GetTeams(ctx context.Context) ([]*APITeam, error) {
+func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*APITeam, error) {
+	year, err := time.Parse("2006", seasonStr)
+	if err != nil {
+		year = time.Now()
+	}
+
 	teams, err := ts.client.Club.Query().
 		WithCountry().
 		WithTeam(
 			func(q *ent.TeamQuery) {
 				q.WithSeason(
 					func(q *ent.SeasonQuery) {
-						q.Where(season.Current(true))
+						q.Where(season.YearEQ(year.Year()))
 					},
 				)
 				q.WithBiggestStats()
