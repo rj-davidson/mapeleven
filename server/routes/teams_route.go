@@ -18,7 +18,9 @@ func SetupTeamsRoutes(app *fiber.App, client *ent.Client) {
 
 func getAllTeams(serializer *serializer.TeamSerializer) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		teams, err := serializer.GetTeams(context.Background())
+		season := c.Query("season", "") // Default to empty if not provided
+
+		teams, err := serializer.GetTeams(context.Background(), season)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(&fiber.Map{
 				"error": fmt.Sprintf("Failed to get teams: %v", err),
@@ -31,8 +33,9 @@ func getAllTeams(serializer *serializer.TeamSerializer) fiber.Handler {
 func getTeamBySlug(serializer *serializer.TeamSerializer) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		slug := c.Params("slug")
+		season := c.Query("season", "") // Default to empty if not provided
 
-		team, err := serializer.GetTeamBySlug(context.Background(), slug)
+		team, err := serializer.GetTeamBySlug(context.Background(), slug, season)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
