@@ -4,35 +4,25 @@ import DisplayImage from '../../Util/DisplayImage';
 import { Flex } from '../../Util/Flex.jsx';
 import { Link } from 'react-router-dom';
 
-interface TeamCardProps {
-    slug: string;
-    nameLong: string;
-    nameShort: string;
-    badge: string;
-    countryCode: string;
-    countryName: string;
-    countryFlag: string;
+interface PlayerCardProps {
+    name: string;
+    photo: string;
 }
 
-const TeamCard: React.FC<TeamCardProps> = ({
-    slug,
-    nameLong,
-    nameShort,
-    badge,
-    countryCode,
-    countryName,
-    countryFlag,
+const PlayerCard: React.FC<PlayerCardProps> = ({
+    name,
+    photo,
 }) => {
     return (
-        <Link to={`/teams/${slug}`}>
+        <Link to={`/players/${name}`}>
             <Card>
                 <CardContent sx={{ padding: '8px' }}>
                     <Flex style={{ flexDirection: 'row', gap: '16px', justifyContent: 'left', alignItems: 'center' }}>
-                        <Box sx={{ display: 'flex', justifyContent: 'left', alignItems: 'center' }}>
-                            <DisplayImage src={badge} alt={nameShort} />
+                        <Box sx={{ display: 'flex', justifyContent: 'left', alignItems: 'center'}}>
+                            <DisplayImage src={photo} alt={name} location={""} sx={{borderRadius: '8px'}}/>
                         </Box>
                         <Typography variant='h6' component='h2' sx={{ fontSize: '16px' }}>
-                            {nameLong}
+                            {name}
                         </Typography>
                     </Flex>
                 </CardContent>
@@ -41,4 +31,4 @@ const TeamCard: React.FC<TeamCardProps> = ({
     );
 };
 
-export default TeamCard;
+export default PlayerCard;
