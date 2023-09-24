@@ -14,7 +14,6 @@ const styles = {
         justifyContent: 'space-between',
         width: '100%',
         marginBottom: '16px',
-        marginTop: '16px',
         border: '1.5px solid var(--dark2)',
         borderRadius: '12px',
     },
@@ -49,13 +48,20 @@ const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
         onDateChange(newDate);
     };
 
+    const options: Intl.DateTimeFormatOptions = {
+        weekday: 'long',
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    };
+
     return (
         <Box sx={styles.root}>
             <Button sx={styles.arrowButton} onClick={handleBackwardClick}>
                 <ChevronLeftIcon />
             </Button>
-            <Typography sx={styles.dateText}>
-                {currentDate.toDateString() === new Date().toDateString() ? 'Today' : currentDate.toLocaleDateString()}
+            <Typography variant='h6' component='h2' gutterBottom sx={styles.dateText}>
+                {currentDate.toDateString() === new Date().toDateString() ? 'Today' : currentDate.toLocaleDateString('en-US', options)}
             </Typography>
             <Button sx={styles.arrowButton} onClick={handleForwardClick}>
                 <ChevronRightIcon />

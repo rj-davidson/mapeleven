@@ -7,13 +7,14 @@ import './Players.css';
 import PlayerCards from './PlayerCard.tsx';
 import {Tile} from "../../Util/Tile.jsx";
 import { Grid } from "@mui/material";
+import DisplayPlayers from "./DisplayPlayersCopy.tsx";
 
 function Players() {
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                 <Tile>
-                    <PlayerCards/>
+                    <DisplayPlayers skeleton={5}/>
                 </Tile>
             </Grid>
 

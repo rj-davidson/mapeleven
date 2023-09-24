@@ -78,30 +78,30 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
-/*@media (prefers-color-scheme: light) {
+@media (prefers-color-scheme: light) {
   :root {
-    color: var(--dark1);
-    background-color: var(--light0);
+    color: var(--light0);
+    background-color: var(--dark0);
   }
-  .bg-dark {
-    background-color: var(--dark1) !important;
+
+  .bg-light {
+    background-color: var(--dark0) !important;
   }
+
   a {
-    color: var(--blue);
+    color: var(--light0);
   }
+
   a:hover {
     color: var(--focus);
   }
+
   button {
-    background-color: var(--light2);
-    color: var(--dark1);
-  }
-  button:hover {
-    border-color: var(--focus);
-    background-color: var(--light1);
+    background-color: var(--dark3);
+    color: var(--light0);
   }
 }
-*/
+
 @media (prefers-color-scheme: dark) {
   :root {
     color: var(--light0);
