@@ -6,6 +6,7 @@ import {Tile} from "../../Util/Tile.jsx";
 import {useNavigate} from "react-router-dom";
 import {Flex} from "../../Util/Flex.jsx";
 import Standings from "../Fixtures/Standings.jsx";
+import FormCard from "./FormCard.jsx";
 
 function LeaguePage() {
 
@@ -93,7 +94,13 @@ function LeaguePage() {
                             src={'http://localhost:8080/' + flag}
                         />
                     </Flex>
+
                 </Tile>
+            </Grid>
+            <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
+                <Flex style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
+                    <FormCard />
+                </Flex>
             </Grid>
 
         </Grid>));
