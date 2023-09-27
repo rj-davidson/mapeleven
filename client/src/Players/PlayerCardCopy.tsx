@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Box, Card, CardContent, Typography } from '@mui/material';
-import DisplayImage from '../../Util/DisplayImage';
-import { Flex } from '../../Util/Flex.jsx';
+import DisplayImage from '../Util/DisplayImage';
+import { Flex } from '../Util/Flex.jsx';
 import { Link } from 'react-router-dom';
 
 interface PlayerCardProps {

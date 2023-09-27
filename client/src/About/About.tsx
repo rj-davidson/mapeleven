@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Box, List, ListItem, ListItemText, Typography } from '@mui/material';
-import '../../../App.css';
+import '../App.css';
 
 function About() {
     return (

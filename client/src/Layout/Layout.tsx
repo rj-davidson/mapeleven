@@ -1,7 +1,6 @@
-import Footer from './Footer';
 import { ReactNode } from 'react';
-import NavigationBar from './NavigationBar';
-import NavigationBarCopy from './NavigationBarCopy';
+import Footer from './Footer';
+import NavBar from './NavBar';
 import PageBody from './PageBody';
 import { Grid } from '@mui/material';
 
@@ -13,7 +12,7 @@ const Layout = ({ children }: LayoutProps) => {
     return (
         <Grid container direction='column'>
             <Grid item>
-                <NavigationBarCopy />
+                <NavBar />
             </Grid>
 
             <Grid item>

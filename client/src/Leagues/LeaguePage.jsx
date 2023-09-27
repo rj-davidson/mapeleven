@@ -2,10 +2,10 @@ import React, {useState, useRef, useEffect} from "react";
 import {useParams} from "react-router-dom";
 import * as d3 from 'd3';
 import {Box, Grid, Skeleton, Typography} from "@mui/material";
-import {Tile} from "../../Util/Tile.jsx";
+import {Tile} from "../Util/Tile.jsx";
 import {useNavigate} from "react-router-dom";
-import {Flex} from "../../Util/Flex.jsx";
-import Standings from "../Fixtures/Standings.jsx";
+import {Flex} from "../Util/Flex.jsx";
+import Standings from "./Standings.jsx";
 
 function LeaguePage() {
 
