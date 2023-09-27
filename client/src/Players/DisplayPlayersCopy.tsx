@@ -1,30 +1,35 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { APITeam } from '../../../Models/api_types';
+import { APITeam } from '../Models/api_types';
 import { Box, Grid, Skeleton, Typography } from '@mui/material';
-import { Flex } from '../../Util/Flex.jsx';
-import { Groups } from '@mui/icons-material';
-import TeamCard from './TeamCard';
+import { Flex } from '../Util/Flex.jsx';
+import { Groups, Person } from '@mui/icons-material';
+import PlayerCard from './PlayerCardCopy';
 
-interface DisplayTeamsProps {
+interface DisplayPlayersProps {
     limit?: number;
     skeleton: number;
 }
 
-const DisplayTeams: React.FC<DisplayTeamsProps> = ({ limit, skeleton }) => {
-    const [teamData, setTeamData] = useState<APITeam[]>([]);
+const DisplayPlayers: React.FC<DisplayPlayersProps> = ({ limit, skeleton }) => {
+    const [playerData, setPlayerData] = useState([]);
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
         // Send a GET request to the API.
-        fetch(`http://localhost:8080/teams`)
+        fetch(`http://localhost:8080/stats/topscorers`)
             .then(response => response.json())
             .then(jsonData => {
-                const newTeamData = jsonData;
+                const response = jsonData.response;
+                const newPlayerData = [];
+                for (let i = 0; i < response.length; i++) {
+                    const player = response[i].player;
+                    newPlayerData.push(player);
+                }
                 if (limit) {
-                    setTeamData(newTeamData.slice(0, limit));
+                    setPlayerData(newPlayerData.slice(0, limit));
                 } else {
-                    setTeamData(newTeamData);
+                    setPlayerData(newPlayerData);
                 }
                 setLoading(false);
             })
@@ -57,9 +62,9 @@ const DisplayTeams: React.FC<DisplayTeamsProps> = ({ limit, skeleton }) => {
                 }}
             >
                 <Typography variant='h6' component='h2' gutterBottom>
-                    Teams
+                    Players
                 </Typography>
-                <Groups />
+                <Person />
             </Flex>
             {loading ? (
                 <Grid container spacing={1}>
@@ -67,17 +72,9 @@ const DisplayTeams: React.FC<DisplayTeamsProps> = ({ limit, skeleton }) => {
                 </Grid>
             ) : (
                 <Grid container spacing={1}>
-                    {teamData.map(team => (
-                        <Grid item xs={12} sm={12} md={12} lg={12} key={team.slug}>
-                            <TeamCard
-                                slug={team.slug}
-                                nameLong={team.name.long}
-                                nameShort={team.name.short}
-                                badge={team.badge}
-                                countryCode={team.country.code}
-                                countryName={team.country.name}
-                                countryFlag={team.country.flag}
-                            />
+                    {playerData.map(player => (
+                        <Grid item xs={12} sm={12} md={12} lg={12} key={player.slug}>
+                            <PlayerCard name={player.name} photo={player.photo} />
                         </Grid>
                     ))}
                 </Grid>
@@ -86,4 +83,4 @@ const DisplayTeams: React.FC<DisplayTeamsProps> = ({ limit, skeleton }) => {
     );
 };
 
-export default DisplayTeams;
+export default DisplayPlayers;

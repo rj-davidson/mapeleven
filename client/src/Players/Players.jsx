@@ -1,27 +1,26 @@
 import React from 'react';
-import '../../../App.css';
-import DisplayLeagues from './DisplayLeagues.jsx';
-import Layout from '../../Layout/Layout.tsx';
-import LeagueCard from './LeagueCard.tsx';
-import {Grid} from "@mui/material";
-import {Tile} from "../../Util/Tile.jsx";
-//import PlayerCards from "../Players/PlayerCard.js";
-//import BarChart from "../../DataVis/BarChart.jsx";
-import ScatterPlot from "../../DataVis/ScatterPlot.jsx";
-import SpiderChart from "../../DataVis/SpiderChart.jsx";
+import '../App.css';
+import BarChart from '../Util/BarChart.jsx';
+import SpiderChart from '../Util/SpiderChart.jsx';
+import ScatterPlot from '../Util/ScatterPlot.jsx';
+import './Players.css';
+import PlayerCards from './PlayerCard.tsx';
+import {Tile} from "../Util/Tile.jsx";
+import { Grid } from "@mui/material";
+import DisplayPlayers from "./DisplayPlayersCopy.tsx";
 
-function Leagues() {
+function Players() {
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                 <Tile>
-                    <LeagueCard/>
+                    <DisplayPlayers skeleton={5}/>
                 </Tile>
             </Grid>
 
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                 <Tile>
-                    <DisplayLeagues/>
+                    <BarChart/>
                 </Tile>
             </Grid>
 
@@ -37,10 +36,7 @@ function Leagues() {
                 </Tile>
             </Grid>
         </Grid>
-
     );
 }
-//<div>
-//    <LeagueCard />
-//</div>
-export default Leagues;
+
+export default Players;

@@ -1,6 +1,6 @@
 import React from 'react';
 import {Table, TableHead, TableBody, TableRow, TableCell, Paper, Box, Typography} from '@mui/material';
-import {Flex} from "../../Util/Flex.jsx";
+import {Flex} from "../Util/Flex.jsx";
 
 const StandingsTable = ({data}) => {
 

@@ -6,8 +6,8 @@ import Fixture from './Fixture';
 import FixtureTeam from './FixtureTeam';
 import FixtureHeader from './FixtureHeader';
 import DisplayPlayers from '../Players/DisplayPlayersCopy';
-import { Tile } from '../../Util/TileTS';
-import DisplayTeams from '../Clubs/DisplayTeams';
+import { Tile } from '../Util/TileTS';
+import ListTeams from '../Teams/ListTeams';
 import * as React from 'react';
 
 export default function FixturesPage(): JSX.Element {
@@ -149,7 +149,7 @@ export default function FixturesPage(): JSX.Element {
 
             <Grid item xs={12} sm={12} md={12} lg={2.5} width='100%'>
                 <Tile>
-                    <DisplayTeams limit={10} skeleton={10}/>
+                    <ListTeams limit={10} skeleton={10}/>
                 </Tile>
             </Grid>
         </Grid>
