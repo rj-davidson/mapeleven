@@ -16,7 +16,6 @@ export default function SearchBar() {
         fetch('http://localhost:8080/search')
             .then(response => response.json())
             .then(jsonData => {
-                console.log(jsonData);
                 setData(jsonData);
             })
             .catch(error => console.error(error));

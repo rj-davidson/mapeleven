@@ -5,7 +5,7 @@ import Layout from './Layout/Layout.tsx';
 import FixturesPage from './Fixtures/FixturesPage.tsx';
 import Players from './Players/Players.jsx';
 import TeamPageAll from './Teams/TeamPageAll.jsx';
-import TeamPageSingle from './Teams/TeamPageSingle.jsx';
+import TeamPageSingle from './Teams/TeamPageSingle';
 import Leagues from './Leagues/Leagues.jsx';
 import LeaguePage from './Leagues/LeaguePage.jsx';
 import About from './About/About.tsx';
