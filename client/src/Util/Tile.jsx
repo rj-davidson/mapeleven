@@ -9,6 +9,7 @@ export const Tile = ({children, style}) => {
         borderRadius: '12px',
         padding: '24px',
         width: '100%',
+        border: '5px solid var(--dark1)',
         ...style,
     };
 

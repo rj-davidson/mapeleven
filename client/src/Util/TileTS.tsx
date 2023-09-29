@@ -14,6 +14,7 @@ export const Tile: React.FC<TileProps> = ({ children, sx }) => {
         borderRadius: '12px',
         padding: '24px',
         width: '100%',
+        border: '5px solid var(--dark1)',
         ...sx,
     };
 
