@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
 import * as React from 'react';
 
+const url = import.meta.env.VITE_API_URL;
+
 function PlayerCards() {
     const [players, setPlayers] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:8080/stats/topscorers')
+        fetch(`${url}/stats/topscorers`)
             .then(response => response.json())
             .then(jsonData => {
                 const response = jsonData.response;

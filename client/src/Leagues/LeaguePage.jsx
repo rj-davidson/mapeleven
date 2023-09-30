@@ -7,6 +7,8 @@ import {useNavigate} from "react-router-dom";
 import {Flex} from "../Util/Flex.jsx";
 import Standings from "./Standings.jsx";
 
+const url = import.meta.env.VITE_API_URL;
+
 function LeaguePage() {
 
     const navigate = useNavigate();
@@ -25,7 +27,7 @@ function LeaguePage() {
         setLoading(true);
 
         // Send a GET request to the API.
-        fetch(`http://localhost:8080/leagues/${slug}`)
+        fetch(`${url}/leagues/${slug}`)
             .then(response => response.json())
             .then(jsonData => {
                 console.log(jsonData);
@@ -78,7 +80,7 @@ function LeaguePage() {
                                 maxHeight: {xs: 64, sm: 96}, maxWidth: {xs: 64, sm: 96},
                             }}
                             alt={name}
-                            src={'http://localhost:8080/' + logo}
+                            src={`${url}/` + logo}
                         />
                         <Typography sx={{fontSize: {xs: '24px', sm: '48px'},}}>
                             {name}
@@ -91,7 +93,7 @@ function LeaguePage() {
                                 maxHeight: {xs: 48, sm: 48}, maxWidth: {xs: 60, sm: 60},
                             }}
                             alt={country}
-                            src={'http://localhost:8080/' + flag}
+                            src={`${url}/` + flag}
                         />
                     </Flex>
                 </Tile>

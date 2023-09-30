@@ -3,6 +3,8 @@ import { Card, CardContent, Grid, Typography } from '@mui/material';
 import LeagueIcon from '@mui/icons-material/SportsSoccer';
 import CupIcon from '@mui/icons-material/EmojiEvents';
 
+const url = import.meta.env.VITE_API_URL;
+
 interface League {
     id: number;
     logo: string;
@@ -23,7 +25,7 @@ class LeagueCards extends React.Component<{}, DisplayLeaguesState> {
     }
 
     componentDidMount() {
-        fetch('http://localhost:8080/leagues')
+        fetch(`${url}/leagues`)
             .then(response => response.json())
             .then(data => {
                 this.setState({ leagues: data });
@@ -45,7 +47,7 @@ class LeagueCards extends React.Component<{}, DisplayLeaguesState> {
                                 padding: '24px',
                             }}
                         >
-                            <img src={'http://localhost:8080/' + league.logo} alt={league.name + ' logo'} height={44} />
+                            <img src={`${url}/` + league.logo} alt={league.name + ' logo'} height={44} />
                             <Typography variant='h6' component='h2' sx={{ mr: 2 }}>
                                 {league.name}
                             </Typography>

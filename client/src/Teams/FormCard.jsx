@@ -7,6 +7,8 @@ import { useNavigate } from 'react-router-dom';
 import { Flex } from '../Util/Flex.jsx';
 import Standings from '../Leagues/Standings.jsx';
 
+const url = import.meta.env.VITE_API_URL;
+
 function FormCard() {
     const navigate = useNavigate();
     const { slug } = useParams();
@@ -25,7 +27,7 @@ function FormCard() {
         setLoading(true);
 
         // Send a GET request to the API.
-        fetch(`http://localhost:8080/teams/${slug}`)
+        fetch(`${url}/teams/${slug}`)
             .then(response => response.json())
             .then(jsonData => {
                 setForm(jsonData.stats.form);

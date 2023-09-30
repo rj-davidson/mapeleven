@@ -1,6 +1,8 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 
+const url = import.meta.env.VITE_API_URL;
+
 class DisplayLeagues extends React.Component {
     constructor(props) {
         super(props);
@@ -13,7 +15,7 @@ class DisplayLeagues extends React.Component {
     }
 
     componentDidMount() {
-        fetch("http://localhost:8080/leagues").then(
+        fetch(`{${url}/leagues`).then(
             (response) => response.json()
         ).then(data => {
             this.setState({ leagues: data })
@@ -25,7 +27,7 @@ class DisplayLeagues extends React.Component {
         let table_data = this.state.leagues.map((league) => {
             return (
                 <TableRow key={league.id}>
-                    <TableCell>{<img src={'http://localhost:8080/' + league.logo} alt="League Photo" width="50" height="50" />}</TableCell>
+                    <TableCell>{<img src={`${url}/` + league.logo} alt="League Photo" width="50" height="50" />}</TableCell>
                     <TableCell>{league.id}</TableCell>
                     <TableCell>{league.name}</TableCell>
                     <TableCell>{league.type}</TableCell>

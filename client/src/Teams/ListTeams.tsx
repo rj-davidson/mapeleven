@@ -6,6 +6,8 @@ import { Flex } from '../Util/Flex.jsx';
 import { Groups } from '@mui/icons-material';
 import TeamCard from './TeamCard';
 
+const url = import.meta.env.VITE_API_URL;
+
 interface ListTeamsProps {
     limit?: number;
     skeleton: number;
@@ -17,7 +19,7 @@ const ListTeams: React.FC<ListTeamsProps> = ({ limit, skeleton }) => {
 
     useEffect(() => {
         // Send a GET request to the API.
-        fetch(`http://localhost:8080/teams`)
+        fetch(`${url}/teams`)
             .then(response => response.json())
             .then(jsonData => {
                 const newTeamData = jsonData;

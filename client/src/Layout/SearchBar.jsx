@@ -7,13 +7,15 @@ import { styled } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import SearchIcon from '@mui/icons-material/Search';
 
+const url = import.meta.env.VITE_API_URL;
+
 export default function SearchBar() {
     const [data, setData] = useState([]);
     const maxFilter = 6;
 
     useEffect(() => {
         // Send a GET request to the API.
-        fetch('http://localhost:8080/search')
+        fetch(`${url}/search`)
             .then(response => response.json())
             .then(jsonData => {
                 setData(jsonData);
@@ -49,7 +51,7 @@ export default function SearchBar() {
     const customRenderOption = (props, option) => (
         <li {...props} style={{ marginBottom: 8 }}>
             <img
-                src={'http://localhost:8080/' + option.image}
+                src={`${url}/` + option.image}
                 alt={option.name}
                 style={{ marginRight: '16px', width: '32px', height: '32px', overflow: 'hidden' }}
             />
