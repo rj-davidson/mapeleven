@@ -10,6 +10,8 @@ import { Tile } from '../Util/TileTS';
 import ListTeams from '../Teams/ListTeams';
 import * as React from 'react';
 
+const url = import.meta.env.VITE_API_URL
+
 export default function FixturesPage(): JSX.Element {
     const [liveFixtures, setLiveFixtures] = useState([]);
     const [dateFixtures, setDateFixtures] = useState([]);
@@ -22,7 +24,7 @@ export default function FixturesPage(): JSX.Element {
 
             // Fetch live fixtures
             fetch(
-                `http://127.0.0.1:8080/fixtures?live=${
+                `${url}/fixtures?live=${
                     selectedDate === new Date().toISOString().slice(0, 10) ? 'all' : 'none'
                 }`,
             )
@@ -32,7 +34,7 @@ export default function FixturesPage(): JSX.Element {
                 });
 
             // Fetch date fixtures
-            fetch(`http://127.0.0.1:8080/fixtures?date=${selectedDate}`)
+            fetch(`${url}/fixtures?date=${selectedDate}`)
                 .then(response => response.json())
                 .then(data => {
                     setDateFixtures(data.response.filter(fixture => countries.indexOf(fixture.league.country) !== -1));

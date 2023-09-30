@@ -2,6 +2,8 @@ import React, {useState} from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import {console} from "yarn/lib/cli.js";
 
+const url = import.meta.env.VITE_API_URL;
+
 class DisplayPlayers extends React.Component {
 
     constructor(props) {
@@ -12,7 +14,7 @@ class DisplayPlayers extends React.Component {
     }
 
     componentDidMount() {
-        fetch('http://localhost:8080/stats/topscorers')
+        fetch(`${url}/stats/topscorers`)
             .then(response => response.json())
             .then(jsonData => {
                 console.log(jsonData.response[0].player.name);

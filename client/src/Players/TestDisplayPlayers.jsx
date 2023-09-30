@@ -1,6 +1,8 @@
 import React from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 
+const url = import.meta.env.VITE_API_URL;
+
 class TestDisplayPlayers extends React.Component {
     constructor(props) {
         super(props);
@@ -13,7 +15,7 @@ class TestDisplayPlayers extends React.Component {
     }
 
     componentDidMount() {
-        fetch("http://localhost:8080/stats/topscorers").then(
+        fetch(`${url}/stats/topscorers`).then(
             (response) => response.json()
         ).then(data => {
             const response = data.response;

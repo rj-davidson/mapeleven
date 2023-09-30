@@ -11,8 +11,9 @@ import GoalSplitPieChart from './GoalSplitPieChart';
 import FormCard from './FormCard.jsx';
 import { Groups } from '@mui/icons-material';
 
+const url = import.meta.env.VITE_API_URL;
+
 function TeamPageSingle() {
-    const navigate = useNavigate();
     const { slug } = useParams();
 
     const [name, setName] = useState<string>('');
@@ -24,7 +25,7 @@ function TeamPageSingle() {
 
     useEffect(() => {
         // Send a GET request to the API.
-        fetch(`http://localhost:8080/teams/${slug}`)
+        fetch(`${url}/teams/${slug}`)
             .then(response => response.json())
             .then(jsonData => {
                 setName(jsonData.name.long);
@@ -68,7 +69,7 @@ function TeamPageSingle() {
                                 maxWidth: { xs: 64, sm: 96 },
                             }}
                             alt={name}
-                            src={'http://localhost:8080/' + logo}
+                            src={`${url}/` + logo}
                         />
                         <Flex style={{ flexDirection: 'column' }}>
                             <Typography sx={{ fontSize: { xs: '24px', sm: '32px' } }}>{name}</Typography>
@@ -82,13 +83,13 @@ function TeamPageSingle() {
                                         maxWidth: 25,
                                     }}
                                     alt={country}
-                                    src={'http://localhost:8080/' + flag}
+                                    src={`${url}/` + flag}
                                 />
                                 <Typography sx={{ fontSize: '18px' }}>{country}</Typography>
                             </Flex>
                         </Flex>
                     </Flex>
-                    <Flex style={{ justifyContent: 'center', alignItems: 'center'}}>
+                    <Flex style={{ justifyContent: 'center', alignItems: 'center' }}>
                         <Groups style={{ fontSize: 50 }} />
                     </Flex>
                 </Tile>

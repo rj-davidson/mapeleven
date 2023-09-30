@@ -3,6 +3,8 @@ import * as d3 from 'd3';
 import {RadarChart} from './radarChart.js';
 import './SpiderChart.css'
 
+const url = import.meta.env.VITE_API_URL;
+
 function SpiderChart() {
     // Declare state variables using the `useState` hook.
     const [data, setData] = useState([[]]);
@@ -14,7 +16,7 @@ function SpiderChart() {
     const svgRef = useRef();
     // Fetch the player list when the page loads.
     useEffect(() => {
-        fetch('http://localhost:8080/stats/topscorers')
+        fetch(`${url}/stats/topscorers`)
             .then(response => response.json())
             .then(jsonData => {
                 console.log(jsonData.response[0].player.name);
@@ -37,7 +39,7 @@ function SpiderChart() {
     // Define a function to handle the button click.
     const handleClick = () => {
         // Send a GET request to the API.
-        fetch('http://localhost:8080/stats/topscorers')
+        fetch(`${url}/stats/topscorers`)
             .then(response => response.json())
             .then(jsonData => {
                 console.log(jsonData.response);

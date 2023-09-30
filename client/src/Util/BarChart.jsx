@@ -2,6 +2,8 @@ import React, { useState, useRef, useEffect } from "react";
 import * as d3 from 'd3';
 import "./BarChart.css";
 
+const url = import.meta.env.VITE_API_URL;
+
 function BarChart() {
     // Declare state variables using the `useState` hook.
     const [data, setData] = useState([]);
@@ -12,7 +14,7 @@ function BarChart() {
 
     useEffect(() => {
         // Send a GET request to the API.
-        fetch('http://localhost:8080/stats/topscorers')
+        fetch(`${url}/stats/topscorers`)
             .then(response => response.json())
             .then(jsonData => {
                 console.log(jsonData.response);

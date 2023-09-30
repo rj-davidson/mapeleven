@@ -6,6 +6,8 @@ import { Flex } from '../Util/Flex.jsx';
 import { Groups, Person } from '@mui/icons-material';
 import PlayerCard from './PlayerCardCopy';
 
+const url = import.meta.env.VITE_API_URL;
+
 interface DisplayPlayersProps {
     limit?: number;
     skeleton: number;
@@ -17,7 +19,7 @@ const DisplayPlayers: React.FC<DisplayPlayersProps> = ({ limit, skeleton }) => {
 
     useEffect(() => {
         // Send a GET request to the API.
-        fetch(`http://localhost:8080/stats/topscorers`)
+        fetch(`${url}/stats/topscorers`)
             .then(response => response.json())
             .then(jsonData => {
                 const response = jsonData.response;
