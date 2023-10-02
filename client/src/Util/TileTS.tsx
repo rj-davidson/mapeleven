@@ -12,9 +12,11 @@ export const Tile: React.FC<TileProps> = ({ children, sx }) => {
         justifyContent: 'center',
         backgroundColor: 'var(--dark2)',
         borderRadius: '12px',
-        padding: '24px',
+        padding: '12px',
+        paddingTop: '10px',
         width: '100%',
         border: '5px solid var(--dark1)',
+        color: 'var(--light2)',
         ...sx,
     };
 
