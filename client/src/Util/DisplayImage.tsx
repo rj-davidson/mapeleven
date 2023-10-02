@@ -1,6 +1,8 @@
 import * as React from 'react';
 import { CSSProperties } from 'react';
 
+const url = import.meta.env.VITE_API_URL;
+
 interface DisplayImageProps {
     src: string;
     alt: string;
@@ -13,7 +15,7 @@ interface DisplayImageProps {
 const DisplayImage: React.FC<DisplayImageProps> = ({
     src,
     alt,
-    location = 'http://localhost:8080/',
+    location = `${url}/`,
     width = '32px',
     height = '32px',
     sx,
