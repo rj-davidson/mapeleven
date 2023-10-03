@@ -6,10 +6,19 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
+	"mapeleven/db/ent"
+	"mapeleven/serializer"
 	"net/http"
 )
 
-func SetupFixtureRoutes(app *fiber.App) {
+func SetupFixtureRoutes(app *fiber.App, client *ent.Client) {
+	ss := serializer.NewScoreboardSerializer(client)
+
+	app.Get("/fixtures/:slug", getFixtureBySlug())
+	app.Get("/fixtures/league/:slug", getFixturesByLeague())
+	app.Get("/scoreboard", getScoreboard(ss))
+
+	// TODO: DEPRECATED
 	app.Get("/fixtures", func(c *fiber.Ctx) error {
 		date := c.Query("date")
 		live := c.Query("live")
@@ -57,4 +66,21 @@ func SetupFixtureRoutes(app *fiber.App) {
 		return c.JSON(result)
 	})
 
+}
+
+// TODO: Implement
+func getFixtureBySlug() fiber.Handler {
+	return nil
+}
+
+// TODO: Implement
+func getFixturesByLeague() fiber.Handler {
+	return nil
+}
+
+func getScoreboard(serializer *serializer.ScoreboardSerializer) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		scoreboard := serializer.SerializeScoreboard()
+		return c.JSON(scoreboard)
+	}
 }

@@ -65,14 +65,14 @@ func fetchCountries(countryModel *models.CountryModel) {
 
 func fetchLeagues(leagueModel *models.LeagueModel, seasonModel *models.SeasonModel) {
 	championsLeagueID := 2
-	europaLeagueID := 3
+	//europaLeagueID := 3
 	premierLeagueID := 39
-	serieAID := 61
-	ligue1ID := 71
+	//serieAID := 61
+	//ligue1ID := 71
 	bundesligaID := 78
 	laLigaID := 140
 	majorleaguesoccerID := 253
-	leagueIDs := []int{laLigaID, serieAID, bundesligaID, premierLeagueID, ligue1ID, majorleaguesoccerID, championsLeagueID, europaLeagueID}
+	leagueIDs := []int{laLigaID, bundesligaID, premierLeagueID, majorleaguesoccerID, championsLeagueID}
 	//leagueIDs := []int{majorleaguesoccerID, championsLeagueID, europaLeagueID}
 
 	leagueController := NewLeagueController(leagueModel, seasonModel)

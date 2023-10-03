@@ -160,7 +160,7 @@ func SetupRoutes(app *fiber.App, client *ent.Client) {
 	routes.SetupStatsRoutes(app)
 
 	// Setup routes for stats
-	routes.SetupFixtureRoutes(app)
+	routes.SetupFixtureRoutes(app, client)
 
 	// Setup routes for search
 	routes.SetupSearchRoutes(app, client)
