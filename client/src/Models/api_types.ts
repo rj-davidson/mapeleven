@@ -12,6 +12,42 @@ interface APISearch {
   image: string;
 }
 
+interface APIScoreboard {
+  dates: {
+    date: string;
+    leagues: {
+      slug: string;
+      name: string;
+      type: string;
+      logo: string;
+      country?: APICountry;
+      fixtures?: {
+        slug: string;
+        referee?: string;
+        elapsed?: number;
+        round?: number;
+        status?: string;
+        timezone?: string;
+        homeTeam: {
+          slug: string;
+          name: string;
+          logo: string;
+        };
+        awayTeam: {
+          slug: string;
+          name: string;
+          logo: string;
+        };
+        score?: {
+          home: number;
+          away: number;
+        };
+      }[];
+    }[];
+  }[];
+};
+
+
 interface APICountry {
   code: string;
   name: string;
@@ -169,6 +205,7 @@ interface APIStanding {
 export {
   APISearchType,
   APISearch,
+  APIScoreboard,
   APICountry,
   APILeagueType,
   APILeague,
