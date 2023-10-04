@@ -12,7 +12,7 @@ import (
 func SetupStatsRoutes(app *fiber.App) {
 
 	// Get Top Scorers
-	app.Get("/stats/topscorers", func(c *fiber.Ctx) error {
+	app.Get(viper.GetString("ENV_PATH")+"/stats/topscorers", func(c *fiber.Ctx) error {
 		req, err := http.NewRequestWithContext(context.Background(), "GET",
 			"https://api-football-v1.p.rapidapi.com/v3/players/topscorers?league=39&season=2022", nil)
 		if err != nil {
@@ -41,7 +41,7 @@ func SetupStatsRoutes(app *fiber.App) {
 	})
 
 	// Get Team Stats
-	app.Get("/stats/team", func(c *fiber.Ctx) error {
+	app.Get(viper.GetString("ENV_PATH")+"/stats/team", func(c *fiber.Ctx) error {
 		req, err := http.NewRequestWithContext(context.Background(), "GET",
 			"https://api-football-v1.p.rapidapi.com/v3/teams/statistics?league=39&season=2022&team=33", nil)
 		if err != nil {
@@ -70,7 +70,7 @@ func SetupStatsRoutes(app *fiber.App) {
 	})
 
 	// Get Player Stats
-	app.Get("/stats/player", func(c *fiber.Ctx) error {
+	app.Get(viper.GetString("ENV_PATH")+"/stats/player", func(c *fiber.Ctx) error {
 		req, err := http.NewRequestWithContext(context.Background(), "GET",
 			"https://api-football-v1.p.rapidapi.com/v3/players?id=276&season=2022", nil)
 		if err != nil {
@@ -99,7 +99,7 @@ func SetupStatsRoutes(app *fiber.App) {
 	})
 
 	// Get Fixture Stats
-	app.Get("/stats/fixture", func(c *fiber.Ctx) error {
+	app.Get(viper.GetString("ENV_PATH")+"/stats/fixture", func(c *fiber.Ctx) error {
 		req, err := http.NewRequestWithContext(context.Background(), "GET",
 			"https://api-football-v1.p.rapidapi.com/v3/fixtures/statistics?fixture=215662", nil)
 		if err != nil {

@@ -116,7 +116,9 @@ func main() {
 
 	// Add CORS middleware
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: "http://localhost:3000",
+		AllowOrigins: "http://" + viper.GetString("IP_HOST") +
+			":3000, http://localhost:3000, https://" + viper.GetString("DOMAIN") + ", http://" +
+			viper.GetString("IP HOST") + ":80, http://" + viper.GetString("IP_HOST"),
 		AllowHeaders: "Origin, Content-Type, Accept",
 	}))
 
@@ -166,5 +168,5 @@ func SetupRoutes(app *fiber.App, client *ent.Client) {
 	routes.SetupSearchRoutes(app, client)
 
 	// Serve images from public directory
-	app.Static("/images", "./public/images")
+	app.Static(viper.GetString("ENV_PATH")+"/images", "./public/images")
 }
