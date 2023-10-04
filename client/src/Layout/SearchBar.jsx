@@ -28,14 +28,25 @@ export default function SearchBar() {
             {...params}
             fullWidth
             variant='outlined'
-            label={
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <SearchIcon sx={{ marginRight: '8px' }} />
-                    <label>Search players, teams, or leagues</label>
-                </div>
-            }
+            placeholder="Search players, teams, or leagues"
             InputProps={{
                 ...params.InputProps,
+                onFocus: (e) => {
+                    if (!e.target.value) {
+                        e.target.setAttribute(
+                            "placeholder",
+                            "Search players, teams, or leagues"
+                        );
+                    }
+                },
+                onBlur: (e) => {
+                    if (!e.target.value) {
+                        e.target.setAttribute(
+                            "placeholder",
+                            "Search players, teams, or leagues"
+                        );
+                    }
+                },
                 onKeyDown: e => {
                     if (e.key === 'Enter') {
                         e.stopPropagation();
