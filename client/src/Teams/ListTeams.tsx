@@ -31,7 +31,7 @@ const ListTeams: React.FC<ListTeamsProps> = ({ limit, skeleton }) => {
                 setLoading(false);
             })
             .catch(error => console.error(error));
-    });
+    }, []);
 
     const skeletonCards: JSX.Element[] = [];
 

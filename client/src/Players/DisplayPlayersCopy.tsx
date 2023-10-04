@@ -36,7 +36,7 @@ const DisplayPlayers: React.FC<DisplayPlayersProps> = ({ limit, skeleton }) => {
                 setLoading(false);
             })
             .catch(error => console.error(error));
-    });
+    }, []);
 
     const skeletonCards: JSX.Element[] = [];
 
