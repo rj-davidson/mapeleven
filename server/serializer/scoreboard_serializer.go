@@ -123,7 +123,7 @@ func (ss *ScoreboardSerializer) SerializeScoreboard() *APIFixturesByDate {
 
 	for date, leagues := range fixturesByDate {
 		fixtureDate := fixtureDate{
-			Date:    date.Format("2006-01-02"),
+			Date:    date,
 			Leagues: mapLeaguesToAPILeagues(leagues),
 		}
 
@@ -133,15 +133,16 @@ func (ss *ScoreboardSerializer) SerializeScoreboard() *APIFixturesByDate {
 	return apiFixturesByDate
 }
 
-func groupFixturesByDateAndLeague(fixtures []*ent.Fixture) map[time.Time]map[*ent.League][]*ent.Fixture {
-	m := make(map[time.Time]map[*ent.League][]*ent.Fixture)
+func groupFixturesByDateAndLeague(fixtures []*ent.Fixture) map[string]map[*ent.League][]*ent.Fixture {
+	m := make(map[string]map[*ent.League][]*ent.Fixture)
 
 	for _, f := range fixtures {
-		if _, exists := m[f.Date]; !exists {
-			m[f.Date] = make(map[*ent.League][]*ent.Fixture)
+		dateStr := f.Date.Format("01-02-2006")
+		if _, exists := m[dateStr]; !exists {
+			m[dateStr] = make(map[*ent.League][]*ent.Fixture)
 		}
 
-		m[f.Date][f.Edges.Season.Edges.League] = append(m[f.Date][f.Edges.Season.Edges.League], f)
+		m[dateStr][f.Edges.Season.Edges.League] = append(m[dateStr][f.Edges.Season.Edges.League], f)
 	}
 
 	return m

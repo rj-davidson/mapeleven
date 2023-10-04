@@ -3,6 +3,7 @@ package routes
 import (
 	"context"
 	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
 	"log"
 	"mapeleven/db/ent"
 	"mapeleven/models"
@@ -14,7 +15,7 @@ func SetupPlayersRoutes(app *fiber.App, client *ent.Client) {
 	playerModel := models.NewPlayerModel(client)
 
 	// Get all players
-	app.Get("/players", func(c *fiber.Ctx) error {
+	app.Get(viper.GetString("ENV_PATH")+"/players", func(c *fiber.Ctx) error {
 		players, err := playerModel.ListPlayers(context.Background())
 		if err != nil {
 			log.Println(err)
@@ -25,7 +26,7 @@ func SetupPlayersRoutes(app *fiber.App, client *ent.Client) {
 	})
 
 	// Get a player by FootballApiId
-	app.Get("/players/:id", func(c *fiber.Ctx) error {
+	app.Get(viper.GetString("ENV_PATH")+"/players/:id", func(c *fiber.Ctx) error {
 		id, err := strconv.Atoi(c.Params("id"))
 		if err != nil {
 			log.Println(err)

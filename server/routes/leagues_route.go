@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
+	"github.com/spf13/viper"
 	"mapeleven/db/ent"
 	"mapeleven/serializer"
 )
@@ -11,8 +12,8 @@ import (
 func SetupLeaguesRoutes(app *fiber.App, client *ent.Client) {
 	leagueSerializer := serializer.NewLeagueSerializer(client)
 
-	app.Get("/leagues", getAllLeagues(leagueSerializer))
-	app.Get("/leagues/:slug", getLeagueBySlug(leagueSerializer))
+	app.Get(viper.GetString("ENV_PATH")+"/leagues", getAllLeagues(leagueSerializer))
+	app.Get(viper.GetString("ENV_PATH")+"/leagues/:slug", getLeagueBySlug(leagueSerializer))
 }
 
 func getAllLeagues(serializer *serializer.LeagueSerializer) fiber.Handler {

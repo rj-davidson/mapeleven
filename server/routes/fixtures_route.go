@@ -14,9 +14,9 @@ import (
 func SetupFixtureRoutes(app *fiber.App, client *ent.Client) {
 	ss := serializer.NewScoreboardSerializer(client)
 
-	app.Get("/fixtures/:slug", getFixtureBySlug())
-	app.Get("/fixtures/league/:slug", getFixturesByLeague())
-	app.Get("/scoreboard", getScoreboard(ss))
+	app.Get(viper.GetString("ENV_PATH")+"/fixtures/:slug", getFixtureBySlug())
+	app.Get(viper.GetString("ENV_PATH")+"/fixtures/league/:slug", getFixturesByLeague())
+	app.Get(viper.GetString("ENV_PATH")+"/scoreboard", getScoreboard(ss))
 
 	// TODO: DEPRECATED
 	app.Get("/fixtures", func(c *fiber.Ctx) error {
