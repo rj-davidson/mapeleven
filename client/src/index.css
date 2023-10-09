@@ -93,7 +93,7 @@ button:focus-visible {
   }
 
   a:hover {
-    color: var(--focus);
+    color: var(--light2);
   }
 
   button {
@@ -117,7 +117,7 @@ button:focus-visible {
   }
 
   a:hover {
-    color: var(--focus);
+    color: var(--light2);
   }
 
   button {

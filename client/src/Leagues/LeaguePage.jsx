@@ -1,29 +1,24 @@
-import React, {useState, useRef, useEffect} from "react";
-import {useParams} from "react-router-dom";
-import * as d3 from 'd3';
-import {Box, Grid, Skeleton, Typography} from "@mui/material";
-import {Tile} from "../Util/Tile.jsx";
-import {useNavigate} from "react-router-dom";
-import {Flex} from "../Util/Flex.jsx";
-import Standings from "./Standings.jsx";
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Box, Grid, Skeleton, Typography } from '@mui/material';
+import { Tile } from '../Util/Tile.jsx';
+import { Flex } from '../Util/Flex.jsx';
+import Standings from './Standings.jsx';
 
 const url = import.meta.env.VITE_API_URL;
 
 function LeaguePage() {
-
-    const navigate = useNavigate();
-    const {slug} = useParams();
+    const { slug } = useParams();
 
     // Declare state variables using the `useState` hook.
     const [name, setName] = useState();
     const [logo, setLogo] = useState();
-    const [flag, setFlag] = useState("");
-    const [country, setCountry] = useState("");
+    const [flag, setFlag] = useState('');
+    const [country, setCountry] = useState('');
     const [teams, setTeams] = useState(new Set());
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-
         setLoading(true);
 
         // Send a GET request to the API.
@@ -49,6 +44,7 @@ function LeaguePage() {
                             wins: standings[i].overall.won,
                             draw: standings[i].overall.draw,
                             losses: standings[i].overall.lost,
+                            slug: standings[i].team.slug,
                         });
                     }
                 }
@@ -59,38 +55,47 @@ function LeaguePage() {
             .catch(error => console.error(error));
     }, [slug]);
 
-    return (
-
-        loading ? (<Grid container spacing={2} direction="column">
+    return loading ? (
+        <Grid container spacing={2} direction='column'>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                <Skeleton variant="rectangular" height="150px" width="100%"
-                          sx={{background: 'gray', borderRadius: '12px'}}/>
+                <Skeleton
+                    variant='rectangular'
+                    height='150px'
+                    width='100%'
+                    sx={{ background: 'gray', borderRadius: '12px' }}
+                />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                <Skeleton variant="rectangular" height="600px" width="100%"
-                          sx={{background: 'gray', borderRadius: '12px'}}/>
+                <Skeleton
+                    variant='rectangular'
+                    height='600px'
+                    width='100%'
+                    sx={{ background: 'gray', borderRadius: '12px' }}
+                />
             </Grid>
-        </Grid>) : (<Grid container spacing={2}>
+        </Grid>
+    ) : (
+        <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                <Tile style={{justifyContent: 'space-between'}}>
-                    <Flex style={{justifyContent: 'center', alignItems: 'center', gap: '32px'}}>
+                <Tile style={{ justifyContent: 'space-between' }}>
+                    <Flex style={{ justifyContent: 'center', alignItems: 'center', gap: '32px' }}>
                         <Box
-                            component="img"
+                            component='img'
                             sx={{
-                                maxHeight: {xs: 64, sm: 96}, maxWidth: {xs: 64, sm: 96},
+                                maxHeight: { xs: 64, sm: 96 },
+                                maxWidth: { xs: 64, sm: 96 },
                             }}
                             alt={name}
                             src={`${url}/` + logo}
                         />
-                        <Typography sx={{fontSize: {xs: '24px', sm: '48px'},}}>
-                            {name}
-                        </Typography>
+                        <Typography sx={{ fontSize: { xs: '24px', sm: '48px' } }}>{name}</Typography>
                     </Flex>
-                    <Flex style={{justifyContent: 'center', alignItems: 'center', flexDirection: 'column'}}>
+                    <Flex style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
                         <Box
-                            component="img"
+                            component='img'
                             sx={{
-                                maxHeight: {xs: 48, sm: 48}, maxWidth: {xs: 60, sm: 60},
+                                maxHeight: { xs: 48, sm: 48 },
+                                maxWidth: { xs: 60, sm: 60 },
                             }}
                             alt={country}
                             src={`${url}/` + flag}
@@ -100,12 +105,12 @@ function LeaguePage() {
             </Grid>
 
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                <Tile style={{justifyContent: 'left'}}>
-                    <Standings data={teams}/>
+                <Tile style={{ justifyContent: 'left' }}>
+                    <Standings data={teams} />
                 </Tile>
             </Grid>
-        </Grid>));
+        </Grid>
+    );
 }
 
 export default LeaguePage;
-
