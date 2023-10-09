@@ -2,7 +2,6 @@ import React from 'react';
 import './App.css';
 import dark from './Theme/MapTheme.tsx';
 import Layout from './Layout/Layout.tsx';
-import FixturesPage from './Fixtures/FixturesPage.tsx';
 import Players from './Players/Players.jsx';
 import TeamPageAll from './Teams/TeamPageAll.jsx';
 import TeamPageSingle from './Teams/TeamPageSingle';
@@ -11,6 +10,7 @@ import LeaguePage from './Leagues/LeaguePage.jsx';
 import About from './About/About.tsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material';
+import HomePage from './Home/HomePage';
 
 function App() {
     return (
@@ -19,7 +19,7 @@ function App() {
                 <Router>
                     <Layout>
                         <Routes>
-                            <Route path='/fixtures/:slug' element={<FixturesPage />} />
+                            <Route path='/fixtures/:slug' element='' />
                             <Route path='/players/:slug' element={<Players />} />
                             <Route path='/players' element={<Players />} />
                             <Route path='/teams/:slug' element={<TeamPageSingle />} />
@@ -27,7 +27,7 @@ function App() {
                             <Route path='/leagues/:slug' element={<LeaguePage />} />
                             <Route path='/leagues' element={<Leagues />} />
                             <Route path='/about' element={<About />} />
-                            <Route path='/' element={<FixturesPage />} />
+                            <Route path='/' element={<HomePage />} />
                         </Routes>
                     </Layout>
                 </Router>

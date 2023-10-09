@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
-import { APITeam } from '../Models/api_types';
 import { Box, Grid, Skeleton, Typography } from '@mui/material';
 import { Flex } from '../Util/Flex.jsx';
-import { Groups, Person } from '@mui/icons-material';
+import { Person } from '@mui/icons-material';
 import PlayerCard from './PlayerCardCopy';
 
 const url = import.meta.env.VITE_API_URL;
@@ -74,8 +73,8 @@ const DisplayPlayers: React.FC<DisplayPlayersProps> = ({ limit, skeleton }) => {
                 </Grid>
             ) : (
                 <Grid container spacing={1}>
-                    {playerData.map(player => (
-                        <Grid item xs={12} sm={12} md={12} lg={12} key={player.slug}>
+                    {playerData.map((player, playerIndex) => (
+                        <Grid item xs={12} sm={12} md={12} lg={12} key={playerIndex}>
                             <PlayerCard name={player.name} photo={player.photo} />
                         </Grid>
                     ))}
