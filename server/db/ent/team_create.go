@@ -9,6 +9,7 @@ import (
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/player"
+	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
@@ -299,6 +300,21 @@ func (tc *TeamCreate) SetPenaltyStats(t *TSPenalty) *TeamCreate {
 	return tc.SetPenaltyStatsID(t.ID)
 }
 
+// AddTeamIDs adds the "team" edge to the PlayerSeason entity by IDs.
+func (tc *TeamCreate) AddTeamIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddTeamIDs(ids...)
+	return tc
+}
+
+// AddTeam adds the "team" edges to the PlayerSeason entity.
+func (tc *TeamCreate) AddTeam(p ...*PlayerSeason) *TeamCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tc.AddTeamIDs(ids...)
+}
+
 // Mutation returns the TeamMutation object of the builder.
 func (tc *TeamCreate) Mutation() *TeamMutation {
 	return tc.mutation
@@ -463,10 +479,10 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 	}
 	if nodes := tc.mutation.PlayersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   team.PlayersTable,
-			Columns: team.PlayersPrimaryKey,
+			Columns: []string{team.PlayersColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
@@ -598,6 +614,22 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(tspenalty.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.TeamIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.TeamTable,
+			Columns: []string{team.TeamColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

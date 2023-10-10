@@ -130,17 +130,19 @@ var (
 	// PlayersColumns holds the columns for the "players" table.
 	PlayersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "api_football_id", Type: field.TypeInt, Unique: true},
 		{Name: "slug", Type: field.TypeString, Unique: true},
 		{Name: "name", Type: field.TypeString},
 		{Name: "firstname", Type: field.TypeString},
 		{Name: "lastname", Type: field.TypeString},
 		{Name: "age", Type: field.TypeInt},
-		{Name: "height", Type: field.TypeFloat64},
-		{Name: "weight", Type: field.TypeFloat64},
+		{Name: "height", Type: field.TypeString},
+		{Name: "weight", Type: field.TypeString},
 		{Name: "injured", Type: field.TypeBool},
 		{Name: "photo", Type: field.TypeString},
 		{Name: "birth_player", Type: field.TypeInt, Nullable: true},
 		{Name: "country_players", Type: field.TypeInt, Nullable: true},
+		{Name: "team_players", Type: field.TypeInt, Nullable: true},
 	}
 	// PlayersTable holds the schema information for the "players" table.
 	PlayersTable = &schema.Table{
@@ -150,14 +152,56 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "players_births_player",
-				Columns:    []*schema.Column{PlayersColumns[10]},
+				Columns:    []*schema.Column{PlayersColumns[11]},
 				RefColumns: []*schema.Column{BirthsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "players_countries_players",
-				Columns:    []*schema.Column{PlayersColumns[11]},
+				Columns:    []*schema.Column{PlayersColumns[12]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "players_teams_players",
+				Columns:    []*schema.Column{PlayersColumns[13]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PlayerSeasonsColumns holds the columns for the "player_seasons" table.
+	PlayerSeasonsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "season", Type: field.TypeInt},
+		{Name: "p_id", Type: field.TypeInt},
+		{Name: "nationality", Type: field.TypeString},
+		{Name: "position", Type: field.TypeString},
+		{Name: "team", Type: field.TypeString},
+		{Name: "year", Type: field.TypeInt},
+		{Name: "appearances", Type: field.TypeInt},
+		{Name: "goals", Type: field.TypeInt},
+		{Name: "assists", Type: field.TypeInt},
+		{Name: "saves", Type: field.TypeInt},
+		{Name: "season_player_seasons", Type: field.TypeInt, Nullable: true},
+		{Name: "team_team", Type: field.TypeInt, Nullable: true},
+	}
+	// PlayerSeasonsTable holds the schema information for the "player_seasons" table.
+	PlayerSeasonsTable = &schema.Table{
+		Name:       "player_seasons",
+		Columns:    PlayerSeasonsColumns,
+		PrimaryKey: []*schema.Column{PlayerSeasonsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "player_seasons_seasons_playerSeasons",
+				Columns:    []*schema.Column{PlayerSeasonsColumns[11]},
+				RefColumns: []*schema.Column{SeasonsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "player_seasons_teams_team",
+				Columns:    []*schema.Column{PlayerSeasonsColumns[12]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 		},
@@ -538,27 +582,27 @@ var (
 			},
 		},
 	}
-	// TeamPlayersColumns holds the columns for the "team_players" table.
-	TeamPlayersColumns = []*schema.Column{
-		{Name: "team_id", Type: field.TypeInt},
-		{Name: "player_id", Type: field.TypeInt},
+	// ClubPlayerSeasonsColumns holds the columns for the "club_playerSeasons" table.
+	ClubPlayerSeasonsColumns = []*schema.Column{
+		{Name: "club_id", Type: field.TypeInt},
+		{Name: "player_season_id", Type: field.TypeInt},
 	}
-	// TeamPlayersTable holds the schema information for the "team_players" table.
-	TeamPlayersTable = &schema.Table{
-		Name:       "team_players",
-		Columns:    TeamPlayersColumns,
-		PrimaryKey: []*schema.Column{TeamPlayersColumns[0], TeamPlayersColumns[1]},
+	// ClubPlayerSeasonsTable holds the schema information for the "club_playerSeasons" table.
+	ClubPlayerSeasonsTable = &schema.Table{
+		Name:       "club_playerSeasons",
+		Columns:    ClubPlayerSeasonsColumns,
+		PrimaryKey: []*schema.Column{ClubPlayerSeasonsColumns[0], ClubPlayerSeasonsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "team_players_team_id",
-				Columns:    []*schema.Column{TeamPlayersColumns[0]},
-				RefColumns: []*schema.Column{TeamsColumns[0]},
+				Symbol:     "club_playerSeasons_club_id",
+				Columns:    []*schema.Column{ClubPlayerSeasonsColumns[0]},
+				RefColumns: []*schema.Column{ClubsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "team_players_player_id",
-				Columns:    []*schema.Column{TeamPlayersColumns[1]},
-				RefColumns: []*schema.Column{PlayersColumns[0]},
+				Symbol:     "club_playerSeasons_player_season_id",
+				Columns:    []*schema.Column{ClubPlayerSeasonsColumns[1]},
+				RefColumns: []*schema.Column{PlayerSeasonsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
@@ -571,6 +615,7 @@ var (
 		FixturesTable,
 		LeaguesTable,
 		PlayersTable,
+		PlayerSeasonsTable,
 		SeasonsTable,
 		StandingsTable,
 		TsBiggestsTable,
@@ -582,7 +627,7 @@ var (
 		TsLineupsTable,
 		TsPenaltiesTable,
 		TeamsTable,
-		TeamPlayersTable,
+		ClubPlayerSeasonsTable,
 	}
 )
 
@@ -594,6 +639,9 @@ func init() {
 	LeaguesTable.ForeignKeys[0].RefTable = CountriesTable
 	PlayersTable.ForeignKeys[0].RefTable = BirthsTable
 	PlayersTable.ForeignKeys[1].RefTable = CountriesTable
+	PlayersTable.ForeignKeys[2].RefTable = TeamsTable
+	PlayerSeasonsTable.ForeignKeys[0].RefTable = SeasonsTable
+	PlayerSeasonsTable.ForeignKeys[1].RefTable = TeamsTable
 	SeasonsTable.ForeignKeys[0].RefTable = LeaguesTable
 	StandingsTable.ForeignKeys[0].RefTable = SeasonsTable
 	StandingsTable.ForeignKeys[1].RefTable = TeamsTable
@@ -607,6 +655,6 @@ func init() {
 	TsPenaltiesTable.ForeignKeys[0].RefTable = TeamsTable
 	TeamsTable.ForeignKeys[0].RefTable = ClubsTable
 	TeamsTable.ForeignKeys[1].RefTable = SeasonsTable
-	TeamPlayersTable.ForeignKeys[0].RefTable = TeamsTable
-	TeamPlayersTable.ForeignKeys[1].RefTable = PlayersTable
+	ClubPlayerSeasonsTable.ForeignKeys[0].RefTable = ClubsTable
+	ClubPlayerSeasonsTable.ForeignKeys[1].RefTable = PlayerSeasonsTable
 }

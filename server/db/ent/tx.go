@@ -24,6 +24,8 @@ type Tx struct {
 	League *LeagueClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
+	// PlayerSeason is the client for interacting with the PlayerSeason builders.
+	PlayerSeason *PlayerSeasonClient
 	// Season is the client for interacting with the Season builders.
 	Season *SeasonClient
 	// Standings is the client for interacting with the Standings builders.
@@ -183,6 +185,7 @@ func (tx *Tx) init() {
 	tx.Fixture = NewFixtureClient(tx.config)
 	tx.League = NewLeagueClient(tx.config)
 	tx.Player = NewPlayerClient(tx.config)
+	tx.PlayerSeason = NewPlayerSeasonClient(tx.config)
 	tx.Season = NewSeasonClient(tx.config)
 	tx.Standings = NewStandingsClient(tx.config)
 	tx.TSBiggest = NewTSBiggestClient(tx.config)

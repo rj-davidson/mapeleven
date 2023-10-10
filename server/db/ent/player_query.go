@@ -4,12 +4,10 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
-	"mapeleven/db/ent/team"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -25,7 +23,6 @@ type PlayerQuery struct {
 	inters     []Interceptor
 	predicates []predicate.Player
 	withBirth  *BirthQuery
-	withTeam   *TeamQuery
 	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -78,28 +75,6 @@ func (pq *PlayerQuery) QueryBirth() *BirthQuery {
 			sqlgraph.From(player.Table, player.FieldID, selector),
 			sqlgraph.To(birth.Table, birth.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, player.BirthTable, player.BirthColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryTeam chains the current query on the "team" edge.
-func (pq *PlayerQuery) QueryTeam() *TeamQuery {
-	query := (&TeamClient{config: pq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := pq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := pq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, selector),
-			sqlgraph.To(team.Table, team.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, player.TeamTable, player.TeamPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,7 +275,6 @@ func (pq *PlayerQuery) Clone() *PlayerQuery {
 		inters:     append([]Interceptor{}, pq.inters...),
 		predicates: append([]predicate.Player{}, pq.predicates...),
 		withBirth:  pq.withBirth.Clone(),
-		withTeam:   pq.withTeam.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -318,29 +292,18 @@ func (pq *PlayerQuery) WithBirth(opts ...func(*BirthQuery)) *PlayerQuery {
 	return pq
 }
 
-// WithTeam tells the query-builder to eager-load the nodes that are connected to
-// the "team" edge. The optional arguments are used to configure the query builder of the edge.
-func (pq *PlayerQuery) WithTeam(opts ...func(*TeamQuery)) *PlayerQuery {
-	query := (&TeamClient{config: pq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	pq.withTeam = query
-	return pq
-}
-
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		Slug string `json:"slug,omitempty"`
+//		ApiFootballID int `json:"ApiFootballID,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.Player.Query().
-//		GroupBy(player.FieldSlug).
+//		GroupBy(player.FieldApiFootballID).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (pq *PlayerQuery) GroupBy(field string, fields ...string) *PlayerGroupBy {
@@ -358,11 +321,11 @@ func (pq *PlayerQuery) GroupBy(field string, fields ...string) *PlayerGroupBy {
 // Example:
 //
 //	var v []struct {
-//		Slug string `json:"slug,omitempty"`
+//		ApiFootballID int `json:"ApiFootballID,omitempty"`
 //	}
 //
 //	client.Player.Query().
-//		Select(player.FieldSlug).
+//		Select(player.FieldApiFootballID).
 //		Scan(ctx, &v)
 func (pq *PlayerQuery) Select(fields ...string) *PlayerSelect {
 	pq.ctx.Fields = append(pq.ctx.Fields, fields...)
@@ -408,9 +371,8 @@ func (pq *PlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Playe
 		nodes       = []*Player{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			pq.withBirth != nil,
-			pq.withTeam != nil,
 		}
 	)
 	if pq.withBirth != nil {
@@ -440,13 +402,6 @@ func (pq *PlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Playe
 	if query := pq.withBirth; query != nil {
 		if err := pq.loadBirth(ctx, query, nodes, nil,
 			func(n *Player, e *Birth) { n.Edges.Birth = e }); err != nil {
-			return nil, err
-		}
-	}
-	if query := pq.withTeam; query != nil {
-		if err := pq.loadTeam(ctx, query, nodes,
-			func(n *Player) { n.Edges.Team = []*Team{} },
-			func(n *Player, e *Team) { n.Edges.Team = append(n.Edges.Team, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -481,67 +436,6 @@ func (pq *PlayerQuery) loadBirth(ctx context.Context, query *BirthQuery, nodes [
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
-		}
-	}
-	return nil
-}
-func (pq *PlayerQuery) loadTeam(ctx context.Context, query *TeamQuery, nodes []*Player, init func(*Player), assign func(*Player, *Team)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*Player)
-	nids := make(map[int]map[*Player]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(player.TeamTable)
-		s.Join(joinT).On(s.C(team.FieldID), joinT.C(player.TeamPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(player.TeamPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(player.TeamPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*Player]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Team](ctx, query, qr, query.inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "team" node returned %v`, n.ID)
-		}
-		for kn := range nodes {
-			assign(kn, n)
 		}
 	}
 	return nil

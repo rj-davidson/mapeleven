@@ -55,5 +55,6 @@ func (Team) Edges() []ent.Edge {
 		edge.To("lineups", TSLineups.Type),
 		edge.To("penalty_stats", TSPenalty.Type).
 			Unique(),
+		edge.To("team", PlayerSeason.Type),
 	}
 }

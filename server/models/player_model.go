@@ -10,28 +10,35 @@ import (
 
 // CreatePlayerInput holds the required fields to create a new player.
 type CreatePlayerInput struct {
-	ID        int
-	Name      string
-	Firstname string
-	Lastname  string
-	Age       int
-	Height    float64
-	Weight    float64
-	Injured   bool
-	Photo     string
+	ApiFootballID int
+	Name          string
+	Firstname     string
+	Lastname      string
+	Age           int
+	Height        string
+	Weight        string
+	Injured       bool
+	Photo         string
+	LeagueID      int
+	Season        int
+	//PlayerSeason []PlayerSeason
 }
 
 // UpdatePlayerInput holds the fields to update an existing player.
 type UpdatePlayerInput struct {
-	ID        int
-	Name      *string
-	Firstname *string
-	Lastname  *string
-	Age       *int
-	Height    *float64
-	Weight    *float64
-	Injured   *bool
-	Photo     *string
+	ApiFootballID int
+	Name          *string
+	Firstname     *string
+	Lastname      *string
+	Age           *int
+	Height        *string
+	Weight        *string
+	Injured       *bool
+	Photo         *string
+	LeagueID      *int
+	Season        *int
+
+	//PlayerSeason []PlayerSeason
 }
 
 // DeletePlayerInput holds the required fields to delete a player.
@@ -53,7 +60,9 @@ func NewPlayerModel(client *ent.Client) *PlayerModel {
 func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput) (*ent.Player, error) {
 	p, err := m.client.Player.
 		Create().
-		SetID(input.ID).
+		//SetLeagueID(input.LeagueID).
+		//SetSeason(input.Season).
+		SetApiFootballID(input.ApiFootballID).
 		SetSlug(utils.Slugify(input.Name)).
 		SetName(input.Name).
 		SetFirstname(input.Firstname).
@@ -62,6 +71,7 @@ func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput)
 		SetHeight(input.Height).
 		SetWeight(input.Weight).
 		SetInjured(input.Injured).
+		//setPlayerSeasons(input.PlayerSeason).
 		SetPhoto(input.Photo).
 		Save(ctx)
 
@@ -73,7 +83,11 @@ func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput)
 
 // UpdatePlayer updates an existing player.
 func (m *PlayerModel) UpdatePlayer(ctx context.Context, input UpdatePlayerInput) (*ent.Player, error) {
-	update := m.client.Player.UpdateOneID(input.ID)
+	pl, err := m.client.Player.Query().Where(player.ApiFootballIDEQ(input.ApiFootballID)).Only(ctx)
+	if err != nil {
+		return nil, err
+	}
+	update := m.client.Player.UpdateOne(pl)
 
 	if input.Name != nil {
 		update.SetName(*input.Name)
@@ -99,6 +113,9 @@ func (m *PlayerModel) UpdatePlayer(ctx context.Context, input UpdatePlayerInput)
 	if input.Photo != nil {
 		update.SetPhoto(*input.Photo)
 	}
+	//if input.PlayerSeason != nil {
+	//	update.PlayerSeason(input.PlayerSeason)
+	//}
 
 	p, err := update.Save(ctx)
 	if err != nil {
@@ -165,4 +182,29 @@ func (m *PlayerModel) GetPlayerBirth(ctx context.Context, playerID int) (*ent.Bi
 		return nil, err
 	}
 	return birth, nil
+}
+
+// Exists checks if a player exists.
+func (m *PlayerModel) Exists(ctx context.Context, id int) bool {
+	count, _ := m.client.Player.
+		Query().
+		Where(player.IDEQ(id)).
+		Count(ctx)
+
+	return count > 0
+}
+
+// PlayerModel method to execute a transaction
+func (m *PlayerModel) WithTransaction(ctx context.Context, fn func(tx *ent.Tx) error) error {
+	// Start a new transaction
+	tx, err := m.client.Tx(ctx)
+	if err != nil {
+		return err
+	}
+	// Execute logic
+	if err := fn(tx); err != nil {
+		_ = tx.Rollback() // rollback the transaction in case of errors
+		return err
+	}
+	return tx.Commit() // commit the transaction
 }

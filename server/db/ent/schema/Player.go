@@ -14,7 +14,7 @@ type Player struct {
 // Fields of the Player.
 func (Player) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("id").
+		field.Int("ApiFootballID").
 			Unique().
 			Immutable(),
 		field.String("slug").
@@ -24,10 +24,12 @@ func (Player) Fields() []ent.Field {
 		field.String("firstname"),
 		field.String("lastname"),
 		field.Int("age"),
-		field.Float("height"),
-		field.Float("weight"),
+		field.String("height"),
+		field.String("weight"),
 		field.Bool("injured"),
 		field.String("photo"),
+		//field.Int("leagueID"),
+		//field.Int("season"),
 	}
 }
 
@@ -37,8 +39,9 @@ func (Player) Edges() []ent.Edge {
 		edge.From("birth", Birth.Type).
 			Ref("player").
 			Unique(),
-		edge.From("team", Team.Type).
-			Ref("players").
-			Required(),
+		//edge.From("team", Team.Type).
+		//	Ref("players").
+		//	Required(),
+		//edge.To("playerSeasons", PlayerSeason.Type),
 	}
 }

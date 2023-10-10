@@ -54,6 +54,11 @@ func IDLTE(id int) predicate.Player {
 	return predicate.Player(sql.FieldLTE(FieldID, id))
 }
 
+// ApiFootballID applies equality check predicate on the "ApiFootballID" field. It's identical to ApiFootballIDEQ.
+func ApiFootballID(v int) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldApiFootballID, v))
+}
+
 // Slug applies equality check predicate on the "slug" field. It's identical to SlugEQ.
 func Slug(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldSlug, v))
@@ -80,12 +85,12 @@ func Age(v int) predicate.Player {
 }
 
 // Height applies equality check predicate on the "height" field. It's identical to HeightEQ.
-func Height(v float64) predicate.Player {
+func Height(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldHeight, v))
 }
 
 // Weight applies equality check predicate on the "weight" field. It's identical to WeightEQ.
-func Weight(v float64) predicate.Player {
+func Weight(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldWeight, v))
 }
 
@@ -97,6 +102,46 @@ func Injured(v bool) predicate.Player {
 // Photo applies equality check predicate on the "photo" field. It's identical to PhotoEQ.
 func Photo(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldPhoto, v))
+}
+
+// ApiFootballIDEQ applies the EQ predicate on the "ApiFootballID" field.
+func ApiFootballIDEQ(v int) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldApiFootballID, v))
+}
+
+// ApiFootballIDNEQ applies the NEQ predicate on the "ApiFootballID" field.
+func ApiFootballIDNEQ(v int) predicate.Player {
+	return predicate.Player(sql.FieldNEQ(FieldApiFootballID, v))
+}
+
+// ApiFootballIDIn applies the In predicate on the "ApiFootballID" field.
+func ApiFootballIDIn(vs ...int) predicate.Player {
+	return predicate.Player(sql.FieldIn(FieldApiFootballID, vs...))
+}
+
+// ApiFootballIDNotIn applies the NotIn predicate on the "ApiFootballID" field.
+func ApiFootballIDNotIn(vs ...int) predicate.Player {
+	return predicate.Player(sql.FieldNotIn(FieldApiFootballID, vs...))
+}
+
+// ApiFootballIDGT applies the GT predicate on the "ApiFootballID" field.
+func ApiFootballIDGT(v int) predicate.Player {
+	return predicate.Player(sql.FieldGT(FieldApiFootballID, v))
+}
+
+// ApiFootballIDGTE applies the GTE predicate on the "ApiFootballID" field.
+func ApiFootballIDGTE(v int) predicate.Player {
+	return predicate.Player(sql.FieldGTE(FieldApiFootballID, v))
+}
+
+// ApiFootballIDLT applies the LT predicate on the "ApiFootballID" field.
+func ApiFootballIDLT(v int) predicate.Player {
+	return predicate.Player(sql.FieldLT(FieldApiFootballID, v))
+}
+
+// ApiFootballIDLTE applies the LTE predicate on the "ApiFootballID" field.
+func ApiFootballIDLTE(v int) predicate.Player {
+	return predicate.Player(sql.FieldLTE(FieldApiFootballID, v))
 }
 
 // SlugEQ applies the EQ predicate on the "slug" field.
@@ -400,83 +445,133 @@ func AgeLTE(v int) predicate.Player {
 }
 
 // HeightEQ applies the EQ predicate on the "height" field.
-func HeightEQ(v float64) predicate.Player {
+func HeightEQ(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldHeight, v))
 }
 
 // HeightNEQ applies the NEQ predicate on the "height" field.
-func HeightNEQ(v float64) predicate.Player {
+func HeightNEQ(v string) predicate.Player {
 	return predicate.Player(sql.FieldNEQ(FieldHeight, v))
 }
 
 // HeightIn applies the In predicate on the "height" field.
-func HeightIn(vs ...float64) predicate.Player {
+func HeightIn(vs ...string) predicate.Player {
 	return predicate.Player(sql.FieldIn(FieldHeight, vs...))
 }
 
 // HeightNotIn applies the NotIn predicate on the "height" field.
-func HeightNotIn(vs ...float64) predicate.Player {
+func HeightNotIn(vs ...string) predicate.Player {
 	return predicate.Player(sql.FieldNotIn(FieldHeight, vs...))
 }
 
 // HeightGT applies the GT predicate on the "height" field.
-func HeightGT(v float64) predicate.Player {
+func HeightGT(v string) predicate.Player {
 	return predicate.Player(sql.FieldGT(FieldHeight, v))
 }
 
 // HeightGTE applies the GTE predicate on the "height" field.
-func HeightGTE(v float64) predicate.Player {
+func HeightGTE(v string) predicate.Player {
 	return predicate.Player(sql.FieldGTE(FieldHeight, v))
 }
 
 // HeightLT applies the LT predicate on the "height" field.
-func HeightLT(v float64) predicate.Player {
+func HeightLT(v string) predicate.Player {
 	return predicate.Player(sql.FieldLT(FieldHeight, v))
 }
 
 // HeightLTE applies the LTE predicate on the "height" field.
-func HeightLTE(v float64) predicate.Player {
+func HeightLTE(v string) predicate.Player {
 	return predicate.Player(sql.FieldLTE(FieldHeight, v))
 }
 
+// HeightContains applies the Contains predicate on the "height" field.
+func HeightContains(v string) predicate.Player {
+	return predicate.Player(sql.FieldContains(FieldHeight, v))
+}
+
+// HeightHasPrefix applies the HasPrefix predicate on the "height" field.
+func HeightHasPrefix(v string) predicate.Player {
+	return predicate.Player(sql.FieldHasPrefix(FieldHeight, v))
+}
+
+// HeightHasSuffix applies the HasSuffix predicate on the "height" field.
+func HeightHasSuffix(v string) predicate.Player {
+	return predicate.Player(sql.FieldHasSuffix(FieldHeight, v))
+}
+
+// HeightEqualFold applies the EqualFold predicate on the "height" field.
+func HeightEqualFold(v string) predicate.Player {
+	return predicate.Player(sql.FieldEqualFold(FieldHeight, v))
+}
+
+// HeightContainsFold applies the ContainsFold predicate on the "height" field.
+func HeightContainsFold(v string) predicate.Player {
+	return predicate.Player(sql.FieldContainsFold(FieldHeight, v))
+}
+
 // WeightEQ applies the EQ predicate on the "weight" field.
-func WeightEQ(v float64) predicate.Player {
+func WeightEQ(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldWeight, v))
 }
 
 // WeightNEQ applies the NEQ predicate on the "weight" field.
-func WeightNEQ(v float64) predicate.Player {
+func WeightNEQ(v string) predicate.Player {
 	return predicate.Player(sql.FieldNEQ(FieldWeight, v))
 }
 
 // WeightIn applies the In predicate on the "weight" field.
-func WeightIn(vs ...float64) predicate.Player {
+func WeightIn(vs ...string) predicate.Player {
 	return predicate.Player(sql.FieldIn(FieldWeight, vs...))
 }
 
 // WeightNotIn applies the NotIn predicate on the "weight" field.
-func WeightNotIn(vs ...float64) predicate.Player {
+func WeightNotIn(vs ...string) predicate.Player {
 	return predicate.Player(sql.FieldNotIn(FieldWeight, vs...))
 }
 
 // WeightGT applies the GT predicate on the "weight" field.
-func WeightGT(v float64) predicate.Player {
+func WeightGT(v string) predicate.Player {
 	return predicate.Player(sql.FieldGT(FieldWeight, v))
 }
 
 // WeightGTE applies the GTE predicate on the "weight" field.
-func WeightGTE(v float64) predicate.Player {
+func WeightGTE(v string) predicate.Player {
 	return predicate.Player(sql.FieldGTE(FieldWeight, v))
 }
 
 // WeightLT applies the LT predicate on the "weight" field.
-func WeightLT(v float64) predicate.Player {
+func WeightLT(v string) predicate.Player {
 	return predicate.Player(sql.FieldLT(FieldWeight, v))
 }
 
 // WeightLTE applies the LTE predicate on the "weight" field.
-func WeightLTE(v float64) predicate.Player {
+func WeightLTE(v string) predicate.Player {
 	return predicate.Player(sql.FieldLTE(FieldWeight, v))
+}
+
+// WeightContains applies the Contains predicate on the "weight" field.
+func WeightContains(v string) predicate.Player {
+	return predicate.Player(sql.FieldContains(FieldWeight, v))
+}
+
+// WeightHasPrefix applies the HasPrefix predicate on the "weight" field.
+func WeightHasPrefix(v string) predicate.Player {
+	return predicate.Player(sql.FieldHasPrefix(FieldWeight, v))
+}
+
+// WeightHasSuffix applies the HasSuffix predicate on the "weight" field.
+func WeightHasSuffix(v string) predicate.Player {
+	return predicate.Player(sql.FieldHasSuffix(FieldWeight, v))
+}
+
+// WeightEqualFold applies the EqualFold predicate on the "weight" field.
+func WeightEqualFold(v string) predicate.Player {
+	return predicate.Player(sql.FieldEqualFold(FieldWeight, v))
+}
+
+// WeightContainsFold applies the ContainsFold predicate on the "weight" field.
+func WeightContainsFold(v string) predicate.Player {
+	return predicate.Player(sql.FieldContainsFold(FieldWeight, v))
 }
 
 // InjuredEQ applies the EQ predicate on the "injured" field.
@@ -569,29 +664,6 @@ func HasBirth() predicate.Player {
 func HasBirthWith(preds ...predicate.Birth) predicate.Player {
 	return predicate.Player(func(s *sql.Selector) {
 		step := newBirthStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasTeam applies the HasEdge predicate on the "team" edge.
-func HasTeam() predicate.Player {
-	return predicate.Player(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, TeamTable, TeamPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTeamWith applies the HasEdge predicate on the "team" edge with a given conditions (other predicates).
-func HasTeamWith(preds ...predicate.Team) predicate.Player {
-	return predicate.Player(func(s *sql.Selector) {
-		step := newTeamStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
