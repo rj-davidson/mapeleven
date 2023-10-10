@@ -80,6 +80,18 @@ func (f PlayerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlayerMutation", m)
 }
 
+// The PlayerSeasonFunc type is an adapter to allow the use of ordinary
+// function as PlayerSeason mutator.
+type PlayerSeasonFunc func(context.Context, *ent.PlayerSeasonMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PlayerSeasonFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PlayerSeasonMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlayerSeasonMutation", m)
+}
+
 // The SeasonFunc type is an adapter to allow the use of ordinary
 // function as Season mutator.
 type SeasonFunc func(context.Context, *ent.SeasonMutation) (ent.Value, error)

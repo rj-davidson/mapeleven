@@ -121,3 +121,9 @@ func (lm *LeagueModel) GetCurrentSeasonForLeague(ctx context.Context, l *ent.Lea
 		).
 		Only(ctx)
 }
+
+func (lm *LeagueModel) ListAll(ctx context.Context) ([]*ent.League, error) {
+	return lm.client.League.
+		Query().
+		All(ctx)
+}

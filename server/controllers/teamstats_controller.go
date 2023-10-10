@@ -103,5 +103,10 @@ func (tsc *TeamStatsController) parseTeamStatsResponse(data []byte, team *ent.Te
 
 func (tsc *TeamStatsController) upsertTeamStats(team *ent.Team, teamStats *team_stats.TeamStats) error {
 	_, err := tsc.teamStatsModel.UpsertTeamStats(context.Background(), team, *teamStats)
+	if err == nil {
+		fmt.Printf("Team stats for %s successfully upserted.\n", team.Edges.Club.Name)
+	} else {
+		fmt.Printf("Error upserting team stats for %s: %v\n", team.Edges.Club.Name, err)
+	}
 	return err
 }

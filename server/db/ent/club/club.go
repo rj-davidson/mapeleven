@@ -30,6 +30,8 @@ const (
 	EdgeCountry = "country"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
+	// EdgePlayerSeasons holds the string denoting the playerseasons edge name in mutations.
+	EdgePlayerSeasons = "playerSeasons"
 	// Table holds the table name of the club in the database.
 	Table = "clubs"
 	// CountryTable is the table that holds the country relation/edge.
@@ -46,6 +48,11 @@ const (
 	TeamInverseTable = "teams"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "club_team"
+	// PlayerSeasonsTable is the table that holds the playerSeasons relation/edge. The primary key declared below.
+	PlayerSeasonsTable = "club_playerSeasons"
+	// PlayerSeasonsInverseTable is the table name for the PlayerSeason entity.
+	// It exists in this package in order to avoid circular dependency with the "playerseason" package.
+	PlayerSeasonsInverseTable = "player_seasons"
 )
 
 // Columns holds all SQL columns for club fields.
@@ -65,6 +72,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"country_clubs",
 }
+
+var (
+	// PlayerSeasonsPrimaryKey and PlayerSeasonsColumn2 are the table columns denoting the
+	// primary key for the playerSeasons relation (M2M).
+	PlayerSeasonsPrimaryKey = []string{"club_id", "player_season_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -149,6 +162,20 @@ func ByTeam(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPlayerSeasonsCount orders the results by playerSeasons count.
+func ByPlayerSeasonsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPlayerSeasonsStep(), opts...)
+	}
+}
+
+// ByPlayerSeasons orders the results by playerSeasons terms.
+func ByPlayerSeasons(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerSeasonsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newCountryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -161,5 +188,12 @@ func newTeamStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TeamTable, TeamColumn),
+	)
+}
+func newPlayerSeasonsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayerSeasonsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, PlayerSeasonsTable, PlayerSeasonsPrimaryKey...),
 	)
 }

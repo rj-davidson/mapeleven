@@ -485,6 +485,29 @@ func HasTeamWith(preds ...predicate.Team) predicate.Club {
 	})
 }
 
+// HasPlayerSeasons applies the HasEdge predicate on the "playerSeasons" edge.
+func HasPlayerSeasons() predicate.Club {
+	return predicate.Club(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, PlayerSeasonsTable, PlayerSeasonsPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPlayerSeasonsWith applies the HasEdge predicate on the "playerSeasons" edge with a given conditions (other predicates).
+func HasPlayerSeasonsWith(preds ...predicate.PlayerSeason) predicate.Club {
+	return predicate.Club(func(s *sql.Selector) {
+		step := newPlayerSeasonsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Club) predicate.Club {
 	return predicate.Club(func(s *sql.Selector) {

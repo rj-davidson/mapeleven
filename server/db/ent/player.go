@@ -17,6 +17,8 @@ type Player struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// ApiFootballID holds the value of the "ApiFootballID" field.
+	ApiFootballID int `json:"ApiFootballID,omitempty"`
 	// Slug holds the value of the "slug" field.
 	Slug string `json:"slug,omitempty"`
 	// Name holds the value of the "name" field.
@@ -28,9 +30,9 @@ type Player struct {
 	// Age holds the value of the "age" field.
 	Age int `json:"age,omitempty"`
 	// Height holds the value of the "height" field.
-	Height float64 `json:"height,omitempty"`
+	Height string `json:"height,omitempty"`
 	// Weight holds the value of the "weight" field.
-	Weight float64 `json:"weight,omitempty"`
+	Weight string `json:"weight,omitempty"`
 	// Injured holds the value of the "injured" field.
 	Injured bool `json:"injured,omitempty"`
 	// Photo holds the value of the "photo" field.
@@ -40,6 +42,7 @@ type Player struct {
 	Edges           PlayerEdges `json:"edges"`
 	birth_player    *int
 	country_players *int
+	team_players    *int
 	selectValues    sql.SelectValues
 }
 
@@ -47,11 +50,9 @@ type Player struct {
 type PlayerEdges struct {
 	// Birth holds the value of the birth edge.
 	Birth *Birth `json:"birth,omitempty"`
-	// Team holds the value of the team edge.
-	Team []*Team `json:"team,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -67,15 +68,6 @@ func (e PlayerEdges) BirthOrErr() (*Birth, error) {
 	return nil, &NotLoadedError{edge: "birth"}
 }
 
-// TeamOrErr returns the Team value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerEdges) TeamOrErr() ([]*Team, error) {
-	if e.loadedTypes[1] {
-		return e.Team, nil
-	}
-	return nil, &NotLoadedError{edge: "team"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Player) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -83,15 +75,15 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case player.FieldInjured:
 			values[i] = new(sql.NullBool)
-		case player.FieldHeight, player.FieldWeight:
-			values[i] = new(sql.NullFloat64)
-		case player.FieldID, player.FieldAge:
+		case player.FieldID, player.FieldApiFootballID, player.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldPhoto:
+		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto:
 			values[i] = new(sql.NullString)
 		case player.ForeignKeys[0]: // birth_player
 			values[i] = new(sql.NullInt64)
 		case player.ForeignKeys[1]: // country_players
+			values[i] = new(sql.NullInt64)
+		case player.ForeignKeys[2]: // team_players
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -114,6 +106,12 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pl.ID = int(value.Int64)
+		case player.FieldApiFootballID:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field ApiFootballID", values[i])
+			} else if value.Valid {
+				pl.ApiFootballID = int(value.Int64)
+			}
 		case player.FieldSlug:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field slug", values[i])
@@ -145,16 +143,16 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 				pl.Age = int(value.Int64)
 			}
 		case player.FieldHeight:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field height", values[i])
 			} else if value.Valid {
-				pl.Height = value.Float64
+				pl.Height = value.String
 			}
 		case player.FieldWeight:
-			if value, ok := values[i].(*sql.NullFloat64); !ok {
+			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field weight", values[i])
 			} else if value.Valid {
-				pl.Weight = value.Float64
+				pl.Weight = value.String
 			}
 		case player.FieldInjured:
 			if value, ok := values[i].(*sql.NullBool); !ok {
@@ -182,6 +180,13 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 				pl.country_players = new(int)
 				*pl.country_players = int(value.Int64)
 			}
+		case player.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field team_players", value)
+			} else if value.Valid {
+				pl.team_players = new(int)
+				*pl.team_players = int(value.Int64)
+			}
 		default:
 			pl.selectValues.Set(columns[i], values[i])
 		}
@@ -198,11 +203,6 @@ func (pl *Player) Value(name string) (ent.Value, error) {
 // QueryBirth queries the "birth" edge of the Player entity.
 func (pl *Player) QueryBirth() *BirthQuery {
 	return NewPlayerClient(pl.config).QueryBirth(pl)
-}
-
-// QueryTeam queries the "team" edge of the Player entity.
-func (pl *Player) QueryTeam() *TeamQuery {
-	return NewPlayerClient(pl.config).QueryTeam(pl)
 }
 
 // Update returns a builder for updating this Player.
@@ -228,6 +228,9 @@ func (pl *Player) String() string {
 	var builder strings.Builder
 	builder.WriteString("Player(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pl.ID))
+	builder.WriteString("ApiFootballID=")
+	builder.WriteString(fmt.Sprintf("%v", pl.ApiFootballID))
+	builder.WriteString(", ")
 	builder.WriteString("slug=")
 	builder.WriteString(pl.Slug)
 	builder.WriteString(", ")
@@ -244,10 +247,10 @@ func (pl *Player) String() string {
 	builder.WriteString(fmt.Sprintf("%v", pl.Age))
 	builder.WriteString(", ")
 	builder.WriteString("height=")
-	builder.WriteString(fmt.Sprintf("%v", pl.Height))
+	builder.WriteString(pl.Height)
 	builder.WriteString(", ")
 	builder.WriteString("weight=")
-	builder.WriteString(fmt.Sprintf("%v", pl.Weight))
+	builder.WriteString(pl.Weight)
 	builder.WriteString(", ")
 	builder.WriteString("injured=")
 	builder.WriteString(fmt.Sprintf("%v", pl.Injured))

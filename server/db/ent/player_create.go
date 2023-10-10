@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/team"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -19,6 +18,12 @@ type PlayerCreate struct {
 	config
 	mutation *PlayerMutation
 	hooks    []Hook
+}
+
+// SetApiFootballID sets the "ApiFootballID" field.
+func (pc *PlayerCreate) SetApiFootballID(i int) *PlayerCreate {
+	pc.mutation.SetApiFootballID(i)
+	return pc
 }
 
 // SetSlug sets the "slug" field.
@@ -52,14 +57,14 @@ func (pc *PlayerCreate) SetAge(i int) *PlayerCreate {
 }
 
 // SetHeight sets the "height" field.
-func (pc *PlayerCreate) SetHeight(f float64) *PlayerCreate {
-	pc.mutation.SetHeight(f)
+func (pc *PlayerCreate) SetHeight(s string) *PlayerCreate {
+	pc.mutation.SetHeight(s)
 	return pc
 }
 
 // SetWeight sets the "weight" field.
-func (pc *PlayerCreate) SetWeight(f float64) *PlayerCreate {
-	pc.mutation.SetWeight(f)
+func (pc *PlayerCreate) SetWeight(s string) *PlayerCreate {
+	pc.mutation.SetWeight(s)
 	return pc
 }
 
@@ -72,12 +77,6 @@ func (pc *PlayerCreate) SetInjured(b bool) *PlayerCreate {
 // SetPhoto sets the "photo" field.
 func (pc *PlayerCreate) SetPhoto(s string) *PlayerCreate {
 	pc.mutation.SetPhoto(s)
-	return pc
-}
-
-// SetID sets the "id" field.
-func (pc *PlayerCreate) SetID(i int) *PlayerCreate {
-	pc.mutation.SetID(i)
 	return pc
 }
 
@@ -98,21 +97,6 @@ func (pc *PlayerCreate) SetNillableBirthID(id *int) *PlayerCreate {
 // SetBirth sets the "birth" edge to the Birth entity.
 func (pc *PlayerCreate) SetBirth(b *Birth) *PlayerCreate {
 	return pc.SetBirthID(b.ID)
-}
-
-// AddTeamIDs adds the "team" edge to the Team entity by IDs.
-func (pc *PlayerCreate) AddTeamIDs(ids ...int) *PlayerCreate {
-	pc.mutation.AddTeamIDs(ids...)
-	return pc
-}
-
-// AddTeam adds the "team" edges to the Team entity.
-func (pc *PlayerCreate) AddTeam(t ...*Team) *PlayerCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return pc.AddTeamIDs(ids...)
 }
 
 // Mutation returns the PlayerMutation object of the builder.
@@ -149,6 +133,9 @@ func (pc *PlayerCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *PlayerCreate) check() error {
+	if _, ok := pc.mutation.ApiFootballID(); !ok {
+		return &ValidationError{Name: "ApiFootballID", err: errors.New(`ent: missing required field "Player.ApiFootballID"`)}
+	}
 	if _, ok := pc.mutation.Slug(); !ok {
 		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "Player.slug"`)}
 	}
@@ -176,9 +163,6 @@ func (pc *PlayerCreate) check() error {
 	if _, ok := pc.mutation.Photo(); !ok {
 		return &ValidationError{Name: "photo", err: errors.New(`ent: missing required field "Player.photo"`)}
 	}
-	if len(pc.mutation.TeamIDs()) == 0 {
-		return &ValidationError{Name: "team", err: errors.New(`ent: missing required edge "Player.team"`)}
-	}
 	return nil
 }
 
@@ -193,10 +177,8 @@ func (pc *PlayerCreate) sqlSave(ctx context.Context) (*Player, error) {
 		}
 		return nil, err
 	}
-	if _spec.ID.Value != _node.ID {
-		id := _spec.ID.Value.(int64)
-		_node.ID = int(id)
-	}
+	id := _spec.ID.Value.(int64)
+	_node.ID = int(id)
 	pc.mutation.id = &_node.ID
 	pc.mutation.done = true
 	return _node, nil
@@ -207,9 +189,9 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 		_node = &Player{config: pc.config}
 		_spec = sqlgraph.NewCreateSpec(player.Table, sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt))
 	)
-	if id, ok := pc.mutation.ID(); ok {
-		_node.ID = id
-		_spec.ID.Value = id
+	if value, ok := pc.mutation.ApiFootballID(); ok {
+		_spec.SetField(player.FieldApiFootballID, field.TypeInt, value)
+		_node.ApiFootballID = value
 	}
 	if value, ok := pc.mutation.Slug(); ok {
 		_spec.SetField(player.FieldSlug, field.TypeString, value)
@@ -232,11 +214,11 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 		_node.Age = value
 	}
 	if value, ok := pc.mutation.Height(); ok {
-		_spec.SetField(player.FieldHeight, field.TypeFloat64, value)
+		_spec.SetField(player.FieldHeight, field.TypeString, value)
 		_node.Height = value
 	}
 	if value, ok := pc.mutation.Weight(); ok {
-		_spec.SetField(player.FieldWeight, field.TypeFloat64, value)
+		_spec.SetField(player.FieldWeight, field.TypeString, value)
 		_node.Weight = value
 	}
 	if value, ok := pc.mutation.Injured(); ok {
@@ -262,22 +244,6 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.birth_player = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := pc.mutation.TeamIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   player.TeamTable,
-			Columns: player.TeamPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -323,7 +289,7 @@ func (pcb *PlayerCreateBulk) Save(ctx context.Context) ([]*Player, error) {
 					return nil, err
 				}
 				mutation.id = &nodes[i].ID
-				if specs[i].ID.Value != nil && nodes[i].ID == 0 {
+				if specs[i].ID.Value != nil {
 					id := specs[i].ID.Value.(int64)
 					nodes[i].ID = int(id)
 				}

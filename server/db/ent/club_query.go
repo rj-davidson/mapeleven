@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/team"
 	"math"
@@ -20,13 +21,14 @@ import (
 // ClubQuery is the builder for querying Club entities.
 type ClubQuery struct {
 	config
-	ctx         *QueryContext
-	order       []club.Order
-	inters      []Interceptor
-	predicates  []predicate.Club
-	withCountry *CountryQuery
-	withTeam    *TeamQuery
-	withFKs     bool
+	ctx               *QueryContext
+	order             []club.Order
+	inters            []Interceptor
+	predicates        []predicate.Club
+	withCountry       *CountryQuery
+	withTeam          *TeamQuery
+	withPlayerSeasons *PlayerSeasonQuery
+	withFKs           bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -100,6 +102,28 @@ func (cq *ClubQuery) QueryTeam() *TeamQuery {
 			sqlgraph.From(club.Table, club.FieldID, selector),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, club.TeamTable, club.TeamColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPlayerSeasons chains the current query on the "playerSeasons" edge.
+func (cq *ClubQuery) QueryPlayerSeasons() *PlayerSeasonQuery {
+	query := (&PlayerSeasonClient{config: cq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := cq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := cq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(club.Table, club.FieldID, selector),
+			sqlgraph.To(playerseason.Table, playerseason.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, club.PlayerSeasonsTable, club.PlayerSeasonsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -294,13 +318,14 @@ func (cq *ClubQuery) Clone() *ClubQuery {
 		return nil
 	}
 	return &ClubQuery{
-		config:      cq.config,
-		ctx:         cq.ctx.Clone(),
-		order:       append([]club.Order{}, cq.order...),
-		inters:      append([]Interceptor{}, cq.inters...),
-		predicates:  append([]predicate.Club{}, cq.predicates...),
-		withCountry: cq.withCountry.Clone(),
-		withTeam:    cq.withTeam.Clone(),
+		config:            cq.config,
+		ctx:               cq.ctx.Clone(),
+		order:             append([]club.Order{}, cq.order...),
+		inters:            append([]Interceptor{}, cq.inters...),
+		predicates:        append([]predicate.Club{}, cq.predicates...),
+		withCountry:       cq.withCountry.Clone(),
+		withTeam:          cq.withTeam.Clone(),
+		withPlayerSeasons: cq.withPlayerSeasons.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -326,6 +351,17 @@ func (cq *ClubQuery) WithTeam(opts ...func(*TeamQuery)) *ClubQuery {
 		opt(query)
 	}
 	cq.withTeam = query
+	return cq
+}
+
+// WithPlayerSeasons tells the query-builder to eager-load the nodes that are connected to
+// the "playerSeasons" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *ClubQuery) WithPlayerSeasons(opts ...func(*PlayerSeasonQuery)) *ClubQuery {
+	query := (&PlayerSeasonClient{config: cq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	cq.withPlayerSeasons = query
 	return cq
 }
 
@@ -408,9 +444,10 @@ func (cq *ClubQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Club, e
 		nodes       = []*Club{}
 		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			cq.withCountry != nil,
 			cq.withTeam != nil,
+			cq.withPlayerSeasons != nil,
 		}
 	)
 	if cq.withCountry != nil {
@@ -447,6 +484,13 @@ func (cq *ClubQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Club, e
 		if err := cq.loadTeam(ctx, query, nodes,
 			func(n *Club) { n.Edges.Team = []*Team{} },
 			func(n *Club, e *Team) { n.Edges.Team = append(n.Edges.Team, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := cq.withPlayerSeasons; query != nil {
+		if err := cq.loadPlayerSeasons(ctx, query, nodes,
+			func(n *Club) { n.Edges.PlayerSeasons = []*PlayerSeason{} },
+			func(n *Club, e *PlayerSeason) { n.Edges.PlayerSeasons = append(n.Edges.PlayerSeasons, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -513,6 +557,67 @@ func (cq *ClubQuery) loadTeam(ctx context.Context, query *TeamQuery, nodes []*Cl
 			return fmt.Errorf(`unexpected foreign-key "club_team" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
+	}
+	return nil
+}
+func (cq *ClubQuery) loadPlayerSeasons(ctx context.Context, query *PlayerSeasonQuery, nodes []*Club, init func(*Club), assign func(*Club, *PlayerSeason)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*Club)
+	nids := make(map[int]map[*Club]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(club.PlayerSeasonsTable)
+		s.Join(joinT).On(s.C(playerseason.FieldID), joinT.C(club.PlayerSeasonsPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(club.PlayerSeasonsPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(club.PlayerSeasonsPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*Club]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*PlayerSeason](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "playerSeasons" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
+		}
 	}
 	return nil
 }

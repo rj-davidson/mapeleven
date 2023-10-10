@@ -68,9 +68,11 @@ type TeamEdges struct {
 	Lineups []*TSLineups `json:"lineups,omitempty"`
 	// PenaltyStats holds the value of the penalty_stats edge.
 	PenaltyStats *TSPenalty `json:"penalty_stats,omitempty"`
+	// Team holds the value of the team edge.
+	Team []*PlayerSeason `json:"team,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [14]bool
+	loadedTypes [15]bool
 }
 
 // SeasonOrErr returns the Season value or an error if the edge
@@ -235,6 +237,15 @@ func (e TeamEdges) PenaltyStatsOrErr() (*TSPenalty, error) {
 	return nil, &NotLoadedError{edge: "penalty_stats"}
 }
 
+// TeamOrErr returns the Team value or an error if the edge
+// was not loaded in eager-loading.
+func (e TeamEdges) TeamOrErr() ([]*PlayerSeason, error) {
+	if e.loadedTypes[14] {
+		return e.Team, nil
+	}
+	return nil, &NotLoadedError{edge: "team"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Team) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -378,6 +389,11 @@ func (t *Team) QueryLineups() *TSLineupsQuery {
 // QueryPenaltyStats queries the "penalty_stats" edge of the Team entity.
 func (t *Team) QueryPenaltyStats() *TSPenaltyQuery {
 	return NewTeamClient(t.config).QueryPenaltyStats(t)
+}
+
+// QueryTeam queries the "team" edge of the Team entity.
+func (t *Team) QueryTeam() *PlayerSeasonQuery {
+	return NewTeamClient(t.config).QueryTeam(t)
 }
 
 // Update returns a builder for updating this Team.

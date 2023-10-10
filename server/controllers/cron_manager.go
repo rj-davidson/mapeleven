@@ -2,10 +2,13 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-co-op/gocron"
 	"log"
 	"mapeleven/db/ent"
 	"mapeleven/models"
+	//"mapeleven/models/player_models"
+	_ "mapeleven/models/player_models"
 	"mapeleven/models/team_models"
 	"mapeleven/models/team_models/team_stats"
 	"time"
@@ -24,6 +27,8 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	teamStatsModel := team_stats.NewTeamStatsModel(client)
 	standingsModel := models.NewStandingsModel(client)
 	fixturesModel := models.NewFixtureModel(client)
+	playerModel := models.NewPlayerModel(client)
+	//playerSeasonModel := player_models.NewPlayerSeasonModel(client)
 
 	if initialize {
 		// Country Initialization
@@ -40,6 +45,12 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 		// Team Stats Initialization
 		fetchTeamStats(teamModel, teamStatsModel)
+
+		//Player Initialization
+		fetchPlayer(client, playerModel, leagueModel)
+
+		// Player Stats Initialization
+		//fetchPlayerStats(client, playerSeasonModel)
 	}
 
 	if runScheduler {
@@ -49,6 +60,9 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 		s.Every(14).Days().At("00:00").Do(fetchStandings, standingsModel, clubModel)
 		s.Every(14).Days().At("00:00").Do(fetchFixtures, fixturesModel)
 		s.Every(14).Days().At("00:00").Do(fetchTeamStats, teamModel, teamStatsModel)
+		//s.Every(14).Days().At("00:00").Do(fetchPlayerStats, client, playerSeasonModel)
+		//s.Every(14).Days().At("00:00").Do(fetchPlayer, client, playerModel, leagueModel)
+
 	}
 
 	if devRun {
@@ -114,3 +128,47 @@ func fetchTeamStats(teamModel *team_models.TeamModel, teamStatsModel *team_stats
 		log.Printf("error initializing team stats: %v", err)
 	}
 }
+
+func fetchPlayer(client *ent.Client, playerModel *models.PlayerModel, leagueModel *models.LeagueModel) {
+	fmt.Println("Initializing Player... IN CRON")
+
+	leagues, err := leagueModel.ListAll(context.Background())
+	fmt.Println(leagues)
+	if err != nil {
+		log.Printf("Error fetching leagues: %v", err)
+		return
+	}
+
+	playerController := NewPlayerController(playerModel)
+	for _, league := range leagues {
+		err := playerController.FetchPlayersByLeague(context.Background(), league.FootballApiId)
+		if err != nil {
+			log.Printf("Error initializing players for league %d: %v", league.FootballApiId, err)
+		}
+	}
+	fmt.Println("Player complete.")
+}
+
+//func fetchPlayerStats(client *ent.Client, playerSeasonModel *player_models.PlayerSeasonModel) {
+//	fmt.Println("Initializing Player Seasons... IN CRON")
+//	playerSeasonController := NewPlayerSeasonController(client)
+//	playerSeasonModel = player_models.NewPlayerSeasonModel(client)
+//
+//	// Fetching player stats from your local database
+//	playerStats, err := playerSeasonModel.ListAll(context.Background())
+//	if err != nil {
+//		log.Printf("Error fetching player stats from database: %v", err)
+//		return
+//	}
+//
+//	currentYear := time.Now().Year() // Get the current year
+//
+//	// Ensure player seasons exist or create/update them using the controller
+//	for _, playerSeason := range playerStats {
+//		err := playerSeasonController.EnsurePlayerSeasonExists(context.Background(), currentYear, playerSeason.ID)
+//		if err != nil {
+//			log.Printf("Error ensuring player season exists: %v", err)
+//		}
+//	}
+//	fmt.Println("PlayerSeason complete.")
+//}

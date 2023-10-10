@@ -46,6 +46,8 @@ const (
 	EdgeLineups = "lineups"
 	// EdgePenaltyStats holds the string denoting the penalty_stats edge name in mutations.
 	EdgePenaltyStats = "penalty_stats"
+	// EdgeTeam holds the string denoting the team edge name in mutations.
+	EdgeTeam = "team"
 	// Table holds the table name of the team in the database.
 	Table = "teams"
 	// SeasonTable is the table that holds the season relation/edge.
@@ -83,11 +85,13 @@ const (
 	AwayFixturesInverseTable = "fixtures"
 	// AwayFixturesColumn is the table column denoting the awayFixtures relation/edge.
 	AwayFixturesColumn = "team_away_fixtures"
-	// PlayersTable is the table that holds the players relation/edge. The primary key declared below.
-	PlayersTable = "team_players"
+	// PlayersTable is the table that holds the players relation/edge.
+	PlayersTable = "players"
 	// PlayersInverseTable is the table name for the Player entity.
 	// It exists in this package in order to avoid circular dependency with the "player" package.
 	PlayersInverseTable = "players"
+	// PlayersColumn is the table column denoting the players relation/edge.
+	PlayersColumn = "team_players"
 	// BiggestStatsTable is the table that holds the biggest_stats relation/edge.
 	BiggestStatsTable = "ts_biggests"
 	// BiggestStatsInverseTable is the table name for the TSBiggest entity.
@@ -144,6 +148,13 @@ const (
 	PenaltyStatsInverseTable = "ts_penalties"
 	// PenaltyStatsColumn is the table column denoting the penalty_stats relation/edge.
 	PenaltyStatsColumn = "team_penalty_stats"
+	// TeamTable is the table that holds the team relation/edge.
+	TeamTable = "player_seasons"
+	// TeamInverseTable is the table name for the PlayerSeason entity.
+	// It exists in this package in order to avoid circular dependency with the "playerseason" package.
+	TeamInverseTable = "player_seasons"
+	// TeamColumn is the table column denoting the team relation/edge.
+	TeamColumn = "team_team"
 )
 
 // Columns holds all SQL columns for team fields.
@@ -159,12 +170,6 @@ var ForeignKeys = []string{
 	"club_team",
 	"season_teams",
 }
-
-var (
-	// PlayersPrimaryKey and PlayersColumn2 are the table columns denoting the
-	// primary key for the players relation (M2M).
-	PlayersPrimaryKey = []string{"team_id", "player_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -338,6 +343,20 @@ func ByPenaltyStatsField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newPenaltyStatsStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByTeamCount orders the results by team count.
+func ByTeamCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newTeamStep(), opts...)
+	}
+}
+
+// ByTeam orders the results by team terms.
+func ByTeam(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newSeasonStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -377,7 +396,7 @@ func newPlayersStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PlayersTable, PlayersPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, PlayersTable, PlayersColumn),
 	)
 }
 func newBiggestStatsStep() *sqlgraph.Step {
@@ -434,5 +453,12 @@ func newPenaltyStatsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PenaltyStatsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, PenaltyStatsTable, PenaltyStatsColumn),
+	)
+}
+func newTeamStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(TeamInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, TeamTable, TeamColumn),
 	)
 }
