@@ -12,8 +12,8 @@ import (
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/squad"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"mapeleven/db/ent/tsbiggest"
@@ -96,8 +96,8 @@ func checkColumn(table, column string) error {
 			fixture.Table:         fixture.ValidColumn,
 			league.Table:          league.ValidColumn,
 			player.Table:          player.ValidColumn,
-			playerseason.Table:    playerseason.ValidColumn,
 			season.Table:          season.ValidColumn,
+			squad.Table:           squad.ValidColumn,
 			standings.Table:       standings.ValidColumn,
 			tsbiggest.Table:       tsbiggest.ValidColumn,
 			tscards.Table:         tscards.ValidColumn,

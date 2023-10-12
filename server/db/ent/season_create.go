@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
-	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
@@ -117,21 +116,6 @@ func (sc *SeasonCreate) AddTeams(t ...*Team) *SeasonCreate {
 		ids[i] = t[i].ID
 	}
 	return sc.AddTeamIDs(ids...)
-}
-
-// AddPlayerSeasonIDs adds the "playerSeasons" edge to the PlayerSeason entity by IDs.
-func (sc *SeasonCreate) AddPlayerSeasonIDs(ids ...int) *SeasonCreate {
-	sc.mutation.AddPlayerSeasonIDs(ids...)
-	return sc
-}
-
-// AddPlayerSeasons adds the "playerSeasons" edges to the PlayerSeason entity.
-func (sc *SeasonCreate) AddPlayerSeasons(p ...*PlayerSeason) *SeasonCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return sc.AddPlayerSeasonIDs(ids...)
 }
 
 // Mutation returns the SeasonMutation object of the builder.
@@ -287,22 +271,6 @@ func (sc *SeasonCreate) createSpec() (*Season, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := sc.mutation.PlayerSeasonsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   season.PlayerSeasonsTable,
-			Columns: []string{season.PlayerSeasonsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

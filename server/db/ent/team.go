@@ -52,6 +52,8 @@ type TeamEdges struct {
 	AwayFixtures []*Fixture `json:"awayFixtures,omitempty"`
 	// Players holds the value of the players edge.
 	Players []*Player `json:"players,omitempty"`
+	// Squad holds the value of the squad edge.
+	Squad []*Squad `json:"squad,omitempty"`
 	// BiggestStats holds the value of the biggest_stats edge.
 	BiggestStats *TSBiggest `json:"biggest_stats,omitempty"`
 	// CardsStats holds the value of the cards_stats edge.
@@ -68,8 +70,6 @@ type TeamEdges struct {
 	Lineups []*TSLineups `json:"lineups,omitempty"`
 	// PenaltyStats holds the value of the penalty_stats edge.
 	PenaltyStats *TSPenalty `json:"penalty_stats,omitempty"`
-	// Team holds the value of the team edge.
-	Team []*PlayerSeason `json:"team,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [15]bool
@@ -137,10 +137,19 @@ func (e TeamEdges) PlayersOrErr() ([]*Player, error) {
 	return nil, &NotLoadedError{edge: "players"}
 }
 
+// SquadOrErr returns the Squad value or an error if the edge
+// was not loaded in eager-loading.
+func (e TeamEdges) SquadOrErr() ([]*Squad, error) {
+	if e.loadedTypes[6] {
+		return e.Squad, nil
+	}
+	return nil, &NotLoadedError{edge: "squad"}
+}
+
 // BiggestStatsOrErr returns the BiggestStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TeamEdges) BiggestStatsOrErr() (*TSBiggest, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		if e.BiggestStats == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tsbiggest.Label}
@@ -153,7 +162,7 @@ func (e TeamEdges) BiggestStatsOrErr() (*TSBiggest, error) {
 // CardsStatsOrErr returns the CardsStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TeamEdges) CardsStatsOrErr() (*TSCards, error) {
-	if e.loadedTypes[7] {
+	if e.loadedTypes[8] {
 		if e.CardsStats == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tscards.Label}
@@ -166,7 +175,7 @@ func (e TeamEdges) CardsStatsOrErr() (*TSCards, error) {
 // CleanSheetStatsOrErr returns the CleanSheetStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TeamEdges) CleanSheetStatsOrErr() (*TSCleanSheet, error) {
-	if e.loadedTypes[8] {
+	if e.loadedTypes[9] {
 		if e.CleanSheetStats == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tscleansheet.Label}
@@ -179,7 +188,7 @@ func (e TeamEdges) CleanSheetStatsOrErr() (*TSCleanSheet, error) {
 // FailedToScoreStatsOrErr returns the FailedToScoreStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TeamEdges) FailedToScoreStatsOrErr() (*TSFailedToScore, error) {
-	if e.loadedTypes[9] {
+	if e.loadedTypes[10] {
 		if e.FailedToScoreStats == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tsfailedtoscore.Label}
@@ -192,7 +201,7 @@ func (e TeamEdges) FailedToScoreStatsOrErr() (*TSFailedToScore, error) {
 // FixturesStatsOrErr returns the FixturesStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TeamEdges) FixturesStatsOrErr() (*TSFixtures, error) {
-	if e.loadedTypes[10] {
+	if e.loadedTypes[11] {
 		if e.FixturesStats == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tsfixtures.Label}
@@ -205,7 +214,7 @@ func (e TeamEdges) FixturesStatsOrErr() (*TSFixtures, error) {
 // GoalsStatsOrErr returns the GoalsStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TeamEdges) GoalsStatsOrErr() (*TSGoals, error) {
-	if e.loadedTypes[11] {
+	if e.loadedTypes[12] {
 		if e.GoalsStats == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tsgoals.Label}
@@ -218,7 +227,7 @@ func (e TeamEdges) GoalsStatsOrErr() (*TSGoals, error) {
 // LineupsOrErr returns the Lineups value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) LineupsOrErr() ([]*TSLineups, error) {
-	if e.loadedTypes[12] {
+	if e.loadedTypes[13] {
 		return e.Lineups, nil
 	}
 	return nil, &NotLoadedError{edge: "lineups"}
@@ -227,7 +236,7 @@ func (e TeamEdges) LineupsOrErr() ([]*TSLineups, error) {
 // PenaltyStatsOrErr returns the PenaltyStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e TeamEdges) PenaltyStatsOrErr() (*TSPenalty, error) {
-	if e.loadedTypes[13] {
+	if e.loadedTypes[14] {
 		if e.PenaltyStats == nil {
 			// Edge was loaded but was not found.
 			return nil, &NotFoundError{label: tspenalty.Label}
@@ -235,15 +244,6 @@ func (e TeamEdges) PenaltyStatsOrErr() (*TSPenalty, error) {
 		return e.PenaltyStats, nil
 	}
 	return nil, &NotLoadedError{edge: "penalty_stats"}
-}
-
-// TeamOrErr returns the Team value or an error if the edge
-// was not loaded in eager-loading.
-func (e TeamEdges) TeamOrErr() ([]*PlayerSeason, error) {
-	if e.loadedTypes[14] {
-		return e.Team, nil
-	}
-	return nil, &NotLoadedError{edge: "team"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -351,6 +351,11 @@ func (t *Team) QueryPlayers() *PlayerQuery {
 	return NewTeamClient(t.config).QueryPlayers(t)
 }
 
+// QuerySquad queries the "squad" edge of the Team entity.
+func (t *Team) QuerySquad() *SquadQuery {
+	return NewTeamClient(t.config).QuerySquad(t)
+}
+
 // QueryBiggestStats queries the "biggest_stats" edge of the Team entity.
 func (t *Team) QueryBiggestStats() *TSBiggestQuery {
 	return NewTeamClient(t.config).QueryBiggestStats(t)
@@ -389,11 +394,6 @@ func (t *Team) QueryLineups() *TSLineupsQuery {
 // QueryPenaltyStats queries the "penalty_stats" edge of the Team entity.
 func (t *Team) QueryPenaltyStats() *TSPenaltyQuery {
 	return NewTeamClient(t.config).QueryPenaltyStats(t)
-}
-
-// QueryTeam queries the "team" edge of the Team entity.
-func (t *Team) QueryTeam() *PlayerSeasonQuery {
-	return NewTeamClient(t.config).QueryTeam(t)
 }
 
 // Update returns a builder for updating this Team.

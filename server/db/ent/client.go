@@ -16,8 +16,8 @@ import (
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/squad"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"mapeleven/db/ent/tsbiggest"
@@ -52,10 +52,10 @@ type Client struct {
 	League *LeagueClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
-	// PlayerSeason is the client for interacting with the PlayerSeason builders.
-	PlayerSeason *PlayerSeasonClient
 	// Season is the client for interacting with the Season builders.
 	Season *SeasonClient
+	// Squad is the client for interacting with the Squad builders.
+	Squad *SquadClient
 	// Standings is the client for interacting with the Standings builders.
 	Standings *StandingsClient
 	// TSBiggest is the client for interacting with the TSBiggest builders.
@@ -95,8 +95,8 @@ func (c *Client) init() {
 	c.Fixture = NewFixtureClient(c.config)
 	c.League = NewLeagueClient(c.config)
 	c.Player = NewPlayerClient(c.config)
-	c.PlayerSeason = NewPlayerSeasonClient(c.config)
 	c.Season = NewSeasonClient(c.config)
+	c.Squad = NewSquadClient(c.config)
 	c.Standings = NewStandingsClient(c.config)
 	c.TSBiggest = NewTSBiggestClient(c.config)
 	c.TSCards = NewTSCardsClient(c.config)
@@ -195,8 +195,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		Fixture:         NewFixtureClient(cfg),
 		League:          NewLeagueClient(cfg),
 		Player:          NewPlayerClient(cfg),
-		PlayerSeason:    NewPlayerSeasonClient(cfg),
 		Season:          NewSeasonClient(cfg),
+		Squad:           NewSquadClient(cfg),
 		Standings:       NewStandingsClient(cfg),
 		TSBiggest:       NewTSBiggestClient(cfg),
 		TSCards:         NewTSCardsClient(cfg),
@@ -232,8 +232,8 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		Fixture:         NewFixtureClient(cfg),
 		League:          NewLeagueClient(cfg),
 		Player:          NewPlayerClient(cfg),
-		PlayerSeason:    NewPlayerSeasonClient(cfg),
 		Season:          NewSeasonClient(cfg),
+		Squad:           NewSquadClient(cfg),
 		Standings:       NewStandingsClient(cfg),
 		TSBiggest:       NewTSBiggestClient(cfg),
 		TSCards:         NewTSCardsClient(cfg),
@@ -273,9 +273,9 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.PlayerSeason,
-		c.Season, c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet,
-		c.TSFailedToScore, c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
+		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.Season, c.Squad,
+		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
+		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
 	} {
 		n.Use(hooks...)
 	}
@@ -285,9 +285,9 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.PlayerSeason,
-		c.Season, c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet,
-		c.TSFailedToScore, c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
+		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.Season, c.Squad,
+		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
+		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -308,10 +308,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.League.mutate(ctx, m)
 	case *PlayerMutation:
 		return c.Player.mutate(ctx, m)
-	case *PlayerSeasonMutation:
-		return c.PlayerSeason.mutate(ctx, m)
 	case *SeasonMutation:
 		return c.Season.mutate(ctx, m)
+	case *SquadMutation:
+		return c.Squad.mutate(ctx, m)
 	case *StandingsMutation:
 		return c.Standings.mutate(ctx, m)
 	case *TSBiggestMutation:
@@ -589,22 +589,6 @@ func (c *ClubClient) QueryTeam(cl *Club) *TeamQuery {
 			sqlgraph.From(club.Table, club.FieldID, id),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, club.TeamTable, club.TeamColumn),
-		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPlayerSeasons queries the playerSeasons edge of a Club.
-func (c *ClubClient) QueryPlayerSeasons(cl *Club) *PlayerSeasonQuery {
-	query := (&PlayerSeasonClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(club.Table, club.FieldID, id),
-			sqlgraph.To(playerseason.Table, playerseason.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, club.PlayerSeasonsTable, club.PlayerSeasonsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
 		return fromV, nil
@@ -1228,6 +1212,38 @@ func (c *PlayerClient) QueryBirth(pl *Player) *BirthQuery {
 	return query
 }
 
+// QueryNationality queries the nationality edge of a Player.
+func (c *PlayerClient) QueryNationality(pl *Player) *CountryQuery {
+	query := (&CountryClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, id),
+			sqlgraph.To(country.Table, country.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, player.NationalityTable, player.NationalityColumn),
+		)
+		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySquad queries the squad edge of a Player.
+func (c *PlayerClient) QuerySquad(pl *Player) *SquadQuery {
+	query := (&SquadClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, id),
+			sqlgraph.To(squad.Table, squad.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, player.SquadTable, player.SquadColumn),
+		)
+		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *PlayerClient) Hooks() []Hook {
 	return c.hooks.Player
@@ -1250,140 +1266,6 @@ func (c *PlayerClient) mutate(ctx context.Context, m *PlayerMutation) (Value, er
 		return (&PlayerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Player mutation op: %q", m.Op())
-	}
-}
-
-// PlayerSeasonClient is a client for the PlayerSeason schema.
-type PlayerSeasonClient struct {
-	config
-}
-
-// NewPlayerSeasonClient returns a client for the PlayerSeason from the given config.
-func NewPlayerSeasonClient(c config) *PlayerSeasonClient {
-	return &PlayerSeasonClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `playerseason.Hooks(f(g(h())))`.
-func (c *PlayerSeasonClient) Use(hooks ...Hook) {
-	c.hooks.PlayerSeason = append(c.hooks.PlayerSeason, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `playerseason.Intercept(f(g(h())))`.
-func (c *PlayerSeasonClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PlayerSeason = append(c.inters.PlayerSeason, interceptors...)
-}
-
-// Create returns a builder for creating a PlayerSeason entity.
-func (c *PlayerSeasonClient) Create() *PlayerSeasonCreate {
-	mutation := newPlayerSeasonMutation(c.config, OpCreate)
-	return &PlayerSeasonCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of PlayerSeason entities.
-func (c *PlayerSeasonClient) CreateBulk(builders ...*PlayerSeasonCreate) *PlayerSeasonCreateBulk {
-	return &PlayerSeasonCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PlayerSeason.
-func (c *PlayerSeasonClient) Update() *PlayerSeasonUpdate {
-	mutation := newPlayerSeasonMutation(c.config, OpUpdate)
-	return &PlayerSeasonUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PlayerSeasonClient) UpdateOne(ps *PlayerSeason) *PlayerSeasonUpdateOne {
-	mutation := newPlayerSeasonMutation(c.config, OpUpdateOne, withPlayerSeason(ps))
-	return &PlayerSeasonUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PlayerSeasonClient) UpdateOneID(id int) *PlayerSeasonUpdateOne {
-	mutation := newPlayerSeasonMutation(c.config, OpUpdateOne, withPlayerSeasonID(id))
-	return &PlayerSeasonUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PlayerSeason.
-func (c *PlayerSeasonClient) Delete() *PlayerSeasonDelete {
-	mutation := newPlayerSeasonMutation(c.config, OpDelete)
-	return &PlayerSeasonDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *PlayerSeasonClient) DeleteOne(ps *PlayerSeason) *PlayerSeasonDeleteOne {
-	return c.DeleteOneID(ps.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PlayerSeasonClient) DeleteOneID(id int) *PlayerSeasonDeleteOne {
-	builder := c.Delete().Where(playerseason.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PlayerSeasonDeleteOne{builder}
-}
-
-// Query returns a query builder for PlayerSeason.
-func (c *PlayerSeasonClient) Query() *PlayerSeasonQuery {
-	return &PlayerSeasonQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypePlayerSeason},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a PlayerSeason entity by its id.
-func (c *PlayerSeasonClient) Get(ctx context.Context, id int) (*PlayerSeason, error) {
-	return c.Query().Where(playerseason.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PlayerSeasonClient) GetX(ctx context.Context, id int) *PlayerSeason {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryClub queries the club edge of a PlayerSeason.
-func (c *PlayerSeasonClient) QueryClub(ps *PlayerSeason) *ClubQuery {
-	query := (&ClubClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ps.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(playerseason.Table, playerseason.FieldID, id),
-			sqlgraph.To(club.Table, club.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, playerseason.ClubTable, playerseason.ClubPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *PlayerSeasonClient) Hooks() []Hook {
-	return c.hooks.PlayerSeason
-}
-
-// Interceptors returns the client interceptors.
-func (c *PlayerSeasonClient) Interceptors() []Interceptor {
-	return c.inters.PlayerSeason
-}
-
-func (c *PlayerSeasonClient) mutate(ctx context.Context, m *PlayerSeasonMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&PlayerSeasonCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&PlayerSeasonUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&PlayerSeasonUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&PlayerSeasonDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown PlayerSeason mutation op: %q", m.Op())
 	}
 }
 
@@ -1544,22 +1426,6 @@ func (c *SeasonClient) QueryTeams(s *Season) *TeamQuery {
 	return query
 }
 
-// QueryPlayerSeasons queries the playerSeasons edge of a Season.
-func (c *SeasonClient) QueryPlayerSeasons(s *Season) *PlayerSeasonQuery {
-	query := (&PlayerSeasonClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(season.Table, season.FieldID, id),
-			sqlgraph.To(playerseason.Table, playerseason.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, season.PlayerSeasonsTable, season.PlayerSeasonsColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *SeasonClient) Hooks() []Hook {
 	return c.hooks.Season
@@ -1582,6 +1448,156 @@ func (c *SeasonClient) mutate(ctx context.Context, m *SeasonMutation) (Value, er
 		return (&SeasonDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Season mutation op: %q", m.Op())
+	}
+}
+
+// SquadClient is a client for the Squad schema.
+type SquadClient struct {
+	config
+}
+
+// NewSquadClient returns a client for the Squad from the given config.
+func NewSquadClient(c config) *SquadClient {
+	return &SquadClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `squad.Hooks(f(g(h())))`.
+func (c *SquadClient) Use(hooks ...Hook) {
+	c.hooks.Squad = append(c.hooks.Squad, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `squad.Intercept(f(g(h())))`.
+func (c *SquadClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Squad = append(c.inters.Squad, interceptors...)
+}
+
+// Create returns a builder for creating a Squad entity.
+func (c *SquadClient) Create() *SquadCreate {
+	mutation := newSquadMutation(c.config, OpCreate)
+	return &SquadCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Squad entities.
+func (c *SquadClient) CreateBulk(builders ...*SquadCreate) *SquadCreateBulk {
+	return &SquadCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Squad.
+func (c *SquadClient) Update() *SquadUpdate {
+	mutation := newSquadMutation(c.config, OpUpdate)
+	return &SquadUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *SquadClient) UpdateOne(s *Squad) *SquadUpdateOne {
+	mutation := newSquadMutation(c.config, OpUpdateOne, withSquad(s))
+	return &SquadUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *SquadClient) UpdateOneID(id int) *SquadUpdateOne {
+	mutation := newSquadMutation(c.config, OpUpdateOne, withSquadID(id))
+	return &SquadUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Squad.
+func (c *SquadClient) Delete() *SquadDelete {
+	mutation := newSquadMutation(c.config, OpDelete)
+	return &SquadDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *SquadClient) DeleteOne(s *Squad) *SquadDeleteOne {
+	return c.DeleteOneID(s.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *SquadClient) DeleteOneID(id int) *SquadDeleteOne {
+	builder := c.Delete().Where(squad.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &SquadDeleteOne{builder}
+}
+
+// Query returns a query builder for Squad.
+func (c *SquadClient) Query() *SquadQuery {
+	return &SquadQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeSquad},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Squad entity by its id.
+func (c *SquadClient) Get(ctx context.Context, id int) (*Squad, error) {
+	return c.Query().Where(squad.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *SquadClient) GetX(ctx context.Context, id int) *Squad {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayer queries the player edge of a Squad.
+func (c *SquadClient) QueryPlayer(s *Squad) *PlayerQuery {
+	query := (&PlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(squad.Table, squad.FieldID, id),
+			sqlgraph.To(player.Table, player.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, squad.PlayerTable, squad.PlayerColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTeam queries the team edge of a Squad.
+func (c *SquadClient) QueryTeam(s *Squad) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(squad.Table, squad.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, squad.TeamTable, squad.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *SquadClient) Hooks() []Hook {
+	return c.hooks.Squad
+}
+
+// Interceptors returns the client interceptors.
+func (c *SquadClient) Interceptors() []Interceptor {
+	return c.inters.Squad
+}
+
+func (c *SquadClient) mutate(ctx context.Context, m *SquadMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&SquadCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&SquadUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&SquadUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&SquadDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Squad mutation op: %q", m.Op())
 	}
 }
 
@@ -2996,6 +3012,22 @@ func (c *TeamClient) QueryPlayers(t *Team) *PlayerQuery {
 	return query
 }
 
+// QuerySquad queries the squad edge of a Team.
+func (c *TeamClient) QuerySquad(t *Team) *SquadQuery {
+	query := (&SquadClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(squad.Table, squad.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, team.SquadTable, team.SquadColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryBiggestStats queries the biggest_stats edge of a Team.
 func (c *TeamClient) QueryBiggestStats(t *Team) *TSBiggestQuery {
 	query := (&TSBiggestClient{config: c.config}).Query()
@@ -3124,22 +3156,6 @@ func (c *TeamClient) QueryPenaltyStats(t *Team) *TSPenaltyQuery {
 	return query
 }
 
-// QueryTeam queries the team edge of a Team.
-func (c *TeamClient) QueryTeam(t *Team) *PlayerSeasonQuery {
-	query := (&PlayerSeasonClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(team.Table, team.FieldID, id),
-			sqlgraph.To(playerseason.Table, playerseason.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, team.TeamTable, team.TeamColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *TeamClient) Hooks() []Hook {
 	return c.hooks.Team
@@ -3168,12 +3184,12 @@ func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Birth, Club, Country, Fixture, League, Player, PlayerSeason, Season, Standings,
+		Birth, Club, Country, Fixture, League, Player, Season, Squad, Standings,
 		TSBiggest, TSCards, TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals,
 		TSLineups, TSPenalty, Team []ent.Hook
 	}
 	inters struct {
-		Birth, Club, Country, Fixture, League, Player, PlayerSeason, Season, Standings,
+		Birth, Club, Country, Fixture, League, Player, Season, Squad, Standings,
 		TSBiggest, TSCards, TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals,
 		TSLineups, TSPenalty, Team []ent.Interceptor
 	}

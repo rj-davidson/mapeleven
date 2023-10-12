@@ -328,6 +328,29 @@ func HasPlayersWith(preds ...predicate.Player) predicate.Team {
 	})
 }
 
+// HasSquad applies the HasEdge predicate on the "squad" edge.
+func HasSquad() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SquadTable, SquadColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSquadWith applies the HasEdge predicate on the "squad" edge with a given conditions (other predicates).
+func HasSquadWith(preds ...predicate.Squad) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newSquadStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasBiggestStats applies the HasEdge predicate on the "biggest_stats" edge.
 func HasBiggestStats() predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
@@ -504,29 +527,6 @@ func HasPenaltyStats() predicate.Team {
 func HasPenaltyStatsWith(preds ...predicate.TSPenalty) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		step := newPenaltyStatsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasTeam applies the HasEdge predicate on the "team" edge.
-func HasTeam() predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TeamTable, TeamColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasTeamWith applies the HasEdge predicate on the "team" edge with a given conditions (other predicates).
-func HasTeamWith(preds ...predicate.PlayerSeason) predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := newTeamStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

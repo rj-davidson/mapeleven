@@ -45,11 +45,9 @@ type SeasonEdges struct {
 	Standings []*Standings `json:"standings,omitempty"`
 	// Teams holds the value of the teams edge.
 	Teams []*Team `json:"teams,omitempty"`
-	// PlayerSeasons holds the value of the playerSeasons edge.
-	PlayerSeasons []*PlayerSeason `json:"playerSeasons,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [5]bool
+	loadedTypes [4]bool
 }
 
 // LeagueOrErr returns the League value or an error if the edge
@@ -90,15 +88,6 @@ func (e SeasonEdges) TeamsOrErr() ([]*Team, error) {
 		return e.Teams, nil
 	}
 	return nil, &NotLoadedError{edge: "teams"}
-}
-
-// PlayerSeasonsOrErr returns the PlayerSeasons value or an error if the edge
-// was not loaded in eager-loading.
-func (e SeasonEdges) PlayerSeasonsOrErr() ([]*PlayerSeason, error) {
-	if e.loadedTypes[4] {
-		return e.PlayerSeasons, nil
-	}
-	return nil, &NotLoadedError{edge: "playerSeasons"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -205,11 +194,6 @@ func (s *Season) QueryStandings() *StandingsQuery {
 // QueryTeams queries the "teams" edge of the Season entity.
 func (s *Season) QueryTeams() *TeamQuery {
 	return NewSeasonClient(s.config).QueryTeams(s)
-}
-
-// QueryPlayerSeasons queries the "playerSeasons" edge of the Season entity.
-func (s *Season) QueryPlayerSeasons() *PlayerSeasonQuery {
-	return NewSeasonClient(s.config).QueryPlayerSeasons(s)
 }
 
 // Update returns a builder for updating this Season.

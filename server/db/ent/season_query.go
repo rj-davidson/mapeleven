@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
-	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/standings"
@@ -23,16 +22,15 @@ import (
 // SeasonQuery is the builder for querying Season entities.
 type SeasonQuery struct {
 	config
-	ctx               *QueryContext
-	order             []season.Order
-	inters            []Interceptor
-	predicates        []predicate.Season
-	withLeague        *LeagueQuery
-	withFixtures      *FixtureQuery
-	withStandings     *StandingsQuery
-	withTeams         *TeamQuery
-	withPlayerSeasons *PlayerSeasonQuery
-	withFKs           bool
+	ctx           *QueryContext
+	order         []season.Order
+	inters        []Interceptor
+	predicates    []predicate.Season
+	withLeague    *LeagueQuery
+	withFixtures  *FixtureQuery
+	withStandings *StandingsQuery
+	withTeams     *TeamQuery
+	withFKs       bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -150,28 +148,6 @@ func (sq *SeasonQuery) QueryTeams() *TeamQuery {
 			sqlgraph.From(season.Table, season.FieldID, selector),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, season.TeamsTable, season.TeamsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPlayerSeasons chains the current query on the "playerSeasons" edge.
-func (sq *SeasonQuery) QueryPlayerSeasons() *PlayerSeasonQuery {
-	query := (&PlayerSeasonClient{config: sq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := sq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := sq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(season.Table, season.FieldID, selector),
-			sqlgraph.To(playerseason.Table, playerseason.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, season.PlayerSeasonsTable, season.PlayerSeasonsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(sq.driver.Dialect(), step)
 		return fromU, nil
@@ -366,16 +342,15 @@ func (sq *SeasonQuery) Clone() *SeasonQuery {
 		return nil
 	}
 	return &SeasonQuery{
-		config:            sq.config,
-		ctx:               sq.ctx.Clone(),
-		order:             append([]season.Order{}, sq.order...),
-		inters:            append([]Interceptor{}, sq.inters...),
-		predicates:        append([]predicate.Season{}, sq.predicates...),
-		withLeague:        sq.withLeague.Clone(),
-		withFixtures:      sq.withFixtures.Clone(),
-		withStandings:     sq.withStandings.Clone(),
-		withTeams:         sq.withTeams.Clone(),
-		withPlayerSeasons: sq.withPlayerSeasons.Clone(),
+		config:        sq.config,
+		ctx:           sq.ctx.Clone(),
+		order:         append([]season.Order{}, sq.order...),
+		inters:        append([]Interceptor{}, sq.inters...),
+		predicates:    append([]predicate.Season{}, sq.predicates...),
+		withLeague:    sq.withLeague.Clone(),
+		withFixtures:  sq.withFixtures.Clone(),
+		withStandings: sq.withStandings.Clone(),
+		withTeams:     sq.withTeams.Clone(),
 		// clone intermediate query.
 		sql:  sq.sql.Clone(),
 		path: sq.path,
@@ -423,17 +398,6 @@ func (sq *SeasonQuery) WithTeams(opts ...func(*TeamQuery)) *SeasonQuery {
 		opt(query)
 	}
 	sq.withTeams = query
-	return sq
-}
-
-// WithPlayerSeasons tells the query-builder to eager-load the nodes that are connected to
-// the "playerSeasons" edge. The optional arguments are used to configure the query builder of the edge.
-func (sq *SeasonQuery) WithPlayerSeasons(opts ...func(*PlayerSeasonQuery)) *SeasonQuery {
-	query := (&PlayerSeasonClient{config: sq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	sq.withPlayerSeasons = query
 	return sq
 }
 
@@ -516,12 +480,11 @@ func (sq *SeasonQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Seaso
 		nodes       = []*Season{}
 		withFKs     = sq.withFKs
 		_spec       = sq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [4]bool{
 			sq.withLeague != nil,
 			sq.withFixtures != nil,
 			sq.withStandings != nil,
 			sq.withTeams != nil,
-			sq.withPlayerSeasons != nil,
 		}
 	)
 	if sq.withLeague != nil {
@@ -572,13 +535,6 @@ func (sq *SeasonQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Seaso
 		if err := sq.loadTeams(ctx, query, nodes,
 			func(n *Season) { n.Edges.Teams = []*Team{} },
 			func(n *Season, e *Team) { n.Edges.Teams = append(n.Edges.Teams, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := sq.withPlayerSeasons; query != nil {
-		if err := sq.loadPlayerSeasons(ctx, query, nodes,
-			func(n *Season) { n.Edges.PlayerSeasons = []*PlayerSeason{} },
-			func(n *Season, e *PlayerSeason) { n.Edges.PlayerSeasons = append(n.Edges.PlayerSeasons, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -705,37 +661,6 @@ func (sq *SeasonQuery) loadTeams(ctx context.Context, query *TeamQuery, nodes []
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "season_teams" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (sq *SeasonQuery) loadPlayerSeasons(ctx context.Context, query *PlayerSeasonQuery, nodes []*Season, init func(*Season), assign func(*Season, *PlayerSeason)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Season)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.PlayerSeason(func(s *sql.Selector) {
-		s.Where(sql.InValues(season.PlayerSeasonsColumn, fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.season_player_seasons
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "season_player_seasons" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "season_player_seasons" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

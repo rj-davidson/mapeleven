@@ -12,10 +12,10 @@ const (
 	Label = "player"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldApiFootballID holds the string denoting the apifootballid field in the database.
-	FieldApiFootballID = "api_football_id"
 	// FieldSlug holds the string denoting the slug field in the database.
 	FieldSlug = "slug"
+	// FieldApiFootballId holds the string denoting the apifootballid field in the database.
+	FieldApiFootballId = "api_football_id"
 	// FieldName holds the string denoting the name field in the database.
 	FieldName = "name"
 	// FieldFirstname holds the string denoting the firstname field in the database.
@@ -34,6 +34,10 @@ const (
 	FieldPhoto = "photo"
 	// EdgeBirth holds the string denoting the birth edge name in mutations.
 	EdgeBirth = "birth"
+	// EdgeNationality holds the string denoting the nationality edge name in mutations.
+	EdgeNationality = "nationality"
+	// EdgeSquad holds the string denoting the squad edge name in mutations.
+	EdgeSquad = "squad"
 	// Table holds the table name of the player in the database.
 	Table = "players"
 	// BirthTable is the table that holds the birth relation/edge.
@@ -43,13 +47,27 @@ const (
 	BirthInverseTable = "births"
 	// BirthColumn is the table column denoting the birth relation/edge.
 	BirthColumn = "birth_player"
+	// NationalityTable is the table that holds the nationality relation/edge.
+	NationalityTable = "players"
+	// NationalityInverseTable is the table name for the Country entity.
+	// It exists in this package in order to avoid circular dependency with the "country" package.
+	NationalityInverseTable = "countries"
+	// NationalityColumn is the table column denoting the nationality relation/edge.
+	NationalityColumn = "country_players"
+	// SquadTable is the table that holds the squad relation/edge.
+	SquadTable = "squads"
+	// SquadInverseTable is the table name for the Squad entity.
+	// It exists in this package in order to avoid circular dependency with the "squad" package.
+	SquadInverseTable = "squads"
+	// SquadColumn is the table column denoting the squad relation/edge.
+	SquadColumn = "player_squad"
 )
 
 // Columns holds all SQL columns for player fields.
 var Columns = []string{
 	FieldID,
-	FieldApiFootballID,
 	FieldSlug,
+	FieldApiFootballId,
 	FieldName,
 	FieldFirstname,
 	FieldLastname,
@@ -91,14 +109,14 @@ func ByID(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByApiFootballID orders the results by the ApiFootballID field.
-func ByApiFootballID(opts ...sql.OrderTermOption) Order {
-	return sql.OrderByField(FieldApiFootballID, opts...).ToFunc()
-}
-
 // BySlug orders the results by the slug field.
 func BySlug(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldSlug, opts...).ToFunc()
+}
+
+// ByApiFootballId orders the results by the ApiFootballId field.
+func ByApiFootballId(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldApiFootballId, opts...).ToFunc()
 }
 
 // ByName orders the results by the name field.
@@ -147,10 +165,45 @@ func ByBirthField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newBirthStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByNationalityField orders the results by nationality field.
+func ByNationalityField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newNationalityStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// BySquadCount orders the results by squad count.
+func BySquadCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSquadStep(), opts...)
+	}
+}
+
+// BySquad orders the results by squad terms.
+func BySquad(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSquadStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newBirthStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(BirthInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, BirthTable, BirthColumn),
+	)
+}
+func newNationalityStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(NationalityInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, NationalityTable, NationalityColumn),
+	)
+}
+func newSquadStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SquadInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SquadTable, SquadColumn),
 	)
 }

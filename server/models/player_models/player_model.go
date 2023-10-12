@@ -1,4 +1,4 @@
-package models
+package player_models
 
 import (
 	"context"
@@ -10,7 +10,7 @@ import (
 
 // CreatePlayerInput holds the required fields to create a new player.
 type CreatePlayerInput struct {
-	ApiFootballID int
+	ApiFootballId int
 	Name          string
 	Firstname     string
 	Lastname      string
@@ -21,12 +21,11 @@ type CreatePlayerInput struct {
 	Photo         string
 	LeagueID      int
 	Season        int
-	//PlayerSeason []PlayerSeason
 }
 
 // UpdatePlayerInput holds the fields to update an existing player.
 type UpdatePlayerInput struct {
-	ApiFootballID int
+	ApiFootballId int
 	Name          *string
 	Firstname     *string
 	Lastname      *string
@@ -37,8 +36,6 @@ type UpdatePlayerInput struct {
 	Photo         *string
 	LeagueID      *int
 	Season        *int
-
-	//PlayerSeason []PlayerSeason
 }
 
 // DeletePlayerInput holds the required fields to delete a player.
@@ -60,9 +57,7 @@ func NewPlayerModel(client *ent.Client) *PlayerModel {
 func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput) (*ent.Player, error) {
 	p, err := m.client.Player.
 		Create().
-		//SetLeagueID(input.LeagueID).
-		//SetSeason(input.Season).
-		SetApiFootballID(input.ApiFootballID).
+		SetApiFootballId(input.ApiFootballId).
 		SetSlug(utils.Slugify(input.Name)).
 		SetName(input.Name).
 		SetFirstname(input.Firstname).
@@ -71,7 +66,6 @@ func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput)
 		SetHeight(input.Height).
 		SetWeight(input.Weight).
 		SetInjured(input.Injured).
-		//setPlayerSeasons(input.PlayerSeason).
 		SetPhoto(input.Photo).
 		Save(ctx)
 
@@ -83,7 +77,7 @@ func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput)
 
 // UpdatePlayer updates an existing player.
 func (m *PlayerModel) UpdatePlayer(ctx context.Context, input UpdatePlayerInput) (*ent.Player, error) {
-	pl, err := m.client.Player.Query().Where(player.ApiFootballIDEQ(input.ApiFootballID)).Only(ctx)
+	pl, err := m.client.Player.Query().Where(player.ApiFootballIdEQ(input.ApiFootballId)).Only(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +188,7 @@ func (m *PlayerModel) Exists(ctx context.Context, id int) bool {
 	return count > 0
 }
 
-// PlayerModel method to execute a transaction
+// WithTransaction method to execute a transaction
 func (m *PlayerModel) WithTransaction(ctx context.Context, fn func(tx *ent.Tx) error) error {
 	// Start a new transaction
 	tx, err := m.client.Tx(ctx)

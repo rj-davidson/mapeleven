@@ -30,6 +30,8 @@ const (
 	EdgeAwayFixtures = "awayFixtures"
 	// EdgePlayers holds the string denoting the players edge name in mutations.
 	EdgePlayers = "players"
+	// EdgeSquad holds the string denoting the squad edge name in mutations.
+	EdgeSquad = "squad"
 	// EdgeBiggestStats holds the string denoting the biggest_stats edge name in mutations.
 	EdgeBiggestStats = "biggest_stats"
 	// EdgeCardsStats holds the string denoting the cards_stats edge name in mutations.
@@ -46,8 +48,6 @@ const (
 	EdgeLineups = "lineups"
 	// EdgePenaltyStats holds the string denoting the penalty_stats edge name in mutations.
 	EdgePenaltyStats = "penalty_stats"
-	// EdgeTeam holds the string denoting the team edge name in mutations.
-	EdgeTeam = "team"
 	// Table holds the table name of the team in the database.
 	Table = "teams"
 	// SeasonTable is the table that holds the season relation/edge.
@@ -92,6 +92,13 @@ const (
 	PlayersInverseTable = "players"
 	// PlayersColumn is the table column denoting the players relation/edge.
 	PlayersColumn = "team_players"
+	// SquadTable is the table that holds the squad relation/edge.
+	SquadTable = "squads"
+	// SquadInverseTable is the table name for the Squad entity.
+	// It exists in this package in order to avoid circular dependency with the "squad" package.
+	SquadInverseTable = "squads"
+	// SquadColumn is the table column denoting the squad relation/edge.
+	SquadColumn = "team_squad"
 	// BiggestStatsTable is the table that holds the biggest_stats relation/edge.
 	BiggestStatsTable = "ts_biggests"
 	// BiggestStatsInverseTable is the table name for the TSBiggest entity.
@@ -148,13 +155,6 @@ const (
 	PenaltyStatsInverseTable = "ts_penalties"
 	// PenaltyStatsColumn is the table column denoting the penalty_stats relation/edge.
 	PenaltyStatsColumn = "team_penalty_stats"
-	// TeamTable is the table that holds the team relation/edge.
-	TeamTable = "player_seasons"
-	// TeamInverseTable is the table name for the PlayerSeason entity.
-	// It exists in this package in order to avoid circular dependency with the "playerseason" package.
-	TeamInverseTable = "player_seasons"
-	// TeamColumn is the table column denoting the team relation/edge.
-	TeamColumn = "team_team"
 )
 
 // Columns holds all SQL columns for team fields.
@@ -281,6 +281,20 @@ func ByPlayers(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 	}
 }
 
+// BySquadCount orders the results by squad count.
+func BySquadCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSquadStep(), opts...)
+	}
+}
+
+// BySquad orders the results by squad terms.
+func BySquad(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSquadStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByBiggestStatsField orders the results by biggest_stats field.
 func ByBiggestStatsField(field string, opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
@@ -343,20 +357,6 @@ func ByPenaltyStatsField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newPenaltyStatsStep(), sql.OrderByField(field, opts...))
 	}
 }
-
-// ByTeamCount orders the results by team count.
-func ByTeamCount(opts ...sql.OrderTermOption) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTeamStep(), opts...)
-	}
-}
-
-// ByTeam orders the results by team terms.
-func ByTeam(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newSeasonStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -397,6 +397,13 @@ func newPlayersStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayersInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, PlayersTable, PlayersColumn),
+	)
+}
+func newSquadStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SquadInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SquadTable, SquadColumn),
 	)
 }
 func newBiggestStatsStep() *sqlgraph.Step {
@@ -453,12 +460,5 @@ func newPenaltyStatsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PenaltyStatsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2O, false, PenaltyStatsTable, PenaltyStatsColumn),
-	)
-}
-func newTeamStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(TeamInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TeamTable, TeamColumn),
 	)
 }
