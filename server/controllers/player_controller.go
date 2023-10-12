@@ -3,14 +3,13 @@ package controllers
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/player"
-	"mapeleven/models"
+	"mapeleven/models/player_models"
 	"mapeleven/utils"
 	"net/http"
 	"path/filepath"
@@ -27,7 +26,6 @@ type PlayerStatistics struct {
 
 type LeaguePlayerInfo struct {
 	ID int `json:"id"`
-	// Add other fields as needed
 }
 
 type LeaguePlayer struct {
@@ -47,6 +45,7 @@ type PlayerInfo struct {
 	//Statistics []PlayerStatistics `json:"statistics"`
 }
 type LeaguePlayerResponse struct {
+	Results  int `json:"results"`
 	Response []struct {
 		Player struct {
 			ID int `json:"id"`
@@ -59,15 +58,16 @@ type Player struct {
 }
 
 type PlayerResponse struct {
+	Results  int      `json:"results"`
 	Response []Player `json:"response"`
 }
 
 type PlayerController struct {
 	client      *http.Client
-	playerModel *models.PlayerModel
+	playerModel *player_models.PlayerModel
 }
 
-func NewPlayerController(playerModel *models.PlayerModel) *PlayerController {
+func NewPlayerController(playerModel *player_models.PlayerModel) *PlayerController {
 	return &PlayerController{
 		client:      &http.Client{},
 		playerModel: playerModel,
@@ -96,14 +96,13 @@ func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) e
 	req.Header.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
 
+	fmt.Printf("Fetching player by ID: %d\n", playerID)
 	resp, err := pc.client.Do(req)
 	if err != nil {
 		return err
 	}
 	defer resp.Body.Close()
 
-	// Log the HTTP status code
-	fmt.Printf("Received HTTP status code: %d for playerID: %d\n", resp.StatusCode, playerID)
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Received non-OK HTTP status %d", resp.StatusCode)
 	}
@@ -112,28 +111,30 @@ func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) e
 	if err != nil {
 		return err
 	}
-
-	return pc.parsePlayerResponse(ctx, data)
+	return pc.parsePlayerResponse(ctx, data, playerID)
 }
 
-func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte) error {
+func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte, playerID int) error {
 	var response PlayerResponse
 	if err := json.Unmarshal(data, &response); err != nil {
 		return err
 	}
-	// Log additional information to debug an empty response
-	if len(response.Response) == 0 {
-		fmt.Println("Received empty response from API for data:", string(data))
-		return errors.New("response is empty")
+
+	// Check if the response is empty
+	if response.Results == 0 {
+		// Log the scenario and return without an error
+		fmt.Printf("No data available for playerID: %d for season 2022.\n", playerID)
+		return nil
 	}
 
 	p := response.Response[0].Player
+
 	if err := pc.downloadPhotoIfNeeded(&p); err != nil {
 		return err
 	}
 
-	input := models.CreatePlayerInput{
-		ApiFootballID: p.ID,
+	input := player_models.CreatePlayerInput{
+		ApiFootballId: p.ID,
 		Name:          p.Name,
 		Firstname:     p.Firstname,
 		Lastname:      p.Lastname,
@@ -142,8 +143,6 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 		Weight:        p.Weight,
 		Injured:       p.Injured,
 		Photo:         p.Photo,
-		//LeagueID:  p.Statistics[0].Team.League.ID,
-		//Season:    p.Statistics[0].Season,
 	}
 
 	err := pc.upsertPlayer(ctx, input)
@@ -154,12 +153,12 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 	return nil
 }
 
-func (pc *PlayerController) upsertPlayer(ctx context.Context, input models.CreatePlayerInput) error {
+func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_models.CreatePlayerInput) error {
 	return pc.playerModel.WithTransaction(ctx, func(tx *ent.Tx) error {
-		exists := tx.Player.Query().Where(player.ApiFootballIDEQ(input.ApiFootballID)).ExistX(ctx)
+		exists := tx.Player.Query().Where(player.ApiFootballIdEQ(input.ApiFootballId)).ExistX(ctx)
 		if exists {
-			updateInput := models.UpdatePlayerInput{
-				ApiFootballID: input.ApiFootballID,
+			updateInput := player_models.UpdatePlayerInput{
+				ApiFootballId: input.ApiFootballId,
 				Name:          &input.Name,
 				Firstname:     &input.Firstname,
 				Lastname:      &input.Lastname,

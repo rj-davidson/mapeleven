@@ -9,9 +9,9 @@ import (
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/squad"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"mapeleven/db/ent/tsbiggest"
@@ -164,6 +164,21 @@ func (tu *TeamUpdate) AddPlayers(p ...*Player) *TeamUpdate {
 	return tu.AddPlayerIDs(ids...)
 }
 
+// AddSquadIDs adds the "squad" edge to the Squad entity by IDs.
+func (tu *TeamUpdate) AddSquadIDs(ids ...int) *TeamUpdate {
+	tu.mutation.AddSquadIDs(ids...)
+	return tu
+}
+
+// AddSquad adds the "squad" edges to the Squad entity.
+func (tu *TeamUpdate) AddSquad(s ...*Squad) *TeamUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tu.AddSquadIDs(ids...)
+}
+
 // SetBiggestStatsID sets the "biggest_stats" edge to the TSBiggest entity by ID.
 func (tu *TeamUpdate) SetBiggestStatsID(id int) *TeamUpdate {
 	tu.mutation.SetBiggestStatsID(id)
@@ -312,21 +327,6 @@ func (tu *TeamUpdate) SetPenaltyStats(t *TSPenalty) *TeamUpdate {
 	return tu.SetPenaltyStatsID(t.ID)
 }
 
-// AddTeamIDs adds the "team" edge to the PlayerSeason entity by IDs.
-func (tu *TeamUpdate) AddTeamIDs(ids ...int) *TeamUpdate {
-	tu.mutation.AddTeamIDs(ids...)
-	return tu
-}
-
-// AddTeam adds the "team" edges to the PlayerSeason entity.
-func (tu *TeamUpdate) AddTeam(p ...*PlayerSeason) *TeamUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tu.AddTeamIDs(ids...)
-}
-
 // Mutation returns the TeamMutation object of the builder.
 func (tu *TeamUpdate) Mutation() *TeamMutation {
 	return tu.mutation
@@ -428,6 +428,27 @@ func (tu *TeamUpdate) RemovePlayers(p ...*Player) *TeamUpdate {
 	return tu.RemovePlayerIDs(ids...)
 }
 
+// ClearSquad clears all "squad" edges to the Squad entity.
+func (tu *TeamUpdate) ClearSquad() *TeamUpdate {
+	tu.mutation.ClearSquad()
+	return tu
+}
+
+// RemoveSquadIDs removes the "squad" edge to Squad entities by IDs.
+func (tu *TeamUpdate) RemoveSquadIDs(ids ...int) *TeamUpdate {
+	tu.mutation.RemoveSquadIDs(ids...)
+	return tu
+}
+
+// RemoveSquad removes "squad" edges to Squad entities.
+func (tu *TeamUpdate) RemoveSquad(s ...*Squad) *TeamUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tu.RemoveSquadIDs(ids...)
+}
+
 // ClearBiggestStats clears the "biggest_stats" edge to the TSBiggest entity.
 func (tu *TeamUpdate) ClearBiggestStats() *TeamUpdate {
 	tu.mutation.ClearBiggestStats()
@@ -489,27 +510,6 @@ func (tu *TeamUpdate) RemoveLineups(t ...*TSLineups) *TeamUpdate {
 func (tu *TeamUpdate) ClearPenaltyStats() *TeamUpdate {
 	tu.mutation.ClearPenaltyStats()
 	return tu
-}
-
-// ClearTeam clears all "team" edges to the PlayerSeason entity.
-func (tu *TeamUpdate) ClearTeam() *TeamUpdate {
-	tu.mutation.ClearTeam()
-	return tu
-}
-
-// RemoveTeamIDs removes the "team" edge to PlayerSeason entities by IDs.
-func (tu *TeamUpdate) RemoveTeamIDs(ids ...int) *TeamUpdate {
-	tu.mutation.RemoveTeamIDs(ids...)
-	return tu
-}
-
-// RemoveTeam removes "team" edges to PlayerSeason entities.
-func (tu *TeamUpdate) RemoveTeam(p ...*PlayerSeason) *TeamUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tu.RemoveTeamIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -818,6 +818,51 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tu.mutation.SquadCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.SquadTable,
+			Columns: []string{team.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.RemovedSquadIDs(); len(nodes) > 0 && !tu.mutation.SquadCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.SquadTable,
+			Columns: []string{team.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tu.mutation.SquadIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.SquadTable,
+			Columns: []string{team.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if tu.mutation.BiggestStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -1066,51 +1111,6 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.TeamCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.TeamTable,
-			Columns: []string{team.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.RemovedTeamIDs(); len(nodes) > 0 && !tu.mutation.TeamCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.TeamTable,
-			Columns: []string{team.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tu.mutation.TeamIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.TeamTable,
-			Columns: []string{team.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if n, err = sqlgraph.UpdateNodes(ctx, tu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{team.Label}
@@ -1251,6 +1251,21 @@ func (tuo *TeamUpdateOne) AddPlayers(p ...*Player) *TeamUpdateOne {
 		ids[i] = p[i].ID
 	}
 	return tuo.AddPlayerIDs(ids...)
+}
+
+// AddSquadIDs adds the "squad" edge to the Squad entity by IDs.
+func (tuo *TeamUpdateOne) AddSquadIDs(ids ...int) *TeamUpdateOne {
+	tuo.mutation.AddSquadIDs(ids...)
+	return tuo
+}
+
+// AddSquad adds the "squad" edges to the Squad entity.
+func (tuo *TeamUpdateOne) AddSquad(s ...*Squad) *TeamUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tuo.AddSquadIDs(ids...)
 }
 
 // SetBiggestStatsID sets the "biggest_stats" edge to the TSBiggest entity by ID.
@@ -1401,21 +1416,6 @@ func (tuo *TeamUpdateOne) SetPenaltyStats(t *TSPenalty) *TeamUpdateOne {
 	return tuo.SetPenaltyStatsID(t.ID)
 }
 
-// AddTeamIDs adds the "team" edge to the PlayerSeason entity by IDs.
-func (tuo *TeamUpdateOne) AddTeamIDs(ids ...int) *TeamUpdateOne {
-	tuo.mutation.AddTeamIDs(ids...)
-	return tuo
-}
-
-// AddTeam adds the "team" edges to the PlayerSeason entity.
-func (tuo *TeamUpdateOne) AddTeam(p ...*PlayerSeason) *TeamUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tuo.AddTeamIDs(ids...)
-}
-
 // Mutation returns the TeamMutation object of the builder.
 func (tuo *TeamUpdateOne) Mutation() *TeamMutation {
 	return tuo.mutation
@@ -1517,6 +1517,27 @@ func (tuo *TeamUpdateOne) RemovePlayers(p ...*Player) *TeamUpdateOne {
 	return tuo.RemovePlayerIDs(ids...)
 }
 
+// ClearSquad clears all "squad" edges to the Squad entity.
+func (tuo *TeamUpdateOne) ClearSquad() *TeamUpdateOne {
+	tuo.mutation.ClearSquad()
+	return tuo
+}
+
+// RemoveSquadIDs removes the "squad" edge to Squad entities by IDs.
+func (tuo *TeamUpdateOne) RemoveSquadIDs(ids ...int) *TeamUpdateOne {
+	tuo.mutation.RemoveSquadIDs(ids...)
+	return tuo
+}
+
+// RemoveSquad removes "squad" edges to Squad entities.
+func (tuo *TeamUpdateOne) RemoveSquad(s ...*Squad) *TeamUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tuo.RemoveSquadIDs(ids...)
+}
+
 // ClearBiggestStats clears the "biggest_stats" edge to the TSBiggest entity.
 func (tuo *TeamUpdateOne) ClearBiggestStats() *TeamUpdateOne {
 	tuo.mutation.ClearBiggestStats()
@@ -1578,27 +1599,6 @@ func (tuo *TeamUpdateOne) RemoveLineups(t ...*TSLineups) *TeamUpdateOne {
 func (tuo *TeamUpdateOne) ClearPenaltyStats() *TeamUpdateOne {
 	tuo.mutation.ClearPenaltyStats()
 	return tuo
-}
-
-// ClearTeam clears all "team" edges to the PlayerSeason entity.
-func (tuo *TeamUpdateOne) ClearTeam() *TeamUpdateOne {
-	tuo.mutation.ClearTeam()
-	return tuo
-}
-
-// RemoveTeamIDs removes the "team" edge to PlayerSeason entities by IDs.
-func (tuo *TeamUpdateOne) RemoveTeamIDs(ids ...int) *TeamUpdateOne {
-	tuo.mutation.RemoveTeamIDs(ids...)
-	return tuo
-}
-
-// RemoveTeam removes "team" edges to PlayerSeason entities.
-func (tuo *TeamUpdateOne) RemoveTeam(p ...*PlayerSeason) *TeamUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tuo.RemoveTeamIDs(ids...)
 }
 
 // Where appends a list predicates to the TeamUpdate builder.
@@ -1937,6 +1937,51 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if tuo.mutation.SquadCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.SquadTable,
+			Columns: []string{team.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.RemovedSquadIDs(); len(nodes) > 0 && !tuo.mutation.SquadCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.SquadTable,
+			Columns: []string{team.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := tuo.mutation.SquadIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.SquadTable,
+			Columns: []string{team.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if tuo.mutation.BiggestStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -2178,51 +2223,6 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(tspenalty.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if tuo.mutation.TeamCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.TeamTable,
-			Columns: []string{team.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.RemovedTeamIDs(); len(nodes) > 0 && !tuo.mutation.TeamCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.TeamTable,
-			Columns: []string{team.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := tuo.mutation.TeamIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.TeamTable,
-			Columns: []string{team.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

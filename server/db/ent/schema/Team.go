@@ -38,6 +38,7 @@ func (Team) Edges() []ent.Edge {
 		edge.To("homeFixtures", Fixture.Type),
 		edge.To("awayFixtures", Fixture.Type),
 		edge.To("players", Player.Type),
+		edge.To("squad", Squad.Type),
 
 		// Team Statistics
 		edge.To("biggest_stats", TSBiggest.Type).
@@ -55,6 +56,5 @@ func (Team) Edges() []ent.Edge {
 		edge.To("lineups", TSLineups.Type),
 		edge.To("penalty_stats", TSPenalty.Type).
 			Unique(),
-		edge.To("team", PlayerSeason.Type),
 	}
 }

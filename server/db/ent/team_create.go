@@ -9,8 +9,8 @@ import (
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/squad"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"mapeleven/db/ent/tsbiggest"
@@ -150,6 +150,21 @@ func (tc *TeamCreate) AddPlayers(p ...*Player) *TeamCreate {
 		ids[i] = p[i].ID
 	}
 	return tc.AddPlayerIDs(ids...)
+}
+
+// AddSquadIDs adds the "squad" edge to the Squad entity by IDs.
+func (tc *TeamCreate) AddSquadIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddSquadIDs(ids...)
+	return tc
+}
+
+// AddSquad adds the "squad" edges to the Squad entity.
+func (tc *TeamCreate) AddSquad(s ...*Squad) *TeamCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return tc.AddSquadIDs(ids...)
 }
 
 // SetBiggestStatsID sets the "biggest_stats" edge to the TSBiggest entity by ID.
@@ -298,21 +313,6 @@ func (tc *TeamCreate) SetNillablePenaltyStatsID(id *int) *TeamCreate {
 // SetPenaltyStats sets the "penalty_stats" edge to the TSPenalty entity.
 func (tc *TeamCreate) SetPenaltyStats(t *TSPenalty) *TeamCreate {
 	return tc.SetPenaltyStatsID(t.ID)
-}
-
-// AddTeamIDs adds the "team" edge to the PlayerSeason entity by IDs.
-func (tc *TeamCreate) AddTeamIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddTeamIDs(ids...)
-	return tc
-}
-
-// AddTeam adds the "team" edges to the PlayerSeason entity.
-func (tc *TeamCreate) AddTeam(p ...*PlayerSeason) *TeamCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tc.AddTeamIDs(ids...)
 }
 
 // Mutation returns the TeamMutation object of the builder.
@@ -493,6 +493,22 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := tc.mutation.SquadIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.SquadTable,
+			Columns: []string{team.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := tc.mutation.BiggestStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -614,22 +630,6 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(tspenalty.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.TeamIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.TeamTable,
-			Columns: []string{team.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerseason.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

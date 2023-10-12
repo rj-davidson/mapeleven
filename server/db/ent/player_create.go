@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/birth"
+	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/player"
+	"mapeleven/db/ent/squad"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,15 +22,15 @@ type PlayerCreate struct {
 	hooks    []Hook
 }
 
-// SetApiFootballID sets the "ApiFootballID" field.
-func (pc *PlayerCreate) SetApiFootballID(i int) *PlayerCreate {
-	pc.mutation.SetApiFootballID(i)
-	return pc
-}
-
 // SetSlug sets the "slug" field.
 func (pc *PlayerCreate) SetSlug(s string) *PlayerCreate {
 	pc.mutation.SetSlug(s)
+	return pc
+}
+
+// SetApiFootballId sets the "ApiFootballId" field.
+func (pc *PlayerCreate) SetApiFootballId(i int) *PlayerCreate {
+	pc.mutation.SetApiFootballId(i)
 	return pc
 }
 
@@ -99,6 +101,40 @@ func (pc *PlayerCreate) SetBirth(b *Birth) *PlayerCreate {
 	return pc.SetBirthID(b.ID)
 }
 
+// SetNationalityID sets the "nationality" edge to the Country entity by ID.
+func (pc *PlayerCreate) SetNationalityID(id int) *PlayerCreate {
+	pc.mutation.SetNationalityID(id)
+	return pc
+}
+
+// SetNillableNationalityID sets the "nationality" edge to the Country entity by ID if the given value is not nil.
+func (pc *PlayerCreate) SetNillableNationalityID(id *int) *PlayerCreate {
+	if id != nil {
+		pc = pc.SetNationalityID(*id)
+	}
+	return pc
+}
+
+// SetNationality sets the "nationality" edge to the Country entity.
+func (pc *PlayerCreate) SetNationality(c *Country) *PlayerCreate {
+	return pc.SetNationalityID(c.ID)
+}
+
+// AddSquadIDs adds the "squad" edge to the Squad entity by IDs.
+func (pc *PlayerCreate) AddSquadIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddSquadIDs(ids...)
+	return pc
+}
+
+// AddSquad adds the "squad" edges to the Squad entity.
+func (pc *PlayerCreate) AddSquad(s ...*Squad) *PlayerCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return pc.AddSquadIDs(ids...)
+}
+
 // Mutation returns the PlayerMutation object of the builder.
 func (pc *PlayerCreate) Mutation() *PlayerMutation {
 	return pc.mutation
@@ -133,11 +169,11 @@ func (pc *PlayerCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (pc *PlayerCreate) check() error {
-	if _, ok := pc.mutation.ApiFootballID(); !ok {
-		return &ValidationError{Name: "ApiFootballID", err: errors.New(`ent: missing required field "Player.ApiFootballID"`)}
-	}
 	if _, ok := pc.mutation.Slug(); !ok {
 		return &ValidationError{Name: "slug", err: errors.New(`ent: missing required field "Player.slug"`)}
+	}
+	if _, ok := pc.mutation.ApiFootballId(); !ok {
+		return &ValidationError{Name: "ApiFootballId", err: errors.New(`ent: missing required field "Player.ApiFootballId"`)}
 	}
 	if _, ok := pc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "Player.name"`)}
@@ -189,13 +225,13 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 		_node = &Player{config: pc.config}
 		_spec = sqlgraph.NewCreateSpec(player.Table, sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt))
 	)
-	if value, ok := pc.mutation.ApiFootballID(); ok {
-		_spec.SetField(player.FieldApiFootballID, field.TypeInt, value)
-		_node.ApiFootballID = value
-	}
 	if value, ok := pc.mutation.Slug(); ok {
 		_spec.SetField(player.FieldSlug, field.TypeString, value)
 		_node.Slug = value
+	}
+	if value, ok := pc.mutation.ApiFootballId(); ok {
+		_spec.SetField(player.FieldApiFootballId, field.TypeInt, value)
+		_node.ApiFootballId = value
 	}
 	if value, ok := pc.mutation.Name(); ok {
 		_spec.SetField(player.FieldName, field.TypeString, value)
@@ -244,6 +280,39 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.birth_player = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.NationalityIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   player.NationalityTable,
+			Columns: []string{player.NationalityColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(country.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.country_players = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.SquadIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.SquadTable,
+			Columns: []string{player.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
