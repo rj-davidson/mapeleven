@@ -15,8 +15,9 @@ type APITeamName struct {
 }
 
 type APICompetitions struct {
-	LeagueItem APILeague `json:"league"`
-	Current    bool      `json:"current"`
+	LeagueItem APILeague    `json:"league"`
+	Current    bool         `json:"current"`
+	Stats      APITeamStats `json:"stats,omitempty"`
 }
 
 type APITeamStats struct {
@@ -39,7 +40,6 @@ type APITeam struct {
 	NationalTeam bool              `json:"nationalTeam,omitempty"`
 	Country      APICountry        `json:"country,omitempty"`
 	Competitions []APICompetitions `json:"competitions,omitempty"`
-	Stats        APITeamStats      `json:"stats,omitempty"`
 }
 
 type TeamSerializer struct {
@@ -50,10 +50,11 @@ func NewTeamSerializer(client *ent.Client) *TeamSerializer {
 	return &TeamSerializer{client: client}
 }
 
-func SerializeTeam(club *ent.Club) *APITeam {
-	var tsList = make([]APITeamStats, 0)
+func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
+	ls := NewLeagueSerializer(ts.client)
+	var compList = make([]APICompetitions, 0)
 	for _, t := range club.Edges.Team {
-		tsList = append(tsList, APITeamStats{
+		tsList := APITeamStats{
 			Form:          t.Form,
 			Biggest:       teamstats_serializer.SerializeTSBiggest(t.Edges.BiggestStats),
 			Cards:         teamstats_serializer.SerializeTSCards(t.Edges.CardsStats),
@@ -63,8 +64,18 @@ func SerializeTeam(club *ent.Club) *APITeam {
 			Goals:         teamstats_serializer.SerializeTSGoals(t.Edges.GoalsStats),
 			Lineups:       teamstats_serializer.SerializeTSLineups(t.Edges.Lineups),
 			Penalty:       teamstats_serializer.SerializeTSPenalty(t.Edges.PenaltyStats),
+		}
+		li, err := ls.Serialize(t.Edges.Season.Edges.League)
+		if err != nil {
+			continue
+		}
+		compList = append(compList, APICompetitions{
+			LeagueItem: *li,
+			Current:    t.Edges.Season.Current,
+			Stats:      tsList,
 		})
 	}
+
 	return &APITeam{
 		Slug:         club.Slug,
 		Name:         APITeamName{Long: club.Name, Short: club.Code},
@@ -76,7 +87,7 @@ func SerializeTeam(club *ent.Club) *APITeam {
 			Name: club.Edges.Country.Name,
 			Flag: club.Edges.Country.Flag,
 		},
-		Stats: tsList[len(tsList)-1],
+		Competitions: compList,
 	}
 }
 
@@ -93,7 +104,12 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 			func(q *ent.TeamQuery) {
 				q.WithSeason(
 					func(q *ent.SeasonQuery) {
-						q.Where(season.YearEQ(year.Year()))
+						q.Where(season.YearEQ(year.Year())).
+							WithLeague(
+								func(q *ent.LeagueQuery) {
+									q.WithCountry()
+								},
+							)
 					},
 				)
 				q.WithBiggestStats()
@@ -113,7 +129,7 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 		return nil, err
 	}
 
-	return SerializeTeam(t), nil
+	return ts.SerializeTeam(t), nil
 }
 
 func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*APITeam, error) {
@@ -128,7 +144,12 @@ func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*AP
 			func(q *ent.TeamQuery) {
 				q.WithSeason(
 					func(q *ent.SeasonQuery) {
-						q.Where(season.YearEQ(year.Year()))
+						q.Where(season.YearEQ(year.Year())).
+							WithLeague(
+								func(q *ent.LeagueQuery) {
+									q.WithCountry()
+								},
+							)
 					},
 				)
 				q.WithBiggestStats()
@@ -148,7 +169,7 @@ func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*AP
 
 	var teamItems []*APITeam
 	for _, t := range teams {
-		teamItems = append(teamItems, SerializeTeam(t))
+		teamItems = append(teamItems, ts.SerializeTeam(t))
 	}
 
 	return teamItems, nil

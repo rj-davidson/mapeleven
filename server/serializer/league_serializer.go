@@ -25,7 +25,7 @@ func NewLeagueSerializer(client *ent.Client) *LeagueSerializer {
 	return &LeagueSerializer{client: client}
 }
 
-func SerializeLeague(league *ent.League) (*APILeague, error) {
+func serializeLeague(league *ent.League) (*APILeague, error) {
 	countryItem, err := SerializeCountry(league.Edges.Country)
 	APIStandings := make([]APIStanding, 0, len(league.Edges.Season))
 	for _, s := range league.Edges.Season {
@@ -51,6 +51,10 @@ func SerializeLeague(league *ent.League) (*APILeague, error) {
 	}, nil
 }
 
+func (ls *LeagueSerializer) Serialize(league *ent.League) (*APILeague, error) {
+	return serializeLeague(league)
+}
+
 func (ls *LeagueSerializer) GetLeagueBySlug(ctx context.Context, slug string) (*APILeague, error) {
 	l, err := ls.client.League.
 		Query().
@@ -68,7 +72,7 @@ func (ls *LeagueSerializer) GetLeagueBySlug(ctx context.Context, slug string) (*
 		return nil, err
 	}
 
-	return SerializeLeague(l)
+	return serializeLeague(l)
 }
 
 func (ls *LeagueSerializer) GetCurrentLeagues(ctx context.Context) ([]*APILeague, error) {
@@ -89,7 +93,7 @@ func (ls *LeagueSerializer) GetCurrentLeagues(ctx context.Context) ([]*APILeague
 
 	leagueItems := make([]*APILeague, len(leagues))
 	for i, l := range leagues {
-		leagueItems[i], err = SerializeLeague(l)
+		leagueItems[i], err = serializeLeague(l)
 		if err != nil {
 			return nil, err
 		}

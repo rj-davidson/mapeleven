@@ -82,10 +82,10 @@ func fetchLeagues(leagueModel *models.LeagueModel, seasonModel *models.SeasonMod
 	premierLeagueID := 39
 	//serieAID := 61
 	//ligue1ID := 71
-	bundesligaID := 78
-	laLigaID := 140
+	//bundesligaID := 78
+	//laLigaID := 140
 	majorleaguesoccerID := 253
-	leagueIDs := []int{laLigaID, bundesligaID, premierLeagueID, majorleaguesoccerID, championsLeagueID}
+	leagueIDs := []int{premierLeagueID, majorleaguesoccerID, championsLeagueID}
 	//leagueIDs := []int{majorleaguesoccerID, championsLeagueID, europaLeagueID}
 
 	leagueController := NewLeagueController(leagueModel, seasonModel)
