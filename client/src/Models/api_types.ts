@@ -82,7 +82,6 @@ interface APITeam {
     nationalTeam?: boolean;
     country?: APICountry;
     competitions?: APICompetitions[];
-    Stats?: APITeamStats;
 }
 
 export interface APITeamStats {
@@ -173,6 +172,7 @@ export interface APITSPenalty {
 interface APICompetitions {
     League: APILeague;
     Current: boolean;
+    Stats?: APITeamStats;
 }
 
 interface APIStandings {

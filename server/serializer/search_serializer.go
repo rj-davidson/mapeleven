@@ -4,6 +4,7 @@ import (
 	"context"
 	"mapeleven/db/ent"
 	"mapeleven/models"
+	"mapeleven/models/player_models"
 )
 
 type APISearch struct {
@@ -38,7 +39,7 @@ func SearchSerializer(client *ent.Client) ([]APISearch, error) {
 		})
 	}
 
-	playerModel := models.NewPlayerModel(client)
+	playerModel := player_models.NewPlayerModel(client)
 	players, err := playerModel.ListPlayers(context.Background())
 	for _, player := range players {
 		searchItems = append(searchItems, APISearch{

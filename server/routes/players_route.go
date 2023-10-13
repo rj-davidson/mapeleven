@@ -6,13 +6,13 @@ import (
 	"github.com/spf13/viper"
 	"log"
 	"mapeleven/db/ent"
-	"mapeleven/models"
+	"mapeleven/models/player_models"
 	"strconv"
 )
 
 // SetupPlayersRoutes sets up the routes for managing players.
 func SetupPlayersRoutes(app *fiber.App, client *ent.Client) {
-	playerModel := models.NewPlayerModel(client)
+	playerModel := player_models.NewPlayerModel(client)
 
 	// Get all players
 	app.Get(viper.GetString("ENV_PATH")+"/players", func(c *fiber.Ctx) error {

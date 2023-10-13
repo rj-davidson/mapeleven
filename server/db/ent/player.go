@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"mapeleven/db/ent/birth"
+	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/player"
 	"strings"
 
@@ -17,10 +18,10 @@ type Player struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// ApiFootballID holds the value of the "ApiFootballID" field.
-	ApiFootballID int `json:"ApiFootballID,omitempty"`
 	// Slug holds the value of the "slug" field.
 	Slug string `json:"slug,omitempty"`
+	// ApiFootballId holds the value of the "ApiFootballId" field.
+	ApiFootballId int `json:"ApiFootballId,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
 	// Firstname holds the value of the "firstname" field.
@@ -50,9 +51,13 @@ type Player struct {
 type PlayerEdges struct {
 	// Birth holds the value of the birth edge.
 	Birth *Birth `json:"birth,omitempty"`
+	// Nationality holds the value of the nationality edge.
+	Nationality *Country `json:"nationality,omitempty"`
+	// Squad holds the value of the squad edge.
+	Squad []*Squad `json:"squad,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [3]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -68,6 +73,28 @@ func (e PlayerEdges) BirthOrErr() (*Birth, error) {
 	return nil, &NotLoadedError{edge: "birth"}
 }
 
+// NationalityOrErr returns the Nationality value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerEdges) NationalityOrErr() (*Country, error) {
+	if e.loadedTypes[1] {
+		if e.Nationality == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: country.Label}
+		}
+		return e.Nationality, nil
+	}
+	return nil, &NotLoadedError{edge: "nationality"}
+}
+
+// SquadOrErr returns the Squad value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) SquadOrErr() ([]*Squad, error) {
+	if e.loadedTypes[2] {
+		return e.Squad, nil
+	}
+	return nil, &NotLoadedError{edge: "squad"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Player) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -75,7 +102,7 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case player.FieldInjured:
 			values[i] = new(sql.NullBool)
-		case player.FieldID, player.FieldApiFootballID, player.FieldAge:
+		case player.FieldID, player.FieldApiFootballId, player.FieldAge:
 			values[i] = new(sql.NullInt64)
 		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto:
 			values[i] = new(sql.NullString)
@@ -106,17 +133,17 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pl.ID = int(value.Int64)
-		case player.FieldApiFootballID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field ApiFootballID", values[i])
-			} else if value.Valid {
-				pl.ApiFootballID = int(value.Int64)
-			}
 		case player.FieldSlug:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field slug", values[i])
 			} else if value.Valid {
 				pl.Slug = value.String
+			}
+		case player.FieldApiFootballId:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field ApiFootballId", values[i])
+			} else if value.Valid {
+				pl.ApiFootballId = int(value.Int64)
 			}
 		case player.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -205,6 +232,16 @@ func (pl *Player) QueryBirth() *BirthQuery {
 	return NewPlayerClient(pl.config).QueryBirth(pl)
 }
 
+// QueryNationality queries the "nationality" edge of the Player entity.
+func (pl *Player) QueryNationality() *CountryQuery {
+	return NewPlayerClient(pl.config).QueryNationality(pl)
+}
+
+// QuerySquad queries the "squad" edge of the Player entity.
+func (pl *Player) QuerySquad() *SquadQuery {
+	return NewPlayerClient(pl.config).QuerySquad(pl)
+}
+
 // Update returns a builder for updating this Player.
 // Note that you need to call Player.Unwrap() before calling this method if this Player
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -228,11 +265,11 @@ func (pl *Player) String() string {
 	var builder strings.Builder
 	builder.WriteString("Player(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pl.ID))
-	builder.WriteString("ApiFootballID=")
-	builder.WriteString(fmt.Sprintf("%v", pl.ApiFootballID))
-	builder.WriteString(", ")
 	builder.WriteString("slug=")
 	builder.WriteString(pl.Slug)
+	builder.WriteString(", ")
+	builder.WriteString("ApiFootballId=")
+	builder.WriteString(fmt.Sprintf("%v", pl.ApiFootballId))
 	builder.WriteString(", ")
 	builder.WriteString("name=")
 	builder.WriteString(pl.Name)

@@ -9,9 +9,6 @@ import (
 	"mapeleven/db/ent/team"
 )
 
-type Team struct {
-}
-
 type TeamModel struct {
 	client *ent.Client
 }

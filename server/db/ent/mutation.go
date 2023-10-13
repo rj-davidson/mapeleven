@@ -12,9 +12,9 @@ import (
 	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
-	"mapeleven/db/ent/playerseason"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
+	"mapeleven/db/ent/squad"
 	"mapeleven/db/ent/standings"
 	"mapeleven/db/ent/team"
 	"mapeleven/db/ent/tsbiggest"
@@ -47,8 +47,8 @@ const (
 	TypeFixture         = "Fixture"
 	TypeLeague          = "League"
 	TypePlayer          = "Player"
-	TypePlayerSeason    = "PlayerSeason"
 	TypeSeason          = "Season"
+	TypeSquad           = "Squad"
 	TypeStandings       = "Standings"
 	TypeTSBiggest       = "TSBiggest"
 	TypeTSCards         = "TSCards"
@@ -591,30 +591,27 @@ func (m *BirthMutation) ResetEdge(name string) error {
 // ClubMutation represents an operation that mutates the Club nodes in the graph.
 type ClubMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *int
-	apiFootballId        *int
-	addapiFootballId     *int
-	slug                 *string
-	name                 *string
-	code                 *string
-	founded              *int
-	addfounded           *int
-	national             *bool
-	logo                 *string
-	clearedFields        map[string]struct{}
-	country              *int
-	clearedcountry       bool
-	team                 map[int]struct{}
-	removedteam          map[int]struct{}
-	clearedteam          bool
-	playerSeasons        map[int]struct{}
-	removedplayerSeasons map[int]struct{}
-	clearedplayerSeasons bool
-	done                 bool
-	oldValue             func(context.Context) (*Club, error)
-	predicates           []predicate.Club
+	op               Op
+	typ              string
+	id               *int
+	apiFootballId    *int
+	addapiFootballId *int
+	slug             *string
+	name             *string
+	code             *string
+	founded          *int
+	addfounded       *int
+	national         *bool
+	logo             *string
+	clearedFields    map[string]struct{}
+	country          *int
+	clearedcountry   bool
+	team             map[int]struct{}
+	removedteam      map[int]struct{}
+	clearedteam      bool
+	done             bool
+	oldValue         func(context.Context) (*Club, error)
+	predicates       []predicate.Club
 }
 
 var _ ent.Mutation = (*ClubMutation)(nil)
@@ -1100,60 +1097,6 @@ func (m *ClubMutation) ResetTeam() {
 	m.removedteam = nil
 }
 
-// AddPlayerSeasonIDs adds the "playerSeasons" edge to the PlayerSeason entity by ids.
-func (m *ClubMutation) AddPlayerSeasonIDs(ids ...int) {
-	if m.playerSeasons == nil {
-		m.playerSeasons = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.playerSeasons[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPlayerSeasons clears the "playerSeasons" edge to the PlayerSeason entity.
-func (m *ClubMutation) ClearPlayerSeasons() {
-	m.clearedplayerSeasons = true
-}
-
-// PlayerSeasonsCleared reports if the "playerSeasons" edge to the PlayerSeason entity was cleared.
-func (m *ClubMutation) PlayerSeasonsCleared() bool {
-	return m.clearedplayerSeasons
-}
-
-// RemovePlayerSeasonIDs removes the "playerSeasons" edge to the PlayerSeason entity by IDs.
-func (m *ClubMutation) RemovePlayerSeasonIDs(ids ...int) {
-	if m.removedplayerSeasons == nil {
-		m.removedplayerSeasons = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.playerSeasons, ids[i])
-		m.removedplayerSeasons[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPlayerSeasons returns the removed IDs of the "playerSeasons" edge to the PlayerSeason entity.
-func (m *ClubMutation) RemovedPlayerSeasonsIDs() (ids []int) {
-	for id := range m.removedplayerSeasons {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PlayerSeasonsIDs returns the "playerSeasons" edge IDs in the mutation.
-func (m *ClubMutation) PlayerSeasonsIDs() (ids []int) {
-	for id := range m.playerSeasons {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPlayerSeasons resets all changes to the "playerSeasons" edge.
-func (m *ClubMutation) ResetPlayerSeasons() {
-	m.playerSeasons = nil
-	m.clearedplayerSeasons = false
-	m.removedplayerSeasons = nil
-}
-
 // Where appends a list predicates to the ClubMutation builder.
 func (m *ClubMutation) Where(ps ...predicate.Club) {
 	m.predicates = append(m.predicates, ps...)
@@ -1416,15 +1359,12 @@ func (m *ClubMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ClubMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.country != nil {
 		edges = append(edges, club.EdgeCountry)
 	}
 	if m.team != nil {
 		edges = append(edges, club.EdgeTeam)
-	}
-	if m.playerSeasons != nil {
-		edges = append(edges, club.EdgePlayerSeasons)
 	}
 	return edges
 }
@@ -1443,24 +1383,15 @@ func (m *ClubMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case club.EdgePlayerSeasons:
-		ids := make([]ent.Value, 0, len(m.playerSeasons))
-		for id := range m.playerSeasons {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ClubMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.removedteam != nil {
 		edges = append(edges, club.EdgeTeam)
-	}
-	if m.removedplayerSeasons != nil {
-		edges = append(edges, club.EdgePlayerSeasons)
 	}
 	return edges
 }
@@ -1475,27 +1406,18 @@ func (m *ClubMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case club.EdgePlayerSeasons:
-		ids := make([]ent.Value, 0, len(m.removedplayerSeasons))
-		for id := range m.removedplayerSeasons {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ClubMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedcountry {
 		edges = append(edges, club.EdgeCountry)
 	}
 	if m.clearedteam {
 		edges = append(edges, club.EdgeTeam)
-	}
-	if m.clearedplayerSeasons {
-		edges = append(edges, club.EdgePlayerSeasons)
 	}
 	return edges
 }
@@ -1508,8 +1430,6 @@ func (m *ClubMutation) EdgeCleared(name string) bool {
 		return m.clearedcountry
 	case club.EdgeTeam:
 		return m.clearedteam
-	case club.EdgePlayerSeasons:
-		return m.clearedplayerSeasons
 	}
 	return false
 }
@@ -1534,9 +1454,6 @@ func (m *ClubMutation) ResetEdge(name string) error {
 		return nil
 	case club.EdgeTeam:
 		m.ResetTeam()
-		return nil
-	case club.EdgePlayerSeasons:
-		m.ResetPlayerSeasons()
 		return nil
 	}
 	return fmt.Errorf("unknown Club edge %s", name)
@@ -4254,27 +4171,32 @@ func (m *LeagueMutation) ResetEdge(name string) error {
 // PlayerMutation represents an operation that mutates the Player nodes in the graph.
 type PlayerMutation struct {
 	config
-	op                Op
-	typ               string
-	id                *int
-	_ApiFootballID    *int
-	add_ApiFootballID *int
-	slug              *string
-	name              *string
-	firstname         *string
-	lastname          *string
-	age               *int
-	addage            *int
-	height            *string
-	weight            *string
-	injured           *bool
-	photo             *string
-	clearedFields     map[string]struct{}
-	birth             *int
-	clearedbirth      bool
-	done              bool
-	oldValue          func(context.Context) (*Player, error)
-	predicates        []predicate.Player
+	op                 Op
+	typ                string
+	id                 *int
+	slug               *string
+	_ApiFootballId     *int
+	add_ApiFootballId  *int
+	name               *string
+	firstname          *string
+	lastname           *string
+	age                *int
+	addage             *int
+	height             *string
+	weight             *string
+	injured            *bool
+	photo              *string
+	clearedFields      map[string]struct{}
+	birth              *int
+	clearedbirth       bool
+	nationality        *int
+	clearednationality bool
+	squad              map[int]struct{}
+	removedsquad       map[int]struct{}
+	clearedsquad       bool
+	done               bool
+	oldValue           func(context.Context) (*Player, error)
+	predicates         []predicate.Player
 }
 
 var _ ent.Mutation = (*PlayerMutation)(nil)
@@ -4375,62 +4297,6 @@ func (m *PlayerMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetApiFootballID sets the "ApiFootballID" field.
-func (m *PlayerMutation) SetApiFootballID(i int) {
-	m._ApiFootballID = &i
-	m.add_ApiFootballID = nil
-}
-
-// ApiFootballID returns the value of the "ApiFootballID" field in the mutation.
-func (m *PlayerMutation) ApiFootballID() (r int, exists bool) {
-	v := m._ApiFootballID
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldApiFootballID returns the old "ApiFootballID" field's value of the Player entity.
-// If the Player object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerMutation) OldApiFootballID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldApiFootballID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldApiFootballID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldApiFootballID: %w", err)
-	}
-	return oldValue.ApiFootballID, nil
-}
-
-// AddApiFootballID adds i to the "ApiFootballID" field.
-func (m *PlayerMutation) AddApiFootballID(i int) {
-	if m.add_ApiFootballID != nil {
-		*m.add_ApiFootballID += i
-	} else {
-		m.add_ApiFootballID = &i
-	}
-}
-
-// AddedApiFootballID returns the value that was added to the "ApiFootballID" field in this mutation.
-func (m *PlayerMutation) AddedApiFootballID() (r int, exists bool) {
-	v := m.add_ApiFootballID
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetApiFootballID resets all changes to the "ApiFootballID" field.
-func (m *PlayerMutation) ResetApiFootballID() {
-	m._ApiFootballID = nil
-	m.add_ApiFootballID = nil
-}
-
 // SetSlug sets the "slug" field.
 func (m *PlayerMutation) SetSlug(s string) {
 	m.slug = &s
@@ -4465,6 +4331,62 @@ func (m *PlayerMutation) OldSlug(ctx context.Context) (v string, err error) {
 // ResetSlug resets all changes to the "slug" field.
 func (m *PlayerMutation) ResetSlug() {
 	m.slug = nil
+}
+
+// SetApiFootballId sets the "ApiFootballId" field.
+func (m *PlayerMutation) SetApiFootballId(i int) {
+	m._ApiFootballId = &i
+	m.add_ApiFootballId = nil
+}
+
+// ApiFootballId returns the value of the "ApiFootballId" field in the mutation.
+func (m *PlayerMutation) ApiFootballId() (r int, exists bool) {
+	v := m._ApiFootballId
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldApiFootballId returns the old "ApiFootballId" field's value of the Player entity.
+// If the Player object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlayerMutation) OldApiFootballId(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldApiFootballId is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldApiFootballId requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldApiFootballId: %w", err)
+	}
+	return oldValue.ApiFootballId, nil
+}
+
+// AddApiFootballId adds i to the "ApiFootballId" field.
+func (m *PlayerMutation) AddApiFootballId(i int) {
+	if m.add_ApiFootballId != nil {
+		*m.add_ApiFootballId += i
+	} else {
+		m.add_ApiFootballId = &i
+	}
+}
+
+// AddedApiFootballId returns the value that was added to the "ApiFootballId" field in this mutation.
+func (m *PlayerMutation) AddedApiFootballId() (r int, exists bool) {
+	v := m.add_ApiFootballId
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetApiFootballId resets all changes to the "ApiFootballId" field.
+func (m *PlayerMutation) ResetApiFootballId() {
+	m._ApiFootballId = nil
+	m.add_ApiFootballId = nil
 }
 
 // SetName sets the "name" field.
@@ -4814,6 +4736,99 @@ func (m *PlayerMutation) ResetBirth() {
 	m.clearedbirth = false
 }
 
+// SetNationalityID sets the "nationality" edge to the Country entity by id.
+func (m *PlayerMutation) SetNationalityID(id int) {
+	m.nationality = &id
+}
+
+// ClearNationality clears the "nationality" edge to the Country entity.
+func (m *PlayerMutation) ClearNationality() {
+	m.clearednationality = true
+}
+
+// NationalityCleared reports if the "nationality" edge to the Country entity was cleared.
+func (m *PlayerMutation) NationalityCleared() bool {
+	return m.clearednationality
+}
+
+// NationalityID returns the "nationality" edge ID in the mutation.
+func (m *PlayerMutation) NationalityID() (id int, exists bool) {
+	if m.nationality != nil {
+		return *m.nationality, true
+	}
+	return
+}
+
+// NationalityIDs returns the "nationality" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// NationalityID instead. It exists only for internal usage by the builders.
+func (m *PlayerMutation) NationalityIDs() (ids []int) {
+	if id := m.nationality; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetNationality resets all changes to the "nationality" edge.
+func (m *PlayerMutation) ResetNationality() {
+	m.nationality = nil
+	m.clearednationality = false
+}
+
+// AddSquadIDs adds the "squad" edge to the Squad entity by ids.
+func (m *PlayerMutation) AddSquadIDs(ids ...int) {
+	if m.squad == nil {
+		m.squad = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.squad[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSquad clears the "squad" edge to the Squad entity.
+func (m *PlayerMutation) ClearSquad() {
+	m.clearedsquad = true
+}
+
+// SquadCleared reports if the "squad" edge to the Squad entity was cleared.
+func (m *PlayerMutation) SquadCleared() bool {
+	return m.clearedsquad
+}
+
+// RemoveSquadIDs removes the "squad" edge to the Squad entity by IDs.
+func (m *PlayerMutation) RemoveSquadIDs(ids ...int) {
+	if m.removedsquad == nil {
+		m.removedsquad = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.squad, ids[i])
+		m.removedsquad[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSquad returns the removed IDs of the "squad" edge to the Squad entity.
+func (m *PlayerMutation) RemovedSquadIDs() (ids []int) {
+	for id := range m.removedsquad {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SquadIDs returns the "squad" edge IDs in the mutation.
+func (m *PlayerMutation) SquadIDs() (ids []int) {
+	for id := range m.squad {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSquad resets all changes to the "squad" edge.
+func (m *PlayerMutation) ResetSquad() {
+	m.squad = nil
+	m.clearedsquad = false
+	m.removedsquad = nil
+}
+
 // Where appends a list predicates to the PlayerMutation builder.
 func (m *PlayerMutation) Where(ps ...predicate.Player) {
 	m.predicates = append(m.predicates, ps...)
@@ -4849,11 +4864,11 @@ func (m *PlayerMutation) Type() string {
 // AddedFields().
 func (m *PlayerMutation) Fields() []string {
 	fields := make([]string, 0, 10)
-	if m._ApiFootballID != nil {
-		fields = append(fields, player.FieldApiFootballID)
-	}
 	if m.slug != nil {
 		fields = append(fields, player.FieldSlug)
+	}
+	if m._ApiFootballId != nil {
+		fields = append(fields, player.FieldApiFootballId)
 	}
 	if m.name != nil {
 		fields = append(fields, player.FieldName)
@@ -4887,10 +4902,10 @@ func (m *PlayerMutation) Fields() []string {
 // schema.
 func (m *PlayerMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case player.FieldApiFootballID:
-		return m.ApiFootballID()
 	case player.FieldSlug:
 		return m.Slug()
+	case player.FieldApiFootballId:
+		return m.ApiFootballId()
 	case player.FieldName:
 		return m.Name()
 	case player.FieldFirstname:
@@ -4916,10 +4931,10 @@ func (m *PlayerMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PlayerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case player.FieldApiFootballID:
-		return m.OldApiFootballID(ctx)
 	case player.FieldSlug:
 		return m.OldSlug(ctx)
+	case player.FieldApiFootballId:
+		return m.OldApiFootballId(ctx)
 	case player.FieldName:
 		return m.OldName(ctx)
 	case player.FieldFirstname:
@@ -4945,19 +4960,19 @@ func (m *PlayerMutation) OldField(ctx context.Context, name string) (ent.Value, 
 // type.
 func (m *PlayerMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case player.FieldApiFootballID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetApiFootballID(v)
-		return nil
 	case player.FieldSlug:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetSlug(v)
+		return nil
+	case player.FieldApiFootballId:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetApiFootballId(v)
 		return nil
 	case player.FieldName:
 		v, ok := value.(string)
@@ -5023,8 +5038,8 @@ func (m *PlayerMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *PlayerMutation) AddedFields() []string {
 	var fields []string
-	if m.add_ApiFootballID != nil {
-		fields = append(fields, player.FieldApiFootballID)
+	if m.add_ApiFootballId != nil {
+		fields = append(fields, player.FieldApiFootballId)
 	}
 	if m.addage != nil {
 		fields = append(fields, player.FieldAge)
@@ -5037,8 +5052,8 @@ func (m *PlayerMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *PlayerMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case player.FieldApiFootballID:
-		return m.AddedApiFootballID()
+	case player.FieldApiFootballId:
+		return m.AddedApiFootballId()
 	case player.FieldAge:
 		return m.AddedAge()
 	}
@@ -5050,12 +5065,12 @@ func (m *PlayerMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *PlayerMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case player.FieldApiFootballID:
+	case player.FieldApiFootballId:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddApiFootballID(v)
+		m.AddApiFootballId(v)
 		return nil
 	case player.FieldAge:
 		v, ok := value.(int)
@@ -5091,11 +5106,11 @@ func (m *PlayerMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PlayerMutation) ResetField(name string) error {
 	switch name {
-	case player.FieldApiFootballID:
-		m.ResetApiFootballID()
-		return nil
 	case player.FieldSlug:
 		m.ResetSlug()
+		return nil
+	case player.FieldApiFootballId:
+		m.ResetApiFootballId()
 		return nil
 	case player.FieldName:
 		m.ResetName()
@@ -5127,9 +5142,15 @@ func (m *PlayerMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PlayerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.birth != nil {
 		edges = append(edges, player.EdgeBirth)
+	}
+	if m.nationality != nil {
+		edges = append(edges, player.EdgeNationality)
+	}
+	if m.squad != nil {
+		edges = append(edges, player.EdgeSquad)
 	}
 	return edges
 }
@@ -5142,27 +5163,54 @@ func (m *PlayerMutation) AddedIDs(name string) []ent.Value {
 		if id := m.birth; id != nil {
 			return []ent.Value{*id}
 		}
+	case player.EdgeNationality:
+		if id := m.nationality; id != nil {
+			return []ent.Value{*id}
+		}
+	case player.EdgeSquad:
+		ids := make([]ent.Value, 0, len(m.squad))
+		for id := range m.squad {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PlayerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
+	if m.removedsquad != nil {
+		edges = append(edges, player.EdgeSquad)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PlayerMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case player.EdgeSquad:
+		ids := make([]ent.Value, 0, len(m.removedsquad))
+		for id := range m.removedsquad {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PlayerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 3)
 	if m.clearedbirth {
 		edges = append(edges, player.EdgeBirth)
+	}
+	if m.clearednationality {
+		edges = append(edges, player.EdgeNationality)
+	}
+	if m.clearedsquad {
+		edges = append(edges, player.EdgeSquad)
 	}
 	return edges
 }
@@ -5173,6 +5221,10 @@ func (m *PlayerMutation) EdgeCleared(name string) bool {
 	switch name {
 	case player.EdgeBirth:
 		return m.clearedbirth
+	case player.EdgeNationality:
+		return m.clearednationality
+	case player.EdgeSquad:
+		return m.clearedsquad
 	}
 	return false
 }
@@ -5183,6 +5235,9 @@ func (m *PlayerMutation) ClearEdge(name string) error {
 	switch name {
 	case player.EdgeBirth:
 		m.ClearBirth()
+		return nil
+	case player.EdgeNationality:
+		m.ClearNationality()
 		return nil
 	}
 	return fmt.Errorf("unknown Player unique edge %s", name)
@@ -5195,1179 +5250,43 @@ func (m *PlayerMutation) ResetEdge(name string) error {
 	case player.EdgeBirth:
 		m.ResetBirth()
 		return nil
-	}
-	return fmt.Errorf("unknown Player edge %s", name)
-}
-
-// PlayerSeasonMutation represents an operation that mutates the PlayerSeason nodes in the graph.
-type PlayerSeasonMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *int
-	season         *int
-	addseason      *int
-	pID            *int
-	addpID         *int
-	nationality    *string
-	position       *string
-	team           *string
-	year           *int
-	addyear        *int
-	appearances    *int
-	addappearances *int
-	goals          *int
-	addgoals       *int
-	assists        *int
-	addassists     *int
-	saves          *int
-	addsaves       *int
-	clearedFields  map[string]struct{}
-	club           map[int]struct{}
-	removedclub    map[int]struct{}
-	clearedclub    bool
-	done           bool
-	oldValue       func(context.Context) (*PlayerSeason, error)
-	predicates     []predicate.PlayerSeason
-}
-
-var _ ent.Mutation = (*PlayerSeasonMutation)(nil)
-
-// playerseasonOption allows management of the mutation configuration using functional options.
-type playerseasonOption func(*PlayerSeasonMutation)
-
-// newPlayerSeasonMutation creates new mutation for the PlayerSeason entity.
-func newPlayerSeasonMutation(c config, op Op, opts ...playerseasonOption) *PlayerSeasonMutation {
-	m := &PlayerSeasonMutation{
-		config:        c,
-		op:            op,
-		typ:           TypePlayerSeason,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withPlayerSeasonID sets the ID field of the mutation.
-func withPlayerSeasonID(id int) playerseasonOption {
-	return func(m *PlayerSeasonMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *PlayerSeason
-		)
-		m.oldValue = func(ctx context.Context) (*PlayerSeason, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().PlayerSeason.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withPlayerSeason sets the old PlayerSeason of the mutation.
-func withPlayerSeason(node *PlayerSeason) playerseasonOption {
-	return func(m *PlayerSeasonMutation) {
-		m.oldValue = func(context.Context) (*PlayerSeason, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m PlayerSeasonMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m PlayerSeasonMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *PlayerSeasonMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *PlayerSeasonMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().PlayerSeason.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetSeason sets the "season" field.
-func (m *PlayerSeasonMutation) SetSeason(i int) {
-	m.season = &i
-	m.addseason = nil
-}
-
-// Season returns the value of the "season" field in the mutation.
-func (m *PlayerSeasonMutation) Season() (r int, exists bool) {
-	v := m.season
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSeason returns the old "season" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldSeason(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSeason is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSeason requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSeason: %w", err)
-	}
-	return oldValue.Season, nil
-}
-
-// AddSeason adds i to the "season" field.
-func (m *PlayerSeasonMutation) AddSeason(i int) {
-	if m.addseason != nil {
-		*m.addseason += i
-	} else {
-		m.addseason = &i
-	}
-}
-
-// AddedSeason returns the value that was added to the "season" field in this mutation.
-func (m *PlayerSeasonMutation) AddedSeason() (r int, exists bool) {
-	v := m.addseason
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSeason resets all changes to the "season" field.
-func (m *PlayerSeasonMutation) ResetSeason() {
-	m.season = nil
-	m.addseason = nil
-}
-
-// SetPID sets the "pID" field.
-func (m *PlayerSeasonMutation) SetPID(i int) {
-	m.pID = &i
-	m.addpID = nil
-}
-
-// PID returns the value of the "pID" field in the mutation.
-func (m *PlayerSeasonMutation) PID() (r int, exists bool) {
-	v := m.pID
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPID returns the old "pID" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldPID(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPID is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPID requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPID: %w", err)
-	}
-	return oldValue.PID, nil
-}
-
-// AddPID adds i to the "pID" field.
-func (m *PlayerSeasonMutation) AddPID(i int) {
-	if m.addpID != nil {
-		*m.addpID += i
-	} else {
-		m.addpID = &i
-	}
-}
-
-// AddedPID returns the value that was added to the "pID" field in this mutation.
-func (m *PlayerSeasonMutation) AddedPID() (r int, exists bool) {
-	v := m.addpID
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPID resets all changes to the "pID" field.
-func (m *PlayerSeasonMutation) ResetPID() {
-	m.pID = nil
-	m.addpID = nil
-}
-
-// SetNationality sets the "nationality" field.
-func (m *PlayerSeasonMutation) SetNationality(s string) {
-	m.nationality = &s
-}
-
-// Nationality returns the value of the "nationality" field in the mutation.
-func (m *PlayerSeasonMutation) Nationality() (r string, exists bool) {
-	v := m.nationality
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldNationality returns the old "nationality" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldNationality(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldNationality is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldNationality requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldNationality: %w", err)
-	}
-	return oldValue.Nationality, nil
-}
-
-// ResetNationality resets all changes to the "nationality" field.
-func (m *PlayerSeasonMutation) ResetNationality() {
-	m.nationality = nil
-}
-
-// SetPosition sets the "position" field.
-func (m *PlayerSeasonMutation) SetPosition(s string) {
-	m.position = &s
-}
-
-// Position returns the value of the "position" field in the mutation.
-func (m *PlayerSeasonMutation) Position() (r string, exists bool) {
-	v := m.position
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPosition returns the old "position" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldPosition(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPosition is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPosition requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPosition: %w", err)
-	}
-	return oldValue.Position, nil
-}
-
-// ResetPosition resets all changes to the "position" field.
-func (m *PlayerSeasonMutation) ResetPosition() {
-	m.position = nil
-}
-
-// SetTeam sets the "team" field.
-func (m *PlayerSeasonMutation) SetTeam(s string) {
-	m.team = &s
-}
-
-// Team returns the value of the "team" field in the mutation.
-func (m *PlayerSeasonMutation) Team() (r string, exists bool) {
-	v := m.team
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTeam returns the old "team" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldTeam(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTeam is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTeam requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTeam: %w", err)
-	}
-	return oldValue.Team, nil
-}
-
-// ResetTeam resets all changes to the "team" field.
-func (m *PlayerSeasonMutation) ResetTeam() {
-	m.team = nil
-}
-
-// SetYear sets the "year" field.
-func (m *PlayerSeasonMutation) SetYear(i int) {
-	m.year = &i
-	m.addyear = nil
-}
-
-// Year returns the value of the "year" field in the mutation.
-func (m *PlayerSeasonMutation) Year() (r int, exists bool) {
-	v := m.year
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldYear returns the old "year" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldYear(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldYear is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldYear requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldYear: %w", err)
-	}
-	return oldValue.Year, nil
-}
-
-// AddYear adds i to the "year" field.
-func (m *PlayerSeasonMutation) AddYear(i int) {
-	if m.addyear != nil {
-		*m.addyear += i
-	} else {
-		m.addyear = &i
-	}
-}
-
-// AddedYear returns the value that was added to the "year" field in this mutation.
-func (m *PlayerSeasonMutation) AddedYear() (r int, exists bool) {
-	v := m.addyear
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetYear resets all changes to the "year" field.
-func (m *PlayerSeasonMutation) ResetYear() {
-	m.year = nil
-	m.addyear = nil
-}
-
-// SetAppearances sets the "appearances" field.
-func (m *PlayerSeasonMutation) SetAppearances(i int) {
-	m.appearances = &i
-	m.addappearances = nil
-}
-
-// Appearances returns the value of the "appearances" field in the mutation.
-func (m *PlayerSeasonMutation) Appearances() (r int, exists bool) {
-	v := m.appearances
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAppearances returns the old "appearances" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldAppearances(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAppearances is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAppearances requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAppearances: %w", err)
-	}
-	return oldValue.Appearances, nil
-}
-
-// AddAppearances adds i to the "appearances" field.
-func (m *PlayerSeasonMutation) AddAppearances(i int) {
-	if m.addappearances != nil {
-		*m.addappearances += i
-	} else {
-		m.addappearances = &i
-	}
-}
-
-// AddedAppearances returns the value that was added to the "appearances" field in this mutation.
-func (m *PlayerSeasonMutation) AddedAppearances() (r int, exists bool) {
-	v := m.addappearances
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAppearances resets all changes to the "appearances" field.
-func (m *PlayerSeasonMutation) ResetAppearances() {
-	m.appearances = nil
-	m.addappearances = nil
-}
-
-// SetGoals sets the "goals" field.
-func (m *PlayerSeasonMutation) SetGoals(i int) {
-	m.goals = &i
-	m.addgoals = nil
-}
-
-// Goals returns the value of the "goals" field in the mutation.
-func (m *PlayerSeasonMutation) Goals() (r int, exists bool) {
-	v := m.goals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldGoals returns the old "goals" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldGoals(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldGoals is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldGoals requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldGoals: %w", err)
-	}
-	return oldValue.Goals, nil
-}
-
-// AddGoals adds i to the "goals" field.
-func (m *PlayerSeasonMutation) AddGoals(i int) {
-	if m.addgoals != nil {
-		*m.addgoals += i
-	} else {
-		m.addgoals = &i
-	}
-}
-
-// AddedGoals returns the value that was added to the "goals" field in this mutation.
-func (m *PlayerSeasonMutation) AddedGoals() (r int, exists bool) {
-	v := m.addgoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetGoals resets all changes to the "goals" field.
-func (m *PlayerSeasonMutation) ResetGoals() {
-	m.goals = nil
-	m.addgoals = nil
-}
-
-// SetAssists sets the "assists" field.
-func (m *PlayerSeasonMutation) SetAssists(i int) {
-	m.assists = &i
-	m.addassists = nil
-}
-
-// Assists returns the value of the "assists" field in the mutation.
-func (m *PlayerSeasonMutation) Assists() (r int, exists bool) {
-	v := m.assists
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAssists returns the old "assists" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldAssists(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAssists is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAssists requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAssists: %w", err)
-	}
-	return oldValue.Assists, nil
-}
-
-// AddAssists adds i to the "assists" field.
-func (m *PlayerSeasonMutation) AddAssists(i int) {
-	if m.addassists != nil {
-		*m.addassists += i
-	} else {
-		m.addassists = &i
-	}
-}
-
-// AddedAssists returns the value that was added to the "assists" field in this mutation.
-func (m *PlayerSeasonMutation) AddedAssists() (r int, exists bool) {
-	v := m.addassists
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAssists resets all changes to the "assists" field.
-func (m *PlayerSeasonMutation) ResetAssists() {
-	m.assists = nil
-	m.addassists = nil
-}
-
-// SetSaves sets the "saves" field.
-func (m *PlayerSeasonMutation) SetSaves(i int) {
-	m.saves = &i
-	m.addsaves = nil
-}
-
-// Saves returns the value of the "saves" field in the mutation.
-func (m *PlayerSeasonMutation) Saves() (r int, exists bool) {
-	v := m.saves
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSaves returns the old "saves" field's value of the PlayerSeason entity.
-// If the PlayerSeason object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerSeasonMutation) OldSaves(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSaves is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSaves requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSaves: %w", err)
-	}
-	return oldValue.Saves, nil
-}
-
-// AddSaves adds i to the "saves" field.
-func (m *PlayerSeasonMutation) AddSaves(i int) {
-	if m.addsaves != nil {
-		*m.addsaves += i
-	} else {
-		m.addsaves = &i
-	}
-}
-
-// AddedSaves returns the value that was added to the "saves" field in this mutation.
-func (m *PlayerSeasonMutation) AddedSaves() (r int, exists bool) {
-	v := m.addsaves
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSaves resets all changes to the "saves" field.
-func (m *PlayerSeasonMutation) ResetSaves() {
-	m.saves = nil
-	m.addsaves = nil
-}
-
-// AddClubIDs adds the "club" edge to the Club entity by ids.
-func (m *PlayerSeasonMutation) AddClubIDs(ids ...int) {
-	if m.club == nil {
-		m.club = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.club[ids[i]] = struct{}{}
-	}
-}
-
-// ClearClub clears the "club" edge to the Club entity.
-func (m *PlayerSeasonMutation) ClearClub() {
-	m.clearedclub = true
-}
-
-// ClubCleared reports if the "club" edge to the Club entity was cleared.
-func (m *PlayerSeasonMutation) ClubCleared() bool {
-	return m.clearedclub
-}
-
-// RemoveClubIDs removes the "club" edge to the Club entity by IDs.
-func (m *PlayerSeasonMutation) RemoveClubIDs(ids ...int) {
-	if m.removedclub == nil {
-		m.removedclub = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.club, ids[i])
-		m.removedclub[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedClub returns the removed IDs of the "club" edge to the Club entity.
-func (m *PlayerSeasonMutation) RemovedClubIDs() (ids []int) {
-	for id := range m.removedclub {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ClubIDs returns the "club" edge IDs in the mutation.
-func (m *PlayerSeasonMutation) ClubIDs() (ids []int) {
-	for id := range m.club {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetClub resets all changes to the "club" edge.
-func (m *PlayerSeasonMutation) ResetClub() {
-	m.club = nil
-	m.clearedclub = false
-	m.removedclub = nil
-}
-
-// Where appends a list predicates to the PlayerSeasonMutation builder.
-func (m *PlayerSeasonMutation) Where(ps ...predicate.PlayerSeason) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the PlayerSeasonMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *PlayerSeasonMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.PlayerSeason, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *PlayerSeasonMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *PlayerSeasonMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (PlayerSeason).
-func (m *PlayerSeasonMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *PlayerSeasonMutation) Fields() []string {
-	fields := make([]string, 0, 10)
-	if m.season != nil {
-		fields = append(fields, playerseason.FieldSeason)
-	}
-	if m.pID != nil {
-		fields = append(fields, playerseason.FieldPID)
-	}
-	if m.nationality != nil {
-		fields = append(fields, playerseason.FieldNationality)
-	}
-	if m.position != nil {
-		fields = append(fields, playerseason.FieldPosition)
-	}
-	if m.team != nil {
-		fields = append(fields, playerseason.FieldTeam)
-	}
-	if m.year != nil {
-		fields = append(fields, playerseason.FieldYear)
-	}
-	if m.appearances != nil {
-		fields = append(fields, playerseason.FieldAppearances)
-	}
-	if m.goals != nil {
-		fields = append(fields, playerseason.FieldGoals)
-	}
-	if m.assists != nil {
-		fields = append(fields, playerseason.FieldAssists)
-	}
-	if m.saves != nil {
-		fields = append(fields, playerseason.FieldSaves)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *PlayerSeasonMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case playerseason.FieldSeason:
-		return m.Season()
-	case playerseason.FieldPID:
-		return m.PID()
-	case playerseason.FieldNationality:
-		return m.Nationality()
-	case playerseason.FieldPosition:
-		return m.Position()
-	case playerseason.FieldTeam:
-		return m.Team()
-	case playerseason.FieldYear:
-		return m.Year()
-	case playerseason.FieldAppearances:
-		return m.Appearances()
-	case playerseason.FieldGoals:
-		return m.Goals()
-	case playerseason.FieldAssists:
-		return m.Assists()
-	case playerseason.FieldSaves:
-		return m.Saves()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *PlayerSeasonMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case playerseason.FieldSeason:
-		return m.OldSeason(ctx)
-	case playerseason.FieldPID:
-		return m.OldPID(ctx)
-	case playerseason.FieldNationality:
-		return m.OldNationality(ctx)
-	case playerseason.FieldPosition:
-		return m.OldPosition(ctx)
-	case playerseason.FieldTeam:
-		return m.OldTeam(ctx)
-	case playerseason.FieldYear:
-		return m.OldYear(ctx)
-	case playerseason.FieldAppearances:
-		return m.OldAppearances(ctx)
-	case playerseason.FieldGoals:
-		return m.OldGoals(ctx)
-	case playerseason.FieldAssists:
-		return m.OldAssists(ctx)
-	case playerseason.FieldSaves:
-		return m.OldSaves(ctx)
-	}
-	return nil, fmt.Errorf("unknown PlayerSeason field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *PlayerSeasonMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case playerseason.FieldSeason:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSeason(v)
-		return nil
-	case playerseason.FieldPID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPID(v)
-		return nil
-	case playerseason.FieldNationality:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetNationality(v)
-		return nil
-	case playerseason.FieldPosition:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPosition(v)
-		return nil
-	case playerseason.FieldTeam:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTeam(v)
-		return nil
-	case playerseason.FieldYear:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetYear(v)
-		return nil
-	case playerseason.FieldAppearances:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAppearances(v)
-		return nil
-	case playerseason.FieldGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetGoals(v)
-		return nil
-	case playerseason.FieldAssists:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAssists(v)
-		return nil
-	case playerseason.FieldSaves:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSaves(v)
-		return nil
-	}
-	return fmt.Errorf("unknown PlayerSeason field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *PlayerSeasonMutation) AddedFields() []string {
-	var fields []string
-	if m.addseason != nil {
-		fields = append(fields, playerseason.FieldSeason)
-	}
-	if m.addpID != nil {
-		fields = append(fields, playerseason.FieldPID)
-	}
-	if m.addyear != nil {
-		fields = append(fields, playerseason.FieldYear)
-	}
-	if m.addappearances != nil {
-		fields = append(fields, playerseason.FieldAppearances)
-	}
-	if m.addgoals != nil {
-		fields = append(fields, playerseason.FieldGoals)
-	}
-	if m.addassists != nil {
-		fields = append(fields, playerseason.FieldAssists)
-	}
-	if m.addsaves != nil {
-		fields = append(fields, playerseason.FieldSaves)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *PlayerSeasonMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case playerseason.FieldSeason:
-		return m.AddedSeason()
-	case playerseason.FieldPID:
-		return m.AddedPID()
-	case playerseason.FieldYear:
-		return m.AddedYear()
-	case playerseason.FieldAppearances:
-		return m.AddedAppearances()
-	case playerseason.FieldGoals:
-		return m.AddedGoals()
-	case playerseason.FieldAssists:
-		return m.AddedAssists()
-	case playerseason.FieldSaves:
-		return m.AddedSaves()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *PlayerSeasonMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case playerseason.FieldSeason:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSeason(v)
-		return nil
-	case playerseason.FieldPID:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPID(v)
-		return nil
-	case playerseason.FieldYear:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddYear(v)
-		return nil
-	case playerseason.FieldAppearances:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAppearances(v)
-		return nil
-	case playerseason.FieldGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddGoals(v)
-		return nil
-	case playerseason.FieldAssists:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAssists(v)
-		return nil
-	case playerseason.FieldSaves:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSaves(v)
-		return nil
-	}
-	return fmt.Errorf("unknown PlayerSeason numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *PlayerSeasonMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *PlayerSeasonMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *PlayerSeasonMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown PlayerSeason nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *PlayerSeasonMutation) ResetField(name string) error {
-	switch name {
-	case playerseason.FieldSeason:
-		m.ResetSeason()
-		return nil
-	case playerseason.FieldPID:
-		m.ResetPID()
-		return nil
-	case playerseason.FieldNationality:
+	case player.EdgeNationality:
 		m.ResetNationality()
 		return nil
-	case playerseason.FieldPosition:
-		m.ResetPosition()
-		return nil
-	case playerseason.FieldTeam:
-		m.ResetTeam()
-		return nil
-	case playerseason.FieldYear:
-		m.ResetYear()
-		return nil
-	case playerseason.FieldAppearances:
-		m.ResetAppearances()
-		return nil
-	case playerseason.FieldGoals:
-		m.ResetGoals()
-		return nil
-	case playerseason.FieldAssists:
-		m.ResetAssists()
-		return nil
-	case playerseason.FieldSaves:
-		m.ResetSaves()
+	case player.EdgeSquad:
+		m.ResetSquad()
 		return nil
 	}
-	return fmt.Errorf("unknown PlayerSeason field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *PlayerSeasonMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.club != nil {
-		edges = append(edges, playerseason.EdgeClub)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *PlayerSeasonMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case playerseason.EdgeClub:
-		ids := make([]ent.Value, 0, len(m.club))
-		for id := range m.club {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *PlayerSeasonMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.removedclub != nil {
-		edges = append(edges, playerseason.EdgeClub)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *PlayerSeasonMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case playerseason.EdgeClub:
-		ids := make([]ent.Value, 0, len(m.removedclub))
-		for id := range m.removedclub {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *PlayerSeasonMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedclub {
-		edges = append(edges, playerseason.EdgeClub)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *PlayerSeasonMutation) EdgeCleared(name string) bool {
-	switch name {
-	case playerseason.EdgeClub:
-		return m.clearedclub
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *PlayerSeasonMutation) ClearEdge(name string) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown PlayerSeason unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *PlayerSeasonMutation) ResetEdge(name string) error {
-	switch name {
-	case playerseason.EdgeClub:
-		m.ResetClub()
-		return nil
-	}
-	return fmt.Errorf("unknown PlayerSeason edge %s", name)
+	return fmt.Errorf("unknown Player edge %s", name)
 }
 
 // SeasonMutation represents an operation that mutates the Season nodes in the graph.
 type SeasonMutation struct {
 	config
-	op                   Op
-	typ                  string
-	id                   *int
-	slug                 *string
-	year                 *int
-	addyear              *int
-	start_date           *time.Time
-	end_date             *time.Time
-	current              *bool
-	clearedFields        map[string]struct{}
-	league               *int
-	clearedleague        bool
-	fixtures             map[int]struct{}
-	removedfixtures      map[int]struct{}
-	clearedfixtures      bool
-	standings            map[int]struct{}
-	removedstandings     map[int]struct{}
-	clearedstandings     bool
-	teams                map[int]struct{}
-	removedteams         map[int]struct{}
-	clearedteams         bool
-	playerSeasons        map[int]struct{}
-	removedplayerSeasons map[int]struct{}
-	clearedplayerSeasons bool
-	done                 bool
-	oldValue             func(context.Context) (*Season, error)
-	predicates           []predicate.Season
+	op               Op
+	typ              string
+	id               *int
+	slug             *string
+	year             *int
+	addyear          *int
+	start_date       *time.Time
+	end_date         *time.Time
+	current          *bool
+	clearedFields    map[string]struct{}
+	league           *int
+	clearedleague    bool
+	fixtures         map[int]struct{}
+	removedfixtures  map[int]struct{}
+	clearedfixtures  bool
+	standings        map[int]struct{}
+	removedstandings map[int]struct{}
+	clearedstandings bool
+	teams            map[int]struct{}
+	removedteams     map[int]struct{}
+	clearedteams     bool
+	done             bool
+	oldValue         func(context.Context) (*Season, error)
+	predicates       []predicate.Season
 }
 
 var _ ent.Mutation = (*SeasonMutation)(nil)
@@ -6869,60 +5788,6 @@ func (m *SeasonMutation) ResetTeams() {
 	m.removedteams = nil
 }
 
-// AddPlayerSeasonIDs adds the "playerSeasons" edge to the PlayerSeason entity by ids.
-func (m *SeasonMutation) AddPlayerSeasonIDs(ids ...int) {
-	if m.playerSeasons == nil {
-		m.playerSeasons = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.playerSeasons[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPlayerSeasons clears the "playerSeasons" edge to the PlayerSeason entity.
-func (m *SeasonMutation) ClearPlayerSeasons() {
-	m.clearedplayerSeasons = true
-}
-
-// PlayerSeasonsCleared reports if the "playerSeasons" edge to the PlayerSeason entity was cleared.
-func (m *SeasonMutation) PlayerSeasonsCleared() bool {
-	return m.clearedplayerSeasons
-}
-
-// RemovePlayerSeasonIDs removes the "playerSeasons" edge to the PlayerSeason entity by IDs.
-func (m *SeasonMutation) RemovePlayerSeasonIDs(ids ...int) {
-	if m.removedplayerSeasons == nil {
-		m.removedplayerSeasons = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.playerSeasons, ids[i])
-		m.removedplayerSeasons[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPlayerSeasons returns the removed IDs of the "playerSeasons" edge to the PlayerSeason entity.
-func (m *SeasonMutation) RemovedPlayerSeasonsIDs() (ids []int) {
-	for id := range m.removedplayerSeasons {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PlayerSeasonsIDs returns the "playerSeasons" edge IDs in the mutation.
-func (m *SeasonMutation) PlayerSeasonsIDs() (ids []int) {
-	for id := range m.playerSeasons {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPlayerSeasons resets all changes to the "playerSeasons" edge.
-func (m *SeasonMutation) ResetPlayerSeasons() {
-	m.playerSeasons = nil
-	m.clearedplayerSeasons = false
-	m.removedplayerSeasons = nil
-}
-
 // Where appends a list predicates to the SeasonMutation builder.
 func (m *SeasonMutation) Where(ps ...predicate.Season) {
 	m.predicates = append(m.predicates, ps...)
@@ -7139,7 +6004,7 @@ func (m *SeasonMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SeasonMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 4)
 	if m.league != nil {
 		edges = append(edges, season.EdgeLeague)
 	}
@@ -7151,9 +6016,6 @@ func (m *SeasonMutation) AddedEdges() []string {
 	}
 	if m.teams != nil {
 		edges = append(edges, season.EdgeTeams)
-	}
-	if m.playerSeasons != nil {
-		edges = append(edges, season.EdgePlayerSeasons)
 	}
 	return edges
 }
@@ -7184,19 +6046,13 @@ func (m *SeasonMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case season.EdgePlayerSeasons:
-		ids := make([]ent.Value, 0, len(m.playerSeasons))
-		for id := range m.playerSeasons {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SeasonMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 4)
 	if m.removedfixtures != nil {
 		edges = append(edges, season.EdgeFixtures)
 	}
@@ -7205,9 +6061,6 @@ func (m *SeasonMutation) RemovedEdges() []string {
 	}
 	if m.removedteams != nil {
 		edges = append(edges, season.EdgeTeams)
-	}
-	if m.removedplayerSeasons != nil {
-		edges = append(edges, season.EdgePlayerSeasons)
 	}
 	return edges
 }
@@ -7234,19 +6087,13 @@ func (m *SeasonMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case season.EdgePlayerSeasons:
-		ids := make([]ent.Value, 0, len(m.removedplayerSeasons))
-		for id := range m.removedplayerSeasons {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SeasonMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 4)
 	if m.clearedleague {
 		edges = append(edges, season.EdgeLeague)
 	}
@@ -7258,9 +6105,6 @@ func (m *SeasonMutation) ClearedEdges() []string {
 	}
 	if m.clearedteams {
 		edges = append(edges, season.EdgeTeams)
-	}
-	if m.clearedplayerSeasons {
-		edges = append(edges, season.EdgePlayerSeasons)
 	}
 	return edges
 }
@@ -7277,8 +6121,6 @@ func (m *SeasonMutation) EdgeCleared(name string) bool {
 		return m.clearedstandings
 	case season.EdgeTeams:
 		return m.clearedteams
-	case season.EdgePlayerSeasons:
-		return m.clearedplayerSeasons
 	}
 	return false
 }
@@ -7310,11 +6152,550 @@ func (m *SeasonMutation) ResetEdge(name string) error {
 	case season.EdgeTeams:
 		m.ResetTeams()
 		return nil
-	case season.EdgePlayerSeasons:
-		m.ResetPlayerSeasons()
-		return nil
 	}
 	return fmt.Errorf("unknown Season edge %s", name)
+}
+
+// SquadMutation represents an operation that mutates the Squad nodes in the graph.
+type SquadMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	position      *string
+	number        *int
+	addnumber     *int
+	clearedFields map[string]struct{}
+	player        *int
+	clearedplayer bool
+	team          *int
+	clearedteam   bool
+	done          bool
+	oldValue      func(context.Context) (*Squad, error)
+	predicates    []predicate.Squad
+}
+
+var _ ent.Mutation = (*SquadMutation)(nil)
+
+// squadOption allows management of the mutation configuration using functional options.
+type squadOption func(*SquadMutation)
+
+// newSquadMutation creates new mutation for the Squad entity.
+func newSquadMutation(c config, op Op, opts ...squadOption) *SquadMutation {
+	m := &SquadMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeSquad,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withSquadID sets the ID field of the mutation.
+func withSquadID(id int) squadOption {
+	return func(m *SquadMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Squad
+		)
+		m.oldValue = func(ctx context.Context) (*Squad, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Squad.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withSquad sets the old Squad of the mutation.
+func withSquad(node *Squad) squadOption {
+	return func(m *SquadMutation) {
+		m.oldValue = func(context.Context) (*Squad, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m SquadMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m SquadMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *SquadMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *SquadMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Squad.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetPosition sets the "position" field.
+func (m *SquadMutation) SetPosition(s string) {
+	m.position = &s
+}
+
+// Position returns the value of the "position" field in the mutation.
+func (m *SquadMutation) Position() (r string, exists bool) {
+	v := m.position
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPosition returns the old "position" field's value of the Squad entity.
+// If the Squad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SquadMutation) OldPosition(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPosition is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPosition requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPosition: %w", err)
+	}
+	return oldValue.Position, nil
+}
+
+// ResetPosition resets all changes to the "position" field.
+func (m *SquadMutation) ResetPosition() {
+	m.position = nil
+}
+
+// SetNumber sets the "number" field.
+func (m *SquadMutation) SetNumber(i int) {
+	m.number = &i
+	m.addnumber = nil
+}
+
+// Number returns the value of the "number" field in the mutation.
+func (m *SquadMutation) Number() (r int, exists bool) {
+	v := m.number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNumber returns the old "number" field's value of the Squad entity.
+// If the Squad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SquadMutation) OldNumber(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNumber: %w", err)
+	}
+	return oldValue.Number, nil
+}
+
+// AddNumber adds i to the "number" field.
+func (m *SquadMutation) AddNumber(i int) {
+	if m.addnumber != nil {
+		*m.addnumber += i
+	} else {
+		m.addnumber = &i
+	}
+}
+
+// AddedNumber returns the value that was added to the "number" field in this mutation.
+func (m *SquadMutation) AddedNumber() (r int, exists bool) {
+	v := m.addnumber
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNumber resets all changes to the "number" field.
+func (m *SquadMutation) ResetNumber() {
+	m.number = nil
+	m.addnumber = nil
+}
+
+// SetPlayerID sets the "player" edge to the Player entity by id.
+func (m *SquadMutation) SetPlayerID(id int) {
+	m.player = &id
+}
+
+// ClearPlayer clears the "player" edge to the Player entity.
+func (m *SquadMutation) ClearPlayer() {
+	m.clearedplayer = true
+}
+
+// PlayerCleared reports if the "player" edge to the Player entity was cleared.
+func (m *SquadMutation) PlayerCleared() bool {
+	return m.clearedplayer
+}
+
+// PlayerID returns the "player" edge ID in the mutation.
+func (m *SquadMutation) PlayerID() (id int, exists bool) {
+	if m.player != nil {
+		return *m.player, true
+	}
+	return
+}
+
+// PlayerIDs returns the "player" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerID instead. It exists only for internal usage by the builders.
+func (m *SquadMutation) PlayerIDs() (ids []int) {
+	if id := m.player; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayer resets all changes to the "player" edge.
+func (m *SquadMutation) ResetPlayer() {
+	m.player = nil
+	m.clearedplayer = false
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *SquadMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *SquadMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *SquadMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *SquadMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *SquadMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *SquadMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the SquadMutation builder.
+func (m *SquadMutation) Where(ps ...predicate.Squad) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the SquadMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *SquadMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Squad, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *SquadMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *SquadMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Squad).
+func (m *SquadMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *SquadMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.position != nil {
+		fields = append(fields, squad.FieldPosition)
+	}
+	if m.number != nil {
+		fields = append(fields, squad.FieldNumber)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *SquadMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case squad.FieldPosition:
+		return m.Position()
+	case squad.FieldNumber:
+		return m.Number()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *SquadMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case squad.FieldPosition:
+		return m.OldPosition(ctx)
+	case squad.FieldNumber:
+		return m.OldNumber(ctx)
+	}
+	return nil, fmt.Errorf("unknown Squad field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SquadMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case squad.FieldPosition:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPosition(v)
+		return nil
+	case squad.FieldNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNumber(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Squad field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *SquadMutation) AddedFields() []string {
+	var fields []string
+	if m.addnumber != nil {
+		fields = append(fields, squad.FieldNumber)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *SquadMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case squad.FieldNumber:
+		return m.AddedNumber()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *SquadMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case squad.FieldNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNumber(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Squad numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *SquadMutation) ClearedFields() []string {
+	return nil
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *SquadMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *SquadMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Squad nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *SquadMutation) ResetField(name string) error {
+	switch name {
+	case squad.FieldPosition:
+		m.ResetPosition()
+		return nil
+	case squad.FieldNumber:
+		m.ResetNumber()
+		return nil
+	}
+	return fmt.Errorf("unknown Squad field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *SquadMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.player != nil {
+		edges = append(edges, squad.EdgePlayer)
+	}
+	if m.team != nil {
+		edges = append(edges, squad.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *SquadMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case squad.EdgePlayer:
+		if id := m.player; id != nil {
+			return []ent.Value{*id}
+		}
+	case squad.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *SquadMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *SquadMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *SquadMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedplayer {
+		edges = append(edges, squad.EdgePlayer)
+	}
+	if m.clearedteam {
+		edges = append(edges, squad.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *SquadMutation) EdgeCleared(name string) bool {
+	switch name {
+	case squad.EdgePlayer:
+		return m.clearedplayer
+	case squad.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *SquadMutation) ClearEdge(name string) error {
+	switch name {
+	case squad.EdgePlayer:
+		m.ClearPlayer()
+		return nil
+	case squad.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown Squad unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *SquadMutation) ResetEdge(name string) error {
+	switch name {
+	case squad.EdgePlayer:
+		m.ResetPlayer()
+		return nil
+	case squad.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown Squad edge %s", name)
 }
 
 // StandingsMutation represents an operation that mutates the Standings nodes in the graph.
@@ -23680,6 +23061,9 @@ type TeamMutation struct {
 	players                      map[int]struct{}
 	removedplayers               map[int]struct{}
 	clearedplayers               bool
+	squad                        map[int]struct{}
+	removedsquad                 map[int]struct{}
+	clearedsquad                 bool
 	biggest_stats                *int
 	clearedbiggest_stats         bool
 	cards_stats                  *int
@@ -23697,9 +23081,6 @@ type TeamMutation struct {
 	clearedlineups               bool
 	penalty_stats                *int
 	clearedpenalty_stats         bool
-	team                         map[int]struct{}
-	removedteam                  map[int]struct{}
-	clearedteam                  bool
 	done                         bool
 	oldValue                     func(context.Context) (*Team, error)
 	predicates                   []predicate.Team
@@ -24195,6 +23576,60 @@ func (m *TeamMutation) ResetPlayers() {
 	m.removedplayers = nil
 }
 
+// AddSquadIDs adds the "squad" edge to the Squad entity by ids.
+func (m *TeamMutation) AddSquadIDs(ids ...int) {
+	if m.squad == nil {
+		m.squad = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.squad[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSquad clears the "squad" edge to the Squad entity.
+func (m *TeamMutation) ClearSquad() {
+	m.clearedsquad = true
+}
+
+// SquadCleared reports if the "squad" edge to the Squad entity was cleared.
+func (m *TeamMutation) SquadCleared() bool {
+	return m.clearedsquad
+}
+
+// RemoveSquadIDs removes the "squad" edge to the Squad entity by IDs.
+func (m *TeamMutation) RemoveSquadIDs(ids ...int) {
+	if m.removedsquad == nil {
+		m.removedsquad = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.squad, ids[i])
+		m.removedsquad[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSquad returns the removed IDs of the "squad" edge to the Squad entity.
+func (m *TeamMutation) RemovedSquadIDs() (ids []int) {
+	for id := range m.removedsquad {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SquadIDs returns the "squad" edge IDs in the mutation.
+func (m *TeamMutation) SquadIDs() (ids []int) {
+	for id := range m.squad {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSquad resets all changes to the "squad" edge.
+func (m *TeamMutation) ResetSquad() {
+	m.squad = nil
+	m.clearedsquad = false
+	m.removedsquad = nil
+}
+
 // SetBiggestStatsID sets the "biggest_stats" edge to the TSBiggest entity by id.
 func (m *TeamMutation) SetBiggestStatsID(id int) {
 	m.biggest_stats = &id
@@ -24522,60 +23957,6 @@ func (m *TeamMutation) ResetPenaltyStats() {
 	m.clearedpenalty_stats = false
 }
 
-// AddTeamIDs adds the "team" edge to the PlayerSeason entity by ids.
-func (m *TeamMutation) AddTeamIDs(ids ...int) {
-	if m.team == nil {
-		m.team = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.team[ids[i]] = struct{}{}
-	}
-}
-
-// ClearTeam clears the "team" edge to the PlayerSeason entity.
-func (m *TeamMutation) ClearTeam() {
-	m.clearedteam = true
-}
-
-// TeamCleared reports if the "team" edge to the PlayerSeason entity was cleared.
-func (m *TeamMutation) TeamCleared() bool {
-	return m.clearedteam
-}
-
-// RemoveTeamIDs removes the "team" edge to the PlayerSeason entity by IDs.
-func (m *TeamMutation) RemoveTeamIDs(ids ...int) {
-	if m.removedteam == nil {
-		m.removedteam = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.team, ids[i])
-		m.removedteam[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedTeam returns the removed IDs of the "team" edge to the PlayerSeason entity.
-func (m *TeamMutation) RemovedTeamIDs() (ids []int) {
-	for id := range m.removedteam {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// TeamIDs returns the "team" edge IDs in the mutation.
-func (m *TeamMutation) TeamIDs() (ids []int) {
-	for id := range m.team {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetTeam resets all changes to the "team" edge.
-func (m *TeamMutation) ResetTeam() {
-	m.team = nil
-	m.clearedteam = false
-	m.removedteam = nil
-}
-
 // Where appends a list predicates to the TeamMutation builder.
 func (m *TeamMutation) Where(ps ...predicate.Team) {
 	m.predicates = append(m.predicates, ps...)
@@ -24760,6 +24141,9 @@ func (m *TeamMutation) AddedEdges() []string {
 	if m.players != nil {
 		edges = append(edges, team.EdgePlayers)
 	}
+	if m.squad != nil {
+		edges = append(edges, team.EdgeSquad)
+	}
 	if m.biggest_stats != nil {
 		edges = append(edges, team.EdgeBiggestStats)
 	}
@@ -24783,9 +24167,6 @@ func (m *TeamMutation) AddedEdges() []string {
 	}
 	if m.penalty_stats != nil {
 		edges = append(edges, team.EdgePenaltyStats)
-	}
-	if m.team != nil {
-		edges = append(edges, team.EdgeTeam)
 	}
 	return edges
 }
@@ -24826,6 +24207,12 @@ func (m *TeamMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case team.EdgeSquad:
+		ids := make([]ent.Value, 0, len(m.squad))
+		for id := range m.squad {
+			ids = append(ids, id)
+		}
+		return ids
 	case team.EdgeBiggestStats:
 		if id := m.biggest_stats; id != nil {
 			return []ent.Value{*id}
@@ -24860,12 +24247,6 @@ func (m *TeamMutation) AddedIDs(name string) []ent.Value {
 		if id := m.penalty_stats; id != nil {
 			return []ent.Value{*id}
 		}
-	case team.EdgeTeam:
-		ids := make([]ent.Value, 0, len(m.team))
-		for id := range m.team {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
@@ -24885,11 +24266,11 @@ func (m *TeamMutation) RemovedEdges() []string {
 	if m.removedplayers != nil {
 		edges = append(edges, team.EdgePlayers)
 	}
+	if m.removedsquad != nil {
+		edges = append(edges, team.EdgeSquad)
+	}
 	if m.removedlineups != nil {
 		edges = append(edges, team.EdgeLineups)
-	}
-	if m.removedteam != nil {
-		edges = append(edges, team.EdgeTeam)
 	}
 	return edges
 }
@@ -24922,15 +24303,15 @@ func (m *TeamMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case team.EdgeLineups:
-		ids := make([]ent.Value, 0, len(m.removedlineups))
-		for id := range m.removedlineups {
+	case team.EdgeSquad:
+		ids := make([]ent.Value, 0, len(m.removedsquad))
+		for id := range m.removedsquad {
 			ids = append(ids, id)
 		}
 		return ids
-	case team.EdgeTeam:
-		ids := make([]ent.Value, 0, len(m.removedteam))
-		for id := range m.removedteam {
+	case team.EdgeLineups:
+		ids := make([]ent.Value, 0, len(m.removedlineups))
+		for id := range m.removedlineups {
 			ids = append(ids, id)
 		}
 		return ids
@@ -24959,6 +24340,9 @@ func (m *TeamMutation) ClearedEdges() []string {
 	if m.clearedplayers {
 		edges = append(edges, team.EdgePlayers)
 	}
+	if m.clearedsquad {
+		edges = append(edges, team.EdgeSquad)
+	}
 	if m.clearedbiggest_stats {
 		edges = append(edges, team.EdgeBiggestStats)
 	}
@@ -24983,9 +24367,6 @@ func (m *TeamMutation) ClearedEdges() []string {
 	if m.clearedpenalty_stats {
 		edges = append(edges, team.EdgePenaltyStats)
 	}
-	if m.clearedteam {
-		edges = append(edges, team.EdgeTeam)
-	}
 	return edges
 }
 
@@ -25005,6 +24386,8 @@ func (m *TeamMutation) EdgeCleared(name string) bool {
 		return m.clearedawayFixtures
 	case team.EdgePlayers:
 		return m.clearedplayers
+	case team.EdgeSquad:
+		return m.clearedsquad
 	case team.EdgeBiggestStats:
 		return m.clearedbiggest_stats
 	case team.EdgeCardsStats:
@@ -25021,8 +24404,6 @@ func (m *TeamMutation) EdgeCleared(name string) bool {
 		return m.clearedlineups
 	case team.EdgePenaltyStats:
 		return m.clearedpenalty_stats
-	case team.EdgeTeam:
-		return m.clearedteam
 	}
 	return false
 }
@@ -25084,6 +24465,9 @@ func (m *TeamMutation) ResetEdge(name string) error {
 	case team.EdgePlayers:
 		m.ResetPlayers()
 		return nil
+	case team.EdgeSquad:
+		m.ResetSquad()
+		return nil
 	case team.EdgeBiggestStats:
 		m.ResetBiggestStats()
 		return nil
@@ -25107,9 +24491,6 @@ func (m *TeamMutation) ResetEdge(name string) error {
 		return nil
 	case team.EdgePenaltyStats:
 		m.ResetPenaltyStats()
-		return nil
-	case team.EdgeTeam:
-		m.ResetTeam()
 		return nil
 	}
 	return fmt.Errorf("unknown Team edge %s", name)

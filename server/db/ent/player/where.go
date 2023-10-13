@@ -54,14 +54,14 @@ func IDLTE(id int) predicate.Player {
 	return predicate.Player(sql.FieldLTE(FieldID, id))
 }
 
-// ApiFootballID applies equality check predicate on the "ApiFootballID" field. It's identical to ApiFootballIDEQ.
-func ApiFootballID(v int) predicate.Player {
-	return predicate.Player(sql.FieldEQ(FieldApiFootballID, v))
-}
-
 // Slug applies equality check predicate on the "slug" field. It's identical to SlugEQ.
 func Slug(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldSlug, v))
+}
+
+// ApiFootballId applies equality check predicate on the "ApiFootballId" field. It's identical to ApiFootballIdEQ.
+func ApiFootballId(v int) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldApiFootballId, v))
 }
 
 // Name applies equality check predicate on the "name" field. It's identical to NameEQ.
@@ -102,46 +102,6 @@ func Injured(v bool) predicate.Player {
 // Photo applies equality check predicate on the "photo" field. It's identical to PhotoEQ.
 func Photo(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldPhoto, v))
-}
-
-// ApiFootballIDEQ applies the EQ predicate on the "ApiFootballID" field.
-func ApiFootballIDEQ(v int) predicate.Player {
-	return predicate.Player(sql.FieldEQ(FieldApiFootballID, v))
-}
-
-// ApiFootballIDNEQ applies the NEQ predicate on the "ApiFootballID" field.
-func ApiFootballIDNEQ(v int) predicate.Player {
-	return predicate.Player(sql.FieldNEQ(FieldApiFootballID, v))
-}
-
-// ApiFootballIDIn applies the In predicate on the "ApiFootballID" field.
-func ApiFootballIDIn(vs ...int) predicate.Player {
-	return predicate.Player(sql.FieldIn(FieldApiFootballID, vs...))
-}
-
-// ApiFootballIDNotIn applies the NotIn predicate on the "ApiFootballID" field.
-func ApiFootballIDNotIn(vs ...int) predicate.Player {
-	return predicate.Player(sql.FieldNotIn(FieldApiFootballID, vs...))
-}
-
-// ApiFootballIDGT applies the GT predicate on the "ApiFootballID" field.
-func ApiFootballIDGT(v int) predicate.Player {
-	return predicate.Player(sql.FieldGT(FieldApiFootballID, v))
-}
-
-// ApiFootballIDGTE applies the GTE predicate on the "ApiFootballID" field.
-func ApiFootballIDGTE(v int) predicate.Player {
-	return predicate.Player(sql.FieldGTE(FieldApiFootballID, v))
-}
-
-// ApiFootballIDLT applies the LT predicate on the "ApiFootballID" field.
-func ApiFootballIDLT(v int) predicate.Player {
-	return predicate.Player(sql.FieldLT(FieldApiFootballID, v))
-}
-
-// ApiFootballIDLTE applies the LTE predicate on the "ApiFootballID" field.
-func ApiFootballIDLTE(v int) predicate.Player {
-	return predicate.Player(sql.FieldLTE(FieldApiFootballID, v))
 }
 
 // SlugEQ applies the EQ predicate on the "slug" field.
@@ -207,6 +167,46 @@ func SlugEqualFold(v string) predicate.Player {
 // SlugContainsFold applies the ContainsFold predicate on the "slug" field.
 func SlugContainsFold(v string) predicate.Player {
 	return predicate.Player(sql.FieldContainsFold(FieldSlug, v))
+}
+
+// ApiFootballIdEQ applies the EQ predicate on the "ApiFootballId" field.
+func ApiFootballIdEQ(v int) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldApiFootballId, v))
+}
+
+// ApiFootballIdNEQ applies the NEQ predicate on the "ApiFootballId" field.
+func ApiFootballIdNEQ(v int) predicate.Player {
+	return predicate.Player(sql.FieldNEQ(FieldApiFootballId, v))
+}
+
+// ApiFootballIdIn applies the In predicate on the "ApiFootballId" field.
+func ApiFootballIdIn(vs ...int) predicate.Player {
+	return predicate.Player(sql.FieldIn(FieldApiFootballId, vs...))
+}
+
+// ApiFootballIdNotIn applies the NotIn predicate on the "ApiFootballId" field.
+func ApiFootballIdNotIn(vs ...int) predicate.Player {
+	return predicate.Player(sql.FieldNotIn(FieldApiFootballId, vs...))
+}
+
+// ApiFootballIdGT applies the GT predicate on the "ApiFootballId" field.
+func ApiFootballIdGT(v int) predicate.Player {
+	return predicate.Player(sql.FieldGT(FieldApiFootballId, v))
+}
+
+// ApiFootballIdGTE applies the GTE predicate on the "ApiFootballId" field.
+func ApiFootballIdGTE(v int) predicate.Player {
+	return predicate.Player(sql.FieldGTE(FieldApiFootballId, v))
+}
+
+// ApiFootballIdLT applies the LT predicate on the "ApiFootballId" field.
+func ApiFootballIdLT(v int) predicate.Player {
+	return predicate.Player(sql.FieldLT(FieldApiFootballId, v))
+}
+
+// ApiFootballIdLTE applies the LTE predicate on the "ApiFootballId" field.
+func ApiFootballIdLTE(v int) predicate.Player {
+	return predicate.Player(sql.FieldLTE(FieldApiFootballId, v))
 }
 
 // NameEQ applies the EQ predicate on the "name" field.
@@ -664,6 +664,52 @@ func HasBirth() predicate.Player {
 func HasBirthWith(preds ...predicate.Birth) predicate.Player {
 	return predicate.Player(func(s *sql.Selector) {
 		step := newBirthStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasNationality applies the HasEdge predicate on the "nationality" edge.
+func HasNationality() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, NationalityTable, NationalityColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasNationalityWith applies the HasEdge predicate on the "nationality" edge with a given conditions (other predicates).
+func HasNationalityWith(preds ...predicate.Country) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newNationalityStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSquad applies the HasEdge predicate on the "squad" edge.
+func HasSquad() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SquadTable, SquadColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSquadWith applies the HasEdge predicate on the "squad" edge with a given conditions (other predicates).
+func HasSquadWith(preds ...predicate.Squad) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newSquadStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
