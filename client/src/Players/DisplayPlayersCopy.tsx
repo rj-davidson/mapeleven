@@ -18,13 +18,13 @@ const DisplayPlayers: React.FC<DisplayPlayersProps> = ({ limit, skeleton }) => {
 
     useEffect(() => {
         // Send a GET request to the API.
-        fetch(`${url}/stats/topscorers`)
+        fetch(`${url}/players`)
             .then(response => response.json())
             .then(jsonData => {
-                const response = jsonData.response;
+                const response = jsonData;
                 const newPlayerData = [];
                 for (let i = 0; i < response.length; i++) {
-                    const player = response[i].player;
+                    const player = response[i];
                     newPlayerData.push(player);
                 }
                 if (limit) {
@@ -75,7 +75,7 @@ const DisplayPlayers: React.FC<DisplayPlayersProps> = ({ limit, skeleton }) => {
                 <Grid container spacing={1}>
                     {playerData.map((player, playerIndex) => (
                         <Grid item xs={12} sm={12} md={12} lg={12} key={playerIndex}>
-                            <PlayerCard name={player.name} photo={player.photo} />
+                            <PlayerCard slug={player.slug} name={player.name} photo={player.photo} />
                         </Grid>
                     ))}
                 </Grid>
