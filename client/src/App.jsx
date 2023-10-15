@@ -20,7 +20,7 @@ function App() {
                     <Layout>
                         <Routes>
                             <Route path='/fixtures/:slug' element='' />
-                            <Route path='/players/:slug' element={<Players />} />
+                            <Route path='/players/:slug' element={''} />
                             <Route path='/players' element={<Players />} />
                             <Route path='/teams/:slug' element={<TeamPageSingle />} />
                             <Route path='/teams' element={<TeamPageAll />} />

@@ -25,7 +25,7 @@ function FormCard() {
         fetch(`${url}/teams/${slug}`)
             .then(response => response.json())
             .then(jsonData => {
-                setForm(jsonData.stats.form);
+                setForm(jsonData.competitions[0].stats.form);
                 setLoading(false);
             })
             .catch(error => console.error(error));

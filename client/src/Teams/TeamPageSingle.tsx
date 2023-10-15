@@ -31,10 +31,10 @@ function TeamPageSingle() {
                 setFlag(jsonData.country.flag);
                 setCountry(jsonData.country.name);
                 setFounded(jsonData.founded);
-                setGoals(jsonData.stats.goals.for.total.total);
-                setClean(jsonData.stats.clean_sheet.total);
-                setGamesPlayed(jsonData.stats.fixtures.played.home + jsonData.stats.fixtures.played.away);
-                setGoalMinuteSplit(jsonData.stats.goals.for.minute);
+                setGoals(jsonData.competitions[0].stats.goals.for.total.total);
+                setClean(jsonData.competitions[0].stats.clean_sheet.total);
+                setGamesPlayed(jsonData.competitions[0].stats.fixtures.played.home + jsonData.competitions[0].stats.fixtures.played.away);
+                setGoalMinuteSplit(jsonData.competitions[0].stats.goals.for.minute);
                 setLoading(false);
             })
             .catch(error => console.error(error));
