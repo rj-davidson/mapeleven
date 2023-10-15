@@ -9,6 +9,7 @@ import TeamIDTitle from './TeamIDTitle';
 import TeamIDStatBox from './TeamIDStatBox';
 
 interface TeamIDCardProps {
+    slug: string;
     name: string;
     badge: string;
     country: string;
@@ -19,7 +20,17 @@ interface TeamIDCardProps {
     gamesPlayed: number;
 }
 
-const TeamIDCard: React.FC<TeamIDCardProps> = ({ name, badge, country, flag, founded, goals, clean, gamesPlayed }) => {
+const TeamIDCard: React.FC<TeamIDCardProps> = ({
+    slug,
+    name,
+    badge,
+    country,
+    flag,
+    founded,
+    goals,
+    clean,
+    gamesPlayed,
+}) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [inspect, setInspect] = useState<boolean>(false);
 
@@ -52,7 +63,7 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({ name, badge, country, flag, fou
                         gap: '24px',
                     }}
                 >
-                    <TeamIDTitle name={name} country={country} flag={flag} />
+                    <TeamIDTitle slug={slug} name={name} country={country} flag={flag} />
 
                     <Flex style={{ justifyContent: 'center', alignItems: 'center', marginTop: '-12px' }}>
                         <DisplayImage src={badge} alt={name} width={'108px'} height={'108'} />

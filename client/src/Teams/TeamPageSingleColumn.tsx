@@ -5,6 +5,7 @@ import FormCard from './FormCard.jsx';
 import TeamIDCard from './TeamIDCard';
 
 interface TeamPageSingleColumnProps {
+    slug: string;
     name: string;
     badge: string;
     country: string;
@@ -16,19 +17,21 @@ interface TeamPageSingleColumnProps {
 }
 
 const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
-    name,
-    badge,
-    country,
-    flag,
-    founded,
-    goals,
-    clean,
-    gamesPlayed,
-}) => {
+                                                                       slug,
+                                                                       name,
+                                                                       badge,
+                                                                       country,
+                                                                       flag,
+                                                                       founded,
+                                                                       goals,
+                                                                       clean,
+                                                                       gamesPlayed,
+                                                                   }) => {
     return (
         <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                 <TeamIDCard
+                    slug={slug}
                     name={name}
                     badge={badge}
                     country={country}

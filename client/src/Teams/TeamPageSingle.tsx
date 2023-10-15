@@ -17,8 +17,12 @@ function TeamPageSingle() {
     const [country, setCountry] = useState<string>('');
     const [founded, setFounded] = useState<string>('');
     const [goals, setGoals] = useState<number>(0);
+    const [averageGoals, setAverageGoals] = useState<number>(0);
     const [clean, setClean] = useState<number>(0);
     const [gamesPlayed, setGamesPlayed] = useState<number>(0);
+    const [wins, setWins] = useState<number>(0);
+    const [failedToScore, setFailedToScore] = useState<number>(0);
+    const [gamesScored, setGamesScored] = useState<number>(0);
     const [goalMinuteSplit, setGoalMinuteSplit] = useState<APITSGoalMinuteSplit>(null);
     const [loading, setLoading] = useState<boolean>(true);
 
@@ -32,8 +36,22 @@ function TeamPageSingle() {
                 setCountry(jsonData.country.name);
                 setFounded(jsonData.founded);
                 setGoals(jsonData.competitions[0].stats.goals.for.total.total);
+                setAverageGoals(jsonData.competitions[0].stats.goals.for.average.total);
                 setClean(jsonData.competitions[0].stats.clean_sheet.total);
-                setGamesPlayed(jsonData.competitions[0].stats.fixtures.played.home + jsonData.competitions[0].stats.fixtures.played.away);
+                setGamesPlayed(
+                    jsonData.competitions[0].stats.fixtures.played.home +
+                        jsonData.competitions[0].stats.fixtures.played.away,
+                );
+                setWins(
+                    jsonData.competitions[0].stats.fixtures.wins.home +
+                        jsonData.competitions[0].stats.fixtures.wins.away,
+                );
+                setFailedToScore(jsonData.competitions[0].stats.failed_to_score.total);
+                setGamesScored(
+                    jsonData.competitions[0].stats.fixtures.played.home +
+                        jsonData.competitions[0].stats.fixtures.played.away -
+                        jsonData.competitions[0].stats.failed_to_score.total,
+                );
                 setGoalMinuteSplit(jsonData.competitions[0].stats.goals.for.minute);
                 setLoading(false);
             })
@@ -63,6 +81,7 @@ function TeamPageSingle() {
         <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={12} lg={3} width='100%'>
                 <TeamPageSingleColumn
+                    slug={slug}
                     name={name}
                     badge={badge}
                     country={country}
@@ -74,7 +93,17 @@ function TeamPageSingle() {
                 />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={9} width='100%'>
-                <TeamPageSingleMain goalMinuteSplit={goalMinuteSplit} />
+                <TeamPageSingleMain
+                    goalMinuteSplit={goalMinuteSplit}
+                    name={name}
+                    goals={goals}
+                    clean={clean}
+                    fixtures={gamesPlayed}
+                    wins={wins}
+                    averageGoals={averageGoals}
+                    gamesScored={gamesScored}
+                    failedToScore={failedToScore}
+                />
             </Grid>
         </Grid>
     );

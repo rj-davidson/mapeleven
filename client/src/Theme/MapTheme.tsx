@@ -58,6 +58,34 @@ const customTheme = createTheme({
                 },
             },
         },
+        MuiInputBase: {
+            styleOverrides: {
+                root: {
+                    backgroundColor: 'var(--dark1)',
+                },
+            },
+        },
+        MuiOutlinedInput: {
+            styleOverrides: {
+                root: {
+                    // Change border color and border radius here
+                    borderRadius: '10px',
+                    border: 'none'
+
+                },
+                notchedOutline: {
+                    border: 'none', // Change the border color for the outline as needed
+                },
+            },
+        },
+        MuiSelect: {
+            styleOverrides: {
+                icon: {
+                    // Change the color of the dropdown icon here
+                    fill: 'white',
+                },
+            },
+        },
         MuiCard: {
             styleOverrides: {
                 root: {
@@ -97,7 +125,7 @@ const customTheme = createTheme({
             styleOverrides: {
                 root: {
                     '& .MuiOutlinedInput-root': {
-                        backgroundColor: 'var(--dark2)',
+                        backgroundColor: 'var(--dark1)',
                         '& fieldset': {
                             border: 'none', // Remove the border
                         },
