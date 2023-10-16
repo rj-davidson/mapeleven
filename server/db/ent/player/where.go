@@ -4,6 +4,7 @@ package player
 
 import (
 	"mapeleven/db/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -102,6 +103,11 @@ func Injured(v bool) predicate.Player {
 // Photo applies equality check predicate on the "photo" field. It's identical to PhotoEQ.
 func Photo(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldPhoto, v))
+}
+
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // SlugEQ applies the EQ predicate on the "slug" field.
@@ -647,6 +653,56 @@ func PhotoEqualFold(v string) predicate.Player {
 // PhotoContainsFold applies the ContainsFold predicate on the "photo" field.
 func PhotoContainsFold(v string) predicate.Player {
 	return predicate.Player(sql.FieldContainsFold(FieldPhoto, v))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.Player {
+	return predicate.Player(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.Player {
+	return predicate.Player(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.Player {
+	return predicate.Player(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.Player {
+	return predicate.Player(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.Player {
+	return predicate.Player(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.Player {
+	return predicate.Player(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.Player {
+	return predicate.Player(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.Player {
+	return predicate.Player(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.Player {
+	return predicate.Player(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasBirth applies the HasEdge predicate on the "birth" edge.

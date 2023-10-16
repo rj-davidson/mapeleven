@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // Country holds the schema definition for the Country entity.
@@ -19,6 +20,10 @@ func (Country) Fields() []ent.Field {
 		field.String("name").
 			Unique(),
 		field.String("flag"),
+		field.Time("lastUpdated").
+			Default(time.Now).
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 

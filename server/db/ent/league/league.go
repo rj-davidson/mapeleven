@@ -4,6 +4,7 @@ package league
 
 import (
 	"fmt"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -24,6 +25,8 @@ const (
 	FieldType = "type"
 	// FieldLogo holds the string denoting the logo field in the database.
 	FieldLogo = "logo"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgeCountry holds the string denoting the country edge name in mutations.
 	EdgeCountry = "country"
 	// EdgeSeason holds the string denoting the season edge name in mutations.
@@ -54,6 +57,7 @@ var Columns = []string{
 	FieldName,
 	FieldType,
 	FieldLogo,
+	FieldLastUpdated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "leagues"
@@ -76,6 +80,13 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
+)
 
 // Type defines the type for the "type" enum field.
 type Type string
@@ -133,6 +144,11 @@ func ByType(opts ...sql.OrderTermOption) Order {
 // ByLogo orders the results by the logo field.
 func ByLogo(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldLogo, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // ByCountryField orders the results by country field.

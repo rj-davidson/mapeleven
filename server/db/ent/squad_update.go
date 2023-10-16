@@ -10,6 +10,7 @@ import (
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/squad"
 	"mapeleven/db/ent/team"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -45,6 +46,18 @@ func (su *SquadUpdate) SetNumber(i int) *SquadUpdate {
 // AddNumber adds i to the "number" field.
 func (su *SquadUpdate) AddNumber(i int) *SquadUpdate {
 	su.mutation.AddNumber(i)
+	return su
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (su *SquadUpdate) SetLastUpdated(t time.Time) *SquadUpdate {
+	su.mutation.SetLastUpdated(t)
+	return su
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (su *SquadUpdate) ClearLastUpdated() *SquadUpdate {
+	su.mutation.ClearLastUpdated()
 	return su
 }
 
@@ -105,6 +118,7 @@ func (su *SquadUpdate) ClearTeam() *SquadUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *SquadUpdate) Save(ctx context.Context) (int, error) {
+	su.defaults()
 	return withHooks[int, SquadMutation](ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
@@ -130,6 +144,14 @@ func (su *SquadUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (su *SquadUpdate) defaults() {
+	if _, ok := su.mutation.LastUpdated(); !ok && !su.mutation.LastUpdatedCleared() {
+		v := squad.UpdateDefaultLastUpdated()
+		su.mutation.SetLastUpdated(v)
+	}
+}
+
 func (su *SquadUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(squad.Table, squad.Columns, sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt))
 	if ps := su.mutation.predicates; len(ps) > 0 {
@@ -147,6 +169,12 @@ func (su *SquadUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.AddedNumber(); ok {
 		_spec.AddField(squad.FieldNumber, field.TypeInt, value)
+	}
+	if value, ok := su.mutation.LastUpdated(); ok {
+		_spec.SetField(squad.FieldLastUpdated, field.TypeTime, value)
+	}
+	if su.mutation.LastUpdatedCleared() {
+		_spec.ClearField(squad.FieldLastUpdated, field.TypeTime)
 	}
 	if su.mutation.PlayerCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -245,6 +273,18 @@ func (suo *SquadUpdateOne) AddNumber(i int) *SquadUpdateOne {
 	return suo
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (suo *SquadUpdateOne) SetLastUpdated(t time.Time) *SquadUpdateOne {
+	suo.mutation.SetLastUpdated(t)
+	return suo
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (suo *SquadUpdateOne) ClearLastUpdated() *SquadUpdateOne {
+	suo.mutation.ClearLastUpdated()
+	return suo
+}
+
 // SetPlayerID sets the "player" edge to the Player entity by ID.
 func (suo *SquadUpdateOne) SetPlayerID(id int) *SquadUpdateOne {
 	suo.mutation.SetPlayerID(id)
@@ -315,6 +355,7 @@ func (suo *SquadUpdateOne) Select(field string, fields ...string) *SquadUpdateOn
 
 // Save executes the query and returns the updated Squad entity.
 func (suo *SquadUpdateOne) Save(ctx context.Context) (*Squad, error) {
+	suo.defaults()
 	return withHooks[*Squad, SquadMutation](ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
@@ -337,6 +378,14 @@ func (suo *SquadUpdateOne) Exec(ctx context.Context) error {
 func (suo *SquadUpdateOne) ExecX(ctx context.Context) {
 	if err := suo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (suo *SquadUpdateOne) defaults() {
+	if _, ok := suo.mutation.LastUpdated(); !ok && !suo.mutation.LastUpdatedCleared() {
+		v := squad.UpdateDefaultLastUpdated()
+		suo.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -374,6 +423,12 @@ func (suo *SquadUpdateOne) sqlSave(ctx context.Context) (_node *Squad, err error
 	}
 	if value, ok := suo.mutation.AddedNumber(); ok {
 		_spec.AddField(squad.FieldNumber, field.TypeInt, value)
+	}
+	if value, ok := suo.mutation.LastUpdated(); ok {
+		_spec.SetField(squad.FieldLastUpdated, field.TypeTime, value)
+	}
+	if suo.mutation.LastUpdatedCleared() {
+		_spec.ClearField(squad.FieldLastUpdated, field.TypeTime)
 	}
 	if suo.mutation.PlayerCleared() {
 		edge := &sqlgraph.EdgeSpec{

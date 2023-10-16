@@ -50,6 +50,18 @@ func (su *SeasonUpdate) SetCurrent(b bool) *SeasonUpdate {
 	return su
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (su *SeasonUpdate) SetLastUpdated(t time.Time) *SeasonUpdate {
+	su.mutation.SetLastUpdated(t)
+	return su
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (su *SeasonUpdate) ClearLastUpdated() *SeasonUpdate {
+	su.mutation.ClearLastUpdated()
+	return su
+}
+
 // SetLeagueID sets the "league" edge to the League entity by ID.
 func (su *SeasonUpdate) SetLeagueID(id int) *SeasonUpdate {
 	su.mutation.SetLeagueID(id)
@@ -190,6 +202,7 @@ func (su *SeasonUpdate) RemoveTeams(t ...*Team) *SeasonUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (su *SeasonUpdate) Save(ctx context.Context) (int, error) {
+	su.defaults()
 	return withHooks[int, SeasonMutation](ctx, su.sqlSave, su.mutation, su.hooks)
 }
 
@@ -215,6 +228,14 @@ func (su *SeasonUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (su *SeasonUpdate) defaults() {
+	if _, ok := su.mutation.LastUpdated(); !ok && !su.mutation.LastUpdatedCleared() {
+		v := season.UpdateDefaultLastUpdated()
+		su.mutation.SetLastUpdated(v)
+	}
+}
+
 func (su *SeasonUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := sqlgraph.NewUpdateSpec(season.Table, season.Columns, sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt))
 	if ps := su.mutation.predicates; len(ps) > 0 {
@@ -232,6 +253,12 @@ func (su *SeasonUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := su.mutation.Current(); ok {
 		_spec.SetField(season.FieldCurrent, field.TypeBool, value)
+	}
+	if value, ok := su.mutation.LastUpdated(); ok {
+		_spec.SetField(season.FieldLastUpdated, field.TypeTime, value)
+	}
+	if su.mutation.LastUpdatedCleared() {
+		_spec.ClearField(season.FieldLastUpdated, field.TypeTime)
 	}
 	if su.mutation.LeagueCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -435,6 +462,18 @@ func (suo *SeasonUpdateOne) SetCurrent(b bool) *SeasonUpdateOne {
 	return suo
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (suo *SeasonUpdateOne) SetLastUpdated(t time.Time) *SeasonUpdateOne {
+	suo.mutation.SetLastUpdated(t)
+	return suo
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (suo *SeasonUpdateOne) ClearLastUpdated() *SeasonUpdateOne {
+	suo.mutation.ClearLastUpdated()
+	return suo
+}
+
 // SetLeagueID sets the "league" edge to the League entity by ID.
 func (suo *SeasonUpdateOne) SetLeagueID(id int) *SeasonUpdateOne {
 	suo.mutation.SetLeagueID(id)
@@ -588,6 +627,7 @@ func (suo *SeasonUpdateOne) Select(field string, fields ...string) *SeasonUpdate
 
 // Save executes the query and returns the updated Season entity.
 func (suo *SeasonUpdateOne) Save(ctx context.Context) (*Season, error) {
+	suo.defaults()
 	return withHooks[*Season, SeasonMutation](ctx, suo.sqlSave, suo.mutation, suo.hooks)
 }
 
@@ -610,6 +650,14 @@ func (suo *SeasonUpdateOne) Exec(ctx context.Context) error {
 func (suo *SeasonUpdateOne) ExecX(ctx context.Context) {
 	if err := suo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (suo *SeasonUpdateOne) defaults() {
+	if _, ok := suo.mutation.LastUpdated(); !ok && !suo.mutation.LastUpdatedCleared() {
+		v := season.UpdateDefaultLastUpdated()
+		suo.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -647,6 +695,12 @@ func (suo *SeasonUpdateOne) sqlSave(ctx context.Context) (_node *Season, err err
 	}
 	if value, ok := suo.mutation.Current(); ok {
 		_spec.SetField(season.FieldCurrent, field.TypeBool, value)
+	}
+	if value, ok := suo.mutation.LastUpdated(); ok {
+		_spec.SetField(season.FieldLastUpdated, field.TypeTime, value)
+	}
+	if suo.mutation.LastUpdatedCleared() {
+		_spec.ClearField(season.FieldLastUpdated, field.TypeTime)
 	}
 	if suo.mutation.LeagueCleared() {
 		edge := &sqlgraph.EdgeSpec{

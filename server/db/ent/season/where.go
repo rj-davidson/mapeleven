@@ -80,6 +80,11 @@ func Current(v bool) predicate.Season {
 	return predicate.Season(sql.FieldEQ(FieldCurrent, v))
 }
 
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.Season {
+	return predicate.Season(sql.FieldEQ(FieldLastUpdated, v))
+}
+
 // SlugEQ applies the EQ predicate on the "slug" field.
 func SlugEQ(v string) predicate.Season {
 	return predicate.Season(sql.FieldEQ(FieldSlug, v))
@@ -273,6 +278,56 @@ func CurrentEQ(v bool) predicate.Season {
 // CurrentNEQ applies the NEQ predicate on the "current" field.
 func CurrentNEQ(v bool) predicate.Season {
 	return predicate.Season(sql.FieldNEQ(FieldCurrent, v))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.Season {
+	return predicate.Season(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.Season {
+	return predicate.Season(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.Season {
+	return predicate.Season(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.Season {
+	return predicate.Season(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.Season {
+	return predicate.Season(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.Season {
+	return predicate.Season(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.Season {
+	return predicate.Season(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.Season {
+	return predicate.Season(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.Season {
+	return predicate.Season(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.Season {
+	return predicate.Season(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasLeague applies the HasEdge predicate on the "league" edge.

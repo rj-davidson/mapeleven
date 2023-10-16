@@ -34,28 +34,6 @@ func init() {
 	flag.Parse()
 }
 
-//func resetDatabase() {
-//	// Connect to the default "postgres" database to reset the specific database
-//	connectionString := "postgres://" + viper.GetString("DB_USER") + ":" + viper.GetString("DB_PASS") + "@" + viper.GetString("DB_HOST") + ":" + viper.GetString("DB_PORT") + "/postgres?sslmode=disable"
-//	db, err := sql.Open("postgres", connectionString)
-//	if err != nil {
-//		log.Fatalf("Failed to connect to the default postgres database: %v", err)
-//	}
-//	defer db.Close()
-//
-//	// Drop the database
-//	_, err = db.Exec(`DROP DATABASE IF EXISTS "` + viper.GetString("DB_NAME") + `"`)
-//	if err != nil {
-//		log.Fatalf("Failed to drop database: %v", err)
-//	}
-//
-//	// Create the database
-//	_, err = db.Exec(`CREATE DATABASE "` + viper.GetString("DB_NAME") + `"`)
-//	if err != nil {
-//		log.Fatalf("Failed to create database: %v", err)
-//	}
-//}
-
 func main() {
 	// Set up Viper configuration
 	viper.SetConfigFile(".env")

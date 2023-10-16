@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // League holds the schema definition for the League entity.
@@ -24,6 +25,10 @@ func (League) Fields() []ent.Field {
 		field.Enum("type").
 			Values("League", "Cup", "Tournament", "Friendly"),
 		field.String("logo"),
+		field.Time("lastUpdated").
+			Default(time.Now).
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 

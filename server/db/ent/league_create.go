@@ -9,6 +9,7 @@ import (
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/season"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -48,6 +49,20 @@ func (lc *LeagueCreate) SetType(l league.Type) *LeagueCreate {
 // SetLogo sets the "logo" field.
 func (lc *LeagueCreate) SetLogo(s string) *LeagueCreate {
 	lc.mutation.SetLogo(s)
+	return lc
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (lc *LeagueCreate) SetLastUpdated(t time.Time) *LeagueCreate {
+	lc.mutation.SetLastUpdated(t)
+	return lc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (lc *LeagueCreate) SetNillableLastUpdated(t *time.Time) *LeagueCreate {
+	if t != nil {
+		lc.SetLastUpdated(*t)
+	}
 	return lc
 }
 
@@ -92,6 +107,7 @@ func (lc *LeagueCreate) Mutation() *LeagueMutation {
 
 // Save creates the League in the database.
 func (lc *LeagueCreate) Save(ctx context.Context) (*League, error) {
+	lc.defaults()
 	return withHooks[*League, LeagueMutation](ctx, lc.sqlSave, lc.mutation, lc.hooks)
 }
 
@@ -114,6 +130,14 @@ func (lc *LeagueCreate) Exec(ctx context.Context) error {
 func (lc *LeagueCreate) ExecX(ctx context.Context) {
 	if err := lc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (lc *LeagueCreate) defaults() {
+	if _, ok := lc.mutation.LastUpdated(); !ok {
+		v := league.DefaultLastUpdated()
+		lc.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -185,6 +209,10 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 		_spec.SetField(league.FieldLogo, field.TypeString, value)
 		_node.Logo = value
 	}
+	if value, ok := lc.mutation.LastUpdated(); ok {
+		_spec.SetField(league.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
+	}
 	if nodes := lc.mutation.CountryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -235,6 +263,7 @@ func (lcb *LeagueCreateBulk) Save(ctx context.Context) ([]*League, error) {
 	for i := range lcb.builders {
 		func(i int, root context.Context) {
 			builder := lcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*LeagueMutation)
 				if !ok {

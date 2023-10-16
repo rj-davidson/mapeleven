@@ -7,6 +7,7 @@ import (
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -27,6 +28,8 @@ type League struct {
 	Type league.Type `json:"type,omitempty"`
 	// Logo holds the value of the "logo" field.
 	Logo string `json:"logo,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the LeagueQuery when eager-loading is set.
 	Edges           LeagueEdges `json:"edges"`
@@ -76,6 +79,8 @@ func (*League) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case league.FieldSlug, league.FieldName, league.FieldType, league.FieldLogo:
 			values[i] = new(sql.NullString)
+		case league.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
 		case league.ForeignKeys[0]: // country_leagues
 			values[i] = new(sql.NullInt64)
 		default:
@@ -128,6 +133,12 @@ func (l *League) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field logo", values[i])
 			} else if value.Valid {
 				l.Logo = value.String
+			}
+		case league.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				l.LastUpdated = value.Time
 			}
 		case league.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -196,6 +207,9 @@ func (l *League) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("logo=")
 	builder.WriteString(l.Logo)
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(l.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

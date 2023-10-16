@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // Player holds the schema definition for the Player entity.
@@ -28,6 +29,10 @@ func (Player) Fields() []ent.Field {
 		field.String("weight"),
 		field.Bool("injured"),
 		field.String("photo"),
+		field.Time("lastUpdated").
+			Default(time.Now).
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 

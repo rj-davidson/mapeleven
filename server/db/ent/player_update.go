@@ -11,6 +11,7 @@ import (
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/squad"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -82,6 +83,18 @@ func (pu *PlayerUpdate) SetInjured(b bool) *PlayerUpdate {
 // SetPhoto sets the "photo" field.
 func (pu *PlayerUpdate) SetPhoto(s string) *PlayerUpdate {
 	pu.mutation.SetPhoto(s)
+	return pu
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (pu *PlayerUpdate) SetLastUpdated(t time.Time) *PlayerUpdate {
+	pu.mutation.SetLastUpdated(t)
+	return pu
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (pu *PlayerUpdate) ClearLastUpdated() *PlayerUpdate {
+	pu.mutation.ClearLastUpdated()
 	return pu
 }
 
@@ -178,6 +191,7 @@ func (pu *PlayerUpdate) RemoveSquad(s ...*Squad) *PlayerUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PlayerUpdate) Save(ctx context.Context) (int, error) {
+	pu.defaults()
 	return withHooks[int, PlayerMutation](ctx, pu.sqlSave, pu.mutation, pu.hooks)
 }
 
@@ -200,6 +214,14 @@ func (pu *PlayerUpdate) Exec(ctx context.Context) error {
 func (pu *PlayerUpdate) ExecX(ctx context.Context) {
 	if err := pu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pu *PlayerUpdate) defaults() {
+	if _, ok := pu.mutation.LastUpdated(); !ok && !pu.mutation.LastUpdatedCleared() {
+		v := player.UpdateDefaultLastUpdated()
+		pu.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -238,6 +260,12 @@ func (pu *PlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pu.mutation.Photo(); ok {
 		_spec.SetField(player.FieldPhoto, field.TypeString, value)
+	}
+	if value, ok := pu.mutation.LastUpdated(); ok {
+		_spec.SetField(player.FieldLastUpdated, field.TypeTime, value)
+	}
+	if pu.mutation.LastUpdatedCleared() {
+		_spec.ClearField(player.FieldLastUpdated, field.TypeTime)
 	}
 	if pu.mutation.BirthCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -417,6 +445,18 @@ func (puo *PlayerUpdateOne) SetPhoto(s string) *PlayerUpdateOne {
 	return puo
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (puo *PlayerUpdateOne) SetLastUpdated(t time.Time) *PlayerUpdateOne {
+	puo.mutation.SetLastUpdated(t)
+	return puo
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (puo *PlayerUpdateOne) ClearLastUpdated() *PlayerUpdateOne {
+	puo.mutation.ClearLastUpdated()
+	return puo
+}
+
 // SetBirthID sets the "birth" edge to the Birth entity by ID.
 func (puo *PlayerUpdateOne) SetBirthID(id int) *PlayerUpdateOne {
 	puo.mutation.SetBirthID(id)
@@ -523,6 +563,7 @@ func (puo *PlayerUpdateOne) Select(field string, fields ...string) *PlayerUpdate
 
 // Save executes the query and returns the updated Player entity.
 func (puo *PlayerUpdateOne) Save(ctx context.Context) (*Player, error) {
+	puo.defaults()
 	return withHooks[*Player, PlayerMutation](ctx, puo.sqlSave, puo.mutation, puo.hooks)
 }
 
@@ -545,6 +586,14 @@ func (puo *PlayerUpdateOne) Exec(ctx context.Context) error {
 func (puo *PlayerUpdateOne) ExecX(ctx context.Context) {
 	if err := puo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (puo *PlayerUpdateOne) defaults() {
+	if _, ok := puo.mutation.LastUpdated(); !ok && !puo.mutation.LastUpdatedCleared() {
+		v := player.UpdateDefaultLastUpdated()
+		puo.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -600,6 +649,12 @@ func (puo *PlayerUpdateOne) sqlSave(ctx context.Context) (_node *Player, err err
 	}
 	if value, ok := puo.mutation.Photo(); ok {
 		_spec.SetField(player.FieldPhoto, field.TypeString, value)
+	}
+	if value, ok := puo.mutation.LastUpdated(); ok {
+		_spec.SetField(player.FieldLastUpdated, field.TypeTime, value)
+	}
+	if puo.mutation.LastUpdatedCleared() {
+		_spec.ClearField(player.FieldLastUpdated, field.TypeTime)
 	}
 	if puo.mutation.BirthCleared() {
 		edge := &sqlgraph.EdgeSpec{

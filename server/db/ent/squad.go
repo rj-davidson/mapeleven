@@ -8,6 +8,7 @@ import (
 	"mapeleven/db/ent/squad"
 	"mapeleven/db/ent/team"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -22,6 +23,8 @@ type Squad struct {
 	Position string `json:"position,omitempty"`
 	// Number holds the value of the "number" field.
 	Number int `json:"number,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SquadQuery when eager-loading is set.
 	Edges        SquadEdges `json:"edges"`
@@ -76,6 +79,8 @@ func (*Squad) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case squad.FieldPosition:
 			values[i] = new(sql.NullString)
+		case squad.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
 		case squad.ForeignKeys[0]: // player_squad
 			values[i] = new(sql.NullInt64)
 		case squad.ForeignKeys[1]: // team_squad
@@ -112,6 +117,12 @@ func (s *Squad) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field number", values[i])
 			} else if value.Valid {
 				s.Number = int(value.Int64)
+			}
+		case squad.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				s.LastUpdated = value.Time
 			}
 		case squad.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -178,6 +189,9 @@ func (s *Squad) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("number=")
 	builder.WriteString(fmt.Sprintf("%v", s.Number))
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(s.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

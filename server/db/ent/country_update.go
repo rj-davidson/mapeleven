@@ -11,6 +11,7 @@ import (
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -45,6 +46,18 @@ func (cu *CountryUpdate) SetName(s string) *CountryUpdate {
 // SetFlag sets the "flag" field.
 func (cu *CountryUpdate) SetFlag(s string) *CountryUpdate {
 	cu.mutation.SetFlag(s)
+	return cu
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (cu *CountryUpdate) SetLastUpdated(t time.Time) *CountryUpdate {
+	cu.mutation.SetLastUpdated(t)
+	return cu
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (cu *CountryUpdate) ClearLastUpdated() *CountryUpdate {
+	cu.mutation.ClearLastUpdated()
 	return cu
 }
 
@@ -163,6 +176,7 @@ func (cu *CountryUpdate) RemoveClubs(c ...*Club) *CountryUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (cu *CountryUpdate) Save(ctx context.Context) (int, error) {
+	cu.defaults()
 	return withHooks[int, CountryMutation](ctx, cu.sqlSave, cu.mutation, cu.hooks)
 }
 
@@ -185,6 +199,14 @@ func (cu *CountryUpdate) Exec(ctx context.Context) error {
 func (cu *CountryUpdate) ExecX(ctx context.Context) {
 	if err := cu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cu *CountryUpdate) defaults() {
+	if _, ok := cu.mutation.LastUpdated(); !ok && !cu.mutation.LastUpdatedCleared() {
+		v := country.UpdateDefaultLastUpdated()
+		cu.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -218,6 +240,12 @@ func (cu *CountryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := cu.mutation.Flag(); ok {
 		_spec.SetField(country.FieldFlag, field.TypeString, value)
+	}
+	if value, ok := cu.mutation.LastUpdated(); ok {
+		_spec.SetField(country.FieldLastUpdated, field.TypeTime, value)
+	}
+	if cu.mutation.LastUpdatedCleared() {
+		_spec.ClearField(country.FieldLastUpdated, field.TypeTime)
 	}
 	if cu.mutation.PlayersCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -392,6 +420,18 @@ func (cuo *CountryUpdateOne) SetFlag(s string) *CountryUpdateOne {
 	return cuo
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (cuo *CountryUpdateOne) SetLastUpdated(t time.Time) *CountryUpdateOne {
+	cuo.mutation.SetLastUpdated(t)
+	return cuo
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (cuo *CountryUpdateOne) ClearLastUpdated() *CountryUpdateOne {
+	cuo.mutation.ClearLastUpdated()
+	return cuo
+}
+
 // AddPlayerIDs adds the "players" edge to the Player entity by IDs.
 func (cuo *CountryUpdateOne) AddPlayerIDs(ids ...int) *CountryUpdateOne {
 	cuo.mutation.AddPlayerIDs(ids...)
@@ -520,6 +560,7 @@ func (cuo *CountryUpdateOne) Select(field string, fields ...string) *CountryUpda
 
 // Save executes the query and returns the updated Country entity.
 func (cuo *CountryUpdateOne) Save(ctx context.Context) (*Country, error) {
+	cuo.defaults()
 	return withHooks[*Country, CountryMutation](ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
 }
 
@@ -542,6 +583,14 @@ func (cuo *CountryUpdateOne) Exec(ctx context.Context) error {
 func (cuo *CountryUpdateOne) ExecX(ctx context.Context) {
 	if err := cuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cuo *CountryUpdateOne) defaults() {
+	if _, ok := cuo.mutation.LastUpdated(); !ok && !cuo.mutation.LastUpdatedCleared() {
+		v := country.UpdateDefaultLastUpdated()
+		cuo.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -592,6 +641,12 @@ func (cuo *CountryUpdateOne) sqlSave(ctx context.Context) (_node *Country, err e
 	}
 	if value, ok := cuo.mutation.Flag(); ok {
 		_spec.SetField(country.FieldFlag, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.LastUpdated(); ok {
+		_spec.SetField(country.FieldLastUpdated, field.TypeTime, value)
+	}
+	if cuo.mutation.LastUpdatedCleared() {
+		_spec.ClearField(country.FieldLastUpdated, field.TypeTime)
 	}
 	if cuo.mutation.PlayersCleared() {
 		edge := &sqlgraph.EdgeSpec{

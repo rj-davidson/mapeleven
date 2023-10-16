@@ -3,6 +3,8 @@
 package fixture
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -32,6 +34,8 @@ const (
 	FieldHomeTeamScore = "home_team_score"
 	// FieldAwayTeamScore holds the string denoting the awayteamscore field in the database.
 	FieldAwayTeamScore = "away_team_score"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgeHomeTeam holds the string denoting the hometeam edge name in mutations.
 	EdgeHomeTeam = "homeTeam"
 	// EdgeAwayTeam holds the string denoting the awayteam edge name in mutations.
@@ -76,6 +80,7 @@ var Columns = []string{
 	FieldStatus,
 	FieldHomeTeamScore,
 	FieldAwayTeamScore,
+	FieldLastUpdated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "fixtures"
@@ -100,6 +105,13 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
+)
 
 // Order defines the ordering method for the Fixture queries.
 type Order func(*sql.Selector)
@@ -157,6 +169,11 @@ func ByHomeTeamScore(opts ...sql.OrderTermOption) Order {
 // ByAwayTeamScore orders the results by the awayTeamScore field.
 func ByAwayTeamScore(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldAwayTeamScore, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // ByHomeTeamField orders the results by homeTeam field.

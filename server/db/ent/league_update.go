@@ -10,6 +10,7 @@ import (
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -44,6 +45,18 @@ func (lu *LeagueUpdate) SetType(l league.Type) *LeagueUpdate {
 // SetLogo sets the "logo" field.
 func (lu *LeagueUpdate) SetLogo(s string) *LeagueUpdate {
 	lu.mutation.SetLogo(s)
+	return lu
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (lu *LeagueUpdate) SetLastUpdated(t time.Time) *LeagueUpdate {
+	lu.mutation.SetLastUpdated(t)
+	return lu
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (lu *LeagueUpdate) ClearLastUpdated() *LeagueUpdate {
+	lu.mutation.ClearLastUpdated()
 	return lu
 }
 
@@ -115,6 +128,7 @@ func (lu *LeagueUpdate) RemoveSeason(s ...*Season) *LeagueUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (lu *LeagueUpdate) Save(ctx context.Context) (int, error) {
+	lu.defaults()
 	return withHooks[int, LeagueMutation](ctx, lu.sqlSave, lu.mutation, lu.hooks)
 }
 
@@ -137,6 +151,14 @@ func (lu *LeagueUpdate) Exec(ctx context.Context) error {
 func (lu *LeagueUpdate) ExecX(ctx context.Context) {
 	if err := lu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (lu *LeagueUpdate) defaults() {
+	if _, ok := lu.mutation.LastUpdated(); !ok && !lu.mutation.LastUpdatedCleared() {
+		v := league.UpdateDefaultLastUpdated()
+		lu.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -170,6 +192,12 @@ func (lu *LeagueUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := lu.mutation.Logo(); ok {
 		_spec.SetField(league.FieldLogo, field.TypeString, value)
+	}
+	if value, ok := lu.mutation.LastUpdated(); ok {
+		_spec.SetField(league.FieldLastUpdated, field.TypeTime, value)
+	}
+	if lu.mutation.LastUpdatedCleared() {
+		_spec.ClearField(league.FieldLastUpdated, field.TypeTime)
 	}
 	if lu.mutation.CountryCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -283,6 +311,18 @@ func (luo *LeagueUpdateOne) SetLogo(s string) *LeagueUpdateOne {
 	return luo
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (luo *LeagueUpdateOne) SetLastUpdated(t time.Time) *LeagueUpdateOne {
+	luo.mutation.SetLastUpdated(t)
+	return luo
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (luo *LeagueUpdateOne) ClearLastUpdated() *LeagueUpdateOne {
+	luo.mutation.ClearLastUpdated()
+	return luo
+}
+
 // SetCountryID sets the "country" edge to the Country entity by ID.
 func (luo *LeagueUpdateOne) SetCountryID(id int) *LeagueUpdateOne {
 	luo.mutation.SetCountryID(id)
@@ -364,6 +404,7 @@ func (luo *LeagueUpdateOne) Select(field string, fields ...string) *LeagueUpdate
 
 // Save executes the query and returns the updated League entity.
 func (luo *LeagueUpdateOne) Save(ctx context.Context) (*League, error) {
+	luo.defaults()
 	return withHooks[*League, LeagueMutation](ctx, luo.sqlSave, luo.mutation, luo.hooks)
 }
 
@@ -386,6 +427,14 @@ func (luo *LeagueUpdateOne) Exec(ctx context.Context) error {
 func (luo *LeagueUpdateOne) ExecX(ctx context.Context) {
 	if err := luo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (luo *LeagueUpdateOne) defaults() {
+	if _, ok := luo.mutation.LastUpdated(); !ok && !luo.mutation.LastUpdatedCleared() {
+		v := league.UpdateDefaultLastUpdated()
+		luo.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -436,6 +485,12 @@ func (luo *LeagueUpdateOne) sqlSave(ctx context.Context) (_node *League, err err
 	}
 	if value, ok := luo.mutation.Logo(); ok {
 		_spec.SetField(league.FieldLogo, field.TypeString, value)
+	}
+	if value, ok := luo.mutation.LastUpdated(); ok {
+		_spec.SetField(league.FieldLastUpdated, field.TypeTime, value)
+	}
+	if luo.mutation.LastUpdatedCleared() {
+		_spec.ClearField(league.FieldLastUpdated, field.TypeTime)
 	}
 	if luo.mutation.CountryCleared() {
 		edge := &sqlgraph.EdgeSpec{

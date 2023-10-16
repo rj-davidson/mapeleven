@@ -4,6 +4,7 @@ package country
 
 import (
 	"mapeleven/db/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -67,6 +68,11 @@ func Name(v string) predicate.Country {
 // Flag applies equality check predicate on the "flag" field. It's identical to FlagEQ.
 func Flag(v string) predicate.Country {
 	return predicate.Country(sql.FieldEQ(FieldFlag, v))
+}
+
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.Country {
+	return predicate.Country(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // CodeEQ applies the EQ predicate on the "code" field.
@@ -262,6 +268,56 @@ func FlagEqualFold(v string) predicate.Country {
 // FlagContainsFold applies the ContainsFold predicate on the "flag" field.
 func FlagContainsFold(v string) predicate.Country {
 	return predicate.Country(sql.FieldContainsFold(FieldFlag, v))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.Country {
+	return predicate.Country(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.Country {
+	return predicate.Country(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.Country {
+	return predicate.Country(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.Country {
+	return predicate.Country(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.Country {
+	return predicate.Country(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.Country {
+	return predicate.Country(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.Country {
+	return predicate.Country(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.Country {
+	return predicate.Country(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.Country {
+	return predicate.Country(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.Country {
+	return predicate.Country(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasPlayers applies the HasEdge predicate on the "players" edge.

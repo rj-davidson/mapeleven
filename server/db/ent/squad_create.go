@@ -9,6 +9,7 @@ import (
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/squad"
 	"mapeleven/db/ent/team"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -30,6 +31,20 @@ func (sc *SquadCreate) SetPosition(s string) *SquadCreate {
 // SetNumber sets the "number" field.
 func (sc *SquadCreate) SetNumber(i int) *SquadCreate {
 	sc.mutation.SetNumber(i)
+	return sc
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (sc *SquadCreate) SetLastUpdated(t time.Time) *SquadCreate {
+	sc.mutation.SetLastUpdated(t)
+	return sc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (sc *SquadCreate) SetNillableLastUpdated(t *time.Time) *SquadCreate {
+	if t != nil {
+		sc.SetLastUpdated(*t)
+	}
 	return sc
 }
 
@@ -78,6 +93,7 @@ func (sc *SquadCreate) Mutation() *SquadMutation {
 
 // Save creates the Squad in the database.
 func (sc *SquadCreate) Save(ctx context.Context) (*Squad, error) {
+	sc.defaults()
 	return withHooks[*Squad, SquadMutation](ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
@@ -100,6 +116,14 @@ func (sc *SquadCreate) Exec(ctx context.Context) error {
 func (sc *SquadCreate) ExecX(ctx context.Context) {
 	if err := sc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (sc *SquadCreate) defaults() {
+	if _, ok := sc.mutation.LastUpdated(); !ok {
+		v := squad.DefaultLastUpdated()
+		sc.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -144,6 +168,10 @@ func (sc *SquadCreate) createSpec() (*Squad, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Number(); ok {
 		_spec.SetField(squad.FieldNumber, field.TypeInt, value)
 		_node.Number = value
+	}
+	if value, ok := sc.mutation.LastUpdated(); ok {
+		_spec.SetField(squad.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
 	}
 	if nodes := sc.mutation.PlayerIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -196,6 +224,7 @@ func (scb *SquadCreateBulk) Save(ctx context.Context) ([]*Squad, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SquadMutation)
 				if !ok {

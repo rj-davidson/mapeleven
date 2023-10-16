@@ -10,6 +10,7 @@ import (
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/league"
 	"mapeleven/db/ent/player"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -37,6 +38,20 @@ func (cc *CountryCreate) SetName(s string) *CountryCreate {
 // SetFlag sets the "flag" field.
 func (cc *CountryCreate) SetFlag(s string) *CountryCreate {
 	cc.mutation.SetFlag(s)
+	return cc
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (cc *CountryCreate) SetLastUpdated(t time.Time) *CountryCreate {
+	cc.mutation.SetLastUpdated(t)
+	return cc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (cc *CountryCreate) SetNillableLastUpdated(t *time.Time) *CountryCreate {
+	if t != nil {
+		cc.SetLastUpdated(*t)
+	}
 	return cc
 }
 
@@ -92,6 +107,7 @@ func (cc *CountryCreate) Mutation() *CountryMutation {
 
 // Save creates the Country in the database.
 func (cc *CountryCreate) Save(ctx context.Context) (*Country, error) {
+	cc.defaults()
 	return withHooks[*Country, CountryMutation](ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
@@ -114,6 +130,14 @@ func (cc *CountryCreate) Exec(ctx context.Context) error {
 func (cc *CountryCreate) ExecX(ctx context.Context) {
 	if err := cc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cc *CountryCreate) defaults() {
+	if _, ok := cc.mutation.LastUpdated(); !ok {
+		v := country.DefaultLastUpdated()
+		cc.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -170,6 +194,10 @@ func (cc *CountryCreate) createSpec() (*Country, *sqlgraph.CreateSpec) {
 	if value, ok := cc.mutation.Flag(); ok {
 		_spec.SetField(country.FieldFlag, field.TypeString, value)
 		_node.Flag = value
+	}
+	if value, ok := cc.mutation.LastUpdated(); ok {
+		_spec.SetField(country.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
 	}
 	if nodes := cc.mutation.PlayersIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -236,6 +264,7 @@ func (ccb *CountryCreateBulk) Save(ctx context.Context) ([]*Country, error) {
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CountryMutation)
 				if !ok {

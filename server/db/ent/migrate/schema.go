@@ -53,6 +53,7 @@ var (
 		{Name: "code", Type: field.TypeString, Size: 3},
 		{Name: "name", Type: field.TypeString, Unique: true},
 		{Name: "flag", Type: field.TypeString},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 	}
 	// CountriesTable holds the schema information for the "countries" table.
 	CountriesTable = &schema.Table{
@@ -73,6 +74,7 @@ var (
 		{Name: "status", Type: field.TypeString},
 		{Name: "home_team_score", Type: field.TypeInt, Nullable: true},
 		{Name: "away_team_score", Type: field.TypeInt, Nullable: true},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "season_fixtures", Type: field.TypeInt},
 		{Name: "team_home_fixtures", Type: field.TypeInt},
 		{Name: "team_away_fixtures", Type: field.TypeInt},
@@ -85,19 +87,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "fixtures_seasons_fixtures",
-				Columns:    []*schema.Column{FixturesColumns[11]},
+				Columns:    []*schema.Column{FixturesColumns[12]},
 				RefColumns: []*schema.Column{SeasonsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "fixtures_teams_homeFixtures",
-				Columns:    []*schema.Column{FixturesColumns[12]},
+				Columns:    []*schema.Column{FixturesColumns[13]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "fixtures_teams_awayFixtures",
-				Columns:    []*schema.Column{FixturesColumns[13]},
+				Columns:    []*schema.Column{FixturesColumns[14]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -111,6 +113,7 @@ var (
 		{Name: "name", Type: field.TypeString},
 		{Name: "type", Type: field.TypeEnum, Enums: []string{"League", "Cup", "Tournament", "Friendly"}},
 		{Name: "logo", Type: field.TypeString},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "country_leagues", Type: field.TypeInt, Nullable: true},
 	}
 	// LeaguesTable holds the schema information for the "leagues" table.
@@ -121,7 +124,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "leagues_countries_leagues",
-				Columns:    []*schema.Column{LeaguesColumns[6]},
+				Columns:    []*schema.Column{LeaguesColumns[7]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -140,6 +143,7 @@ var (
 		{Name: "weight", Type: field.TypeString},
 		{Name: "injured", Type: field.TypeBool},
 		{Name: "photo", Type: field.TypeString},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "birth_player", Type: field.TypeInt, Nullable: true},
 		{Name: "country_players", Type: field.TypeInt, Nullable: true},
 		{Name: "team_players", Type: field.TypeInt, Nullable: true},
@@ -152,19 +156,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "players_births_player",
-				Columns:    []*schema.Column{PlayersColumns[11]},
+				Columns:    []*schema.Column{PlayersColumns[12]},
 				RefColumns: []*schema.Column{BirthsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "players_countries_players",
-				Columns:    []*schema.Column{PlayersColumns[12]},
+				Columns:    []*schema.Column{PlayersColumns[13]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "players_teams_players",
-				Columns:    []*schema.Column{PlayersColumns[13]},
+				Columns:    []*schema.Column{PlayersColumns[14]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -178,6 +182,7 @@ var (
 		{Name: "start_date", Type: field.TypeTime},
 		{Name: "end_date", Type: field.TypeTime},
 		{Name: "current", Type: field.TypeBool},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "league_season", Type: field.TypeInt, Nullable: true},
 	}
 	// SeasonsTable holds the schema information for the "seasons" table.
@@ -188,7 +193,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "seasons_leagues_season",
-				Columns:    []*schema.Column{SeasonsColumns[6]},
+				Columns:    []*schema.Column{SeasonsColumns[7]},
 				RefColumns: []*schema.Column{LeaguesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -199,6 +204,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "position", Type: field.TypeString},
 		{Name: "number", Type: field.TypeInt},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "player_squad", Type: field.TypeInt, Nullable: true},
 		{Name: "team_squad", Type: field.TypeInt, Nullable: true},
 	}
@@ -210,13 +216,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "squads_players_squad",
-				Columns:    []*schema.Column{SquadsColumns[3]},
+				Columns:    []*schema.Column{SquadsColumns[4]},
 				RefColumns: []*schema.Column{PlayersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "squads_teams_squad",
-				Columns:    []*schema.Column{SquadsColumns[4]},
+				Columns:    []*schema.Column{SquadsColumns[5]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

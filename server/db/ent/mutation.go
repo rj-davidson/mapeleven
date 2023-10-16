@@ -1468,6 +1468,7 @@ type CountryMutation struct {
 	code           *string
 	name           *string
 	flag           *string
+	lastUpdated    *time.Time
 	clearedFields  map[string]struct{}
 	players        map[int]struct{}
 	removedplayers map[int]struct{}
@@ -1689,6 +1690,55 @@ func (m *CountryMutation) ResetFlag() {
 	m.flag = nil
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *CountryMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *CountryMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the Country entity.
+// If the Country object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CountryMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *CountryMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[country.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *CountryMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[country.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *CountryMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, country.FieldLastUpdated)
+}
+
 // AddPlayerIDs adds the "players" edge to the Player entity by ids.
 func (m *CountryMutation) AddPlayerIDs(ids ...int) {
 	if m.players == nil {
@@ -1885,7 +1935,7 @@ func (m *CountryMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CountryMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+	fields := make([]string, 0, 4)
 	if m.code != nil {
 		fields = append(fields, country.FieldCode)
 	}
@@ -1894,6 +1944,9 @@ func (m *CountryMutation) Fields() []string {
 	}
 	if m.flag != nil {
 		fields = append(fields, country.FieldFlag)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, country.FieldLastUpdated)
 	}
 	return fields
 }
@@ -1909,6 +1962,8 @@ func (m *CountryMutation) Field(name string) (ent.Value, bool) {
 		return m.Name()
 	case country.FieldFlag:
 		return m.Flag()
+	case country.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -1924,6 +1979,8 @@ func (m *CountryMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldName(ctx)
 	case country.FieldFlag:
 		return m.OldFlag(ctx)
+	case country.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown Country field %s", name)
 }
@@ -1954,6 +2011,13 @@ func (m *CountryMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetFlag(v)
 		return nil
+	case country.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Country field %s", name)
 }
@@ -1983,7 +2047,11 @@ func (m *CountryMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *CountryMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(country.FieldLastUpdated) {
+		fields = append(fields, country.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -1996,6 +2064,11 @@ func (m *CountryMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *CountryMutation) ClearField(name string) error {
+	switch name {
+	case country.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown Country nullable field %s", name)
 }
 
@@ -2011,6 +2084,9 @@ func (m *CountryMutation) ResetField(name string) error {
 		return nil
 	case country.FieldFlag:
 		m.ResetFlag()
+		return nil
+	case country.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown Country field %s", name)
@@ -2173,6 +2249,7 @@ type FixtureMutation struct {
 	addhomeTeamScore *int
 	awayTeamScore    *int
 	addawayTeamScore *int
+	lastUpdated      *time.Time
 	clearedFields    map[string]struct{}
 	homeTeam         *int
 	clearedhomeTeam  bool
@@ -2825,6 +2902,55 @@ func (m *FixtureMutation) ResetAwayTeamScore() {
 	delete(m.clearedFields, fixture.FieldAwayTeamScore)
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *FixtureMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *FixtureMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the Fixture entity.
+// If the Fixture object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *FixtureMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[fixture.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *FixtureMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[fixture.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *FixtureMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, fixture.FieldLastUpdated)
+}
+
 // SetHomeTeamID sets the "homeTeam" edge to the Team entity by id.
 func (m *FixtureMutation) SetHomeTeamID(id int) {
 	m.homeTeam = &id
@@ -2976,7 +3102,7 @@ func (m *FixtureMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *FixtureMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.slug != nil {
 		fields = append(fields, fixture.FieldSlug)
 	}
@@ -3007,6 +3133,9 @@ func (m *FixtureMutation) Fields() []string {
 	if m.awayTeamScore != nil {
 		fields = append(fields, fixture.FieldAwayTeamScore)
 	}
+	if m.lastUpdated != nil {
+		fields = append(fields, fixture.FieldLastUpdated)
+	}
 	return fields
 }
 
@@ -3035,6 +3164,8 @@ func (m *FixtureMutation) Field(name string) (ent.Value, bool) {
 		return m.HomeTeamScore()
 	case fixture.FieldAwayTeamScore:
 		return m.AwayTeamScore()
+	case fixture.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -3064,6 +3195,8 @@ func (m *FixtureMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldHomeTeamScore(ctx)
 	case fixture.FieldAwayTeamScore:
 		return m.OldAwayTeamScore(ctx)
+	case fixture.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown Fixture field %s", name)
 }
@@ -3142,6 +3275,13 @@ func (m *FixtureMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetAwayTeamScore(v)
+		return nil
+	case fixture.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Fixture field %s", name)
@@ -3254,6 +3394,9 @@ func (m *FixtureMutation) ClearedFields() []string {
 	if m.FieldCleared(fixture.FieldAwayTeamScore) {
 		fields = append(fields, fixture.FieldAwayTeamScore)
 	}
+	if m.FieldCleared(fixture.FieldLastUpdated) {
+		fields = append(fields, fixture.FieldLastUpdated)
+	}
 	return fields
 }
 
@@ -3285,6 +3428,9 @@ func (m *FixtureMutation) ClearField(name string) error {
 		return nil
 	case fixture.FieldAwayTeamScore:
 		m.ClearAwayTeamScore()
+		return nil
+	case fixture.FieldLastUpdated:
+		m.ClearLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown Fixture nullable field %s", name)
@@ -3323,6 +3469,9 @@ func (m *FixtureMutation) ResetField(name string) error {
 		return nil
 	case fixture.FieldAwayTeamScore:
 		m.ResetAwayTeamScore()
+		return nil
+	case fixture.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown Fixture field %s", name)
@@ -3450,6 +3599,7 @@ type LeagueMutation struct {
 	name             *string
 	_type            *league.Type
 	logo             *string
+	lastUpdated      *time.Time
 	clearedFields    map[string]struct{}
 	country          *int
 	clearedcountry   bool
@@ -3759,6 +3909,55 @@ func (m *LeagueMutation) ResetLogo() {
 	m.logo = nil
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *LeagueMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *LeagueMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the League entity.
+// If the League object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *LeagueMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *LeagueMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[league.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *LeagueMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[league.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *LeagueMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, league.FieldLastUpdated)
+}
+
 // SetCountryID sets the "country" edge to the Country entity by id.
 func (m *LeagueMutation) SetCountryID(id int) {
 	m.country = &id
@@ -3886,7 +4085,7 @@ func (m *LeagueMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *LeagueMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.footballApiId != nil {
 		fields = append(fields, league.FieldFootballApiId)
 	}
@@ -3901,6 +4100,9 @@ func (m *LeagueMutation) Fields() []string {
 	}
 	if m.logo != nil {
 		fields = append(fields, league.FieldLogo)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, league.FieldLastUpdated)
 	}
 	return fields
 }
@@ -3920,6 +4122,8 @@ func (m *LeagueMutation) Field(name string) (ent.Value, bool) {
 		return m.GetType()
 	case league.FieldLogo:
 		return m.Logo()
+	case league.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -3939,6 +4143,8 @@ func (m *LeagueMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldType(ctx)
 	case league.FieldLogo:
 		return m.OldLogo(ctx)
+	case league.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown League field %s", name)
 }
@@ -3982,6 +4188,13 @@ func (m *LeagueMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetLogo(v)
+		return nil
+	case league.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown League field %s", name)
@@ -4027,7 +4240,11 @@ func (m *LeagueMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *LeagueMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(league.FieldLastUpdated) {
+		fields = append(fields, league.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -4040,6 +4257,11 @@ func (m *LeagueMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *LeagueMutation) ClearField(name string) error {
+	switch name {
+	case league.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown League nullable field %s", name)
 }
 
@@ -4061,6 +4283,9 @@ func (m *LeagueMutation) ResetField(name string) error {
 		return nil
 	case league.FieldLogo:
 		m.ResetLogo()
+		return nil
+	case league.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown League field %s", name)
@@ -4186,6 +4411,7 @@ type PlayerMutation struct {
 	weight             *string
 	injured            *bool
 	photo              *string
+	lastUpdated        *time.Time
 	clearedFields      map[string]struct{}
 	birth              *int
 	clearedbirth       bool
@@ -4697,6 +4923,55 @@ func (m *PlayerMutation) ResetPhoto() {
 	m.photo = nil
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PlayerMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PlayerMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the Player entity.
+// If the Player object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlayerMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PlayerMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[player.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PlayerMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[player.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PlayerMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, player.FieldLastUpdated)
+}
+
 // SetBirthID sets the "birth" edge to the Birth entity by id.
 func (m *PlayerMutation) SetBirthID(id int) {
 	m.birth = &id
@@ -4863,7 +5138,7 @@ func (m *PlayerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PlayerMutation) Fields() []string {
-	fields := make([]string, 0, 10)
+	fields := make([]string, 0, 11)
 	if m.slug != nil {
 		fields = append(fields, player.FieldSlug)
 	}
@@ -4894,6 +5169,9 @@ func (m *PlayerMutation) Fields() []string {
 	if m.photo != nil {
 		fields = append(fields, player.FieldPhoto)
 	}
+	if m.lastUpdated != nil {
+		fields = append(fields, player.FieldLastUpdated)
+	}
 	return fields
 }
 
@@ -4922,6 +5200,8 @@ func (m *PlayerMutation) Field(name string) (ent.Value, bool) {
 		return m.Injured()
 	case player.FieldPhoto:
 		return m.Photo()
+	case player.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -4951,6 +5231,8 @@ func (m *PlayerMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldInjured(ctx)
 	case player.FieldPhoto:
 		return m.OldPhoto(ctx)
+	case player.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown Player field %s", name)
 }
@@ -5030,6 +5312,13 @@ func (m *PlayerMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPhoto(v)
 		return nil
+	case player.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Player field %s", name)
 }
@@ -5086,7 +5375,11 @@ func (m *PlayerMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PlayerMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(player.FieldLastUpdated) {
+		fields = append(fields, player.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -5099,6 +5392,11 @@ func (m *PlayerMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PlayerMutation) ClearField(name string) error {
+	switch name {
+	case player.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown Player nullable field %s", name)
 }
 
@@ -5135,6 +5433,9 @@ func (m *PlayerMutation) ResetField(name string) error {
 		return nil
 	case player.FieldPhoto:
 		m.ResetPhoto()
+		return nil
+	case player.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown Player field %s", name)
@@ -5272,6 +5573,7 @@ type SeasonMutation struct {
 	start_date       *time.Time
 	end_date         *time.Time
 	current          *bool
+	lastUpdated      *time.Time
 	clearedFields    map[string]struct{}
 	league           *int
 	clearedleague    bool
@@ -5587,6 +5889,55 @@ func (m *SeasonMutation) ResetCurrent() {
 	m.current = nil
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *SeasonMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *SeasonMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the Season entity.
+// If the Season object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SeasonMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *SeasonMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[season.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *SeasonMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[season.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *SeasonMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, season.FieldLastUpdated)
+}
+
 // SetLeagueID sets the "league" edge to the League entity by id.
 func (m *SeasonMutation) SetLeagueID(id int) {
 	m.league = &id
@@ -5822,7 +6173,7 @@ func (m *SeasonMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SeasonMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.slug != nil {
 		fields = append(fields, season.FieldSlug)
 	}
@@ -5837,6 +6188,9 @@ func (m *SeasonMutation) Fields() []string {
 	}
 	if m.current != nil {
 		fields = append(fields, season.FieldCurrent)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, season.FieldLastUpdated)
 	}
 	return fields
 }
@@ -5856,6 +6210,8 @@ func (m *SeasonMutation) Field(name string) (ent.Value, bool) {
 		return m.EndDate()
 	case season.FieldCurrent:
 		return m.Current()
+	case season.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -5875,6 +6231,8 @@ func (m *SeasonMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldEndDate(ctx)
 	case season.FieldCurrent:
 		return m.OldCurrent(ctx)
+	case season.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown Season field %s", name)
 }
@@ -5918,6 +6276,13 @@ func (m *SeasonMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCurrent(v)
+		return nil
+	case season.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Season field %s", name)
@@ -5963,7 +6328,11 @@ func (m *SeasonMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *SeasonMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(season.FieldLastUpdated) {
+		fields = append(fields, season.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -5976,6 +6345,11 @@ func (m *SeasonMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SeasonMutation) ClearField(name string) error {
+	switch name {
+	case season.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown Season nullable field %s", name)
 }
 
@@ -5997,6 +6371,9 @@ func (m *SeasonMutation) ResetField(name string) error {
 		return nil
 	case season.FieldCurrent:
 		m.ResetCurrent()
+		return nil
+	case season.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown Season field %s", name)
@@ -6165,6 +6542,7 @@ type SquadMutation struct {
 	position      *string
 	number        *int
 	addnumber     *int
+	lastUpdated   *time.Time
 	clearedFields map[string]struct{}
 	player        *int
 	clearedplayer bool
@@ -6365,6 +6743,55 @@ func (m *SquadMutation) ResetNumber() {
 	m.addnumber = nil
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *SquadMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *SquadMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the Squad entity.
+// If the Squad object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *SquadMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *SquadMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[squad.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *SquadMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[squad.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *SquadMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, squad.FieldLastUpdated)
+}
+
 // SetPlayerID sets the "player" edge to the Player entity by id.
 func (m *SquadMutation) SetPlayerID(id int) {
 	m.player = &id
@@ -6477,12 +6904,15 @@ func (m *SquadMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *SquadMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.position != nil {
 		fields = append(fields, squad.FieldPosition)
 	}
 	if m.number != nil {
 		fields = append(fields, squad.FieldNumber)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, squad.FieldLastUpdated)
 	}
 	return fields
 }
@@ -6496,6 +6926,8 @@ func (m *SquadMutation) Field(name string) (ent.Value, bool) {
 		return m.Position()
 	case squad.FieldNumber:
 		return m.Number()
+	case squad.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -6509,6 +6941,8 @@ func (m *SquadMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldPosition(ctx)
 	case squad.FieldNumber:
 		return m.OldNumber(ctx)
+	case squad.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown Squad field %s", name)
 }
@@ -6531,6 +6965,13 @@ func (m *SquadMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetNumber(v)
+		return nil
+	case squad.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Squad field %s", name)
@@ -6576,7 +7017,11 @@ func (m *SquadMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *SquadMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(squad.FieldLastUpdated) {
+		fields = append(fields, squad.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -6589,6 +7034,11 @@ func (m *SquadMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *SquadMutation) ClearField(name string) error {
+	switch name {
+	case squad.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown Squad nullable field %s", name)
 }
 
@@ -6601,6 +7051,9 @@ func (m *SquadMutation) ResetField(name string) error {
 		return nil
 	case squad.FieldNumber:
 		m.ResetNumber()
+		return nil
+	case squad.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown Squad field %s", name)
