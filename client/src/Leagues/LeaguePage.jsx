@@ -45,6 +45,7 @@ function LeaguePage() {
                             draw: standings[i].overall.draw,
                             losses: standings[i].overall.lost,
                             slug: standings[i].team.slug,
+                            form: standings[i].form,
                         });
                     }
                 }
