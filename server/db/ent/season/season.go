@@ -3,6 +3,8 @@
 package season
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -22,6 +24,8 @@ const (
 	FieldEndDate = "end_date"
 	// FieldCurrent holds the string denoting the current field in the database.
 	FieldCurrent = "current"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgeLeague holds the string denoting the league edge name in mutations.
 	EdgeLeague = "league"
 	// EdgeFixtures holds the string denoting the fixtures edge name in mutations.
@@ -70,6 +74,7 @@ var Columns = []string{
 	FieldStartDate,
 	FieldEndDate,
 	FieldCurrent,
+	FieldLastUpdated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "seasons"
@@ -92,6 +97,13 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
+)
 
 // Order defines the ordering method for the Season queries.
 type Order func(*sql.Selector)
@@ -124,6 +136,11 @@ func ByEndDate(opts ...sql.OrderTermOption) Order {
 // ByCurrent orders the results by the current field.
 func ByCurrent(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldCurrent, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // ByLeagueField orders the results by league field.

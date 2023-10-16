@@ -3,6 +3,8 @@
 package squad
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -16,6 +18,8 @@ const (
 	FieldPosition = "position"
 	// FieldNumber holds the string denoting the number field in the database.
 	FieldNumber = "number"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgePlayer holds the string denoting the player edge name in mutations.
 	EdgePlayer = "player"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
@@ -43,6 +47,7 @@ var Columns = []string{
 	FieldID,
 	FieldPosition,
 	FieldNumber,
+	FieldLastUpdated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "squads"
@@ -67,6 +72,13 @@ func ValidColumn(column string) bool {
 	return false
 }
 
+var (
+	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
+)
+
 // Order defines the ordering method for the Squad queries.
 type Order func(*sql.Selector)
 
@@ -83,6 +95,11 @@ func ByPosition(opts ...sql.OrderTermOption) Order {
 // ByNumber orders the results by the number field.
 func ByNumber(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldNumber, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // ByPlayerField orders the results by player field.

@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // Fixture holds the schema definition for the Fixture entity.
@@ -34,6 +35,10 @@ func (Fixture) Fields() []ent.Field {
 			Optional(),
 		field.Int("awayTeamScore").
 			Optional(),
+		field.Time("lastUpdated").
+			Default(time.Now).
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 

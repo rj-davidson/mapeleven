@@ -130,6 +130,20 @@ func (fc *FixtureCreate) SetNillableAwayTeamScore(i *int) *FixtureCreate {
 	return fc
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (fc *FixtureCreate) SetLastUpdated(t time.Time) *FixtureCreate {
+	fc.mutation.SetLastUpdated(t)
+	return fc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (fc *FixtureCreate) SetNillableLastUpdated(t *time.Time) *FixtureCreate {
+	if t != nil {
+		fc.SetLastUpdated(*t)
+	}
+	return fc
+}
+
 // SetHomeTeamID sets the "homeTeam" edge to the Team entity by ID.
 func (fc *FixtureCreate) SetHomeTeamID(id int) *FixtureCreate {
 	fc.mutation.SetHomeTeamID(id)
@@ -170,6 +184,7 @@ func (fc *FixtureCreate) Mutation() *FixtureMutation {
 
 // Save creates the Fixture in the database.
 func (fc *FixtureCreate) Save(ctx context.Context) (*Fixture, error) {
+	fc.defaults()
 	return withHooks[*Fixture, FixtureMutation](ctx, fc.sqlSave, fc.mutation, fc.hooks)
 }
 
@@ -192,6 +207,14 @@ func (fc *FixtureCreate) Exec(ctx context.Context) error {
 func (fc *FixtureCreate) ExecX(ctx context.Context) {
 	if err := fc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (fc *FixtureCreate) defaults() {
+	if _, ok := fc.mutation.LastUpdated(); !ok {
+		v := fixture.DefaultLastUpdated()
+		fc.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -284,6 +307,10 @@ func (fc *FixtureCreate) createSpec() (*Fixture, *sqlgraph.CreateSpec) {
 		_spec.SetField(fixture.FieldAwayTeamScore, field.TypeInt, value)
 		_node.AwayTeamScore = value
 	}
+	if value, ok := fc.mutation.LastUpdated(); ok {
+		_spec.SetField(fixture.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
+	}
 	if nodes := fc.mutation.HomeTeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -352,6 +379,7 @@ func (fcb *FixtureCreateBulk) Save(ctx context.Context) ([]*Fixture, error) {
 	for i := range fcb.builders {
 		func(i int, root context.Context) {
 			builder := fcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*FixtureMutation)
 				if !ok {

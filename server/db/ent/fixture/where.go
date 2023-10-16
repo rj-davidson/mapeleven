@@ -105,6 +105,11 @@ func AwayTeamScore(v int) predicate.Fixture {
 	return predicate.Fixture(sql.FieldEQ(FieldAwayTeamScore, v))
 }
 
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldEQ(FieldLastUpdated, v))
+}
+
 // SlugEQ applies the EQ predicate on the "slug" field.
 func SlugEQ(v string) predicate.Fixture {
 	return predicate.Fixture(sql.FieldEQ(FieldSlug, v))
@@ -663,6 +668,56 @@ func AwayTeamScoreIsNil() predicate.Fixture {
 // AwayTeamScoreNotNil applies the NotNil predicate on the "awayTeamScore" field.
 func AwayTeamScoreNotNil() predicate.Fixture {
 	return predicate.Fixture(sql.FieldNotNull(FieldAwayTeamScore))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.Fixture {
+	return predicate.Fixture(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.Fixture {
+	return predicate.Fixture(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.Fixture {
+	return predicate.Fixture(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasHomeTeam applies the HasEdge predicate on the "homeTeam" edge.

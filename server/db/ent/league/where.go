@@ -4,6 +4,7 @@ package league
 
 import (
 	"mapeleven/db/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -72,6 +73,11 @@ func Name(v string) predicate.League {
 // Logo applies equality check predicate on the "logo" field. It's identical to LogoEQ.
 func Logo(v string) predicate.League {
 	return predicate.League(sql.FieldEQ(FieldLogo, v))
+}
+
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.League {
+	return predicate.League(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // FootballApiIdEQ applies the EQ predicate on the "footballApiId" field.
@@ -327,6 +333,56 @@ func LogoEqualFold(v string) predicate.League {
 // LogoContainsFold applies the ContainsFold predicate on the "logo" field.
 func LogoContainsFold(v string) predicate.League {
 	return predicate.League(sql.FieldContainsFold(FieldLogo, v))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.League {
+	return predicate.League(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.League {
+	return predicate.League(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.League {
+	return predicate.League(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.League {
+	return predicate.League(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.League {
+	return predicate.League(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.League {
+	return predicate.League(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.League {
+	return predicate.League(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.League {
+	return predicate.League(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.League {
+	return predicate.League(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.League {
+	return predicate.League(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasCountry applies the HasEdge predicate on the "country" edge.

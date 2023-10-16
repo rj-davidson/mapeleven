@@ -3,6 +3,8 @@
 package country
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -18,6 +20,8 @@ const (
 	FieldName = "name"
 	// FieldFlag holds the string denoting the flag field in the database.
 	FieldFlag = "flag"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgePlayers holds the string denoting the players edge name in mutations.
 	EdgePlayers = "players"
 	// EdgeLeagues holds the string denoting the leagues edge name in mutations.
@@ -55,6 +59,7 @@ var Columns = []string{
 	FieldCode,
 	FieldName,
 	FieldFlag,
+	FieldLastUpdated,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -70,6 +75,10 @@ func ValidColumn(column string) bool {
 var (
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	CodeValidator func(string) error
+	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
 )
 
 // Order defines the ordering method for the Country queries.
@@ -93,6 +102,11 @@ func ByName(opts ...sql.OrderTermOption) Order {
 // ByFlag orders the results by the flag field.
 func ByFlag(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldFlag, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // ByPlayersCount orders the results by players count.

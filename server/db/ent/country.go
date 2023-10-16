@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"mapeleven/db/ent/country"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -22,6 +23,8 @@ type Country struct {
 	Name string `json:"name,omitempty"`
 	// Flag holds the value of the "flag" field.
 	Flag string `json:"flag,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the CountryQuery when eager-loading is set.
 	Edges        CountryEdges `json:"edges"`
@@ -77,6 +80,8 @@ func (*Country) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case country.FieldCode, country.FieldName, country.FieldFlag:
 			values[i] = new(sql.NullString)
+		case country.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -115,6 +120,12 @@ func (c *Country) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field flag", values[i])
 			} else if value.Valid {
 				c.Flag = value.String
+			}
+		case country.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				c.LastUpdated = value.Time
 			}
 		default:
 			c.selectValues.Set(columns[i], values[i])
@@ -175,6 +186,9 @@ func (c *Country) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("flag=")
 	builder.WriteString(c.Flag)
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(c.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

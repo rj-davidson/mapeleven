@@ -4,6 +4,7 @@ package squad
 
 import (
 	"mapeleven/db/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -62,6 +63,11 @@ func Position(v string) predicate.Squad {
 // Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
 func Number(v int) predicate.Squad {
 	return predicate.Squad(sql.FieldEQ(FieldNumber, v))
+}
+
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // PositionEQ applies the EQ predicate on the "position" field.
@@ -167,6 +173,56 @@ func NumberLT(v int) predicate.Squad {
 // NumberLTE applies the LTE predicate on the "number" field.
 func NumberLTE(v int) predicate.Squad {
 	return predicate.Squad(sql.FieldLTE(FieldNumber, v))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.Squad {
+	return predicate.Squad(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.Squad {
+	return predicate.Squad(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.Squad {
+	return predicate.Squad(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasPlayer applies the HasEdge predicate on the "player" edge.

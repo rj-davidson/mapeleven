@@ -10,6 +10,7 @@ import (
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/squad"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -82,6 +83,20 @@ func (pc *PlayerCreate) SetPhoto(s string) *PlayerCreate {
 	return pc
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (pc *PlayerCreate) SetLastUpdated(t time.Time) *PlayerCreate {
+	pc.mutation.SetLastUpdated(t)
+	return pc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (pc *PlayerCreate) SetNillableLastUpdated(t *time.Time) *PlayerCreate {
+	if t != nil {
+		pc.SetLastUpdated(*t)
+	}
+	return pc
+}
+
 // SetBirthID sets the "birth" edge to the Birth entity by ID.
 func (pc *PlayerCreate) SetBirthID(id int) *PlayerCreate {
 	pc.mutation.SetBirthID(id)
@@ -142,6 +157,7 @@ func (pc *PlayerCreate) Mutation() *PlayerMutation {
 
 // Save creates the Player in the database.
 func (pc *PlayerCreate) Save(ctx context.Context) (*Player, error) {
+	pc.defaults()
 	return withHooks[*Player, PlayerMutation](ctx, pc.sqlSave, pc.mutation, pc.hooks)
 }
 
@@ -164,6 +180,14 @@ func (pc *PlayerCreate) Exec(ctx context.Context) error {
 func (pc *PlayerCreate) ExecX(ctx context.Context) {
 	if err := pc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pc *PlayerCreate) defaults() {
+	if _, ok := pc.mutation.LastUpdated(); !ok {
+		v := player.DefaultLastUpdated()
+		pc.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -265,6 +289,10 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 		_spec.SetField(player.FieldPhoto, field.TypeString, value)
 		_node.Photo = value
 	}
+	if value, ok := pc.mutation.LastUpdated(); ok {
+		_spec.SetField(player.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
+	}
 	if nodes := pc.mutation.BirthIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -332,6 +360,7 @@ func (pcb *PlayerCreateBulk) Save(ctx context.Context) ([]*Player, error) {
 	for i := range pcb.builders {
 		func(i int, root context.Context) {
 			builder := pcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PlayerMutation)
 				if !ok {

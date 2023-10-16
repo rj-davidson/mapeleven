@@ -8,6 +8,7 @@ import (
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/player"
 	"strings"
+	"time"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -38,6 +39,8 @@ type Player struct {
 	Injured bool `json:"injured,omitempty"`
 	// Photo holds the value of the "photo" field.
 	Photo string `json:"photo,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlayerQuery when eager-loading is set.
 	Edges           PlayerEdges `json:"edges"`
@@ -106,6 +109,8 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto:
 			values[i] = new(sql.NullString)
+		case player.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
 		case player.ForeignKeys[0]: // birth_player
 			values[i] = new(sql.NullInt64)
 		case player.ForeignKeys[1]: // country_players
@@ -192,6 +197,12 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field photo", values[i])
 			} else if value.Valid {
 				pl.Photo = value.String
+			}
+		case player.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				pl.LastUpdated = value.Time
 			}
 		case player.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -294,6 +305,9 @@ func (pl *Player) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("photo=")
 	builder.WriteString(pl.Photo)
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(pl.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

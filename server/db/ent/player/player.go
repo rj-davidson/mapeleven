@@ -3,6 +3,8 @@
 package player
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -32,6 +34,8 @@ const (
 	FieldInjured = "injured"
 	// FieldPhoto holds the string denoting the photo field in the database.
 	FieldPhoto = "photo"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgeBirth holds the string denoting the birth edge name in mutations.
 	EdgeBirth = "birth"
 	// EdgeNationality holds the string denoting the nationality edge name in mutations.
@@ -76,6 +80,7 @@ var Columns = []string{
 	FieldWeight,
 	FieldInjured,
 	FieldPhoto,
+	FieldLastUpdated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "players"
@@ -100,6 +105,13 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
+)
 
 // Order defines the ordering method for the Player queries.
 type Order func(*sql.Selector)
@@ -157,6 +169,11 @@ func ByInjured(opts ...sql.OrderTermOption) Order {
 // ByPhoto orders the results by the photo field.
 func ByPhoto(opts ...sql.OrderTermOption) Order {
 	return sql.OrderByField(FieldPhoto, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) Order {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // ByBirthField orders the results by birth field.

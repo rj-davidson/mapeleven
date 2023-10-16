@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // Squad holds the schema definition for the Squad entity.
@@ -16,6 +17,10 @@ func (Squad) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("position"),
 		field.Int("number"),
+		field.Time("lastUpdated").
+			Default(time.Now).
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 

@@ -190,6 +190,18 @@ func (fu *FixtureUpdate) ClearAwayTeamScore() *FixtureUpdate {
 	return fu
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (fu *FixtureUpdate) SetLastUpdated(t time.Time) *FixtureUpdate {
+	fu.mutation.SetLastUpdated(t)
+	return fu
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (fu *FixtureUpdate) ClearLastUpdated() *FixtureUpdate {
+	fu.mutation.ClearLastUpdated()
+	return fu
+}
+
 // SetHomeTeamID sets the "homeTeam" edge to the Team entity by ID.
 func (fu *FixtureUpdate) SetHomeTeamID(id int) *FixtureUpdate {
 	fu.mutation.SetHomeTeamID(id)
@@ -248,6 +260,7 @@ func (fu *FixtureUpdate) ClearSeason() *FixtureUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (fu *FixtureUpdate) Save(ctx context.Context) (int, error) {
+	fu.defaults()
 	return withHooks[int, FixtureMutation](ctx, fu.sqlSave, fu.mutation, fu.hooks)
 }
 
@@ -270,6 +283,14 @@ func (fu *FixtureUpdate) Exec(ctx context.Context) error {
 func (fu *FixtureUpdate) ExecX(ctx context.Context) {
 	if err := fu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (fu *FixtureUpdate) defaults() {
+	if _, ok := fu.mutation.LastUpdated(); !ok && !fu.mutation.LastUpdatedCleared() {
+		v := fixture.UpdateDefaultLastUpdated()
+		fu.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -352,6 +373,12 @@ func (fu *FixtureUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if fu.mutation.AwayTeamScoreCleared() {
 		_spec.ClearField(fixture.FieldAwayTeamScore, field.TypeInt)
+	}
+	if value, ok := fu.mutation.LastUpdated(); ok {
+		_spec.SetField(fixture.FieldLastUpdated, field.TypeTime, value)
+	}
+	if fu.mutation.LastUpdatedCleared() {
+		_spec.ClearField(fixture.FieldLastUpdated, field.TypeTime)
 	}
 	if fu.mutation.HomeTeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -620,6 +647,18 @@ func (fuo *FixtureUpdateOne) ClearAwayTeamScore() *FixtureUpdateOne {
 	return fuo
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (fuo *FixtureUpdateOne) SetLastUpdated(t time.Time) *FixtureUpdateOne {
+	fuo.mutation.SetLastUpdated(t)
+	return fuo
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (fuo *FixtureUpdateOne) ClearLastUpdated() *FixtureUpdateOne {
+	fuo.mutation.ClearLastUpdated()
+	return fuo
+}
+
 // SetHomeTeamID sets the "homeTeam" edge to the Team entity by ID.
 func (fuo *FixtureUpdateOne) SetHomeTeamID(id int) *FixtureUpdateOne {
 	fuo.mutation.SetHomeTeamID(id)
@@ -691,6 +730,7 @@ func (fuo *FixtureUpdateOne) Select(field string, fields ...string) *FixtureUpda
 
 // Save executes the query and returns the updated Fixture entity.
 func (fuo *FixtureUpdateOne) Save(ctx context.Context) (*Fixture, error) {
+	fuo.defaults()
 	return withHooks[*Fixture, FixtureMutation](ctx, fuo.sqlSave, fuo.mutation, fuo.hooks)
 }
 
@@ -713,6 +753,14 @@ func (fuo *FixtureUpdateOne) Exec(ctx context.Context) error {
 func (fuo *FixtureUpdateOne) ExecX(ctx context.Context) {
 	if err := fuo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (fuo *FixtureUpdateOne) defaults() {
+	if _, ok := fuo.mutation.LastUpdated(); !ok && !fuo.mutation.LastUpdatedCleared() {
+		v := fixture.UpdateDefaultLastUpdated()
+		fuo.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -812,6 +860,12 @@ func (fuo *FixtureUpdateOne) sqlSave(ctx context.Context) (_node *Fixture, err e
 	}
 	if fuo.mutation.AwayTeamScoreCleared() {
 		_spec.ClearField(fixture.FieldAwayTeamScore, field.TypeInt)
+	}
+	if value, ok := fuo.mutation.LastUpdated(); ok {
+		_spec.SetField(fixture.FieldLastUpdated, field.TypeTime, value)
+	}
+	if fuo.mutation.LastUpdatedCleared() {
+		_spec.ClearField(fixture.FieldLastUpdated, field.TypeTime)
 	}
 	if fuo.mutation.HomeTeamCleared() {
 		edge := &sqlgraph.EdgeSpec{

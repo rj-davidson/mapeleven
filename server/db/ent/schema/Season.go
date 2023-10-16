@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // Season holds the schema definition for the Season entity.
@@ -22,6 +23,11 @@ func (Season) Fields() []ent.Field {
 		field.Time("start_date"),
 		field.Time("end_date"),
 		field.Bool("current"),
+
+		field.Time("lastUpdated").
+			Default(time.Now).
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 

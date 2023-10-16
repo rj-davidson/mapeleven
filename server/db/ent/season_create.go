@@ -54,6 +54,20 @@ func (sc *SeasonCreate) SetCurrent(b bool) *SeasonCreate {
 	return sc
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (sc *SeasonCreate) SetLastUpdated(t time.Time) *SeasonCreate {
+	sc.mutation.SetLastUpdated(t)
+	return sc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (sc *SeasonCreate) SetNillableLastUpdated(t *time.Time) *SeasonCreate {
+	if t != nil {
+		sc.SetLastUpdated(*t)
+	}
+	return sc
+}
+
 // SetLeagueID sets the "league" edge to the League entity by ID.
 func (sc *SeasonCreate) SetLeagueID(id int) *SeasonCreate {
 	sc.mutation.SetLeagueID(id)
@@ -125,6 +139,7 @@ func (sc *SeasonCreate) Mutation() *SeasonMutation {
 
 // Save creates the Season in the database.
 func (sc *SeasonCreate) Save(ctx context.Context) (*Season, error) {
+	sc.defaults()
 	return withHooks[*Season, SeasonMutation](ctx, sc.sqlSave, sc.mutation, sc.hooks)
 }
 
@@ -147,6 +162,14 @@ func (sc *SeasonCreate) Exec(ctx context.Context) error {
 func (sc *SeasonCreate) ExecX(ctx context.Context) {
 	if err := sc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (sc *SeasonCreate) defaults() {
+	if _, ok := sc.mutation.LastUpdated(); !ok {
+		v := season.DefaultLastUpdated()
+		sc.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -212,6 +235,10 @@ func (sc *SeasonCreate) createSpec() (*Season, *sqlgraph.CreateSpec) {
 	if value, ok := sc.mutation.Current(); ok {
 		_spec.SetField(season.FieldCurrent, field.TypeBool, value)
 		_node.Current = value
+	}
+	if value, ok := sc.mutation.LastUpdated(); ok {
+		_spec.SetField(season.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
 	}
 	if nodes := sc.mutation.LeagueIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -295,6 +322,7 @@ func (scb *SeasonCreateBulk) Save(ctx context.Context) ([]*Season, error) {
 	for i := range scb.builders {
 		func(i int, root context.Context) {
 			builder := scb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*SeasonMutation)
 				if !ok {

@@ -28,6 +28,8 @@ type Season struct {
 	EndDate time.Time `json:"end_date,omitempty"`
 	// Current holds the value of the "current" field.
 	Current bool `json:"current,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the SeasonQuery when eager-loading is set.
 	Edges         SeasonEdges `json:"edges"`
@@ -101,7 +103,7 @@ func (*Season) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case season.FieldSlug:
 			values[i] = new(sql.NullString)
-		case season.FieldStartDate, season.FieldEndDate:
+		case season.FieldStartDate, season.FieldEndDate, season.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
 		case season.ForeignKeys[0]: // league_season
 			values[i] = new(sql.NullInt64)
@@ -155,6 +157,12 @@ func (s *Season) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field current", values[i])
 			} else if value.Valid {
 				s.Current = value.Bool
+			}
+		case season.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				s.LastUpdated = value.Time
 			}
 		case season.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -233,6 +241,9 @@ func (s *Season) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("current=")
 	builder.WriteString(fmt.Sprintf("%v", s.Current))
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(s.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

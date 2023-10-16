@@ -39,6 +39,8 @@ type Fixture struct {
 	HomeTeamScore int `json:"homeTeamScore,omitempty"`
 	// AwayTeamScore holds the value of the "awayTeamScore" field.
 	AwayTeamScore int `json:"awayTeamScore,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FixtureQuery when eager-loading is set.
 	Edges              FixtureEdges `json:"edges"`
@@ -109,7 +111,7 @@ func (*Fixture) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case fixture.FieldSlug, fixture.FieldReferee, fixture.FieldTimezone, fixture.FieldStatus:
 			values[i] = new(sql.NullString)
-		case fixture.FieldDate:
+		case fixture.FieldDate, fixture.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
 		case fixture.ForeignKeys[0]: // season_fixtures
 			values[i] = new(sql.NullInt64)
@@ -197,6 +199,12 @@ func (f *Fixture) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field awayTeamScore", values[i])
 			} else if value.Valid {
 				f.AwayTeamScore = int(value.Int64)
+			}
+		case fixture.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				f.LastUpdated = value.Time
 			}
 		case fixture.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -299,6 +307,9 @@ func (f *Fixture) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("awayTeamScore=")
 	builder.WriteString(fmt.Sprintf("%v", f.AwayTeamScore))
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(f.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
