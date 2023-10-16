@@ -32,6 +32,18 @@ func (f ClubFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ClubMutation", m)
 }
 
+// The CoachFunc type is an adapter to allow the use of ordinary
+// function as Coach mutator.
+type CoachFunc func(context.Context, *ent.CoachMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f CoachFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.CoachMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.CoachMutation", m)
+}
+
 // The CountryFunc type is an adapter to allow the use of ordinary
 // function as Country mutator.
 type CountryFunc func(context.Context, *ent.CountryMutation) (ent.Value, error)
@@ -56,6 +68,30 @@ func (f FixtureFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, err
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FixtureMutation", m)
 }
 
+// The FixtureEventsFunc type is an adapter to allow the use of ordinary
+// function as FixtureEvents mutator.
+type FixtureEventsFunc func(context.Context, *ent.FixtureEventsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FixtureEventsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FixtureEventsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FixtureEventsMutation", m)
+}
+
+// The FixtureLineupsFunc type is an adapter to allow the use of ordinary
+// function as FixtureLineups mutator.
+type FixtureLineupsFunc func(context.Context, *ent.FixtureLineupsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f FixtureLineupsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.FixtureLineupsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FixtureLineupsMutation", m)
+}
+
 // The LeagueFunc type is an adapter to allow the use of ordinary
 // function as League mutator.
 type LeagueFunc func(context.Context, *ent.LeagueMutation) (ent.Value, error)
@@ -66,6 +102,18 @@ func (f LeagueFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.LeagueMutation", m)
+}
+
+// The MatchPlayerFunc type is an adapter to allow the use of ordinary
+// function as MatchPlayer mutator.
+type MatchPlayerFunc func(context.Context, *ent.MatchPlayerMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f MatchPlayerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.MatchPlayerMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MatchPlayerMutation", m)
 }
 
 // The PlayerFunc type is an adapter to allow the use of ordinary

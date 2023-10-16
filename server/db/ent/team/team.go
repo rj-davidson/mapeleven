@@ -28,6 +28,10 @@ const (
 	EdgeHomeFixtures = "homeFixtures"
 	// EdgeAwayFixtures holds the string denoting the awayfixtures edge name in mutations.
 	EdgeAwayFixtures = "awayFixtures"
+	// EdgeFixtureEvents holds the string denoting the fixtureevents edge name in mutations.
+	EdgeFixtureEvents = "fixtureEvents"
+	// EdgeFixtureLineups holds the string denoting the fixturelineups edge name in mutations.
+	EdgeFixtureLineups = "fixtureLineups"
 	// EdgePlayers holds the string denoting the players edge name in mutations.
 	EdgePlayers = "players"
 	// EdgeSquad holds the string denoting the squad edge name in mutations.
@@ -85,6 +89,20 @@ const (
 	AwayFixturesInverseTable = "fixtures"
 	// AwayFixturesColumn is the table column denoting the awayFixtures relation/edge.
 	AwayFixturesColumn = "team_away_fixtures"
+	// FixtureEventsTable is the table that holds the fixtureEvents relation/edge.
+	FixtureEventsTable = "fixture_events"
+	// FixtureEventsInverseTable is the table name for the FixtureEvents entity.
+	// It exists in this package in order to avoid circular dependency with the "fixtureevents" package.
+	FixtureEventsInverseTable = "fixture_events"
+	// FixtureEventsColumn is the table column denoting the fixtureEvents relation/edge.
+	FixtureEventsColumn = "team_fixture_events"
+	// FixtureLineupsTable is the table that holds the fixtureLineups relation/edge.
+	FixtureLineupsTable = "fixture_lineups"
+	// FixtureLineupsInverseTable is the table name for the FixtureLineups entity.
+	// It exists in this package in order to avoid circular dependency with the "fixturelineups" package.
+	FixtureLineupsInverseTable = "fixture_lineups"
+	// FixtureLineupsColumn is the table column denoting the fixtureLineups relation/edge.
+	FixtureLineupsColumn = "team_fixture_lineups"
 	// PlayersTable is the table that holds the players relation/edge.
 	PlayersTable = "players"
 	// PlayersInverseTable is the table name for the Player entity.
@@ -267,6 +285,34 @@ func ByAwayFixtures(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 	}
 }
 
+// ByFixtureEventsCount orders the results by fixtureEvents count.
+func ByFixtureEventsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFixtureEventsStep(), opts...)
+	}
+}
+
+// ByFixtureEvents orders the results by fixtureEvents terms.
+func ByFixtureEvents(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFixtureEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByFixtureLineupsCount orders the results by fixtureLineups count.
+func ByFixtureLineupsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFixtureLineupsStep(), opts...)
+	}
+}
+
+// ByFixtureLineups orders the results by fixtureLineups terms.
+func ByFixtureLineups(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFixtureLineupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByPlayersCount orders the results by players count.
 func ByPlayersCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
@@ -390,6 +436,20 @@ func newAwayFixturesStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AwayFixturesInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AwayFixturesTable, AwayFixturesColumn),
+	)
+}
+func newFixtureEventsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FixtureEventsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FixtureEventsTable, FixtureEventsColumn),
+	)
+}
+func newFixtureLineupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FixtureLineupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FixtureLineupsTable, FixtureLineupsColumn),
 	)
 }
 func newPlayersStep() *sqlgraph.Step {

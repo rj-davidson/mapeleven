@@ -42,6 +42,12 @@ const (
 	EdgeNationality = "nationality"
 	// EdgeSquad holds the string denoting the squad edge name in mutations.
 	EdgeSquad = "squad"
+	// EdgePlayerEvents holds the string denoting the playerevents edge name in mutations.
+	EdgePlayerEvents = "playerEvents"
+	// EdgeMatchPlayer holds the string denoting the matchplayer edge name in mutations.
+	EdgeMatchPlayer = "matchPlayer"
+	// EdgeAssistEvents holds the string denoting the assistevents edge name in mutations.
+	EdgeAssistEvents = "assistEvents"
 	// Table holds the table name of the player in the database.
 	Table = "players"
 	// BirthTable is the table that holds the birth relation/edge.
@@ -65,6 +71,27 @@ const (
 	SquadInverseTable = "squads"
 	// SquadColumn is the table column denoting the squad relation/edge.
 	SquadColumn = "player_squad"
+	// PlayerEventsTable is the table that holds the playerEvents relation/edge.
+	PlayerEventsTable = "fixture_events"
+	// PlayerEventsInverseTable is the table name for the FixtureEvents entity.
+	// It exists in this package in order to avoid circular dependency with the "fixtureevents" package.
+	PlayerEventsInverseTable = "fixture_events"
+	// PlayerEventsColumn is the table column denoting the playerEvents relation/edge.
+	PlayerEventsColumn = "player_player_events"
+	// MatchPlayerTable is the table that holds the matchPlayer relation/edge.
+	MatchPlayerTable = "match_players"
+	// MatchPlayerInverseTable is the table name for the MatchPlayer entity.
+	// It exists in this package in order to avoid circular dependency with the "matchplayer" package.
+	MatchPlayerInverseTable = "match_players"
+	// MatchPlayerColumn is the table column denoting the matchPlayer relation/edge.
+	MatchPlayerColumn = "player_match_player"
+	// AssistEventsTable is the table that holds the assistEvents relation/edge.
+	AssistEventsTable = "fixture_events"
+	// AssistEventsInverseTable is the table name for the FixtureEvents entity.
+	// It exists in this package in order to avoid circular dependency with the "fixtureevents" package.
+	AssistEventsInverseTable = "fixture_events"
+	// AssistEventsColumn is the table column denoting the assistEvents relation/edge.
+	AssistEventsColumn = "player_assist_events"
 )
 
 // Columns holds all SQL columns for player fields.
@@ -203,6 +230,48 @@ func BySquad(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
 		sqlgraph.OrderByNeighborTerms(s, newSquadStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPlayerEventsCount orders the results by playerEvents count.
+func ByPlayerEventsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPlayerEventsStep(), opts...)
+	}
+}
+
+// ByPlayerEvents orders the results by playerEvents terms.
+func ByPlayerEvents(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByMatchPlayerCount orders the results by matchPlayer count.
+func ByMatchPlayerCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newMatchPlayerStep(), opts...)
+	}
+}
+
+// ByMatchPlayer orders the results by matchPlayer terms.
+func ByMatchPlayer(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newMatchPlayerStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByAssistEventsCount orders the results by assistEvents count.
+func ByAssistEventsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newAssistEventsStep(), opts...)
+	}
+}
+
+// ByAssistEvents orders the results by assistEvents terms.
+func ByAssistEvents(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newAssistEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newBirthStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -222,5 +291,26 @@ func newSquadStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SquadInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, SquadTable, SquadColumn),
+	)
+}
+func newPlayerEventsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayerEventsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PlayerEventsTable, PlayerEventsColumn),
+	)
+}
+func newMatchPlayerStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(MatchPlayerInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, MatchPlayerTable, MatchPlayerColumn),
+	)
+}
+func newAssistEventsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(AssistEventsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, AssistEventsTable, AssistEventsColumn),
 	)
 }

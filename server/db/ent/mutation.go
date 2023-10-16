@@ -8,9 +8,13 @@ import (
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/club"
+	"mapeleven/db/ent/coach"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/fixtureevents"
+	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
@@ -43,9 +47,13 @@ const (
 	// Node types.
 	TypeBirth           = "Birth"
 	TypeClub            = "Club"
+	TypeCoach           = "Coach"
 	TypeCountry         = "Country"
 	TypeFixture         = "Fixture"
+	TypeFixtureEvents   = "FixtureEvents"
+	TypeFixtureLineups  = "FixtureLineups"
 	TypeLeague          = "League"
+	TypeMatchPlayer     = "MatchPlayer"
 	TypePlayer          = "Player"
 	TypeSeason          = "Season"
 	TypeSquad           = "Squad"
@@ -1457,6 +1465,552 @@ func (m *ClubMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Club edge %s", name)
+}
+
+// CoachMutation represents an operation that mutates the Coach nodes in the graph.
+type CoachMutation struct {
+	config
+	op               Op
+	typ              string
+	id               *int
+	footballApiId    *int
+	addfootballApiId *int
+	name             *string
+	photo            *string
+	lastUpdated      *time.Time
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*Coach, error)
+	predicates       []predicate.Coach
+}
+
+var _ ent.Mutation = (*CoachMutation)(nil)
+
+// coachOption allows management of the mutation configuration using functional options.
+type coachOption func(*CoachMutation)
+
+// newCoachMutation creates new mutation for the Coach entity.
+func newCoachMutation(c config, op Op, opts ...coachOption) *CoachMutation {
+	m := &CoachMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeCoach,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withCoachID sets the ID field of the mutation.
+func withCoachID(id int) coachOption {
+	return func(m *CoachMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *Coach
+		)
+		m.oldValue = func(ctx context.Context) (*Coach, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().Coach.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withCoach sets the old Coach of the mutation.
+func withCoach(node *Coach) coachOption {
+	return func(m *CoachMutation) {
+		m.oldValue = func(context.Context) (*Coach, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m CoachMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m CoachMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *CoachMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *CoachMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().Coach.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFootballApiId sets the "footballApiId" field.
+func (m *CoachMutation) SetFootballApiId(i int) {
+	m.footballApiId = &i
+	m.addfootballApiId = nil
+}
+
+// FootballApiId returns the value of the "footballApiId" field in the mutation.
+func (m *CoachMutation) FootballApiId() (r int, exists bool) {
+	v := m.footballApiId
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFootballApiId returns the old "footballApiId" field's value of the Coach entity.
+// If the Coach object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoachMutation) OldFootballApiId(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFootballApiId is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFootballApiId requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFootballApiId: %w", err)
+	}
+	return oldValue.FootballApiId, nil
+}
+
+// AddFootballApiId adds i to the "footballApiId" field.
+func (m *CoachMutation) AddFootballApiId(i int) {
+	if m.addfootballApiId != nil {
+		*m.addfootballApiId += i
+	} else {
+		m.addfootballApiId = &i
+	}
+}
+
+// AddedFootballApiId returns the value that was added to the "footballApiId" field in this mutation.
+func (m *CoachMutation) AddedFootballApiId() (r int, exists bool) {
+	v := m.addfootballApiId
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFootballApiId resets all changes to the "footballApiId" field.
+func (m *CoachMutation) ResetFootballApiId() {
+	m.footballApiId = nil
+	m.addfootballApiId = nil
+}
+
+// SetName sets the "name" field.
+func (m *CoachMutation) SetName(s string) {
+	m.name = &s
+}
+
+// Name returns the value of the "name" field in the mutation.
+func (m *CoachMutation) Name() (r string, exists bool) {
+	v := m.name
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldName returns the old "name" field's value of the Coach entity.
+// If the Coach object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoachMutation) OldName(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldName is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldName requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldName: %w", err)
+	}
+	return oldValue.Name, nil
+}
+
+// ResetName resets all changes to the "name" field.
+func (m *CoachMutation) ResetName() {
+	m.name = nil
+}
+
+// SetPhoto sets the "photo" field.
+func (m *CoachMutation) SetPhoto(s string) {
+	m.photo = &s
+}
+
+// Photo returns the value of the "photo" field in the mutation.
+func (m *CoachMutation) Photo() (r string, exists bool) {
+	v := m.photo
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPhoto returns the old "photo" field's value of the Coach entity.
+// If the Coach object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoachMutation) OldPhoto(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPhoto is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPhoto requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPhoto: %w", err)
+	}
+	return oldValue.Photo, nil
+}
+
+// ResetPhoto resets all changes to the "photo" field.
+func (m *CoachMutation) ResetPhoto() {
+	m.photo = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *CoachMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *CoachMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the Coach entity.
+// If the Coach object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CoachMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *CoachMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[coach.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *CoachMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[coach.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *CoachMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, coach.FieldLastUpdated)
+}
+
+// Where appends a list predicates to the CoachMutation builder.
+func (m *CoachMutation) Where(ps ...predicate.Coach) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the CoachMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *CoachMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.Coach, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *CoachMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *CoachMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (Coach).
+func (m *CoachMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *CoachMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m.footballApiId != nil {
+		fields = append(fields, coach.FieldFootballApiId)
+	}
+	if m.name != nil {
+		fields = append(fields, coach.FieldName)
+	}
+	if m.photo != nil {
+		fields = append(fields, coach.FieldPhoto)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, coach.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *CoachMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case coach.FieldFootballApiId:
+		return m.FootballApiId()
+	case coach.FieldName:
+		return m.Name()
+	case coach.FieldPhoto:
+		return m.Photo()
+	case coach.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *CoachMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case coach.FieldFootballApiId:
+		return m.OldFootballApiId(ctx)
+	case coach.FieldName:
+		return m.OldName(ctx)
+	case coach.FieldPhoto:
+		return m.OldPhoto(ctx)
+	case coach.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown Coach field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoachMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case coach.FieldFootballApiId:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFootballApiId(v)
+		return nil
+	case coach.FieldName:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetName(v)
+		return nil
+	case coach.FieldPhoto:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPhoto(v)
+		return nil
+	case coach.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Coach field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *CoachMutation) AddedFields() []string {
+	var fields []string
+	if m.addfootballApiId != nil {
+		fields = append(fields, coach.FieldFootballApiId)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *CoachMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case coach.FieldFootballApiId:
+		return m.AddedFootballApiId()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *CoachMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case coach.FieldFootballApiId:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFootballApiId(v)
+		return nil
+	}
+	return fmt.Errorf("unknown Coach numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *CoachMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(coach.FieldLastUpdated) {
+		fields = append(fields, coach.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *CoachMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *CoachMutation) ClearField(name string) error {
+	switch name {
+	case coach.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown Coach nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *CoachMutation) ResetField(name string) error {
+	switch name {
+	case coach.FieldFootballApiId:
+		m.ResetFootballApiId()
+		return nil
+	case coach.FieldName:
+		m.ResetName()
+		return nil
+	case coach.FieldPhoto:
+		m.ResetPhoto()
+		return nil
+	case coach.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown Coach field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *CoachMutation) AddedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *CoachMutation) AddedIDs(name string) []ent.Value {
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *CoachMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *CoachMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *CoachMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 0)
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *CoachMutation) EdgeCleared(name string) bool {
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *CoachMutation) ClearEdge(name string) error {
+	return fmt.Errorf("unknown Coach unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *CoachMutation) ResetEdge(name string) error {
+	return fmt.Errorf("unknown Coach edge %s", name)
 }
 
 // CountryMutation represents an operation that mutates the Country nodes in the graph.
@@ -3587,6 +4141,1382 @@ func (m *FixtureMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown Fixture edge %s", name)
 }
 
+// FixtureEventsMutation represents an operation that mutates the FixtureEvents nodes in the graph.
+type FixtureEventsMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	elapsedTime   *string
+	extraTime     *string
+	_type         *string
+	detail        *string
+	comments      *string
+	lastUpdated   *time.Time
+	clearedFields map[string]struct{}
+	player        *int
+	clearedplayer bool
+	assist        *int
+	clearedassist bool
+	team          *int
+	clearedteam   bool
+	done          bool
+	oldValue      func(context.Context) (*FixtureEvents, error)
+	predicates    []predicate.FixtureEvents
+}
+
+var _ ent.Mutation = (*FixtureEventsMutation)(nil)
+
+// fixtureeventsOption allows management of the mutation configuration using functional options.
+type fixtureeventsOption func(*FixtureEventsMutation)
+
+// newFixtureEventsMutation creates new mutation for the FixtureEvents entity.
+func newFixtureEventsMutation(c config, op Op, opts ...fixtureeventsOption) *FixtureEventsMutation {
+	m := &FixtureEventsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeFixtureEvents,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withFixtureEventsID sets the ID field of the mutation.
+func withFixtureEventsID(id int) fixtureeventsOption {
+	return func(m *FixtureEventsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *FixtureEvents
+		)
+		m.oldValue = func(ctx context.Context) (*FixtureEvents, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FixtureEvents.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withFixtureEvents sets the old FixtureEvents of the mutation.
+func withFixtureEvents(node *FixtureEvents) fixtureeventsOption {
+	return func(m *FixtureEventsMutation) {
+		m.oldValue = func(context.Context) (*FixtureEvents, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FixtureEventsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FixtureEventsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *FixtureEventsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *FixtureEventsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().FixtureEvents.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetElapsedTime sets the "elapsedTime" field.
+func (m *FixtureEventsMutation) SetElapsedTime(s string) {
+	m.elapsedTime = &s
+}
+
+// ElapsedTime returns the value of the "elapsedTime" field in the mutation.
+func (m *FixtureEventsMutation) ElapsedTime() (r string, exists bool) {
+	v := m.elapsedTime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldElapsedTime returns the old "elapsedTime" field's value of the FixtureEvents entity.
+// If the FixtureEvents object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureEventsMutation) OldElapsedTime(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldElapsedTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldElapsedTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldElapsedTime: %w", err)
+	}
+	return oldValue.ElapsedTime, nil
+}
+
+// ResetElapsedTime resets all changes to the "elapsedTime" field.
+func (m *FixtureEventsMutation) ResetElapsedTime() {
+	m.elapsedTime = nil
+}
+
+// SetExtraTime sets the "extraTime" field.
+func (m *FixtureEventsMutation) SetExtraTime(s string) {
+	m.extraTime = &s
+}
+
+// ExtraTime returns the value of the "extraTime" field in the mutation.
+func (m *FixtureEventsMutation) ExtraTime() (r string, exists bool) {
+	v := m.extraTime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldExtraTime returns the old "extraTime" field's value of the FixtureEvents entity.
+// If the FixtureEvents object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureEventsMutation) OldExtraTime(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldExtraTime is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldExtraTime requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldExtraTime: %w", err)
+	}
+	return oldValue.ExtraTime, nil
+}
+
+// ResetExtraTime resets all changes to the "extraTime" field.
+func (m *FixtureEventsMutation) ResetExtraTime() {
+	m.extraTime = nil
+}
+
+// SetType sets the "type" field.
+func (m *FixtureEventsMutation) SetType(s string) {
+	m._type = &s
+}
+
+// GetType returns the value of the "type" field in the mutation.
+func (m *FixtureEventsMutation) GetType() (r string, exists bool) {
+	v := m._type
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldType returns the old "type" field's value of the FixtureEvents entity.
+// If the FixtureEvents object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureEventsMutation) OldType(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldType is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldType requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldType: %w", err)
+	}
+	return oldValue.Type, nil
+}
+
+// ResetType resets all changes to the "type" field.
+func (m *FixtureEventsMutation) ResetType() {
+	m._type = nil
+}
+
+// SetDetail sets the "detail" field.
+func (m *FixtureEventsMutation) SetDetail(s string) {
+	m.detail = &s
+}
+
+// Detail returns the value of the "detail" field in the mutation.
+func (m *FixtureEventsMutation) Detail() (r string, exists bool) {
+	v := m.detail
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDetail returns the old "detail" field's value of the FixtureEvents entity.
+// If the FixtureEvents object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureEventsMutation) OldDetail(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDetail is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDetail requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDetail: %w", err)
+	}
+	return oldValue.Detail, nil
+}
+
+// ResetDetail resets all changes to the "detail" field.
+func (m *FixtureEventsMutation) ResetDetail() {
+	m.detail = nil
+}
+
+// SetComments sets the "comments" field.
+func (m *FixtureEventsMutation) SetComments(s string) {
+	m.comments = &s
+}
+
+// Comments returns the value of the "comments" field in the mutation.
+func (m *FixtureEventsMutation) Comments() (r string, exists bool) {
+	v := m.comments
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldComments returns the old "comments" field's value of the FixtureEvents entity.
+// If the FixtureEvents object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureEventsMutation) OldComments(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldComments is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldComments requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldComments: %w", err)
+	}
+	return oldValue.Comments, nil
+}
+
+// ClearComments clears the value of the "comments" field.
+func (m *FixtureEventsMutation) ClearComments() {
+	m.comments = nil
+	m.clearedFields[fixtureevents.FieldComments] = struct{}{}
+}
+
+// CommentsCleared returns if the "comments" field was cleared in this mutation.
+func (m *FixtureEventsMutation) CommentsCleared() bool {
+	_, ok := m.clearedFields[fixtureevents.FieldComments]
+	return ok
+}
+
+// ResetComments resets all changes to the "comments" field.
+func (m *FixtureEventsMutation) ResetComments() {
+	m.comments = nil
+	delete(m.clearedFields, fixtureevents.FieldComments)
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *FixtureEventsMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *FixtureEventsMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the FixtureEvents entity.
+// If the FixtureEvents object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureEventsMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *FixtureEventsMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[fixtureevents.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *FixtureEventsMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[fixtureevents.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *FixtureEventsMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, fixtureevents.FieldLastUpdated)
+}
+
+// SetPlayerID sets the "player" edge to the Player entity by id.
+func (m *FixtureEventsMutation) SetPlayerID(id int) {
+	m.player = &id
+}
+
+// ClearPlayer clears the "player" edge to the Player entity.
+func (m *FixtureEventsMutation) ClearPlayer() {
+	m.clearedplayer = true
+}
+
+// PlayerCleared reports if the "player" edge to the Player entity was cleared.
+func (m *FixtureEventsMutation) PlayerCleared() bool {
+	return m.clearedplayer
+}
+
+// PlayerID returns the "player" edge ID in the mutation.
+func (m *FixtureEventsMutation) PlayerID() (id int, exists bool) {
+	if m.player != nil {
+		return *m.player, true
+	}
+	return
+}
+
+// PlayerIDs returns the "player" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerID instead. It exists only for internal usage by the builders.
+func (m *FixtureEventsMutation) PlayerIDs() (ids []int) {
+	if id := m.player; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayer resets all changes to the "player" edge.
+func (m *FixtureEventsMutation) ResetPlayer() {
+	m.player = nil
+	m.clearedplayer = false
+}
+
+// SetAssistID sets the "assist" edge to the Player entity by id.
+func (m *FixtureEventsMutation) SetAssistID(id int) {
+	m.assist = &id
+}
+
+// ClearAssist clears the "assist" edge to the Player entity.
+func (m *FixtureEventsMutation) ClearAssist() {
+	m.clearedassist = true
+}
+
+// AssistCleared reports if the "assist" edge to the Player entity was cleared.
+func (m *FixtureEventsMutation) AssistCleared() bool {
+	return m.clearedassist
+}
+
+// AssistID returns the "assist" edge ID in the mutation.
+func (m *FixtureEventsMutation) AssistID() (id int, exists bool) {
+	if m.assist != nil {
+		return *m.assist, true
+	}
+	return
+}
+
+// AssistIDs returns the "assist" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// AssistID instead. It exists only for internal usage by the builders.
+func (m *FixtureEventsMutation) AssistIDs() (ids []int) {
+	if id := m.assist; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetAssist resets all changes to the "assist" edge.
+func (m *FixtureEventsMutation) ResetAssist() {
+	m.assist = nil
+	m.clearedassist = false
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *FixtureEventsMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *FixtureEventsMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *FixtureEventsMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *FixtureEventsMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *FixtureEventsMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *FixtureEventsMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// Where appends a list predicates to the FixtureEventsMutation builder.
+func (m *FixtureEventsMutation) Where(ps ...predicate.FixtureEvents) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the FixtureEventsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FixtureEventsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FixtureEvents, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *FixtureEventsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FixtureEventsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (FixtureEvents).
+func (m *FixtureEventsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *FixtureEventsMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m.elapsedTime != nil {
+		fields = append(fields, fixtureevents.FieldElapsedTime)
+	}
+	if m.extraTime != nil {
+		fields = append(fields, fixtureevents.FieldExtraTime)
+	}
+	if m._type != nil {
+		fields = append(fields, fixtureevents.FieldType)
+	}
+	if m.detail != nil {
+		fields = append(fields, fixtureevents.FieldDetail)
+	}
+	if m.comments != nil {
+		fields = append(fields, fixtureevents.FieldComments)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, fixtureevents.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *FixtureEventsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case fixtureevents.FieldElapsedTime:
+		return m.ElapsedTime()
+	case fixtureevents.FieldExtraTime:
+		return m.ExtraTime()
+	case fixtureevents.FieldType:
+		return m.GetType()
+	case fixtureevents.FieldDetail:
+		return m.Detail()
+	case fixtureevents.FieldComments:
+		return m.Comments()
+	case fixtureevents.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *FixtureEventsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case fixtureevents.FieldElapsedTime:
+		return m.OldElapsedTime(ctx)
+	case fixtureevents.FieldExtraTime:
+		return m.OldExtraTime(ctx)
+	case fixtureevents.FieldType:
+		return m.OldType(ctx)
+	case fixtureevents.FieldDetail:
+		return m.OldDetail(ctx)
+	case fixtureevents.FieldComments:
+		return m.OldComments(ctx)
+	case fixtureevents.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown FixtureEvents field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FixtureEventsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case fixtureevents.FieldElapsedTime:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetElapsedTime(v)
+		return nil
+	case fixtureevents.FieldExtraTime:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetExtraTime(v)
+		return nil
+	case fixtureevents.FieldType:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetType(v)
+		return nil
+	case fixtureevents.FieldDetail:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDetail(v)
+		return nil
+	case fixtureevents.FieldComments:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetComments(v)
+		return nil
+	case fixtureevents.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureEvents field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *FixtureEventsMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *FixtureEventsMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FixtureEventsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown FixtureEvents numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *FixtureEventsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(fixtureevents.FieldComments) {
+		fields = append(fields, fixtureevents.FieldComments)
+	}
+	if m.FieldCleared(fixtureevents.FieldLastUpdated) {
+		fields = append(fields, fixtureevents.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *FixtureEventsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *FixtureEventsMutation) ClearField(name string) error {
+	switch name {
+	case fixtureevents.FieldComments:
+		m.ClearComments()
+		return nil
+	case fixtureevents.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureEvents nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *FixtureEventsMutation) ResetField(name string) error {
+	switch name {
+	case fixtureevents.FieldElapsedTime:
+		m.ResetElapsedTime()
+		return nil
+	case fixtureevents.FieldExtraTime:
+		m.ResetExtraTime()
+		return nil
+	case fixtureevents.FieldType:
+		m.ResetType()
+		return nil
+	case fixtureevents.FieldDetail:
+		m.ResetDetail()
+		return nil
+	case fixtureevents.FieldComments:
+		m.ResetComments()
+		return nil
+	case fixtureevents.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureEvents field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *FixtureEventsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.player != nil {
+		edges = append(edges, fixtureevents.EdgePlayer)
+	}
+	if m.assist != nil {
+		edges = append(edges, fixtureevents.EdgeAssist)
+	}
+	if m.team != nil {
+		edges = append(edges, fixtureevents.EdgeTeam)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *FixtureEventsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case fixtureevents.EdgePlayer:
+		if id := m.player; id != nil {
+			return []ent.Value{*id}
+		}
+	case fixtureevents.EdgeAssist:
+		if id := m.assist; id != nil {
+			return []ent.Value{*id}
+		}
+	case fixtureevents.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *FixtureEventsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 3)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *FixtureEventsMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *FixtureEventsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 3)
+	if m.clearedplayer {
+		edges = append(edges, fixtureevents.EdgePlayer)
+	}
+	if m.clearedassist {
+		edges = append(edges, fixtureevents.EdgeAssist)
+	}
+	if m.clearedteam {
+		edges = append(edges, fixtureevents.EdgeTeam)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *FixtureEventsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case fixtureevents.EdgePlayer:
+		return m.clearedplayer
+	case fixtureevents.EdgeAssist:
+		return m.clearedassist
+	case fixtureevents.EdgeTeam:
+		return m.clearedteam
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *FixtureEventsMutation) ClearEdge(name string) error {
+	switch name {
+	case fixtureevents.EdgePlayer:
+		m.ClearPlayer()
+		return nil
+	case fixtureevents.EdgeAssist:
+		m.ClearAssist()
+		return nil
+	case fixtureevents.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureEvents unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *FixtureEventsMutation) ResetEdge(name string) error {
+	switch name {
+	case fixtureevents.EdgePlayer:
+		m.ResetPlayer()
+		return nil
+	case fixtureevents.EdgeAssist:
+		m.ResetAssist()
+		return nil
+	case fixtureevents.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureEvents edge %s", name)
+}
+
+// FixtureLineupsMutation represents an operation that mutates the FixtureLineups nodes in the graph.
+type FixtureLineupsMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int
+	formation           *string
+	lastUpdated         *time.Time
+	clearedFields       map[string]struct{}
+	team                *int
+	clearedteam         bool
+	lineupPlayer        map[int]struct{}
+	removedlineupPlayer map[int]struct{}
+	clearedlineupPlayer bool
+	done                bool
+	oldValue            func(context.Context) (*FixtureLineups, error)
+	predicates          []predicate.FixtureLineups
+}
+
+var _ ent.Mutation = (*FixtureLineupsMutation)(nil)
+
+// fixturelineupsOption allows management of the mutation configuration using functional options.
+type fixturelineupsOption func(*FixtureLineupsMutation)
+
+// newFixtureLineupsMutation creates new mutation for the FixtureLineups entity.
+func newFixtureLineupsMutation(c config, op Op, opts ...fixturelineupsOption) *FixtureLineupsMutation {
+	m := &FixtureLineupsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeFixtureLineups,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withFixtureLineupsID sets the ID field of the mutation.
+func withFixtureLineupsID(id int) fixturelineupsOption {
+	return func(m *FixtureLineupsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *FixtureLineups
+		)
+		m.oldValue = func(ctx context.Context) (*FixtureLineups, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().FixtureLineups.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withFixtureLineups sets the old FixtureLineups of the mutation.
+func withFixtureLineups(node *FixtureLineups) fixturelineupsOption {
+	return func(m *FixtureLineupsMutation) {
+		m.oldValue = func(context.Context) (*FixtureLineups, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m FixtureLineupsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m FixtureLineupsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *FixtureLineupsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *FixtureLineupsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().FixtureLineups.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFormation sets the "formation" field.
+func (m *FixtureLineupsMutation) SetFormation(s string) {
+	m.formation = &s
+}
+
+// Formation returns the value of the "formation" field in the mutation.
+func (m *FixtureLineupsMutation) Formation() (r string, exists bool) {
+	v := m.formation
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFormation returns the old "formation" field's value of the FixtureLineups entity.
+// If the FixtureLineups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureLineupsMutation) OldFormation(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFormation is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFormation requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFormation: %w", err)
+	}
+	return oldValue.Formation, nil
+}
+
+// ResetFormation resets all changes to the "formation" field.
+func (m *FixtureLineupsMutation) ResetFormation() {
+	m.formation = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *FixtureLineupsMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *FixtureLineupsMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the FixtureLineups entity.
+// If the FixtureLineups object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *FixtureLineupsMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *FixtureLineupsMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[fixturelineups.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *FixtureLineupsMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[fixturelineups.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *FixtureLineupsMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, fixturelineups.FieldLastUpdated)
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *FixtureLineupsMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *FixtureLineupsMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *FixtureLineupsMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *FixtureLineupsMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *FixtureLineupsMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *FixtureLineupsMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// AddLineupPlayerIDs adds the "lineupPlayer" edge to the MatchPlayer entity by ids.
+func (m *FixtureLineupsMutation) AddLineupPlayerIDs(ids ...int) {
+	if m.lineupPlayer == nil {
+		m.lineupPlayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lineupPlayer[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLineupPlayer clears the "lineupPlayer" edge to the MatchPlayer entity.
+func (m *FixtureLineupsMutation) ClearLineupPlayer() {
+	m.clearedlineupPlayer = true
+}
+
+// LineupPlayerCleared reports if the "lineupPlayer" edge to the MatchPlayer entity was cleared.
+func (m *FixtureLineupsMutation) LineupPlayerCleared() bool {
+	return m.clearedlineupPlayer
+}
+
+// RemoveLineupPlayerIDs removes the "lineupPlayer" edge to the MatchPlayer entity by IDs.
+func (m *FixtureLineupsMutation) RemoveLineupPlayerIDs(ids ...int) {
+	if m.removedlineupPlayer == nil {
+		m.removedlineupPlayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lineupPlayer, ids[i])
+		m.removedlineupPlayer[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLineupPlayer returns the removed IDs of the "lineupPlayer" edge to the MatchPlayer entity.
+func (m *FixtureLineupsMutation) RemovedLineupPlayerIDs() (ids []int) {
+	for id := range m.removedlineupPlayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LineupPlayerIDs returns the "lineupPlayer" edge IDs in the mutation.
+func (m *FixtureLineupsMutation) LineupPlayerIDs() (ids []int) {
+	for id := range m.lineupPlayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLineupPlayer resets all changes to the "lineupPlayer" edge.
+func (m *FixtureLineupsMutation) ResetLineupPlayer() {
+	m.lineupPlayer = nil
+	m.clearedlineupPlayer = false
+	m.removedlineupPlayer = nil
+}
+
+// Where appends a list predicates to the FixtureLineupsMutation builder.
+func (m *FixtureLineupsMutation) Where(ps ...predicate.FixtureLineups) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the FixtureLineupsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *FixtureLineupsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.FixtureLineups, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *FixtureLineupsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *FixtureLineupsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (FixtureLineups).
+func (m *FixtureLineupsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *FixtureLineupsMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.formation != nil {
+		fields = append(fields, fixturelineups.FieldFormation)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, fixturelineups.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *FixtureLineupsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case fixturelineups.FieldFormation:
+		return m.Formation()
+	case fixturelineups.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *FixtureLineupsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case fixturelineups.FieldFormation:
+		return m.OldFormation(ctx)
+	case fixturelineups.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown FixtureLineups field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FixtureLineupsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case fixturelineups.FieldFormation:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFormation(v)
+		return nil
+	case fixturelineups.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureLineups field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *FixtureLineupsMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *FixtureLineupsMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *FixtureLineupsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown FixtureLineups numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *FixtureLineupsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(fixturelineups.FieldLastUpdated) {
+		fields = append(fields, fixturelineups.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *FixtureLineupsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *FixtureLineupsMutation) ClearField(name string) error {
+	switch name {
+	case fixturelineups.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureLineups nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *FixtureLineupsMutation) ResetField(name string) error {
+	switch name {
+	case fixturelineups.FieldFormation:
+		m.ResetFormation()
+		return nil
+	case fixturelineups.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureLineups field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *FixtureLineupsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.team != nil {
+		edges = append(edges, fixturelineups.EdgeTeam)
+	}
+	if m.lineupPlayer != nil {
+		edges = append(edges, fixturelineups.EdgeLineupPlayer)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *FixtureLineupsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case fixturelineups.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	case fixturelineups.EdgeLineupPlayer:
+		ids := make([]ent.Value, 0, len(m.lineupPlayer))
+		for id := range m.lineupPlayer {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *FixtureLineupsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.removedlineupPlayer != nil {
+		edges = append(edges, fixturelineups.EdgeLineupPlayer)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *FixtureLineupsMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case fixturelineups.EdgeLineupPlayer:
+		ids := make([]ent.Value, 0, len(m.removedlineupPlayer))
+		for id := range m.removedlineupPlayer {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *FixtureLineupsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedteam {
+		edges = append(edges, fixturelineups.EdgeTeam)
+	}
+	if m.clearedlineupPlayer {
+		edges = append(edges, fixturelineups.EdgeLineupPlayer)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *FixtureLineupsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case fixturelineups.EdgeTeam:
+		return m.clearedteam
+	case fixturelineups.EdgeLineupPlayer:
+		return m.clearedlineupPlayer
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *FixtureLineupsMutation) ClearEdge(name string) error {
+	switch name {
+	case fixturelineups.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureLineups unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *FixtureLineupsMutation) ResetEdge(name string) error {
+	switch name {
+	case fixturelineups.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	case fixturelineups.EdgeLineupPlayer:
+		m.ResetLineupPlayer()
+		return nil
+	}
+	return fmt.Errorf("unknown FixtureLineups edge %s", name)
+}
+
 // LeagueMutation represents an operation that mutates the League nodes in the graph.
 type LeagueMutation struct {
 	config
@@ -4393,36 +6323,771 @@ func (m *LeagueMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown League edge %s", name)
 }
 
+// MatchPlayerMutation represents an operation that mutates the MatchPlayer nodes in the graph.
+type MatchPlayerMutation struct {
+	config
+	op            Op
+	typ           string
+	id            *int
+	number        *int
+	addnumber     *int
+	position      *string
+	x             *string
+	y             *string
+	lastUpdated   *time.Time
+	clearedFields map[string]struct{}
+	player        *int
+	clearedplayer bool
+	lineup        *int
+	clearedlineup bool
+	done          bool
+	oldValue      func(context.Context) (*MatchPlayer, error)
+	predicates    []predicate.MatchPlayer
+}
+
+var _ ent.Mutation = (*MatchPlayerMutation)(nil)
+
+// matchplayerOption allows management of the mutation configuration using functional options.
+type matchplayerOption func(*MatchPlayerMutation)
+
+// newMatchPlayerMutation creates new mutation for the MatchPlayer entity.
+func newMatchPlayerMutation(c config, op Op, opts ...matchplayerOption) *MatchPlayerMutation {
+	m := &MatchPlayerMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeMatchPlayer,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withMatchPlayerID sets the ID field of the mutation.
+func withMatchPlayerID(id int) matchplayerOption {
+	return func(m *MatchPlayerMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *MatchPlayer
+		)
+		m.oldValue = func(ctx context.Context) (*MatchPlayer, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().MatchPlayer.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withMatchPlayer sets the old MatchPlayer of the mutation.
+func withMatchPlayer(node *MatchPlayer) matchplayerOption {
+	return func(m *MatchPlayerMutation) {
+		m.oldValue = func(context.Context) (*MatchPlayer, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m MatchPlayerMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m MatchPlayerMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *MatchPlayerMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *MatchPlayerMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().MatchPlayer.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetNumber sets the "number" field.
+func (m *MatchPlayerMutation) SetNumber(i int) {
+	m.number = &i
+	m.addnumber = nil
+}
+
+// Number returns the value of the "number" field in the mutation.
+func (m *MatchPlayerMutation) Number() (r int, exists bool) {
+	v := m.number
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldNumber returns the old "number" field's value of the MatchPlayer entity.
+// If the MatchPlayer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MatchPlayerMutation) OldNumber(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldNumber is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldNumber requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldNumber: %w", err)
+	}
+	return oldValue.Number, nil
+}
+
+// AddNumber adds i to the "number" field.
+func (m *MatchPlayerMutation) AddNumber(i int) {
+	if m.addnumber != nil {
+		*m.addnumber += i
+	} else {
+		m.addnumber = &i
+	}
+}
+
+// AddedNumber returns the value that was added to the "number" field in this mutation.
+func (m *MatchPlayerMutation) AddedNumber() (r int, exists bool) {
+	v := m.addnumber
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetNumber resets all changes to the "number" field.
+func (m *MatchPlayerMutation) ResetNumber() {
+	m.number = nil
+	m.addnumber = nil
+}
+
+// SetPosition sets the "position" field.
+func (m *MatchPlayerMutation) SetPosition(s string) {
+	m.position = &s
+}
+
+// Position returns the value of the "position" field in the mutation.
+func (m *MatchPlayerMutation) Position() (r string, exists bool) {
+	v := m.position
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPosition returns the old "position" field's value of the MatchPlayer entity.
+// If the MatchPlayer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MatchPlayerMutation) OldPosition(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPosition is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPosition requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPosition: %w", err)
+	}
+	return oldValue.Position, nil
+}
+
+// ResetPosition resets all changes to the "position" field.
+func (m *MatchPlayerMutation) ResetPosition() {
+	m.position = nil
+}
+
+// SetX sets the "x" field.
+func (m *MatchPlayerMutation) SetX(s string) {
+	m.x = &s
+}
+
+// X returns the value of the "x" field in the mutation.
+func (m *MatchPlayerMutation) X() (r string, exists bool) {
+	v := m.x
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldX returns the old "x" field's value of the MatchPlayer entity.
+// If the MatchPlayer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MatchPlayerMutation) OldX(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldX is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldX requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldX: %w", err)
+	}
+	return oldValue.X, nil
+}
+
+// ResetX resets all changes to the "x" field.
+func (m *MatchPlayerMutation) ResetX() {
+	m.x = nil
+}
+
+// SetY sets the "y" field.
+func (m *MatchPlayerMutation) SetY(s string) {
+	m.y = &s
+}
+
+// Y returns the value of the "y" field in the mutation.
+func (m *MatchPlayerMutation) Y() (r string, exists bool) {
+	v := m.y
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldY returns the old "y" field's value of the MatchPlayer entity.
+// If the MatchPlayer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MatchPlayerMutation) OldY(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldY is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldY requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldY: %w", err)
+	}
+	return oldValue.Y, nil
+}
+
+// ResetY resets all changes to the "y" field.
+func (m *MatchPlayerMutation) ResetY() {
+	m.y = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *MatchPlayerMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *MatchPlayerMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the MatchPlayer entity.
+// If the MatchPlayer object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MatchPlayerMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *MatchPlayerMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[matchplayer.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *MatchPlayerMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[matchplayer.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *MatchPlayerMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, matchplayer.FieldLastUpdated)
+}
+
+// SetPlayerID sets the "player" edge to the Player entity by id.
+func (m *MatchPlayerMutation) SetPlayerID(id int) {
+	m.player = &id
+}
+
+// ClearPlayer clears the "player" edge to the Player entity.
+func (m *MatchPlayerMutation) ClearPlayer() {
+	m.clearedplayer = true
+}
+
+// PlayerCleared reports if the "player" edge to the Player entity was cleared.
+func (m *MatchPlayerMutation) PlayerCleared() bool {
+	return m.clearedplayer
+}
+
+// PlayerID returns the "player" edge ID in the mutation.
+func (m *MatchPlayerMutation) PlayerID() (id int, exists bool) {
+	if m.player != nil {
+		return *m.player, true
+	}
+	return
+}
+
+// PlayerIDs returns the "player" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerID instead. It exists only for internal usage by the builders.
+func (m *MatchPlayerMutation) PlayerIDs() (ids []int) {
+	if id := m.player; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayer resets all changes to the "player" edge.
+func (m *MatchPlayerMutation) ResetPlayer() {
+	m.player = nil
+	m.clearedplayer = false
+}
+
+// SetLineupID sets the "lineup" edge to the FixtureLineups entity by id.
+func (m *MatchPlayerMutation) SetLineupID(id int) {
+	m.lineup = &id
+}
+
+// ClearLineup clears the "lineup" edge to the FixtureLineups entity.
+func (m *MatchPlayerMutation) ClearLineup() {
+	m.clearedlineup = true
+}
+
+// LineupCleared reports if the "lineup" edge to the FixtureLineups entity was cleared.
+func (m *MatchPlayerMutation) LineupCleared() bool {
+	return m.clearedlineup
+}
+
+// LineupID returns the "lineup" edge ID in the mutation.
+func (m *MatchPlayerMutation) LineupID() (id int, exists bool) {
+	if m.lineup != nil {
+		return *m.lineup, true
+	}
+	return
+}
+
+// LineupIDs returns the "lineup" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LineupID instead. It exists only for internal usage by the builders.
+func (m *MatchPlayerMutation) LineupIDs() (ids []int) {
+	if id := m.lineup; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLineup resets all changes to the "lineup" edge.
+func (m *MatchPlayerMutation) ResetLineup() {
+	m.lineup = nil
+	m.clearedlineup = false
+}
+
+// Where appends a list predicates to the MatchPlayerMutation builder.
+func (m *MatchPlayerMutation) Where(ps ...predicate.MatchPlayer) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the MatchPlayerMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *MatchPlayerMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.MatchPlayer, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *MatchPlayerMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *MatchPlayerMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (MatchPlayer).
+func (m *MatchPlayerMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *MatchPlayerMutation) Fields() []string {
+	fields := make([]string, 0, 5)
+	if m.number != nil {
+		fields = append(fields, matchplayer.FieldNumber)
+	}
+	if m.position != nil {
+		fields = append(fields, matchplayer.FieldPosition)
+	}
+	if m.x != nil {
+		fields = append(fields, matchplayer.FieldX)
+	}
+	if m.y != nil {
+		fields = append(fields, matchplayer.FieldY)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, matchplayer.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *MatchPlayerMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case matchplayer.FieldNumber:
+		return m.Number()
+	case matchplayer.FieldPosition:
+		return m.Position()
+	case matchplayer.FieldX:
+		return m.X()
+	case matchplayer.FieldY:
+		return m.Y()
+	case matchplayer.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *MatchPlayerMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case matchplayer.FieldNumber:
+		return m.OldNumber(ctx)
+	case matchplayer.FieldPosition:
+		return m.OldPosition(ctx)
+	case matchplayer.FieldX:
+		return m.OldX(ctx)
+	case matchplayer.FieldY:
+		return m.OldY(ctx)
+	case matchplayer.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown MatchPlayer field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MatchPlayerMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case matchplayer.FieldNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetNumber(v)
+		return nil
+	case matchplayer.FieldPosition:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPosition(v)
+		return nil
+	case matchplayer.FieldX:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetX(v)
+		return nil
+	case matchplayer.FieldY:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetY(v)
+		return nil
+	case matchplayer.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MatchPlayer field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *MatchPlayerMutation) AddedFields() []string {
+	var fields []string
+	if m.addnumber != nil {
+		fields = append(fields, matchplayer.FieldNumber)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *MatchPlayerMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case matchplayer.FieldNumber:
+		return m.AddedNumber()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *MatchPlayerMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case matchplayer.FieldNumber:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddNumber(v)
+		return nil
+	}
+	return fmt.Errorf("unknown MatchPlayer numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *MatchPlayerMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(matchplayer.FieldLastUpdated) {
+		fields = append(fields, matchplayer.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *MatchPlayerMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *MatchPlayerMutation) ClearField(name string) error {
+	switch name {
+	case matchplayer.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown MatchPlayer nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *MatchPlayerMutation) ResetField(name string) error {
+	switch name {
+	case matchplayer.FieldNumber:
+		m.ResetNumber()
+		return nil
+	case matchplayer.FieldPosition:
+		m.ResetPosition()
+		return nil
+	case matchplayer.FieldX:
+		m.ResetX()
+		return nil
+	case matchplayer.FieldY:
+		m.ResetY()
+		return nil
+	case matchplayer.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown MatchPlayer field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *MatchPlayerMutation) AddedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.player != nil {
+		edges = append(edges, matchplayer.EdgePlayer)
+	}
+	if m.lineup != nil {
+		edges = append(edges, matchplayer.EdgeLineup)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *MatchPlayerMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case matchplayer.EdgePlayer:
+		if id := m.player; id != nil {
+			return []ent.Value{*id}
+		}
+	case matchplayer.EdgeLineup:
+		if id := m.lineup; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *MatchPlayerMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 2)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *MatchPlayerMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *MatchPlayerMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 2)
+	if m.clearedplayer {
+		edges = append(edges, matchplayer.EdgePlayer)
+	}
+	if m.clearedlineup {
+		edges = append(edges, matchplayer.EdgeLineup)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *MatchPlayerMutation) EdgeCleared(name string) bool {
+	switch name {
+	case matchplayer.EdgePlayer:
+		return m.clearedplayer
+	case matchplayer.EdgeLineup:
+		return m.clearedlineup
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *MatchPlayerMutation) ClearEdge(name string) error {
+	switch name {
+	case matchplayer.EdgePlayer:
+		m.ClearPlayer()
+		return nil
+	case matchplayer.EdgeLineup:
+		m.ClearLineup()
+		return nil
+	}
+	return fmt.Errorf("unknown MatchPlayer unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *MatchPlayerMutation) ResetEdge(name string) error {
+	switch name {
+	case matchplayer.EdgePlayer:
+		m.ResetPlayer()
+		return nil
+	case matchplayer.EdgeLineup:
+		m.ResetLineup()
+		return nil
+	}
+	return fmt.Errorf("unknown MatchPlayer edge %s", name)
+}
+
 // PlayerMutation represents an operation that mutates the Player nodes in the graph.
 type PlayerMutation struct {
 	config
-	op                 Op
-	typ                string
-	id                 *int
-	slug               *string
-	_ApiFootballId     *int
-	add_ApiFootballId  *int
-	name               *string
-	firstname          *string
-	lastname           *string
-	age                *int
-	addage             *int
-	height             *string
-	weight             *string
-	injured            *bool
-	photo              *string
-	lastUpdated        *time.Time
-	clearedFields      map[string]struct{}
-	birth              *int
-	clearedbirth       bool
-	nationality        *int
-	clearednationality bool
-	squad              map[int]struct{}
-	removedsquad       map[int]struct{}
-	clearedsquad       bool
-	done               bool
-	oldValue           func(context.Context) (*Player, error)
-	predicates         []predicate.Player
+	op                  Op
+	typ                 string
+	id                  *int
+	slug                *string
+	_ApiFootballId      *int
+	add_ApiFootballId   *int
+	name                *string
+	firstname           *string
+	lastname            *string
+	age                 *int
+	addage              *int
+	height              *string
+	weight              *string
+	injured             *bool
+	photo               *string
+	lastUpdated         *time.Time
+	clearedFields       map[string]struct{}
+	birth               *int
+	clearedbirth        bool
+	nationality         *int
+	clearednationality  bool
+	squad               map[int]struct{}
+	removedsquad        map[int]struct{}
+	clearedsquad        bool
+	playerEvents        map[int]struct{}
+	removedplayerEvents map[int]struct{}
+	clearedplayerEvents bool
+	matchPlayer         map[int]struct{}
+	removedmatchPlayer  map[int]struct{}
+	clearedmatchPlayer  bool
+	assistEvents        map[int]struct{}
+	removedassistEvents map[int]struct{}
+	clearedassistEvents bool
+	done                bool
+	oldValue            func(context.Context) (*Player, error)
+	predicates          []predicate.Player
 }
 
 var _ ent.Mutation = (*PlayerMutation)(nil)
@@ -5104,6 +7769,168 @@ func (m *PlayerMutation) ResetSquad() {
 	m.removedsquad = nil
 }
 
+// AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by ids.
+func (m *PlayerMutation) AddPlayerEventIDs(ids ...int) {
+	if m.playerEvents == nil {
+		m.playerEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.playerEvents[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPlayerEvents clears the "playerEvents" edge to the FixtureEvents entity.
+func (m *PlayerMutation) ClearPlayerEvents() {
+	m.clearedplayerEvents = true
+}
+
+// PlayerEventsCleared reports if the "playerEvents" edge to the FixtureEvents entity was cleared.
+func (m *PlayerMutation) PlayerEventsCleared() bool {
+	return m.clearedplayerEvents
+}
+
+// RemovePlayerEventIDs removes the "playerEvents" edge to the FixtureEvents entity by IDs.
+func (m *PlayerMutation) RemovePlayerEventIDs(ids ...int) {
+	if m.removedplayerEvents == nil {
+		m.removedplayerEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.playerEvents, ids[i])
+		m.removedplayerEvents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayerEvents returns the removed IDs of the "playerEvents" edge to the FixtureEvents entity.
+func (m *PlayerMutation) RemovedPlayerEventsIDs() (ids []int) {
+	for id := range m.removedplayerEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PlayerEventsIDs returns the "playerEvents" edge IDs in the mutation.
+func (m *PlayerMutation) PlayerEventsIDs() (ids []int) {
+	for id := range m.playerEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPlayerEvents resets all changes to the "playerEvents" edge.
+func (m *PlayerMutation) ResetPlayerEvents() {
+	m.playerEvents = nil
+	m.clearedplayerEvents = false
+	m.removedplayerEvents = nil
+}
+
+// AddMatchPlayerIDs adds the "matchPlayer" edge to the MatchPlayer entity by ids.
+func (m *PlayerMutation) AddMatchPlayerIDs(ids ...int) {
+	if m.matchPlayer == nil {
+		m.matchPlayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.matchPlayer[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMatchPlayer clears the "matchPlayer" edge to the MatchPlayer entity.
+func (m *PlayerMutation) ClearMatchPlayer() {
+	m.clearedmatchPlayer = true
+}
+
+// MatchPlayerCleared reports if the "matchPlayer" edge to the MatchPlayer entity was cleared.
+func (m *PlayerMutation) MatchPlayerCleared() bool {
+	return m.clearedmatchPlayer
+}
+
+// RemoveMatchPlayerIDs removes the "matchPlayer" edge to the MatchPlayer entity by IDs.
+func (m *PlayerMutation) RemoveMatchPlayerIDs(ids ...int) {
+	if m.removedmatchPlayer == nil {
+		m.removedmatchPlayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.matchPlayer, ids[i])
+		m.removedmatchPlayer[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMatchPlayer returns the removed IDs of the "matchPlayer" edge to the MatchPlayer entity.
+func (m *PlayerMutation) RemovedMatchPlayerIDs() (ids []int) {
+	for id := range m.removedmatchPlayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MatchPlayerIDs returns the "matchPlayer" edge IDs in the mutation.
+func (m *PlayerMutation) MatchPlayerIDs() (ids []int) {
+	for id := range m.matchPlayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMatchPlayer resets all changes to the "matchPlayer" edge.
+func (m *PlayerMutation) ResetMatchPlayer() {
+	m.matchPlayer = nil
+	m.clearedmatchPlayer = false
+	m.removedmatchPlayer = nil
+}
+
+// AddAssistEventIDs adds the "assistEvents" edge to the FixtureEvents entity by ids.
+func (m *PlayerMutation) AddAssistEventIDs(ids ...int) {
+	if m.assistEvents == nil {
+		m.assistEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.assistEvents[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAssistEvents clears the "assistEvents" edge to the FixtureEvents entity.
+func (m *PlayerMutation) ClearAssistEvents() {
+	m.clearedassistEvents = true
+}
+
+// AssistEventsCleared reports if the "assistEvents" edge to the FixtureEvents entity was cleared.
+func (m *PlayerMutation) AssistEventsCleared() bool {
+	return m.clearedassistEvents
+}
+
+// RemoveAssistEventIDs removes the "assistEvents" edge to the FixtureEvents entity by IDs.
+func (m *PlayerMutation) RemoveAssistEventIDs(ids ...int) {
+	if m.removedassistEvents == nil {
+		m.removedassistEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.assistEvents, ids[i])
+		m.removedassistEvents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAssistEvents returns the removed IDs of the "assistEvents" edge to the FixtureEvents entity.
+func (m *PlayerMutation) RemovedAssistEventsIDs() (ids []int) {
+	for id := range m.removedassistEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AssistEventsIDs returns the "assistEvents" edge IDs in the mutation.
+func (m *PlayerMutation) AssistEventsIDs() (ids []int) {
+	for id := range m.assistEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAssistEvents resets all changes to the "assistEvents" edge.
+func (m *PlayerMutation) ResetAssistEvents() {
+	m.assistEvents = nil
+	m.clearedassistEvents = false
+	m.removedassistEvents = nil
+}
+
 // Where appends a list predicates to the PlayerMutation builder.
 func (m *PlayerMutation) Where(ps ...predicate.Player) {
 	m.predicates = append(m.predicates, ps...)
@@ -5443,7 +8270,7 @@ func (m *PlayerMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PlayerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 6)
 	if m.birth != nil {
 		edges = append(edges, player.EdgeBirth)
 	}
@@ -5452,6 +8279,15 @@ func (m *PlayerMutation) AddedEdges() []string {
 	}
 	if m.squad != nil {
 		edges = append(edges, player.EdgeSquad)
+	}
+	if m.playerEvents != nil {
+		edges = append(edges, player.EdgePlayerEvents)
+	}
+	if m.matchPlayer != nil {
+		edges = append(edges, player.EdgeMatchPlayer)
+	}
+	if m.assistEvents != nil {
+		edges = append(edges, player.EdgeAssistEvents)
 	}
 	return edges
 }
@@ -5474,15 +8310,42 @@ func (m *PlayerMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case player.EdgePlayerEvents:
+		ids := make([]ent.Value, 0, len(m.playerEvents))
+		for id := range m.playerEvents {
+			ids = append(ids, id)
+		}
+		return ids
+	case player.EdgeMatchPlayer:
+		ids := make([]ent.Value, 0, len(m.matchPlayer))
+		for id := range m.matchPlayer {
+			ids = append(ids, id)
+		}
+		return ids
+	case player.EdgeAssistEvents:
+		ids := make([]ent.Value, 0, len(m.assistEvents))
+		for id := range m.assistEvents {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PlayerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 6)
 	if m.removedsquad != nil {
 		edges = append(edges, player.EdgeSquad)
+	}
+	if m.removedplayerEvents != nil {
+		edges = append(edges, player.EdgePlayerEvents)
+	}
+	if m.removedmatchPlayer != nil {
+		edges = append(edges, player.EdgeMatchPlayer)
+	}
+	if m.removedassistEvents != nil {
+		edges = append(edges, player.EdgeAssistEvents)
 	}
 	return edges
 }
@@ -5497,13 +8360,31 @@ func (m *PlayerMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case player.EdgePlayerEvents:
+		ids := make([]ent.Value, 0, len(m.removedplayerEvents))
+		for id := range m.removedplayerEvents {
+			ids = append(ids, id)
+		}
+		return ids
+	case player.EdgeMatchPlayer:
+		ids := make([]ent.Value, 0, len(m.removedmatchPlayer))
+		for id := range m.removedmatchPlayer {
+			ids = append(ids, id)
+		}
+		return ids
+	case player.EdgeAssistEvents:
+		ids := make([]ent.Value, 0, len(m.removedassistEvents))
+		for id := range m.removedassistEvents {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PlayerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 6)
 	if m.clearedbirth {
 		edges = append(edges, player.EdgeBirth)
 	}
@@ -5512,6 +8393,15 @@ func (m *PlayerMutation) ClearedEdges() []string {
 	}
 	if m.clearedsquad {
 		edges = append(edges, player.EdgeSquad)
+	}
+	if m.clearedplayerEvents {
+		edges = append(edges, player.EdgePlayerEvents)
+	}
+	if m.clearedmatchPlayer {
+		edges = append(edges, player.EdgeMatchPlayer)
+	}
+	if m.clearedassistEvents {
+		edges = append(edges, player.EdgeAssistEvents)
 	}
 	return edges
 }
@@ -5526,6 +8416,12 @@ func (m *PlayerMutation) EdgeCleared(name string) bool {
 		return m.clearednationality
 	case player.EdgeSquad:
 		return m.clearedsquad
+	case player.EdgePlayerEvents:
+		return m.clearedplayerEvents
+	case player.EdgeMatchPlayer:
+		return m.clearedmatchPlayer
+	case player.EdgeAssistEvents:
+		return m.clearedassistEvents
 	}
 	return false
 }
@@ -5556,6 +8452,15 @@ func (m *PlayerMutation) ResetEdge(name string) error {
 		return nil
 	case player.EdgeSquad:
 		m.ResetSquad()
+		return nil
+	case player.EdgePlayerEvents:
+		m.ResetPlayerEvents()
+		return nil
+	case player.EdgeMatchPlayer:
+		m.ResetMatchPlayer()
+		return nil
+	case player.EdgeAssistEvents:
+		m.ResetAssistEvents()
 		return nil
 	}
 	return fmt.Errorf("unknown Player edge %s", name)
@@ -23511,6 +26416,12 @@ type TeamMutation struct {
 	awayFixtures                 map[int]struct{}
 	removedawayFixtures          map[int]struct{}
 	clearedawayFixtures          bool
+	fixtureEvents                map[int]struct{}
+	removedfixtureEvents         map[int]struct{}
+	clearedfixtureEvents         bool
+	fixtureLineups               map[int]struct{}
+	removedfixtureLineups        map[int]struct{}
+	clearedfixtureLineups        bool
 	players                      map[int]struct{}
 	removedplayers               map[int]struct{}
 	clearedplayers               bool
@@ -23973,6 +26884,114 @@ func (m *TeamMutation) ResetAwayFixtures() {
 	m.awayFixtures = nil
 	m.clearedawayFixtures = false
 	m.removedawayFixtures = nil
+}
+
+// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by ids.
+func (m *TeamMutation) AddFixtureEventIDs(ids ...int) {
+	if m.fixtureEvents == nil {
+		m.fixtureEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.fixtureEvents[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFixtureEvents clears the "fixtureEvents" edge to the FixtureEvents entity.
+func (m *TeamMutation) ClearFixtureEvents() {
+	m.clearedfixtureEvents = true
+}
+
+// FixtureEventsCleared reports if the "fixtureEvents" edge to the FixtureEvents entity was cleared.
+func (m *TeamMutation) FixtureEventsCleared() bool {
+	return m.clearedfixtureEvents
+}
+
+// RemoveFixtureEventIDs removes the "fixtureEvents" edge to the FixtureEvents entity by IDs.
+func (m *TeamMutation) RemoveFixtureEventIDs(ids ...int) {
+	if m.removedfixtureEvents == nil {
+		m.removedfixtureEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.fixtureEvents, ids[i])
+		m.removedfixtureEvents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFixtureEvents returns the removed IDs of the "fixtureEvents" edge to the FixtureEvents entity.
+func (m *TeamMutation) RemovedFixtureEventsIDs() (ids []int) {
+	for id := range m.removedfixtureEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FixtureEventsIDs returns the "fixtureEvents" edge IDs in the mutation.
+func (m *TeamMutation) FixtureEventsIDs() (ids []int) {
+	for id := range m.fixtureEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFixtureEvents resets all changes to the "fixtureEvents" edge.
+func (m *TeamMutation) ResetFixtureEvents() {
+	m.fixtureEvents = nil
+	m.clearedfixtureEvents = false
+	m.removedfixtureEvents = nil
+}
+
+// AddFixtureLineupIDs adds the "fixtureLineups" edge to the FixtureLineups entity by ids.
+func (m *TeamMutation) AddFixtureLineupIDs(ids ...int) {
+	if m.fixtureLineups == nil {
+		m.fixtureLineups = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.fixtureLineups[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFixtureLineups clears the "fixtureLineups" edge to the FixtureLineups entity.
+func (m *TeamMutation) ClearFixtureLineups() {
+	m.clearedfixtureLineups = true
+}
+
+// FixtureLineupsCleared reports if the "fixtureLineups" edge to the FixtureLineups entity was cleared.
+func (m *TeamMutation) FixtureLineupsCleared() bool {
+	return m.clearedfixtureLineups
+}
+
+// RemoveFixtureLineupIDs removes the "fixtureLineups" edge to the FixtureLineups entity by IDs.
+func (m *TeamMutation) RemoveFixtureLineupIDs(ids ...int) {
+	if m.removedfixtureLineups == nil {
+		m.removedfixtureLineups = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.fixtureLineups, ids[i])
+		m.removedfixtureLineups[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFixtureLineups returns the removed IDs of the "fixtureLineups" edge to the FixtureLineups entity.
+func (m *TeamMutation) RemovedFixtureLineupsIDs() (ids []int) {
+	for id := range m.removedfixtureLineups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FixtureLineupsIDs returns the "fixtureLineups" edge IDs in the mutation.
+func (m *TeamMutation) FixtureLineupsIDs() (ids []int) {
+	for id := range m.fixtureLineups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFixtureLineups resets all changes to the "fixtureLineups" edge.
+func (m *TeamMutation) ResetFixtureLineups() {
+	m.fixtureLineups = nil
+	m.clearedfixtureLineups = false
+	m.removedfixtureLineups = nil
 }
 
 // AddPlayerIDs adds the "players" edge to the Player entity by ids.
@@ -24575,7 +27594,7 @@ func (m *TeamMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *TeamMutation) AddedEdges() []string {
-	edges := make([]string, 0, 15)
+	edges := make([]string, 0, 17)
 	if m.season != nil {
 		edges = append(edges, team.EdgeSeason)
 	}
@@ -24590,6 +27609,12 @@ func (m *TeamMutation) AddedEdges() []string {
 	}
 	if m.awayFixtures != nil {
 		edges = append(edges, team.EdgeAwayFixtures)
+	}
+	if m.fixtureEvents != nil {
+		edges = append(edges, team.EdgeFixtureEvents)
+	}
+	if m.fixtureLineups != nil {
+		edges = append(edges, team.EdgeFixtureLineups)
 	}
 	if m.players != nil {
 		edges = append(edges, team.EdgePlayers)
@@ -24654,6 +27679,18 @@ func (m *TeamMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case team.EdgeFixtureEvents:
+		ids := make([]ent.Value, 0, len(m.fixtureEvents))
+		for id := range m.fixtureEvents {
+			ids = append(ids, id)
+		}
+		return ids
+	case team.EdgeFixtureLineups:
+		ids := make([]ent.Value, 0, len(m.fixtureLineups))
+		for id := range m.fixtureLineups {
+			ids = append(ids, id)
+		}
+		return ids
 	case team.EdgePlayers:
 		ids := make([]ent.Value, 0, len(m.players))
 		for id := range m.players {
@@ -24706,7 +27743,7 @@ func (m *TeamMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *TeamMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 15)
+	edges := make([]string, 0, 17)
 	if m.removedstandings != nil {
 		edges = append(edges, team.EdgeStandings)
 	}
@@ -24715,6 +27752,12 @@ func (m *TeamMutation) RemovedEdges() []string {
 	}
 	if m.removedawayFixtures != nil {
 		edges = append(edges, team.EdgeAwayFixtures)
+	}
+	if m.removedfixtureEvents != nil {
+		edges = append(edges, team.EdgeFixtureEvents)
+	}
+	if m.removedfixtureLineups != nil {
+		edges = append(edges, team.EdgeFixtureLineups)
 	}
 	if m.removedplayers != nil {
 		edges = append(edges, team.EdgePlayers)
@@ -24750,6 +27793,18 @@ func (m *TeamMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case team.EdgeFixtureEvents:
+		ids := make([]ent.Value, 0, len(m.removedfixtureEvents))
+		for id := range m.removedfixtureEvents {
+			ids = append(ids, id)
+		}
+		return ids
+	case team.EdgeFixtureLineups:
+		ids := make([]ent.Value, 0, len(m.removedfixtureLineups))
+		for id := range m.removedfixtureLineups {
+			ids = append(ids, id)
+		}
+		return ids
 	case team.EdgePlayers:
 		ids := make([]ent.Value, 0, len(m.removedplayers))
 		for id := range m.removedplayers {
@@ -24774,7 +27829,7 @@ func (m *TeamMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *TeamMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 15)
+	edges := make([]string, 0, 17)
 	if m.clearedseason {
 		edges = append(edges, team.EdgeSeason)
 	}
@@ -24789,6 +27844,12 @@ func (m *TeamMutation) ClearedEdges() []string {
 	}
 	if m.clearedawayFixtures {
 		edges = append(edges, team.EdgeAwayFixtures)
+	}
+	if m.clearedfixtureEvents {
+		edges = append(edges, team.EdgeFixtureEvents)
+	}
+	if m.clearedfixtureLineups {
+		edges = append(edges, team.EdgeFixtureLineups)
 	}
 	if m.clearedplayers {
 		edges = append(edges, team.EdgePlayers)
@@ -24837,6 +27898,10 @@ func (m *TeamMutation) EdgeCleared(name string) bool {
 		return m.clearedhomeFixtures
 	case team.EdgeAwayFixtures:
 		return m.clearedawayFixtures
+	case team.EdgeFixtureEvents:
+		return m.clearedfixtureEvents
+	case team.EdgeFixtureLineups:
+		return m.clearedfixtureLineups
 	case team.EdgePlayers:
 		return m.clearedplayers
 	case team.EdgeSquad:
@@ -24914,6 +27979,12 @@ func (m *TeamMutation) ResetEdge(name string) error {
 		return nil
 	case team.EdgeAwayFixtures:
 		m.ResetAwayFixtures()
+		return nil
+	case team.EdgeFixtureEvents:
+		m.ResetFixtureEvents()
+		return nil
+	case team.EdgeFixtureLineups:
+		m.ResetFixtureLineups()
 		return nil
 	case team.EdgePlayers:
 		m.ResetPlayers()

@@ -12,14 +12,26 @@ type Birth func(*sql.Selector)
 // Club is the predicate function for club builders.
 type Club func(*sql.Selector)
 
+// Coach is the predicate function for coach builders.
+type Coach func(*sql.Selector)
+
 // Country is the predicate function for country builders.
 type Country func(*sql.Selector)
 
 // Fixture is the predicate function for fixture builders.
 type Fixture func(*sql.Selector)
 
+// FixtureEvents is the predicate function for fixtureevents builders.
+type FixtureEvents func(*sql.Selector)
+
+// FixtureLineups is the predicate function for fixturelineups builders.
+type FixtureLineups func(*sql.Selector)
+
 // League is the predicate function for league builders.
 type League func(*sql.Selector)
+
+// MatchPlayer is the predicate function for matchplayer builders.
+type MatchPlayer func(*sql.Selector)
 
 // Player is the predicate function for player builders.
 type Player func(*sql.Selector)

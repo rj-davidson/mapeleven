@@ -47,6 +47,20 @@ var (
 			},
 		},
 	}
+	// CoachesColumns holds the columns for the "coaches" table.
+	CoachesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "football_api_id", Type: field.TypeInt, Unique: true},
+		{Name: "name", Type: field.TypeString},
+		{Name: "photo", Type: field.TypeString},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+	}
+	// CoachesTable holds the schema information for the "coaches" table.
+	CoachesTable = &schema.Table{
+		Name:       "coaches",
+		Columns:    CoachesColumns,
+		PrimaryKey: []*schema.Column{CoachesColumns[0]},
+	}
 	// CountriesColumns holds the columns for the "countries" table.
 	CountriesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -105,6 +119,66 @@ var (
 			},
 		},
 	}
+	// FixtureEventsColumns holds the columns for the "fixture_events" table.
+	FixtureEventsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "elapsed_time", Type: field.TypeString},
+		{Name: "extra_time", Type: field.TypeString},
+		{Name: "type", Type: field.TypeString},
+		{Name: "detail", Type: field.TypeString},
+		{Name: "comments", Type: field.TypeString, Nullable: true},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "player_player_events", Type: field.TypeInt},
+		{Name: "player_assist_events", Type: field.TypeInt, Nullable: true},
+		{Name: "team_fixture_events", Type: field.TypeInt},
+	}
+	// FixtureEventsTable holds the schema information for the "fixture_events" table.
+	FixtureEventsTable = &schema.Table{
+		Name:       "fixture_events",
+		Columns:    FixtureEventsColumns,
+		PrimaryKey: []*schema.Column{FixtureEventsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "fixture_events_players_playerEvents",
+				Columns:    []*schema.Column{FixtureEventsColumns[7]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "fixture_events_players_assistEvents",
+				Columns:    []*schema.Column{FixtureEventsColumns[8]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "fixture_events_teams_fixtureEvents",
+				Columns:    []*schema.Column{FixtureEventsColumns[9]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
+	// FixtureLineupsColumns holds the columns for the "fixture_lineups" table.
+	FixtureLineupsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "formation", Type: field.TypeString},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "team_fixture_lineups", Type: field.TypeInt},
+	}
+	// FixtureLineupsTable holds the schema information for the "fixture_lineups" table.
+	FixtureLineupsTable = &schema.Table{
+		Name:       "fixture_lineups",
+		Columns:    FixtureLineupsColumns,
+		PrimaryKey: []*schema.Column{FixtureLineupsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "fixture_lineups_teams_fixtureLineups",
+				Columns:    []*schema.Column{FixtureLineupsColumns[3]},
+				RefColumns: []*schema.Column{TeamsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
+	}
 	// LeaguesColumns holds the columns for the "leagues" table.
 	LeaguesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -127,6 +201,37 @@ var (
 				Columns:    []*schema.Column{LeaguesColumns[7]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// MatchPlayersColumns holds the columns for the "match_players" table.
+	MatchPlayersColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "number", Type: field.TypeInt},
+		{Name: "position", Type: field.TypeString},
+		{Name: "x", Type: field.TypeString},
+		{Name: "y", Type: field.TypeString},
+		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "fixture_lineups_lineup_player", Type: field.TypeInt},
+		{Name: "player_match_player", Type: field.TypeInt},
+	}
+	// MatchPlayersTable holds the schema information for the "match_players" table.
+	MatchPlayersTable = &schema.Table{
+		Name:       "match_players",
+		Columns:    MatchPlayersColumns,
+		PrimaryKey: []*schema.Column{MatchPlayersColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "match_players_fixture_lineups_lineupPlayer",
+				Columns:    []*schema.Column{MatchPlayersColumns[6]},
+				RefColumns: []*schema.Column{FixtureLineupsColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "match_players_players_matchPlayer",
+				Columns:    []*schema.Column{MatchPlayersColumns[7]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -584,9 +689,13 @@ var (
 	Tables = []*schema.Table{
 		BirthsTable,
 		ClubsTable,
+		CoachesTable,
 		CountriesTable,
 		FixturesTable,
+		FixtureEventsTable,
+		FixtureLineupsTable,
 		LeaguesTable,
+		MatchPlayersTable,
 		PlayersTable,
 		SeasonsTable,
 		SquadsTable,
@@ -608,7 +717,13 @@ func init() {
 	FixturesTable.ForeignKeys[0].RefTable = SeasonsTable
 	FixturesTable.ForeignKeys[1].RefTable = TeamsTable
 	FixturesTable.ForeignKeys[2].RefTable = TeamsTable
+	FixtureEventsTable.ForeignKeys[0].RefTable = PlayersTable
+	FixtureEventsTable.ForeignKeys[1].RefTable = PlayersTable
+	FixtureEventsTable.ForeignKeys[2].RefTable = TeamsTable
+	FixtureLineupsTable.ForeignKeys[0].RefTable = TeamsTable
 	LeaguesTable.ForeignKeys[0].RefTable = CountriesTable
+	MatchPlayersTable.ForeignKeys[0].RefTable = FixtureLineupsTable
+	MatchPlayersTable.ForeignKeys[1].RefTable = PlayersTable
 	PlayersTable.ForeignKeys[0].RefTable = BirthsTable
 	PlayersTable.ForeignKeys[1].RefTable = CountriesTable
 	PlayersTable.ForeignKeys[2].RefTable = TeamsTable

@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/fixtureevents"
+	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/squad"
@@ -151,6 +153,51 @@ func (pu *PlayerUpdate) AddSquad(s ...*Squad) *PlayerUpdate {
 	return pu.AddSquadIDs(ids...)
 }
 
+// AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by IDs.
+func (pu *PlayerUpdate) AddPlayerEventIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.AddPlayerEventIDs(ids...)
+	return pu
+}
+
+// AddPlayerEvents adds the "playerEvents" edges to the FixtureEvents entity.
+func (pu *PlayerUpdate) AddPlayerEvents(f ...*FixtureEvents) *PlayerUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return pu.AddPlayerEventIDs(ids...)
+}
+
+// AddMatchPlayerIDs adds the "matchPlayer" edge to the MatchPlayer entity by IDs.
+func (pu *PlayerUpdate) AddMatchPlayerIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.AddMatchPlayerIDs(ids...)
+	return pu
+}
+
+// AddMatchPlayer adds the "matchPlayer" edges to the MatchPlayer entity.
+func (pu *PlayerUpdate) AddMatchPlayer(m ...*MatchPlayer) *PlayerUpdate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return pu.AddMatchPlayerIDs(ids...)
+}
+
+// AddAssistEventIDs adds the "assistEvents" edge to the FixtureEvents entity by IDs.
+func (pu *PlayerUpdate) AddAssistEventIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.AddAssistEventIDs(ids...)
+	return pu
+}
+
+// AddAssistEvents adds the "assistEvents" edges to the FixtureEvents entity.
+func (pu *PlayerUpdate) AddAssistEvents(f ...*FixtureEvents) *PlayerUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return pu.AddAssistEventIDs(ids...)
+}
+
 // Mutation returns the PlayerMutation object of the builder.
 func (pu *PlayerUpdate) Mutation() *PlayerMutation {
 	return pu.mutation
@@ -187,6 +234,69 @@ func (pu *PlayerUpdate) RemoveSquad(s ...*Squad) *PlayerUpdate {
 		ids[i] = s[i].ID
 	}
 	return pu.RemoveSquadIDs(ids...)
+}
+
+// ClearPlayerEvents clears all "playerEvents" edges to the FixtureEvents entity.
+func (pu *PlayerUpdate) ClearPlayerEvents() *PlayerUpdate {
+	pu.mutation.ClearPlayerEvents()
+	return pu
+}
+
+// RemovePlayerEventIDs removes the "playerEvents" edge to FixtureEvents entities by IDs.
+func (pu *PlayerUpdate) RemovePlayerEventIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.RemovePlayerEventIDs(ids...)
+	return pu
+}
+
+// RemovePlayerEvents removes "playerEvents" edges to FixtureEvents entities.
+func (pu *PlayerUpdate) RemovePlayerEvents(f ...*FixtureEvents) *PlayerUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return pu.RemovePlayerEventIDs(ids...)
+}
+
+// ClearMatchPlayer clears all "matchPlayer" edges to the MatchPlayer entity.
+func (pu *PlayerUpdate) ClearMatchPlayer() *PlayerUpdate {
+	pu.mutation.ClearMatchPlayer()
+	return pu
+}
+
+// RemoveMatchPlayerIDs removes the "matchPlayer" edge to MatchPlayer entities by IDs.
+func (pu *PlayerUpdate) RemoveMatchPlayerIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.RemoveMatchPlayerIDs(ids...)
+	return pu
+}
+
+// RemoveMatchPlayer removes "matchPlayer" edges to MatchPlayer entities.
+func (pu *PlayerUpdate) RemoveMatchPlayer(m ...*MatchPlayer) *PlayerUpdate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return pu.RemoveMatchPlayerIDs(ids...)
+}
+
+// ClearAssistEvents clears all "assistEvents" edges to the FixtureEvents entity.
+func (pu *PlayerUpdate) ClearAssistEvents() *PlayerUpdate {
+	pu.mutation.ClearAssistEvents()
+	return pu
+}
+
+// RemoveAssistEventIDs removes the "assistEvents" edge to FixtureEvents entities by IDs.
+func (pu *PlayerUpdate) RemoveAssistEventIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.RemoveAssistEventIDs(ids...)
+	return pu
+}
+
+// RemoveAssistEvents removes "assistEvents" edges to FixtureEvents entities.
+func (pu *PlayerUpdate) RemoveAssistEvents(f ...*FixtureEvents) *PlayerUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return pu.RemoveAssistEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -370,6 +480,141 @@ func (pu *PlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pu.mutation.PlayerEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerEventsTable,
+			Columns: []string{player.PlayerEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedPlayerEventsIDs(); len(nodes) > 0 && !pu.mutation.PlayerEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerEventsTable,
+			Columns: []string{player.PlayerEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.PlayerEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerEventsTable,
+			Columns: []string{player.PlayerEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pu.mutation.MatchPlayerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.MatchPlayerTable,
+			Columns: []string{player.MatchPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(matchplayer.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedMatchPlayerIDs(); len(nodes) > 0 && !pu.mutation.MatchPlayerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.MatchPlayerTable,
+			Columns: []string{player.MatchPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(matchplayer.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.MatchPlayerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.MatchPlayerTable,
+			Columns: []string{player.MatchPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(matchplayer.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if pu.mutation.AssistEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.AssistEventsTable,
+			Columns: []string{player.AssistEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedAssistEventsIDs(); len(nodes) > 0 && !pu.mutation.AssistEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.AssistEventsTable,
+			Columns: []string{player.AssistEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.AssistEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.AssistEventsTable,
+			Columns: []string{player.AssistEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{player.Label}
@@ -510,6 +755,51 @@ func (puo *PlayerUpdateOne) AddSquad(s ...*Squad) *PlayerUpdateOne {
 	return puo.AddSquadIDs(ids...)
 }
 
+// AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by IDs.
+func (puo *PlayerUpdateOne) AddPlayerEventIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.AddPlayerEventIDs(ids...)
+	return puo
+}
+
+// AddPlayerEvents adds the "playerEvents" edges to the FixtureEvents entity.
+func (puo *PlayerUpdateOne) AddPlayerEvents(f ...*FixtureEvents) *PlayerUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return puo.AddPlayerEventIDs(ids...)
+}
+
+// AddMatchPlayerIDs adds the "matchPlayer" edge to the MatchPlayer entity by IDs.
+func (puo *PlayerUpdateOne) AddMatchPlayerIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.AddMatchPlayerIDs(ids...)
+	return puo
+}
+
+// AddMatchPlayer adds the "matchPlayer" edges to the MatchPlayer entity.
+func (puo *PlayerUpdateOne) AddMatchPlayer(m ...*MatchPlayer) *PlayerUpdateOne {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return puo.AddMatchPlayerIDs(ids...)
+}
+
+// AddAssistEventIDs adds the "assistEvents" edge to the FixtureEvents entity by IDs.
+func (puo *PlayerUpdateOne) AddAssistEventIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.AddAssistEventIDs(ids...)
+	return puo
+}
+
+// AddAssistEvents adds the "assistEvents" edges to the FixtureEvents entity.
+func (puo *PlayerUpdateOne) AddAssistEvents(f ...*FixtureEvents) *PlayerUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return puo.AddAssistEventIDs(ids...)
+}
+
 // Mutation returns the PlayerMutation object of the builder.
 func (puo *PlayerUpdateOne) Mutation() *PlayerMutation {
 	return puo.mutation
@@ -546,6 +836,69 @@ func (puo *PlayerUpdateOne) RemoveSquad(s ...*Squad) *PlayerUpdateOne {
 		ids[i] = s[i].ID
 	}
 	return puo.RemoveSquadIDs(ids...)
+}
+
+// ClearPlayerEvents clears all "playerEvents" edges to the FixtureEvents entity.
+func (puo *PlayerUpdateOne) ClearPlayerEvents() *PlayerUpdateOne {
+	puo.mutation.ClearPlayerEvents()
+	return puo
+}
+
+// RemovePlayerEventIDs removes the "playerEvents" edge to FixtureEvents entities by IDs.
+func (puo *PlayerUpdateOne) RemovePlayerEventIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.RemovePlayerEventIDs(ids...)
+	return puo
+}
+
+// RemovePlayerEvents removes "playerEvents" edges to FixtureEvents entities.
+func (puo *PlayerUpdateOne) RemovePlayerEvents(f ...*FixtureEvents) *PlayerUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return puo.RemovePlayerEventIDs(ids...)
+}
+
+// ClearMatchPlayer clears all "matchPlayer" edges to the MatchPlayer entity.
+func (puo *PlayerUpdateOne) ClearMatchPlayer() *PlayerUpdateOne {
+	puo.mutation.ClearMatchPlayer()
+	return puo
+}
+
+// RemoveMatchPlayerIDs removes the "matchPlayer" edge to MatchPlayer entities by IDs.
+func (puo *PlayerUpdateOne) RemoveMatchPlayerIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.RemoveMatchPlayerIDs(ids...)
+	return puo
+}
+
+// RemoveMatchPlayer removes "matchPlayer" edges to MatchPlayer entities.
+func (puo *PlayerUpdateOne) RemoveMatchPlayer(m ...*MatchPlayer) *PlayerUpdateOne {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return puo.RemoveMatchPlayerIDs(ids...)
+}
+
+// ClearAssistEvents clears all "assistEvents" edges to the FixtureEvents entity.
+func (puo *PlayerUpdateOne) ClearAssistEvents() *PlayerUpdateOne {
+	puo.mutation.ClearAssistEvents()
+	return puo
+}
+
+// RemoveAssistEventIDs removes the "assistEvents" edge to FixtureEvents entities by IDs.
+func (puo *PlayerUpdateOne) RemoveAssistEventIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.RemoveAssistEventIDs(ids...)
+	return puo
+}
+
+// RemoveAssistEvents removes "assistEvents" edges to FixtureEvents entities.
+func (puo *PlayerUpdateOne) RemoveAssistEvents(f ...*FixtureEvents) *PlayerUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return puo.RemoveAssistEventIDs(ids...)
 }
 
 // Where appends a list predicates to the PlayerUpdate builder.
@@ -752,6 +1105,141 @@ func (puo *PlayerUpdateOne) sqlSave(ctx context.Context) (_node *Player, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.PlayerEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerEventsTable,
+			Columns: []string{player.PlayerEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedPlayerEventsIDs(); len(nodes) > 0 && !puo.mutation.PlayerEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerEventsTable,
+			Columns: []string{player.PlayerEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.PlayerEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerEventsTable,
+			Columns: []string{player.PlayerEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.MatchPlayerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.MatchPlayerTable,
+			Columns: []string{player.MatchPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(matchplayer.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedMatchPlayerIDs(); len(nodes) > 0 && !puo.mutation.MatchPlayerCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.MatchPlayerTable,
+			Columns: []string{player.MatchPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(matchplayer.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.MatchPlayerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.MatchPlayerTable,
+			Columns: []string{player.MatchPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(matchplayer.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.AssistEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.AssistEventsTable,
+			Columns: []string{player.AssistEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedAssistEventsIDs(); len(nodes) > 0 && !puo.mutation.AssistEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.AssistEventsTable,
+			Columns: []string{player.AssistEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.AssistEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.AssistEventsTable,
+			Columns: []string{player.AssistEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

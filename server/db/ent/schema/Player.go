@@ -46,5 +46,8 @@ func (Player) Edges() []ent.Edge {
 			Ref("players").
 			Unique(),
 		edge.To("squad", Squad.Type),
+		edge.To("playerEvents", FixtureEvents.Type),
+		edge.To("matchPlayer", MatchPlayer.Type),
+		edge.To("assistEvents", FixtureEvents.Type),
 	}
 }

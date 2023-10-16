@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/fixtureevents"
+	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/squad"
 	"time"
@@ -148,6 +150,51 @@ func (pc *PlayerCreate) AddSquad(s ...*Squad) *PlayerCreate {
 		ids[i] = s[i].ID
 	}
 	return pc.AddSquadIDs(ids...)
+}
+
+// AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by IDs.
+func (pc *PlayerCreate) AddPlayerEventIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddPlayerEventIDs(ids...)
+	return pc
+}
+
+// AddPlayerEvents adds the "playerEvents" edges to the FixtureEvents entity.
+func (pc *PlayerCreate) AddPlayerEvents(f ...*FixtureEvents) *PlayerCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return pc.AddPlayerEventIDs(ids...)
+}
+
+// AddMatchPlayerIDs adds the "matchPlayer" edge to the MatchPlayer entity by IDs.
+func (pc *PlayerCreate) AddMatchPlayerIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddMatchPlayerIDs(ids...)
+	return pc
+}
+
+// AddMatchPlayer adds the "matchPlayer" edges to the MatchPlayer entity.
+func (pc *PlayerCreate) AddMatchPlayer(m ...*MatchPlayer) *PlayerCreate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return pc.AddMatchPlayerIDs(ids...)
+}
+
+// AddAssistEventIDs adds the "assistEvents" edge to the FixtureEvents entity by IDs.
+func (pc *PlayerCreate) AddAssistEventIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddAssistEventIDs(ids...)
+	return pc
+}
+
+// AddAssistEvents adds the "assistEvents" edges to the FixtureEvents entity.
+func (pc *PlayerCreate) AddAssistEvents(f ...*FixtureEvents) *PlayerCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return pc.AddAssistEventIDs(ids...)
 }
 
 // Mutation returns the PlayerMutation object of the builder.
@@ -336,6 +383,54 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.PlayerEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerEventsTable,
+			Columns: []string{player.PlayerEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.MatchPlayerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.MatchPlayerTable,
+			Columns: []string{player.MatchPlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(matchplayer.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.AssistEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.AssistEventsTable,
+			Columns: []string{player.AssistEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

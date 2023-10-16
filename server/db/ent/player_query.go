@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/country"
+	"mapeleven/db/ent/fixtureevents"
+	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/squad"
@@ -21,14 +23,17 @@ import (
 // PlayerQuery is the builder for querying Player entities.
 type PlayerQuery struct {
 	config
-	ctx             *QueryContext
-	order           []player.Order
-	inters          []Interceptor
-	predicates      []predicate.Player
-	withBirth       *BirthQuery
-	withNationality *CountryQuery
-	withSquad       *SquadQuery
-	withFKs         bool
+	ctx              *QueryContext
+	order            []player.Order
+	inters           []Interceptor
+	predicates       []predicate.Player
+	withBirth        *BirthQuery
+	withNationality  *CountryQuery
+	withSquad        *SquadQuery
+	withPlayerEvents *FixtureEventsQuery
+	withMatchPlayer  *MatchPlayerQuery
+	withAssistEvents *FixtureEventsQuery
+	withFKs          bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -124,6 +129,72 @@ func (pq *PlayerQuery) QuerySquad() *SquadQuery {
 			sqlgraph.From(player.Table, player.FieldID, selector),
 			sqlgraph.To(squad.Table, squad.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, player.SquadTable, player.SquadColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPlayerEvents chains the current query on the "playerEvents" edge.
+func (pq *PlayerQuery) QueryPlayerEvents() *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: pq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, selector),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, player.PlayerEventsTable, player.PlayerEventsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMatchPlayer chains the current query on the "matchPlayer" edge.
+func (pq *PlayerQuery) QueryMatchPlayer() *MatchPlayerQuery {
+	query := (&MatchPlayerClient{config: pq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, selector),
+			sqlgraph.To(matchplayer.Table, matchplayer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, player.MatchPlayerTable, player.MatchPlayerColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryAssistEvents chains the current query on the "assistEvents" edge.
+func (pq *PlayerQuery) QueryAssistEvents() *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: pq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := pq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := pq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, selector),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, player.AssistEventsTable, player.AssistEventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,14 +389,17 @@ func (pq *PlayerQuery) Clone() *PlayerQuery {
 		return nil
 	}
 	return &PlayerQuery{
-		config:          pq.config,
-		ctx:             pq.ctx.Clone(),
-		order:           append([]player.Order{}, pq.order...),
-		inters:          append([]Interceptor{}, pq.inters...),
-		predicates:      append([]predicate.Player{}, pq.predicates...),
-		withBirth:       pq.withBirth.Clone(),
-		withNationality: pq.withNationality.Clone(),
-		withSquad:       pq.withSquad.Clone(),
+		config:           pq.config,
+		ctx:              pq.ctx.Clone(),
+		order:            append([]player.Order{}, pq.order...),
+		inters:           append([]Interceptor{}, pq.inters...),
+		predicates:       append([]predicate.Player{}, pq.predicates...),
+		withBirth:        pq.withBirth.Clone(),
+		withNationality:  pq.withNationality.Clone(),
+		withSquad:        pq.withSquad.Clone(),
+		withPlayerEvents: pq.withPlayerEvents.Clone(),
+		withMatchPlayer:  pq.withMatchPlayer.Clone(),
+		withAssistEvents: pq.withAssistEvents.Clone(),
 		// clone intermediate query.
 		sql:  pq.sql.Clone(),
 		path: pq.path,
@@ -362,6 +436,39 @@ func (pq *PlayerQuery) WithSquad(opts ...func(*SquadQuery)) *PlayerQuery {
 		opt(query)
 	}
 	pq.withSquad = query
+	return pq
+}
+
+// WithPlayerEvents tells the query-builder to eager-load the nodes that are connected to
+// the "playerEvents" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *PlayerQuery) WithPlayerEvents(opts ...func(*FixtureEventsQuery)) *PlayerQuery {
+	query := (&FixtureEventsClient{config: pq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withPlayerEvents = query
+	return pq
+}
+
+// WithMatchPlayer tells the query-builder to eager-load the nodes that are connected to
+// the "matchPlayer" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *PlayerQuery) WithMatchPlayer(opts ...func(*MatchPlayerQuery)) *PlayerQuery {
+	query := (&MatchPlayerClient{config: pq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withMatchPlayer = query
+	return pq
+}
+
+// WithAssistEvents tells the query-builder to eager-load the nodes that are connected to
+// the "assistEvents" edge. The optional arguments are used to configure the query builder of the edge.
+func (pq *PlayerQuery) WithAssistEvents(opts ...func(*FixtureEventsQuery)) *PlayerQuery {
+	query := (&FixtureEventsClient{config: pq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	pq.withAssistEvents = query
 	return pq
 }
 
@@ -444,10 +551,13 @@ func (pq *PlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Playe
 		nodes       = []*Player{}
 		withFKs     = pq.withFKs
 		_spec       = pq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [6]bool{
 			pq.withBirth != nil,
 			pq.withNationality != nil,
 			pq.withSquad != nil,
+			pq.withPlayerEvents != nil,
+			pq.withMatchPlayer != nil,
+			pq.withAssistEvents != nil,
 		}
 	)
 	if pq.withBirth != nil || pq.withNationality != nil {
@@ -490,6 +600,27 @@ func (pq *PlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Playe
 		if err := pq.loadSquad(ctx, query, nodes,
 			func(n *Player) { n.Edges.Squad = []*Squad{} },
 			func(n *Player, e *Squad) { n.Edges.Squad = append(n.Edges.Squad, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pq.withPlayerEvents; query != nil {
+		if err := pq.loadPlayerEvents(ctx, query, nodes,
+			func(n *Player) { n.Edges.PlayerEvents = []*FixtureEvents{} },
+			func(n *Player, e *FixtureEvents) { n.Edges.PlayerEvents = append(n.Edges.PlayerEvents, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pq.withMatchPlayer; query != nil {
+		if err := pq.loadMatchPlayer(ctx, query, nodes,
+			func(n *Player) { n.Edges.MatchPlayer = []*MatchPlayer{} },
+			func(n *Player, e *MatchPlayer) { n.Edges.MatchPlayer = append(n.Edges.MatchPlayer, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := pq.withAssistEvents; query != nil {
+		if err := pq.loadAssistEvents(ctx, query, nodes,
+			func(n *Player) { n.Edges.AssistEvents = []*FixtureEvents{} },
+			func(n *Player, e *FixtureEvents) { n.Edges.AssistEvents = append(n.Edges.AssistEvents, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -586,6 +717,99 @@ func (pq *PlayerQuery) loadSquad(ctx context.Context, query *SquadQuery, nodes [
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "player_squad" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pq *PlayerQuery) loadPlayerEvents(ctx context.Context, query *FixtureEventsQuery, nodes []*Player, init func(*Player), assign func(*Player, *FixtureEvents)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Player)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.FixtureEvents(func(s *sql.Selector) {
+		s.Where(sql.InValues(player.PlayerEventsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.player_player_events
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "player_player_events" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "player_player_events" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pq *PlayerQuery) loadMatchPlayer(ctx context.Context, query *MatchPlayerQuery, nodes []*Player, init func(*Player), assign func(*Player, *MatchPlayer)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Player)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.MatchPlayer(func(s *sql.Selector) {
+		s.Where(sql.InValues(player.MatchPlayerColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.player_match_player
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "player_match_player" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "player_match_player" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (pq *PlayerQuery) loadAssistEvents(ctx context.Context, query *FixtureEventsQuery, nodes []*Player, init func(*Player), assign func(*Player, *FixtureEvents)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Player)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.FixtureEvents(func(s *sql.Selector) {
+		s.Where(sql.InValues(player.AssistEventsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.player_assist_events
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "player_assist_events" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "player_assist_events" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

@@ -12,9 +12,13 @@ import (
 
 	"mapeleven/db/ent/birth"
 	"mapeleven/db/ent/club"
+	"mapeleven/db/ent/coach"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/fixtureevents"
+	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/squad"
@@ -44,12 +48,20 @@ type Client struct {
 	Birth *BirthClient
 	// Club is the client for interacting with the Club builders.
 	Club *ClubClient
+	// Coach is the client for interacting with the Coach builders.
+	Coach *CoachClient
 	// Country is the client for interacting with the Country builders.
 	Country *CountryClient
 	// Fixture is the client for interacting with the Fixture builders.
 	Fixture *FixtureClient
+	// FixtureEvents is the client for interacting with the FixtureEvents builders.
+	FixtureEvents *FixtureEventsClient
+	// FixtureLineups is the client for interacting with the FixtureLineups builders.
+	FixtureLineups *FixtureLineupsClient
 	// League is the client for interacting with the League builders.
 	League *LeagueClient
+	// MatchPlayer is the client for interacting with the MatchPlayer builders.
+	MatchPlayer *MatchPlayerClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
 	// Season is the client for interacting with the Season builders.
@@ -91,9 +103,13 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Birth = NewBirthClient(c.config)
 	c.Club = NewClubClient(c.config)
+	c.Coach = NewCoachClient(c.config)
 	c.Country = NewCountryClient(c.config)
 	c.Fixture = NewFixtureClient(c.config)
+	c.FixtureEvents = NewFixtureEventsClient(c.config)
+	c.FixtureLineups = NewFixtureLineupsClient(c.config)
 	c.League = NewLeagueClient(c.config)
+	c.MatchPlayer = NewMatchPlayerClient(c.config)
 	c.Player = NewPlayerClient(c.config)
 	c.Season = NewSeasonClient(c.config)
 	c.Squad = NewSquadClient(c.config)
@@ -191,9 +207,13 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		config:          cfg,
 		Birth:           NewBirthClient(cfg),
 		Club:            NewClubClient(cfg),
+		Coach:           NewCoachClient(cfg),
 		Country:         NewCountryClient(cfg),
 		Fixture:         NewFixtureClient(cfg),
+		FixtureEvents:   NewFixtureEventsClient(cfg),
+		FixtureLineups:  NewFixtureLineupsClient(cfg),
 		League:          NewLeagueClient(cfg),
+		MatchPlayer:     NewMatchPlayerClient(cfg),
 		Player:          NewPlayerClient(cfg),
 		Season:          NewSeasonClient(cfg),
 		Squad:           NewSquadClient(cfg),
@@ -228,9 +248,13 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		config:          cfg,
 		Birth:           NewBirthClient(cfg),
 		Club:            NewClubClient(cfg),
+		Coach:           NewCoachClient(cfg),
 		Country:         NewCountryClient(cfg),
 		Fixture:         NewFixtureClient(cfg),
+		FixtureEvents:   NewFixtureEventsClient(cfg),
+		FixtureLineups:  NewFixtureLineupsClient(cfg),
 		League:          NewLeagueClient(cfg),
+		MatchPlayer:     NewMatchPlayerClient(cfg),
 		Player:          NewPlayerClient(cfg),
 		Season:          NewSeasonClient(cfg),
 		Squad:           NewSquadClient(cfg),
@@ -273,7 +297,8 @@ func (c *Client) Close() error {
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
-		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.Season, c.Squad,
+		c.Birth, c.Club, c.Coach, c.Country, c.Fixture, c.FixtureEvents,
+		c.FixtureLineups, c.League, c.MatchPlayer, c.Player, c.Season, c.Squad,
 		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
 		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
 	} {
@@ -285,7 +310,8 @@ func (c *Client) Use(hooks ...Hook) {
 // In order to add interceptors to a specific client, call: `client.Node.Intercept(...)`.
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
-		c.Birth, c.Club, c.Country, c.Fixture, c.League, c.Player, c.Season, c.Squad,
+		c.Birth, c.Club, c.Coach, c.Country, c.Fixture, c.FixtureEvents,
+		c.FixtureLineups, c.League, c.MatchPlayer, c.Player, c.Season, c.Squad,
 		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
 		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
 	} {
@@ -300,12 +326,20 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Birth.mutate(ctx, m)
 	case *ClubMutation:
 		return c.Club.mutate(ctx, m)
+	case *CoachMutation:
+		return c.Coach.mutate(ctx, m)
 	case *CountryMutation:
 		return c.Country.mutate(ctx, m)
 	case *FixtureMutation:
 		return c.Fixture.mutate(ctx, m)
+	case *FixtureEventsMutation:
+		return c.FixtureEvents.mutate(ctx, m)
+	case *FixtureLineupsMutation:
+		return c.FixtureLineups.mutate(ctx, m)
 	case *LeagueMutation:
 		return c.League.mutate(ctx, m)
+	case *MatchPlayerMutation:
+		return c.MatchPlayer.mutate(ctx, m)
 	case *PlayerMutation:
 		return c.Player.mutate(ctx, m)
 	case *SeasonMutation:
@@ -618,6 +652,124 @@ func (c *ClubClient) mutate(ctx context.Context, m *ClubMutation) (Value, error)
 		return (&ClubDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Club mutation op: %q", m.Op())
+	}
+}
+
+// CoachClient is a client for the Coach schema.
+type CoachClient struct {
+	config
+}
+
+// NewCoachClient returns a client for the Coach from the given config.
+func NewCoachClient(c config) *CoachClient {
+	return &CoachClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `coach.Hooks(f(g(h())))`.
+func (c *CoachClient) Use(hooks ...Hook) {
+	c.hooks.Coach = append(c.hooks.Coach, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `coach.Intercept(f(g(h())))`.
+func (c *CoachClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Coach = append(c.inters.Coach, interceptors...)
+}
+
+// Create returns a builder for creating a Coach entity.
+func (c *CoachClient) Create() *CoachCreate {
+	mutation := newCoachMutation(c.config, OpCreate)
+	return &CoachCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Coach entities.
+func (c *CoachClient) CreateBulk(builders ...*CoachCreate) *CoachCreateBulk {
+	return &CoachCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Coach.
+func (c *CoachClient) Update() *CoachUpdate {
+	mutation := newCoachMutation(c.config, OpUpdate)
+	return &CoachUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *CoachClient) UpdateOne(co *Coach) *CoachUpdateOne {
+	mutation := newCoachMutation(c.config, OpUpdateOne, withCoach(co))
+	return &CoachUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *CoachClient) UpdateOneID(id int) *CoachUpdateOne {
+	mutation := newCoachMutation(c.config, OpUpdateOne, withCoachID(id))
+	return &CoachUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Coach.
+func (c *CoachClient) Delete() *CoachDelete {
+	mutation := newCoachMutation(c.config, OpDelete)
+	return &CoachDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *CoachClient) DeleteOne(co *Coach) *CoachDeleteOne {
+	return c.DeleteOneID(co.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *CoachClient) DeleteOneID(id int) *CoachDeleteOne {
+	builder := c.Delete().Where(coach.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &CoachDeleteOne{builder}
+}
+
+// Query returns a query builder for Coach.
+func (c *CoachClient) Query() *CoachQuery {
+	return &CoachQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeCoach},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Coach entity by its id.
+func (c *CoachClient) Get(ctx context.Context, id int) (*Coach, error) {
+	return c.Query().Where(coach.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *CoachClient) GetX(ctx context.Context, id int) *Coach {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *CoachClient) Hooks() []Hook {
+	return c.hooks.Coach
+}
+
+// Interceptors returns the client interceptors.
+func (c *CoachClient) Interceptors() []Interceptor {
+	return c.inters.Coach
+}
+
+func (c *CoachClient) mutate(ctx context.Context, m *CoachMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&CoachCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&CoachUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&CoachUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&CoachDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Coach mutation op: %q", m.Op())
 	}
 }
 
@@ -953,6 +1105,322 @@ func (c *FixtureClient) mutate(ctx context.Context, m *FixtureMutation) (Value, 
 	}
 }
 
+// FixtureEventsClient is a client for the FixtureEvents schema.
+type FixtureEventsClient struct {
+	config
+}
+
+// NewFixtureEventsClient returns a client for the FixtureEvents from the given config.
+func NewFixtureEventsClient(c config) *FixtureEventsClient {
+	return &FixtureEventsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `fixtureevents.Hooks(f(g(h())))`.
+func (c *FixtureEventsClient) Use(hooks ...Hook) {
+	c.hooks.FixtureEvents = append(c.hooks.FixtureEvents, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `fixtureevents.Intercept(f(g(h())))`.
+func (c *FixtureEventsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FixtureEvents = append(c.inters.FixtureEvents, interceptors...)
+}
+
+// Create returns a builder for creating a FixtureEvents entity.
+func (c *FixtureEventsClient) Create() *FixtureEventsCreate {
+	mutation := newFixtureEventsMutation(c.config, OpCreate)
+	return &FixtureEventsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FixtureEvents entities.
+func (c *FixtureEventsClient) CreateBulk(builders ...*FixtureEventsCreate) *FixtureEventsCreateBulk {
+	return &FixtureEventsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FixtureEvents.
+func (c *FixtureEventsClient) Update() *FixtureEventsUpdate {
+	mutation := newFixtureEventsMutation(c.config, OpUpdate)
+	return &FixtureEventsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FixtureEventsClient) UpdateOne(fe *FixtureEvents) *FixtureEventsUpdateOne {
+	mutation := newFixtureEventsMutation(c.config, OpUpdateOne, withFixtureEvents(fe))
+	return &FixtureEventsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FixtureEventsClient) UpdateOneID(id int) *FixtureEventsUpdateOne {
+	mutation := newFixtureEventsMutation(c.config, OpUpdateOne, withFixtureEventsID(id))
+	return &FixtureEventsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FixtureEvents.
+func (c *FixtureEventsClient) Delete() *FixtureEventsDelete {
+	mutation := newFixtureEventsMutation(c.config, OpDelete)
+	return &FixtureEventsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FixtureEventsClient) DeleteOne(fe *FixtureEvents) *FixtureEventsDeleteOne {
+	return c.DeleteOneID(fe.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FixtureEventsClient) DeleteOneID(id int) *FixtureEventsDeleteOne {
+	builder := c.Delete().Where(fixtureevents.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FixtureEventsDeleteOne{builder}
+}
+
+// Query returns a query builder for FixtureEvents.
+func (c *FixtureEventsClient) Query() *FixtureEventsQuery {
+	return &FixtureEventsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFixtureEvents},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FixtureEvents entity by its id.
+func (c *FixtureEventsClient) Get(ctx context.Context, id int) (*FixtureEvents, error) {
+	return c.Query().Where(fixtureevents.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FixtureEventsClient) GetX(ctx context.Context, id int) *FixtureEvents {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayer queries the player edge of a FixtureEvents.
+func (c *FixtureEventsClient) QueryPlayer(fe *FixtureEvents) *PlayerQuery {
+	query := (&PlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixtureevents.Table, fixtureevents.FieldID, id),
+			sqlgraph.To(player.Table, player.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixtureevents.PlayerTable, fixtureevents.PlayerColumn),
+		)
+		fromV = sqlgraph.Neighbors(fe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAssist queries the assist edge of a FixtureEvents.
+func (c *FixtureEventsClient) QueryAssist(fe *FixtureEvents) *PlayerQuery {
+	query := (&PlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixtureevents.Table, fixtureevents.FieldID, id),
+			sqlgraph.To(player.Table, player.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixtureevents.AssistTable, fixtureevents.AssistColumn),
+		)
+		fromV = sqlgraph.Neighbors(fe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTeam queries the team edge of a FixtureEvents.
+func (c *FixtureEventsClient) QueryTeam(fe *FixtureEvents) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixtureevents.Table, fixtureevents.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixtureevents.TeamTable, fixtureevents.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(fe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FixtureEventsClient) Hooks() []Hook {
+	return c.hooks.FixtureEvents
+}
+
+// Interceptors returns the client interceptors.
+func (c *FixtureEventsClient) Interceptors() []Interceptor {
+	return c.inters.FixtureEvents
+}
+
+func (c *FixtureEventsClient) mutate(ctx context.Context, m *FixtureEventsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FixtureEventsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FixtureEventsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FixtureEventsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FixtureEventsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FixtureEvents mutation op: %q", m.Op())
+	}
+}
+
+// FixtureLineupsClient is a client for the FixtureLineups schema.
+type FixtureLineupsClient struct {
+	config
+}
+
+// NewFixtureLineupsClient returns a client for the FixtureLineups from the given config.
+func NewFixtureLineupsClient(c config) *FixtureLineupsClient {
+	return &FixtureLineupsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `fixturelineups.Hooks(f(g(h())))`.
+func (c *FixtureLineupsClient) Use(hooks ...Hook) {
+	c.hooks.FixtureLineups = append(c.hooks.FixtureLineups, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `fixturelineups.Intercept(f(g(h())))`.
+func (c *FixtureLineupsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.FixtureLineups = append(c.inters.FixtureLineups, interceptors...)
+}
+
+// Create returns a builder for creating a FixtureLineups entity.
+func (c *FixtureLineupsClient) Create() *FixtureLineupsCreate {
+	mutation := newFixtureLineupsMutation(c.config, OpCreate)
+	return &FixtureLineupsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of FixtureLineups entities.
+func (c *FixtureLineupsClient) CreateBulk(builders ...*FixtureLineupsCreate) *FixtureLineupsCreateBulk {
+	return &FixtureLineupsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for FixtureLineups.
+func (c *FixtureLineupsClient) Update() *FixtureLineupsUpdate {
+	mutation := newFixtureLineupsMutation(c.config, OpUpdate)
+	return &FixtureLineupsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *FixtureLineupsClient) UpdateOne(fl *FixtureLineups) *FixtureLineupsUpdateOne {
+	mutation := newFixtureLineupsMutation(c.config, OpUpdateOne, withFixtureLineups(fl))
+	return &FixtureLineupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *FixtureLineupsClient) UpdateOneID(id int) *FixtureLineupsUpdateOne {
+	mutation := newFixtureLineupsMutation(c.config, OpUpdateOne, withFixtureLineupsID(id))
+	return &FixtureLineupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for FixtureLineups.
+func (c *FixtureLineupsClient) Delete() *FixtureLineupsDelete {
+	mutation := newFixtureLineupsMutation(c.config, OpDelete)
+	return &FixtureLineupsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *FixtureLineupsClient) DeleteOne(fl *FixtureLineups) *FixtureLineupsDeleteOne {
+	return c.DeleteOneID(fl.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *FixtureLineupsClient) DeleteOneID(id int) *FixtureLineupsDeleteOne {
+	builder := c.Delete().Where(fixturelineups.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &FixtureLineupsDeleteOne{builder}
+}
+
+// Query returns a query builder for FixtureLineups.
+func (c *FixtureLineupsClient) Query() *FixtureLineupsQuery {
+	return &FixtureLineupsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeFixtureLineups},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a FixtureLineups entity by its id.
+func (c *FixtureLineupsClient) Get(ctx context.Context, id int) (*FixtureLineups, error) {
+	return c.Query().Where(fixturelineups.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *FixtureLineupsClient) GetX(ctx context.Context, id int) *FixtureLineups {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryTeam queries the team edge of a FixtureLineups.
+func (c *FixtureLineupsClient) QueryTeam(fl *FixtureLineups) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixturelineups.Table, fixturelineups.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixturelineups.TeamTable, fixturelineups.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(fl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLineupPlayer queries the lineupPlayer edge of a FixtureLineups.
+func (c *FixtureLineupsClient) QueryLineupPlayer(fl *FixtureLineups) *MatchPlayerQuery {
+	query := (&MatchPlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixturelineups.Table, fixturelineups.FieldID, id),
+			sqlgraph.To(matchplayer.Table, matchplayer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, fixturelineups.LineupPlayerTable, fixturelineups.LineupPlayerColumn),
+		)
+		fromV = sqlgraph.Neighbors(fl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *FixtureLineupsClient) Hooks() []Hook {
+	return c.hooks.FixtureLineups
+}
+
+// Interceptors returns the client interceptors.
+func (c *FixtureLineupsClient) Interceptors() []Interceptor {
+	return c.inters.FixtureLineups
+}
+
+func (c *FixtureLineupsClient) mutate(ctx context.Context, m *FixtureLineupsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&FixtureLineupsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&FixtureLineupsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&FixtureLineupsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&FixtureLineupsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown FixtureLineups mutation op: %q", m.Op())
+	}
+}
+
 // LeagueClient is a client for the League schema.
 type LeagueClient struct {
 	config
@@ -1103,6 +1571,156 @@ func (c *LeagueClient) mutate(ctx context.Context, m *LeagueMutation) (Value, er
 	}
 }
 
+// MatchPlayerClient is a client for the MatchPlayer schema.
+type MatchPlayerClient struct {
+	config
+}
+
+// NewMatchPlayerClient returns a client for the MatchPlayer from the given config.
+func NewMatchPlayerClient(c config) *MatchPlayerClient {
+	return &MatchPlayerClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `matchplayer.Hooks(f(g(h())))`.
+func (c *MatchPlayerClient) Use(hooks ...Hook) {
+	c.hooks.MatchPlayer = append(c.hooks.MatchPlayer, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `matchplayer.Intercept(f(g(h())))`.
+func (c *MatchPlayerClient) Intercept(interceptors ...Interceptor) {
+	c.inters.MatchPlayer = append(c.inters.MatchPlayer, interceptors...)
+}
+
+// Create returns a builder for creating a MatchPlayer entity.
+func (c *MatchPlayerClient) Create() *MatchPlayerCreate {
+	mutation := newMatchPlayerMutation(c.config, OpCreate)
+	return &MatchPlayerCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of MatchPlayer entities.
+func (c *MatchPlayerClient) CreateBulk(builders ...*MatchPlayerCreate) *MatchPlayerCreateBulk {
+	return &MatchPlayerCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for MatchPlayer.
+func (c *MatchPlayerClient) Update() *MatchPlayerUpdate {
+	mutation := newMatchPlayerMutation(c.config, OpUpdate)
+	return &MatchPlayerUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *MatchPlayerClient) UpdateOne(mp *MatchPlayer) *MatchPlayerUpdateOne {
+	mutation := newMatchPlayerMutation(c.config, OpUpdateOne, withMatchPlayer(mp))
+	return &MatchPlayerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *MatchPlayerClient) UpdateOneID(id int) *MatchPlayerUpdateOne {
+	mutation := newMatchPlayerMutation(c.config, OpUpdateOne, withMatchPlayerID(id))
+	return &MatchPlayerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for MatchPlayer.
+func (c *MatchPlayerClient) Delete() *MatchPlayerDelete {
+	mutation := newMatchPlayerMutation(c.config, OpDelete)
+	return &MatchPlayerDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *MatchPlayerClient) DeleteOne(mp *MatchPlayer) *MatchPlayerDeleteOne {
+	return c.DeleteOneID(mp.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *MatchPlayerClient) DeleteOneID(id int) *MatchPlayerDeleteOne {
+	builder := c.Delete().Where(matchplayer.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &MatchPlayerDeleteOne{builder}
+}
+
+// Query returns a query builder for MatchPlayer.
+func (c *MatchPlayerClient) Query() *MatchPlayerQuery {
+	return &MatchPlayerQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeMatchPlayer},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a MatchPlayer entity by its id.
+func (c *MatchPlayerClient) Get(ctx context.Context, id int) (*MatchPlayer, error) {
+	return c.Query().Where(matchplayer.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *MatchPlayerClient) GetX(ctx context.Context, id int) *MatchPlayer {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayer queries the player edge of a MatchPlayer.
+func (c *MatchPlayerClient) QueryPlayer(mp *MatchPlayer) *PlayerQuery {
+	query := (&PlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(matchplayer.Table, matchplayer.FieldID, id),
+			sqlgraph.To(player.Table, player.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, matchplayer.PlayerTable, matchplayer.PlayerColumn),
+		)
+		fromV = sqlgraph.Neighbors(mp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryLineup queries the lineup edge of a MatchPlayer.
+func (c *MatchPlayerClient) QueryLineup(mp *MatchPlayer) *FixtureLineupsQuery {
+	query := (&FixtureLineupsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(matchplayer.Table, matchplayer.FieldID, id),
+			sqlgraph.To(fixturelineups.Table, fixturelineups.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, matchplayer.LineupTable, matchplayer.LineupColumn),
+		)
+		fromV = sqlgraph.Neighbors(mp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *MatchPlayerClient) Hooks() []Hook {
+	return c.hooks.MatchPlayer
+}
+
+// Interceptors returns the client interceptors.
+func (c *MatchPlayerClient) Interceptors() []Interceptor {
+	return c.inters.MatchPlayer
+}
+
+func (c *MatchPlayerClient) mutate(ctx context.Context, m *MatchPlayerMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&MatchPlayerCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&MatchPlayerUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&MatchPlayerUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&MatchPlayerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown MatchPlayer mutation op: %q", m.Op())
+	}
+}
+
 // PlayerClient is a client for the Player schema.
 type PlayerClient struct {
 	config
@@ -1237,6 +1855,54 @@ func (c *PlayerClient) QuerySquad(pl *Player) *SquadQuery {
 			sqlgraph.From(player.Table, player.FieldID, id),
 			sqlgraph.To(squad.Table, squad.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, player.SquadTable, player.SquadColumn),
+		)
+		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPlayerEvents queries the playerEvents edge of a Player.
+func (c *PlayerClient) QueryPlayerEvents(pl *Player) *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, id),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, player.PlayerEventsTable, player.PlayerEventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMatchPlayer queries the matchPlayer edge of a Player.
+func (c *PlayerClient) QueryMatchPlayer(pl *Player) *MatchPlayerQuery {
+	query := (&MatchPlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, id),
+			sqlgraph.To(matchplayer.Table, matchplayer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, player.MatchPlayerTable, player.MatchPlayerColumn),
+		)
+		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAssistEvents queries the assistEvents edge of a Player.
+func (c *PlayerClient) QueryAssistEvents(pl *Player) *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(player.Table, player.FieldID, id),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, player.AssistEventsTable, player.AssistEventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
 		return fromV, nil
@@ -2996,6 +3662,38 @@ func (c *TeamClient) QueryAwayFixtures(t *Team) *FixtureQuery {
 	return query
 }
 
+// QueryFixtureEvents queries the fixtureEvents edge of a Team.
+func (c *TeamClient) QueryFixtureEvents(t *Team) *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, team.FixtureEventsTable, team.FixtureEventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFixtureLineups queries the fixtureLineups edge of a Team.
+func (c *TeamClient) QueryFixtureLineups(t *Team) *FixtureLineupsQuery {
+	query := (&FixtureLineupsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(fixturelineups.Table, fixturelineups.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, team.FixtureLineupsTable, team.FixtureLineupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPlayers queries the players edge of a Team.
 func (c *TeamClient) QueryPlayers(t *Team) *PlayerQuery {
 	query := (&PlayerClient{config: c.config}).Query()
@@ -3184,13 +3882,15 @@ func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error)
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Birth, Club, Country, Fixture, League, Player, Season, Squad, Standings,
-		TSBiggest, TSCards, TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals,
-		TSLineups, TSPenalty, Team []ent.Hook
+		Birth, Club, Coach, Country, Fixture, FixtureEvents, FixtureLineups, League,
+		MatchPlayer, Player, Season, Squad, Standings, TSBiggest, TSCards,
+		TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals, TSLineups, TSPenalty,
+		Team []ent.Hook
 	}
 	inters struct {
-		Birth, Club, Country, Fixture, League, Player, Season, Squad, Standings,
-		TSBiggest, TSCards, TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals,
-		TSLineups, TSPenalty, Team []ent.Interceptor
+		Birth, Club, Coach, Country, Fixture, FixtureEvents, FixtureLineups, League,
+		MatchPlayer, Player, Season, Squad, Standings, TSBiggest, TSCards,
+		TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals, TSLineups, TSPenalty,
+		Team []ent.Interceptor
 	}
 )

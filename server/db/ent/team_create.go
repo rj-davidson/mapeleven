@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/fixtureevents"
+	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/squad"
@@ -135,6 +137,36 @@ func (tc *TeamCreate) AddAwayFixtures(f ...*Fixture) *TeamCreate {
 		ids[i] = f[i].ID
 	}
 	return tc.AddAwayFixtureIDs(ids...)
+}
+
+// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by IDs.
+func (tc *TeamCreate) AddFixtureEventIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddFixtureEventIDs(ids...)
+	return tc
+}
+
+// AddFixtureEvents adds the "fixtureEvents" edges to the FixtureEvents entity.
+func (tc *TeamCreate) AddFixtureEvents(f ...*FixtureEvents) *TeamCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return tc.AddFixtureEventIDs(ids...)
+}
+
+// AddFixtureLineupIDs adds the "fixtureLineups" edge to the FixtureLineups entity by IDs.
+func (tc *TeamCreate) AddFixtureLineupIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddFixtureLineupIDs(ids...)
+	return tc
+}
+
+// AddFixtureLineups adds the "fixtureLineups" edges to the FixtureLineups entity.
+func (tc *TeamCreate) AddFixtureLineups(f ...*FixtureLineups) *TeamCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return tc.AddFixtureLineupIDs(ids...)
 }
 
 // AddPlayerIDs adds the "players" edge to the Player entity by IDs.
@@ -470,6 +502,38 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.FixtureEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.FixtureEventsTable,
+			Columns: []string{team.FixtureEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.FixtureLineupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.FixtureLineupsTable,
+			Columns: []string{team.FixtureLineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -16,12 +16,20 @@ type Tx struct {
 	Birth *BirthClient
 	// Club is the client for interacting with the Club builders.
 	Club *ClubClient
+	// Coach is the client for interacting with the Coach builders.
+	Coach *CoachClient
 	// Country is the client for interacting with the Country builders.
 	Country *CountryClient
 	// Fixture is the client for interacting with the Fixture builders.
 	Fixture *FixtureClient
+	// FixtureEvents is the client for interacting with the FixtureEvents builders.
+	FixtureEvents *FixtureEventsClient
+	// FixtureLineups is the client for interacting with the FixtureLineups builders.
+	FixtureLineups *FixtureLineupsClient
 	// League is the client for interacting with the League builders.
 	League *LeagueClient
+	// MatchPlayer is the client for interacting with the MatchPlayer builders.
+	MatchPlayer *MatchPlayerClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
 	// Season is the client for interacting with the Season builders.
@@ -181,9 +189,13 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Birth = NewBirthClient(tx.config)
 	tx.Club = NewClubClient(tx.config)
+	tx.Coach = NewCoachClient(tx.config)
 	tx.Country = NewCountryClient(tx.config)
 	tx.Fixture = NewFixtureClient(tx.config)
+	tx.FixtureEvents = NewFixtureEventsClient(tx.config)
+	tx.FixtureLineups = NewFixtureLineupsClient(tx.config)
 	tx.League = NewLeagueClient(tx.config)
+	tx.MatchPlayer = NewMatchPlayerClient(tx.config)
 	tx.Player = NewPlayerClient(tx.config)
 	tx.Season = NewSeasonClient(tx.config)
 	tx.Squad = NewSquadClient(tx.config)
