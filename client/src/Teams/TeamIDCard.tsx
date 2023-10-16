@@ -18,6 +18,9 @@ interface TeamIDCardProps {
     goals: number;
     clean: number;
     gamesPlayed: number;
+    wins: number,
+    draws: number,
+    loses: number,
 }
 
 const TeamIDCard: React.FC<TeamIDCardProps> = ({
@@ -78,6 +81,15 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
                         </Grid>
                         <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                             <TeamIDStatBox stat='Games Played' value={gamesPlayed} />
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
+                            <TeamIDStatBox stat='Wins' value={wins} />
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
+                            <TeamIDStatBox stat='Draws' value={draws} />
+                        </Grid>
+                        <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
+                            <TeamIDStatBox stat='Loses' value={loses} />
                         </Grid>
                     </Grid>
 

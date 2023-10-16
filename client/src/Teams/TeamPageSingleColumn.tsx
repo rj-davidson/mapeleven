@@ -14,6 +14,9 @@ interface TeamPageSingleColumnProps {
     goals: number;
     clean: number;
     gamesPlayed: number;
+    wins: number;
+    draws: number;
+    loses: number;
 }
 
 const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
@@ -40,6 +43,9 @@ const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
                     goals={goals}
                     clean={clean}
                     gamesPlayed={gamesPlayed}
+                    wins={wins}
+                    draws={draws}
+                    loses={loses}
                 />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>

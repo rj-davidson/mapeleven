@@ -25,6 +25,9 @@ function TeamPageSingle() {
     const [gamesScored, setGamesScored] = useState<number>(0);
     const [goalMinuteSplit, setGoalMinuteSplit] = useState<APITSGoalMinuteSplit>(null);
     const [loading, setLoading] = useState<boolean>(true);
+    const [wins, setWins] = useState<number>(0);
+    const [draws, setDraws] = useState<number>(0);
+    const [loses, setLoses] = useState<number>(0);
 
     useEffect(() => {
         fetch(`${url}/teams/${slug}`)
@@ -54,6 +57,9 @@ function TeamPageSingle() {
                 );
                 setGoalMinuteSplit(jsonData.competitions[0].stats.goals.for.minute);
                 setLoading(false);
+                setWins(jsonData.stats.fixtures.wins.home + jsonData.stats.fixtures.wins.away)
+                setDraws(jsonData.stats.fixtures.draws.home + jsonData.stats.fixtures.draws.away)
+                setLoses(jsonData.stats.fixtures.loses.home + jsonData.stats.fixtures.loses.away)
             })
             .catch(error => console.error(error));
     }, [slug]);
@@ -90,6 +96,9 @@ function TeamPageSingle() {
                     goals={goals}
                     clean={clean}
                     gamesPlayed={gamesPlayed}
+                    wins={wins}
+                    draws={draws}
+                    loses={loses}
                 />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={9} width='100%'>
