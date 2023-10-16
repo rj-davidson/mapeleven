@@ -7,6 +7,7 @@ import (
 )
 
 type APIPlayer struct {
+	Slug      string `json:"slug"`
 	Name      string `json:"name"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
@@ -60,6 +61,7 @@ func (ps *PlayerSerializer) GetPlayers(ctx context.Context) ([]*APIPlayer, error
 func (ps *PlayerSerializer) SerializePlayer(p *ent.Player) *APIPlayer {
 
 	return &APIPlayer{
+		Slug:      p.Slug,
 		Name:      p.Name,
 		Firstname: p.Firstname,
 		Lastname:  p.Lastname,
