@@ -10,6 +10,7 @@ interface APISearch {
     name: string;
     type: APISearchType;
     image: string;
+    player?: APIPlayer;  // Optional player field
 }
 
 interface APIScoreboard {
@@ -74,6 +75,7 @@ interface APITeamName {
     short: string;
 }
 
+// Include player data in team if necessary
 interface APITeam {
     slug: string;
     name: APITeamName;
@@ -82,6 +84,7 @@ interface APITeam {
     nationalTeam?: boolean;
     country?: APICountry;
     competitions?: APICompetitions[];
+    players?: APIPlayer[]; // Optional players array
 }
 
 export interface APITeamStats {
@@ -202,6 +205,17 @@ interface APIStanding {
     Overall: APIRecord;
 }
 
+interface APIPlayer {
+    apiFootballID: number;
+    name: string;
+    firstname: string;
+    lastname: string;
+    age: number;
+    height: string;
+    weight: string;
+    injured: boolean;
+    photo: string;
+}
 export {
     APISearchType,
     APISearch,
@@ -216,4 +230,5 @@ export {
     APIStandings,
     APIRecord,
     APIStanding,
+    APIPlayer,
 };
