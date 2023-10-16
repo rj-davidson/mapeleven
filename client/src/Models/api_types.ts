@@ -82,6 +82,7 @@ interface APITeam {
     nationalTeam?: boolean;
     country?: APICountry;
     competitions?: APICompetitions[];
+    players?: APIPlayer[];
 }
 
 export interface APITeamStats {
@@ -202,6 +203,18 @@ interface APIStanding {
     Overall: APIRecord;
 }
 
+interface APIPlayer {
+    slug: string;
+    name: string;
+    firstname: string;
+    lastname: string;
+    age: number;
+    height: string;
+    weight: string;
+    injured: boolean;
+    photo: string;
+}
+
 export {
     APISearchType,
     APISearch,
@@ -216,4 +229,5 @@ export {
     APIStandings,
     APIRecord,
     APIStanding,
+    APIPlayer,
 };
