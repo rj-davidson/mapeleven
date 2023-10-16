@@ -7,15 +7,14 @@ import (
 )
 
 type PlayerInfo struct {
-	ApiFootballID int    `json:"apiFootballID"`
-	Name          string `json:"name"`
-	Firstname     string `json:"firstname"`
-	Lastname      string `json:"lastname"`
-	Age           int    `json:"age"`
-	Height        string `json:"height"`
-	Weight        string `json:"weight"`
-	Injured       bool   `json:"injured"`
-	Photo         string `json:"photo"`
+	Name      string `json:"name"`
+	Firstname string `json:"firstname"`
+	Lastname  string `json:"lastname"`
+	Age       int    `json:"age"`
+	Height    string `json:"height"`
+	Weight    string `json:"weight"`
+	Injured   bool   `json:"injured"`
+	Photo     string `json:"photo"`
 }
 
 type PlayerSerializer struct {
@@ -26,10 +25,10 @@ func NewPlayerSerializer(client *ent.Client) *PlayerSerializer {
 	return &PlayerSerializer{client: client}
 }
 
-func (ps *PlayerSerializer) getPlayerData(apiFootballID int) (*ent.Player, error) {
+func (ps *PlayerSerializer) getPlayerData(slug string) (*ent.Player, error) {
 	playerData, err := ps.client.Player.
 		Query().
-		Where(player.ApiFootballIdEQ(apiFootballID)).
+		Where(player.SlugEQ(slug)).
 		Only(context.Background())
 
 	if err != nil {
@@ -39,21 +38,20 @@ func (ps *PlayerSerializer) getPlayerData(apiFootballID int) (*ent.Player, error
 	return playerData, nil
 }
 
-func (ps *PlayerSerializer) SerializePlayer(apiFootballID int) *PlayerInfo {
-	playerData, err := ps.getPlayerData(apiFootballID)
+func (ps *PlayerSerializer) SerializePlayer(slug string) *PlayerInfo {
+	playerData, err := ps.getPlayerData(slug)
 	if err != nil {
 		return nil
 	}
 
 	return &PlayerInfo{
-		ApiFootballID: playerData.ApiFootballId,
-		Name:          playerData.Name,
-		Firstname:     playerData.Firstname,
-		Lastname:      playerData.Lastname,
-		Age:           playerData.Age,
-		Height:        playerData.Height,
-		Weight:        playerData.Weight,
-		Injured:       playerData.Injured,
-		Photo:         playerData.Photo,
+		Name:      playerData.Name,
+		Firstname: playerData.Firstname,
+		Lastname:  playerData.Lastname,
+		Age:       playerData.Age,
+		Height:    playerData.Height,
+		Weight:    playerData.Weight,
+		Injured:   playerData.Injured,
+		Photo:     playerData.Photo,
 	}
 }

@@ -205,7 +205,6 @@ interface APIStanding {
 }
 
 interface APIPlayer {
-    apiFootballID: number;
     name: string;
     firstname: string;
     lastname: string;
