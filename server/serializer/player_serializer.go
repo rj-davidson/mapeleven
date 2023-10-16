@@ -6,7 +6,7 @@ import (
 	"mapeleven/db/ent/player"
 )
 
-type PlayerInfo struct {
+type APIPlayer struct {
 	Name      string `json:"name"`
 	Firstname string `json:"firstname"`
 	Lastname  string `json:"lastname"`
@@ -25,33 +25,48 @@ func NewPlayerSerializer(client *ent.Client) *PlayerSerializer {
 	return &PlayerSerializer{client: client}
 }
 
-func (ps *PlayerSerializer) getPlayerData(slug string) (*ent.Player, error) {
-	playerData, err := ps.client.Player.
+// GetPlayerBySlug returns a player by slug.
+func (ps *PlayerSerializer) GetPlayerBySlug(slug string, ctx context.Context) (*APIPlayer, error) {
+	p, err := ps.client.Player.
 		Query().
 		Where(player.SlugEQ(slug)).
-		Only(context.Background())
+		Only(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return playerData, nil
+	return ps.SerializePlayer(p), nil
 }
 
-func (ps *PlayerSerializer) SerializePlayer(slug string) *PlayerInfo {
-	playerData, err := ps.getPlayerData(slug)
+// GetPlayers returns all players.
+func (ps *PlayerSerializer) GetPlayers(ctx context.Context) ([]*APIPlayer, error) {
+	players, err := ps.client.Player.
+		Query().
+		All(ctx)
 	if err != nil {
-		return nil
+		return nil, err
 	}
 
-	return &PlayerInfo{
-		Name:      playerData.Name,
-		Firstname: playerData.Firstname,
-		Lastname:  playerData.Lastname,
-		Age:       playerData.Age,
-		Height:    playerData.Height,
-		Weight:    playerData.Weight,
-		Injured:   playerData.Injured,
-		Photo:     playerData.Photo,
+	var playerItems []*APIPlayer
+	for _, p := range players {
+		playerItems = append(playerItems, ps.SerializePlayer(p))
+	}
+
+	return playerItems, nil
+}
+
+// SerializePlayer serializes a player entity into an APIPlayer.
+func (ps *PlayerSerializer) SerializePlayer(p *ent.Player) *APIPlayer {
+
+	return &APIPlayer{
+		Name:      p.Name,
+		Firstname: p.Firstname,
+		Lastname:  p.Lastname,
+		Age:       p.Age,
+		Height:    p.Height,
+		Weight:    p.Weight,
+		Injured:   p.Injured,
+		Photo:     p.Photo,
 	}
 }
