@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Card, CardContent, Grid, Typography } from '@mui/material';
 import LeagueIcon from '@mui/icons-material/SportsSoccer';
 import CupIcon from '@mui/icons-material/EmojiEvents';
+import {Link} from "react-router-dom";
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -10,6 +11,7 @@ interface League {
     logo: string;
     name: string;
     type: string;
+    slug: string;
 }
 
 interface DisplayLeaguesState {
@@ -48,9 +50,18 @@ class LeagueCards extends React.Component<{}, DisplayLeaguesState> {
                             }}
                         >
                             <img src={`${url}/` + league.logo} alt={league.name + ' logo'} height={44} />
-                            <Typography variant='h6' component='h2' sx={{ mr: 2 }}>
-                                {league.name}
-                            </Typography>
+
+                            <Link to={`/leagues/${league.slug}`}>
+                                <Typography
+                                    sx={{
+                                        '&:hover': {
+                                            textDecoration: 'underline', // Add underline on hover
+                                        },
+                                    }}
+                                >
+                                    {league.name}
+                                </Typography>
+                            </Link>
                             <Typography variant='body1' color='text.secondary' sx={{ mr: 2 }}>
                                 {league.type.toLowerCase() === 'league' ? <LeagueIcon /> : <CupIcon />}
                             </Typography>

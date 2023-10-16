@@ -1,5 +1,6 @@
 import React from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import {Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography} from "@mui/material";
+import {Link} from "react-router-dom";
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -29,7 +30,17 @@ class DisplayLeagues extends React.Component {
                 <TableRow key={league.id}>
                     <TableCell>{<img src={`${url}/` + league.logo} alt="League Photo" width="50" height="50" />}</TableCell>
                     <TableCell>{league.id}</TableCell>
-                    <TableCell>{league.name}</TableCell>
+                    <Link to={`/teams/${league.slug}`}>
+                        <Typography
+                            sx={{
+                                '&:hover': {
+                                    textDecoration: 'underline', // Add underline on hover
+                                },
+                            }}
+                        >
+                            {league.name}
+                        </Typography>
+                    </Link>
                     <TableCell>{league.type}</TableCell>
                 </TableRow>
             )
