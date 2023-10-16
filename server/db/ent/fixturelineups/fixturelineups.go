@@ -20,6 +20,8 @@ const (
 	FieldLastUpdated = "last_updated"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
+	// EdgeFixture holds the string denoting the fixture edge name in mutations.
+	EdgeFixture = "fixture"
 	// EdgeLineupPlayer holds the string denoting the lineupplayer edge name in mutations.
 	EdgeLineupPlayer = "lineupPlayer"
 	// Table holds the table name of the fixturelineups in the database.
@@ -31,6 +33,13 @@ const (
 	TeamInverseTable = "teams"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "team_fixture_lineups"
+	// FixtureTable is the table that holds the fixture relation/edge.
+	FixtureTable = "fixture_lineups"
+	// FixtureInverseTable is the table name for the Fixture entity.
+	// It exists in this package in order to avoid circular dependency with the "fixture" package.
+	FixtureInverseTable = "fixtures"
+	// FixtureColumn is the table column denoting the fixture relation/edge.
+	FixtureColumn = "fixture_lineups"
 	// LineupPlayerTable is the table that holds the lineupPlayer relation/edge.
 	LineupPlayerTable = "match_players"
 	// LineupPlayerInverseTable is the table name for the MatchPlayer entity.
@@ -50,6 +59,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "fixture_lineups"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"fixture_lineups",
 	"team_fixture_lineups",
 }
 
@@ -100,6 +110,13 @@ func ByTeamField(field string, opts ...sql.OrderTermOption) Order {
 	}
 }
 
+// ByFixtureField orders the results by fixture field.
+func ByFixtureField(field string, opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFixtureStep(), sql.OrderByField(field, opts...))
+	}
+}
+
 // ByLineupPlayerCount orders the results by lineupPlayer count.
 func ByLineupPlayerCount(opts ...sql.OrderTermOption) Order {
 	return func(s *sql.Selector) {
@@ -118,6 +135,13 @@ func newTeamStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, TeamTable, TeamColumn),
+	)
+}
+func newFixtureStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FixtureInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, FixtureTable, FixtureColumn),
 	)
 }
 func newLineupPlayerStep() *sqlgraph.Step {

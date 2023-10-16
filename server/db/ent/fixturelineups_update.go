@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/predicate"
@@ -59,6 +60,17 @@ func (flu *FixtureLineupsUpdate) SetTeam(t *Team) *FixtureLineupsUpdate {
 	return flu.SetTeamID(t.ID)
 }
 
+// SetFixtureID sets the "fixture" edge to the Fixture entity by ID.
+func (flu *FixtureLineupsUpdate) SetFixtureID(id int) *FixtureLineupsUpdate {
+	flu.mutation.SetFixtureID(id)
+	return flu
+}
+
+// SetFixture sets the "fixture" edge to the Fixture entity.
+func (flu *FixtureLineupsUpdate) SetFixture(f *Fixture) *FixtureLineupsUpdate {
+	return flu.SetFixtureID(f.ID)
+}
+
 // AddLineupPlayerIDs adds the "lineupPlayer" edge to the MatchPlayer entity by IDs.
 func (flu *FixtureLineupsUpdate) AddLineupPlayerIDs(ids ...int) *FixtureLineupsUpdate {
 	flu.mutation.AddLineupPlayerIDs(ids...)
@@ -82,6 +94,12 @@ func (flu *FixtureLineupsUpdate) Mutation() *FixtureLineupsMutation {
 // ClearTeam clears the "team" edge to the Team entity.
 func (flu *FixtureLineupsUpdate) ClearTeam() *FixtureLineupsUpdate {
 	flu.mutation.ClearTeam()
+	return flu
+}
+
+// ClearFixture clears the "fixture" edge to the Fixture entity.
+func (flu *FixtureLineupsUpdate) ClearFixture() *FixtureLineupsUpdate {
+	flu.mutation.ClearFixture()
 	return flu
 }
 
@@ -147,6 +165,9 @@ func (flu *FixtureLineupsUpdate) check() error {
 	if _, ok := flu.mutation.TeamID(); flu.mutation.TeamCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "FixtureLineups.team"`)
 	}
+	if _, ok := flu.mutation.FixtureID(); flu.mutation.FixtureCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "FixtureLineups.fixture"`)
+	}
 	return nil
 }
 
@@ -193,6 +214,35 @@ func (flu *FixtureLineupsUpdate) sqlSave(ctx context.Context) (n int, err error)
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if flu.mutation.FixtureCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixturelineups.FixtureTable,
+			Columns: []string{fixturelineups.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := flu.mutation.FixtureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixturelineups.FixtureTable,
+			Columns: []string{fixturelineups.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -294,6 +344,17 @@ func (fluo *FixtureLineupsUpdateOne) SetTeam(t *Team) *FixtureLineupsUpdateOne {
 	return fluo.SetTeamID(t.ID)
 }
 
+// SetFixtureID sets the "fixture" edge to the Fixture entity by ID.
+func (fluo *FixtureLineupsUpdateOne) SetFixtureID(id int) *FixtureLineupsUpdateOne {
+	fluo.mutation.SetFixtureID(id)
+	return fluo
+}
+
+// SetFixture sets the "fixture" edge to the Fixture entity.
+func (fluo *FixtureLineupsUpdateOne) SetFixture(f *Fixture) *FixtureLineupsUpdateOne {
+	return fluo.SetFixtureID(f.ID)
+}
+
 // AddLineupPlayerIDs adds the "lineupPlayer" edge to the MatchPlayer entity by IDs.
 func (fluo *FixtureLineupsUpdateOne) AddLineupPlayerIDs(ids ...int) *FixtureLineupsUpdateOne {
 	fluo.mutation.AddLineupPlayerIDs(ids...)
@@ -317,6 +378,12 @@ func (fluo *FixtureLineupsUpdateOne) Mutation() *FixtureLineupsMutation {
 // ClearTeam clears the "team" edge to the Team entity.
 func (fluo *FixtureLineupsUpdateOne) ClearTeam() *FixtureLineupsUpdateOne {
 	fluo.mutation.ClearTeam()
+	return fluo
+}
+
+// ClearFixture clears the "fixture" edge to the Fixture entity.
+func (fluo *FixtureLineupsUpdateOne) ClearFixture() *FixtureLineupsUpdateOne {
+	fluo.mutation.ClearFixture()
 	return fluo
 }
 
@@ -395,6 +462,9 @@ func (fluo *FixtureLineupsUpdateOne) check() error {
 	if _, ok := fluo.mutation.TeamID(); fluo.mutation.TeamCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "FixtureLineups.team"`)
 	}
+	if _, ok := fluo.mutation.FixtureID(); fluo.mutation.FixtureCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "FixtureLineups.fixture"`)
+	}
 	return nil
 }
 
@@ -458,6 +528,35 @@ func (fluo *FixtureLineupsUpdateOne) sqlSave(ctx context.Context) (_node *Fixtur
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fluo.mutation.FixtureCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixturelineups.FixtureTable,
+			Columns: []string{fixturelineups.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fluo.mutation.FixtureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixturelineups.FixtureTable,
+			Columns: []string{fixturelineups.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

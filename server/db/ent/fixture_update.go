@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/team"
@@ -235,6 +236,21 @@ func (fu *FixtureUpdate) SetSeason(s *Season) *FixtureUpdate {
 	return fu.SetSeasonID(s.ID)
 }
 
+// AddLineupIDs adds the "lineups" edge to the FixtureLineups entity by IDs.
+func (fu *FixtureUpdate) AddLineupIDs(ids ...int) *FixtureUpdate {
+	fu.mutation.AddLineupIDs(ids...)
+	return fu
+}
+
+// AddLineups adds the "lineups" edges to the FixtureLineups entity.
+func (fu *FixtureUpdate) AddLineups(f ...*FixtureLineups) *FixtureUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.AddLineupIDs(ids...)
+}
+
 // Mutation returns the FixtureMutation object of the builder.
 func (fu *FixtureUpdate) Mutation() *FixtureMutation {
 	return fu.mutation
@@ -256,6 +272,27 @@ func (fu *FixtureUpdate) ClearAwayTeam() *FixtureUpdate {
 func (fu *FixtureUpdate) ClearSeason() *FixtureUpdate {
 	fu.mutation.ClearSeason()
 	return fu
+}
+
+// ClearLineups clears all "lineups" edges to the FixtureLineups entity.
+func (fu *FixtureUpdate) ClearLineups() *FixtureUpdate {
+	fu.mutation.ClearLineups()
+	return fu
+}
+
+// RemoveLineupIDs removes the "lineups" edge to FixtureLineups entities by IDs.
+func (fu *FixtureUpdate) RemoveLineupIDs(ids ...int) *FixtureUpdate {
+	fu.mutation.RemoveLineupIDs(ids...)
+	return fu
+}
+
+// RemoveLineups removes "lineups" edges to FixtureLineups entities.
+func (fu *FixtureUpdate) RemoveLineups(f ...*FixtureLineups) *FixtureUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.RemoveLineupIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -460,6 +497,51 @@ func (fu *FixtureUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fu.mutation.LineupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.LineupsTable,
+			Columns: []string{fixture.LineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.RemovedLineupsIDs(); len(nodes) > 0 && !fu.mutation.LineupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.LineupsTable,
+			Columns: []string{fixture.LineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.LineupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.LineupsTable,
+			Columns: []string{fixture.LineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -692,6 +774,21 @@ func (fuo *FixtureUpdateOne) SetSeason(s *Season) *FixtureUpdateOne {
 	return fuo.SetSeasonID(s.ID)
 }
 
+// AddLineupIDs adds the "lineups" edge to the FixtureLineups entity by IDs.
+func (fuo *FixtureUpdateOne) AddLineupIDs(ids ...int) *FixtureUpdateOne {
+	fuo.mutation.AddLineupIDs(ids...)
+	return fuo
+}
+
+// AddLineups adds the "lineups" edges to the FixtureLineups entity.
+func (fuo *FixtureUpdateOne) AddLineups(f ...*FixtureLineups) *FixtureUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.AddLineupIDs(ids...)
+}
+
 // Mutation returns the FixtureMutation object of the builder.
 func (fuo *FixtureUpdateOne) Mutation() *FixtureMutation {
 	return fuo.mutation
@@ -713,6 +810,27 @@ func (fuo *FixtureUpdateOne) ClearAwayTeam() *FixtureUpdateOne {
 func (fuo *FixtureUpdateOne) ClearSeason() *FixtureUpdateOne {
 	fuo.mutation.ClearSeason()
 	return fuo
+}
+
+// ClearLineups clears all "lineups" edges to the FixtureLineups entity.
+func (fuo *FixtureUpdateOne) ClearLineups() *FixtureUpdateOne {
+	fuo.mutation.ClearLineups()
+	return fuo
+}
+
+// RemoveLineupIDs removes the "lineups" edge to FixtureLineups entities by IDs.
+func (fuo *FixtureUpdateOne) RemoveLineupIDs(ids ...int) *FixtureUpdateOne {
+	fuo.mutation.RemoveLineupIDs(ids...)
+	return fuo
+}
+
+// RemoveLineups removes "lineups" edges to FixtureLineups entities.
+func (fuo *FixtureUpdateOne) RemoveLineups(f ...*FixtureLineups) *FixtureUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.RemoveLineupIDs(ids...)
 }
 
 // Where appends a list predicates to the FixtureUpdate builder.
@@ -947,6 +1065,51 @@ func (fuo *FixtureUpdateOne) sqlSave(ctx context.Context) (_node *Fixture, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fuo.mutation.LineupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.LineupsTable,
+			Columns: []string{fixture.LineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.RemovedLineupsIDs(); len(nodes) > 0 && !fuo.mutation.LineupsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.LineupsTable,
+			Columns: []string{fixture.LineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.LineupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.LineupsTable,
+			Columns: []string{fixture.LineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

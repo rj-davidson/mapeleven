@@ -28,7 +28,7 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	teamModel := team_models.NewTeamModel(client)
 	teamStatsModel := team_stats.NewTeamStatsModel(client)
 	standingsModel := models.NewStandingsModel(client)
-	fixturesModel := models.NewFixtureModel(client)
+	fixturesModel := models.NewBaseFixtureModel(client)
 	playerModel := player_models.NewPlayerModel(client)
 	squadModel := team_models.NewSquadModel(client)
 
@@ -107,7 +107,7 @@ func fetchStandings(standingsModel *models.StandingsModel, clubModel *models.Clu
 }
 
 // Fetches Fixtures by league from API and saves them to the database
-func fetchFixtures(fixturesModel *models.FixtureModel, leagueModel *models.LeagueModel) {
+func fetchFixtures(fixturesModel *models.BaseFixtureModel, leagueModel *models.LeagueModel) {
 	fixtureController := NewFixtureController(fixturesModel)
 	err := fixtureController.InitializeFixtures(leagueModel, context.Background())
 	if err != nil {

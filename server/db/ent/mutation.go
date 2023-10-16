@@ -2811,6 +2811,9 @@ type FixtureMutation struct {
 	clearedawayTeam  bool
 	season           *int
 	clearedseason    bool
+	lineups          map[int]struct{}
+	removedlineups   map[int]struct{}
+	clearedlineups   bool
 	done             bool
 	oldValue         func(context.Context) (*Fixture, error)
 	predicates       []predicate.Fixture
@@ -3622,6 +3625,60 @@ func (m *FixtureMutation) ResetSeason() {
 	m.clearedseason = false
 }
 
+// AddLineupIDs adds the "lineups" edge to the FixtureLineups entity by ids.
+func (m *FixtureMutation) AddLineupIDs(ids ...int) {
+	if m.lineups == nil {
+		m.lineups = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.lineups[ids[i]] = struct{}{}
+	}
+}
+
+// ClearLineups clears the "lineups" edge to the FixtureLineups entity.
+func (m *FixtureMutation) ClearLineups() {
+	m.clearedlineups = true
+}
+
+// LineupsCleared reports if the "lineups" edge to the FixtureLineups entity was cleared.
+func (m *FixtureMutation) LineupsCleared() bool {
+	return m.clearedlineups
+}
+
+// RemoveLineupIDs removes the "lineups" edge to the FixtureLineups entity by IDs.
+func (m *FixtureMutation) RemoveLineupIDs(ids ...int) {
+	if m.removedlineups == nil {
+		m.removedlineups = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.lineups, ids[i])
+		m.removedlineups[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedLineups returns the removed IDs of the "lineups" edge to the FixtureLineups entity.
+func (m *FixtureMutation) RemovedLineupsIDs() (ids []int) {
+	for id := range m.removedlineups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// LineupsIDs returns the "lineups" edge IDs in the mutation.
+func (m *FixtureMutation) LineupsIDs() (ids []int) {
+	for id := range m.lineups {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetLineups resets all changes to the "lineups" edge.
+func (m *FixtureMutation) ResetLineups() {
+	m.lineups = nil
+	m.clearedlineups = false
+	m.removedlineups = nil
+}
+
 // Where appends a list predicates to the FixtureMutation builder.
 func (m *FixtureMutation) Where(ps ...predicate.Fixture) {
 	m.predicates = append(m.predicates, ps...)
@@ -4033,7 +4090,7 @@ func (m *FixtureMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FixtureMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.homeTeam != nil {
 		edges = append(edges, fixture.EdgeHomeTeam)
 	}
@@ -4042,6 +4099,9 @@ func (m *FixtureMutation) AddedEdges() []string {
 	}
 	if m.season != nil {
 		edges = append(edges, fixture.EdgeSeason)
+	}
+	if m.lineups != nil {
+		edges = append(edges, fixture.EdgeLineups)
 	}
 	return edges
 }
@@ -4062,25 +4122,42 @@ func (m *FixtureMutation) AddedIDs(name string) []ent.Value {
 		if id := m.season; id != nil {
 			return []ent.Value{*id}
 		}
+	case fixture.EdgeLineups:
+		ids := make([]ent.Value, 0, len(m.lineups))
+		for id := range m.lineups {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FixtureMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
+	if m.removedlineups != nil {
+		edges = append(edges, fixture.EdgeLineups)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *FixtureMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case fixture.EdgeLineups:
+		ids := make([]ent.Value, 0, len(m.removedlineups))
+		for id := range m.removedlineups {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FixtureMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedhomeTeam {
 		edges = append(edges, fixture.EdgeHomeTeam)
 	}
@@ -4089,6 +4166,9 @@ func (m *FixtureMutation) ClearedEdges() []string {
 	}
 	if m.clearedseason {
 		edges = append(edges, fixture.EdgeSeason)
+	}
+	if m.clearedlineups {
+		edges = append(edges, fixture.EdgeLineups)
 	}
 	return edges
 }
@@ -4103,6 +4183,8 @@ func (m *FixtureMutation) EdgeCleared(name string) bool {
 		return m.clearedawayTeam
 	case fixture.EdgeSeason:
 		return m.clearedseason
+	case fixture.EdgeLineups:
+		return m.clearedlineups
 	}
 	return false
 }
@@ -4136,6 +4218,9 @@ func (m *FixtureMutation) ResetEdge(name string) error {
 		return nil
 	case fixture.EdgeSeason:
 		m.ResetSeason()
+		return nil
+	case fixture.EdgeLineups:
+		m.ResetLineups()
 		return nil
 	}
 	return fmt.Errorf("unknown Fixture edge %s", name)
@@ -4974,6 +5059,8 @@ type FixtureLineupsMutation struct {
 	clearedFields       map[string]struct{}
 	team                *int
 	clearedteam         bool
+	fixture             *int
+	clearedfixture      bool
 	lineupPlayer        map[int]struct{}
 	removedlineupPlayer map[int]struct{}
 	clearedlineupPlayer bool
@@ -5204,6 +5291,45 @@ func (m *FixtureLineupsMutation) ResetTeam() {
 	m.clearedteam = false
 }
 
+// SetFixtureID sets the "fixture" edge to the Fixture entity by id.
+func (m *FixtureLineupsMutation) SetFixtureID(id int) {
+	m.fixture = &id
+}
+
+// ClearFixture clears the "fixture" edge to the Fixture entity.
+func (m *FixtureLineupsMutation) ClearFixture() {
+	m.clearedfixture = true
+}
+
+// FixtureCleared reports if the "fixture" edge to the Fixture entity was cleared.
+func (m *FixtureLineupsMutation) FixtureCleared() bool {
+	return m.clearedfixture
+}
+
+// FixtureID returns the "fixture" edge ID in the mutation.
+func (m *FixtureLineupsMutation) FixtureID() (id int, exists bool) {
+	if m.fixture != nil {
+		return *m.fixture, true
+	}
+	return
+}
+
+// FixtureIDs returns the "fixture" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FixtureID instead. It exists only for internal usage by the builders.
+func (m *FixtureLineupsMutation) FixtureIDs() (ids []int) {
+	if id := m.fixture; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFixture resets all changes to the "fixture" edge.
+func (m *FixtureLineupsMutation) ResetFixture() {
+	m.fixture = nil
+	m.clearedfixture = false
+}
+
 // AddLineupPlayerIDs adds the "lineupPlayer" edge to the MatchPlayer entity by ids.
 func (m *FixtureLineupsMutation) AddLineupPlayerIDs(ids ...int) {
 	if m.lineupPlayer == nil {
@@ -5417,9 +5543,12 @@ func (m *FixtureLineupsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FixtureLineupsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.team != nil {
 		edges = append(edges, fixturelineups.EdgeTeam)
+	}
+	if m.fixture != nil {
+		edges = append(edges, fixturelineups.EdgeFixture)
 	}
 	if m.lineupPlayer != nil {
 		edges = append(edges, fixturelineups.EdgeLineupPlayer)
@@ -5435,6 +5564,10 @@ func (m *FixtureLineupsMutation) AddedIDs(name string) []ent.Value {
 		if id := m.team; id != nil {
 			return []ent.Value{*id}
 		}
+	case fixturelineups.EdgeFixture:
+		if id := m.fixture; id != nil {
+			return []ent.Value{*id}
+		}
 	case fixturelineups.EdgeLineupPlayer:
 		ids := make([]ent.Value, 0, len(m.lineupPlayer))
 		for id := range m.lineupPlayer {
@@ -5447,7 +5580,7 @@ func (m *FixtureLineupsMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FixtureLineupsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedlineupPlayer != nil {
 		edges = append(edges, fixturelineups.EdgeLineupPlayer)
 	}
@@ -5470,9 +5603,12 @@ func (m *FixtureLineupsMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FixtureLineupsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedteam {
 		edges = append(edges, fixturelineups.EdgeTeam)
+	}
+	if m.clearedfixture {
+		edges = append(edges, fixturelineups.EdgeFixture)
 	}
 	if m.clearedlineupPlayer {
 		edges = append(edges, fixturelineups.EdgeLineupPlayer)
@@ -5486,6 +5622,8 @@ func (m *FixtureLineupsMutation) EdgeCleared(name string) bool {
 	switch name {
 	case fixturelineups.EdgeTeam:
 		return m.clearedteam
+	case fixturelineups.EdgeFixture:
+		return m.clearedfixture
 	case fixturelineups.EdgeLineupPlayer:
 		return m.clearedlineupPlayer
 	}
@@ -5499,6 +5637,9 @@ func (m *FixtureLineupsMutation) ClearEdge(name string) error {
 	case fixturelineups.EdgeTeam:
 		m.ClearTeam()
 		return nil
+	case fixturelineups.EdgeFixture:
+		m.ClearFixture()
+		return nil
 	}
 	return fmt.Errorf("unknown FixtureLineups unique edge %s", name)
 }
@@ -5509,6 +5650,9 @@ func (m *FixtureLineupsMutation) ResetEdge(name string) error {
 	switch name {
 	case fixturelineups.EdgeTeam:
 		m.ResetTeam()
+		return nil
+	case fixturelineups.EdgeFixture:
+		m.ResetFixture()
 		return nil
 	case fixturelineups.EdgeLineupPlayer:
 		m.ResetLineupPlayer()

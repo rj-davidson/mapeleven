@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/team"
@@ -51,6 +52,17 @@ func (flc *FixtureLineupsCreate) SetTeamID(id int) *FixtureLineupsCreate {
 // SetTeam sets the "team" edge to the Team entity.
 func (flc *FixtureLineupsCreate) SetTeam(t *Team) *FixtureLineupsCreate {
 	return flc.SetTeamID(t.ID)
+}
+
+// SetFixtureID sets the "fixture" edge to the Fixture entity by ID.
+func (flc *FixtureLineupsCreate) SetFixtureID(id int) *FixtureLineupsCreate {
+	flc.mutation.SetFixtureID(id)
+	return flc
+}
+
+// SetFixture sets the "fixture" edge to the Fixture entity.
+func (flc *FixtureLineupsCreate) SetFixture(f *Fixture) *FixtureLineupsCreate {
+	return flc.SetFixtureID(f.ID)
 }
 
 // AddLineupPlayerIDs adds the "lineupPlayer" edge to the MatchPlayer entity by IDs.
@@ -117,6 +129,9 @@ func (flc *FixtureLineupsCreate) check() error {
 	if _, ok := flc.mutation.TeamID(); !ok {
 		return &ValidationError{Name: "team", err: errors.New(`ent: missing required edge "FixtureLineups.team"`)}
 	}
+	if _, ok := flc.mutation.FixtureID(); !ok {
+		return &ValidationError{Name: "fixture", err: errors.New(`ent: missing required edge "FixtureLineups.fixture"`)}
+	}
 	return nil
 }
 
@@ -166,6 +181,23 @@ func (flc *FixtureLineupsCreate) createSpec() (*FixtureLineups, *sqlgraph.Create
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.team_fixture_lineups = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := flc.mutation.FixtureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixturelineups.FixtureTable,
+			Columns: []string{fixturelineups.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.fixture_lineups = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := flc.mutation.LineupPlayerIDs(); len(nodes) > 0 {

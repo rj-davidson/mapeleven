@@ -57,5 +57,7 @@ func (Fixture) Edges() []ent.Edge {
 			Ref("fixtures").
 			Unique().
 			Required(),
+
+		edge.To("lineups", FixtureLineups.Type),
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/season"
 	"mapeleven/db/ent/team"
 	"time"
@@ -175,6 +176,21 @@ func (fc *FixtureCreate) SetSeasonID(id int) *FixtureCreate {
 // SetSeason sets the "season" edge to the Season entity.
 func (fc *FixtureCreate) SetSeason(s *Season) *FixtureCreate {
 	return fc.SetSeasonID(s.ID)
+}
+
+// AddLineupIDs adds the "lineups" edge to the FixtureLineups entity by IDs.
+func (fc *FixtureCreate) AddLineupIDs(ids ...int) *FixtureCreate {
+	fc.mutation.AddLineupIDs(ids...)
+	return fc
+}
+
+// AddLineups adds the "lineups" edges to the FixtureLineups entity.
+func (fc *FixtureCreate) AddLineups(f ...*FixtureLineups) *FixtureCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fc.AddLineupIDs(ids...)
 }
 
 // Mutation returns the FixtureMutation object of the builder.
@@ -360,6 +376,22 @@ func (fc *FixtureCreate) createSpec() (*Fixture, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.season_fixtures = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fc.mutation.LineupsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.LineupsTable,
+			Columns: []string{fixture.LineupsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

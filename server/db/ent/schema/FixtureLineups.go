@@ -31,6 +31,11 @@ func (FixtureLineups) Edges() []ent.Edge {
 			Ref("fixtureLineups").
 			Unique().
 			Required(),
+		edge.From("fixture", Fixture.Type).
+			Ref("lineups").
+			Unique().
+			Required(),
+
 		edge.To("lineupPlayer", MatchPlayer.Type),
 	}
 }

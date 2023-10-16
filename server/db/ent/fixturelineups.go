@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/team"
 	"strings"
@@ -25,6 +26,7 @@ type FixtureLineups struct {
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FixtureLineupsQuery when eager-loading is set.
 	Edges                FixtureLineupsEdges `json:"edges"`
+	fixture_lineups      *int
 	team_fixture_lineups *int
 	selectValues         sql.SelectValues
 }
@@ -33,11 +35,13 @@ type FixtureLineups struct {
 type FixtureLineupsEdges struct {
 	// Team holds the value of the team edge.
 	Team *Team `json:"team,omitempty"`
+	// Fixture holds the value of the fixture edge.
+	Fixture *Fixture `json:"fixture,omitempty"`
 	// LineupPlayer holds the value of the lineupPlayer edge.
 	LineupPlayer []*MatchPlayer `json:"lineupPlayer,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // TeamOrErr returns the Team value or an error if the edge
@@ -53,10 +57,23 @@ func (e FixtureLineupsEdges) TeamOrErr() (*Team, error) {
 	return nil, &NotLoadedError{edge: "team"}
 }
 
+// FixtureOrErr returns the Fixture value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e FixtureLineupsEdges) FixtureOrErr() (*Fixture, error) {
+	if e.loadedTypes[1] {
+		if e.Fixture == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: fixture.Label}
+		}
+		return e.Fixture, nil
+	}
+	return nil, &NotLoadedError{edge: "fixture"}
+}
+
 // LineupPlayerOrErr returns the LineupPlayer value or an error if the edge
 // was not loaded in eager-loading.
 func (e FixtureLineupsEdges) LineupPlayerOrErr() ([]*MatchPlayer, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[2] {
 		return e.LineupPlayer, nil
 	}
 	return nil, &NotLoadedError{edge: "lineupPlayer"}
@@ -73,7 +90,9 @@ func (*FixtureLineups) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullString)
 		case fixturelineups.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
-		case fixturelineups.ForeignKeys[0]: // team_fixture_lineups
+		case fixturelineups.ForeignKeys[0]: // fixture_lineups
+			values[i] = new(sql.NullInt64)
+		case fixturelineups.ForeignKeys[1]: // team_fixture_lineups
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -110,6 +129,13 @@ func (fl *FixtureLineups) assignValues(columns []string, values []any) error {
 			}
 		case fixturelineups.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field fixture_lineups", value)
+			} else if value.Valid {
+				fl.fixture_lineups = new(int)
+				*fl.fixture_lineups = int(value.Int64)
+			}
+		case fixturelineups.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field team_fixture_lineups", value)
 			} else if value.Valid {
 				fl.team_fixture_lineups = new(int)
@@ -131,6 +157,11 @@ func (fl *FixtureLineups) Value(name string) (ent.Value, error) {
 // QueryTeam queries the "team" edge of the FixtureLineups entity.
 func (fl *FixtureLineups) QueryTeam() *TeamQuery {
 	return NewFixtureLineupsClient(fl.config).QueryTeam(fl)
+}
+
+// QueryFixture queries the "fixture" edge of the FixtureLineups entity.
+func (fl *FixtureLineups) QueryFixture() *FixtureQuery {
+	return NewFixtureLineupsClient(fl.config).QueryFixture(fl)
 }
 
 // QueryLineupPlayer queries the "lineupPlayer" edge of the FixtureLineups entity.

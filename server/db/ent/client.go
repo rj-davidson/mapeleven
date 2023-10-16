@@ -1080,6 +1080,22 @@ func (c *FixtureClient) QuerySeason(f *Fixture) *SeasonQuery {
 	return query
 }
 
+// QueryLineups queries the lineups edge of a Fixture.
+func (c *FixtureClient) QueryLineups(f *Fixture) *FixtureLineupsQuery {
+	query := (&FixtureLineupsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixture.Table, fixture.FieldID, id),
+			sqlgraph.To(fixturelineups.Table, fixturelineups.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, fixture.LineupsTable, fixture.LineupsColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *FixtureClient) Hooks() []Hook {
 	return c.hooks.Fixture
@@ -1373,6 +1389,22 @@ func (c *FixtureLineupsClient) QueryTeam(fl *FixtureLineups) *TeamQuery {
 			sqlgraph.From(fixturelineups.Table, fixturelineups.FieldID, id),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, fixturelineups.TeamTable, fixturelineups.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(fl.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFixture queries the fixture edge of a FixtureLineups.
+func (c *FixtureLineupsClient) QueryFixture(fl *FixtureLineups) *FixtureQuery {
+	query := (&FixtureClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fl.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixturelineups.Table, fixturelineups.FieldID, id),
+			sqlgraph.To(fixture.Table, fixture.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixturelineups.FixtureTable, fixturelineups.FixtureColumn),
 		)
 		fromV = sqlgraph.Neighbors(fl.driver.Dialect(), step)
 		return fromV, nil

@@ -203,6 +203,29 @@ func HasTeamWith(preds ...predicate.Team) predicate.FixtureLineups {
 	})
 }
 
+// HasFixture applies the HasEdge predicate on the "fixture" edge.
+func HasFixture() predicate.FixtureLineups {
+	return predicate.FixtureLineups(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, FixtureTable, FixtureColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFixtureWith applies the HasEdge predicate on the "fixture" edge with a given conditions (other predicates).
+func HasFixtureWith(preds ...predicate.Fixture) predicate.FixtureLineups {
+	return predicate.FixtureLineups(func(s *sql.Selector) {
+		step := newFixtureStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasLineupPlayer applies the HasEdge predicate on the "lineupPlayer" edge.
 func HasLineupPlayer() predicate.FixtureLineups {
 	return predicate.FixtureLineups(func(s *sql.Selector) {

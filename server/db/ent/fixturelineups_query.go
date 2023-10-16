@@ -6,6 +6,7 @@ import (
 	"context"
 	"database/sql/driver"
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/predicate"
@@ -25,6 +26,7 @@ type FixtureLineupsQuery struct {
 	inters           []Interceptor
 	predicates       []predicate.FixtureLineups
 	withTeam         *TeamQuery
+	withFixture      *FixtureQuery
 	withLineupPlayer *MatchPlayerQuery
 	withFKs          bool
 	// intermediate query (i.e. traversal path).
@@ -78,6 +80,28 @@ func (flq *FixtureLineupsQuery) QueryTeam() *TeamQuery {
 			sqlgraph.From(fixturelineups.Table, fixturelineups.FieldID, selector),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, fixturelineups.TeamTable, fixturelineups.TeamColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(flq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFixture chains the current query on the "fixture" edge.
+func (flq *FixtureLineupsQuery) QueryFixture() *FixtureQuery {
+	query := (&FixtureClient{config: flq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := flq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := flq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixturelineups.Table, fixturelineups.FieldID, selector),
+			sqlgraph.To(fixture.Table, fixture.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixturelineups.FixtureTable, fixturelineups.FixtureColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(flq.driver.Dialect(), step)
 		return fromU, nil
@@ -300,6 +324,7 @@ func (flq *FixtureLineupsQuery) Clone() *FixtureLineupsQuery {
 		inters:           append([]Interceptor{}, flq.inters...),
 		predicates:       append([]predicate.FixtureLineups{}, flq.predicates...),
 		withTeam:         flq.withTeam.Clone(),
+		withFixture:      flq.withFixture.Clone(),
 		withLineupPlayer: flq.withLineupPlayer.Clone(),
 		// clone intermediate query.
 		sql:  flq.sql.Clone(),
@@ -315,6 +340,17 @@ func (flq *FixtureLineupsQuery) WithTeam(opts ...func(*TeamQuery)) *FixtureLineu
 		opt(query)
 	}
 	flq.withTeam = query
+	return flq
+}
+
+// WithFixture tells the query-builder to eager-load the nodes that are connected to
+// the "fixture" edge. The optional arguments are used to configure the query builder of the edge.
+func (flq *FixtureLineupsQuery) WithFixture(opts ...func(*FixtureQuery)) *FixtureLineupsQuery {
+	query := (&FixtureClient{config: flq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	flq.withFixture = query
 	return flq
 }
 
@@ -408,12 +444,13 @@ func (flq *FixtureLineupsQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 		nodes       = []*FixtureLineups{}
 		withFKs     = flq.withFKs
 		_spec       = flq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			flq.withTeam != nil,
+			flq.withFixture != nil,
 			flq.withLineupPlayer != nil,
 		}
 	)
-	if flq.withTeam != nil {
+	if flq.withTeam != nil || flq.withFixture != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -440,6 +477,12 @@ func (flq *FixtureLineupsQuery) sqlAll(ctx context.Context, hooks ...queryHook) 
 	if query := flq.withTeam; query != nil {
 		if err := flq.loadTeam(ctx, query, nodes, nil,
 			func(n *FixtureLineups, e *Team) { n.Edges.Team = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := flq.withFixture; query != nil {
+		if err := flq.loadFixture(ctx, query, nodes, nil,
+			func(n *FixtureLineups, e *Fixture) { n.Edges.Fixture = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -478,6 +521,38 @@ func (flq *FixtureLineupsQuery) loadTeam(ctx context.Context, query *TeamQuery, 
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "team_fixture_lineups" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (flq *FixtureLineupsQuery) loadFixture(ctx context.Context, query *FixtureQuery, nodes []*FixtureLineups, init func(*FixtureLineups), assign func(*FixtureLineups, *Fixture)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*FixtureLineups)
+	for i := range nodes {
+		if nodes[i].fixture_lineups == nil {
+			continue
+		}
+		fk := *nodes[i].fixture_lineups
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(fixture.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "fixture_lineups" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

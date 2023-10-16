@@ -58,9 +58,11 @@ type FixtureEdges struct {
 	AwayTeam *Team `json:"awayTeam,omitempty"`
 	// Season holds the value of the season edge.
 	Season *Season `json:"season,omitempty"`
+	// Lineups holds the value of the lineups edge.
+	Lineups []*FixtureLineups `json:"lineups,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // HomeTeamOrErr returns the HomeTeam value or an error if the edge
@@ -100,6 +102,15 @@ func (e FixtureEdges) SeasonOrErr() (*Season, error) {
 		return e.Season, nil
 	}
 	return nil, &NotLoadedError{edge: "season"}
+}
+
+// LineupsOrErr returns the Lineups value or an error if the edge
+// was not loaded in eager-loading.
+func (e FixtureEdges) LineupsOrErr() ([]*FixtureLineups, error) {
+	if e.loadedTypes[3] {
+		return e.Lineups, nil
+	}
+	return nil, &NotLoadedError{edge: "lineups"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -253,6 +264,11 @@ func (f *Fixture) QueryAwayTeam() *TeamQuery {
 // QuerySeason queries the "season" edge of the Fixture entity.
 func (f *Fixture) QuerySeason() *SeasonQuery {
 	return NewFixtureClient(f.config).QuerySeason(f)
+}
+
+// QueryLineups queries the "lineups" edge of the Fixture entity.
+func (f *Fixture) QueryLineups() *FixtureLineupsQuery {
+	return NewFixtureClient(f.config).QueryLineups(f)
 }
 
 // Update returns a builder for updating this Fixture.

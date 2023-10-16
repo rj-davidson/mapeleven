@@ -789,6 +789,29 @@ func HasSeasonWith(preds ...predicate.Season) predicate.Fixture {
 	})
 }
 
+// HasLineups applies the HasEdge predicate on the "lineups" edge.
+func HasLineups() predicate.Fixture {
+	return predicate.Fixture(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, LineupsTable, LineupsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasLineupsWith applies the HasEdge predicate on the "lineups" edge with a given conditions (other predicates).
+func HasLineupsWith(preds ...predicate.FixtureLineups) predicate.Fixture {
+	return predicate.Fixture(func(s *sql.Selector) {
+		step := newLineupsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Fixture) predicate.Fixture {
 	return predicate.Fixture(func(s *sql.Selector) {

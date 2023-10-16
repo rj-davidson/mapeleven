@@ -10,8 +10,8 @@ import (
 	"time"
 )
 
-// CreateFixtureInput holds the input data needed to create a new fixture record.
-type CreateFixtureInput struct {
+// CreateBaseFixtureInput holds the input data needed to create a new fixture record.
+type CreateBaseFixtureInput struct {
 	ApiFootballId int
 	Slug          string
 	Referee       *string
@@ -27,8 +27,8 @@ type CreateFixtureInput struct {
 	AwayTeamID    int
 }
 
-// UpdateFixtureInput holds the input data needed to update an existing fixture record.
-type UpdateFixtureInput struct {
+// UpdateBaseFixtureInput holds the input data needed to update an existing fixture record.
+type UpdateBaseFixtureInput struct {
 	ApiFootballId int
 	Slug          string
 	Referee       *string
@@ -43,15 +43,15 @@ type UpdateFixtureInput struct {
 	AwayTeamID    *int
 }
 
-type FixtureModel struct {
+type BaseFixtureModel struct {
 	client *ent.Client
 }
 
-func NewFixtureModel(client *ent.Client) *FixtureModel {
-	return &FixtureModel{client: client}
+func NewBaseFixtureModel(client *ent.Client) *BaseFixtureModel {
+	return &BaseFixtureModel{client: client}
 }
 
-func (fm *FixtureModel) getTeam(ctx context.Context, seasonID, apiFootabllClubId int) (*ent.Team, error) {
+func (fm *BaseFixtureModel) getTeam(ctx context.Context, seasonID, apiFootabllClubId int) (*ent.Team, error) {
 	return fm.client.Team.
 		Query().
 		Where(
@@ -65,7 +65,7 @@ func (fm *FixtureModel) getTeam(ctx context.Context, seasonID, apiFootabllClubId
 		Only(ctx)
 }
 
-func (fm *FixtureModel) CreateFixture(ctx context.Context, input CreateFixtureInput) (*ent.Fixture, error) {
+func (fm *BaseFixtureModel) CreateBaseFixture(ctx context.Context, input CreateBaseFixtureInput) (*ent.Fixture, error) {
 	awayTeam, err := fm.getTeam(ctx, input.Season.ID, input.AwayTeamID)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func (fm *FixtureModel) CreateFixture(ctx context.Context, input CreateFixtureIn
 		Save(ctx)
 }
 
-func (fm *FixtureModel) UpdateFixture(ctx context.Context, input UpdateFixtureInput) (*ent.Fixture, error) {
+func (fm *BaseFixtureModel) UpdateBaseFixture(ctx context.Context, input UpdateBaseFixtureInput) (*ent.Fixture, error) {
 	updater := fm.client.Fixture.UpdateOneID(input.ApiFootballId)
 	if input.Round != nil {
 		updater.SetRound(*input.Round)
@@ -109,14 +109,14 @@ func (fm *FixtureModel) UpdateFixture(ctx context.Context, input UpdateFixtureIn
 	return updater.Save(ctx)
 }
 
-func (fm *FixtureModel) GetFixtureByApiFootballId(ctx context.Context, apiFootballId int) (*ent.Fixture, error) {
+func (fm *BaseFixtureModel) GetFixtureByApiFootballId(ctx context.Context, apiFootballId int) (*ent.Fixture, error) {
 	return fm.client.Fixture.
 		Query().
 		Where(fixture.ApiFootballIdEQ(apiFootballId)).
 		Only(ctx)
 }
 
-func (fm *FixtureModel) FixtureExistsByApiFootballId(ctx context.Context, apiFootballId int) bool {
+func (fm *BaseFixtureModel) FixtureExistsByApiFootballId(ctx context.Context, apiFootballId int) bool {
 	f, _ := fm.client.Fixture.
 		Query().
 		Where(fixture.ApiFootballIdEQ(apiFootballId)).
@@ -124,7 +124,7 @@ func (fm *FixtureModel) FixtureExistsByApiFootballId(ctx context.Context, apiFoo
 	return f != nil
 }
 
-func (fm *FixtureModel) ListFixtures(ctx context.Context) ([]*ent.Fixture, error) {
+func (fm *BaseFixtureModel) ListFixtures(ctx context.Context) ([]*ent.Fixture, error) {
 	return fm.client.Fixture.
 		Query().
 		All(ctx)

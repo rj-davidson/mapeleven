@@ -163,6 +163,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "formation", Type: field.TypeString},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "fixture_lineups", Type: field.TypeInt},
 		{Name: "team_fixture_lineups", Type: field.TypeInt},
 	}
 	// FixtureLineupsTable holds the schema information for the "fixture_lineups" table.
@@ -172,8 +173,14 @@ var (
 		PrimaryKey: []*schema.Column{FixtureLineupsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "fixture_lineups_teams_fixtureLineups",
+				Symbol:     "fixture_lineups_fixtures_lineups",
 				Columns:    []*schema.Column{FixtureLineupsColumns[3]},
+				RefColumns: []*schema.Column{FixturesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+			{
+				Symbol:     "fixture_lineups_teams_fixtureLineups",
+				Columns:    []*schema.Column{FixtureLineupsColumns[4]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
@@ -720,7 +727,8 @@ func init() {
 	FixtureEventsTable.ForeignKeys[0].RefTable = PlayersTable
 	FixtureEventsTable.ForeignKeys[1].RefTable = PlayersTable
 	FixtureEventsTable.ForeignKeys[2].RefTable = TeamsTable
-	FixtureLineupsTable.ForeignKeys[0].RefTable = TeamsTable
+	FixtureLineupsTable.ForeignKeys[0].RefTable = FixturesTable
+	FixtureLineupsTable.ForeignKeys[1].RefTable = TeamsTable
 	LeaguesTable.ForeignKeys[0].RefTable = CountriesTable
 	MatchPlayersTable.ForeignKeys[0].RefTable = FixtureLineupsTable
 	MatchPlayersTable.ForeignKeys[1].RefTable = PlayersTable
