@@ -33,6 +33,9 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
     goals,
     clean,
     gamesPlayed,
+    wins,
+    draws,
+    loses
 }) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [inspect, setInspect] = useState<boolean>(false);
