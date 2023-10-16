@@ -41,6 +41,9 @@ const StandingsTable = ({ data }) => {
                         <TableCell sx={{ fontWeight: 'bold' }} align='right'>
                             Points
                         </TableCell>
+                        <TableCell sx={{ fontWeight: 'bold' }} align='right'>
+                            Form
+                        </TableCell>
                     </TableRow>
                 </TableHead>
                 <TableBody sx={{ backgroundColor: 'var(--dark1)' }}>
@@ -68,6 +71,7 @@ const StandingsTable = ({ data }) => {
                             <TableCell align='right'>{row.draw}</TableCell>
                             <TableCell align='right'>{row.losses}</TableCell>
                             <TableCell align='right'>{row.points}</TableCell>
+                            <TableCell align='right'>{row.form}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>
