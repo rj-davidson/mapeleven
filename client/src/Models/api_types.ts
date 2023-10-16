@@ -10,7 +10,6 @@ interface APISearch {
     name: string;
     type: APISearchType;
     image: string;
-    player?: APIPlayer;
 }
 
 interface APIScoreboard {
@@ -205,6 +204,7 @@ interface APIStanding {
 }
 
 interface APIPlayer {
+    slug: string;
     name: string;
     firstname: string;
     lastname: string;
@@ -214,6 +214,7 @@ interface APIPlayer {
     injured: boolean;
     photo: string;
 }
+
 export {
     APISearchType,
     APISearch,
