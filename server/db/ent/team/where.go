@@ -305,21 +305,21 @@ func HasAwayFixturesWith(preds ...predicate.Fixture) predicate.Team {
 	})
 }
 
-// HasFixtureEvents applies the HasEdge predicate on the "fixtureEvents" edge.
-func HasFixtureEvents() predicate.Team {
+// HasTeamFixtureEvents applies the HasEdge predicate on the "teamFixtureEvents" edge.
+func HasTeamFixtureEvents() predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, FixtureEventsTable, FixtureEventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, TeamFixtureEventsTable, TeamFixtureEventsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasFixtureEventsWith applies the HasEdge predicate on the "fixtureEvents" edge with a given conditions (other predicates).
-func HasFixtureEventsWith(preds ...predicate.FixtureEvents) predicate.Team {
+// HasTeamFixtureEventsWith applies the HasEdge predicate on the "teamFixtureEvents" edge with a given conditions (other predicates).
+func HasTeamFixtureEventsWith(preds ...predicate.FixtureEvents) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
-		step := newFixtureEventsStep()
+		step := newTeamFixtureEventsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -2785,38 +2785,41 @@ func (m *CountryMutation) ResetEdge(name string) error {
 // FixtureMutation represents an operation that mutates the Fixture nodes in the graph.
 type FixtureMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	slug             *string
-	apiFootballId    *int
-	addapiFootballId *int
-	referee          *string
-	timezone         *string
-	date             *time.Time
-	elapsed          *int
-	addelapsed       *int
-	round            *int
-	addround         *int
-	status           *string
-	homeTeamScore    *int
-	addhomeTeamScore *int
-	awayTeamScore    *int
-	addawayTeamScore *int
-	lastUpdated      *time.Time
-	clearedFields    map[string]struct{}
-	homeTeam         *int
-	clearedhomeTeam  bool
-	awayTeam         *int
-	clearedawayTeam  bool
-	season           *int
-	clearedseason    bool
-	lineups          map[int]struct{}
-	removedlineups   map[int]struct{}
-	clearedlineups   bool
-	done             bool
-	oldValue         func(context.Context) (*Fixture, error)
-	predicates       []predicate.Fixture
+	op                   Op
+	typ                  string
+	id                   *int
+	slug                 *string
+	apiFootballId        *int
+	addapiFootballId     *int
+	referee              *string
+	timezone             *string
+	date                 *time.Time
+	elapsed              *int
+	addelapsed           *int
+	round                *int
+	addround             *int
+	status               *string
+	homeTeamScore        *int
+	addhomeTeamScore     *int
+	awayTeamScore        *int
+	addawayTeamScore     *int
+	lastUpdated          *time.Time
+	clearedFields        map[string]struct{}
+	homeTeam             *int
+	clearedhomeTeam      bool
+	awayTeam             *int
+	clearedawayTeam      bool
+	season               *int
+	clearedseason        bool
+	lineups              map[int]struct{}
+	removedlineups       map[int]struct{}
+	clearedlineups       bool
+	fixtureEvents        map[int]struct{}
+	removedfixtureEvents map[int]struct{}
+	clearedfixtureEvents bool
+	done                 bool
+	oldValue             func(context.Context) (*Fixture, error)
+	predicates           []predicate.Fixture
 }
 
 var _ ent.Mutation = (*FixtureMutation)(nil)
@@ -3679,6 +3682,60 @@ func (m *FixtureMutation) ResetLineups() {
 	m.removedlineups = nil
 }
 
+// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by ids.
+func (m *FixtureMutation) AddFixtureEventIDs(ids ...int) {
+	if m.fixtureEvents == nil {
+		m.fixtureEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.fixtureEvents[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFixtureEvents clears the "fixtureEvents" edge to the FixtureEvents entity.
+func (m *FixtureMutation) ClearFixtureEvents() {
+	m.clearedfixtureEvents = true
+}
+
+// FixtureEventsCleared reports if the "fixtureEvents" edge to the FixtureEvents entity was cleared.
+func (m *FixtureMutation) FixtureEventsCleared() bool {
+	return m.clearedfixtureEvents
+}
+
+// RemoveFixtureEventIDs removes the "fixtureEvents" edge to the FixtureEvents entity by IDs.
+func (m *FixtureMutation) RemoveFixtureEventIDs(ids ...int) {
+	if m.removedfixtureEvents == nil {
+		m.removedfixtureEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.fixtureEvents, ids[i])
+		m.removedfixtureEvents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFixtureEvents returns the removed IDs of the "fixtureEvents" edge to the FixtureEvents entity.
+func (m *FixtureMutation) RemovedFixtureEventsIDs() (ids []int) {
+	for id := range m.removedfixtureEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FixtureEventsIDs returns the "fixtureEvents" edge IDs in the mutation.
+func (m *FixtureMutation) FixtureEventsIDs() (ids []int) {
+	for id := range m.fixtureEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFixtureEvents resets all changes to the "fixtureEvents" edge.
+func (m *FixtureMutation) ResetFixtureEvents() {
+	m.fixtureEvents = nil
+	m.clearedfixtureEvents = false
+	m.removedfixtureEvents = nil
+}
+
 // Where appends a list predicates to the FixtureMutation builder.
 func (m *FixtureMutation) Where(ps ...predicate.Fixture) {
 	m.predicates = append(m.predicates, ps...)
@@ -4090,7 +4147,7 @@ func (m *FixtureMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FixtureMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.homeTeam != nil {
 		edges = append(edges, fixture.EdgeHomeTeam)
 	}
@@ -4102,6 +4159,9 @@ func (m *FixtureMutation) AddedEdges() []string {
 	}
 	if m.lineups != nil {
 		edges = append(edges, fixture.EdgeLineups)
+	}
+	if m.fixtureEvents != nil {
+		edges = append(edges, fixture.EdgeFixtureEvents)
 	}
 	return edges
 }
@@ -4128,15 +4188,24 @@ func (m *FixtureMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case fixture.EdgeFixtureEvents:
+		ids := make([]ent.Value, 0, len(m.fixtureEvents))
+		for id := range m.fixtureEvents {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FixtureMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.removedlineups != nil {
 		edges = append(edges, fixture.EdgeLineups)
+	}
+	if m.removedfixtureEvents != nil {
+		edges = append(edges, fixture.EdgeFixtureEvents)
 	}
 	return edges
 }
@@ -4151,13 +4220,19 @@ func (m *FixtureMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case fixture.EdgeFixtureEvents:
+		ids := make([]ent.Value, 0, len(m.removedfixtureEvents))
+		for id := range m.removedfixtureEvents {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FixtureMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedhomeTeam {
 		edges = append(edges, fixture.EdgeHomeTeam)
 	}
@@ -4169,6 +4244,9 @@ func (m *FixtureMutation) ClearedEdges() []string {
 	}
 	if m.clearedlineups {
 		edges = append(edges, fixture.EdgeLineups)
+	}
+	if m.clearedfixtureEvents {
+		edges = append(edges, fixture.EdgeFixtureEvents)
 	}
 	return edges
 }
@@ -4185,6 +4263,8 @@ func (m *FixtureMutation) EdgeCleared(name string) bool {
 		return m.clearedseason
 	case fixture.EdgeLineups:
 		return m.clearedlineups
+	case fixture.EdgeFixtureEvents:
+		return m.clearedfixtureEvents
 	}
 	return false
 }
@@ -4222,6 +4302,9 @@ func (m *FixtureMutation) ResetEdge(name string) error {
 	case fixture.EdgeLineups:
 		m.ResetLineups()
 		return nil
+	case fixture.EdgeFixtureEvents:
+		m.ResetFixtureEvents()
+		return nil
 	}
 	return fmt.Errorf("unknown Fixture edge %s", name)
 }
@@ -4229,25 +4312,29 @@ func (m *FixtureMutation) ResetEdge(name string) error {
 // FixtureEventsMutation represents an operation that mutates the FixtureEvents nodes in the graph.
 type FixtureEventsMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	elapsedTime   *string
-	extraTime     *string
-	_type         *string
-	detail        *string
-	comments      *string
-	lastUpdated   *time.Time
-	clearedFields map[string]struct{}
-	player        *int
-	clearedplayer bool
-	assist        *int
-	clearedassist bool
-	team          *int
-	clearedteam   bool
-	done          bool
-	oldValue      func(context.Context) (*FixtureEvents, error)
-	predicates    []predicate.FixtureEvents
+	op             Op
+	typ            string
+	id             *int
+	elapsedTime    *int
+	addelapsedTime *int
+	extraTime      *int
+	addextraTime   *int
+	_type          *string
+	detail         *string
+	comments       *string
+	lastUpdated    *time.Time
+	clearedFields  map[string]struct{}
+	player         *int
+	clearedplayer  bool
+	assist         *int
+	clearedassist  bool
+	team           *int
+	clearedteam    bool
+	fixture        *int
+	clearedfixture bool
+	done           bool
+	oldValue       func(context.Context) (*FixtureEvents, error)
+	predicates     []predicate.FixtureEvents
 }
 
 var _ ent.Mutation = (*FixtureEventsMutation)(nil)
@@ -4349,12 +4436,13 @@ func (m *FixtureEventsMutation) IDs(ctx context.Context) ([]int, error) {
 }
 
 // SetElapsedTime sets the "elapsedTime" field.
-func (m *FixtureEventsMutation) SetElapsedTime(s string) {
-	m.elapsedTime = &s
+func (m *FixtureEventsMutation) SetElapsedTime(i int) {
+	m.elapsedTime = &i
+	m.addelapsedTime = nil
 }
 
 // ElapsedTime returns the value of the "elapsedTime" field in the mutation.
-func (m *FixtureEventsMutation) ElapsedTime() (r string, exists bool) {
+func (m *FixtureEventsMutation) ElapsedTime() (r int, exists bool) {
 	v := m.elapsedTime
 	if v == nil {
 		return
@@ -4365,7 +4453,7 @@ func (m *FixtureEventsMutation) ElapsedTime() (r string, exists bool) {
 // OldElapsedTime returns the old "elapsedTime" field's value of the FixtureEvents entity.
 // If the FixtureEvents object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FixtureEventsMutation) OldElapsedTime(ctx context.Context) (v string, err error) {
+func (m *FixtureEventsMutation) OldElapsedTime(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldElapsedTime is only allowed on UpdateOne operations")
 	}
@@ -4379,18 +4467,38 @@ func (m *FixtureEventsMutation) OldElapsedTime(ctx context.Context) (v string, e
 	return oldValue.ElapsedTime, nil
 }
 
+// AddElapsedTime adds i to the "elapsedTime" field.
+func (m *FixtureEventsMutation) AddElapsedTime(i int) {
+	if m.addelapsedTime != nil {
+		*m.addelapsedTime += i
+	} else {
+		m.addelapsedTime = &i
+	}
+}
+
+// AddedElapsedTime returns the value that was added to the "elapsedTime" field in this mutation.
+func (m *FixtureEventsMutation) AddedElapsedTime() (r int, exists bool) {
+	v := m.addelapsedTime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetElapsedTime resets all changes to the "elapsedTime" field.
 func (m *FixtureEventsMutation) ResetElapsedTime() {
 	m.elapsedTime = nil
+	m.addelapsedTime = nil
 }
 
 // SetExtraTime sets the "extraTime" field.
-func (m *FixtureEventsMutation) SetExtraTime(s string) {
-	m.extraTime = &s
+func (m *FixtureEventsMutation) SetExtraTime(i int) {
+	m.extraTime = &i
+	m.addextraTime = nil
 }
 
 // ExtraTime returns the value of the "extraTime" field in the mutation.
-func (m *FixtureEventsMutation) ExtraTime() (r string, exists bool) {
+func (m *FixtureEventsMutation) ExtraTime() (r int, exists bool) {
 	v := m.extraTime
 	if v == nil {
 		return
@@ -4401,7 +4509,7 @@ func (m *FixtureEventsMutation) ExtraTime() (r string, exists bool) {
 // OldExtraTime returns the old "extraTime" field's value of the FixtureEvents entity.
 // If the FixtureEvents object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *FixtureEventsMutation) OldExtraTime(ctx context.Context) (v string, err error) {
+func (m *FixtureEventsMutation) OldExtraTime(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldExtraTime is only allowed on UpdateOne operations")
 	}
@@ -4415,9 +4523,42 @@ func (m *FixtureEventsMutation) OldExtraTime(ctx context.Context) (v string, err
 	return oldValue.ExtraTime, nil
 }
 
+// AddExtraTime adds i to the "extraTime" field.
+func (m *FixtureEventsMutation) AddExtraTime(i int) {
+	if m.addextraTime != nil {
+		*m.addextraTime += i
+	} else {
+		m.addextraTime = &i
+	}
+}
+
+// AddedExtraTime returns the value that was added to the "extraTime" field in this mutation.
+func (m *FixtureEventsMutation) AddedExtraTime() (r int, exists bool) {
+	v := m.addextraTime
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearExtraTime clears the value of the "extraTime" field.
+func (m *FixtureEventsMutation) ClearExtraTime() {
+	m.extraTime = nil
+	m.addextraTime = nil
+	m.clearedFields[fixtureevents.FieldExtraTime] = struct{}{}
+}
+
+// ExtraTimeCleared returns if the "extraTime" field was cleared in this mutation.
+func (m *FixtureEventsMutation) ExtraTimeCleared() bool {
+	_, ok := m.clearedFields[fixtureevents.FieldExtraTime]
+	return ok
+}
+
 // ResetExtraTime resets all changes to the "extraTime" field.
 func (m *FixtureEventsMutation) ResetExtraTime() {
 	m.extraTime = nil
+	m.addextraTime = nil
+	delete(m.clearedFields, fixtureevents.FieldExtraTime)
 }
 
 // SetType sets the "type" field.
@@ -4707,6 +4848,45 @@ func (m *FixtureEventsMutation) ResetTeam() {
 	m.clearedteam = false
 }
 
+// SetFixtureID sets the "fixture" edge to the Fixture entity by id.
+func (m *FixtureEventsMutation) SetFixtureID(id int) {
+	m.fixture = &id
+}
+
+// ClearFixture clears the "fixture" edge to the Fixture entity.
+func (m *FixtureEventsMutation) ClearFixture() {
+	m.clearedfixture = true
+}
+
+// FixtureCleared reports if the "fixture" edge to the Fixture entity was cleared.
+func (m *FixtureEventsMutation) FixtureCleared() bool {
+	return m.clearedfixture
+}
+
+// FixtureID returns the "fixture" edge ID in the mutation.
+func (m *FixtureEventsMutation) FixtureID() (id int, exists bool) {
+	if m.fixture != nil {
+		return *m.fixture, true
+	}
+	return
+}
+
+// FixtureIDs returns the "fixture" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FixtureID instead. It exists only for internal usage by the builders.
+func (m *FixtureEventsMutation) FixtureIDs() (ids []int) {
+	if id := m.fixture; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFixture resets all changes to the "fixture" edge.
+func (m *FixtureEventsMutation) ResetFixture() {
+	m.fixture = nil
+	m.clearedfixture = false
+}
+
 // Where appends a list predicates to the FixtureEventsMutation builder.
 func (m *FixtureEventsMutation) Where(ps ...predicate.FixtureEvents) {
 	m.predicates = append(m.predicates, ps...)
@@ -4811,14 +4991,14 @@ func (m *FixtureEventsMutation) OldField(ctx context.Context, name string) (ent.
 func (m *FixtureEventsMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case fixtureevents.FieldElapsedTime:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetElapsedTime(v)
 		return nil
 	case fixtureevents.FieldExtraTime:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -4859,13 +5039,26 @@ func (m *FixtureEventsMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *FixtureEventsMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.addelapsedTime != nil {
+		fields = append(fields, fixtureevents.FieldElapsedTime)
+	}
+	if m.addextraTime != nil {
+		fields = append(fields, fixtureevents.FieldExtraTime)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *FixtureEventsMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case fixtureevents.FieldElapsedTime:
+		return m.AddedElapsedTime()
+	case fixtureevents.FieldExtraTime:
+		return m.AddedExtraTime()
+	}
 	return nil, false
 }
 
@@ -4874,6 +5067,20 @@ func (m *FixtureEventsMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *FixtureEventsMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case fixtureevents.FieldElapsedTime:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddElapsedTime(v)
+		return nil
+	case fixtureevents.FieldExtraTime:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddExtraTime(v)
+		return nil
 	}
 	return fmt.Errorf("unknown FixtureEvents numeric field %s", name)
 }
@@ -4882,6 +5089,9 @@ func (m *FixtureEventsMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *FixtureEventsMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(fixtureevents.FieldExtraTime) {
+		fields = append(fields, fixtureevents.FieldExtraTime)
+	}
 	if m.FieldCleared(fixtureevents.FieldComments) {
 		fields = append(fields, fixtureevents.FieldComments)
 	}
@@ -4902,6 +5112,9 @@ func (m *FixtureEventsMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *FixtureEventsMutation) ClearField(name string) error {
 	switch name {
+	case fixtureevents.FieldExtraTime:
+		m.ClearExtraTime()
+		return nil
 	case fixtureevents.FieldComments:
 		m.ClearComments()
 		return nil
@@ -4940,7 +5153,7 @@ func (m *FixtureEventsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FixtureEventsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.player != nil {
 		edges = append(edges, fixtureevents.EdgePlayer)
 	}
@@ -4949,6 +5162,9 @@ func (m *FixtureEventsMutation) AddedEdges() []string {
 	}
 	if m.team != nil {
 		edges = append(edges, fixtureevents.EdgeTeam)
+	}
+	if m.fixture != nil {
+		edges = append(edges, fixtureevents.EdgeFixture)
 	}
 	return edges
 }
@@ -4969,13 +5185,17 @@ func (m *FixtureEventsMutation) AddedIDs(name string) []ent.Value {
 		if id := m.team; id != nil {
 			return []ent.Value{*id}
 		}
+	case fixtureevents.EdgeFixture:
+		if id := m.fixture; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FixtureEventsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	return edges
 }
 
@@ -4987,7 +5207,7 @@ func (m *FixtureEventsMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FixtureEventsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.clearedplayer {
 		edges = append(edges, fixtureevents.EdgePlayer)
 	}
@@ -4996,6 +5216,9 @@ func (m *FixtureEventsMutation) ClearedEdges() []string {
 	}
 	if m.clearedteam {
 		edges = append(edges, fixtureevents.EdgeTeam)
+	}
+	if m.clearedfixture {
+		edges = append(edges, fixtureevents.EdgeFixture)
 	}
 	return edges
 }
@@ -5010,6 +5233,8 @@ func (m *FixtureEventsMutation) EdgeCleared(name string) bool {
 		return m.clearedassist
 	case fixtureevents.EdgeTeam:
 		return m.clearedteam
+	case fixtureevents.EdgeFixture:
+		return m.clearedfixture
 	}
 	return false
 }
@@ -5027,6 +5252,9 @@ func (m *FixtureEventsMutation) ClearEdge(name string) error {
 	case fixtureevents.EdgeTeam:
 		m.ClearTeam()
 		return nil
+	case fixtureevents.EdgeFixture:
+		m.ClearFixture()
+		return nil
 	}
 	return fmt.Errorf("unknown FixtureEvents unique edge %s", name)
 }
@@ -5043,6 +5271,9 @@ func (m *FixtureEventsMutation) ResetEdge(name string) error {
 		return nil
 	case fixtureevents.EdgeTeam:
 		m.ResetTeam()
+		return nil
+	case fixtureevents.EdgeFixture:
+		m.ResetFixture()
 		return nil
 	}
 	return fmt.Errorf("unknown FixtureEvents edge %s", name)
@@ -6676,9 +6907,22 @@ func (m *MatchPlayerMutation) OldPosition(ctx context.Context) (v string, err er
 	return oldValue.Position, nil
 }
 
+// ClearPosition clears the value of the "position" field.
+func (m *MatchPlayerMutation) ClearPosition() {
+	m.position = nil
+	m.clearedFields[matchplayer.FieldPosition] = struct{}{}
+}
+
+// PositionCleared returns if the "position" field was cleared in this mutation.
+func (m *MatchPlayerMutation) PositionCleared() bool {
+	_, ok := m.clearedFields[matchplayer.FieldPosition]
+	return ok
+}
+
 // ResetPosition resets all changes to the "position" field.
 func (m *MatchPlayerMutation) ResetPosition() {
 	m.position = nil
+	delete(m.clearedFields, matchplayer.FieldPosition)
 }
 
 // SetX sets the "x" field.
@@ -6731,10 +6975,24 @@ func (m *MatchPlayerMutation) AddedX() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearX clears the value of the "x" field.
+func (m *MatchPlayerMutation) ClearX() {
+	m.x = nil
+	m.addx = nil
+	m.clearedFields[matchplayer.FieldX] = struct{}{}
+}
+
+// XCleared returns if the "x" field was cleared in this mutation.
+func (m *MatchPlayerMutation) XCleared() bool {
+	_, ok := m.clearedFields[matchplayer.FieldX]
+	return ok
+}
+
 // ResetX resets all changes to the "x" field.
 func (m *MatchPlayerMutation) ResetX() {
 	m.x = nil
 	m.addx = nil
+	delete(m.clearedFields, matchplayer.FieldX)
 }
 
 // SetY sets the "y" field.
@@ -6787,10 +7045,24 @@ func (m *MatchPlayerMutation) AddedY() (r int, exists bool) {
 	return *v, true
 }
 
+// ClearY clears the value of the "y" field.
+func (m *MatchPlayerMutation) ClearY() {
+	m.y = nil
+	m.addy = nil
+	m.clearedFields[matchplayer.FieldY] = struct{}{}
+}
+
+// YCleared returns if the "y" field was cleared in this mutation.
+func (m *MatchPlayerMutation) YCleared() bool {
+	_, ok := m.clearedFields[matchplayer.FieldY]
+	return ok
+}
+
 // ResetY resets all changes to the "y" field.
 func (m *MatchPlayerMutation) ResetY() {
 	m.y = nil
 	m.addy = nil
+	delete(m.clearedFields, matchplayer.FieldY)
 }
 
 // SetLastUpdated sets the "lastUpdated" field.
@@ -7120,6 +7392,15 @@ func (m *MatchPlayerMutation) AddField(name string, value ent.Value) error {
 // mutation.
 func (m *MatchPlayerMutation) ClearedFields() []string {
 	var fields []string
+	if m.FieldCleared(matchplayer.FieldPosition) {
+		fields = append(fields, matchplayer.FieldPosition)
+	}
+	if m.FieldCleared(matchplayer.FieldX) {
+		fields = append(fields, matchplayer.FieldX)
+	}
+	if m.FieldCleared(matchplayer.FieldY) {
+		fields = append(fields, matchplayer.FieldY)
+	}
 	if m.FieldCleared(matchplayer.FieldLastUpdated) {
 		fields = append(fields, matchplayer.FieldLastUpdated)
 	}
@@ -7137,6 +7418,15 @@ func (m *MatchPlayerMutation) FieldCleared(name string) bool {
 // error if the field is not defined in the schema.
 func (m *MatchPlayerMutation) ClearField(name string) error {
 	switch name {
+	case matchplayer.FieldPosition:
+		m.ClearPosition()
+		return nil
+	case matchplayer.FieldX:
+		m.ClearX()
+		return nil
+	case matchplayer.FieldY:
+		m.ClearY()
+		return nil
 	case matchplayer.FieldLastUpdated:
 		m.ClearLastUpdated()
 		return nil
@@ -26626,9 +26916,9 @@ type TeamMutation struct {
 	awayFixtures                 map[int]struct{}
 	removedawayFixtures          map[int]struct{}
 	clearedawayFixtures          bool
-	fixtureEvents                map[int]struct{}
-	removedfixtureEvents         map[int]struct{}
-	clearedfixtureEvents         bool
+	teamFixtureEvents            map[int]struct{}
+	removedteamFixtureEvents     map[int]struct{}
+	clearedteamFixtureEvents     bool
 	fixtureLineups               map[int]struct{}
 	removedfixtureLineups        map[int]struct{}
 	clearedfixtureLineups        bool
@@ -27096,58 +27386,58 @@ func (m *TeamMutation) ResetAwayFixtures() {
 	m.removedawayFixtures = nil
 }
 
-// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by ids.
-func (m *TeamMutation) AddFixtureEventIDs(ids ...int) {
-	if m.fixtureEvents == nil {
-		m.fixtureEvents = make(map[int]struct{})
+// AddTeamFixtureEventIDs adds the "teamFixtureEvents" edge to the FixtureEvents entity by ids.
+func (m *TeamMutation) AddTeamFixtureEventIDs(ids ...int) {
+	if m.teamFixtureEvents == nil {
+		m.teamFixtureEvents = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.fixtureEvents[ids[i]] = struct{}{}
+		m.teamFixtureEvents[ids[i]] = struct{}{}
 	}
 }
 
-// ClearFixtureEvents clears the "fixtureEvents" edge to the FixtureEvents entity.
-func (m *TeamMutation) ClearFixtureEvents() {
-	m.clearedfixtureEvents = true
+// ClearTeamFixtureEvents clears the "teamFixtureEvents" edge to the FixtureEvents entity.
+func (m *TeamMutation) ClearTeamFixtureEvents() {
+	m.clearedteamFixtureEvents = true
 }
 
-// FixtureEventsCleared reports if the "fixtureEvents" edge to the FixtureEvents entity was cleared.
-func (m *TeamMutation) FixtureEventsCleared() bool {
-	return m.clearedfixtureEvents
+// TeamFixtureEventsCleared reports if the "teamFixtureEvents" edge to the FixtureEvents entity was cleared.
+func (m *TeamMutation) TeamFixtureEventsCleared() bool {
+	return m.clearedteamFixtureEvents
 }
 
-// RemoveFixtureEventIDs removes the "fixtureEvents" edge to the FixtureEvents entity by IDs.
-func (m *TeamMutation) RemoveFixtureEventIDs(ids ...int) {
-	if m.removedfixtureEvents == nil {
-		m.removedfixtureEvents = make(map[int]struct{})
+// RemoveTeamFixtureEventIDs removes the "teamFixtureEvents" edge to the FixtureEvents entity by IDs.
+func (m *TeamMutation) RemoveTeamFixtureEventIDs(ids ...int) {
+	if m.removedteamFixtureEvents == nil {
+		m.removedteamFixtureEvents = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.fixtureEvents, ids[i])
-		m.removedfixtureEvents[ids[i]] = struct{}{}
+		delete(m.teamFixtureEvents, ids[i])
+		m.removedteamFixtureEvents[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedFixtureEvents returns the removed IDs of the "fixtureEvents" edge to the FixtureEvents entity.
-func (m *TeamMutation) RemovedFixtureEventsIDs() (ids []int) {
-	for id := range m.removedfixtureEvents {
+// RemovedTeamFixtureEvents returns the removed IDs of the "teamFixtureEvents" edge to the FixtureEvents entity.
+func (m *TeamMutation) RemovedTeamFixtureEventsIDs() (ids []int) {
+	for id := range m.removedteamFixtureEvents {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// FixtureEventsIDs returns the "fixtureEvents" edge IDs in the mutation.
-func (m *TeamMutation) FixtureEventsIDs() (ids []int) {
-	for id := range m.fixtureEvents {
+// TeamFixtureEventsIDs returns the "teamFixtureEvents" edge IDs in the mutation.
+func (m *TeamMutation) TeamFixtureEventsIDs() (ids []int) {
+	for id := range m.teamFixtureEvents {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetFixtureEvents resets all changes to the "fixtureEvents" edge.
-func (m *TeamMutation) ResetFixtureEvents() {
-	m.fixtureEvents = nil
-	m.clearedfixtureEvents = false
-	m.removedfixtureEvents = nil
+// ResetTeamFixtureEvents resets all changes to the "teamFixtureEvents" edge.
+func (m *TeamMutation) ResetTeamFixtureEvents() {
+	m.teamFixtureEvents = nil
+	m.clearedteamFixtureEvents = false
+	m.removedteamFixtureEvents = nil
 }
 
 // AddFixtureLineupIDs adds the "fixtureLineups" edge to the FixtureLineups entity by ids.
@@ -27820,8 +28110,8 @@ func (m *TeamMutation) AddedEdges() []string {
 	if m.awayFixtures != nil {
 		edges = append(edges, team.EdgeAwayFixtures)
 	}
-	if m.fixtureEvents != nil {
-		edges = append(edges, team.EdgeFixtureEvents)
+	if m.teamFixtureEvents != nil {
+		edges = append(edges, team.EdgeTeamFixtureEvents)
 	}
 	if m.fixtureLineups != nil {
 		edges = append(edges, team.EdgeFixtureLineups)
@@ -27889,9 +28179,9 @@ func (m *TeamMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case team.EdgeFixtureEvents:
-		ids := make([]ent.Value, 0, len(m.fixtureEvents))
-		for id := range m.fixtureEvents {
+	case team.EdgeTeamFixtureEvents:
+		ids := make([]ent.Value, 0, len(m.teamFixtureEvents))
+		for id := range m.teamFixtureEvents {
 			ids = append(ids, id)
 		}
 		return ids
@@ -27963,8 +28253,8 @@ func (m *TeamMutation) RemovedEdges() []string {
 	if m.removedawayFixtures != nil {
 		edges = append(edges, team.EdgeAwayFixtures)
 	}
-	if m.removedfixtureEvents != nil {
-		edges = append(edges, team.EdgeFixtureEvents)
+	if m.removedteamFixtureEvents != nil {
+		edges = append(edges, team.EdgeTeamFixtureEvents)
 	}
 	if m.removedfixtureLineups != nil {
 		edges = append(edges, team.EdgeFixtureLineups)
@@ -28003,9 +28293,9 @@ func (m *TeamMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case team.EdgeFixtureEvents:
-		ids := make([]ent.Value, 0, len(m.removedfixtureEvents))
-		for id := range m.removedfixtureEvents {
+	case team.EdgeTeamFixtureEvents:
+		ids := make([]ent.Value, 0, len(m.removedteamFixtureEvents))
+		for id := range m.removedteamFixtureEvents {
 			ids = append(ids, id)
 		}
 		return ids
@@ -28055,8 +28345,8 @@ func (m *TeamMutation) ClearedEdges() []string {
 	if m.clearedawayFixtures {
 		edges = append(edges, team.EdgeAwayFixtures)
 	}
-	if m.clearedfixtureEvents {
-		edges = append(edges, team.EdgeFixtureEvents)
+	if m.clearedteamFixtureEvents {
+		edges = append(edges, team.EdgeTeamFixtureEvents)
 	}
 	if m.clearedfixtureLineups {
 		edges = append(edges, team.EdgeFixtureLineups)
@@ -28108,8 +28398,8 @@ func (m *TeamMutation) EdgeCleared(name string) bool {
 		return m.clearedhomeFixtures
 	case team.EdgeAwayFixtures:
 		return m.clearedawayFixtures
-	case team.EdgeFixtureEvents:
-		return m.clearedfixtureEvents
+	case team.EdgeTeamFixtureEvents:
+		return m.clearedteamFixtureEvents
 	case team.EdgeFixtureLineups:
 		return m.clearedfixtureLineups
 	case team.EdgePlayers:
@@ -28190,8 +28480,8 @@ func (m *TeamMutation) ResetEdge(name string) error {
 	case team.EdgeAwayFixtures:
 		m.ResetAwayFixtures()
 		return nil
-	case team.EdgeFixtureEvents:
-		m.ResetFixtureEvents()
+	case team.EdgeTeamFixtureEvents:
+		m.ResetTeamFixtureEvents()
 		return nil
 	case team.EdgeFixtureLineups:
 		m.ResetFixtureLineups()

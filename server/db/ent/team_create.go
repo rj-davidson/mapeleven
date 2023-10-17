@@ -139,19 +139,19 @@ func (tc *TeamCreate) AddAwayFixtures(f ...*Fixture) *TeamCreate {
 	return tc.AddAwayFixtureIDs(ids...)
 }
 
-// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by IDs.
-func (tc *TeamCreate) AddFixtureEventIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddFixtureEventIDs(ids...)
+// AddTeamFixtureEventIDs adds the "teamFixtureEvents" edge to the FixtureEvents entity by IDs.
+func (tc *TeamCreate) AddTeamFixtureEventIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddTeamFixtureEventIDs(ids...)
 	return tc
 }
 
-// AddFixtureEvents adds the "fixtureEvents" edges to the FixtureEvents entity.
-func (tc *TeamCreate) AddFixtureEvents(f ...*FixtureEvents) *TeamCreate {
+// AddTeamFixtureEvents adds the "teamFixtureEvents" edges to the FixtureEvents entity.
+func (tc *TeamCreate) AddTeamFixtureEvents(f ...*FixtureEvents) *TeamCreate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return tc.AddFixtureEventIDs(ids...)
+	return tc.AddTeamFixtureEventIDs(ids...)
 }
 
 // AddFixtureLineupIDs adds the "fixtureLineups" edge to the FixtureLineups entity by IDs.
@@ -509,12 +509,12 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := tc.mutation.FixtureEventsIDs(); len(nodes) > 0 {
+	if nodes := tc.mutation.TeamFixtureEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   team.FixtureEventsTable,
-			Columns: []string{team.FixtureEventsColumn},
+			Table:   team.TeamFixtureEventsTable,
+			Columns: []string{team.TeamFixtureEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),

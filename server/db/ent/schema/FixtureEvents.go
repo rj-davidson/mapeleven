@@ -15,8 +15,8 @@ type FixtureEvents struct {
 // Fields of the FixtureEvents.
 func (FixtureEvents) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("elapsedTime"),
-		field.String("extraTime"),
+		field.Int("elapsedTime"),
+		field.Int("extraTime").Optional(),
 		field.String("type"),
 		field.String("detail"),
 		field.String("comments").Optional(),
@@ -39,6 +39,10 @@ func (FixtureEvents) Edges() []ent.Edge {
 			Ref("assistEvents").
 			Unique(),
 		edge.From("team", Team.Type).
+			Ref("teamFixtureEvents").
+			Unique().
+			Required(),
+		edge.From("fixture", Fixture.Type).
 			Ref("fixtureEvents").
 			Unique().
 			Required(),

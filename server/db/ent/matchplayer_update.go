@@ -49,6 +49,20 @@ func (mpu *MatchPlayerUpdate) SetPosition(s string) *MatchPlayerUpdate {
 	return mpu
 }
 
+// SetNillablePosition sets the "position" field if the given value is not nil.
+func (mpu *MatchPlayerUpdate) SetNillablePosition(s *string) *MatchPlayerUpdate {
+	if s != nil {
+		mpu.SetPosition(*s)
+	}
+	return mpu
+}
+
+// ClearPosition clears the value of the "position" field.
+func (mpu *MatchPlayerUpdate) ClearPosition() *MatchPlayerUpdate {
+	mpu.mutation.ClearPosition()
+	return mpu
+}
+
 // SetX sets the "x" field.
 func (mpu *MatchPlayerUpdate) SetX(i int) *MatchPlayerUpdate {
 	mpu.mutation.ResetX()
@@ -56,9 +70,23 @@ func (mpu *MatchPlayerUpdate) SetX(i int) *MatchPlayerUpdate {
 	return mpu
 }
 
+// SetNillableX sets the "x" field if the given value is not nil.
+func (mpu *MatchPlayerUpdate) SetNillableX(i *int) *MatchPlayerUpdate {
+	if i != nil {
+		mpu.SetX(*i)
+	}
+	return mpu
+}
+
 // AddX adds i to the "x" field.
 func (mpu *MatchPlayerUpdate) AddX(i int) *MatchPlayerUpdate {
 	mpu.mutation.AddX(i)
+	return mpu
+}
+
+// ClearX clears the value of the "x" field.
+func (mpu *MatchPlayerUpdate) ClearX() *MatchPlayerUpdate {
+	mpu.mutation.ClearX()
 	return mpu
 }
 
@@ -69,9 +97,23 @@ func (mpu *MatchPlayerUpdate) SetY(i int) *MatchPlayerUpdate {
 	return mpu
 }
 
+// SetNillableY sets the "y" field if the given value is not nil.
+func (mpu *MatchPlayerUpdate) SetNillableY(i *int) *MatchPlayerUpdate {
+	if i != nil {
+		mpu.SetY(*i)
+	}
+	return mpu
+}
+
 // AddY adds i to the "y" field.
 func (mpu *MatchPlayerUpdate) AddY(i int) *MatchPlayerUpdate {
 	mpu.mutation.AddY(i)
+	return mpu
+}
+
+// ClearY clears the value of the "y" field.
+func (mpu *MatchPlayerUpdate) ClearY() *MatchPlayerUpdate {
+	mpu.mutation.ClearY()
 	return mpu
 }
 
@@ -194,17 +236,26 @@ func (mpu *MatchPlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := mpu.mutation.Position(); ok {
 		_spec.SetField(matchplayer.FieldPosition, field.TypeString, value)
 	}
+	if mpu.mutation.PositionCleared() {
+		_spec.ClearField(matchplayer.FieldPosition, field.TypeString)
+	}
 	if value, ok := mpu.mutation.X(); ok {
 		_spec.SetField(matchplayer.FieldX, field.TypeInt, value)
 	}
 	if value, ok := mpu.mutation.AddedX(); ok {
 		_spec.AddField(matchplayer.FieldX, field.TypeInt, value)
 	}
+	if mpu.mutation.XCleared() {
+		_spec.ClearField(matchplayer.FieldX, field.TypeInt)
+	}
 	if value, ok := mpu.mutation.Y(); ok {
 		_spec.SetField(matchplayer.FieldY, field.TypeInt, value)
 	}
 	if value, ok := mpu.mutation.AddedY(); ok {
 		_spec.AddField(matchplayer.FieldY, field.TypeInt, value)
+	}
+	if mpu.mutation.YCleared() {
+		_spec.ClearField(matchplayer.FieldY, field.TypeInt)
 	}
 	if value, ok := mpu.mutation.LastUpdated(); ok {
 		_spec.SetField(matchplayer.FieldLastUpdated, field.TypeTime, value)
@@ -309,6 +360,20 @@ func (mpuo *MatchPlayerUpdateOne) SetPosition(s string) *MatchPlayerUpdateOne {
 	return mpuo
 }
 
+// SetNillablePosition sets the "position" field if the given value is not nil.
+func (mpuo *MatchPlayerUpdateOne) SetNillablePosition(s *string) *MatchPlayerUpdateOne {
+	if s != nil {
+		mpuo.SetPosition(*s)
+	}
+	return mpuo
+}
+
+// ClearPosition clears the value of the "position" field.
+func (mpuo *MatchPlayerUpdateOne) ClearPosition() *MatchPlayerUpdateOne {
+	mpuo.mutation.ClearPosition()
+	return mpuo
+}
+
 // SetX sets the "x" field.
 func (mpuo *MatchPlayerUpdateOne) SetX(i int) *MatchPlayerUpdateOne {
 	mpuo.mutation.ResetX()
@@ -316,9 +381,23 @@ func (mpuo *MatchPlayerUpdateOne) SetX(i int) *MatchPlayerUpdateOne {
 	return mpuo
 }
 
+// SetNillableX sets the "x" field if the given value is not nil.
+func (mpuo *MatchPlayerUpdateOne) SetNillableX(i *int) *MatchPlayerUpdateOne {
+	if i != nil {
+		mpuo.SetX(*i)
+	}
+	return mpuo
+}
+
 // AddX adds i to the "x" field.
 func (mpuo *MatchPlayerUpdateOne) AddX(i int) *MatchPlayerUpdateOne {
 	mpuo.mutation.AddX(i)
+	return mpuo
+}
+
+// ClearX clears the value of the "x" field.
+func (mpuo *MatchPlayerUpdateOne) ClearX() *MatchPlayerUpdateOne {
+	mpuo.mutation.ClearX()
 	return mpuo
 }
 
@@ -329,9 +408,23 @@ func (mpuo *MatchPlayerUpdateOne) SetY(i int) *MatchPlayerUpdateOne {
 	return mpuo
 }
 
+// SetNillableY sets the "y" field if the given value is not nil.
+func (mpuo *MatchPlayerUpdateOne) SetNillableY(i *int) *MatchPlayerUpdateOne {
+	if i != nil {
+		mpuo.SetY(*i)
+	}
+	return mpuo
+}
+
 // AddY adds i to the "y" field.
 func (mpuo *MatchPlayerUpdateOne) AddY(i int) *MatchPlayerUpdateOne {
 	mpuo.mutation.AddY(i)
+	return mpuo
+}
+
+// ClearY clears the value of the "y" field.
+func (mpuo *MatchPlayerUpdateOne) ClearY() *MatchPlayerUpdateOne {
+	mpuo.mutation.ClearY()
 	return mpuo
 }
 
@@ -484,17 +577,26 @@ func (mpuo *MatchPlayerUpdateOne) sqlSave(ctx context.Context) (_node *MatchPlay
 	if value, ok := mpuo.mutation.Position(); ok {
 		_spec.SetField(matchplayer.FieldPosition, field.TypeString, value)
 	}
+	if mpuo.mutation.PositionCleared() {
+		_spec.ClearField(matchplayer.FieldPosition, field.TypeString)
+	}
 	if value, ok := mpuo.mutation.X(); ok {
 		_spec.SetField(matchplayer.FieldX, field.TypeInt, value)
 	}
 	if value, ok := mpuo.mutation.AddedX(); ok {
 		_spec.AddField(matchplayer.FieldX, field.TypeInt, value)
 	}
+	if mpuo.mutation.XCleared() {
+		_spec.ClearField(matchplayer.FieldX, field.TypeInt)
+	}
 	if value, ok := mpuo.mutation.Y(); ok {
 		_spec.SetField(matchplayer.FieldY, field.TypeInt, value)
 	}
 	if value, ok := mpuo.mutation.AddedY(); ok {
 		_spec.AddField(matchplayer.FieldY, field.TypeInt, value)
+	}
+	if mpuo.mutation.YCleared() {
+		_spec.ClearField(matchplayer.FieldY, field.TypeInt)
 	}
 	if value, ok := mpuo.mutation.LastUpdated(); ok {
 		_spec.SetField(matchplayer.FieldLastUpdated, field.TypeTime, value)

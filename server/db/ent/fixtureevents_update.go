@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/fixtureevents"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
@@ -31,14 +32,42 @@ func (feu *FixtureEventsUpdate) Where(ps ...predicate.FixtureEvents) *FixtureEve
 }
 
 // SetElapsedTime sets the "elapsedTime" field.
-func (feu *FixtureEventsUpdate) SetElapsedTime(s string) *FixtureEventsUpdate {
-	feu.mutation.SetElapsedTime(s)
+func (feu *FixtureEventsUpdate) SetElapsedTime(i int) *FixtureEventsUpdate {
+	feu.mutation.ResetElapsedTime()
+	feu.mutation.SetElapsedTime(i)
+	return feu
+}
+
+// AddElapsedTime adds i to the "elapsedTime" field.
+func (feu *FixtureEventsUpdate) AddElapsedTime(i int) *FixtureEventsUpdate {
+	feu.mutation.AddElapsedTime(i)
 	return feu
 }
 
 // SetExtraTime sets the "extraTime" field.
-func (feu *FixtureEventsUpdate) SetExtraTime(s string) *FixtureEventsUpdate {
-	feu.mutation.SetExtraTime(s)
+func (feu *FixtureEventsUpdate) SetExtraTime(i int) *FixtureEventsUpdate {
+	feu.mutation.ResetExtraTime()
+	feu.mutation.SetExtraTime(i)
+	return feu
+}
+
+// SetNillableExtraTime sets the "extraTime" field if the given value is not nil.
+func (feu *FixtureEventsUpdate) SetNillableExtraTime(i *int) *FixtureEventsUpdate {
+	if i != nil {
+		feu.SetExtraTime(*i)
+	}
+	return feu
+}
+
+// AddExtraTime adds i to the "extraTime" field.
+func (feu *FixtureEventsUpdate) AddExtraTime(i int) *FixtureEventsUpdate {
+	feu.mutation.AddExtraTime(i)
+	return feu
+}
+
+// ClearExtraTime clears the value of the "extraTime" field.
+func (feu *FixtureEventsUpdate) ClearExtraTime() *FixtureEventsUpdate {
+	feu.mutation.ClearExtraTime()
 	return feu
 }
 
@@ -127,6 +156,17 @@ func (feu *FixtureEventsUpdate) SetTeam(t *Team) *FixtureEventsUpdate {
 	return feu.SetTeamID(t.ID)
 }
 
+// SetFixtureID sets the "fixture" edge to the Fixture entity by ID.
+func (feu *FixtureEventsUpdate) SetFixtureID(id int) *FixtureEventsUpdate {
+	feu.mutation.SetFixtureID(id)
+	return feu
+}
+
+// SetFixture sets the "fixture" edge to the Fixture entity.
+func (feu *FixtureEventsUpdate) SetFixture(f *Fixture) *FixtureEventsUpdate {
+	return feu.SetFixtureID(f.ID)
+}
+
 // Mutation returns the FixtureEventsMutation object of the builder.
 func (feu *FixtureEventsUpdate) Mutation() *FixtureEventsMutation {
 	return feu.mutation
@@ -147,6 +187,12 @@ func (feu *FixtureEventsUpdate) ClearAssist() *FixtureEventsUpdate {
 // ClearTeam clears the "team" edge to the Team entity.
 func (feu *FixtureEventsUpdate) ClearTeam() *FixtureEventsUpdate {
 	feu.mutation.ClearTeam()
+	return feu
+}
+
+// ClearFixture clears the "fixture" edge to the Fixture entity.
+func (feu *FixtureEventsUpdate) ClearFixture() *FixtureEventsUpdate {
+	feu.mutation.ClearFixture()
 	return feu
 }
 
@@ -194,6 +240,9 @@ func (feu *FixtureEventsUpdate) check() error {
 	if _, ok := feu.mutation.TeamID(); feu.mutation.TeamCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "FixtureEvents.team"`)
 	}
+	if _, ok := feu.mutation.FixtureID(); feu.mutation.FixtureCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "FixtureEvents.fixture"`)
+	}
 	return nil
 }
 
@@ -210,10 +259,19 @@ func (feu *FixtureEventsUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 	}
 	if value, ok := feu.mutation.ElapsedTime(); ok {
-		_spec.SetField(fixtureevents.FieldElapsedTime, field.TypeString, value)
+		_spec.SetField(fixtureevents.FieldElapsedTime, field.TypeInt, value)
+	}
+	if value, ok := feu.mutation.AddedElapsedTime(); ok {
+		_spec.AddField(fixtureevents.FieldElapsedTime, field.TypeInt, value)
 	}
 	if value, ok := feu.mutation.ExtraTime(); ok {
-		_spec.SetField(fixtureevents.FieldExtraTime, field.TypeString, value)
+		_spec.SetField(fixtureevents.FieldExtraTime, field.TypeInt, value)
+	}
+	if value, ok := feu.mutation.AddedExtraTime(); ok {
+		_spec.AddField(fixtureevents.FieldExtraTime, field.TypeInt, value)
+	}
+	if feu.mutation.ExtraTimeCleared() {
+		_spec.ClearField(fixtureevents.FieldExtraTime, field.TypeInt)
 	}
 	if value, ok := feu.mutation.GetType(); ok {
 		_spec.SetField(fixtureevents.FieldType, field.TypeString, value)
@@ -320,6 +378,35 @@ func (feu *FixtureEventsUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if feu.mutation.FixtureCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.FixtureTable,
+			Columns: []string{fixtureevents.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := feu.mutation.FixtureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.FixtureTable,
+			Columns: []string{fixtureevents.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, feu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{fixtureevents.Label}
@@ -341,14 +428,42 @@ type FixtureEventsUpdateOne struct {
 }
 
 // SetElapsedTime sets the "elapsedTime" field.
-func (feuo *FixtureEventsUpdateOne) SetElapsedTime(s string) *FixtureEventsUpdateOne {
-	feuo.mutation.SetElapsedTime(s)
+func (feuo *FixtureEventsUpdateOne) SetElapsedTime(i int) *FixtureEventsUpdateOne {
+	feuo.mutation.ResetElapsedTime()
+	feuo.mutation.SetElapsedTime(i)
+	return feuo
+}
+
+// AddElapsedTime adds i to the "elapsedTime" field.
+func (feuo *FixtureEventsUpdateOne) AddElapsedTime(i int) *FixtureEventsUpdateOne {
+	feuo.mutation.AddElapsedTime(i)
 	return feuo
 }
 
 // SetExtraTime sets the "extraTime" field.
-func (feuo *FixtureEventsUpdateOne) SetExtraTime(s string) *FixtureEventsUpdateOne {
-	feuo.mutation.SetExtraTime(s)
+func (feuo *FixtureEventsUpdateOne) SetExtraTime(i int) *FixtureEventsUpdateOne {
+	feuo.mutation.ResetExtraTime()
+	feuo.mutation.SetExtraTime(i)
+	return feuo
+}
+
+// SetNillableExtraTime sets the "extraTime" field if the given value is not nil.
+func (feuo *FixtureEventsUpdateOne) SetNillableExtraTime(i *int) *FixtureEventsUpdateOne {
+	if i != nil {
+		feuo.SetExtraTime(*i)
+	}
+	return feuo
+}
+
+// AddExtraTime adds i to the "extraTime" field.
+func (feuo *FixtureEventsUpdateOne) AddExtraTime(i int) *FixtureEventsUpdateOne {
+	feuo.mutation.AddExtraTime(i)
+	return feuo
+}
+
+// ClearExtraTime clears the value of the "extraTime" field.
+func (feuo *FixtureEventsUpdateOne) ClearExtraTime() *FixtureEventsUpdateOne {
+	feuo.mutation.ClearExtraTime()
 	return feuo
 }
 
@@ -437,6 +552,17 @@ func (feuo *FixtureEventsUpdateOne) SetTeam(t *Team) *FixtureEventsUpdateOne {
 	return feuo.SetTeamID(t.ID)
 }
 
+// SetFixtureID sets the "fixture" edge to the Fixture entity by ID.
+func (feuo *FixtureEventsUpdateOne) SetFixtureID(id int) *FixtureEventsUpdateOne {
+	feuo.mutation.SetFixtureID(id)
+	return feuo
+}
+
+// SetFixture sets the "fixture" edge to the Fixture entity.
+func (feuo *FixtureEventsUpdateOne) SetFixture(f *Fixture) *FixtureEventsUpdateOne {
+	return feuo.SetFixtureID(f.ID)
+}
+
 // Mutation returns the FixtureEventsMutation object of the builder.
 func (feuo *FixtureEventsUpdateOne) Mutation() *FixtureEventsMutation {
 	return feuo.mutation
@@ -457,6 +583,12 @@ func (feuo *FixtureEventsUpdateOne) ClearAssist() *FixtureEventsUpdateOne {
 // ClearTeam clears the "team" edge to the Team entity.
 func (feuo *FixtureEventsUpdateOne) ClearTeam() *FixtureEventsUpdateOne {
 	feuo.mutation.ClearTeam()
+	return feuo
+}
+
+// ClearFixture clears the "fixture" edge to the Fixture entity.
+func (feuo *FixtureEventsUpdateOne) ClearFixture() *FixtureEventsUpdateOne {
+	feuo.mutation.ClearFixture()
 	return feuo
 }
 
@@ -517,6 +649,9 @@ func (feuo *FixtureEventsUpdateOne) check() error {
 	if _, ok := feuo.mutation.TeamID(); feuo.mutation.TeamCleared() && !ok {
 		return errors.New(`ent: clearing a required unique edge "FixtureEvents.team"`)
 	}
+	if _, ok := feuo.mutation.FixtureID(); feuo.mutation.FixtureCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "FixtureEvents.fixture"`)
+	}
 	return nil
 }
 
@@ -550,10 +685,19 @@ func (feuo *FixtureEventsUpdateOne) sqlSave(ctx context.Context) (_node *Fixture
 		}
 	}
 	if value, ok := feuo.mutation.ElapsedTime(); ok {
-		_spec.SetField(fixtureevents.FieldElapsedTime, field.TypeString, value)
+		_spec.SetField(fixtureevents.FieldElapsedTime, field.TypeInt, value)
+	}
+	if value, ok := feuo.mutation.AddedElapsedTime(); ok {
+		_spec.AddField(fixtureevents.FieldElapsedTime, field.TypeInt, value)
 	}
 	if value, ok := feuo.mutation.ExtraTime(); ok {
-		_spec.SetField(fixtureevents.FieldExtraTime, field.TypeString, value)
+		_spec.SetField(fixtureevents.FieldExtraTime, field.TypeInt, value)
+	}
+	if value, ok := feuo.mutation.AddedExtraTime(); ok {
+		_spec.AddField(fixtureevents.FieldExtraTime, field.TypeInt, value)
+	}
+	if feuo.mutation.ExtraTimeCleared() {
+		_spec.ClearField(fixtureevents.FieldExtraTime, field.TypeInt)
 	}
 	if value, ok := feuo.mutation.GetType(); ok {
 		_spec.SetField(fixtureevents.FieldType, field.TypeString, value)
@@ -653,6 +797,35 @@ func (feuo *FixtureEventsUpdateOne) sqlSave(ctx context.Context) (_node *Fixture
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if feuo.mutation.FixtureCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.FixtureTable,
+			Columns: []string{fixtureevents.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := feuo.mutation.FixtureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.FixtureTable,
+			Columns: []string{fixtureevents.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

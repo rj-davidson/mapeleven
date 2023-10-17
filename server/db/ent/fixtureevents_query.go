@@ -5,6 +5,7 @@ package ent
 import (
 	"context"
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/fixtureevents"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/predicate"
@@ -19,14 +20,15 @@ import (
 // FixtureEventsQuery is the builder for querying FixtureEvents entities.
 type FixtureEventsQuery struct {
 	config
-	ctx        *QueryContext
-	order      []fixtureevents.Order
-	inters     []Interceptor
-	predicates []predicate.FixtureEvents
-	withPlayer *PlayerQuery
-	withAssist *PlayerQuery
-	withTeam   *TeamQuery
-	withFKs    bool
+	ctx         *QueryContext
+	order       []fixtureevents.Order
+	inters      []Interceptor
+	predicates  []predicate.FixtureEvents
+	withPlayer  *PlayerQuery
+	withAssist  *PlayerQuery
+	withTeam    *TeamQuery
+	withFixture *FixtureQuery
+	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -122,6 +124,28 @@ func (feq *FixtureEventsQuery) QueryTeam() *TeamQuery {
 			sqlgraph.From(fixtureevents.Table, fixtureevents.FieldID, selector),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, fixtureevents.TeamTable, fixtureevents.TeamColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(feq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFixture chains the current query on the "fixture" edge.
+func (feq *FixtureEventsQuery) QueryFixture() *FixtureQuery {
+	query := (&FixtureClient{config: feq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := feq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := feq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixtureevents.Table, fixtureevents.FieldID, selector),
+			sqlgraph.To(fixture.Table, fixture.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixtureevents.FixtureTable, fixtureevents.FixtureColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(feq.driver.Dialect(), step)
 		return fromU, nil
@@ -316,14 +340,15 @@ func (feq *FixtureEventsQuery) Clone() *FixtureEventsQuery {
 		return nil
 	}
 	return &FixtureEventsQuery{
-		config:     feq.config,
-		ctx:        feq.ctx.Clone(),
-		order:      append([]fixtureevents.Order{}, feq.order...),
-		inters:     append([]Interceptor{}, feq.inters...),
-		predicates: append([]predicate.FixtureEvents{}, feq.predicates...),
-		withPlayer: feq.withPlayer.Clone(),
-		withAssist: feq.withAssist.Clone(),
-		withTeam:   feq.withTeam.Clone(),
+		config:      feq.config,
+		ctx:         feq.ctx.Clone(),
+		order:       append([]fixtureevents.Order{}, feq.order...),
+		inters:      append([]Interceptor{}, feq.inters...),
+		predicates:  append([]predicate.FixtureEvents{}, feq.predicates...),
+		withPlayer:  feq.withPlayer.Clone(),
+		withAssist:  feq.withAssist.Clone(),
+		withTeam:    feq.withTeam.Clone(),
+		withFixture: feq.withFixture.Clone(),
 		// clone intermediate query.
 		sql:  feq.sql.Clone(),
 		path: feq.path,
@@ -363,13 +388,24 @@ func (feq *FixtureEventsQuery) WithTeam(opts ...func(*TeamQuery)) *FixtureEvents
 	return feq
 }
 
+// WithFixture tells the query-builder to eager-load the nodes that are connected to
+// the "fixture" edge. The optional arguments are used to configure the query builder of the edge.
+func (feq *FixtureEventsQuery) WithFixture(opts ...func(*FixtureQuery)) *FixtureEventsQuery {
+	query := (&FixtureClient{config: feq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	feq.withFixture = query
+	return feq
+}
+
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
 //
 // Example:
 //
 //	var v []struct {
-//		ElapsedTime string `json:"elapsedTime,omitempty"`
+//		ElapsedTime int `json:"elapsedTime,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -392,7 +428,7 @@ func (feq *FixtureEventsQuery) GroupBy(field string, fields ...string) *FixtureE
 // Example:
 //
 //	var v []struct {
-//		ElapsedTime string `json:"elapsedTime,omitempty"`
+//		ElapsedTime int `json:"elapsedTime,omitempty"`
 //	}
 //
 //	client.FixtureEvents.Query().
@@ -442,13 +478,14 @@ func (feq *FixtureEventsQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 		nodes       = []*FixtureEvents{}
 		withFKs     = feq.withFKs
 		_spec       = feq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			feq.withPlayer != nil,
 			feq.withAssist != nil,
 			feq.withTeam != nil,
+			feq.withFixture != nil,
 		}
 	)
-	if feq.withPlayer != nil || feq.withAssist != nil || feq.withTeam != nil {
+	if feq.withPlayer != nil || feq.withAssist != nil || feq.withTeam != nil || feq.withFixture != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -487,6 +524,12 @@ func (feq *FixtureEventsQuery) sqlAll(ctx context.Context, hooks ...queryHook) (
 	if query := feq.withTeam; query != nil {
 		if err := feq.loadTeam(ctx, query, nodes, nil,
 			func(n *FixtureEvents, e *Team) { n.Edges.Team = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := feq.withFixture; query != nil {
+		if err := feq.loadFixture(ctx, query, nodes, nil,
+			func(n *FixtureEvents, e *Fixture) { n.Edges.Fixture = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -561,10 +604,10 @@ func (feq *FixtureEventsQuery) loadTeam(ctx context.Context, query *TeamQuery, n
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*FixtureEvents)
 	for i := range nodes {
-		if nodes[i].team_fixture_events == nil {
+		if nodes[i].team_team_fixture_events == nil {
 			continue
 		}
-		fk := *nodes[i].team_fixture_events
+		fk := *nodes[i].team_team_fixture_events
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -581,7 +624,39 @@ func (feq *FixtureEventsQuery) loadTeam(ctx context.Context, query *TeamQuery, n
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "team_fixture_events" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "team_team_fixture_events" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (feq *FixtureEventsQuery) loadFixture(ctx context.Context, query *FixtureQuery, nodes []*FixtureEvents, init func(*FixtureEvents), assign func(*FixtureEvents, *Fixture)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*FixtureEvents)
+	for i := range nodes {
+		if nodes[i].fixture_fixture_events == nil {
+			continue
+		}
+		fk := *nodes[i].fixture_fixture_events
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(fixture.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "fixture_fixture_events" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

@@ -50,8 +50,8 @@ type TeamEdges struct {
 	HomeFixtures []*Fixture `json:"homeFixtures,omitempty"`
 	// AwayFixtures holds the value of the awayFixtures edge.
 	AwayFixtures []*Fixture `json:"awayFixtures,omitempty"`
-	// FixtureEvents holds the value of the fixtureEvents edge.
-	FixtureEvents []*FixtureEvents `json:"fixtureEvents,omitempty"`
+	// TeamFixtureEvents holds the value of the teamFixtureEvents edge.
+	TeamFixtureEvents []*FixtureEvents `json:"teamFixtureEvents,omitempty"`
 	// FixtureLineups holds the value of the fixtureLineups edge.
 	FixtureLineups []*FixtureLineups `json:"fixtureLineups,omitempty"`
 	// Players holds the value of the players edge.
@@ -132,13 +132,13 @@ func (e TeamEdges) AwayFixturesOrErr() ([]*Fixture, error) {
 	return nil, &NotLoadedError{edge: "awayFixtures"}
 }
 
-// FixtureEventsOrErr returns the FixtureEvents value or an error if the edge
+// TeamFixtureEventsOrErr returns the TeamFixtureEvents value or an error if the edge
 // was not loaded in eager-loading.
-func (e TeamEdges) FixtureEventsOrErr() ([]*FixtureEvents, error) {
+func (e TeamEdges) TeamFixtureEventsOrErr() ([]*FixtureEvents, error) {
 	if e.loadedTypes[5] {
-		return e.FixtureEvents, nil
+		return e.TeamFixtureEvents, nil
 	}
-	return nil, &NotLoadedError{edge: "fixtureEvents"}
+	return nil, &NotLoadedError{edge: "teamFixtureEvents"}
 }
 
 // FixtureLineupsOrErr returns the FixtureLineups value or an error if the edge
@@ -368,9 +368,9 @@ func (t *Team) QueryAwayFixtures() *FixtureQuery {
 	return NewTeamClient(t.config).QueryAwayFixtures(t)
 }
 
-// QueryFixtureEvents queries the "fixtureEvents" edge of the Team entity.
-func (t *Team) QueryFixtureEvents() *FixtureEventsQuery {
-	return NewTeamClient(t.config).QueryFixtureEvents(t)
+// QueryTeamFixtureEvents queries the "teamFixtureEvents" edge of the Team entity.
+func (t *Team) QueryTeamFixtureEvents() *FixtureEventsQuery {
+	return NewTeamClient(t.config).QueryTeamFixtureEvents(t)
 }
 
 // QueryFixtureLineups queries the "fixtureLineups" edge of the Team entity.

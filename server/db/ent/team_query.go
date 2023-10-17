@@ -43,7 +43,7 @@ type TeamQuery struct {
 	withStandings          *StandingsQuery
 	withHomeFixtures       *FixtureQuery
 	withAwayFixtures       *FixtureQuery
-	withFixtureEvents      *FixtureEventsQuery
+	withTeamFixtureEvents  *FixtureEventsQuery
 	withFixtureLineups     *FixtureLineupsQuery
 	withPlayers            *PlayerQuery
 	withSquad              *SquadQuery
@@ -202,8 +202,8 @@ func (tq *TeamQuery) QueryAwayFixtures() *FixtureQuery {
 	return query
 }
 
-// QueryFixtureEvents chains the current query on the "fixtureEvents" edge.
-func (tq *TeamQuery) QueryFixtureEvents() *FixtureEventsQuery {
+// QueryTeamFixtureEvents chains the current query on the "teamFixtureEvents" edge.
+func (tq *TeamQuery) QueryTeamFixtureEvents() *FixtureEventsQuery {
 	query := (&FixtureEventsClient{config: tq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := tq.prepareQuery(ctx); err != nil {
@@ -216,7 +216,7 @@ func (tq *TeamQuery) QueryFixtureEvents() *FixtureEventsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(team.Table, team.FieldID, selector),
 			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, team.FixtureEventsTable, team.FixtureEventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, team.TeamFixtureEventsTable, team.TeamFixtureEventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -663,7 +663,7 @@ func (tq *TeamQuery) Clone() *TeamQuery {
 		withStandings:          tq.withStandings.Clone(),
 		withHomeFixtures:       tq.withHomeFixtures.Clone(),
 		withAwayFixtures:       tq.withAwayFixtures.Clone(),
-		withFixtureEvents:      tq.withFixtureEvents.Clone(),
+		withTeamFixtureEvents:  tq.withTeamFixtureEvents.Clone(),
 		withFixtureLineups:     tq.withFixtureLineups.Clone(),
 		withPlayers:            tq.withPlayers.Clone(),
 		withSquad:              tq.withSquad.Clone(),
@@ -736,14 +736,14 @@ func (tq *TeamQuery) WithAwayFixtures(opts ...func(*FixtureQuery)) *TeamQuery {
 	return tq
 }
 
-// WithFixtureEvents tells the query-builder to eager-load the nodes that are connected to
-// the "fixtureEvents" edge. The optional arguments are used to configure the query builder of the edge.
-func (tq *TeamQuery) WithFixtureEvents(opts ...func(*FixtureEventsQuery)) *TeamQuery {
+// WithTeamFixtureEvents tells the query-builder to eager-load the nodes that are connected to
+// the "teamFixtureEvents" edge. The optional arguments are used to configure the query builder of the edge.
+func (tq *TeamQuery) WithTeamFixtureEvents(opts ...func(*FixtureEventsQuery)) *TeamQuery {
 	query := (&FixtureEventsClient{config: tq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	tq.withFixtureEvents = query
+	tq.withTeamFixtureEvents = query
 	return tq
 }
 
@@ -953,7 +953,7 @@ func (tq *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 			tq.withStandings != nil,
 			tq.withHomeFixtures != nil,
 			tq.withAwayFixtures != nil,
-			tq.withFixtureEvents != nil,
+			tq.withTeamFixtureEvents != nil,
 			tq.withFixtureLineups != nil,
 			tq.withPlayers != nil,
 			tq.withSquad != nil,
@@ -1024,10 +1024,10 @@ func (tq *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 			return nil, err
 		}
 	}
-	if query := tq.withFixtureEvents; query != nil {
-		if err := tq.loadFixtureEvents(ctx, query, nodes,
-			func(n *Team) { n.Edges.FixtureEvents = []*FixtureEvents{} },
-			func(n *Team, e *FixtureEvents) { n.Edges.FixtureEvents = append(n.Edges.FixtureEvents, e) }); err != nil {
+	if query := tq.withTeamFixtureEvents; query != nil {
+		if err := tq.loadTeamFixtureEvents(ctx, query, nodes,
+			func(n *Team) { n.Edges.TeamFixtureEvents = []*FixtureEvents{} },
+			func(n *Team, e *FixtureEvents) { n.Edges.TeamFixtureEvents = append(n.Edges.TeamFixtureEvents, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1261,7 +1261,7 @@ func (tq *TeamQuery) loadAwayFixtures(ctx context.Context, query *FixtureQuery, 
 	}
 	return nil
 }
-func (tq *TeamQuery) loadFixtureEvents(ctx context.Context, query *FixtureEventsQuery, nodes []*Team, init func(*Team), assign func(*Team, *FixtureEvents)) error {
+func (tq *TeamQuery) loadTeamFixtureEvents(ctx context.Context, query *FixtureEventsQuery, nodes []*Team, init func(*Team), assign func(*Team, *FixtureEvents)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*Team)
 	for i := range nodes {
@@ -1273,20 +1273,20 @@ func (tq *TeamQuery) loadFixtureEvents(ctx context.Context, query *FixtureEvents
 	}
 	query.withFKs = true
 	query.Where(predicate.FixtureEvents(func(s *sql.Selector) {
-		s.Where(sql.InValues(team.FixtureEventsColumn, fks...))
+		s.Where(sql.InValues(team.TeamFixtureEventsColumn, fks...))
 	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		fk := n.team_fixture_events
+		fk := n.team_team_fixture_events
 		if fk == nil {
-			return fmt.Errorf(`foreign-key "team_fixture_events" is nil for node %v`, n.ID)
+			return fmt.Errorf(`foreign-key "team_team_fixture_events" is nil for node %v`, n.ID)
 		}
 		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "team_fixture_events" returned %v for node %v`, *fk, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "team_team_fixture_events" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

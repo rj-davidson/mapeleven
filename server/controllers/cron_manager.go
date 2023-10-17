@@ -66,6 +66,7 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	}
 
 	if devRun {
+		fetchFixtureData(fixturesModel)
 	}
 }
 
@@ -144,4 +145,14 @@ func fetchSquads(squadModel *team_models.SquadModel, playerModel *player_models.
 		log.Printf("Error initializing squads: %v", err)
 	}
 	fmt.Println("Squads successfully loaded.")
+}
+
+func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
+	fmt.Println("Fetching fixture data...")
+	fixtureDataController := NewFixtureDataController(fixtureModel)
+	err := fixtureDataController.FetchFixtures(context.Background())
+	if err != nil {
+		log.Printf("Error fetching fixture data: %v", err)
+	}
+	fmt.Println("Fixture data successfully loaded.")
 }

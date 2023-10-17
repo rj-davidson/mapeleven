@@ -59,5 +59,6 @@ func (Fixture) Edges() []ent.Edge {
 			Required(),
 
 		edge.To("lineups", FixtureLineups.Type),
+		edge.To("fixtureEvents", FixtureEvents.Type),
 	}
 }

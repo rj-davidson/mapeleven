@@ -37,7 +37,7 @@ func (Team) Edges() []ent.Edge {
 		edge.To("standings", Standings.Type),
 		edge.To("homeFixtures", Fixture.Type),
 		edge.To("awayFixtures", Fixture.Type),
-		edge.To("fixtureEvents", FixtureEvents.Type),
+		edge.To("teamFixtureEvents", FixtureEvents.Type),
 		edge.To("fixtureLineups", FixtureLineups.Type),
 		edge.To("players", Player.Type),
 		edge.To("squad", Squad.Type),

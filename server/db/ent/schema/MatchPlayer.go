@@ -16,9 +16,9 @@ type MatchPlayer struct {
 func (MatchPlayer) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("number"),
-		field.String("position"),
-		field.Int("x"),
-		field.Int("y"),
+		field.String("position").Optional(),
+		field.Int("x").Optional(),
+		field.Int("y").Optional(),
 
 		field.Time("lastUpdated").
 			Default(time.Now).

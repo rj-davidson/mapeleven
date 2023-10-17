@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/fixtureevents"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/team"
@@ -20,9 +21,9 @@ type FixtureEvents struct {
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
 	// ElapsedTime holds the value of the "elapsedTime" field.
-	ElapsedTime string `json:"elapsedTime,omitempty"`
+	ElapsedTime int `json:"elapsedTime,omitempty"`
 	// ExtraTime holds the value of the "extraTime" field.
-	ExtraTime string `json:"extraTime,omitempty"`
+	ExtraTime int `json:"extraTime,omitempty"`
 	// Type holds the value of the "type" field.
 	Type string `json:"type,omitempty"`
 	// Detail holds the value of the "detail" field.
@@ -33,11 +34,12 @@ type FixtureEvents struct {
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FixtureEventsQuery when eager-loading is set.
-	Edges                FixtureEventsEdges `json:"edges"`
-	player_player_events *int
-	player_assist_events *int
-	team_fixture_events  *int
-	selectValues         sql.SelectValues
+	Edges                    FixtureEventsEdges `json:"edges"`
+	fixture_fixture_events   *int
+	player_player_events     *int
+	player_assist_events     *int
+	team_team_fixture_events *int
+	selectValues             sql.SelectValues
 }
 
 // FixtureEventsEdges holds the relations/edges for other nodes in the graph.
@@ -48,9 +50,11 @@ type FixtureEventsEdges struct {
 	Assist *Player `json:"assist,omitempty"`
 	// Team holds the value of the team edge.
 	Team *Team `json:"team,omitempty"`
+	// Fixture holds the value of the fixture edge.
+	Fixture *Fixture `json:"fixture,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // PlayerOrErr returns the Player value or an error if the edge
@@ -92,22 +96,37 @@ func (e FixtureEventsEdges) TeamOrErr() (*Team, error) {
 	return nil, &NotLoadedError{edge: "team"}
 }
 
+// FixtureOrErr returns the Fixture value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e FixtureEventsEdges) FixtureOrErr() (*Fixture, error) {
+	if e.loadedTypes[3] {
+		if e.Fixture == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: fixture.Label}
+		}
+		return e.Fixture, nil
+	}
+	return nil, &NotLoadedError{edge: "fixture"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*FixtureEvents) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case fixtureevents.FieldID:
+		case fixtureevents.FieldID, fixtureevents.FieldElapsedTime, fixtureevents.FieldExtraTime:
 			values[i] = new(sql.NullInt64)
-		case fixtureevents.FieldElapsedTime, fixtureevents.FieldExtraTime, fixtureevents.FieldType, fixtureevents.FieldDetail, fixtureevents.FieldComments:
+		case fixtureevents.FieldType, fixtureevents.FieldDetail, fixtureevents.FieldComments:
 			values[i] = new(sql.NullString)
 		case fixtureevents.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
-		case fixtureevents.ForeignKeys[0]: // player_player_events
+		case fixtureevents.ForeignKeys[0]: // fixture_fixture_events
 			values[i] = new(sql.NullInt64)
-		case fixtureevents.ForeignKeys[1]: // player_assist_events
+		case fixtureevents.ForeignKeys[1]: // player_player_events
 			values[i] = new(sql.NullInt64)
-		case fixtureevents.ForeignKeys[2]: // team_fixture_events
+		case fixtureevents.ForeignKeys[2]: // player_assist_events
+			values[i] = new(sql.NullInt64)
+		case fixtureevents.ForeignKeys[3]: // team_team_fixture_events
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -131,16 +150,16 @@ func (fe *FixtureEvents) assignValues(columns []string, values []any) error {
 			}
 			fe.ID = int(value.Int64)
 		case fixtureevents.FieldElapsedTime:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field elapsedTime", values[i])
 			} else if value.Valid {
-				fe.ElapsedTime = value.String
+				fe.ElapsedTime = int(value.Int64)
 			}
 		case fixtureevents.FieldExtraTime:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field extraTime", values[i])
 			} else if value.Valid {
-				fe.ExtraTime = value.String
+				fe.ExtraTime = int(value.Int64)
 			}
 		case fixtureevents.FieldType:
 			if value, ok := values[i].(*sql.NullString); !ok {
@@ -168,24 +187,31 @@ func (fe *FixtureEvents) assignValues(columns []string, values []any) error {
 			}
 		case fixtureevents.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field fixture_fixture_events", value)
+			} else if value.Valid {
+				fe.fixture_fixture_events = new(int)
+				*fe.fixture_fixture_events = int(value.Int64)
+			}
+		case fixtureevents.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field player_player_events", value)
 			} else if value.Valid {
 				fe.player_player_events = new(int)
 				*fe.player_player_events = int(value.Int64)
 			}
-		case fixtureevents.ForeignKeys[1]:
+		case fixtureevents.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field player_assist_events", value)
 			} else if value.Valid {
 				fe.player_assist_events = new(int)
 				*fe.player_assist_events = int(value.Int64)
 			}
-		case fixtureevents.ForeignKeys[2]:
+		case fixtureevents.ForeignKeys[3]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field team_fixture_events", value)
+				return fmt.Errorf("unexpected type %T for edge-field team_team_fixture_events", value)
 			} else if value.Valid {
-				fe.team_fixture_events = new(int)
-				*fe.team_fixture_events = int(value.Int64)
+				fe.team_team_fixture_events = new(int)
+				*fe.team_team_fixture_events = int(value.Int64)
 			}
 		default:
 			fe.selectValues.Set(columns[i], values[i])
@@ -215,6 +241,11 @@ func (fe *FixtureEvents) QueryTeam() *TeamQuery {
 	return NewFixtureEventsClient(fe.config).QueryTeam(fe)
 }
 
+// QueryFixture queries the "fixture" edge of the FixtureEvents entity.
+func (fe *FixtureEvents) QueryFixture() *FixtureQuery {
+	return NewFixtureEventsClient(fe.config).QueryFixture(fe)
+}
+
 // Update returns a builder for updating this FixtureEvents.
 // Note that you need to call FixtureEvents.Unwrap() before calling this method if this FixtureEvents
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -239,10 +270,10 @@ func (fe *FixtureEvents) String() string {
 	builder.WriteString("FixtureEvents(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", fe.ID))
 	builder.WriteString("elapsedTime=")
-	builder.WriteString(fe.ElapsedTime)
+	builder.WriteString(fmt.Sprintf("%v", fe.ElapsedTime))
 	builder.WriteString(", ")
 	builder.WriteString("extraTime=")
-	builder.WriteString(fe.ExtraTime)
+	builder.WriteString(fmt.Sprintf("%v", fe.ExtraTime))
 	builder.WriteString(", ")
 	builder.WriteString("type=")
 	builder.WriteString(fe.Type)

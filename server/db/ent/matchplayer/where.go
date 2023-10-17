@@ -175,6 +175,16 @@ func PositionHasSuffix(v string) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldHasSuffix(FieldPosition, v))
 }
 
+// PositionIsNil applies the IsNil predicate on the "position" field.
+func PositionIsNil() predicate.MatchPlayer {
+	return predicate.MatchPlayer(sql.FieldIsNull(FieldPosition))
+}
+
+// PositionNotNil applies the NotNil predicate on the "position" field.
+func PositionNotNil() predicate.MatchPlayer {
+	return predicate.MatchPlayer(sql.FieldNotNull(FieldPosition))
+}
+
 // PositionEqualFold applies the EqualFold predicate on the "position" field.
 func PositionEqualFold(v string) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldEqualFold(FieldPosition, v))
@@ -225,6 +235,16 @@ func XLTE(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldLTE(FieldX, v))
 }
 
+// XIsNil applies the IsNil predicate on the "x" field.
+func XIsNil() predicate.MatchPlayer {
+	return predicate.MatchPlayer(sql.FieldIsNull(FieldX))
+}
+
+// XNotNil applies the NotNil predicate on the "x" field.
+func XNotNil() predicate.MatchPlayer {
+	return predicate.MatchPlayer(sql.FieldNotNull(FieldX))
+}
+
 // YEQ applies the EQ predicate on the "y" field.
 func YEQ(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldEQ(FieldY, v))
@@ -263,6 +283,16 @@ func YLT(v int) predicate.MatchPlayer {
 // YLTE applies the LTE predicate on the "y" field.
 func YLTE(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldLTE(FieldY, v))
+}
+
+// YIsNil applies the IsNil predicate on the "y" field.
+func YIsNil() predicate.MatchPlayer {
+	return predicate.MatchPlayer(sql.FieldIsNull(FieldY))
+}
+
+// YNotNil applies the NotNil predicate on the "y" field.
+func YNotNil() predicate.MatchPlayer {
+	return predicate.MatchPlayer(sql.FieldNotNull(FieldY))
 }
 
 // LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.

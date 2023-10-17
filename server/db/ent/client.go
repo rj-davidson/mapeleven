@@ -1096,6 +1096,22 @@ func (c *FixtureClient) QueryLineups(f *Fixture) *FixtureLineupsQuery {
 	return query
 }
 
+// QueryFixtureEvents queries the fixtureEvents edge of a Fixture.
+func (c *FixtureClient) QueryFixtureEvents(f *Fixture) *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := f.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixture.Table, fixture.FieldID, id),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, fixture.FixtureEventsTable, fixture.FixtureEventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(f.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *FixtureClient) Hooks() []Hook {
 	return c.hooks.Fixture
@@ -1255,6 +1271,22 @@ func (c *FixtureEventsClient) QueryTeam(fe *FixtureEvents) *TeamQuery {
 			sqlgraph.From(fixtureevents.Table, fixtureevents.FieldID, id),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, fixtureevents.TeamTable, fixtureevents.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(fe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFixture queries the fixture edge of a FixtureEvents.
+func (c *FixtureEventsClient) QueryFixture(fe *FixtureEvents) *FixtureQuery {
+	query := (&FixtureClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixtureevents.Table, fixtureevents.FieldID, id),
+			sqlgraph.To(fixture.Table, fixture.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixtureevents.FixtureTable, fixtureevents.FixtureColumn),
 		)
 		fromV = sqlgraph.Neighbors(fe.driver.Dialect(), step)
 		return fromV, nil
@@ -3694,15 +3726,15 @@ func (c *TeamClient) QueryAwayFixtures(t *Team) *FixtureQuery {
 	return query
 }
 
-// QueryFixtureEvents queries the fixtureEvents edge of a Team.
-func (c *TeamClient) QueryFixtureEvents(t *Team) *FixtureEventsQuery {
+// QueryTeamFixtureEvents queries the teamFixtureEvents edge of a Team.
+func (c *TeamClient) QueryTeamFixtureEvents(t *Team) *FixtureEventsQuery {
 	query := (&FixtureEventsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := t.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(team.Table, team.FieldID, id),
 			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, team.FixtureEventsTable, team.FixtureEventsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, team.TeamFixtureEventsTable, team.TeamFixtureEventsColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil

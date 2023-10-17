@@ -56,12 +56,12 @@ func IDLTE(id int) predicate.FixtureEvents {
 }
 
 // ElapsedTime applies equality check predicate on the "elapsedTime" field. It's identical to ElapsedTimeEQ.
-func ElapsedTime(v string) predicate.FixtureEvents {
+func ElapsedTime(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldEQ(FieldElapsedTime, v))
 }
 
 // ExtraTime applies equality check predicate on the "extraTime" field. It's identical to ExtraTimeEQ.
-func ExtraTime(v string) predicate.FixtureEvents {
+func ExtraTime(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldEQ(FieldExtraTime, v))
 }
 
@@ -86,133 +86,93 @@ func LastUpdated(v time.Time) predicate.FixtureEvents {
 }
 
 // ElapsedTimeEQ applies the EQ predicate on the "elapsedTime" field.
-func ElapsedTimeEQ(v string) predicate.FixtureEvents {
+func ElapsedTimeEQ(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldEQ(FieldElapsedTime, v))
 }
 
 // ElapsedTimeNEQ applies the NEQ predicate on the "elapsedTime" field.
-func ElapsedTimeNEQ(v string) predicate.FixtureEvents {
+func ElapsedTimeNEQ(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldNEQ(FieldElapsedTime, v))
 }
 
 // ElapsedTimeIn applies the In predicate on the "elapsedTime" field.
-func ElapsedTimeIn(vs ...string) predicate.FixtureEvents {
+func ElapsedTimeIn(vs ...int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldIn(FieldElapsedTime, vs...))
 }
 
 // ElapsedTimeNotIn applies the NotIn predicate on the "elapsedTime" field.
-func ElapsedTimeNotIn(vs ...string) predicate.FixtureEvents {
+func ElapsedTimeNotIn(vs ...int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldNotIn(FieldElapsedTime, vs...))
 }
 
 // ElapsedTimeGT applies the GT predicate on the "elapsedTime" field.
-func ElapsedTimeGT(v string) predicate.FixtureEvents {
+func ElapsedTimeGT(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldGT(FieldElapsedTime, v))
 }
 
 // ElapsedTimeGTE applies the GTE predicate on the "elapsedTime" field.
-func ElapsedTimeGTE(v string) predicate.FixtureEvents {
+func ElapsedTimeGTE(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldGTE(FieldElapsedTime, v))
 }
 
 // ElapsedTimeLT applies the LT predicate on the "elapsedTime" field.
-func ElapsedTimeLT(v string) predicate.FixtureEvents {
+func ElapsedTimeLT(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldLT(FieldElapsedTime, v))
 }
 
 // ElapsedTimeLTE applies the LTE predicate on the "elapsedTime" field.
-func ElapsedTimeLTE(v string) predicate.FixtureEvents {
+func ElapsedTimeLTE(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldLTE(FieldElapsedTime, v))
 }
 
-// ElapsedTimeContains applies the Contains predicate on the "elapsedTime" field.
-func ElapsedTimeContains(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldContains(FieldElapsedTime, v))
-}
-
-// ElapsedTimeHasPrefix applies the HasPrefix predicate on the "elapsedTime" field.
-func ElapsedTimeHasPrefix(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldHasPrefix(FieldElapsedTime, v))
-}
-
-// ElapsedTimeHasSuffix applies the HasSuffix predicate on the "elapsedTime" field.
-func ElapsedTimeHasSuffix(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldHasSuffix(FieldElapsedTime, v))
-}
-
-// ElapsedTimeEqualFold applies the EqualFold predicate on the "elapsedTime" field.
-func ElapsedTimeEqualFold(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldEqualFold(FieldElapsedTime, v))
-}
-
-// ElapsedTimeContainsFold applies the ContainsFold predicate on the "elapsedTime" field.
-func ElapsedTimeContainsFold(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldContainsFold(FieldElapsedTime, v))
-}
-
 // ExtraTimeEQ applies the EQ predicate on the "extraTime" field.
-func ExtraTimeEQ(v string) predicate.FixtureEvents {
+func ExtraTimeEQ(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldEQ(FieldExtraTime, v))
 }
 
 // ExtraTimeNEQ applies the NEQ predicate on the "extraTime" field.
-func ExtraTimeNEQ(v string) predicate.FixtureEvents {
+func ExtraTimeNEQ(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldNEQ(FieldExtraTime, v))
 }
 
 // ExtraTimeIn applies the In predicate on the "extraTime" field.
-func ExtraTimeIn(vs ...string) predicate.FixtureEvents {
+func ExtraTimeIn(vs ...int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldIn(FieldExtraTime, vs...))
 }
 
 // ExtraTimeNotIn applies the NotIn predicate on the "extraTime" field.
-func ExtraTimeNotIn(vs ...string) predicate.FixtureEvents {
+func ExtraTimeNotIn(vs ...int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldNotIn(FieldExtraTime, vs...))
 }
 
 // ExtraTimeGT applies the GT predicate on the "extraTime" field.
-func ExtraTimeGT(v string) predicate.FixtureEvents {
+func ExtraTimeGT(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldGT(FieldExtraTime, v))
 }
 
 // ExtraTimeGTE applies the GTE predicate on the "extraTime" field.
-func ExtraTimeGTE(v string) predicate.FixtureEvents {
+func ExtraTimeGTE(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldGTE(FieldExtraTime, v))
 }
 
 // ExtraTimeLT applies the LT predicate on the "extraTime" field.
-func ExtraTimeLT(v string) predicate.FixtureEvents {
+func ExtraTimeLT(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldLT(FieldExtraTime, v))
 }
 
 // ExtraTimeLTE applies the LTE predicate on the "extraTime" field.
-func ExtraTimeLTE(v string) predicate.FixtureEvents {
+func ExtraTimeLTE(v int) predicate.FixtureEvents {
 	return predicate.FixtureEvents(sql.FieldLTE(FieldExtraTime, v))
 }
 
-// ExtraTimeContains applies the Contains predicate on the "extraTime" field.
-func ExtraTimeContains(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldContains(FieldExtraTime, v))
+// ExtraTimeIsNil applies the IsNil predicate on the "extraTime" field.
+func ExtraTimeIsNil() predicate.FixtureEvents {
+	return predicate.FixtureEvents(sql.FieldIsNull(FieldExtraTime))
 }
 
-// ExtraTimeHasPrefix applies the HasPrefix predicate on the "extraTime" field.
-func ExtraTimeHasPrefix(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldHasPrefix(FieldExtraTime, v))
-}
-
-// ExtraTimeHasSuffix applies the HasSuffix predicate on the "extraTime" field.
-func ExtraTimeHasSuffix(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldHasSuffix(FieldExtraTime, v))
-}
-
-// ExtraTimeEqualFold applies the EqualFold predicate on the "extraTime" field.
-func ExtraTimeEqualFold(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldEqualFold(FieldExtraTime, v))
-}
-
-// ExtraTimeContainsFold applies the ContainsFold predicate on the "extraTime" field.
-func ExtraTimeContainsFold(v string) predicate.FixtureEvents {
-	return predicate.FixtureEvents(sql.FieldContainsFold(FieldExtraTime, v))
+// ExtraTimeNotNil applies the NotNil predicate on the "extraTime" field.
+func ExtraTimeNotNil() predicate.FixtureEvents {
+	return predicate.FixtureEvents(sql.FieldNotNull(FieldExtraTime))
 }
 
 // TypeEQ applies the EQ predicate on the "type" field.
@@ -531,6 +491,29 @@ func HasTeam() predicate.FixtureEvents {
 func HasTeamWith(preds ...predicate.Team) predicate.FixtureEvents {
 	return predicate.FixtureEvents(func(s *sql.Selector) {
 		step := newTeamStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFixture applies the HasEdge predicate on the "fixture" edge.
+func HasFixture() predicate.FixtureEvents {
+	return predicate.FixtureEvents(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, FixtureTable, FixtureColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFixtureWith applies the HasEdge predicate on the "fixture" edge with a given conditions (other predicates).
+func HasFixtureWith(preds ...predicate.Fixture) predicate.FixtureEvents {
+	return predicate.FixtureEvents(func(s *sql.Selector) {
+		step := newFixtureStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

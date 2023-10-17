@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/fixtureevents"
 	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
@@ -251,6 +252,21 @@ func (fu *FixtureUpdate) AddLineups(f ...*FixtureLineups) *FixtureUpdate {
 	return fu.AddLineupIDs(ids...)
 }
 
+// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by IDs.
+func (fu *FixtureUpdate) AddFixtureEventIDs(ids ...int) *FixtureUpdate {
+	fu.mutation.AddFixtureEventIDs(ids...)
+	return fu
+}
+
+// AddFixtureEvents adds the "fixtureEvents" edges to the FixtureEvents entity.
+func (fu *FixtureUpdate) AddFixtureEvents(f ...*FixtureEvents) *FixtureUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.AddFixtureEventIDs(ids...)
+}
+
 // Mutation returns the FixtureMutation object of the builder.
 func (fu *FixtureUpdate) Mutation() *FixtureMutation {
 	return fu.mutation
@@ -293,6 +309,27 @@ func (fu *FixtureUpdate) RemoveLineups(f ...*FixtureLineups) *FixtureUpdate {
 		ids[i] = f[i].ID
 	}
 	return fu.RemoveLineupIDs(ids...)
+}
+
+// ClearFixtureEvents clears all "fixtureEvents" edges to the FixtureEvents entity.
+func (fu *FixtureUpdate) ClearFixtureEvents() *FixtureUpdate {
+	fu.mutation.ClearFixtureEvents()
+	return fu
+}
+
+// RemoveFixtureEventIDs removes the "fixtureEvents" edge to FixtureEvents entities by IDs.
+func (fu *FixtureUpdate) RemoveFixtureEventIDs(ids ...int) *FixtureUpdate {
+	fu.mutation.RemoveFixtureEventIDs(ids...)
+	return fu
+}
+
+// RemoveFixtureEvents removes "fixtureEvents" edges to FixtureEvents entities.
+func (fu *FixtureUpdate) RemoveFixtureEvents(f ...*FixtureEvents) *FixtureUpdate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fu.RemoveFixtureEventIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -549,6 +586,51 @@ func (fu *FixtureUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if fu.mutation.FixtureEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.FixtureEventsTable,
+			Columns: []string{fixture.FixtureEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.RemovedFixtureEventsIDs(); len(nodes) > 0 && !fu.mutation.FixtureEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.FixtureEventsTable,
+			Columns: []string{fixture.FixtureEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fu.mutation.FixtureEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.FixtureEventsTable,
+			Columns: []string{fixture.FixtureEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, fu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{fixture.Label}
@@ -789,6 +871,21 @@ func (fuo *FixtureUpdateOne) AddLineups(f ...*FixtureLineups) *FixtureUpdateOne 
 	return fuo.AddLineupIDs(ids...)
 }
 
+// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by IDs.
+func (fuo *FixtureUpdateOne) AddFixtureEventIDs(ids ...int) *FixtureUpdateOne {
+	fuo.mutation.AddFixtureEventIDs(ids...)
+	return fuo
+}
+
+// AddFixtureEvents adds the "fixtureEvents" edges to the FixtureEvents entity.
+func (fuo *FixtureUpdateOne) AddFixtureEvents(f ...*FixtureEvents) *FixtureUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.AddFixtureEventIDs(ids...)
+}
+
 // Mutation returns the FixtureMutation object of the builder.
 func (fuo *FixtureUpdateOne) Mutation() *FixtureMutation {
 	return fuo.mutation
@@ -831,6 +928,27 @@ func (fuo *FixtureUpdateOne) RemoveLineups(f ...*FixtureLineups) *FixtureUpdateO
 		ids[i] = f[i].ID
 	}
 	return fuo.RemoveLineupIDs(ids...)
+}
+
+// ClearFixtureEvents clears all "fixtureEvents" edges to the FixtureEvents entity.
+func (fuo *FixtureUpdateOne) ClearFixtureEvents() *FixtureUpdateOne {
+	fuo.mutation.ClearFixtureEvents()
+	return fuo
+}
+
+// RemoveFixtureEventIDs removes the "fixtureEvents" edge to FixtureEvents entities by IDs.
+func (fuo *FixtureUpdateOne) RemoveFixtureEventIDs(ids ...int) *FixtureUpdateOne {
+	fuo.mutation.RemoveFixtureEventIDs(ids...)
+	return fuo
+}
+
+// RemoveFixtureEvents removes "fixtureEvents" edges to FixtureEvents entities.
+func (fuo *FixtureUpdateOne) RemoveFixtureEvents(f ...*FixtureEvents) *FixtureUpdateOne {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return fuo.RemoveFixtureEventIDs(ids...)
 }
 
 // Where appends a list predicates to the FixtureUpdate builder.
@@ -1110,6 +1228,51 @@ func (fuo *FixtureUpdateOne) sqlSave(ctx context.Context) (_node *Fixture, err e
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if fuo.mutation.FixtureEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.FixtureEventsTable,
+			Columns: []string{fixture.FixtureEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.RemovedFixtureEventsIDs(); len(nodes) > 0 && !fuo.mutation.FixtureEventsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.FixtureEventsTable,
+			Columns: []string{fixture.FixtureEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := fuo.mutation.FixtureEventsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   fixture.FixtureEventsTable,
+			Columns: []string{fixture.FixtureEventsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

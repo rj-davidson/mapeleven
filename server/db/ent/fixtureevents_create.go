@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"mapeleven/db/ent/fixture"
 	"mapeleven/db/ent/fixtureevents"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/team"
@@ -23,14 +24,22 @@ type FixtureEventsCreate struct {
 }
 
 // SetElapsedTime sets the "elapsedTime" field.
-func (fec *FixtureEventsCreate) SetElapsedTime(s string) *FixtureEventsCreate {
-	fec.mutation.SetElapsedTime(s)
+func (fec *FixtureEventsCreate) SetElapsedTime(i int) *FixtureEventsCreate {
+	fec.mutation.SetElapsedTime(i)
 	return fec
 }
 
 // SetExtraTime sets the "extraTime" field.
-func (fec *FixtureEventsCreate) SetExtraTime(s string) *FixtureEventsCreate {
-	fec.mutation.SetExtraTime(s)
+func (fec *FixtureEventsCreate) SetExtraTime(i int) *FixtureEventsCreate {
+	fec.mutation.SetExtraTime(i)
+	return fec
+}
+
+// SetNillableExtraTime sets the "extraTime" field if the given value is not nil.
+func (fec *FixtureEventsCreate) SetNillableExtraTime(i *int) *FixtureEventsCreate {
+	if i != nil {
+		fec.SetExtraTime(*i)
+	}
 	return fec
 }
 
@@ -115,6 +124,17 @@ func (fec *FixtureEventsCreate) SetTeam(t *Team) *FixtureEventsCreate {
 	return fec.SetTeamID(t.ID)
 }
 
+// SetFixtureID sets the "fixture" edge to the Fixture entity by ID.
+func (fec *FixtureEventsCreate) SetFixtureID(id int) *FixtureEventsCreate {
+	fec.mutation.SetFixtureID(id)
+	return fec
+}
+
+// SetFixture sets the "fixture" edge to the Fixture entity.
+func (fec *FixtureEventsCreate) SetFixture(f *Fixture) *FixtureEventsCreate {
+	return fec.SetFixtureID(f.ID)
+}
+
 // Mutation returns the FixtureEventsMutation object of the builder.
 func (fec *FixtureEventsCreate) Mutation() *FixtureEventsMutation {
 	return fec.mutation
@@ -161,9 +181,6 @@ func (fec *FixtureEventsCreate) check() error {
 	if _, ok := fec.mutation.ElapsedTime(); !ok {
 		return &ValidationError{Name: "elapsedTime", err: errors.New(`ent: missing required field "FixtureEvents.elapsedTime"`)}
 	}
-	if _, ok := fec.mutation.ExtraTime(); !ok {
-		return &ValidationError{Name: "extraTime", err: errors.New(`ent: missing required field "FixtureEvents.extraTime"`)}
-	}
 	if _, ok := fec.mutation.GetType(); !ok {
 		return &ValidationError{Name: "type", err: errors.New(`ent: missing required field "FixtureEvents.type"`)}
 	}
@@ -175,6 +192,9 @@ func (fec *FixtureEventsCreate) check() error {
 	}
 	if _, ok := fec.mutation.TeamID(); !ok {
 		return &ValidationError{Name: "team", err: errors.New(`ent: missing required edge "FixtureEvents.team"`)}
+	}
+	if _, ok := fec.mutation.FixtureID(); !ok {
+		return &ValidationError{Name: "fixture", err: errors.New(`ent: missing required edge "FixtureEvents.fixture"`)}
 	}
 	return nil
 }
@@ -203,11 +223,11 @@ func (fec *FixtureEventsCreate) createSpec() (*FixtureEvents, *sqlgraph.CreateSp
 		_spec = sqlgraph.NewCreateSpec(fixtureevents.Table, sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt))
 	)
 	if value, ok := fec.mutation.ElapsedTime(); ok {
-		_spec.SetField(fixtureevents.FieldElapsedTime, field.TypeString, value)
+		_spec.SetField(fixtureevents.FieldElapsedTime, field.TypeInt, value)
 		_node.ElapsedTime = value
 	}
 	if value, ok := fec.mutation.ExtraTime(); ok {
-		_spec.SetField(fixtureevents.FieldExtraTime, field.TypeString, value)
+		_spec.SetField(fixtureevents.FieldExtraTime, field.TypeInt, value)
 		_node.ExtraTime = value
 	}
 	if value, ok := fec.mutation.GetType(); ok {
@@ -274,7 +294,24 @@ func (fec *FixtureEventsCreate) createSpec() (*FixtureEvents, *sqlgraph.CreateSp
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.team_fixture_events = &nodes[0]
+		_node.team_team_fixture_events = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fec.mutation.FixtureIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.FixtureTable,
+			Columns: []string{fixtureevents.FixtureColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.fixture_fixture_events = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

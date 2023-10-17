@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/fixtureevents"
 	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/predicate"
 	"mapeleven/db/ent/season"
@@ -21,15 +22,16 @@ import (
 // FixtureQuery is the builder for querying Fixture entities.
 type FixtureQuery struct {
 	config
-	ctx          *QueryContext
-	order        []fixture.Order
-	inters       []Interceptor
-	predicates   []predicate.Fixture
-	withHomeTeam *TeamQuery
-	withAwayTeam *TeamQuery
-	withSeason   *SeasonQuery
-	withLineups  *FixtureLineupsQuery
-	withFKs      bool
+	ctx               *QueryContext
+	order             []fixture.Order
+	inters            []Interceptor
+	predicates        []predicate.Fixture
+	withHomeTeam      *TeamQuery
+	withAwayTeam      *TeamQuery
+	withSeason        *SeasonQuery
+	withLineups       *FixtureLineupsQuery
+	withFixtureEvents *FixtureEventsQuery
+	withFKs           bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -147,6 +149,28 @@ func (fq *FixtureQuery) QueryLineups() *FixtureLineupsQuery {
 			sqlgraph.From(fixture.Table, fixture.FieldID, selector),
 			sqlgraph.To(fixturelineups.Table, fixturelineups.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, fixture.LineupsTable, fixture.LineupsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFixtureEvents chains the current query on the "fixtureEvents" edge.
+func (fq *FixtureQuery) QueryFixtureEvents() *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: fq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := fq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := fq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixture.Table, fixture.FieldID, selector),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, fixture.FixtureEventsTable, fixture.FixtureEventsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(fq.driver.Dialect(), step)
 		return fromU, nil
@@ -341,15 +365,16 @@ func (fq *FixtureQuery) Clone() *FixtureQuery {
 		return nil
 	}
 	return &FixtureQuery{
-		config:       fq.config,
-		ctx:          fq.ctx.Clone(),
-		order:        append([]fixture.Order{}, fq.order...),
-		inters:       append([]Interceptor{}, fq.inters...),
-		predicates:   append([]predicate.Fixture{}, fq.predicates...),
-		withHomeTeam: fq.withHomeTeam.Clone(),
-		withAwayTeam: fq.withAwayTeam.Clone(),
-		withSeason:   fq.withSeason.Clone(),
-		withLineups:  fq.withLineups.Clone(),
+		config:            fq.config,
+		ctx:               fq.ctx.Clone(),
+		order:             append([]fixture.Order{}, fq.order...),
+		inters:            append([]Interceptor{}, fq.inters...),
+		predicates:        append([]predicate.Fixture{}, fq.predicates...),
+		withHomeTeam:      fq.withHomeTeam.Clone(),
+		withAwayTeam:      fq.withAwayTeam.Clone(),
+		withSeason:        fq.withSeason.Clone(),
+		withLineups:       fq.withLineups.Clone(),
+		withFixtureEvents: fq.withFixtureEvents.Clone(),
 		// clone intermediate query.
 		sql:  fq.sql.Clone(),
 		path: fq.path,
@@ -397,6 +422,17 @@ func (fq *FixtureQuery) WithLineups(opts ...func(*FixtureLineupsQuery)) *Fixture
 		opt(query)
 	}
 	fq.withLineups = query
+	return fq
+}
+
+// WithFixtureEvents tells the query-builder to eager-load the nodes that are connected to
+// the "fixtureEvents" edge. The optional arguments are used to configure the query builder of the edge.
+func (fq *FixtureQuery) WithFixtureEvents(opts ...func(*FixtureEventsQuery)) *FixtureQuery {
+	query := (&FixtureEventsClient{config: fq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	fq.withFixtureEvents = query
 	return fq
 }
 
@@ -479,11 +515,12 @@ func (fq *FixtureQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fixt
 		nodes       = []*Fixture{}
 		withFKs     = fq.withFKs
 		_spec       = fq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			fq.withHomeTeam != nil,
 			fq.withAwayTeam != nil,
 			fq.withSeason != nil,
 			fq.withLineups != nil,
+			fq.withFixtureEvents != nil,
 		}
 	)
 	if fq.withHomeTeam != nil || fq.withAwayTeam != nil || fq.withSeason != nil {
@@ -532,6 +569,13 @@ func (fq *FixtureQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Fixt
 		if err := fq.loadLineups(ctx, query, nodes,
 			func(n *Fixture) { n.Edges.Lineups = []*FixtureLineups{} },
 			func(n *Fixture, e *FixtureLineups) { n.Edges.Lineups = append(n.Edges.Lineups, e) }); err != nil {
+			return nil, err
+		}
+	}
+	if query := fq.withFixtureEvents; query != nil {
+		if err := fq.loadFixtureEvents(ctx, query, nodes,
+			func(n *Fixture) { n.Edges.FixtureEvents = []*FixtureEvents{} },
+			func(n *Fixture, e *FixtureEvents) { n.Edges.FixtureEvents = append(n.Edges.FixtureEvents, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -660,6 +704,37 @@ func (fq *FixtureQuery) loadLineups(ctx context.Context, query *FixtureLineupsQu
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "fixture_lineups" returned %v for node %v`, *fk, n.ID)
+		}
+		assign(node, n)
+	}
+	return nil
+}
+func (fq *FixtureQuery) loadFixtureEvents(ctx context.Context, query *FixtureEventsQuery, nodes []*Fixture, init func(*Fixture), assign func(*Fixture, *FixtureEvents)) error {
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Fixture)
+	for i := range nodes {
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
+		}
+	}
+	query.withFKs = true
+	query.Where(predicate.FixtureEvents(func(s *sql.Selector) {
+		s.Where(sql.InValues(fixture.FixtureEventsColumn, fks...))
+	}))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		fk := n.fixture_fixture_events
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "fixture_fixture_events" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "fixture_fixture_events" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

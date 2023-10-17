@@ -2,6 +2,7 @@ package fixture_models
 
 import (
 	"context"
+	"fmt"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/fixture"
@@ -32,7 +33,7 @@ type Event struct {
 	Time     TimeDetail `json:"time"`
 	Team     TeamInfo   `json:"team"`
 	Player   Player     `json:"player"`
-	Assist   Player     `json:"assist"`
+	Assist   *Player    `json:"assist"`
 	Type     string     `json:"type"`
 	Detail   string     `json:"detail"`
 	Comments *string    `json:"comments"`
@@ -177,6 +178,8 @@ func (fm *FixtureModel) GetFixtureByApiFootballId(ctx context.Context, apiFootba
 	return fm.client.Fixture.
 		Query().
 		Where(fixture.ApiFootballIdEQ(apiFootballId)).
+		WithHomeTeam().
+		WithAwayTeam().
 		Only(ctx)
 }
 
@@ -192,4 +195,29 @@ func (fm *FixtureModel) ListFixtures(ctx context.Context) ([]*ent.Fixture, error
 	return fm.client.Fixture.
 		Query().
 		All(ctx)
+}
+
+func (fm *FixtureModel) UpsertFixtureData(apiFootballId int, data FixtureDetails, ctx context.Context) error {
+	f, err := fm.GetFixtureByApiFootballId(ctx, apiFootballId)
+	homeTeam := f.Edges.HomeTeam
+	awayTeam := f.Edges.AwayTeam
+
+	if len(data.Lineups) > 0 {
+		_, err = UpsertLineup(f, awayTeam, data.Lineups[0], fm.client, ctx)
+		if err != nil {
+			fmt.Printf("Error upserting lineup: %v", err)
+		}
+
+		_, err = UpsertLineup(f, homeTeam, data.Lineups[1], fm.client, ctx)
+		if err != nil {
+			fmt.Printf("Error upserting lineup: %v", err)
+		}
+	}
+
+	err = RepopulateEvents(f, fm.client, data.Events, ctx)
+	if err != nil {
+		fmt.Printf("Error repopulating events: %v", err)
+	}
+
+	return nil
 }

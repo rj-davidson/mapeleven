@@ -34,15 +34,39 @@ func (mpc *MatchPlayerCreate) SetPosition(s string) *MatchPlayerCreate {
 	return mpc
 }
 
+// SetNillablePosition sets the "position" field if the given value is not nil.
+func (mpc *MatchPlayerCreate) SetNillablePosition(s *string) *MatchPlayerCreate {
+	if s != nil {
+		mpc.SetPosition(*s)
+	}
+	return mpc
+}
+
 // SetX sets the "x" field.
 func (mpc *MatchPlayerCreate) SetX(i int) *MatchPlayerCreate {
 	mpc.mutation.SetX(i)
 	return mpc
 }
 
+// SetNillableX sets the "x" field if the given value is not nil.
+func (mpc *MatchPlayerCreate) SetNillableX(i *int) *MatchPlayerCreate {
+	if i != nil {
+		mpc.SetX(*i)
+	}
+	return mpc
+}
+
 // SetY sets the "y" field.
 func (mpc *MatchPlayerCreate) SetY(i int) *MatchPlayerCreate {
 	mpc.mutation.SetY(i)
+	return mpc
+}
+
+// SetNillableY sets the "y" field if the given value is not nil.
+func (mpc *MatchPlayerCreate) SetNillableY(i *int) *MatchPlayerCreate {
+	if i != nil {
+		mpc.SetY(*i)
+	}
 	return mpc
 }
 
@@ -127,15 +151,6 @@ func (mpc *MatchPlayerCreate) defaults() {
 func (mpc *MatchPlayerCreate) check() error {
 	if _, ok := mpc.mutation.Number(); !ok {
 		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "MatchPlayer.number"`)}
-	}
-	if _, ok := mpc.mutation.Position(); !ok {
-		return &ValidationError{Name: "position", err: errors.New(`ent: missing required field "MatchPlayer.position"`)}
-	}
-	if _, ok := mpc.mutation.X(); !ok {
-		return &ValidationError{Name: "x", err: errors.New(`ent: missing required field "MatchPlayer.x"`)}
-	}
-	if _, ok := mpc.mutation.Y(); !ok {
-		return &ValidationError{Name: "y", err: errors.New(`ent: missing required field "MatchPlayer.y"`)}
 	}
 	if _, ok := mpc.mutation.PlayerID(); !ok {
 		return &ValidationError{Name: "player", err: errors.New(`ent: missing required edge "MatchPlayer.player"`)}

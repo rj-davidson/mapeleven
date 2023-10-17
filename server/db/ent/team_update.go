@@ -151,19 +151,19 @@ func (tu *TeamUpdate) AddAwayFixtures(f ...*Fixture) *TeamUpdate {
 	return tu.AddAwayFixtureIDs(ids...)
 }
 
-// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by IDs.
-func (tu *TeamUpdate) AddFixtureEventIDs(ids ...int) *TeamUpdate {
-	tu.mutation.AddFixtureEventIDs(ids...)
+// AddTeamFixtureEventIDs adds the "teamFixtureEvents" edge to the FixtureEvents entity by IDs.
+func (tu *TeamUpdate) AddTeamFixtureEventIDs(ids ...int) *TeamUpdate {
+	tu.mutation.AddTeamFixtureEventIDs(ids...)
 	return tu
 }
 
-// AddFixtureEvents adds the "fixtureEvents" edges to the FixtureEvents entity.
-func (tu *TeamUpdate) AddFixtureEvents(f ...*FixtureEvents) *TeamUpdate {
+// AddTeamFixtureEvents adds the "teamFixtureEvents" edges to the FixtureEvents entity.
+func (tu *TeamUpdate) AddTeamFixtureEvents(f ...*FixtureEvents) *TeamUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return tu.AddFixtureEventIDs(ids...)
+	return tu.AddTeamFixtureEventIDs(ids...)
 }
 
 // AddFixtureLineupIDs adds the "fixtureLineups" edge to the FixtureLineups entity by IDs.
@@ -439,25 +439,25 @@ func (tu *TeamUpdate) RemoveAwayFixtures(f ...*Fixture) *TeamUpdate {
 	return tu.RemoveAwayFixtureIDs(ids...)
 }
 
-// ClearFixtureEvents clears all "fixtureEvents" edges to the FixtureEvents entity.
-func (tu *TeamUpdate) ClearFixtureEvents() *TeamUpdate {
-	tu.mutation.ClearFixtureEvents()
+// ClearTeamFixtureEvents clears all "teamFixtureEvents" edges to the FixtureEvents entity.
+func (tu *TeamUpdate) ClearTeamFixtureEvents() *TeamUpdate {
+	tu.mutation.ClearTeamFixtureEvents()
 	return tu
 }
 
-// RemoveFixtureEventIDs removes the "fixtureEvents" edge to FixtureEvents entities by IDs.
-func (tu *TeamUpdate) RemoveFixtureEventIDs(ids ...int) *TeamUpdate {
-	tu.mutation.RemoveFixtureEventIDs(ids...)
+// RemoveTeamFixtureEventIDs removes the "teamFixtureEvents" edge to FixtureEvents entities by IDs.
+func (tu *TeamUpdate) RemoveTeamFixtureEventIDs(ids ...int) *TeamUpdate {
+	tu.mutation.RemoveTeamFixtureEventIDs(ids...)
 	return tu
 }
 
-// RemoveFixtureEvents removes "fixtureEvents" edges to FixtureEvents entities.
-func (tu *TeamUpdate) RemoveFixtureEvents(f ...*FixtureEvents) *TeamUpdate {
+// RemoveTeamFixtureEvents removes "teamFixtureEvents" edges to FixtureEvents entities.
+func (tu *TeamUpdate) RemoveTeamFixtureEvents(f ...*FixtureEvents) *TeamUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return tu.RemoveFixtureEventIDs(ids...)
+	return tu.RemoveTeamFixtureEventIDs(ids...)
 }
 
 // ClearFixtureLineups clears all "fixtureLineups" edges to the FixtureLineups entity.
@@ -847,12 +847,12 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tu.mutation.FixtureEventsCleared() {
+	if tu.mutation.TeamFixtureEventsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   team.FixtureEventsTable,
-			Columns: []string{team.FixtureEventsColumn},
+			Table:   team.TeamFixtureEventsTable,
+			Columns: []string{team.TeamFixtureEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
@@ -860,12 +860,12 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.RemovedFixtureEventsIDs(); len(nodes) > 0 && !tu.mutation.FixtureEventsCleared() {
+	if nodes := tu.mutation.RemovedTeamFixtureEventsIDs(); len(nodes) > 0 && !tu.mutation.TeamFixtureEventsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   team.FixtureEventsTable,
-			Columns: []string{team.FixtureEventsColumn},
+			Table:   team.TeamFixtureEventsTable,
+			Columns: []string{team.TeamFixtureEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
@@ -876,12 +876,12 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tu.mutation.FixtureEventsIDs(); len(nodes) > 0 {
+	if nodes := tu.mutation.TeamFixtureEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   team.FixtureEventsTable,
-			Columns: []string{team.FixtureEventsColumn},
+			Table:   team.TeamFixtureEventsTable,
+			Columns: []string{team.TeamFixtureEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
@@ -1402,19 +1402,19 @@ func (tuo *TeamUpdateOne) AddAwayFixtures(f ...*Fixture) *TeamUpdateOne {
 	return tuo.AddAwayFixtureIDs(ids...)
 }
 
-// AddFixtureEventIDs adds the "fixtureEvents" edge to the FixtureEvents entity by IDs.
-func (tuo *TeamUpdateOne) AddFixtureEventIDs(ids ...int) *TeamUpdateOne {
-	tuo.mutation.AddFixtureEventIDs(ids...)
+// AddTeamFixtureEventIDs adds the "teamFixtureEvents" edge to the FixtureEvents entity by IDs.
+func (tuo *TeamUpdateOne) AddTeamFixtureEventIDs(ids ...int) *TeamUpdateOne {
+	tuo.mutation.AddTeamFixtureEventIDs(ids...)
 	return tuo
 }
 
-// AddFixtureEvents adds the "fixtureEvents" edges to the FixtureEvents entity.
-func (tuo *TeamUpdateOne) AddFixtureEvents(f ...*FixtureEvents) *TeamUpdateOne {
+// AddTeamFixtureEvents adds the "teamFixtureEvents" edges to the FixtureEvents entity.
+func (tuo *TeamUpdateOne) AddTeamFixtureEvents(f ...*FixtureEvents) *TeamUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return tuo.AddFixtureEventIDs(ids...)
+	return tuo.AddTeamFixtureEventIDs(ids...)
 }
 
 // AddFixtureLineupIDs adds the "fixtureLineups" edge to the FixtureLineups entity by IDs.
@@ -1690,25 +1690,25 @@ func (tuo *TeamUpdateOne) RemoveAwayFixtures(f ...*Fixture) *TeamUpdateOne {
 	return tuo.RemoveAwayFixtureIDs(ids...)
 }
 
-// ClearFixtureEvents clears all "fixtureEvents" edges to the FixtureEvents entity.
-func (tuo *TeamUpdateOne) ClearFixtureEvents() *TeamUpdateOne {
-	tuo.mutation.ClearFixtureEvents()
+// ClearTeamFixtureEvents clears all "teamFixtureEvents" edges to the FixtureEvents entity.
+func (tuo *TeamUpdateOne) ClearTeamFixtureEvents() *TeamUpdateOne {
+	tuo.mutation.ClearTeamFixtureEvents()
 	return tuo
 }
 
-// RemoveFixtureEventIDs removes the "fixtureEvents" edge to FixtureEvents entities by IDs.
-func (tuo *TeamUpdateOne) RemoveFixtureEventIDs(ids ...int) *TeamUpdateOne {
-	tuo.mutation.RemoveFixtureEventIDs(ids...)
+// RemoveTeamFixtureEventIDs removes the "teamFixtureEvents" edge to FixtureEvents entities by IDs.
+func (tuo *TeamUpdateOne) RemoveTeamFixtureEventIDs(ids ...int) *TeamUpdateOne {
+	tuo.mutation.RemoveTeamFixtureEventIDs(ids...)
 	return tuo
 }
 
-// RemoveFixtureEvents removes "fixtureEvents" edges to FixtureEvents entities.
-func (tuo *TeamUpdateOne) RemoveFixtureEvents(f ...*FixtureEvents) *TeamUpdateOne {
+// RemoveTeamFixtureEvents removes "teamFixtureEvents" edges to FixtureEvents entities.
+func (tuo *TeamUpdateOne) RemoveTeamFixtureEvents(f ...*FixtureEvents) *TeamUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
 	}
-	return tuo.RemoveFixtureEventIDs(ids...)
+	return tuo.RemoveTeamFixtureEventIDs(ids...)
 }
 
 // ClearFixtureLineups clears all "fixtureLineups" edges to the FixtureLineups entity.
@@ -2128,12 +2128,12 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if tuo.mutation.FixtureEventsCleared() {
+	if tuo.mutation.TeamFixtureEventsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   team.FixtureEventsTable,
-			Columns: []string{team.FixtureEventsColumn},
+			Table:   team.TeamFixtureEventsTable,
+			Columns: []string{team.TeamFixtureEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
@@ -2141,12 +2141,12 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.RemovedFixtureEventsIDs(); len(nodes) > 0 && !tuo.mutation.FixtureEventsCleared() {
+	if nodes := tuo.mutation.RemovedTeamFixtureEventsIDs(); len(nodes) > 0 && !tuo.mutation.TeamFixtureEventsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   team.FixtureEventsTable,
-			Columns: []string{team.FixtureEventsColumn},
+			Table:   team.TeamFixtureEventsTable,
+			Columns: []string{team.TeamFixtureEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
@@ -2157,12 +2157,12 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := tuo.mutation.FixtureEventsIDs(); len(nodes) > 0 {
+	if nodes := tuo.mutation.TeamFixtureEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   team.FixtureEventsTable,
-			Columns: []string{team.FixtureEventsColumn},
+			Table:   team.TeamFixtureEventsTable,
+			Columns: []string{team.TeamFixtureEventsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
