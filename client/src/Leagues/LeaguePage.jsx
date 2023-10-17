@@ -25,7 +25,6 @@ function LeaguePage() {
         fetch(`${url}/leagues/${slug}`)
             .then(response => response.json())
             .then(jsonData => {
-                console.log(jsonData);
                 setName(jsonData.name);
                 setLogo(jsonData.logo);
                 setFlag(jsonData.country.flag);

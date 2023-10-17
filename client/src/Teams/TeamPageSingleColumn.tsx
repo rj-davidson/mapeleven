@@ -3,6 +3,7 @@ import { Grid } from '@mui/material';
 import { Flex } from '../Util/Flex.jsx';
 import FormCard from './FormCard.jsx';
 import TeamIDCard from './TeamIDCard';
+import TeamStats from './TeamStats';
 
 interface TeamPageSingleColumnProps {
     slug: string;
@@ -17,6 +18,9 @@ interface TeamPageSingleColumnProps {
     wins: number;
     draws: number;
     loses: number;
+    averageGoals: number;
+    gamesScored: number;
+    failedToScore: number;
 }
 
 const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
@@ -32,6 +36,9 @@ const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
     wins,
     draws,
     loses,
+    averageGoals,
+    gamesScored,
+    failedToScore,
 }) => {
     return (
         <Grid container spacing={2}>
@@ -54,6 +61,21 @@ const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                 <Flex style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
                     <FormCard />
+                </Flex>
+            </Grid>
+            <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
+                <Flex style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
+                    <TeamStats
+                        goals={goals}
+                        clean={clean}
+                        gamesPlayed={gamesPlayed}
+                        wins={wins}
+                        draws={draws}
+                        loses={loses}
+                        averageGoals={averageGoals}
+                        failedToScore={failedToScore}
+                        gamesScored={gamesScored}
+                    />
                 </Flex>
             </Grid>
         </Grid>

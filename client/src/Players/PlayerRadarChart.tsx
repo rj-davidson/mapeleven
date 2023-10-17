@@ -430,7 +430,7 @@ const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
                         <ResponsiveContainer>
                             <RadarChart data={data} innerRadius={'10%'}>
                                 <PolarGrid gridType={'circle'} />
-                                <PolarAngleAxis dataKey='stat' stroke='white' axisLine={false} />
+                                <PolarAngleAxis dataKey='stat' stroke='white' axisLine={false} tickLine={false} />
                                 <Radar
                                     name={name}
                                     dataKey='A'

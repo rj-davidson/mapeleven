@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { APIScoreboardDate } from '../Models/api_types';
-import { Grid, Typography } from '@mui/material';
+import { Grid, Typography, useMediaQuery } from '@mui/material';
 import ListFixtureCard from './ListFixtureCard';
 import { Flex } from '../Util/Flex';
 import DisplayImage from '../Util/DisplayImage';
@@ -13,6 +13,7 @@ interface ListFixtureTableProps {
 const ListFixtureTable: React.FC<ListFixtureTableProps> = ({ date }) => {
     // Sort the leagues array by name in ascending order
     const sortedLeagues = [...date.leagues].sort((a, b) => b.name.localeCompare(a.name));
+    const isSmallerThanLG = useMediaQuery('(max-width: 1260px)');
 
     return (
         <Grid container spacing={1}>
@@ -25,6 +26,7 @@ const ListFixtureTable: React.FC<ListFixtureTableProps> = ({ date }) => {
                             gap: '8px',
                             marginTop: '24px',
                             marginBottom: '10px',
+                            alignItems: 'center',
                         }}
                     >
                         <DisplayImage src={league.logo} alt={league.name} />
@@ -34,6 +36,7 @@ const ListFixtureTable: React.FC<ListFixtureTableProps> = ({ date }) => {
                                 component='h2'
                                 gutterBottom
                                 sx={{
+                                    fontSize: !isSmallerThanLG ? '20px' : '16px',
                                     '&:hover': {
                                         textDecoration: 'underline', // Add underline on hover
                                     },

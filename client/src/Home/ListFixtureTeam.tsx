@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Typography } from '@mui/material';
+import { Typography, useMediaQuery } from '@mui/material';
 import DisplayImage from '../Util/DisplayImage';
 import { Flex } from '../Util/Flex.jsx';
 import { Link } from 'react-router-dom';
@@ -12,6 +12,8 @@ interface ListFixtureTeamProps {
 }
 
 const ListFixtureTeam: React.FC<ListFixtureTeamProps> = ({ slug, name, logo, home }) => {
+    const isSmallerThanLG = useMediaQuery('(max-width: 1260px)');
+
     return home ? (
         <Flex
             style={{
@@ -26,7 +28,8 @@ const ListFixtureTeam: React.FC<ListFixtureTeamProps> = ({ slug, name, logo, hom
                     variant='h6'
                     component='h2'
                     sx={{
-                        fontSize: '16px',
+                        fontSize: !isSmallerThanLG ? '16px' : '12px',
+                        textAlign: 'right',
                         '&:hover': {
                             textDecoration: 'underline', // Add underline on hover
                         },
@@ -52,7 +55,8 @@ const ListFixtureTeam: React.FC<ListFixtureTeamProps> = ({ slug, name, logo, hom
                     variant='h6'
                     component='h2'
                     sx={{
-                        fontSize: '16px',
+                        fontSize: !isSmallerThanLG ? '16px' : '12px',
+                        textAlign: 'left',
                         '&:hover': {
                             textDecoration: 'underline', // Add underline on hover
                         },

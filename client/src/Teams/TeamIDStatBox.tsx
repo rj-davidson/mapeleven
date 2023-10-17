@@ -4,7 +4,7 @@ import { Tile } from '../Util/TileTS';
 
 interface TeamIDStatBoxProps {
     stat: string;
-    value: number;
+    value: number | string;
 }
 
 const TeamIDStatBox: React.FC<TeamIDStatBoxProps> = ({ stat, value }) => {
