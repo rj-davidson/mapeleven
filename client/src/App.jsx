@@ -11,6 +11,7 @@ import About from './About/About.tsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material';
 import HomePage from './Home/HomePage';
+import PlayerPageSingle from './Players/PlayerPageSingle';
 
 function App() {
     return (
@@ -20,7 +21,7 @@ function App() {
                     <Layout>
                         <Routes>
                             <Route path='/fixtures/:slug' element='' />
-                            <Route path='/players/:slug' element={''} />
+                            <Route path='/players/:slug' element={<PlayerPageSingle />} />
                             <Route path='/players' element={<Players />} />
                             <Route path='/teams/:slug' element={<TeamPageSingle />} />
                             <Route path='/teams' element={<TeamPageAll />} />

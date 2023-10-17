@@ -2,20 +2,20 @@ import * as React from 'react';
 import { Box, Grid, MenuItem, Select, Typography } from '@mui/material';
 import { Tile } from '../Util/TileTS';
 import { Flex } from '../Util/Flex.jsx';
-import TeamRadarSearch from './TeamRadarSearch.jsx';
+import PlayerRadarSearch from './PlayerRadarSearch.jsx';
 import { Legend, PolarAngleAxis, PolarGrid, Radar, RadarChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { useEffect, useState } from 'react';
-import TeamOppIDCard from './TeamOppIDCard';
+import PlayerOppIDCard from './PlayerOppIDCard';
 
 interface TeamRadarChartProps {
     name: string;
-    goals: number;
-    clean: number;
-    fixtures: number;
-    wins: number;
-    averageGoals: number;
-    gamesScored: number;
-    failedToScore: number;
+    goals?: number;
+    clean?: number;
+    fixtures?: number;
+    wins?: number;
+    averageGoals?: number;
+    gamesScored?: number;
+    failedToScore?: number;
 }
 
 interface ChartDatum {
@@ -27,27 +27,28 @@ interface ChartDatum {
 const url = import.meta.env.VITE_API_URL;
 
 const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
-    goals,
-    clean,
-    fixtures,
+    goals = 10,
+    clean = 10,
+    fixtures = 10,
     name,
-    averageGoals,
-    failedToScore,
-    gamesScored,
-    wins,
+    averageGoals = 2,
+    failedToScore = 10,
+    gamesScored = 10,
+    wins = 10,
 }) => {
     const [oppSlug, setOppSlug] = useState<string>(null);
     const [oppName, setOppName] = useState<string>('');
-    const [oppBadge, setOppBadge] = useState<string>('');
-    const [oppGoals, setOppGoals] = useState<number>(0);
-    const [oppClean, setOppClean] = useState<number>(0);
-    const [oppWins, setOppWins] = useState<number>(0);
-    const [oppFailed, setOppFailed] = useState<number>(0);
-    const [oppScored, setOppScored] = useState<number>(0);
-    const [oppAvgGoals, setOppAvgGoals] = useState<number>(0);
+    const [oppPhoto, setOppPhoto] = useState<string>('');
+    const [oppGoals, setOppGoals] = useState<number>(5);
+    const [oppClean, setOppClean] = useState<number>(5);
+    const [oppWins, setOppWins] = useState<number>(5);
+    const [oppFailed, setOppFailed] = useState<number>(5);
+    const [oppScored, setOppScored] = useState<number>(5);
+    const [oppAvgGoals, setOppAvgGoals] = useState<number>(5);
     const [oppCountry, setOppCountry] = useState<string>('');
     const [oppFlag, setOppFlag] = useState<string>('');
-    const [oppFixtures, setOppFixtures] = useState<number>(0);
+    const [oppFixtures, setOppFixtures] = useState<number>(10);
+    const [oppInjured, setOppInjured] = useState<boolean>(false);
 
     // Array of all available stats
     const allStats = ['Goals', 'Clean Sheets', 'Fixtures', 'Wins', 'Games Scored', 'Average Goals', 'Failed To Score'];
@@ -63,30 +64,12 @@ const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
 
     useEffect(() => {
         if (oppSlug) {
-            fetch(`${url}/teams/${oppSlug}`)
+            fetch(`${url}/players/${oppSlug}`)
                 .then(response => response.json())
                 .then(jsonData => {
-                    setOppName(jsonData.name.long);
-                    setOppBadge(jsonData.badge);
-                    setOppGoals(jsonData.competitions[0].stats.goals.for.total.total);
-                    setOppClean(jsonData.competitions[0].stats.clean_sheet.total);
-                    setOppCountry(jsonData.country.name);
-                    setOppFlag(jsonData.country.flag);
-                    setOppAvgGoals(jsonData.competitions[0].stats.goals.for.average.total);
-                    setOppWins(
-                        jsonData.competitions[0].stats.fixtures.wins.home +
-                            jsonData.competitions[0].stats.fixtures.wins.away,
-                    );
-                    setOppFailed(jsonData.competitions[0].stats.failed_to_score.total);
-                    setOppFixtures(
-                        jsonData.competitions[0].stats.fixtures.played.home +
-                            jsonData.competitions[0].stats.fixtures.played.away,
-                    );
-                    setOppScored(
-                        jsonData.competitions[0].stats.fixtures.played.home +
-                            jsonData.competitions[0].stats.fixtures.played.away -
-                            jsonData.competitions[0].stats.failed_to_score.total,
-                    );
+                    setOppName(jsonData.name);
+                    setOppPhoto(jsonData.photo);
+                    setOppInjured(jsonData.injured);
                 })
                 .catch(error => console.error(error));
         }
@@ -372,8 +355,10 @@ const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
             <Grid container spacing={{ xs: 6, sm: 1, md: 1, lg: 1 }}>
                 <Grid item xs={12} sm={12} md={12} lg={2.6} width='100%'>
                     <Flex style={{ flexDirection: 'column', height: '100%' }}>
-                        <Typography sx={{ fontSize: '20px', textAlign: 'left', marginBottom: '24px' }}>
-                            Compare Team Stats
+                        <Typography
+                            sx={{ fontSize: '20px', textAlign: 'left', marginBottom: '24px', whiteSpace: 'nowrap' }}
+                        >
+                            Compare Player Stats
                         </Typography>
                         <Flex
                             style={{
@@ -481,16 +466,10 @@ const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
                     <Flex
                         style={{ flexDirection: 'column', justifyContent: 'space-around', height: '100%', gap: '8px' }}
                     >
-                        <TeamRadarSearch handleSearch={handleSearch} />
+                        <PlayerRadarSearch handleSearch={handleSearch} />
 
-                        {oppBadge && oppFlag ? (
-                            <TeamOppIDCard
-                                slug={oppSlug}
-                                name={oppName}
-                                badge={oppBadge}
-                                country={oppCountry}
-                                flag={oppFlag}
-                            />
+                        {oppPhoto ? (
+                            <PlayerOppIDCard slug={oppSlug} name={oppName} photo={oppPhoto} injured={oppInjured} />
                         ) : (
                             <Tile
                                 sx={{
