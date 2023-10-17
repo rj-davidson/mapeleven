@@ -7,6 +7,7 @@ import (
 	"log"
 	"mapeleven/db/ent"
 	"mapeleven/models"
+	"mapeleven/models/fixture_models"
 	"mapeleven/models/player_models"
 
 	//"mapeleven/models/player_models"
@@ -28,7 +29,7 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	teamModel := team_models.NewTeamModel(client)
 	teamStatsModel := team_stats.NewTeamStatsModel(client)
 	standingsModel := models.NewStandingsModel(client)
-	fixturesModel := models.NewBaseFixtureModel(client)
+	fixturesModel := fixture_models.NewFixtureModel(client)
 	playerModel := player_models.NewPlayerModel(client)
 	squadModel := team_models.NewSquadModel(client)
 
@@ -107,7 +108,7 @@ func fetchStandings(standingsModel *models.StandingsModel, clubModel *models.Clu
 }
 
 // Fetches Fixtures by league from API and saves them to the database
-func fetchFixtures(fixturesModel *models.BaseFixtureModel, leagueModel *models.LeagueModel) {
+func fetchFixtures(fixturesModel *fixture_models.FixtureModel, leagueModel *models.LeagueModel) {
 	fixtureController := NewFixtureController(fixturesModel)
 	err := fixtureController.InitializeFixtures(leagueModel, context.Background())
 	if err != nil {

@@ -24,9 +24,9 @@ type MatchPlayer struct {
 	// Position holds the value of the "position" field.
 	Position string `json:"position,omitempty"`
 	// X holds the value of the "x" field.
-	X string `json:"x,omitempty"`
+	X int `json:"x,omitempty"`
 	// Y holds the value of the "y" field.
-	Y string `json:"y,omitempty"`
+	Y int `json:"y,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -79,9 +79,9 @@ func (*MatchPlayer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case matchplayer.FieldID, matchplayer.FieldNumber:
+		case matchplayer.FieldID, matchplayer.FieldNumber, matchplayer.FieldX, matchplayer.FieldY:
 			values[i] = new(sql.NullInt64)
-		case matchplayer.FieldPosition, matchplayer.FieldX, matchplayer.FieldY:
+		case matchplayer.FieldPosition:
 			values[i] = new(sql.NullString)
 		case matchplayer.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
@@ -123,16 +123,16 @@ func (mp *MatchPlayer) assignValues(columns []string, values []any) error {
 				mp.Position = value.String
 			}
 		case matchplayer.FieldX:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field x", values[i])
 			} else if value.Valid {
-				mp.X = value.String
+				mp.X = int(value.Int64)
 			}
 		case matchplayer.FieldY:
-			if value, ok := values[i].(*sql.NullString); !ok {
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field y", values[i])
 			} else if value.Valid {
-				mp.Y = value.String
+				mp.Y = int(value.Int64)
 			}
 		case matchplayer.FieldLastUpdated:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -207,10 +207,10 @@ func (mp *MatchPlayer) String() string {
 	builder.WriteString(mp.Position)
 	builder.WriteString(", ")
 	builder.WriteString("x=")
-	builder.WriteString(mp.X)
+	builder.WriteString(fmt.Sprintf("%v", mp.X))
 	builder.WriteString(", ")
 	builder.WriteString("y=")
-	builder.WriteString(mp.Y)
+	builder.WriteString(fmt.Sprintf("%v", mp.Y))
 	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(mp.LastUpdated.Format(time.ANSIC))

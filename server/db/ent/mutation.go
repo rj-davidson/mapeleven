@@ -6476,8 +6476,10 @@ type MatchPlayerMutation struct {
 	number        *int
 	addnumber     *int
 	position      *string
-	x             *string
-	y             *string
+	x             *int
+	addx          *int
+	y             *int
+	addy          *int
 	lastUpdated   *time.Time
 	clearedFields map[string]struct{}
 	player        *int
@@ -6680,12 +6682,13 @@ func (m *MatchPlayerMutation) ResetPosition() {
 }
 
 // SetX sets the "x" field.
-func (m *MatchPlayerMutation) SetX(s string) {
-	m.x = &s
+func (m *MatchPlayerMutation) SetX(i int) {
+	m.x = &i
+	m.addx = nil
 }
 
 // X returns the value of the "x" field in the mutation.
-func (m *MatchPlayerMutation) X() (r string, exists bool) {
+func (m *MatchPlayerMutation) X() (r int, exists bool) {
 	v := m.x
 	if v == nil {
 		return
@@ -6696,7 +6699,7 @@ func (m *MatchPlayerMutation) X() (r string, exists bool) {
 // OldX returns the old "x" field's value of the MatchPlayer entity.
 // If the MatchPlayer object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MatchPlayerMutation) OldX(ctx context.Context) (v string, err error) {
+func (m *MatchPlayerMutation) OldX(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldX is only allowed on UpdateOne operations")
 	}
@@ -6710,18 +6713,38 @@ func (m *MatchPlayerMutation) OldX(ctx context.Context) (v string, err error) {
 	return oldValue.X, nil
 }
 
+// AddX adds i to the "x" field.
+func (m *MatchPlayerMutation) AddX(i int) {
+	if m.addx != nil {
+		*m.addx += i
+	} else {
+		m.addx = &i
+	}
+}
+
+// AddedX returns the value that was added to the "x" field in this mutation.
+func (m *MatchPlayerMutation) AddedX() (r int, exists bool) {
+	v := m.addx
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetX resets all changes to the "x" field.
 func (m *MatchPlayerMutation) ResetX() {
 	m.x = nil
+	m.addx = nil
 }
 
 // SetY sets the "y" field.
-func (m *MatchPlayerMutation) SetY(s string) {
-	m.y = &s
+func (m *MatchPlayerMutation) SetY(i int) {
+	m.y = &i
+	m.addy = nil
 }
 
 // Y returns the value of the "y" field in the mutation.
-func (m *MatchPlayerMutation) Y() (r string, exists bool) {
+func (m *MatchPlayerMutation) Y() (r int, exists bool) {
 	v := m.y
 	if v == nil {
 		return
@@ -6732,7 +6755,7 @@ func (m *MatchPlayerMutation) Y() (r string, exists bool) {
 // OldY returns the old "y" field's value of the MatchPlayer entity.
 // If the MatchPlayer object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *MatchPlayerMutation) OldY(ctx context.Context) (v string, err error) {
+func (m *MatchPlayerMutation) OldY(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldY is only allowed on UpdateOne operations")
 	}
@@ -6746,9 +6769,28 @@ func (m *MatchPlayerMutation) OldY(ctx context.Context) (v string, err error) {
 	return oldValue.Y, nil
 }
 
+// AddY adds i to the "y" field.
+func (m *MatchPlayerMutation) AddY(i int) {
+	if m.addy != nil {
+		*m.addy += i
+	} else {
+		m.addy = &i
+	}
+}
+
+// AddedY returns the value that was added to the "y" field in this mutation.
+func (m *MatchPlayerMutation) AddedY() (r int, exists bool) {
+	v := m.addy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
 // ResetY resets all changes to the "y" field.
 func (m *MatchPlayerMutation) ResetY() {
 	m.y = nil
+	m.addy = nil
 }
 
 // SetLastUpdated sets the "lastUpdated" field.
@@ -6989,14 +7031,14 @@ func (m *MatchPlayerMutation) SetField(name string, value ent.Value) error {
 		m.SetPosition(v)
 		return nil
 	case matchplayer.FieldX:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetX(v)
 		return nil
 	case matchplayer.FieldY:
-		v, ok := value.(string)
+		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
@@ -7020,6 +7062,12 @@ func (m *MatchPlayerMutation) AddedFields() []string {
 	if m.addnumber != nil {
 		fields = append(fields, matchplayer.FieldNumber)
 	}
+	if m.addx != nil {
+		fields = append(fields, matchplayer.FieldX)
+	}
+	if m.addy != nil {
+		fields = append(fields, matchplayer.FieldY)
+	}
 	return fields
 }
 
@@ -7030,6 +7078,10 @@ func (m *MatchPlayerMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
 	case matchplayer.FieldNumber:
 		return m.AddedNumber()
+	case matchplayer.FieldX:
+		return m.AddedX()
+	case matchplayer.FieldY:
+		return m.AddedY()
 	}
 	return nil, false
 }
@@ -7045,6 +7097,20 @@ func (m *MatchPlayerMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddNumber(v)
+		return nil
+	case matchplayer.FieldX:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddX(v)
+		return nil
+	case matchplayer.FieldY:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddY(v)
 		return nil
 	}
 	return fmt.Errorf("unknown MatchPlayer numeric field %s", name)

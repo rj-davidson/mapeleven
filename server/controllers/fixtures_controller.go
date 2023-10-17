@@ -9,6 +9,7 @@ import (
 	"log"
 	"mapeleven/db/ent"
 	"mapeleven/models"
+	"mapeleven/models/fixture_models"
 	"mapeleven/utils"
 	"net/http"
 	"time"
@@ -16,7 +17,7 @@ import (
 
 type FixtureController struct {
 	client       *http.Client
-	fixtureModel *models.BaseFixtureModel
+	fixtureModel *fixture_models.FixtureModel
 }
 
 type APIFixtureResponse struct {
@@ -54,7 +55,7 @@ type APIFixtureResponse struct {
 	} `json:"response"`
 }
 
-func NewFixtureController(fixtureModel *models.BaseFixtureModel) *FixtureController {
+func NewFixtureController(fixtureModel *fixture_models.FixtureModel) *FixtureController {
 	return &FixtureController{
 		client:       &http.Client{},
 		fixtureModel: fixtureModel,
@@ -155,7 +156,7 @@ func (fc *FixtureController) parseFixturesResponse(data []byte, season *ent.Seas
 			return nil, err
 		}
 
-		fixtureInput := models.CreateBaseFixtureInput{
+		fixtureInput := fixture_models.CreateFixtureInput{
 			ApiFootballId: res.Fixture.ID,
 			Referee:       &res.Fixture.Referee,
 			Timezone:      &res.Fixture.Timezone,
@@ -181,7 +182,7 @@ func (fc *FixtureController) parseFixturesResponse(data []byte, season *ent.Seas
 	return fixtures, nil
 }
 
-func (fc *FixtureController) upsertFixture(ctx context.Context, fixtureInput *models.CreateBaseFixtureInput) (*ent.Fixture, error) {
+func (fc *FixtureController) upsertFixture(ctx context.Context, fixtureInput *fixture_models.CreateFixtureInput) (*ent.Fixture, error) {
 	// Check if the fixture exists, and either create or update it accordingly
 	existingFixture := fc.fixtureModel.FixtureExistsByApiFootballId(ctx, fixtureInput.ApiFootballId)
 
@@ -190,7 +191,7 @@ func (fc *FixtureController) upsertFixture(ctx context.Context, fixtureInput *mo
 		return fc.fixtureModel.CreateBaseFixture(ctx, *fixtureInput)
 	} else {
 		// If the fixture exists, we update it
-		updatedFixtureInput := models.UpdateBaseFixtureInput{
+		updatedFixtureInput := fixture_models.UpdateFixtureInput{
 			Referee:       fixtureInput.Referee,
 			Timezone:      fixtureInput.Timezone,
 			Date:          fixtureInput.Date,

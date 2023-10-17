@@ -50,14 +50,28 @@ func (mpu *MatchPlayerUpdate) SetPosition(s string) *MatchPlayerUpdate {
 }
 
 // SetX sets the "x" field.
-func (mpu *MatchPlayerUpdate) SetX(s string) *MatchPlayerUpdate {
-	mpu.mutation.SetX(s)
+func (mpu *MatchPlayerUpdate) SetX(i int) *MatchPlayerUpdate {
+	mpu.mutation.ResetX()
+	mpu.mutation.SetX(i)
+	return mpu
+}
+
+// AddX adds i to the "x" field.
+func (mpu *MatchPlayerUpdate) AddX(i int) *MatchPlayerUpdate {
+	mpu.mutation.AddX(i)
 	return mpu
 }
 
 // SetY sets the "y" field.
-func (mpu *MatchPlayerUpdate) SetY(s string) *MatchPlayerUpdate {
-	mpu.mutation.SetY(s)
+func (mpu *MatchPlayerUpdate) SetY(i int) *MatchPlayerUpdate {
+	mpu.mutation.ResetY()
+	mpu.mutation.SetY(i)
+	return mpu
+}
+
+// AddY adds i to the "y" field.
+func (mpu *MatchPlayerUpdate) AddY(i int) *MatchPlayerUpdate {
+	mpu.mutation.AddY(i)
 	return mpu
 }
 
@@ -181,10 +195,16 @@ func (mpu *MatchPlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.SetField(matchplayer.FieldPosition, field.TypeString, value)
 	}
 	if value, ok := mpu.mutation.X(); ok {
-		_spec.SetField(matchplayer.FieldX, field.TypeString, value)
+		_spec.SetField(matchplayer.FieldX, field.TypeInt, value)
+	}
+	if value, ok := mpu.mutation.AddedX(); ok {
+		_spec.AddField(matchplayer.FieldX, field.TypeInt, value)
 	}
 	if value, ok := mpu.mutation.Y(); ok {
-		_spec.SetField(matchplayer.FieldY, field.TypeString, value)
+		_spec.SetField(matchplayer.FieldY, field.TypeInt, value)
+	}
+	if value, ok := mpu.mutation.AddedY(); ok {
+		_spec.AddField(matchplayer.FieldY, field.TypeInt, value)
 	}
 	if value, ok := mpu.mutation.LastUpdated(); ok {
 		_spec.SetField(matchplayer.FieldLastUpdated, field.TypeTime, value)
@@ -290,14 +310,28 @@ func (mpuo *MatchPlayerUpdateOne) SetPosition(s string) *MatchPlayerUpdateOne {
 }
 
 // SetX sets the "x" field.
-func (mpuo *MatchPlayerUpdateOne) SetX(s string) *MatchPlayerUpdateOne {
-	mpuo.mutation.SetX(s)
+func (mpuo *MatchPlayerUpdateOne) SetX(i int) *MatchPlayerUpdateOne {
+	mpuo.mutation.ResetX()
+	mpuo.mutation.SetX(i)
+	return mpuo
+}
+
+// AddX adds i to the "x" field.
+func (mpuo *MatchPlayerUpdateOne) AddX(i int) *MatchPlayerUpdateOne {
+	mpuo.mutation.AddX(i)
 	return mpuo
 }
 
 // SetY sets the "y" field.
-func (mpuo *MatchPlayerUpdateOne) SetY(s string) *MatchPlayerUpdateOne {
-	mpuo.mutation.SetY(s)
+func (mpuo *MatchPlayerUpdateOne) SetY(i int) *MatchPlayerUpdateOne {
+	mpuo.mutation.ResetY()
+	mpuo.mutation.SetY(i)
+	return mpuo
+}
+
+// AddY adds i to the "y" field.
+func (mpuo *MatchPlayerUpdateOne) AddY(i int) *MatchPlayerUpdateOne {
+	mpuo.mutation.AddY(i)
 	return mpuo
 }
 
@@ -451,10 +485,16 @@ func (mpuo *MatchPlayerUpdateOne) sqlSave(ctx context.Context) (_node *MatchPlay
 		_spec.SetField(matchplayer.FieldPosition, field.TypeString, value)
 	}
 	if value, ok := mpuo.mutation.X(); ok {
-		_spec.SetField(matchplayer.FieldX, field.TypeString, value)
+		_spec.SetField(matchplayer.FieldX, field.TypeInt, value)
+	}
+	if value, ok := mpuo.mutation.AddedX(); ok {
+		_spec.AddField(matchplayer.FieldX, field.TypeInt, value)
 	}
 	if value, ok := mpuo.mutation.Y(); ok {
-		_spec.SetField(matchplayer.FieldY, field.TypeString, value)
+		_spec.SetField(matchplayer.FieldY, field.TypeInt, value)
+	}
+	if value, ok := mpuo.mutation.AddedY(); ok {
+		_spec.AddField(matchplayer.FieldY, field.TypeInt, value)
 	}
 	if value, ok := mpuo.mutation.LastUpdated(); ok {
 		_spec.SetField(matchplayer.FieldLastUpdated, field.TypeTime, value)

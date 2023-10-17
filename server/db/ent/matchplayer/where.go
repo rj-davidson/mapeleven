@@ -66,12 +66,12 @@ func Position(v string) predicate.MatchPlayer {
 }
 
 // X applies equality check predicate on the "x" field. It's identical to XEQ.
-func X(v string) predicate.MatchPlayer {
+func X(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldEQ(FieldX, v))
 }
 
 // Y applies equality check predicate on the "y" field. It's identical to YEQ.
-func Y(v string) predicate.MatchPlayer {
+func Y(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldEQ(FieldY, v))
 }
 
@@ -186,133 +186,83 @@ func PositionContainsFold(v string) predicate.MatchPlayer {
 }
 
 // XEQ applies the EQ predicate on the "x" field.
-func XEQ(v string) predicate.MatchPlayer {
+func XEQ(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldEQ(FieldX, v))
 }
 
 // XNEQ applies the NEQ predicate on the "x" field.
-func XNEQ(v string) predicate.MatchPlayer {
+func XNEQ(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldNEQ(FieldX, v))
 }
 
 // XIn applies the In predicate on the "x" field.
-func XIn(vs ...string) predicate.MatchPlayer {
+func XIn(vs ...int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldIn(FieldX, vs...))
 }
 
 // XNotIn applies the NotIn predicate on the "x" field.
-func XNotIn(vs ...string) predicate.MatchPlayer {
+func XNotIn(vs ...int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldNotIn(FieldX, vs...))
 }
 
 // XGT applies the GT predicate on the "x" field.
-func XGT(v string) predicate.MatchPlayer {
+func XGT(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldGT(FieldX, v))
 }
 
 // XGTE applies the GTE predicate on the "x" field.
-func XGTE(v string) predicate.MatchPlayer {
+func XGTE(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldGTE(FieldX, v))
 }
 
 // XLT applies the LT predicate on the "x" field.
-func XLT(v string) predicate.MatchPlayer {
+func XLT(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldLT(FieldX, v))
 }
 
 // XLTE applies the LTE predicate on the "x" field.
-func XLTE(v string) predicate.MatchPlayer {
+func XLTE(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldLTE(FieldX, v))
 }
 
-// XContains applies the Contains predicate on the "x" field.
-func XContains(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldContains(FieldX, v))
-}
-
-// XHasPrefix applies the HasPrefix predicate on the "x" field.
-func XHasPrefix(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldHasPrefix(FieldX, v))
-}
-
-// XHasSuffix applies the HasSuffix predicate on the "x" field.
-func XHasSuffix(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldHasSuffix(FieldX, v))
-}
-
-// XEqualFold applies the EqualFold predicate on the "x" field.
-func XEqualFold(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldEqualFold(FieldX, v))
-}
-
-// XContainsFold applies the ContainsFold predicate on the "x" field.
-func XContainsFold(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldContainsFold(FieldX, v))
-}
-
 // YEQ applies the EQ predicate on the "y" field.
-func YEQ(v string) predicate.MatchPlayer {
+func YEQ(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldEQ(FieldY, v))
 }
 
 // YNEQ applies the NEQ predicate on the "y" field.
-func YNEQ(v string) predicate.MatchPlayer {
+func YNEQ(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldNEQ(FieldY, v))
 }
 
 // YIn applies the In predicate on the "y" field.
-func YIn(vs ...string) predicate.MatchPlayer {
+func YIn(vs ...int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldIn(FieldY, vs...))
 }
 
 // YNotIn applies the NotIn predicate on the "y" field.
-func YNotIn(vs ...string) predicate.MatchPlayer {
+func YNotIn(vs ...int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldNotIn(FieldY, vs...))
 }
 
 // YGT applies the GT predicate on the "y" field.
-func YGT(v string) predicate.MatchPlayer {
+func YGT(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldGT(FieldY, v))
 }
 
 // YGTE applies the GTE predicate on the "y" field.
-func YGTE(v string) predicate.MatchPlayer {
+func YGTE(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldGTE(FieldY, v))
 }
 
 // YLT applies the LT predicate on the "y" field.
-func YLT(v string) predicate.MatchPlayer {
+func YLT(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldLT(FieldY, v))
 }
 
 // YLTE applies the LTE predicate on the "y" field.
-func YLTE(v string) predicate.MatchPlayer {
+func YLTE(v int) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.FieldLTE(FieldY, v))
-}
-
-// YContains applies the Contains predicate on the "y" field.
-func YContains(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldContains(FieldY, v))
-}
-
-// YHasPrefix applies the HasPrefix predicate on the "y" field.
-func YHasPrefix(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldHasPrefix(FieldY, v))
-}
-
-// YHasSuffix applies the HasSuffix predicate on the "y" field.
-func YHasSuffix(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldHasSuffix(FieldY, v))
-}
-
-// YEqualFold applies the EqualFold predicate on the "y" field.
-func YEqualFold(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldEqualFold(FieldY, v))
-}
-
-// YContainsFold applies the ContainsFold predicate on the "y" field.
-func YContainsFold(v string) predicate.MatchPlayer {
-	return predicate.MatchPlayer(sql.FieldContainsFold(FieldY, v))
 }
 
 // LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.

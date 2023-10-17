@@ -35,14 +35,14 @@ func (mpc *MatchPlayerCreate) SetPosition(s string) *MatchPlayerCreate {
 }
 
 // SetX sets the "x" field.
-func (mpc *MatchPlayerCreate) SetX(s string) *MatchPlayerCreate {
-	mpc.mutation.SetX(s)
+func (mpc *MatchPlayerCreate) SetX(i int) *MatchPlayerCreate {
+	mpc.mutation.SetX(i)
 	return mpc
 }
 
 // SetY sets the "y" field.
-func (mpc *MatchPlayerCreate) SetY(s string) *MatchPlayerCreate {
-	mpc.mutation.SetY(s)
+func (mpc *MatchPlayerCreate) SetY(i int) *MatchPlayerCreate {
+	mpc.mutation.SetY(i)
 	return mpc
 }
 
@@ -178,11 +178,11 @@ func (mpc *MatchPlayerCreate) createSpec() (*MatchPlayer, *sqlgraph.CreateSpec) 
 		_node.Position = value
 	}
 	if value, ok := mpc.mutation.X(); ok {
-		_spec.SetField(matchplayer.FieldX, field.TypeString, value)
+		_spec.SetField(matchplayer.FieldX, field.TypeInt, value)
 		_node.X = value
 	}
 	if value, ok := mpc.mutation.Y(); ok {
-		_spec.SetField(matchplayer.FieldY, field.TypeString, value)
+		_spec.SetField(matchplayer.FieldY, field.TypeInt, value)
 		_node.Y = value
 	}
 	if value, ok := mpc.mutation.LastUpdated(); ok {

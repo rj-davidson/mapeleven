@@ -17,8 +17,8 @@ func (MatchPlayer) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("number"),
 		field.String("position"),
-		field.String("x"),
-		field.String("y"),
+		field.Int("x"),
+		field.Int("y"),
 
 		field.Time("lastUpdated").
 			Default(time.Now).
