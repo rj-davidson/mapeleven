@@ -34,7 +34,7 @@ func getAllTeams(serializer *serializer.TeamSerializer) fiber.Handler {
 func getTeamBySlug(serializer *serializer.TeamSerializer) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		slug := c.Params("slug")
-		season := c.Query("season", "") // Default to empty if not provided
+		season := c.Query("season", "")
 
 		team, err := serializer.GetTeamBySlug(context.Background(), slug, season)
 		if err != nil {

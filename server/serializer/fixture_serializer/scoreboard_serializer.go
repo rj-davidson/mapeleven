@@ -1,9 +1,10 @@
-package serializer
+package fixture_serializer
 
 import (
 	"context"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/serializer"
 	"time"
 )
 
@@ -31,12 +32,12 @@ type fixtureSimple struct {
 }
 
 type lg struct {
-	Slug     string          `json:"slug"`
-	Name     string          `json:"name"`
-	Type     string          `json:"type"`
-	Logo     string          `json:"logo"`
-	Country  APICountry      `json:"country,omitempty"`
-	Fixtures []fixtureSimple `json:"fixtures,omitempty"`
+	Slug     string                `json:"slug"`
+	Name     string                `json:"name"`
+	Type     string                `json:"type"`
+	Logo     string                `json:"logo"`
+	Country  serializer.APICountry `json:"country,omitempty"`
+	Fixtures []fixtureSimple       `json:"fixtures,omitempty"`
 }
 
 type fixtureDate struct {
@@ -157,7 +158,7 @@ func mapLeaguesToAPILeagues(leagues map[*ent.League][]*ent.Fixture) []lg {
 			Name: l.Name,
 			Type: string(l.Type),
 			Logo: l.Logo,
-			Country: APICountry{
+			Country: serializer.APICountry{
 				Code: l.Edges.Country.Code,
 				Name: l.Edges.Country.Name,
 				Flag: l.Edges.Country.Flag,
