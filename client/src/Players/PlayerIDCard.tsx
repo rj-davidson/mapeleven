@@ -1,41 +1,35 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Box, Grid, Typography } from '@mui/material';
+import { Box, Grid } from '@mui/material';
 import { Tile } from '../Util/Tile.jsx';
 import { Flex } from '../Util/Flex.jsx';
 import Tilt from 'react-parallax-tilt';
 import DisplayImage from '../Util/DisplayImage';
-import TeamIDTitle from './TeamIDTitle';
-import TeamIDStatBox from './TeamIDStatBox';
+import PlayerIDTitle from './PlayerIDTitle';
+import PlayerIDStatBox from './PlayerIDStatBox';
 
-interface TeamIDCardProps {
+interface PlayerIDCardProps {
     slug: string;
     name: string;
-    badge: string;
-    country: string;
-    flag: string;
-    founded: string;
-    goals: number;
-    clean: number;
-    gamesPlayed: number;
-    wins: number;
-    draws: number;
-    loses: number;
+    firstName: string;
+    lastName: string;
+    photo: string;
+    age: number;
+    height: string;
+    weight: string;
+    injured: boolean;
 }
 
-const TeamIDCard: React.FC<TeamIDCardProps> = ({
+const PlayerIDCard: React.FC<PlayerIDCardProps> = ({
     slug,
     name,
-    badge,
-    country,
-    flag,
-    founded,
-    goals,
-    clean,
-    gamesPlayed,
-    wins,
-    draws,
-    loses,
+    firstName,
+    lastName,
+    photo,
+    age,
+    height,
+    weight,
+    injured,
 }) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [inspect, setInspect] = useState<boolean>(false);
@@ -66,44 +60,40 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
                 <Tile
                     style={{
                         flexDirection: 'column',
-                        gap: '24px',
+                        gap: '48px',
                         border: '5px solid var(--red)',
                     }}
                 >
-                    <TeamIDTitle slug={slug} name={name} country={country} flag={flag} />
+                    <PlayerIDTitle slug={slug} name={name} country={'Country'} flag={''} injured={injured} />
 
                     <Flex style={{ justifyContent: 'center', alignItems: 'center', marginTop: '-12px' }}>
-                        <DisplayImage src={badge} alt={name} width={'108px'} height={'108'} />
+                        <DisplayImage
+                            src={photo}
+                            alt={name}
+                            width={'108px'}
+                            height={'108'}
+                            sx={{
+                                borderRadius: '10px',
+                                boxShadow: 'rgba(0,0,0,0.2) 0 0 10px',
+                            }}
+                        />
                     </Flex>
 
                     <Grid container spacing={1}>
                         <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                            <TeamIDStatBox stat='Position' value={0} />
+                            <PlayerIDStatBox stat='Age' value={age} />
                         </Grid>
                         <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                            <TeamIDStatBox stat='Points' value={0} />
+                            <PlayerIDStatBox stat='Height' value={height} />
                         </Grid>
                         <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                            <TeamIDStatBox stat='Games Played' value={gamesPlayed} />
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                            <TeamIDStatBox stat='Wins' value={wins} />
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                            <TeamIDStatBox stat='Draws' value={draws} />
-                        </Grid>
-                        <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                            <TeamIDStatBox stat='Loses' value={loses} />
+                            <PlayerIDStatBox stat='Weight' value={weight} />
                         </Grid>
                     </Grid>
-
-                    <Typography sx={{ fontSize: '16px', textAlign: 'right', fontStyle: 'italic' }}>
-                        Founded {founded}
-                    </Typography>
                 </Tile>
             </Tilt>
         </Box>
     );
 };
 
-export default TeamIDCard;
+export default PlayerIDCard;
