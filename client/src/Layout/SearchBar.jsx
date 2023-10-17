@@ -11,6 +11,7 @@ const url = import.meta.env.VITE_API_URL;
 
 export default function SearchBar() {
     const [data, setData] = useState([]);
+    const [reset, setReset] = useState(false);
     const maxFilter = 6;
 
     useEffect(() => {
@@ -88,6 +89,8 @@ export default function SearchBar() {
     const navigate = useNavigate();
     const handleSearch = (event, newValue) => {
         if (newValue) {
+            setReset(!reset);
+
             // Assuming your data contains players, teams, and leagues with unique IDs.
             const selectedItem = data.find(item => item.slug === newValue.slug);
 
@@ -115,6 +118,7 @@ export default function SearchBar() {
 
     return (
         <Autocomplete
+            key={reset}
             disablePortal
             disableClearable
             options={data}
