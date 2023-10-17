@@ -48,8 +48,9 @@ function FormCard() {
                 <Typography sx={{ fontSize: { xs: '20px', sm: '20px' } }}>Form</Typography>
                 <Flex style={{ justifyContent: 'left', alignItems: 'left', gap: '8px', flexDirection: 'row' }}>
                     {form
-                        .slice(0, 7)
                         .split('')
+                        .reverse()
+                        .slice(0, 7)
                         .map((character, index) => (
                             <Box
                                 key={index}

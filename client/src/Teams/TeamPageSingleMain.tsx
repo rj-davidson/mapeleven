@@ -3,6 +3,8 @@ import { Grid } from '@mui/material';
 import { APITSGoalMinuteSplit } from '../Models/api_types';
 import TeamGoalSplitCharts from './TeamGoalSplitCharts';
 import TeamRadarChart from './TeamRadarChart';
+import { Tile } from '../Util/Tile';
+import Field from './FieldSVG';
 
 interface TeamPageSingleMainProps {
     goalMinuteSplit: APITSGoalMinuteSplit;
@@ -43,6 +45,11 @@ const TeamPageSingleMain: React.FC<TeamPageSingleMainProps> = ({
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                 <TeamGoalSplitCharts goalMinuteSplit={goalMinuteSplit} />
+            </Grid>
+            <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
+                <Tile style={{ height: '385px' }}>
+                    <Field />
+                </Tile>
             </Grid>
         </Grid>
     );

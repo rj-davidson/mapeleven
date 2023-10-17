@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, TableHead, TableBody, TableRow, TableCell, Paper, Typography } from '@mui/material';
+import { Table, TableHead, TableBody, TableRow, TableCell, Paper, Typography, Box } from '@mui/material';
 import { Flex } from '../Util/Flex.jsx';
 import DisplayImage from '../Util/DisplayImage';
 import { Link } from 'react-router-dom';
@@ -18,6 +18,43 @@ const StandingsTable = ({ data }) => {
         } else {
             return 'var(--dark1)';
         }
+    };
+
+    const characterColors = {
+        W: 'var(--green)',
+        L: 'var(--red)',
+    };
+
+    const DisplayForm = form => {
+        return (
+            <Flex
+                style={{
+                    justifyContent: 'right',
+                    alignItems: 'right',
+                    gap: '4px',
+                    flexDirection: 'row',
+                }}
+            >
+                {form.split('').map((character, index) => (
+                    <Box
+                        key={index}
+                        sx={{
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            background: characterColors[character] ?? 'gray',
+                            width: '36px',
+                            height: '36px',
+                            borderRadius: '6px',
+                        }}
+                    >
+                        <Typography key={index} variant='h6' component='span' style={{ color: 'white' }}>
+                            {character}
+                        </Typography>
+                    </Box>
+                ))}
+            </Flex>
+        );
     };
 
     return (
@@ -71,7 +108,7 @@ const StandingsTable = ({ data }) => {
                             <TableCell align='right'>{row.draw}</TableCell>
                             <TableCell align='right'>{row.losses}</TableCell>
                             <TableCell align='right'>{row.points}</TableCell>
-                            <TableCell align='right'>{row.form}</TableCell>
+                            <TableCell align='right'>{DisplayForm(row.form)}</TableCell>
                         </TableRow>
                     ))}
                 </TableBody>

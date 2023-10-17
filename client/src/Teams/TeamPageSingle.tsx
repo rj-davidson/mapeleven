@@ -103,6 +103,9 @@ function TeamPageSingle() {
                     wins={wins}
                     draws={draws}
                     loses={loses}
+                    failedToScore={failedToScore}
+                    averageGoals={averageGoals}
+                    gamesScored={gamesScored}
                 />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={9} width='100%'>

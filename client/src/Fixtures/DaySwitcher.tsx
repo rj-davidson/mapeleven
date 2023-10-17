@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Box, Button, Typography } from '@mui/material';
+import { Box, Button, Typography, useMediaQuery } from '@mui/material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 
@@ -35,6 +35,7 @@ const styles = {
 
 const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
+    const isSmallerThanLG = useMediaQuery('(max-width: 1260px)');
 
     const handleBackwardClick = () => {
         const newDate = new Date(currentDate.getTime() - 86400000);
@@ -60,8 +61,15 @@ const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
             <Button sx={styles.arrowButton} onClick={handleBackwardClick}>
                 <ChevronLeftIcon />
             </Button>
-            <Typography variant='h6' component='h2' gutterBottom sx={styles.dateText}>
-                {currentDate.toDateString() === new Date().toDateString() ? 'Today' : currentDate.toLocaleDateString('en-US', options)}
+            <Typography
+                variant='h6'
+                component='h2'
+                gutterBottom
+                sx={{ ...styles.dateText, fontSize: !isSmallerThanLG ? '20px' : '16px' }}
+            >
+                {currentDate.toDateString() === new Date().toDateString()
+                    ? 'Today'
+                    : currentDate.toLocaleDateString('en-US', options)}
             </Typography>
             <Button sx={styles.arrowButton} onClick={handleForwardClick}>
                 <ChevronRightIcon />
