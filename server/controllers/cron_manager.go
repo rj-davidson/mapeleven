@@ -51,6 +51,9 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 		// Fetch Squads
 		fetchSquads(squadModel, playerModel, teamModel)
+
+		// Fetch Fixture Data
+		fetchFixtureData(fixturesModel)
 	}
 
 	if runScheduler {
@@ -66,7 +69,6 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	}
 
 	if devRun {
-		fetchFixtureData(fixturesModel)
 	}
 }
 

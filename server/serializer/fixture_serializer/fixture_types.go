@@ -31,10 +31,15 @@ type APITeam struct {
 }
 
 type APIFixtureSet struct {
-	Fixture *APIFixture      `json:"fixture,omitempty"`
-	Teams   *APITeamDetails  `json:"teams,omitempty"`
-	Events  *[]APIEvent      `json:"events,omitempty"`
-	Lineups *[]APILineupInfo `json:"lineups,omitempty"`
+	Fixture *APIFixture     `json:"fixture,omitempty"`
+	Teams   *APITeamDetails `json:"teams,omitempty"`
+	Events  *[]APIEvent     `json:"events,omitempty"`
+	Lineups *APIHomeAway    `json:"lineups,omitempty"`
+}
+
+type APIHomeAway struct {
+	Home *APILineupInfo `json:"home,omitempty"`
+	Away *APILineupInfo `json:"away,omitempty"`
 }
 
 type APITeamDetails struct {

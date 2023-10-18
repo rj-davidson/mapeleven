@@ -84,7 +84,7 @@ func NewScoreboardSerializer(client *ent.Client) *ScoreboardSerializer {
 
 func (ss *ScoreboardSerializer) getScoreboardFixtures() ([]*ent.Fixture, error) {
 	now := time.Now()
-	oneWeekAgo := now.AddDate(0, 0, -7)
+	oneWeekAgo := now.AddDate(0, 0, -21)
 	threeWeeksFromNow := now.AddDate(0, 0, 21)
 
 	fixtures, err := ss.client.Fixture.

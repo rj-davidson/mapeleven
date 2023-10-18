@@ -14,40 +14,82 @@ func NewFixtureSerializer(client *ent.Client) *FixtureSerializer {
 	return &FixtureSerializer{client: client}
 }
 
-func (fs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string) (*APIFixtureSet, error) {
+func (fs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string, getFixture, getEvents, getLineups bool) (*APIFixtureSet, error) {
 	f, err := fs.client.Fixture.
 		Query().
-		Where(
-			fixture.Slug(slug),
-		).
+		Where(fixture.Slug(slug)).
 		WithSeason().
-		WithLineups().
-		WithHomeTeam(
-			func(q *ent.TeamQuery) {
+		WithLineups(func(q *ent.FixtureLineupsQuery) {
+			q.WithTeam(func(q *ent.TeamQuery) {
 				q.WithClub()
-			},
-		).
-		WithAwayTeam(
-			func(q *ent.TeamQuery) {
-				q.WithClub()
-			},
+			}).WithLineupPlayer(func(q *ent.MatchPlayerQuery) {
+				q.WithPlayer()
+			})
+		}).
+		WithHomeTeam(func(q *ent.TeamQuery) {
+			q.WithClub()
+		}).
+		WithAwayTeam(func(q *ent.TeamQuery) {
+			q.WithClub()
+		}).
+		WithFixtureEvents(func(q *ent.FixtureEventsQuery) {
+			q.WithPlayer()
+			q.WithAssist()
+			q.WithTeam(
+				func(q *ent.TeamQuery) {
+					q.WithClub()
+				},
+			)
+		},
 		).
 		First(ctx)
+
 	if err != nil {
 		return nil, err
 	}
 
-	sfxt, std, err := fs.Serialize(f)
-	if err != nil {
-		return nil, err
+	var sFixture *APIFixture
+	var sTeams *APITeamDetails
+	var sEvents *[]APIEvent
+	sLineups := &APIHomeAway{}
+
+	if getFixture {
+		sFixture, sTeams, err = fs.serializeFixture(f)
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	if getEvents {
+		sEvents, err = SerializeEvents(f.Edges.FixtureEvents)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if getLineups {
+		for _, l := range f.Edges.Lineups {
+			sLineup, err := SerializeLineup(l)
+			if err != nil {
+				return nil, err
+			}
+			if l.Edges.Team.Edges.Club.Slug == f.Edges.HomeTeam.Edges.Club.Slug {
+				sLineups.Home = sLineup
+			} else {
+				sLineups.Away = sLineup
+			}
+		}
+	}
+
 	return &APIFixtureSet{
-		Fixture: sfxt,
-		Teams:   std,
+		Fixture: sFixture,
+		Teams:   sTeams,
+		Events:  sEvents,
+		Lineups: sLineups,
 	}, nil
 }
 
-func (fs *FixtureSerializer) Serialize(f *ent.Fixture) (*APIFixture, *APITeamDetails, error) {
+func (fs *FixtureSerializer) serializeFixture(f *ent.Fixture) (*APIFixture, *APITeamDetails, error) {
 	var fxt APIFixture
 	var td APITeamDetails
 
