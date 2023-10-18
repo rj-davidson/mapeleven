@@ -42,6 +42,10 @@ const (
 	EdgeAwayTeam = "awayTeam"
 	// EdgeSeason holds the string denoting the season edge name in mutations.
 	EdgeSeason = "season"
+	// EdgeLineups holds the string denoting the lineups edge name in mutations.
+	EdgeLineups = "lineups"
+	// EdgeFixtureEvents holds the string denoting the fixtureevents edge name in mutations.
+	EdgeFixtureEvents = "fixtureEvents"
 	// Table holds the table name of the fixture in the database.
 	Table = "fixtures"
 	// HomeTeamTable is the table that holds the homeTeam relation/edge.
@@ -65,6 +69,20 @@ const (
 	SeasonInverseTable = "seasons"
 	// SeasonColumn is the table column denoting the season relation/edge.
 	SeasonColumn = "season_fixtures"
+	// LineupsTable is the table that holds the lineups relation/edge.
+	LineupsTable = "fixture_lineups"
+	// LineupsInverseTable is the table name for the FixtureLineups entity.
+	// It exists in this package in order to avoid circular dependency with the "fixturelineups" package.
+	LineupsInverseTable = "fixture_lineups"
+	// LineupsColumn is the table column denoting the lineups relation/edge.
+	LineupsColumn = "fixture_lineups"
+	// FixtureEventsTable is the table that holds the fixtureEvents relation/edge.
+	FixtureEventsTable = "fixture_events"
+	// FixtureEventsInverseTable is the table name for the FixtureEvents entity.
+	// It exists in this package in order to avoid circular dependency with the "fixtureevents" package.
+	FixtureEventsInverseTable = "fixture_events"
+	// FixtureEventsColumn is the table column denoting the fixtureEvents relation/edge.
+	FixtureEventsColumn = "fixture_fixture_events"
 )
 
 // Columns holds all SQL columns for fixture fields.
@@ -196,6 +214,34 @@ func BySeasonField(field string, opts ...sql.OrderTermOption) Order {
 		sqlgraph.OrderByNeighborTerms(s, newSeasonStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByLineupsCount orders the results by lineups count.
+func ByLineupsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newLineupsStep(), opts...)
+	}
+}
+
+// ByLineups orders the results by lineups terms.
+func ByLineups(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newLineupsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByFixtureEventsCount orders the results by fixtureEvents count.
+func ByFixtureEventsCount(opts ...sql.OrderTermOption) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newFixtureEventsStep(), opts...)
+	}
+}
+
+// ByFixtureEvents orders the results by fixtureEvents terms.
+func ByFixtureEvents(term sql.OrderTerm, terms ...sql.OrderTerm) Order {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newFixtureEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newHomeTeamStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -215,5 +261,19 @@ func newSeasonStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SeasonInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, SeasonTable, SeasonColumn),
+	)
+}
+func newLineupsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(LineupsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, LineupsTable, LineupsColumn),
+	)
+}
+func newFixtureEventsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(FixtureEventsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, FixtureEventsTable, FixtureEventsColumn),
 	)
 }

@@ -4,9 +4,13 @@ package ent
 
 import (
 	"mapeleven/db/ent/club"
+	"mapeleven/db/ent/coach"
 	"mapeleven/db/ent/country"
 	"mapeleven/db/ent/fixture"
+	"mapeleven/db/ent/fixtureevents"
+	"mapeleven/db/ent/fixturelineups"
 	"mapeleven/db/ent/league"
+	"mapeleven/db/ent/matchplayer"
 	"mapeleven/db/ent/player"
 	"mapeleven/db/ent/schema"
 	"mapeleven/db/ent/season"
@@ -34,6 +38,14 @@ func init() {
 	clubDescCode := clubFields[3].Descriptor()
 	// club.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	club.CodeValidator = clubDescCode.Validators[0].(func(string) error)
+	coachFields := schema.Coach{}.Fields()
+	_ = coachFields
+	// coachDescLastUpdated is the schema descriptor for lastUpdated field.
+	coachDescLastUpdated := coachFields[3].Descriptor()
+	// coach.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
+	coach.DefaultLastUpdated = coachDescLastUpdated.Default.(func() time.Time)
+	// coach.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
+	coach.UpdateDefaultLastUpdated = coachDescLastUpdated.UpdateDefault.(func() time.Time)
 	countryFields := schema.Country{}.Fields()
 	_ = countryFields
 	// countryDescCode is the schema descriptor for code field.
@@ -54,6 +66,22 @@ func init() {
 	fixture.DefaultLastUpdated = fixtureDescLastUpdated.Default.(func() time.Time)
 	// fixture.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	fixture.UpdateDefaultLastUpdated = fixtureDescLastUpdated.UpdateDefault.(func() time.Time)
+	fixtureeventsFields := schema.FixtureEvents{}.Fields()
+	_ = fixtureeventsFields
+	// fixtureeventsDescLastUpdated is the schema descriptor for lastUpdated field.
+	fixtureeventsDescLastUpdated := fixtureeventsFields[5].Descriptor()
+	// fixtureevents.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
+	fixtureevents.DefaultLastUpdated = fixtureeventsDescLastUpdated.Default.(func() time.Time)
+	// fixtureevents.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
+	fixtureevents.UpdateDefaultLastUpdated = fixtureeventsDescLastUpdated.UpdateDefault.(func() time.Time)
+	fixturelineupsFields := schema.FixtureLineups{}.Fields()
+	_ = fixturelineupsFields
+	// fixturelineupsDescLastUpdated is the schema descriptor for lastUpdated field.
+	fixturelineupsDescLastUpdated := fixturelineupsFields[1].Descriptor()
+	// fixturelineups.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
+	fixturelineups.DefaultLastUpdated = fixturelineupsDescLastUpdated.Default.(func() time.Time)
+	// fixturelineups.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
+	fixturelineups.UpdateDefaultLastUpdated = fixturelineupsDescLastUpdated.UpdateDefault.(func() time.Time)
 	leagueFields := schema.League{}.Fields()
 	_ = leagueFields
 	// leagueDescLastUpdated is the schema descriptor for lastUpdated field.
@@ -62,6 +90,14 @@ func init() {
 	league.DefaultLastUpdated = leagueDescLastUpdated.Default.(func() time.Time)
 	// league.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	league.UpdateDefaultLastUpdated = leagueDescLastUpdated.UpdateDefault.(func() time.Time)
+	matchplayerFields := schema.MatchPlayer{}.Fields()
+	_ = matchplayerFields
+	// matchplayerDescLastUpdated is the schema descriptor for lastUpdated field.
+	matchplayerDescLastUpdated := matchplayerFields[4].Descriptor()
+	// matchplayer.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
+	matchplayer.DefaultLastUpdated = matchplayerDescLastUpdated.Default.(func() time.Time)
+	// matchplayer.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
+	matchplayer.UpdateDefaultLastUpdated = matchplayerDescLastUpdated.UpdateDefault.(func() time.Time)
 	playerFields := schema.Player{}.Fields()
 	_ = playerFields
 	// playerDescLastUpdated is the schema descriptor for lastUpdated field.

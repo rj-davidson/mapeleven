@@ -1,7 +1,8 @@
-package models
+package fixture_models
 
 import (
 	"context"
+	"fmt"
 	"mapeleven/db/ent"
 	"mapeleven/db/ent/club"
 	"mapeleven/db/ent/fixture"
@@ -9,6 +10,70 @@ import (
 	"mapeleven/db/ent/team"
 	"time"
 )
+
+type FixtureDetails struct {
+	Teams   TeamDetails  `json:"teams"`
+	Events  []Event      `json:"events"`
+	Lineups []LineupInfo `json:"lineups"`
+}
+
+type TeamDetails struct {
+	Home TeamInfo `json:"home"`
+	Away TeamInfo `json:"away"`
+}
+
+type TeamInfo struct {
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Logo   string `json:"logo"`
+	Winner bool   `json:"winner"`
+}
+
+type Event struct {
+	Time     TimeDetail `json:"time"`
+	Team     TeamInfo   `json:"team"`
+	Player   Player     `json:"player"`
+	Assist   *Player    `json:"assist"`
+	Type     string     `json:"type"`
+	Detail   string     `json:"detail"`
+	Comments *string    `json:"comments"`
+}
+
+type TimeDetail struct {
+	Elapsed int  `json:"elapsed"`
+	Extra   *int `json:"extra"`
+}
+
+type Player struct {
+	ID   int    `json:"id"`
+	Name string `json:"name"`
+}
+
+type LineupInfo struct {
+	Team        TeamInfo       `json:"team"`
+	Coach       Coach          `json:"coach"`
+	Formation   string         `json:"formation"`
+	StartXI     []PlayerDetail `json:"startXI"`
+	Substitutes []PlayerDetail `json:"substitutes"`
+}
+
+type Coach struct {
+	ID    int    `json:"id"`
+	Name  string `json:"name"`
+	Photo string `json:"photo"`
+}
+
+type PlayerDetail struct {
+	Player PlayerDetailInfo `json:"player"`
+}
+
+type PlayerDetailInfo struct {
+	ID     int    `json:"id"`
+	Name   string `json:"name"`
+	Number int    `json:"number"`
+	Pos    string `json:"pos"`
+	Grid   string `json:"grid"`
+}
 
 // CreateFixtureInput holds the input data needed to create a new fixture record.
 type CreateFixtureInput struct {
@@ -51,7 +116,7 @@ func NewFixtureModel(client *ent.Client) *FixtureModel {
 	return &FixtureModel{client: client}
 }
 
-func (fm *FixtureModel) getTeam(ctx context.Context, seasonID, apiFootabllClubId int) (*ent.Team, error) {
+func (fm *FixtureModel) getTeam(ctx context.Context, seasonID, apiFootballClubId int) (*ent.Team, error) {
 	return fm.client.Team.
 		Query().
 		Where(
@@ -59,13 +124,13 @@ func (fm *FixtureModel) getTeam(ctx context.Context, seasonID, apiFootabllClubId
 				season.IDEQ(seasonID),
 			),
 			team.HasClubWith(
-				club.ApiFootballIdEQ(apiFootabllClubId),
+				club.ApiFootballIdEQ(apiFootballClubId),
 			),
 		).
 		Only(ctx)
 }
 
-func (fm *FixtureModel) CreateFixture(ctx context.Context, input CreateFixtureInput) (*ent.Fixture, error) {
+func (fm *FixtureModel) CreateBaseFixture(ctx context.Context, input CreateFixtureInput) (*ent.Fixture, error) {
 	awayTeam, err := fm.getTeam(ctx, input.Season.ID, input.AwayTeamID)
 	if err != nil {
 		return nil, err
@@ -92,7 +157,7 @@ func (fm *FixtureModel) CreateFixture(ctx context.Context, input CreateFixtureIn
 		Save(ctx)
 }
 
-func (fm *FixtureModel) UpdateFixture(ctx context.Context, input UpdateFixtureInput) (*ent.Fixture, error) {
+func (fm *FixtureModel) UpdateBaseFixture(ctx context.Context, input UpdateFixtureInput) (*ent.Fixture, error) {
 	updater := fm.client.Fixture.UpdateOneID(input.ApiFootballId)
 	if input.Round != nil {
 		updater.SetRound(*input.Round)
@@ -113,6 +178,8 @@ func (fm *FixtureModel) GetFixtureByApiFootballId(ctx context.Context, apiFootba
 	return fm.client.Fixture.
 		Query().
 		Where(fixture.ApiFootballIdEQ(apiFootballId)).
+		WithHomeTeam().
+		WithAwayTeam().
 		Only(ctx)
 }
 
@@ -128,4 +195,29 @@ func (fm *FixtureModel) ListFixtures(ctx context.Context) ([]*ent.Fixture, error
 	return fm.client.Fixture.
 		Query().
 		All(ctx)
+}
+
+func (fm *FixtureModel) UpsertFixtureData(apiFootballId int, data FixtureDetails, ctx context.Context) error {
+	f, err := fm.GetFixtureByApiFootballId(ctx, apiFootballId)
+	homeTeam := f.Edges.HomeTeam
+	awayTeam := f.Edges.AwayTeam
+
+	if len(data.Lineups) > 0 {
+		_, err = UpsertLineup(f, awayTeam, data.Lineups[0], fm.client, ctx)
+		if err != nil {
+			fmt.Printf("Error upserting lineup: %v", err)
+		}
+
+		_, err = UpsertLineup(f, homeTeam, data.Lineups[1], fm.client, ctx)
+		if err != nil {
+			fmt.Printf("Error upserting lineup: %v", err)
+		}
+	}
+
+	err = RepopulateEvents(f, fm.client, data.Events, ctx)
+	if err != nil {
+		fmt.Printf("Error repopulating events: %v", err)
+	}
+
+	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"log"
 	"mapeleven/db/ent"
 	"mapeleven/models"
+	"mapeleven/models/fixture_models"
 	"mapeleven/models/player_models"
 
 	//"mapeleven/models/player_models"
@@ -28,7 +29,7 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	teamModel := team_models.NewTeamModel(client)
 	teamStatsModel := team_stats.NewTeamStatsModel(client)
 	standingsModel := models.NewStandingsModel(client)
-	fixturesModel := models.NewFixtureModel(client)
+	fixturesModel := fixture_models.NewFixtureModel(client)
 	playerModel := player_models.NewPlayerModel(client)
 	squadModel := team_models.NewSquadModel(client)
 
@@ -50,6 +51,9 @@ func CronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 		// Fetch Squads
 		fetchSquads(squadModel, playerModel, teamModel)
+
+		// Fetch Fixture Data
+		fetchFixtureData(fixturesModel)
 	}
 
 	if runScheduler {
@@ -107,7 +111,7 @@ func fetchStandings(standingsModel *models.StandingsModel, clubModel *models.Clu
 }
 
 // Fetches Fixtures by league from API and saves them to the database
-func fetchFixtures(fixturesModel *models.FixtureModel, leagueModel *models.LeagueModel) {
+func fetchFixtures(fixturesModel *fixture_models.FixtureModel, leagueModel *models.LeagueModel) {
 	fixtureController := NewFixtureController(fixturesModel)
 	err := fixtureController.InitializeFixtures(leagueModel, context.Background())
 	if err != nil {
@@ -143,4 +147,14 @@ func fetchSquads(squadModel *team_models.SquadModel, playerModel *player_models.
 		log.Printf("Error initializing squads: %v", err)
 	}
 	fmt.Println("Squads successfully loaded.")
+}
+
+func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
+	fmt.Println("Fetching fixture data...")
+	fixtureDataController := NewFixtureDataController(fixtureModel)
+	err := fixtureDataController.FetchFixtures(context.Background())
+	if err != nil {
+		log.Printf("Error fetching fixture data: %v", err)
+	}
+	fmt.Println("Fixture data successfully loaded.")
 }

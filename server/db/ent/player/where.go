@@ -774,6 +774,75 @@ func HasSquadWith(preds ...predicate.Squad) predicate.Player {
 	})
 }
 
+// HasPlayerEvents applies the HasEdge predicate on the "playerEvents" edge.
+func HasPlayerEvents() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PlayerEventsTable, PlayerEventsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPlayerEventsWith applies the HasEdge predicate on the "playerEvents" edge with a given conditions (other predicates).
+func HasPlayerEventsWith(preds ...predicate.FixtureEvents) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newPlayerEventsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasMatchPlayer applies the HasEdge predicate on the "matchPlayer" edge.
+func HasMatchPlayer() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, MatchPlayerTable, MatchPlayerColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMatchPlayerWith applies the HasEdge predicate on the "matchPlayer" edge with a given conditions (other predicates).
+func HasMatchPlayerWith(preds ...predicate.MatchPlayer) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newMatchPlayerStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasAssistEvents applies the HasEdge predicate on the "assistEvents" edge.
+func HasAssistEvents() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, AssistEventsTable, AssistEventsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasAssistEventsWith applies the HasEdge predicate on the "assistEvents" edge with a given conditions (other predicates).
+func HasAssistEventsWith(preds ...predicate.FixtureEvents) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newAssistEventsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Player) predicate.Player {
 	return predicate.Player(func(s *sql.Selector) {

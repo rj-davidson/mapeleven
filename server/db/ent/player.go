@@ -58,9 +58,15 @@ type PlayerEdges struct {
 	Nationality *Country `json:"nationality,omitempty"`
 	// Squad holds the value of the squad edge.
 	Squad []*Squad `json:"squad,omitempty"`
+	// PlayerEvents holds the value of the playerEvents edge.
+	PlayerEvents []*FixtureEvents `json:"playerEvents,omitempty"`
+	// MatchPlayer holds the value of the matchPlayer edge.
+	MatchPlayer []*MatchPlayer `json:"matchPlayer,omitempty"`
+	// AssistEvents holds the value of the assistEvents edge.
+	AssistEvents []*FixtureEvents `json:"assistEvents,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [6]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -96,6 +102,33 @@ func (e PlayerEdges) SquadOrErr() ([]*Squad, error) {
 		return e.Squad, nil
 	}
 	return nil, &NotLoadedError{edge: "squad"}
+}
+
+// PlayerEventsOrErr returns the PlayerEvents value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) PlayerEventsOrErr() ([]*FixtureEvents, error) {
+	if e.loadedTypes[3] {
+		return e.PlayerEvents, nil
+	}
+	return nil, &NotLoadedError{edge: "playerEvents"}
+}
+
+// MatchPlayerOrErr returns the MatchPlayer value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) MatchPlayerOrErr() ([]*MatchPlayer, error) {
+	if e.loadedTypes[4] {
+		return e.MatchPlayer, nil
+	}
+	return nil, &NotLoadedError{edge: "matchPlayer"}
+}
+
+// AssistEventsOrErr returns the AssistEvents value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) AssistEventsOrErr() ([]*FixtureEvents, error) {
+	if e.loadedTypes[5] {
+		return e.AssistEvents, nil
+	}
+	return nil, &NotLoadedError{edge: "assistEvents"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -251,6 +284,21 @@ func (pl *Player) QueryNationality() *CountryQuery {
 // QuerySquad queries the "squad" edge of the Player entity.
 func (pl *Player) QuerySquad() *SquadQuery {
 	return NewPlayerClient(pl.config).QuerySquad(pl)
+}
+
+// QueryPlayerEvents queries the "playerEvents" edge of the Player entity.
+func (pl *Player) QueryPlayerEvents() *FixtureEventsQuery {
+	return NewPlayerClient(pl.config).QueryPlayerEvents(pl)
+}
+
+// QueryMatchPlayer queries the "matchPlayer" edge of the Player entity.
+func (pl *Player) QueryMatchPlayer() *MatchPlayerQuery {
+	return NewPlayerClient(pl.config).QueryMatchPlayer(pl)
+}
+
+// QueryAssistEvents queries the "assistEvents" edge of the Player entity.
+func (pl *Player) QueryAssistEvents() *FixtureEventsQuery {
+	return NewPlayerClient(pl.config).QueryAssistEvents(pl)
 }
 
 // Update returns a builder for updating this Player.
