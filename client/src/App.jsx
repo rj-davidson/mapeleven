@@ -5,7 +5,7 @@ import Layout from './Layout/Layout.tsx';
 import Players from './Players/Players.jsx';
 import TeamPageAll from './Teams/TeamPageAll.jsx';
 import TeamPageSingle from './Teams/TeamPageSingle';
-import Leagues from './Leagues/Leagues.jsx';
+import LeaguesPageAll from './Leagues/LeaguePageAll.jsx';
 import LeaguePage from './Leagues/LeaguePage.jsx';
 import About from './About/About.tsx';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
@@ -26,7 +26,7 @@ function App() {
                             <Route path='/teams/:slug' element={<TeamPageSingle />} />
                             <Route path='/teams' element={<TeamPageAll />} />
                             <Route path='/leagues/:slug' element={<LeaguePage />} />
-                            <Route path='/leagues' element={<Leagues />} />
+                            <Route path='/leagues' element={<LeaguesPageAll />} />
                             <Route path='/about' element={<About />} />
                             <Route path='/' element={<HomePage />} />
                         </Routes>

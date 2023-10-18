@@ -75,8 +75,10 @@ interface APITeamName {
 }
 
 interface APITeam {
+    logo: string;
     slug: string;
     name: APITeamName;
+    leagueName: string;
     badge: string;
     founded?: number;
     nationalTeam?: boolean;

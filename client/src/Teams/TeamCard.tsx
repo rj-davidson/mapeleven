@@ -27,13 +27,16 @@ const TeamCard: React.FC<TeamCardProps> = ({
         <Link to={`/teams/${slug}`}>
             <Card>
                 <CardContent sx={{ padding: '8px' }}>
-                    <Flex style={{ flexDirection: 'row', gap: '16px', justifyContent: 'left', alignItems: 'center' }}>
+                    <Flex style={{ flexDirection: 'row', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Box sx={{ display: 'flex', justifyContent: 'left', alignItems: 'center' }}>
                             <DisplayImage src={badge} alt={nameShort} />
                         </Box>
-                        <Typography variant='h6' component='h2' sx={{ fontSize: '16px' }}>
+                        <Typography variant='h6' component='h2' sx={{ fontSize: '16px', flex: '1' }}>
                             {nameLong}
                         </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'right', alignItems: 'center' }}>
+                            <DisplayImage src={countryFlag} alt={countryName} />
+                        </Box>
                     </Flex>
                 </CardContent>
             </Card>

@@ -1,87 +1,45 @@
 import * as React from 'react';
-import { Card, CardContent, Grid, Typography } from '@mui/material';
-import LeagueIcon from '@mui/icons-material/SportsSoccer';
-import CupIcon from '@mui/icons-material/EmojiEvents';
-import {Link} from "react-router-dom";
+import { Box, Card, CardContent, Typography } from '@mui/material';
+import DisplayImage from '../Util/DisplayImage';
+import { Flex } from '../Util/Flex.jsx';
+import { Link } from 'react-router-dom';
 
-const url = import.meta.env.VITE_API_URL;
-
-interface League {
-    id: number;
-    logo: string;
-    name: string;
-    type: string;
+interface LeagueCardProps {
     slug: string;
+    leagueName: string;
+    logo: string;
+    countryCode: string;
+    countryName: string;
+    countryFlag: string;
 }
 
-interface DisplayLeaguesState {
-    leagues: League[];
-}
+const LeagueCard: React.FC<LeagueCardProps> = ({
+                                               slug,
+                                                   leagueName,
+                                               logo,
+                                               countryCode,
+                                               countryName,
+                                               countryFlag,
+                                           }) => {
+    return (
+        <Link to={`/leagues/${slug}`}>
+            <Card>
+                <CardContent sx={{ padding: '8px', paddingRight: '16px' }}>
+                    <Flex style={{ flexDirection: 'row', gap: '16px', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box sx={{ display: 'flex', justifyContent: 'left', alignItems: 'center' }}>
+                            <DisplayImage src={logo} alt={leagueName} />
+                        </Box>
+                        <Typography variant='h6' component='h2' sx={{ fontSize: '16px', flex: '1' }}>
+                            {leagueName}
+                        </Typography>
+                        <Box sx={{ display: 'flex', justifyContent: 'right', alignItems: 'center' }}>
+                            <DisplayImage src={countryFlag} alt={countryName} />
+                        </Box>
+                    </Flex>
+                </CardContent>
+            </Card>
+        </Link>
+    );
+};
 
-class LeagueCards extends React.Component<{}, DisplayLeaguesState> {
-    constructor(props: {}) {
-        super(props);
-        this.state = {
-            leagues: [],
-        };
-    }
-
-    componentDidMount() {
-        fetch(`${url}/leagues`)
-            .then(response => response.json())
-            .then(data => {
-                this.setState({ leagues: data });
-                console.log(data);
-            });
-    }
-
-    render() {
-        const leagueCards = this.state.leagues.map(league => {
-            return (
-                <Grid item xs={12} sm={12} md={12} lg={12} key={league.id}>
-                    <Card sx={{ height: '100%' }}>
-                        <CardContent
-                            sx={{
-                                flexGrow: 1,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'space-between',
-                                padding: '24px',
-                            }}
-                        >
-                            <img src={`${url}/` + league.logo} alt={league.name + ' logo'} height={44} />
-
-                            <Link to={`/leagues/${league.slug}`}>
-                                <Typography
-                                    sx={{
-                                        '&:hover': {
-                                            textDecoration: 'underline', // Add underline on hover
-                                        },
-                                    }}
-                                >
-                                    {league.name}
-                                </Typography>
-                            </Link>
-                            <Typography variant='body1' color='text.secondary' sx={{ mr: 2 }}>
-                                {league.type.toLowerCase() === 'league' ? <LeagueIcon /> : <CupIcon />}
-                            </Typography>
-                        </CardContent>
-                    </Card>
-                </Grid>
-            );
-        });
-
-        return (
-            <div>
-                <Typography variant='h4' component='h2' gutterBottom>
-                    Leagues
-                </Typography>
-                <Grid container spacing={3} sx={{ justifyContent: 'space-between' }}>
-                    {leagueCards}
-                </Grid>
-            </div>
-        );
-    }
-}
-
-export default LeagueCards;
+export default LeagueCard;
