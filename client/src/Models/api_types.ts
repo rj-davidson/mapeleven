@@ -215,7 +215,105 @@ interface APIPlayer {
     photo: string;
 }
 
+interface APIFixture {
+    slug: string;
+    referee: string;
+    timezone: string;
+    date: Date;
+    elapsed: number;
+    round: number;
+    status: string;
+    homeTeamScore: number;
+    awayTeamScore: number;
+    season: APIFixtureSeason;
+}
+
+interface APIFixtureSeason {
+    year: number;
+    start: Date;
+    end: Date;
+    current: boolean;
+}
+
+interface APIFixtureTeam {
+    slug: string;
+    name: string;
+    logo: string;
+}
+
+interface APIFixtureSet {
+    fixture?: APIFixture;
+    teams?: APIFixtureTeamDetails;
+    events?: APIFixtureEvent[];
+    lineups?: APIFixtureHomeAway;
+}
+
+interface APIFixtureHomeAway {
+    home?: APIFixtureLineupInfo;
+    away?: APIFixtureLineupInfo;
+}
+
+interface APIFixtureTeamDetails {
+    home: APIFixtureTeamInfo;
+    away: APIFixtureTeamInfo;
+}
+
+interface APIFixtureTeamInfo {
+    slug: string;
+    name: string;
+    logo: string;
+    winner?: boolean;
+}
+
+interface APIFixtureEvent {
+    time: APIFixtureTimeDetail;
+    team: APIFixtureTeamInfo;
+    player: APIFixturePlayer;
+    assist?: APIFixturePlayer;
+    type: string;
+    detail: string;
+    comments?: string;
+}
+
+interface APIFixtureTimeDetail {
+    elapsed: number;
+    extra?: number;
+}
+
+interface APIFixturePlayer {
+    slug: string;
+    name: string;
+}
+
+interface APIFixtureLineupInfo {
+    team: APIFixtureTeamInfo;
+    coach: APIFixtureCoach;
+    formation: string;
+    matchPlayers: APIFixturePlayerDetail[];
+}
+
+interface APIFixtureCoach {
+    name: string;
+    photo: string;
+}
+
+interface APIFixturePlayerDetail {
+    player: APIFixturePlayerDetailInfo;
+}
+
+interface APIFixturePlayerDetailInfo {
+    slug: string;
+    name: string;
+    number: number;
+    pos: string;
+    x: number;
+    y: number;
+}
+
+
 export {
+    APIFixture,
+    APIFixtureSet,
     APISearchType,
     APISearch,
     APIScoreboard,
