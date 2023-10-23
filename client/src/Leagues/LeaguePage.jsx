@@ -15,8 +15,8 @@ function LeaguePage() {
     const [logo, setLogo] = useState();
     const [flag, setFlag] = useState('');
     const [country, setCountry] = useState('');
-    const [teams, setTeams] = useState(new Set());
     const [loading, setLoading] = useState(true);
+    const [standingsData, setStandingsData] = useState([]);
 
     const isSmallerThanLG = useMediaQuery('(max-width: 1260px)');
 
@@ -33,10 +33,17 @@ function LeaguePage() {
                 setCountry(jsonData.country.name);
 
                 const standings = jsonData.standings;
-                const newTeams = new Set();
+                const groupedStandings = {};
+
                 for (let i = 0; i < standings.length; i++) {
-                    if (standings[i].rank > 0) {
-                        newTeams.add({
+                    const group = standings[i].group;
+
+                    if (group) {
+                        if (!groupedStandings[group]) {
+                            groupedStandings[group] = [];
+                        }
+
+                        groupedStandings[group].push({
                             rank: standings[i].rank,
                             name: standings[i].team.name.long,
                             logo: standings[i].team.badge,
@@ -50,8 +57,14 @@ function LeaguePage() {
                         });
                     }
                 }
-                // Update the state variables with the new data.
-                setTeams(newTeams);
+
+                // Convert the grouped data to an array of objects
+                const standingsArray = Object.entries(groupedStandings).map(([group, teams]) => ({
+                    group,
+                    teams,
+                }));
+
+                setStandingsData(standingsArray);
                 setLoading(false);
             })
             .catch(error => console.error(error));
@@ -118,11 +131,18 @@ function LeaguePage() {
                 </Tile>
             </Grid>
 
-            <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                <Tile style={{ justifyContent: 'left' }}>
-                    <Standings data={teams} />
-                </Tile>
-            </Grid>
+            {standingsData.map((groupData, index) => (
+                <Grid item xs={12} sm={12} md={12} lg={12} width='100%' key={index}>
+                    <Tile style={{ justifyContent: 'left', flexDirection: 'column' }}>
+                        {standingsData.length > 1 && (
+                            <Typography sx={{ fontSize: { xs: '22px', sm: '24px' }, marginBottom: '8px' }}>
+                                {groupData.group}
+                            </Typography>
+                        )}
+                        <Standings data={groupData.teams} />
+                    </Tile>
+                </Grid>
+            ))}
         </Grid>
     );
 }
