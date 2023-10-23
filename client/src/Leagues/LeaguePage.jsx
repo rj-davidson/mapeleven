@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Grid, Skeleton, Typography } from '@mui/material';
+import { Box, Grid, Skeleton, Typography, useMediaQuery } from '@mui/material';
 import { Tile } from '../Util/Tile.jsx';
 import { Flex } from '../Util/Flex.jsx';
 import Standings from './Standings.jsx';
@@ -17,6 +17,8 @@ function LeaguePage() {
     const [country, setCountry] = useState('');
     const [teams, setTeams] = useState(new Set());
     const [loading, setLoading] = useState(true);
+
+    const isSmallerThanLG = useMediaQuery('(max-width: 1260px)');
 
     useEffect(() => {
         setLoading(true);
@@ -77,29 +79,41 @@ function LeaguePage() {
     ) : (
         <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                <Tile style={{ justifyContent: 'space-between' }}>
-                    <Flex style={{ justifyContent: 'center', alignItems: 'center', gap: '32px' }}>
+                <Tile style={{ justifyContent: 'left', gap: isSmallerThanLG ? '12px' : '18px' }}>
+                    <Flex style={{ alignItems: 'center' }}>
                         <Box
                             component='img'
                             sx={{
-                                maxHeight: { xs: 64, sm: 96 },
-                                maxWidth: { xs: 64, sm: 96 },
+                                maxHeight: { xs: 60, sm: 96 },
+                                maxWidth: { xs: 60, sm: 96 },
                             }}
                             alt={name}
                             src={`${url}/` + logo}
                         />
-                        <Typography sx={{ fontSize: { xs: '24px', sm: '48px' } }}>{name}</Typography>
                     </Flex>
-                    <Flex style={{ justifyContent: 'center', alignItems: 'center', flexDirection: 'column' }}>
-                        <Box
-                            component='img'
-                            sx={{
-                                maxHeight: { xs: 48, sm: 48 },
-                                maxWidth: { xs: 60, sm: 60 },
+                    <Flex style={{ alignItems: 'left', flexDirection: 'column' }}>
+                        <Typography sx={{ fontSize: { xs: '24px', sm: '48px' } }}>{name}</Typography>
+                        <Flex
+                            style={{
+                                justifyContent: 'left',
+                                alignItems: 'center',
+                                flexDirection: 'row',
+                                gap: '6px',
                             }}
-                            alt={country}
-                            src={`${url}/` + flag}
-                        />
+                        >
+                            {country !== 'World' && (
+                                <Box
+                                    component='img'
+                                    sx={{
+                                        maxHeight: { xs: 16, sm: 24 },
+                                        maxWidth: { xs: 20, sm: 30 },
+                                    }}
+                                    alt={country}
+                                    src={`${url}/` + flag}
+                                />
+                            )}
+                            <Typography sx={{ fontSize: { xs: '14px', sm: '24px' } }}>{country}</Typography>
+                        </Flex>
                     </Flex>
                 </Tile>
             </Grid>
