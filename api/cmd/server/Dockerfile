@@ -1,10 +1,14 @@
-# syntax=docker/dockerfile:1
-FROM golang:latest
-WORKDIR /app/
-COPY api/cmd/server/go.mod api/cmd/server/go.sum ./
+FROM golang:latest AS builder
+WORKDIR /app
+ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+COPY ./api/go.mod ./api/go.sum ./
 RUN go mod download
-COPY . .
+COPY ./api .
 RUN go generate ./pkg/ent
-RUN go build -o /app/server ./api/cmd/server
+RUN go build -o /app/server ./cmd/server
+
+FROM alpine:latest
+WORKDIR /app
+COPY --from=builder /app/server .
 EXPOSE 8080
-ENTRYPOINT ["/app/server"]
+ENTRYPOINT ["./server"]

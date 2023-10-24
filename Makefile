@@ -25,7 +25,7 @@ client:
 
 docker-build: docker-build-api-db docker-build-api-server docker-build-client
 
-docker-build-api-db:
+docker-build-api-db: db
 	@echo "+ $@"
 	docker-compose build api-db
 
