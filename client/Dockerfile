@@ -1,11 +1,6 @@
 FROM node:alpine
-
-WORKDIR /app/client/
-
-COPY package.json /app/client/
-
+WORKDIR /app/
+COPY client/package.json ./
 RUN yarn install
-
-COPY . /app/client/
-
+COPY client/ ./
 CMD ["yarn", "run", "dev"]

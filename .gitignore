@@ -4,7 +4,7 @@
 # Editor-based HTTP Client requests
 /httpRequests/
 
-server/public/*
+api/public/*
 
 .idea/
 *.iml
@@ -36,4 +36,4 @@ dist-ssr
 *.sw?
 
 # Environment variables
-server/.env
+api/.env
