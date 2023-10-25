@@ -17,6 +17,7 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
+	"os"
 	"sync"
 	"time"
 )
@@ -27,11 +28,17 @@ func main() {
 	devRun := flag.Bool("dev", false, "Run in development mode")
 	flag.Parse()
 
-	viper.SetConfigFile(".env")
+	envPath := "./.env"
+	if _, err := os.Stat(envPath); os.IsNotExist(err) {
+		log.Fatalf("Error: .env file not found at %s", envPath)
+	}
+
+	viper.SetConfigFile(envPath)
 	err := viper.ReadInConfig()
 	if err != nil {
-		log.Fatalf("Error reading config file, %s", err)
+		log.Fatalf("Error reading config file: %s", err)
 	}
+
 	viper.AutomaticEnv()
 
 	// Initialize WaitGroup

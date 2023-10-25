@@ -41,9 +41,17 @@ docker-up: docker-build
 	@echo "+ $@"
 	docker-compose --env-file $(ENV_FILE) up
 
+docker-up-db-detached:
+	@echo "+ $@"
+	docker-compose --env-file $(ENV_FILE) up db -d
+
 docker-down:
 	@echo "+ $@"
 	docker-compose down
+
+docker-down-db:
+	@echo "+ $@"
+	docker-compose down db
 
 docker-up-detached: docker-build
 	@echo "+ $@"

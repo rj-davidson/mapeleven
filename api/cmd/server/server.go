@@ -3,8 +3,6 @@ package main
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/server/routes"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/migrate"
-	"context"
 	"entgo.io/ent/dialect"
 	"fmt"
 	"github.com/gofiber/fiber/v2"
@@ -40,29 +38,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("failed connecting to postgres database: %v", err)
 	}
-	defer client.Close()
-	ctx := context.Background()
+	defer func(client *ent.Client) {
+		err := client.Close()
+		if err != nil {
 
-	// Run migration.
-	err = client.Schema.Create(
-		ctx,
-		migrate.WithDropIndex(true),
-		migrate.WithDropColumn(true),
-	)
-	if err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
-
-	if err != nil {
-		log.Fatalf("failed opening connection to postgres: %v", err)
-	}
-	defer client.Close()
-
-	// Run migrations on startup
-	err = client.Schema.Create(context.Background(), migrate.WithGlobalUniqueID(true))
-	if err != nil {
-		log.Fatalf("failed creating schema resources: %v", err)
-	}
+		}
+	}(client)
 
 	// Web App Initialization
 	app := fiber.New()
@@ -121,5 +102,5 @@ func SetupRoutes(app *fiber.App, client *ent.Client) {
 	routes.SetupSearchRoutes(app, client)
 
 	// Serve images from public directory
-	app.Static(viper.GetString("ENV_PATH")+"/images", "./public/images")
+	app.Static(viper.GetString("ENV_PATH")+"/images", "/app/public/images")
 }
