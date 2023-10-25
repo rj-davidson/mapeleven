@@ -27,6 +27,10 @@ function TeamPageSingle() {
     const [loading, setLoading] = useState<boolean>(true);
     const [draws, setDraws] = useState<number>(0);
     const [loses, setLoses] = useState<number>(0);
+    const [leagueSlug, setLeagueSlug] = useState<string>('');
+    const [league, setLeague] = useState<string>('');
+    const [leagueLogo, setLeagueLogo] = useState<string>('');
+    const [teamRank, setTeamRank] = useState<string>('');
 
     useEffect(() => {
         fetch(`${url}/teams/${slug}`)
@@ -55,7 +59,6 @@ function TeamPageSingle() {
                         jsonData.competitions[0].stats.failed_to_score.total,
                 );
                 setGoalMinuteSplit(jsonData.competitions[0].stats.goals.for.minute);
-                setLoading(false);
                 setDraws(
                     jsonData.competitions[0].stats.fixtures.draws.home +
                         jsonData.competitions[0].stats.fixtures.draws.away,
@@ -64,9 +67,40 @@ function TeamPageSingle() {
                     jsonData.competitions[0].stats.fixtures.loses.home +
                         jsonData.competitions[0].stats.fixtures.loses.away,
                 );
+                setLeagueSlug(jsonData.competitions[0].league.slug);
+                setLeague(jsonData.competitions[0].league.name);
+                setLeagueLogo(jsonData.competitions[0].league.logo);
             })
             .catch(error => console.error(error));
-    }, [slug]);
+        fetch(`${url}/leagues/${leagueSlug}`)
+            .then(response => response.json())
+            .then(jsonData => {
+                const standings = jsonData.standings;
+
+                // Find the team with the matching slug
+                const team = standings.find(team => team.team.slug === slug);
+
+                // If the team is found, set its rank as the value
+                if (team) {
+                    setTeamRank(getRank(team.rank));
+                }
+                setLoading(false);
+            })
+            .catch(error => console.error(error));
+    }, [slug, leagueSlug]);
+
+    const getRank = (rank: number): string => {
+        if (rank == 1) {
+            return rank + 'st';
+        }
+        if (rank == 2) {
+            return rank + 'nd';
+        }
+        if (rank == 3) {
+            return rank + 'rd';
+        }
+        return rank + 'th';
+    };
 
     return loading ? (
         <Grid container spacing={2} direction='column'>
@@ -106,6 +140,10 @@ function TeamPageSingle() {
                     failedToScore={failedToScore}
                     averageGoals={averageGoals}
                     gamesScored={gamesScored}
+                    leagueSlug={leagueSlug}
+                    leagueName={league}
+                    leagueLogo={leagueLogo}
+                    rank={teamRank}
                 />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={9} width='100%'>

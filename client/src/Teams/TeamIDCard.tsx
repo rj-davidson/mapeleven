@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { Tile } from '../Util/Tile.jsx';
 import { Flex } from '../Util/Flex.jsx';
@@ -22,7 +22,13 @@ interface TeamIDCardProps {
     wins: number;
     draws: number;
     loses: number;
+    leagueSlug: string;
+    leagueName: string;
+    leagueLogo: string;
+    rank: string;
 }
+
+const url = import.meta.env.VITE_API_URL;
 
 const TeamIDCard: React.FC<TeamIDCardProps> = ({
     slug,
@@ -37,6 +43,10 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
     wins,
     draws,
     loses,
+    leagueSlug,
+    leagueName,
+    leagueLogo,
+    rank,
 }) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [inspect, setInspect] = useState<boolean>(false);
@@ -71,11 +81,19 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
                         <Tile
                             style={{
                                 flexDirection: 'column',
-                                gap: '24px',
+                                gap: '32px',
                                 border: '5px solid var(--red)',
                             }}
                         >
-                            <TeamIDTitle slug={slug} name={name} country={country} flag={flag} />
+                            <TeamIDTitle
+                                slug={slug}
+                                name={name}
+                                country={country}
+                                flag={flag}
+                                leagueSlug={leagueSlug}
+                                leagueName={leagueName}
+                                leagueLogo={leagueLogo}
+                            />
 
                             <Flex style={{ justifyContent: 'center', alignItems: 'center', marginTop: '-12px' }}>
                                 <DisplayImage src={badge} alt={name} width={'108px'} height={'108'} />
@@ -83,7 +101,7 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
 
                             <Grid container spacing={1}>
                                 <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                                    <TeamIDStatBox stat='Position' value={'2nd'} />
+                                    <TeamIDStatBox stat='Position' value={rank} />
                                 </Grid>
                                 <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                                     <TeamIDStatBox stat='Points' value={3 * wins + draws} />
@@ -103,11 +121,19 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
                 <Tile
                     style={{
                         flexDirection: 'column',
-                        gap: '24px',
+                        gap: '32px',
                         border: '5px solid var(--red)',
                     }}
                 >
-                    <TeamIDTitle slug={slug} name={name} country={country} flag={flag} />
+                    <TeamIDTitle
+                        slug={slug}
+                        name={name}
+                        country={country}
+                        flag={flag}
+                        leagueSlug={leagueSlug}
+                        leagueName={leagueName}
+                        leagueLogo={leagueLogo}
+                    />
 
                     <Flex style={{ justifyContent: 'center', alignItems: 'center', marginTop: '-12px' }}>
                         <DisplayImage src={badge} alt={name} width={'108px'} height={'108'} />
