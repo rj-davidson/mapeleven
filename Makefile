@@ -39,7 +39,7 @@ docker-build-client:
 
 docker-up: docker-build
 	@echo "+ $@"
-	docker-compose up
+	docker-compose --env-file $(ENV_FILE) up
 
 docker-down:
 	@echo "+ $@"
