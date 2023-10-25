@@ -5,6 +5,7 @@
 /httpRequests/
 
 api/public/*
+api/bin/*
 
 .idea/
 *.iml
