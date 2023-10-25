@@ -141,7 +141,7 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
 
                     <Grid container spacing={1}>
                         <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                            <TeamIDStatBox stat='Position' value={'2nd'} />
+                            <TeamIDStatBox stat='Position' value={rank} />
                         </Grid>
                         <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                             <TeamIDStatBox stat='Points' value={3 * wins + draws} />

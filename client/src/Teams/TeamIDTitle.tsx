@@ -9,9 +9,9 @@ interface TeamIDTitleProps {
     name: string;
     country: string;
     flag: string;
-    leagueSlug: string;
-    leagueName: string;
-    leagueLogo: string;
+    leagueSlug?: string;
+    leagueName?: string;
+    leagueLogo?: string;
 }
 
 const TeamIDTitle: React.FC<TeamIDTitleProps> = ({ name, country, flag, slug, leagueSlug, leagueName, leagueLogo }) => {
@@ -36,19 +36,21 @@ const TeamIDTitle: React.FC<TeamIDTitleProps> = ({ name, country, flag, slug, le
                     <Typography sx={{ fontSize: '14px', color: 'var(--light0)' }}>{country}</Typography>
                 </Flex>
             </Flex>
-            <Flex style={{ flexDirection: 'column' }}>
-                <Flex style={{ flexDirection: 'row', gap: '6px', alignItems: 'center' }}>
-                    <Link to={`/leagues/${leagueSlug}`}>
-                        <DisplayImage
-                            src={leagueLogo}
-                            alt={country}
-                            width={'48px'}
-                            height={'48px'}
-                            sx={{ margin: '4px' }}
-                        />
-                    </Link>
+            {leagueLogo && leagueSlug && (
+                <Flex style={{ flexDirection: 'column' }}>
+                    <Flex style={{ flexDirection: 'row', gap: '6px', alignItems: 'center' }}>
+                        <Link to={`/leagues/${leagueSlug}`}>
+                            <DisplayImage
+                                src={leagueLogo}
+                                alt={leagueName}
+                                width={'48px'}
+                                height={'48px'}
+                                sx={{ margin: '4px' }}
+                            />
+                        </Link>
+                    </Flex>
                 </Flex>
-            </Flex>
+            )}
         </Flex>
     );
 };
