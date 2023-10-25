@@ -316,6 +316,8 @@ interface APIFixturePlayerDetailInfo {
 export {
     APIFixture,
     APIFixtureSet,
+    APIFixtureEvent,
+    APIFixtureTeam,
     APISearchType,
     APISearch,
     APIScoreboard,
