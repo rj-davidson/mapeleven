@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Grid, Typography } from '@mui/material';
 import { Tile } from '../Util/Tile.jsx';
 import { Flex } from '../Util/Flex.jsx';
@@ -8,9 +8,8 @@ import DisplayImage from '../Util/DisplayImage';
 import TeamIDTitle from '../Teams/TeamIDTitle';
 import TeamIDStatBox from '../Teams/TeamIDStatBox';
 import { useMediaQuery } from '@mui/material';
-import {useParams} from "react-router-dom";
-import {APITSGoalMinuteSplit} from "../Models/api_types";
-
+import { useParams } from 'react-router-dom';
+import { APITSGoalMinuteSplit } from '../Models/api_types';
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -20,11 +19,7 @@ interface TeamIDCardProps {
     badge: string;
 }
 
-const TeamIDCardFixturePage: React.FC<TeamIDCardProps> = ({
-                                                   slug,
-                                                   name,
-                                                   badge,
-                                               }) => {
+const TeamIDCardFixturePage: React.FC<TeamIDCardProps> = ({ slug, name, badge }) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
     const [inspect, setInspect] = useState<boolean>(false);
 
@@ -56,20 +51,20 @@ const TeamIDCardFixturePage: React.FC<TeamIDCardProps> = ({
                 setClean(jsonData.competitions[0].stats.clean_sheet.total);
                 setGamesPlayed(
                     jsonData.competitions[0].stats.fixtures.played.home +
-                    jsonData.competitions[0].stats.fixtures.played.away,
+                        jsonData.competitions[0].stats.fixtures.played.away,
                 );
                 setWins(
                     jsonData.competitions[0].stats.fixtures.wins.home +
-                    jsonData.competitions[0].stats.fixtures.wins.away,
+                        jsonData.competitions[0].stats.fixtures.wins.away,
                 );
                 setLoading(false);
                 setDraws(
                     jsonData.competitions[0].stats.fixtures.draws.home +
-                    jsonData.competitions[0].stats.fixtures.draws.away,
+                        jsonData.competitions[0].stats.fixtures.draws.away,
                 );
                 setLoses(
                     jsonData.competitions[0].stats.fixtures.loses.home +
-                    jsonData.competitions[0].stats.fixtures.loses.away,
+                        jsonData.competitions[0].stats.fixtures.loses.away,
                 );
             })
             .catch(error => console.error(error));
@@ -113,9 +108,6 @@ const TeamIDCardFixturePage: React.FC<TeamIDCardProps> = ({
                             </Flex>
 
                             <Grid container spacing={1}>
-                                <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
-                                    <TeamIDStatBox stat='Position' value={'2nd'} />
-                                </Grid>
                                 <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                                     <TeamIDStatBox stat='Points' value={3 * wins + draws} />
                                 </Grid>
