@@ -21,8 +21,6 @@ services:
       dockerfile: api/cmd/db/Dockerfile
     depends_on:
       - db
-    volumes:
-      - ./api/bin:/app/api/bin
     environment:
       DB_HOST: db
       DB_PORT: 5432

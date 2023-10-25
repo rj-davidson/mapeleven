@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
 	"os"

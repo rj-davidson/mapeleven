@@ -1,14 +1,11 @@
-FROM golang:latest AS builder
-WORKDIR /app
-ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+FROM golang:latest
+WORKDIR /app/api
 COPY ./api/go.mod ./api/go.sum ./
 RUN go mod download
 COPY ./api .
 RUN go generate ./pkg/ent
-RUN go build -o /app/server ./cmd/server
-
-FROM alpine:latest
-WORKDIR /app
-COPY --from=builder /app/server .
+RUN go build -o /app/api/bin/server ./cmd/server
+WORKDIR /app/api/bin
+COPY ./api/.env /app/api/bin
 EXPOSE 8080
 ENTRYPOINT ["./server"]
