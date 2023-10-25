@@ -10,6 +10,9 @@ interface TeamOppIDCardProps {
     badge: string;
     country: string;
     flag: string;
+    leagueSlug: string;
+    leagueName: string;
+    leagueLogo: string;
 }
 
 const TeamOppIDCard: React.FC<TeamOppIDCardProps> = ({
@@ -18,6 +21,9 @@ const TeamOppIDCard: React.FC<TeamOppIDCardProps> = ({
     badge = null,
     country = 'Country',
     flag = null,
+    leagueSlug,
+    leagueName,
+    leagueLogo,
 }) => {
     return (
         <Tile
@@ -29,7 +35,15 @@ const TeamOppIDCard: React.FC<TeamOppIDCardProps> = ({
                 border: '5px solid var(--blue)',
             }}
         >
-            <TeamIDTitle slug={slug} name={name} country={country} flag={flag} />
+            <TeamIDTitle
+                slug={slug}
+                name={name}
+                country={country}
+                flag={flag}
+                leagueSlug={leagueSlug}
+                leagueName={leagueName}
+                leagueLogo={leagueLogo}
+            />
 
             <Flex style={{ justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                 <DisplayImage src={badge} alt={name} width={'108px'} height={'108'} />

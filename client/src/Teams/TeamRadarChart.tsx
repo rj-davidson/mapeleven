@@ -48,6 +48,9 @@ const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
     const [oppCountry, setOppCountry] = useState<string>('');
     const [oppFlag, setOppFlag] = useState<string>('');
     const [oppFixtures, setOppFixtures] = useState<number>(0);
+    const [oppLeagueSlug, setOppLeagueSlug] = useState<string>('');
+    const [oppLeagueName, setOppLeagueName] = useState<string>('');
+    const [oppLeagueLogo, setOppLeagueLogo] = useState<string>('');
 
     // Array of all available stats
     const allStats = ['Goals', 'Clean Sheets', 'Fixtures', 'Wins', 'Games Scored', 'Average Goals', 'Failed To Score'];
@@ -87,6 +90,9 @@ const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
                             jsonData.competitions[0].stats.fixtures.played.away -
                             jsonData.competitions[0].stats.failed_to_score.total,
                     );
+                    setOppLeagueSlug(jsonData.competitions[0].league.slug);
+                    setOppLeagueName(jsonData.competitions[0].league.name);
+                    setOppLeagueLogo(jsonData.competitions[0].league.logo);
                 })
                 .catch(error => console.error(error));
         }
@@ -444,8 +450,8 @@ const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
                     >
                         <ResponsiveContainer>
                             <RadarChart data={data} innerRadius={'10%'}>
-                                <PolarGrid gridType={'circle'} />
-                                <PolarAngleAxis dataKey='stat' stroke='white' axisLine={false} tickLine={false}/>
+                                <PolarGrid gridType={'circle'} style={{ strokeWidth: 2 }} />
+                                <PolarAngleAxis dataKey='stat' stroke='white' axisLine={false} tickLine={false} />
                                 <Radar
                                     name={name}
                                     dataKey='A'
@@ -490,6 +496,9 @@ const TeamRadarChart: React.FC<TeamRadarChartProps> = ({
                                 badge={oppBadge}
                                 country={oppCountry}
                                 flag={oppFlag}
+                                leagueSlug={oppLeagueSlug}
+                                leagueName={oppLeagueName}
+                                leagueLogo={oppLeagueLogo}
                             />
                         ) : (
                             <Tile

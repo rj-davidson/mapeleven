@@ -21,6 +21,10 @@ interface TeamPageSingleColumnProps {
     averageGoals: number;
     gamesScored: number;
     failedToScore: number;
+    leagueSlug: string;
+    leagueName: string;
+    leagueLogo: string;
+    rank: string;
 }
 
 const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
@@ -39,6 +43,10 @@ const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
     averageGoals,
     gamesScored,
     failedToScore,
+    leagueSlug,
+    leagueName,
+    leagueLogo,
+    rank,
 }) => {
     return (
         <Grid container spacing={2}>
@@ -56,6 +64,10 @@ const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
                     wins={wins}
                     draws={draws}
                     loses={loses}
+                    leagueSlug={leagueSlug}
+                    leagueName={leagueName}
+                    leagueLogo={leagueLogo}
+                    rank={rank}
                 />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
