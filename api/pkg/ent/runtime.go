@@ -14,6 +14,10 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/schema"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
@@ -99,6 +103,42 @@ func init() {
 	matchplayer.DefaultLastUpdated = matchplayerDescLastUpdated.Default.(func() time.Time)
 	// matchplayer.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	matchplayer.UpdateDefaultLastUpdated = matchplayerDescLastUpdated.UpdateDefault.(func() time.Time)
+	psdefenseFields := schema.PSDefense{}.Fields()
+	_ = psdefenseFields
+	// psdefenseDescBlocks is the schema descriptor for blocks field.
+	psdefenseDescBlocks := psdefenseFields[1].Descriptor()
+	// psdefense.DefaultBlocks holds the default value on creation for the blocks field.
+	psdefense.DefaultBlocks = psdefenseDescBlocks.Default.(int)
+	psgoalsFields := schema.PSGoals{}.Fields()
+	_ = psgoalsFields
+	// psgoalsDescSaveGoals is the schema descriptor for saveGoals field.
+	psgoalsDescSaveGoals := psgoalsFields[3].Descriptor()
+	// psgoals.DefaultSaveGoals holds the default value on creation for the saveGoals field.
+	psgoals.DefaultSaveGoals = psgoalsDescSaveGoals.Default.(int)
+	psoffenseFields := schema.PSOffense{}.Fields()
+	_ = psoffenseFields
+	// psoffenseDescDribblePast is the schema descriptor for dribblePast field.
+	psoffenseDescDribblePast := psoffenseFields[2].Descriptor()
+	// psoffense.DefaultDribblePast holds the default value on creation for the dribblePast field.
+	psoffense.DefaultDribblePast = psoffenseDescDribblePast.Default.(int)
+	pspenaltyFields := schema.PSPenalty{}.Fields()
+	_ = pspenaltyFields
+	// pspenaltyDescPenaltyWon is the schema descriptor for penaltyWon field.
+	pspenaltyDescPenaltyWon := pspenaltyFields[5].Descriptor()
+	// pspenalty.DefaultPenaltyWon holds the default value on creation for the penaltyWon field.
+	pspenalty.DefaultPenaltyWon = pspenaltyDescPenaltyWon.Default.(int)
+	// pspenaltyDescPenaltyCommited is the schema descriptor for penaltyCommited field.
+	pspenaltyDescPenaltyCommited := pspenaltyFields[6].Descriptor()
+	// pspenalty.DefaultPenaltyCommited holds the default value on creation for the penaltyCommited field.
+	pspenalty.DefaultPenaltyCommited = pspenaltyDescPenaltyCommited.Default.(int)
+	// pspenaltyDescPenaltyScored is the schema descriptor for penaltyScored field.
+	pspenaltyDescPenaltyScored := pspenaltyFields[7].Descriptor()
+	// pspenalty.DefaultPenaltyScored holds the default value on creation for the penaltyScored field.
+	pspenalty.DefaultPenaltyScored = pspenaltyDescPenaltyScored.Default.(int)
+	// pspenaltyDescPenaltySaved is the schema descriptor for penaltySaved field.
+	pspenaltyDescPenaltySaved := pspenaltyFields[9].Descriptor()
+	// pspenalty.DefaultPenaltySaved holds the default value on creation for the penaltySaved field.
+	pspenalty.DefaultPenaltySaved = pspenaltyDescPenaltySaved.Default.(int)
 	playerFields := schema.Player{}.Fields()
 	_ = playerFields
 	// playerDescLastUpdated is the schema descriptor for lastUpdated field.

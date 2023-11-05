@@ -33,6 +33,7 @@ func (Player) Fields() []ent.Field {
 			Default(time.Now).
 			Optional().
 			UpdateDefault(time.Now),
+		field.String("form").Optional(),
 	}
 }
 
@@ -49,5 +50,10 @@ func (Player) Edges() []ent.Edge {
 		edge.To("playerEvents", FixtureEvents.Type),
 		edge.To("matchPlayer", MatchPlayer.Type),
 		edge.To("assistEvents", FixtureEvents.Type),
+		edge.To("psgames", PSGames.Type),
+		edge.To("psgoals", PSGoals.Type),
+		edge.To("psdefense", PSDefense.Type),
+		edge.To("psoffense", PSOffense.Type),
+		edge.To("pspenalty", PSPenalty.Type),
 	}
 }

@@ -249,6 +249,135 @@ var (
 			},
 		},
 	}
+	// PsDefensesColumns holds the columns for the "ps_defenses" table.
+	PsDefensesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "tackles_total", Type: field.TypeInt},
+		{Name: "blocks", Type: field.TypeInt, Default: 0},
+		{Name: "interceptions", Type: field.TypeInt},
+		{Name: "total_duels", Type: field.TypeInt},
+		{Name: "won_duels", Type: field.TypeInt},
+		{Name: "player_psdefense", Type: field.TypeInt, Nullable: true},
+	}
+	// PsDefensesTable holds the schema information for the "ps_defenses" table.
+	PsDefensesTable = &schema.Table{
+		Name:       "ps_defenses",
+		Columns:    PsDefensesColumns,
+		PrimaryKey: []*schema.Column{PsDefensesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ps_defenses_players_psdefense",
+				Columns:    []*schema.Column{PsDefensesColumns[6]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PsGamesColumns holds the columns for the "ps_games" table.
+	PsGamesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "appearences", Type: field.TypeInt},
+		{Name: "lineups", Type: field.TypeInt},
+		{Name: "minutes", Type: field.TypeInt},
+		{Name: "number", Type: field.TypeInt},
+		{Name: "position", Type: field.TypeString},
+		{Name: "rating", Type: field.TypeString},
+		{Name: "captain", Type: field.TypeBool},
+		{Name: "player_psgames", Type: field.TypeInt, Nullable: true},
+	}
+	// PsGamesTable holds the schema information for the "ps_games" table.
+	PsGamesTable = &schema.Table{
+		Name:       "ps_games",
+		Columns:    PsGamesColumns,
+		PrimaryKey: []*schema.Column{PsGamesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ps_games_players_psgames",
+				Columns:    []*schema.Column{PsGamesColumns[8]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PsGoalsColumns holds the columns for the "ps_goals" table.
+	PsGoalsColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "total_goals", Type: field.TypeInt},
+		{Name: "conceded_goals", Type: field.TypeInt},
+		{Name: "assist_goals", Type: field.TypeInt},
+		{Name: "save_goals", Type: field.TypeInt, Default: 0},
+		{Name: "shots_total", Type: field.TypeInt},
+		{Name: "shots_on", Type: field.TypeInt},
+		{Name: "player_psgoals", Type: field.TypeInt, Nullable: true},
+	}
+	// PsGoalsTable holds the schema information for the "ps_goals" table.
+	PsGoalsTable = &schema.Table{
+		Name:       "ps_goals",
+		Columns:    PsGoalsColumns,
+		PrimaryKey: []*schema.Column{PsGoalsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ps_goals_players_psgoals",
+				Columns:    []*schema.Column{PsGoalsColumns[7]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PsOffensesColumns holds the columns for the "ps_offenses" table.
+	PsOffensesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "dribble_attempts", Type: field.TypeInt},
+		{Name: "dribble_success", Type: field.TypeInt},
+		{Name: "dribble_past", Type: field.TypeInt, Default: 0},
+		{Name: "passes_total", Type: field.TypeInt},
+		{Name: "passes_key", Type: field.TypeInt},
+		{Name: "passes_accuracy", Type: field.TypeInt},
+		{Name: "player_psoffense", Type: field.TypeInt, Nullable: true},
+	}
+	// PsOffensesTable holds the schema information for the "ps_offenses" table.
+	PsOffensesTable = &schema.Table{
+		Name:       "ps_offenses",
+		Columns:    PsOffensesColumns,
+		PrimaryKey: []*schema.Column{PsOffensesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ps_offenses_players_psoffense",
+				Columns:    []*schema.Column{PsOffensesColumns[7]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
+	// PsPenaltiesColumns holds the columns for the "ps_penalties" table.
+	PsPenaltiesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "fouls_drawn", Type: field.TypeInt},
+		{Name: "fouls_committed", Type: field.TypeInt},
+		{Name: "cards_yellow", Type: field.TypeInt},
+		{Name: "card_yellowred", Type: field.TypeInt},
+		{Name: "cards_red", Type: field.TypeInt},
+		{Name: "penalty_won", Type: field.TypeInt, Default: 0},
+		{Name: "penalty_commited", Type: field.TypeInt, Default: 0},
+		{Name: "penalty_scored", Type: field.TypeInt, Default: 0},
+		{Name: "penalty_missed", Type: field.TypeInt},
+		{Name: "penalty_saved", Type: field.TypeInt, Default: 0},
+		{Name: "player_pspenalty", Type: field.TypeInt, Nullable: true},
+	}
+	// PsPenaltiesTable holds the schema information for the "ps_penalties" table.
+	PsPenaltiesTable = &schema.Table{
+		Name:       "ps_penalties",
+		Columns:    PsPenaltiesColumns,
+		PrimaryKey: []*schema.Column{PsPenaltiesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "ps_penalties_players_pspenalty",
+				Columns:    []*schema.Column{PsPenaltiesColumns[11]},
+				RefColumns: []*schema.Column{PlayersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// PlayersColumns holds the columns for the "players" table.
 	PlayersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -263,6 +392,7 @@ var (
 		{Name: "injured", Type: field.TypeBool},
 		{Name: "photo", Type: field.TypeString},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "form", Type: field.TypeString, Nullable: true},
 		{Name: "birth_player", Type: field.TypeInt, Nullable: true},
 		{Name: "country_players", Type: field.TypeInt, Nullable: true},
 		{Name: "team_players", Type: field.TypeInt, Nullable: true},
@@ -275,19 +405,19 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "players_births_player",
-				Columns:    []*schema.Column{PlayersColumns[12]},
+				Columns:    []*schema.Column{PlayersColumns[13]},
 				RefColumns: []*schema.Column{BirthsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "players_countries_players",
-				Columns:    []*schema.Column{PlayersColumns[13]},
+				Columns:    []*schema.Column{PlayersColumns[14]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "players_teams_players",
-				Columns:    []*schema.Column{PlayersColumns[14]},
+				Columns:    []*schema.Column{PlayersColumns[15]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -710,6 +840,11 @@ var (
 		FixtureLineupsTable,
 		LeaguesTable,
 		MatchPlayersTable,
+		PsDefensesTable,
+		PsGamesTable,
+		PsGoalsTable,
+		PsOffensesTable,
+		PsPenaltiesTable,
 		PlayersTable,
 		SeasonsTable,
 		SquadsTable,
@@ -740,6 +875,11 @@ func init() {
 	LeaguesTable.ForeignKeys[0].RefTable = CountriesTable
 	MatchPlayersTable.ForeignKeys[0].RefTable = FixtureLineupsTable
 	MatchPlayersTable.ForeignKeys[1].RefTable = PlayersTable
+	PsDefensesTable.ForeignKeys[0].RefTable = PlayersTable
+	PsGamesTable.ForeignKeys[0].RefTable = PlayersTable
+	PsGoalsTable.ForeignKeys[0].RefTable = PlayersTable
+	PsOffensesTable.ForeignKeys[0].RefTable = PlayersTable
+	PsPenaltiesTable.ForeignKeys[0].RefTable = PlayersTable
 	PlayersTable.ForeignKeys[0].RefTable = BirthsTable
 	PlayersTable.ForeignKeys[1].RefTable = CountriesTable
 	PlayersTable.ForeignKeys[2].RefTable = TeamsTable

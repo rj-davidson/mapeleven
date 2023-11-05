@@ -41,6 +41,8 @@ type Player struct {
 	Photo string `json:"photo,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
+	// Form holds the value of the "form" field.
+	Form string `json:"form,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlayerQuery when eager-loading is set.
 	Edges           PlayerEdges `json:"edges"`
@@ -64,9 +66,19 @@ type PlayerEdges struct {
 	MatchPlayer []*MatchPlayer `json:"matchPlayer,omitempty"`
 	// AssistEvents holds the value of the assistEvents edge.
 	AssistEvents []*FixtureEvents `json:"assistEvents,omitempty"`
+	// Psgames holds the value of the psgames edge.
+	Psgames []*PSGames `json:"psgames,omitempty"`
+	// Psgoals holds the value of the psgoals edge.
+	Psgoals []*PSGoals `json:"psgoals,omitempty"`
+	// Psdefense holds the value of the psdefense edge.
+	Psdefense []*PSDefense `json:"psdefense,omitempty"`
+	// Psoffense holds the value of the psoffense edge.
+	Psoffense []*PSOffense `json:"psoffense,omitempty"`
+	// Pspenalty holds the value of the pspenalty edge.
+	Pspenalty []*PSPenalty `json:"pspenalty,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [11]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -131,6 +143,51 @@ func (e PlayerEdges) AssistEventsOrErr() ([]*FixtureEvents, error) {
 	return nil, &NotLoadedError{edge: "assistEvents"}
 }
 
+// PsgamesOrErr returns the Psgames value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) PsgamesOrErr() ([]*PSGames, error) {
+	if e.loadedTypes[6] {
+		return e.Psgames, nil
+	}
+	return nil, &NotLoadedError{edge: "psgames"}
+}
+
+// PsgoalsOrErr returns the Psgoals value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) PsgoalsOrErr() ([]*PSGoals, error) {
+	if e.loadedTypes[7] {
+		return e.Psgoals, nil
+	}
+	return nil, &NotLoadedError{edge: "psgoals"}
+}
+
+// PsdefenseOrErr returns the Psdefense value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) PsdefenseOrErr() ([]*PSDefense, error) {
+	if e.loadedTypes[8] {
+		return e.Psdefense, nil
+	}
+	return nil, &NotLoadedError{edge: "psdefense"}
+}
+
+// PsoffenseOrErr returns the Psoffense value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) PsoffenseOrErr() ([]*PSOffense, error) {
+	if e.loadedTypes[9] {
+		return e.Psoffense, nil
+	}
+	return nil, &NotLoadedError{edge: "psoffense"}
+}
+
+// PspenaltyOrErr returns the Pspenalty value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) PspenaltyOrErr() ([]*PSPenalty, error) {
+	if e.loadedTypes[10] {
+		return e.Pspenalty, nil
+	}
+	return nil, &NotLoadedError{edge: "pspenalty"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Player) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -140,7 +197,7 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case player.FieldID, player.FieldApiFootballId, player.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto:
+		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto, player.FieldForm:
 			values[i] = new(sql.NullString)
 		case player.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
@@ -237,6 +294,12 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pl.LastUpdated = value.Time
 			}
+		case player.FieldForm:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field form", values[i])
+			} else if value.Valid {
+				pl.Form = value.String
+			}
 		case player.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field birth_player", value)
@@ -301,6 +364,31 @@ func (pl *Player) QueryAssistEvents() *FixtureEventsQuery {
 	return NewPlayerClient(pl.config).QueryAssistEvents(pl)
 }
 
+// QueryPsgames queries the "psgames" edge of the Player entity.
+func (pl *Player) QueryPsgames() *PSGamesQuery {
+	return NewPlayerClient(pl.config).QueryPsgames(pl)
+}
+
+// QueryPsgoals queries the "psgoals" edge of the Player entity.
+func (pl *Player) QueryPsgoals() *PSGoalsQuery {
+	return NewPlayerClient(pl.config).QueryPsgoals(pl)
+}
+
+// QueryPsdefense queries the "psdefense" edge of the Player entity.
+func (pl *Player) QueryPsdefense() *PSDefenseQuery {
+	return NewPlayerClient(pl.config).QueryPsdefense(pl)
+}
+
+// QueryPsoffense queries the "psoffense" edge of the Player entity.
+func (pl *Player) QueryPsoffense() *PSOffenseQuery {
+	return NewPlayerClient(pl.config).QueryPsoffense(pl)
+}
+
+// QueryPspenalty queries the "pspenalty" edge of the Player entity.
+func (pl *Player) QueryPspenalty() *PSPenaltyQuery {
+	return NewPlayerClient(pl.config).QueryPspenalty(pl)
+}
+
 // Update returns a builder for updating this Player.
 // Note that you need to call Player.Unwrap() before calling this method if this Player
 // was returned from a transaction, and the transaction was committed or rolled back.
@@ -356,6 +444,9 @@ func (pl *Player) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(pl.LastUpdated.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("form=")
+	builder.WriteString(pl.Form)
 	builder.WriteByte(')')
 	return builder.String()
 }

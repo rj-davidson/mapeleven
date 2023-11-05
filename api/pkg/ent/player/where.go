@@ -110,6 +110,11 @@ func LastUpdated(v time.Time) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldLastUpdated, v))
 }
 
+// Form applies equality check predicate on the "form" field. It's identical to FormEQ.
+func Form(v string) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldForm, v))
+}
+
 // SlugEQ applies the EQ predicate on the "slug" field.
 func SlugEQ(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldSlug, v))
@@ -705,6 +710,81 @@ func LastUpdatedNotNil() predicate.Player {
 	return predicate.Player(sql.FieldNotNull(FieldLastUpdated))
 }
 
+// FormEQ applies the EQ predicate on the "form" field.
+func FormEQ(v string) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldForm, v))
+}
+
+// FormNEQ applies the NEQ predicate on the "form" field.
+func FormNEQ(v string) predicate.Player {
+	return predicate.Player(sql.FieldNEQ(FieldForm, v))
+}
+
+// FormIn applies the In predicate on the "form" field.
+func FormIn(vs ...string) predicate.Player {
+	return predicate.Player(sql.FieldIn(FieldForm, vs...))
+}
+
+// FormNotIn applies the NotIn predicate on the "form" field.
+func FormNotIn(vs ...string) predicate.Player {
+	return predicate.Player(sql.FieldNotIn(FieldForm, vs...))
+}
+
+// FormGT applies the GT predicate on the "form" field.
+func FormGT(v string) predicate.Player {
+	return predicate.Player(sql.FieldGT(FieldForm, v))
+}
+
+// FormGTE applies the GTE predicate on the "form" field.
+func FormGTE(v string) predicate.Player {
+	return predicate.Player(sql.FieldGTE(FieldForm, v))
+}
+
+// FormLT applies the LT predicate on the "form" field.
+func FormLT(v string) predicate.Player {
+	return predicate.Player(sql.FieldLT(FieldForm, v))
+}
+
+// FormLTE applies the LTE predicate on the "form" field.
+func FormLTE(v string) predicate.Player {
+	return predicate.Player(sql.FieldLTE(FieldForm, v))
+}
+
+// FormContains applies the Contains predicate on the "form" field.
+func FormContains(v string) predicate.Player {
+	return predicate.Player(sql.FieldContains(FieldForm, v))
+}
+
+// FormHasPrefix applies the HasPrefix predicate on the "form" field.
+func FormHasPrefix(v string) predicate.Player {
+	return predicate.Player(sql.FieldHasPrefix(FieldForm, v))
+}
+
+// FormHasSuffix applies the HasSuffix predicate on the "form" field.
+func FormHasSuffix(v string) predicate.Player {
+	return predicate.Player(sql.FieldHasSuffix(FieldForm, v))
+}
+
+// FormIsNil applies the IsNil predicate on the "form" field.
+func FormIsNil() predicate.Player {
+	return predicate.Player(sql.FieldIsNull(FieldForm))
+}
+
+// FormNotNil applies the NotNil predicate on the "form" field.
+func FormNotNil() predicate.Player {
+	return predicate.Player(sql.FieldNotNull(FieldForm))
+}
+
+// FormEqualFold applies the EqualFold predicate on the "form" field.
+func FormEqualFold(v string) predicate.Player {
+	return predicate.Player(sql.FieldEqualFold(FieldForm, v))
+}
+
+// FormContainsFold applies the ContainsFold predicate on the "form" field.
+func FormContainsFold(v string) predicate.Player {
+	return predicate.Player(sql.FieldContainsFold(FieldForm, v))
+}
+
 // HasBirth applies the HasEdge predicate on the "birth" edge.
 func HasBirth() predicate.Player {
 	return predicate.Player(func(s *sql.Selector) {
@@ -835,6 +915,121 @@ func HasAssistEvents() predicate.Player {
 func HasAssistEventsWith(preds ...predicate.FixtureEvents) predicate.Player {
 	return predicate.Player(func(s *sql.Selector) {
 		step := newAssistEventsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPsgames applies the HasEdge predicate on the "psgames" edge.
+func HasPsgames() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PsgamesTable, PsgamesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPsgamesWith applies the HasEdge predicate on the "psgames" edge with a given conditions (other predicates).
+func HasPsgamesWith(preds ...predicate.PSGames) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newPsgamesStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPsgoals applies the HasEdge predicate on the "psgoals" edge.
+func HasPsgoals() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PsgoalsTable, PsgoalsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPsgoalsWith applies the HasEdge predicate on the "psgoals" edge with a given conditions (other predicates).
+func HasPsgoalsWith(preds ...predicate.PSGoals) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newPsgoalsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPsdefense applies the HasEdge predicate on the "psdefense" edge.
+func HasPsdefense() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PsdefenseTable, PsdefenseColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPsdefenseWith applies the HasEdge predicate on the "psdefense" edge with a given conditions (other predicates).
+func HasPsdefenseWith(preds ...predicate.PSDefense) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newPsdefenseStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPsoffense applies the HasEdge predicate on the "psoffense" edge.
+func HasPsoffense() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PsoffenseTable, PsoffenseColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPsoffenseWith applies the HasEdge predicate on the "psoffense" edge with a given conditions (other predicates).
+func HasPsoffenseWith(preds ...predicate.PSOffense) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newPsoffenseStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPspenalty applies the HasEdge predicate on the "pspenalty" edge.
+func HasPspenalty() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PspenaltyTable, PspenaltyColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPspenaltyWith applies the HasEdge predicate on the "pspenalty" edge with a given conditions (other predicates).
+func HasPspenaltyWith(preds ...predicate.PSPenalty) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newPspenaltyStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

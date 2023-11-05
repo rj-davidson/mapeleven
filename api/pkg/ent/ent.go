@@ -19,6 +19,11 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
@@ -103,6 +108,11 @@ func checkColumn(table, column string) error {
 			fixturelineups.Table:  fixturelineups.ValidColumn,
 			league.Table:          league.ValidColumn,
 			matchplayer.Table:     matchplayer.ValidColumn,
+			psdefense.Table:       psdefense.ValidColumn,
+			psgames.Table:         psgames.ValidColumn,
+			psgoals.Table:         psgoals.ValidColumn,
+			psoffense.Table:       psoffense.ValidColumn,
+			pspenalty.Table:       pspenalty.ValidColumn,
 			player.Table:          player.ValidColumn,
 			season.Table:          season.ValidColumn,
 			squad.Table:           squad.ValidColumn,

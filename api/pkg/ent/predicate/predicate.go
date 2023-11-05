@@ -33,6 +33,21 @@ type League func(*sql.Selector)
 // MatchPlayer is the predicate function for matchplayer builders.
 type MatchPlayer func(*sql.Selector)
 
+// PSDefense is the predicate function for psdefense builders.
+type PSDefense func(*sql.Selector)
+
+// PSGames is the predicate function for psgames builders.
+type PSGames func(*sql.Selector)
+
+// PSGoals is the predicate function for psgoals builders.
+type PSGoals func(*sql.Selector)
+
+// PSOffense is the predicate function for psoffense builders.
+type PSOffense func(*sql.Selector)
+
+// PSPenalty is the predicate function for pspenalty builders.
+type PSPenalty func(*sql.Selector)
+
 // Player is the predicate function for player builders.
 type Player func(*sql.Selector)
 

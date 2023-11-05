@@ -13,6 +13,11 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -95,6 +100,20 @@ func (pc *PlayerCreate) SetLastUpdated(t time.Time) *PlayerCreate {
 func (pc *PlayerCreate) SetNillableLastUpdated(t *time.Time) *PlayerCreate {
 	if t != nil {
 		pc.SetLastUpdated(*t)
+	}
+	return pc
+}
+
+// SetForm sets the "form" field.
+func (pc *PlayerCreate) SetForm(s string) *PlayerCreate {
+	pc.mutation.SetForm(s)
+	return pc
+}
+
+// SetNillableForm sets the "form" field if the given value is not nil.
+func (pc *PlayerCreate) SetNillableForm(s *string) *PlayerCreate {
+	if s != nil {
+		pc.SetForm(*s)
 	}
 	return pc
 }
@@ -195,6 +214,81 @@ func (pc *PlayerCreate) AddAssistEvents(f ...*FixtureEvents) *PlayerCreate {
 		ids[i] = f[i].ID
 	}
 	return pc.AddAssistEventIDs(ids...)
+}
+
+// AddPsgameIDs adds the "psgames" edge to the PSGames entity by IDs.
+func (pc *PlayerCreate) AddPsgameIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddPsgameIDs(ids...)
+	return pc
+}
+
+// AddPsgames adds the "psgames" edges to the PSGames entity.
+func (pc *PlayerCreate) AddPsgames(p ...*PSGames) *PlayerCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pc.AddPsgameIDs(ids...)
+}
+
+// AddPsgoalIDs adds the "psgoals" edge to the PSGoals entity by IDs.
+func (pc *PlayerCreate) AddPsgoalIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddPsgoalIDs(ids...)
+	return pc
+}
+
+// AddPsgoals adds the "psgoals" edges to the PSGoals entity.
+func (pc *PlayerCreate) AddPsgoals(p ...*PSGoals) *PlayerCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pc.AddPsgoalIDs(ids...)
+}
+
+// AddPsdefenseIDs adds the "psdefense" edge to the PSDefense entity by IDs.
+func (pc *PlayerCreate) AddPsdefenseIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddPsdefenseIDs(ids...)
+	return pc
+}
+
+// AddPsdefense adds the "psdefense" edges to the PSDefense entity.
+func (pc *PlayerCreate) AddPsdefense(p ...*PSDefense) *PlayerCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pc.AddPsdefenseIDs(ids...)
+}
+
+// AddPsoffenseIDs adds the "psoffense" edge to the PSOffense entity by IDs.
+func (pc *PlayerCreate) AddPsoffenseIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddPsoffenseIDs(ids...)
+	return pc
+}
+
+// AddPsoffense adds the "psoffense" edges to the PSOffense entity.
+func (pc *PlayerCreate) AddPsoffense(p ...*PSOffense) *PlayerCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pc.AddPsoffenseIDs(ids...)
+}
+
+// AddPspenaltyIDs adds the "pspenalty" edge to the PSPenalty entity by IDs.
+func (pc *PlayerCreate) AddPspenaltyIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddPspenaltyIDs(ids...)
+	return pc
+}
+
+// AddPspenalty adds the "pspenalty" edges to the PSPenalty entity.
+func (pc *PlayerCreate) AddPspenalty(p ...*PSPenalty) *PlayerCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pc.AddPspenaltyIDs(ids...)
 }
 
 // Mutation returns the PlayerMutation object of the builder.
@@ -340,6 +434,10 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 		_spec.SetField(player.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
 	}
+	if value, ok := pc.mutation.Form(); ok {
+		_spec.SetField(player.FieldForm, field.TypeString, value)
+		_node.Form = value
+	}
 	if nodes := pc.mutation.BirthIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -431,6 +529,86 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.PsgamesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PsgamesTable,
+			Columns: []string{player.PsgamesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.PsgoalsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PsgoalsTable,
+			Columns: []string{player.PsgoalsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(psgoals.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.PsdefenseIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PsdefenseTable,
+			Columns: []string{player.PsdefenseColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(psdefense.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.PsoffenseIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PsoffenseTable,
+			Columns: []string{player.PsoffenseColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(psoffense.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.PspenaltyIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PspenaltyTable,
+			Columns: []string{player.PspenaltyColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(pspenalty.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
