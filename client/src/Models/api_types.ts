@@ -213,6 +213,9 @@ interface APIPlayer {
     age: number;
     height: string;
     weight: string;
+
+
+
     injured: boolean;
     photo: string;
 }
