@@ -394,7 +394,10 @@ var (
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "form", Type: field.TypeString, Nullable: true},
 		{Name: "birth_player", Type: field.TypeInt, Nullable: true},
+		{Name: "club_player", Type: field.TypeInt, Nullable: true},
 		{Name: "country_players", Type: field.TypeInt, Nullable: true},
+		{Name: "league_player", Type: field.TypeInt, Nullable: true},
+		{Name: "season_player", Type: field.TypeInt, Nullable: true},
 		{Name: "team_players", Type: field.TypeInt, Nullable: true},
 	}
 	// PlayersTable holds the schema information for the "players" table.
@@ -410,14 +413,32 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "players_countries_players",
+				Symbol:     "players_clubs_player",
 				Columns:    []*schema.Column{PlayersColumns[14]},
+				RefColumns: []*schema.Column{ClubsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "players_countries_players",
+				Columns:    []*schema.Column{PlayersColumns[15]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
+				Symbol:     "players_leagues_player",
+				Columns:    []*schema.Column{PlayersColumns[16]},
+				RefColumns: []*schema.Column{LeaguesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "players_seasons_player",
+				Columns:    []*schema.Column{PlayersColumns[17]},
+				RefColumns: []*schema.Column{SeasonsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "players_teams_players",
-				Columns:    []*schema.Column{PlayersColumns[15]},
+				Columns:    []*schema.Column{PlayersColumns[18]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -455,6 +476,7 @@ var (
 		{Name: "number", Type: field.TypeInt},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "player_squad", Type: field.TypeInt, Nullable: true},
+		{Name: "season_squad", Type: field.TypeInt, Nullable: true},
 		{Name: "team_squad", Type: field.TypeInt, Nullable: true},
 	}
 	// SquadsTable holds the schema information for the "squads" table.
@@ -470,8 +492,14 @@ var (
 				OnDelete:   schema.SetNull,
 			},
 			{
-				Symbol:     "squads_teams_squad",
+				Symbol:     "squads_seasons_squad",
 				Columns:    []*schema.Column{SquadsColumns[5]},
+				RefColumns: []*schema.Column{SeasonsColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
+				Symbol:     "squads_teams_squad",
+				Columns:    []*schema.Column{SquadsColumns[6]},
 				RefColumns: []*schema.Column{TeamsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -881,11 +909,15 @@ func init() {
 	PsOffensesTable.ForeignKeys[0].RefTable = PlayersTable
 	PsPenaltiesTable.ForeignKeys[0].RefTable = PlayersTable
 	PlayersTable.ForeignKeys[0].RefTable = BirthsTable
-	PlayersTable.ForeignKeys[1].RefTable = CountriesTable
-	PlayersTable.ForeignKeys[2].RefTable = TeamsTable
+	PlayersTable.ForeignKeys[1].RefTable = ClubsTable
+	PlayersTable.ForeignKeys[2].RefTable = CountriesTable
+	PlayersTable.ForeignKeys[3].RefTable = LeaguesTable
+	PlayersTable.ForeignKeys[4].RefTable = SeasonsTable
+	PlayersTable.ForeignKeys[5].RefTable = TeamsTable
 	SeasonsTable.ForeignKeys[0].RefTable = LeaguesTable
 	SquadsTable.ForeignKeys[0].RefTable = PlayersTable
-	SquadsTable.ForeignKeys[1].RefTable = TeamsTable
+	SquadsTable.ForeignKeys[1].RefTable = SeasonsTable
+	SquadsTable.ForeignKeys[2].RefTable = TeamsTable
 	StandingsTable.ForeignKeys[0].RefTable = SeasonsTable
 	StandingsTable.ForeignKeys[1].RefTable = TeamsTable
 	TsBiggestsTable.ForeignKeys[0].RefTable = TeamsTable

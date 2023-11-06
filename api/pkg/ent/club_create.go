@@ -9,6 +9,7 @@ import (
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/country"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -95,6 +96,21 @@ func (cc *ClubCreate) AddTeam(t ...*Team) *ClubCreate {
 		ids[i] = t[i].ID
 	}
 	return cc.AddTeamIDs(ids...)
+}
+
+// AddPlayerIDs adds the "player" edge to the Player entity by IDs.
+func (cc *ClubCreate) AddPlayerIDs(ids ...int) *ClubCreate {
+	cc.mutation.AddPlayerIDs(ids...)
+	return cc
+}
+
+// AddPlayer adds the "player" edges to the Player entity.
+func (cc *ClubCreate) AddPlayer(p ...*Player) *ClubCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return cc.AddPlayerIDs(ids...)
 }
 
 // Mutation returns the ClubMutation object of the builder.
@@ -237,6 +253,22 @@ func (cc *ClubCreate) createSpec() (*Club, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := cc.mutation.PlayerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   club.PlayerTable,
+			Columns: []string{club.PlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

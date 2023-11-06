@@ -5,6 +5,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/fixture_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models/player_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models/team_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
@@ -129,6 +130,7 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	fixturesModel := fixture_models.NewFixtureModel(client)
 	playerModel := player_models.NewPlayerModel(client)
 	squadModel := team_models.NewSquadModel(client)
+	playerStatsModel := player_stats.NewPlayerStatsModel(client)
 
 	if initialize {
 		// Country Initialization
@@ -164,6 +166,7 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 	if devRun {
 		// Add your development mode code here
+		fetchPlayerStats(playerStatsModel)
 	}
 }
 
@@ -252,4 +255,14 @@ func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
 		log.Printf("Error fetching fixture data: %v", err)
 	}
 	fmt.Println("Fixture data successfully loaded.")
+}
+
+func fetchPlayerStats(playerStatsModel *player_stats.PlayerStatsModel) {
+	fmt.Println("Fetching player stats...")
+	playerStatsController := controllers.NewPlayerStatsController(playerStatsModel)
+	err := playerStatsController.FetchPlayerStatsByID()
+	if err != nil {
+		log.Printf("Error fetching player stats: %v", err)
+	}
+	fmt.Println("Player stats successfully loaded.")
 }

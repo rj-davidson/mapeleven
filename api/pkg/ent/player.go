@@ -8,8 +8,12 @@ import (
 	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/birth"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/country"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
@@ -47,7 +51,10 @@ type Player struct {
 	// The values are being populated by the PlayerQuery when eager-loading is set.
 	Edges           PlayerEdges `json:"edges"`
 	birth_player    *int
+	club_player     *int
 	country_players *int
+	league_player   *int
+	season_player   *int
 	team_players    *int
 	selectValues    sql.SelectValues
 }
@@ -76,9 +83,17 @@ type PlayerEdges struct {
 	Psoffense []*PSOffense `json:"psoffense,omitempty"`
 	// Pspenalty holds the value of the pspenalty edge.
 	Pspenalty []*PSPenalty `json:"pspenalty,omitempty"`
+	// Season holds the value of the season edge.
+	Season *Season `json:"season,omitempty"`
+	// Team holds the value of the team edge.
+	Team *Team `json:"team,omitempty"`
+	// Club holds the value of the club edge.
+	Club *Club `json:"club,omitempty"`
+	// League holds the value of the league edge.
+	League *League `json:"league,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
+	loadedTypes [15]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -188,6 +203,58 @@ func (e PlayerEdges) PspenaltyOrErr() ([]*PSPenalty, error) {
 	return nil, &NotLoadedError{edge: "pspenalty"}
 }
 
+// SeasonOrErr returns the Season value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerEdges) SeasonOrErr() (*Season, error) {
+	if e.loadedTypes[11] {
+		if e.Season == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: season.Label}
+		}
+		return e.Season, nil
+	}
+	return nil, &NotLoadedError{edge: "season"}
+}
+
+// TeamOrErr returns the Team value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerEdges) TeamOrErr() (*Team, error) {
+	if e.loadedTypes[12] {
+		if e.Team == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: team.Label}
+		}
+		return e.Team, nil
+	}
+	return nil, &NotLoadedError{edge: "team"}
+}
+
+// ClubOrErr returns the Club value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerEdges) ClubOrErr() (*Club, error) {
+	if e.loadedTypes[13] {
+		if e.Club == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: club.Label}
+		}
+		return e.Club, nil
+	}
+	return nil, &NotLoadedError{edge: "club"}
+}
+
+// LeagueOrErr returns the League value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerEdges) LeagueOrErr() (*League, error) {
+	if e.loadedTypes[14] {
+		if e.League == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: league.Label}
+		}
+		return e.League, nil
+	}
+	return nil, &NotLoadedError{edge: "league"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Player) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -203,9 +270,15 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case player.ForeignKeys[0]: // birth_player
 			values[i] = new(sql.NullInt64)
-		case player.ForeignKeys[1]: // country_players
+		case player.ForeignKeys[1]: // club_player
 			values[i] = new(sql.NullInt64)
-		case player.ForeignKeys[2]: // team_players
+		case player.ForeignKeys[2]: // country_players
+			values[i] = new(sql.NullInt64)
+		case player.ForeignKeys[3]: // league_player
+			values[i] = new(sql.NullInt64)
+		case player.ForeignKeys[4]: // season_player
+			values[i] = new(sql.NullInt64)
+		case player.ForeignKeys[5]: // team_players
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -309,12 +382,33 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 			}
 		case player.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field club_player", value)
+			} else if value.Valid {
+				pl.club_player = new(int)
+				*pl.club_player = int(value.Int64)
+			}
+		case player.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field country_players", value)
 			} else if value.Valid {
 				pl.country_players = new(int)
 				*pl.country_players = int(value.Int64)
 			}
-		case player.ForeignKeys[2]:
+		case player.ForeignKeys[3]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field league_player", value)
+			} else if value.Valid {
+				pl.league_player = new(int)
+				*pl.league_player = int(value.Int64)
+			}
+		case player.ForeignKeys[4]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field season_player", value)
+			} else if value.Valid {
+				pl.season_player = new(int)
+				*pl.season_player = int(value.Int64)
+			}
+		case player.ForeignKeys[5]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field team_players", value)
 			} else if value.Valid {
@@ -387,6 +481,26 @@ func (pl *Player) QueryPsoffense() *PSOffenseQuery {
 // QueryPspenalty queries the "pspenalty" edge of the Player entity.
 func (pl *Player) QueryPspenalty() *PSPenaltyQuery {
 	return NewPlayerClient(pl.config).QueryPspenalty(pl)
+}
+
+// QuerySeason queries the "season" edge of the Player entity.
+func (pl *Player) QuerySeason() *SeasonQuery {
+	return NewPlayerClient(pl.config).QuerySeason(pl)
+}
+
+// QueryTeam queries the "team" edge of the Player entity.
+func (pl *Player) QueryTeam() *TeamQuery {
+	return NewPlayerClient(pl.config).QueryTeam(pl)
+}
+
+// QueryClub queries the "club" edge of the Player entity.
+func (pl *Player) QueryClub() *ClubQuery {
+	return NewPlayerClient(pl.config).QueryClub(pl)
+}
+
+// QueryLeague queries the "league" edge of the Player entity.
+func (pl *Player) QueryLeague() *LeagueQuery {
+	return NewPlayerClient(pl.config).QueryLeague(pl)
 }
 
 // Update returns a builder for updating this Player.

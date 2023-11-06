@@ -10,6 +10,7 @@ import (
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/country"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -98,6 +99,21 @@ func (lc *LeagueCreate) AddSeason(s ...*Season) *LeagueCreate {
 		ids[i] = s[i].ID
 	}
 	return lc.AddSeasonIDs(ids...)
+}
+
+// AddPlayerIDs adds the "player" edge to the Player entity by IDs.
+func (lc *LeagueCreate) AddPlayerIDs(ids ...int) *LeagueCreate {
+	lc.mutation.AddPlayerIDs(ids...)
+	return lc
+}
+
+// AddPlayer adds the "player" edges to the Player entity.
+func (lc *LeagueCreate) AddPlayer(p ...*Player) *LeagueCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return lc.AddPlayerIDs(ids...)
 }
 
 // Mutation returns the LeagueMutation object of the builder.
@@ -239,6 +255,22 @@ func (lc *LeagueCreate) createSpec() (*League, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := lc.mutation.PlayerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   league.PlayerTable,
+			Columns: []string{league.PlayerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

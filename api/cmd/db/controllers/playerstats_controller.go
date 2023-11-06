@@ -53,7 +53,7 @@ func (psc *PlayerStatsController) FetchPlayerStatsByID(ctx context.Context, play
 		// Replace the placeholders with appropriate values
 		player.Edges.Season.Edges.League.FootballApiId,
 		player.Edges.Season.Year,
-		player.Edges.Club.ApiFootballId,
+		player.Edges.Team.Edges.Club.ApiFootballId,
 		player.ApiFootballId)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -85,11 +85,11 @@ func (psc *PlayerStatsController) parsePlayerStatsResponse(data []byte, player *
 	}
 
 	playerStats := player_stats.PlayerStats{
-		Games:   playerStatsResponse.Response.Games,
-		Goals:   playerStatsResponse.Response.Goals,
-		Offense: playerStatsResponse.Response.Offense,
-		Defense: playerStatsResponse.Response.Defense,
-		Penalty: playerStatsResponse.Response.Penalty,
+		PSGames:   playerStatsResponse.Response.Games,
+		PSGoals:   playerStatsResponse.Response.Goals,
+		PSOffense: playerStatsResponse.Response.Offense,
+		PSDefense: playerStatsResponse.Response.Defense,
+		PSPenalty: playerStatsResponse.Response.Penalty,
 	}
 
 	return psc.upsertPlayerStats(player, &playerStats)

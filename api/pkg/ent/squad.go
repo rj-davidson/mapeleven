@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent"
@@ -29,6 +30,7 @@ type Squad struct {
 	// The values are being populated by the SquadQuery when eager-loading is set.
 	Edges        SquadEdges `json:"edges"`
 	player_squad *int
+	season_squad *int
 	team_squad   *int
 	selectValues sql.SelectValues
 }
@@ -39,9 +41,11 @@ type SquadEdges struct {
 	Player *Player `json:"player,omitempty"`
 	// Team holds the value of the team edge.
 	Team *Team `json:"team,omitempty"`
+	// Season holds the value of the season edge.
+	Season *Season `json:"season,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // PlayerOrErr returns the Player value or an error if the edge
@@ -70,6 +74,19 @@ func (e SquadEdges) TeamOrErr() (*Team, error) {
 	return nil, &NotLoadedError{edge: "team"}
 }
 
+// SeasonOrErr returns the Season value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e SquadEdges) SeasonOrErr() (*Season, error) {
+	if e.loadedTypes[2] {
+		if e.Season == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: season.Label}
+		}
+		return e.Season, nil
+	}
+	return nil, &NotLoadedError{edge: "season"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Squad) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -83,7 +100,9 @@ func (*Squad) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case squad.ForeignKeys[0]: // player_squad
 			values[i] = new(sql.NullInt64)
-		case squad.ForeignKeys[1]: // team_squad
+		case squad.ForeignKeys[1]: // season_squad
+			values[i] = new(sql.NullInt64)
+		case squad.ForeignKeys[2]: // team_squad
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -133,6 +152,13 @@ func (s *Squad) assignValues(columns []string, values []any) error {
 			}
 		case squad.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field season_squad", value)
+			} else if value.Valid {
+				s.season_squad = new(int)
+				*s.season_squad = int(value.Int64)
+			}
+		case squad.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field team_squad", value)
 			} else if value.Valid {
 				s.team_squad = new(int)
@@ -159,6 +185,11 @@ func (s *Squad) QueryPlayer() *PlayerQuery {
 // QueryTeam queries the "team" edge of the Squad entity.
 func (s *Squad) QueryTeam() *TeamQuery {
 	return NewSquadClient(s.config).QueryTeam(s)
+}
+
+// QuerySeason queries the "season" edge of the Squad entity.
+func (s *Squad) QuerySeason() *SeasonQuery {
+	return NewSquadClient(s.config).QuerySeason(s)
 }
 
 // Update returns a builder for updating this Squad.

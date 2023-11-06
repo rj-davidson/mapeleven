@@ -627,6 +627,9 @@ type ClubMutation struct {
 	team             map[int]struct{}
 	removedteam      map[int]struct{}
 	clearedteam      bool
+	player           map[int]struct{}
+	removedplayer    map[int]struct{}
+	clearedplayer    bool
 	done             bool
 	oldValue         func(context.Context) (*Club, error)
 	predicates       []predicate.Club
@@ -1115,6 +1118,60 @@ func (m *ClubMutation) ResetTeam() {
 	m.removedteam = nil
 }
 
+// AddPlayerIDs adds the "player" edge to the Player entity by ids.
+func (m *ClubMutation) AddPlayerIDs(ids ...int) {
+	if m.player == nil {
+		m.player = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.player[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPlayer clears the "player" edge to the Player entity.
+func (m *ClubMutation) ClearPlayer() {
+	m.clearedplayer = true
+}
+
+// PlayerCleared reports if the "player" edge to the Player entity was cleared.
+func (m *ClubMutation) PlayerCleared() bool {
+	return m.clearedplayer
+}
+
+// RemovePlayerIDs removes the "player" edge to the Player entity by IDs.
+func (m *ClubMutation) RemovePlayerIDs(ids ...int) {
+	if m.removedplayer == nil {
+		m.removedplayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.player, ids[i])
+		m.removedplayer[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayer returns the removed IDs of the "player" edge to the Player entity.
+func (m *ClubMutation) RemovedPlayerIDs() (ids []int) {
+	for id := range m.removedplayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PlayerIDs returns the "player" edge IDs in the mutation.
+func (m *ClubMutation) PlayerIDs() (ids []int) {
+	for id := range m.player {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPlayer resets all changes to the "player" edge.
+func (m *ClubMutation) ResetPlayer() {
+	m.player = nil
+	m.clearedplayer = false
+	m.removedplayer = nil
+}
+
 // Where appends a list predicates to the ClubMutation builder.
 func (m *ClubMutation) Where(ps ...predicate.Club) {
 	m.predicates = append(m.predicates, ps...)
@@ -1377,12 +1434,15 @@ func (m *ClubMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ClubMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.country != nil {
 		edges = append(edges, club.EdgeCountry)
 	}
 	if m.team != nil {
 		edges = append(edges, club.EdgeTeam)
+	}
+	if m.player != nil {
+		edges = append(edges, club.EdgePlayer)
 	}
 	return edges
 }
@@ -1401,15 +1461,24 @@ func (m *ClubMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case club.EdgePlayer:
+		ids := make([]ent.Value, 0, len(m.player))
+		for id := range m.player {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ClubMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedteam != nil {
 		edges = append(edges, club.EdgeTeam)
+	}
+	if m.removedplayer != nil {
+		edges = append(edges, club.EdgePlayer)
 	}
 	return edges
 }
@@ -1424,18 +1493,27 @@ func (m *ClubMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case club.EdgePlayer:
+		ids := make([]ent.Value, 0, len(m.removedplayer))
+		for id := range m.removedplayer {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ClubMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedcountry {
 		edges = append(edges, club.EdgeCountry)
 	}
 	if m.clearedteam {
 		edges = append(edges, club.EdgeTeam)
+	}
+	if m.clearedplayer {
+		edges = append(edges, club.EdgePlayer)
 	}
 	return edges
 }
@@ -1448,6 +1526,8 @@ func (m *ClubMutation) EdgeCleared(name string) bool {
 		return m.clearedcountry
 	case club.EdgeTeam:
 		return m.clearedteam
+	case club.EdgePlayer:
+		return m.clearedplayer
 	}
 	return false
 }
@@ -1472,6 +1552,9 @@ func (m *ClubMutation) ResetEdge(name string) error {
 		return nil
 	case club.EdgeTeam:
 		m.ResetTeam()
+		return nil
+	case club.EdgePlayer:
+		m.ResetPlayer()
 		return nil
 	}
 	return fmt.Errorf("unknown Club edge %s", name)
@@ -5921,6 +6004,9 @@ type LeagueMutation struct {
 	season           map[int]struct{}
 	removedseason    map[int]struct{}
 	clearedseason    bool
+	player           map[int]struct{}
+	removedplayer    map[int]struct{}
+	clearedplayer    bool
 	done             bool
 	oldValue         func(context.Context) (*League, error)
 	predicates       []predicate.League
@@ -6366,6 +6452,60 @@ func (m *LeagueMutation) ResetSeason() {
 	m.removedseason = nil
 }
 
+// AddPlayerIDs adds the "player" edge to the Player entity by ids.
+func (m *LeagueMutation) AddPlayerIDs(ids ...int) {
+	if m.player == nil {
+		m.player = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.player[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPlayer clears the "player" edge to the Player entity.
+func (m *LeagueMutation) ClearPlayer() {
+	m.clearedplayer = true
+}
+
+// PlayerCleared reports if the "player" edge to the Player entity was cleared.
+func (m *LeagueMutation) PlayerCleared() bool {
+	return m.clearedplayer
+}
+
+// RemovePlayerIDs removes the "player" edge to the Player entity by IDs.
+func (m *LeagueMutation) RemovePlayerIDs(ids ...int) {
+	if m.removedplayer == nil {
+		m.removedplayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.player, ids[i])
+		m.removedplayer[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayer returns the removed IDs of the "player" edge to the Player entity.
+func (m *LeagueMutation) RemovedPlayerIDs() (ids []int) {
+	for id := range m.removedplayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PlayerIDs returns the "player" edge IDs in the mutation.
+func (m *LeagueMutation) PlayerIDs() (ids []int) {
+	for id := range m.player {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPlayer resets all changes to the "player" edge.
+func (m *LeagueMutation) ResetPlayer() {
+	m.player = nil
+	m.clearedplayer = false
+	m.removedplayer = nil
+}
+
 // Where appends a list predicates to the LeagueMutation builder.
 func (m *LeagueMutation) Where(ps ...predicate.League) {
 	m.predicates = append(m.predicates, ps...)
@@ -6608,12 +6748,15 @@ func (m *LeagueMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *LeagueMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.country != nil {
 		edges = append(edges, league.EdgeCountry)
 	}
 	if m.season != nil {
 		edges = append(edges, league.EdgeSeason)
+	}
+	if m.player != nil {
+		edges = append(edges, league.EdgePlayer)
 	}
 	return edges
 }
@@ -6632,15 +6775,24 @@ func (m *LeagueMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case league.EdgePlayer:
+		ids := make([]ent.Value, 0, len(m.player))
+		for id := range m.player {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *LeagueMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedseason != nil {
 		edges = append(edges, league.EdgeSeason)
+	}
+	if m.removedplayer != nil {
+		edges = append(edges, league.EdgePlayer)
 	}
 	return edges
 }
@@ -6655,18 +6807,27 @@ func (m *LeagueMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case league.EdgePlayer:
+		ids := make([]ent.Value, 0, len(m.removedplayer))
+		for id := range m.removedplayer {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *LeagueMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedcountry {
 		edges = append(edges, league.EdgeCountry)
 	}
 	if m.clearedseason {
 		edges = append(edges, league.EdgeSeason)
+	}
+	if m.clearedplayer {
+		edges = append(edges, league.EdgePlayer)
 	}
 	return edges
 }
@@ -6679,6 +6840,8 @@ func (m *LeagueMutation) EdgeCleared(name string) bool {
 		return m.clearedcountry
 	case league.EdgeSeason:
 		return m.clearedseason
+	case league.EdgePlayer:
+		return m.clearedplayer
 	}
 	return false
 }
@@ -6703,6 +6866,9 @@ func (m *LeagueMutation) ResetEdge(name string) error {
 		return nil
 	case league.EdgeSeason:
 		m.ResetSeason()
+		return nil
+	case league.EdgePlayer:
+		m.ResetPlayer()
 		return nil
 	}
 	return fmt.Errorf("unknown League edge %s", name)
@@ -12180,6 +12346,14 @@ type PlayerMutation struct {
 	pspenalty           map[int]struct{}
 	removedpspenalty    map[int]struct{}
 	clearedpspenalty    bool
+	season              *int
+	clearedseason       bool
+	team                *int
+	clearedteam         bool
+	club                *int
+	clearedclub         bool
+	league              *int
+	clearedleague       bool
 	done                bool
 	oldValue            func(context.Context) (*Player, error)
 	predicates          []predicate.Player
@@ -13345,6 +13519,162 @@ func (m *PlayerMutation) ResetPspenalty() {
 	m.removedpspenalty = nil
 }
 
+// SetSeasonID sets the "season" edge to the Season entity by id.
+func (m *PlayerMutation) SetSeasonID(id int) {
+	m.season = &id
+}
+
+// ClearSeason clears the "season" edge to the Season entity.
+func (m *PlayerMutation) ClearSeason() {
+	m.clearedseason = true
+}
+
+// SeasonCleared reports if the "season" edge to the Season entity was cleared.
+func (m *PlayerMutation) SeasonCleared() bool {
+	return m.clearedseason
+}
+
+// SeasonID returns the "season" edge ID in the mutation.
+func (m *PlayerMutation) SeasonID() (id int, exists bool) {
+	if m.season != nil {
+		return *m.season, true
+	}
+	return
+}
+
+// SeasonIDs returns the "season" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SeasonID instead. It exists only for internal usage by the builders.
+func (m *PlayerMutation) SeasonIDs() (ids []int) {
+	if id := m.season; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSeason resets all changes to the "season" edge.
+func (m *PlayerMutation) ResetSeason() {
+	m.season = nil
+	m.clearedseason = false
+}
+
+// SetTeamID sets the "team" edge to the Team entity by id.
+func (m *PlayerMutation) SetTeamID(id int) {
+	m.team = &id
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *PlayerMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *PlayerMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// TeamID returns the "team" edge ID in the mutation.
+func (m *PlayerMutation) TeamID() (id int, exists bool) {
+	if m.team != nil {
+		return *m.team, true
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// TeamID instead. It exists only for internal usage by the builders.
+func (m *PlayerMutation) TeamIDs() (ids []int) {
+	if id := m.team; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *PlayerMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+}
+
+// SetClubID sets the "club" edge to the Club entity by id.
+func (m *PlayerMutation) SetClubID(id int) {
+	m.club = &id
+}
+
+// ClearClub clears the "club" edge to the Club entity.
+func (m *PlayerMutation) ClearClub() {
+	m.clearedclub = true
+}
+
+// ClubCleared reports if the "club" edge to the Club entity was cleared.
+func (m *PlayerMutation) ClubCleared() bool {
+	return m.clearedclub
+}
+
+// ClubID returns the "club" edge ID in the mutation.
+func (m *PlayerMutation) ClubID() (id int, exists bool) {
+	if m.club != nil {
+		return *m.club, true
+	}
+	return
+}
+
+// ClubIDs returns the "club" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// ClubID instead. It exists only for internal usage by the builders.
+func (m *PlayerMutation) ClubIDs() (ids []int) {
+	if id := m.club; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetClub resets all changes to the "club" edge.
+func (m *PlayerMutation) ResetClub() {
+	m.club = nil
+	m.clearedclub = false
+}
+
+// SetLeagueID sets the "league" edge to the League entity by id.
+func (m *PlayerMutation) SetLeagueID(id int) {
+	m.league = &id
+}
+
+// ClearLeague clears the "league" edge to the League entity.
+func (m *PlayerMutation) ClearLeague() {
+	m.clearedleague = true
+}
+
+// LeagueCleared reports if the "league" edge to the League entity was cleared.
+func (m *PlayerMutation) LeagueCleared() bool {
+	return m.clearedleague
+}
+
+// LeagueID returns the "league" edge ID in the mutation.
+func (m *PlayerMutation) LeagueID() (id int, exists bool) {
+	if m.league != nil {
+		return *m.league, true
+	}
+	return
+}
+
+// LeagueIDs returns the "league" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// LeagueID instead. It exists only for internal usage by the builders.
+func (m *PlayerMutation) LeagueIDs() (ids []int) {
+	if id := m.league; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetLeague resets all changes to the "league" edge.
+func (m *PlayerMutation) ResetLeague() {
+	m.league = nil
+	m.clearedleague = false
+}
+
 // Where appends a list predicates to the PlayerMutation builder.
 func (m *PlayerMutation) Where(ps ...predicate.Player) {
 	m.predicates = append(m.predicates, ps...)
@@ -13707,7 +14037,7 @@ func (m *PlayerMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PlayerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 15)
 	if m.birth != nil {
 		edges = append(edges, player.EdgeBirth)
 	}
@@ -13740,6 +14070,18 @@ func (m *PlayerMutation) AddedEdges() []string {
 	}
 	if m.pspenalty != nil {
 		edges = append(edges, player.EdgePspenalty)
+	}
+	if m.season != nil {
+		edges = append(edges, player.EdgeSeason)
+	}
+	if m.team != nil {
+		edges = append(edges, player.EdgeTeam)
+	}
+	if m.club != nil {
+		edges = append(edges, player.EdgeClub)
+	}
+	if m.league != nil {
+		edges = append(edges, player.EdgeLeague)
 	}
 	return edges
 }
@@ -13810,13 +14152,29 @@ func (m *PlayerMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case player.EdgeSeason:
+		if id := m.season; id != nil {
+			return []ent.Value{*id}
+		}
+	case player.EdgeTeam:
+		if id := m.team; id != nil {
+			return []ent.Value{*id}
+		}
+	case player.EdgeClub:
+		if id := m.club; id != nil {
+			return []ent.Value{*id}
+		}
+	case player.EdgeLeague:
+		if id := m.league; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PlayerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 15)
 	if m.removedsquad != nil {
 		edges = append(edges, player.EdgeSquad)
 	}
@@ -13911,7 +14269,7 @@ func (m *PlayerMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PlayerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 15)
 	if m.clearedbirth {
 		edges = append(edges, player.EdgeBirth)
 	}
@@ -13945,6 +14303,18 @@ func (m *PlayerMutation) ClearedEdges() []string {
 	if m.clearedpspenalty {
 		edges = append(edges, player.EdgePspenalty)
 	}
+	if m.clearedseason {
+		edges = append(edges, player.EdgeSeason)
+	}
+	if m.clearedteam {
+		edges = append(edges, player.EdgeTeam)
+	}
+	if m.clearedclub {
+		edges = append(edges, player.EdgeClub)
+	}
+	if m.clearedleague {
+		edges = append(edges, player.EdgeLeague)
+	}
 	return edges
 }
 
@@ -13974,6 +14344,14 @@ func (m *PlayerMutation) EdgeCleared(name string) bool {
 		return m.clearedpsoffense
 	case player.EdgePspenalty:
 		return m.clearedpspenalty
+	case player.EdgeSeason:
+		return m.clearedseason
+	case player.EdgeTeam:
+		return m.clearedteam
+	case player.EdgeClub:
+		return m.clearedclub
+	case player.EdgeLeague:
+		return m.clearedleague
 	}
 	return false
 }
@@ -13987,6 +14365,18 @@ func (m *PlayerMutation) ClearEdge(name string) error {
 		return nil
 	case player.EdgeNationality:
 		m.ClearNationality()
+		return nil
+	case player.EdgeSeason:
+		m.ClearSeason()
+		return nil
+	case player.EdgeTeam:
+		m.ClearTeam()
+		return nil
+	case player.EdgeClub:
+		m.ClearClub()
+		return nil
+	case player.EdgeLeague:
+		m.ClearLeague()
 		return nil
 	}
 	return fmt.Errorf("unknown Player unique edge %s", name)
@@ -14029,6 +14419,18 @@ func (m *PlayerMutation) ResetEdge(name string) error {
 	case player.EdgePspenalty:
 		m.ResetPspenalty()
 		return nil
+	case player.EdgeSeason:
+		m.ResetSeason()
+		return nil
+	case player.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	case player.EdgeClub:
+		m.ResetClub()
+		return nil
+	case player.EdgeLeague:
+		m.ResetLeague()
+		return nil
 	}
 	return fmt.Errorf("unknown Player edge %s", name)
 }
@@ -14058,6 +14460,12 @@ type SeasonMutation struct {
 	teams            map[int]struct{}
 	removedteams     map[int]struct{}
 	clearedteams     bool
+	player           map[int]struct{}
+	removedplayer    map[int]struct{}
+	clearedplayer    bool
+	squad            map[int]struct{}
+	removedsquad     map[int]struct{}
+	clearedsquad     bool
 	done             bool
 	oldValue         func(context.Context) (*Season, error)
 	predicates       []predicate.Season
@@ -14611,6 +15019,114 @@ func (m *SeasonMutation) ResetTeams() {
 	m.removedteams = nil
 }
 
+// AddPlayerIDs adds the "player" edge to the Player entity by ids.
+func (m *SeasonMutation) AddPlayerIDs(ids ...int) {
+	if m.player == nil {
+		m.player = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.player[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPlayer clears the "player" edge to the Player entity.
+func (m *SeasonMutation) ClearPlayer() {
+	m.clearedplayer = true
+}
+
+// PlayerCleared reports if the "player" edge to the Player entity was cleared.
+func (m *SeasonMutation) PlayerCleared() bool {
+	return m.clearedplayer
+}
+
+// RemovePlayerIDs removes the "player" edge to the Player entity by IDs.
+func (m *SeasonMutation) RemovePlayerIDs(ids ...int) {
+	if m.removedplayer == nil {
+		m.removedplayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.player, ids[i])
+		m.removedplayer[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayer returns the removed IDs of the "player" edge to the Player entity.
+func (m *SeasonMutation) RemovedPlayerIDs() (ids []int) {
+	for id := range m.removedplayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PlayerIDs returns the "player" edge IDs in the mutation.
+func (m *SeasonMutation) PlayerIDs() (ids []int) {
+	for id := range m.player {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPlayer resets all changes to the "player" edge.
+func (m *SeasonMutation) ResetPlayer() {
+	m.player = nil
+	m.clearedplayer = false
+	m.removedplayer = nil
+}
+
+// AddSquadIDs adds the "squad" edge to the Squad entity by ids.
+func (m *SeasonMutation) AddSquadIDs(ids ...int) {
+	if m.squad == nil {
+		m.squad = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.squad[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSquad clears the "squad" edge to the Squad entity.
+func (m *SeasonMutation) ClearSquad() {
+	m.clearedsquad = true
+}
+
+// SquadCleared reports if the "squad" edge to the Squad entity was cleared.
+func (m *SeasonMutation) SquadCleared() bool {
+	return m.clearedsquad
+}
+
+// RemoveSquadIDs removes the "squad" edge to the Squad entity by IDs.
+func (m *SeasonMutation) RemoveSquadIDs(ids ...int) {
+	if m.removedsquad == nil {
+		m.removedsquad = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.squad, ids[i])
+		m.removedsquad[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSquad returns the removed IDs of the "squad" edge to the Squad entity.
+func (m *SeasonMutation) RemovedSquadIDs() (ids []int) {
+	for id := range m.removedsquad {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SquadIDs returns the "squad" edge IDs in the mutation.
+func (m *SeasonMutation) SquadIDs() (ids []int) {
+	for id := range m.squad {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSquad resets all changes to the "squad" edge.
+func (m *SeasonMutation) ResetSquad() {
+	m.squad = nil
+	m.clearedsquad = false
+	m.removedsquad = nil
+}
+
 // Where appends a list predicates to the SeasonMutation builder.
 func (m *SeasonMutation) Where(ps ...predicate.Season) {
 	m.predicates = append(m.predicates, ps...)
@@ -14853,7 +15369,7 @@ func (m *SeasonMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SeasonMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 6)
 	if m.league != nil {
 		edges = append(edges, season.EdgeLeague)
 	}
@@ -14865,6 +15381,12 @@ func (m *SeasonMutation) AddedEdges() []string {
 	}
 	if m.teams != nil {
 		edges = append(edges, season.EdgeTeams)
+	}
+	if m.player != nil {
+		edges = append(edges, season.EdgePlayer)
+	}
+	if m.squad != nil {
+		edges = append(edges, season.EdgeSquad)
 	}
 	return edges
 }
@@ -14895,13 +15417,25 @@ func (m *SeasonMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case season.EdgePlayer:
+		ids := make([]ent.Value, 0, len(m.player))
+		for id := range m.player {
+			ids = append(ids, id)
+		}
+		return ids
+	case season.EdgeSquad:
+		ids := make([]ent.Value, 0, len(m.squad))
+		for id := range m.squad {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SeasonMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 6)
 	if m.removedfixtures != nil {
 		edges = append(edges, season.EdgeFixtures)
 	}
@@ -14910,6 +15444,12 @@ func (m *SeasonMutation) RemovedEdges() []string {
 	}
 	if m.removedteams != nil {
 		edges = append(edges, season.EdgeTeams)
+	}
+	if m.removedplayer != nil {
+		edges = append(edges, season.EdgePlayer)
+	}
+	if m.removedsquad != nil {
+		edges = append(edges, season.EdgeSquad)
 	}
 	return edges
 }
@@ -14936,13 +15476,25 @@ func (m *SeasonMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case season.EdgePlayer:
+		ids := make([]ent.Value, 0, len(m.removedplayer))
+		for id := range m.removedplayer {
+			ids = append(ids, id)
+		}
+		return ids
+	case season.EdgeSquad:
+		ids := make([]ent.Value, 0, len(m.removedsquad))
+		for id := range m.removedsquad {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SeasonMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 6)
 	if m.clearedleague {
 		edges = append(edges, season.EdgeLeague)
 	}
@@ -14954,6 +15506,12 @@ func (m *SeasonMutation) ClearedEdges() []string {
 	}
 	if m.clearedteams {
 		edges = append(edges, season.EdgeTeams)
+	}
+	if m.clearedplayer {
+		edges = append(edges, season.EdgePlayer)
+	}
+	if m.clearedsquad {
+		edges = append(edges, season.EdgeSquad)
 	}
 	return edges
 }
@@ -14970,6 +15528,10 @@ func (m *SeasonMutation) EdgeCleared(name string) bool {
 		return m.clearedstandings
 	case season.EdgeTeams:
 		return m.clearedteams
+	case season.EdgePlayer:
+		return m.clearedplayer
+	case season.EdgeSquad:
+		return m.clearedsquad
 	}
 	return false
 }
@@ -15001,6 +15563,12 @@ func (m *SeasonMutation) ResetEdge(name string) error {
 	case season.EdgeTeams:
 		m.ResetTeams()
 		return nil
+	case season.EdgePlayer:
+		m.ResetPlayer()
+		return nil
+	case season.EdgeSquad:
+		m.ResetSquad()
+		return nil
 	}
 	return fmt.Errorf("unknown Season edge %s", name)
 }
@@ -15020,6 +15588,8 @@ type SquadMutation struct {
 	clearedplayer bool
 	team          *int
 	clearedteam   bool
+	season        *int
+	clearedseason bool
 	done          bool
 	oldValue      func(context.Context) (*Squad, error)
 	predicates    []predicate.Squad
@@ -15342,6 +15912,45 @@ func (m *SquadMutation) ResetTeam() {
 	m.clearedteam = false
 }
 
+// SetSeasonID sets the "season" edge to the Season entity by id.
+func (m *SquadMutation) SetSeasonID(id int) {
+	m.season = &id
+}
+
+// ClearSeason clears the "season" edge to the Season entity.
+func (m *SquadMutation) ClearSeason() {
+	m.clearedseason = true
+}
+
+// SeasonCleared reports if the "season" edge to the Season entity was cleared.
+func (m *SquadMutation) SeasonCleared() bool {
+	return m.clearedseason
+}
+
+// SeasonID returns the "season" edge ID in the mutation.
+func (m *SquadMutation) SeasonID() (id int, exists bool) {
+	if m.season != nil {
+		return *m.season, true
+	}
+	return
+}
+
+// SeasonIDs returns the "season" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// SeasonID instead. It exists only for internal usage by the builders.
+func (m *SquadMutation) SeasonIDs() (ids []int) {
+	if id := m.season; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetSeason resets all changes to the "season" edge.
+func (m *SquadMutation) ResetSeason() {
+	m.season = nil
+	m.clearedseason = false
+}
+
 // Where appends a list predicates to the SquadMutation builder.
 func (m *SquadMutation) Where(ps ...predicate.Squad) {
 	m.predicates = append(m.predicates, ps...)
@@ -15533,12 +16142,15 @@ func (m *SquadMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SquadMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.player != nil {
 		edges = append(edges, squad.EdgePlayer)
 	}
 	if m.team != nil {
 		edges = append(edges, squad.EdgeTeam)
+	}
+	if m.season != nil {
+		edges = append(edges, squad.EdgeSeason)
 	}
 	return edges
 }
@@ -15555,13 +16167,17 @@ func (m *SquadMutation) AddedIDs(name string) []ent.Value {
 		if id := m.team; id != nil {
 			return []ent.Value{*id}
 		}
+	case squad.EdgeSeason:
+		if id := m.season; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SquadMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -15573,12 +16189,15 @@ func (m *SquadMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SquadMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedplayer {
 		edges = append(edges, squad.EdgePlayer)
 	}
 	if m.clearedteam {
 		edges = append(edges, squad.EdgeTeam)
+	}
+	if m.clearedseason {
+		edges = append(edges, squad.EdgeSeason)
 	}
 	return edges
 }
@@ -15591,6 +16210,8 @@ func (m *SquadMutation) EdgeCleared(name string) bool {
 		return m.clearedplayer
 	case squad.EdgeTeam:
 		return m.clearedteam
+	case squad.EdgeSeason:
+		return m.clearedseason
 	}
 	return false
 }
@@ -15605,6 +16226,9 @@ func (m *SquadMutation) ClearEdge(name string) error {
 	case squad.EdgeTeam:
 		m.ClearTeam()
 		return nil
+	case squad.EdgeSeason:
+		m.ClearSeason()
+		return nil
 	}
 	return fmt.Errorf("unknown Squad unique edge %s", name)
 }
@@ -15618,6 +16242,9 @@ func (m *SquadMutation) ResetEdge(name string) error {
 		return nil
 	case squad.EdgeTeam:
 		m.ResetTeam()
+		return nil
+	case squad.EdgeSeason:
+		m.ResetSeason()
 		return nil
 	}
 	return fmt.Errorf("unknown Squad edge %s", name)
