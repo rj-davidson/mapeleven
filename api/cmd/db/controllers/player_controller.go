@@ -42,7 +42,6 @@ type PlayerInfo struct {
 	Weight    string `json:"weight"`
 	Injured   bool   `json:"injured"`
 	Photo     string `json:"photo"`
-	//Statistics []PlayerStatistics `json:"statistics"`
 }
 type LeaguePlayerResponse struct {
 	Results  int `json:"results"`

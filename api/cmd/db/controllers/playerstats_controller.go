@@ -35,10 +35,14 @@ func NewPlayerStatsController(playerStatsModel *player_stats.PlayerStatsModel) *
 	}
 }
 
-func (psc *PlayerStatsController) InitializeStats(players []*ent.Player, ctx context.Context) error {
+func (psc *PlayerStatsController) InitializeStats(ctx context.Context) error {
 	fmt.Println("Initializing player stats...")
-	for _, player := range players {
-		err := psc.FetchPlayerStatsByID(ctx, player)
+	players, err := psc.playerStatsModel.ListPlayers(ctx)
+	if err != nil {
+		return err
+	}
+	for p := range players {
+		err = psc.FetchPlayerStatsByID(ctx, players[p])
 		if err != nil {
 			return err
 		}

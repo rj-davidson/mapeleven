@@ -160,3 +160,21 @@ func (m *PlayerStatsModel) upsertPSGames(ctx context.Context, p *ent.Player, dat
 		return UpdatePSGames(ctx, m.client, data, prev)
 	}
 }
+
+func (m *PlayerStatsModel) ListPlayers(ctx context.Context) ([]*ent.Player, error) {
+	players, err := m.client.Player.
+		Query().
+		WithSeason(
+			func(q *ent.SeasonQuery) {
+				q.WithLeague()
+			}).
+		WithTeam(
+			func(q *ent.TeamQuery) {
+				q.WithClub()
+			}).
+		All(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return players, nil
+}

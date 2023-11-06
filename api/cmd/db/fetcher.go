@@ -90,7 +90,7 @@ func main() {
 
 	if *devRun {
 		fmt.Println("Running in development mode...")
-		runDevelopmentMode()
+		runDevelopmentMode(client)
 	}
 
 	// Start the scheduler
@@ -111,8 +111,8 @@ func updateDatabase(client *ent.Client) {
 	cronScheduler(client, false, true, false)
 }
 
-func runDevelopmentMode() {
-	cronScheduler(nil, false, false, true)
+func runDevelopmentMode(client *ent.Client) {
+	cronScheduler(client, false, false, true)
 }
 
 func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRun bool) {
@@ -151,6 +151,9 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 		// Fetch Squads
 		fetchSquads(squadModel, playerModel, teamModel)
 
+		// Fetch Player Stats
+		//fetchPlayerStats(playerModel, playerStatsModel)
+
 		// Fetch Fixture Data
 		fetchFixtureData(fixturesModel)
 	}
@@ -166,7 +169,7 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 	if devRun {
 		// Add your development mode code here
-		fetchPlayerStats(playerStatsModel)
+		fetchPlayerStats(playerModel, playerStatsModel)
 	}
 }
 
@@ -257,10 +260,11 @@ func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
 	fmt.Println("Fixture data successfully loaded.")
 }
 
-func fetchPlayerStats(playerStatsModel *player_stats.PlayerStatsModel) {
-	fmt.Println("Fetching player stats...")
+// function that will fetch player stats
+func fetchPlayerStats(playerModel *player_models.PlayerModel, playerStatsModel *player_stats.PlayerStatsModel) {
+	fmt.Println("Fetching Player Stats...")
 	playerStatsController := controllers.NewPlayerStatsController(playerStatsModel)
-	err := playerStatsController.FetchPlayerStatsByID()
+	err := playerStatsController.InitializeStats(context.Background())
 	if err != nil {
 		log.Printf("Error fetching player stats: %v", err)
 	}

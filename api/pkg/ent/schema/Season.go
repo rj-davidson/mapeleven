@@ -23,7 +23,6 @@ func (Season) Fields() []ent.Field {
 		field.Time("start_date"),
 		field.Time("end_date"),
 		field.Bool("current"),
-
 		field.Time("lastUpdated").
 			Default(time.Now).
 			Optional().
