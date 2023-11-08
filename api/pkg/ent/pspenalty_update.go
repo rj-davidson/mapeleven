@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	"entgo.io/ent/dialect/sql"
@@ -190,23 +190,19 @@ func (ppu *PSPenaltyUpdate) AddPenaltySaved(i int) *PSPenaltyUpdate {
 	return ppu
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (ppu *PSPenaltyUpdate) SetPlayerID(id int) *PSPenaltyUpdate {
-	ppu.mutation.SetPlayerID(id)
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (ppu *PSPenaltyUpdate) AddPlayerStatIDs(ids ...int) *PSPenaltyUpdate {
+	ppu.mutation.AddPlayerStatIDs(ids...)
 	return ppu
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (ppu *PSPenaltyUpdate) SetNillablePlayerID(id *int) *PSPenaltyUpdate {
-	if id != nil {
-		ppu = ppu.SetPlayerID(*id)
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (ppu *PSPenaltyUpdate) AddPlayerStats(p ...*PlayerStats) *PSPenaltyUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return ppu
-}
-
-// SetPlayer sets the "player" edge to the Player entity.
-func (ppu *PSPenaltyUpdate) SetPlayer(p *Player) *PSPenaltyUpdate {
-	return ppu.SetPlayerID(p.ID)
+	return ppu.AddPlayerStatIDs(ids...)
 }
 
 // Mutation returns the PSPenaltyMutation object of the builder.
@@ -214,10 +210,25 @@ func (ppu *PSPenaltyUpdate) Mutation() *PSPenaltyMutation {
 	return ppu.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (ppu *PSPenaltyUpdate) ClearPlayer() *PSPenaltyUpdate {
-	ppu.mutation.ClearPlayer()
+// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+func (ppu *PSPenaltyUpdate) ClearPlayerStats() *PSPenaltyUpdate {
+	ppu.mutation.ClearPlayerStats()
 	return ppu
+}
+
+// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
+func (ppu *PSPenaltyUpdate) RemovePlayerStatIDs(ids ...int) *PSPenaltyUpdate {
+	ppu.mutation.RemovePlayerStatIDs(ids...)
+	return ppu
+}
+
+// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
+func (ppu *PSPenaltyUpdate) RemovePlayerStats(p ...*PlayerStats) *PSPenaltyUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return ppu.RemovePlayerStatIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -316,28 +327,44 @@ func (ppu *PSPenaltyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ppu.mutation.AddedPenaltySaved(); ok {
 		_spec.AddField(pspenalty.FieldPenaltySaved, field.TypeInt, value)
 	}
-	if ppu.mutation.PlayerCleared() {
+	if ppu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   pspenalty.PlayerTable,
-			Columns: []string{pspenalty.PlayerColumn},
+			Table:   pspenalty.PlayerStatsTable,
+			Columns: pspenalty.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ppu.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := ppu.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !ppu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   pspenalty.PlayerTable,
-			Columns: []string{pspenalty.PlayerColumn},
+			Table:   pspenalty.PlayerStatsTable,
+			Columns: pspenalty.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ppu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   pspenalty.PlayerStatsTable,
+			Columns: pspenalty.PlayerStatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -527,23 +554,19 @@ func (ppuo *PSPenaltyUpdateOne) AddPenaltySaved(i int) *PSPenaltyUpdateOne {
 	return ppuo
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (ppuo *PSPenaltyUpdateOne) SetPlayerID(id int) *PSPenaltyUpdateOne {
-	ppuo.mutation.SetPlayerID(id)
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (ppuo *PSPenaltyUpdateOne) AddPlayerStatIDs(ids ...int) *PSPenaltyUpdateOne {
+	ppuo.mutation.AddPlayerStatIDs(ids...)
 	return ppuo
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (ppuo *PSPenaltyUpdateOne) SetNillablePlayerID(id *int) *PSPenaltyUpdateOne {
-	if id != nil {
-		ppuo = ppuo.SetPlayerID(*id)
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (ppuo *PSPenaltyUpdateOne) AddPlayerStats(p ...*PlayerStats) *PSPenaltyUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return ppuo
-}
-
-// SetPlayer sets the "player" edge to the Player entity.
-func (ppuo *PSPenaltyUpdateOne) SetPlayer(p *Player) *PSPenaltyUpdateOne {
-	return ppuo.SetPlayerID(p.ID)
+	return ppuo.AddPlayerStatIDs(ids...)
 }
 
 // Mutation returns the PSPenaltyMutation object of the builder.
@@ -551,10 +574,25 @@ func (ppuo *PSPenaltyUpdateOne) Mutation() *PSPenaltyMutation {
 	return ppuo.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (ppuo *PSPenaltyUpdateOne) ClearPlayer() *PSPenaltyUpdateOne {
-	ppuo.mutation.ClearPlayer()
+// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+func (ppuo *PSPenaltyUpdateOne) ClearPlayerStats() *PSPenaltyUpdateOne {
+	ppuo.mutation.ClearPlayerStats()
 	return ppuo
+}
+
+// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
+func (ppuo *PSPenaltyUpdateOne) RemovePlayerStatIDs(ids ...int) *PSPenaltyUpdateOne {
+	ppuo.mutation.RemovePlayerStatIDs(ids...)
+	return ppuo
+}
+
+// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
+func (ppuo *PSPenaltyUpdateOne) RemovePlayerStats(p ...*PlayerStats) *PSPenaltyUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return ppuo.RemovePlayerStatIDs(ids...)
 }
 
 // Where appends a list predicates to the PSPenaltyUpdate builder.
@@ -683,28 +721,44 @@ func (ppuo *PSPenaltyUpdateOne) sqlSave(ctx context.Context) (_node *PSPenalty, 
 	if value, ok := ppuo.mutation.AddedPenaltySaved(); ok {
 		_spec.AddField(pspenalty.FieldPenaltySaved, field.TypeInt, value)
 	}
-	if ppuo.mutation.PlayerCleared() {
+	if ppuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   pspenalty.PlayerTable,
-			Columns: []string{pspenalty.PlayerColumn},
+			Table:   pspenalty.PlayerStatsTable,
+			Columns: pspenalty.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := ppuo.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := ppuo.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !ppuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   pspenalty.PlayerTable,
-			Columns: []string{pspenalty.PlayerColumn},
+			Table:   pspenalty.PlayerStatsTable,
+			Columns: pspenalty.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := ppuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   pspenalty.PlayerStatsTable,
+			Columns: pspenalty.PlayerStatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -34,12 +34,14 @@ func (Team) Edges() []ent.Edge {
 			Ref("team").
 			Unique().
 			Required(),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("team").
+			Unique(),
 		edge.To("standings", Standings.Type),
 		edge.To("homeFixtures", Fixture.Type),
 		edge.To("awayFixtures", Fixture.Type),
 		edge.To("teamFixtureEvents", FixtureEvents.Type),
 		edge.To("fixtureLineups", FixtureLineups.Type),
-		edge.To("players", Player.Type),
 		edge.To("squad", Squad.Type),
 
 		// Team Statistics

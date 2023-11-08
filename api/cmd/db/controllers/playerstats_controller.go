@@ -29,6 +29,10 @@ type PlayerStatsController struct {
 }
 
 func NewPlayerStatsController(playerStatsModel *player_stats.PlayerStatsModel) *PlayerStatsController {
+	if playerStatsModel == nil {
+		panic("playerStatsModel is nil")
+	}
+
 	return &PlayerStatsController{
 		client:           &http.Client{},
 		playerStatsModel: playerStatsModel,
@@ -36,14 +40,17 @@ func NewPlayerStatsController(playerStatsModel *player_stats.PlayerStatsModel) *
 }
 
 func (psc *PlayerStatsController) InitializeStats(ctx context.Context) error {
+	if psc == nil {
+		return fmt.Errorf("PlayerStatsController is nil")
+	}
+
 	fmt.Println("Initializing player stats...")
 	players, err := psc.playerStatsModel.ListPlayers(ctx)
 	if err != nil {
 		return err
 	}
-	for p := range players {
-		err = psc.FetchPlayerStatsByID(ctx, players[p])
-		if err != nil {
+	for _, player := range players {
+		if err := psc.FetchPlayerStatsByID(ctx, player); err != nil {
 			return err
 		}
 	}
@@ -53,8 +60,16 @@ func (psc *PlayerStatsController) InitializeStats(ctx context.Context) error {
 }
 
 func (psc *PlayerStatsController) FetchPlayerStatsByID(ctx context.Context, player *ent.Player) error {
+	if psc == nil {
+		return fmt.Errorf("PlayerStatsController is nil")
+	}
+
+	// Check for nil edges
+	if player.Edges.Season == nil || player.Edges.Team == nil {
+		return fmt.Errorf("player edges are not fully loaded")
+	}
+
 	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players/statistics?league=%d&season=%d&team=%d&player=%d",
-		// Replace the placeholders with appropriate values
 		player.Edges.Season.Edges.League.FootballApiId,
 		player.Edges.Season.Year,
 		player.Edges.Team.Edges.Club.ApiFootballId,
@@ -73,15 +88,20 @@ func (psc *PlayerStatsController) FetchPlayerStatsByID(ctx context.Context, play
 	}
 	defer resp.Body.Close()
 
+	// Check the response status code
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("bad status: %s", resp.Status)
+	}
+
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 
-	return psc.parsePlayerStatsResponse(data, player)
+	return psc.parsePlayerStatsResponse(ctx, data, player)
 }
 
-func (psc *PlayerStatsController) parsePlayerStatsResponse(data []byte, player *ent.Player) error {
+func (psc *PlayerStatsController) parsePlayerStatsResponse(ctx context.Context, data []byte, player *ent.Player) error {
 	var playerStatsResponse APIPlayerStatsResponse
 	err := json.Unmarshal(data, &playerStatsResponse)
 	if err != nil {
@@ -96,15 +116,15 @@ func (psc *PlayerStatsController) parsePlayerStatsResponse(data []byte, player *
 		PSPenalty: playerStatsResponse.Response.Penalty,
 	}
 
-	return psc.upsertPlayerStats(player, &playerStats)
+	return psc.upsertPlayerStats(ctx, player, &playerStats)
 }
 
-func (psc *PlayerStatsController) upsertPlayerStats(player *ent.Player, playerStats *player_stats.PlayerStats) error {
-	_, err := psc.playerStatsModel.UpsertPlayerStats(context.Background(), player, *playerStats)
-	if err == nil {
-		fmt.Printf("Player stats for %s successfully upserted.\n", player.Name)
-	} else {
-		fmt.Printf("Error upserting player stats for %s: %v\n", player.Name, err)
+func (psc *PlayerStatsController) upsertPlayerStats(ctx context.Context, player *ent.Player, playerStats *player_stats.PlayerStats) error {
+	_, err := psc.playerStatsModel.UpsertPlayerStats(ctx, player, *playerStats)
+	if err != nil {
+		return fmt.Errorf("error upserting player stats for %s: %v", player.Name, err)
 	}
-	return err
+
+	fmt.Printf("Player stats for %s successfully upserted.\n", player.Name)
+	return nil
 }

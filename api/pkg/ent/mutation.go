@@ -19,6 +19,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
@@ -65,6 +66,7 @@ const (
 	TypePSOffense       = "PSOffense"
 	TypePSPenalty       = "PSPenalty"
 	TypePlayer          = "Player"
+	TypePlayerStats     = "PlayerStats"
 	TypeSeason          = "Season"
 	TypeSquad           = "Squad"
 	TypeStandings       = "Standings"
@@ -627,9 +629,6 @@ type ClubMutation struct {
 	team             map[int]struct{}
 	removedteam      map[int]struct{}
 	clearedteam      bool
-	player           map[int]struct{}
-	removedplayer    map[int]struct{}
-	clearedplayer    bool
 	done             bool
 	oldValue         func(context.Context) (*Club, error)
 	predicates       []predicate.Club
@@ -1118,60 +1117,6 @@ func (m *ClubMutation) ResetTeam() {
 	m.removedteam = nil
 }
 
-// AddPlayerIDs adds the "player" edge to the Player entity by ids.
-func (m *ClubMutation) AddPlayerIDs(ids ...int) {
-	if m.player == nil {
-		m.player = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.player[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPlayer clears the "player" edge to the Player entity.
-func (m *ClubMutation) ClearPlayer() {
-	m.clearedplayer = true
-}
-
-// PlayerCleared reports if the "player" edge to the Player entity was cleared.
-func (m *ClubMutation) PlayerCleared() bool {
-	return m.clearedplayer
-}
-
-// RemovePlayerIDs removes the "player" edge to the Player entity by IDs.
-func (m *ClubMutation) RemovePlayerIDs(ids ...int) {
-	if m.removedplayer == nil {
-		m.removedplayer = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.player, ids[i])
-		m.removedplayer[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPlayer returns the removed IDs of the "player" edge to the Player entity.
-func (m *ClubMutation) RemovedPlayerIDs() (ids []int) {
-	for id := range m.removedplayer {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PlayerIDs returns the "player" edge IDs in the mutation.
-func (m *ClubMutation) PlayerIDs() (ids []int) {
-	for id := range m.player {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPlayer resets all changes to the "player" edge.
-func (m *ClubMutation) ResetPlayer() {
-	m.player = nil
-	m.clearedplayer = false
-	m.removedplayer = nil
-}
-
 // Where appends a list predicates to the ClubMutation builder.
 func (m *ClubMutation) Where(ps ...predicate.Club) {
 	m.predicates = append(m.predicates, ps...)
@@ -1434,15 +1379,12 @@ func (m *ClubMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *ClubMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.country != nil {
 		edges = append(edges, club.EdgeCountry)
 	}
 	if m.team != nil {
 		edges = append(edges, club.EdgeTeam)
-	}
-	if m.player != nil {
-		edges = append(edges, club.EdgePlayer)
 	}
 	return edges
 }
@@ -1461,24 +1403,15 @@ func (m *ClubMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case club.EdgePlayer:
-		ids := make([]ent.Value, 0, len(m.player))
-		for id := range m.player {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *ClubMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.removedteam != nil {
 		edges = append(edges, club.EdgeTeam)
-	}
-	if m.removedplayer != nil {
-		edges = append(edges, club.EdgePlayer)
 	}
 	return edges
 }
@@ -1493,27 +1426,18 @@ func (m *ClubMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case club.EdgePlayer:
-		ids := make([]ent.Value, 0, len(m.removedplayer))
-		for id := range m.removedplayer {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *ClubMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedcountry {
 		edges = append(edges, club.EdgeCountry)
 	}
 	if m.clearedteam {
 		edges = append(edges, club.EdgeTeam)
-	}
-	if m.clearedplayer {
-		edges = append(edges, club.EdgePlayer)
 	}
 	return edges
 }
@@ -1526,8 +1450,6 @@ func (m *ClubMutation) EdgeCleared(name string) bool {
 		return m.clearedcountry
 	case club.EdgeTeam:
 		return m.clearedteam
-	case club.EdgePlayer:
-		return m.clearedplayer
 	}
 	return false
 }
@@ -1552,9 +1474,6 @@ func (m *ClubMutation) ResetEdge(name string) error {
 		return nil
 	case club.EdgeTeam:
 		m.ResetTeam()
-		return nil
-	case club.EdgePlayer:
-		m.ResetPlayer()
 		return nil
 	}
 	return fmt.Errorf("unknown Club edge %s", name)
@@ -4405,29 +4324,31 @@ func (m *FixtureMutation) ResetEdge(name string) error {
 // FixtureEventsMutation represents an operation that mutates the FixtureEvents nodes in the graph.
 type FixtureEventsMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	elapsedTime    *int
-	addelapsedTime *int
-	extraTime      *int
-	addextraTime   *int
-	_type          *string
-	detail         *string
-	comments       *string
-	lastUpdated    *time.Time
-	clearedFields  map[string]struct{}
-	player         *int
-	clearedplayer  bool
-	assist         *int
-	clearedassist  bool
-	team           *int
-	clearedteam    bool
-	fixture        *int
-	clearedfixture bool
-	done           bool
-	oldValue       func(context.Context) (*FixtureEvents, error)
-	predicates     []predicate.FixtureEvents
+	op                 Op
+	typ                string
+	id                 *int
+	elapsedTime        *int
+	addelapsedTime     *int
+	extraTime          *int
+	addextraTime       *int
+	_type              *string
+	detail             *string
+	comments           *string
+	lastUpdated        *time.Time
+	clearedFields      map[string]struct{}
+	player             *int
+	clearedplayer      bool
+	assist             *int
+	clearedassist      bool
+	team               *int
+	clearedteam        bool
+	fixture            *int
+	clearedfixture     bool
+	playerStats        *int
+	clearedplayerStats bool
+	done               bool
+	oldValue           func(context.Context) (*FixtureEvents, error)
+	predicates         []predicate.FixtureEvents
 }
 
 var _ ent.Mutation = (*FixtureEventsMutation)(nil)
@@ -4980,6 +4901,45 @@ func (m *FixtureEventsMutation) ResetFixture() {
 	m.clearedfixture = false
 }
 
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
+func (m *FixtureEventsMutation) SetPlayerStatsID(id int) {
+	m.playerStats = &id
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *FixtureEventsMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
+}
+
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *FixtureEventsMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
+}
+
+// PlayerStatsID returns the "playerStats" edge ID in the mutation.
+func (m *FixtureEventsMutation) PlayerStatsID() (id int, exists bool) {
+	if m.playerStats != nil {
+		return *m.playerStats, true
+	}
+	return
+}
+
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerStatsID instead. It exists only for internal usage by the builders.
+func (m *FixtureEventsMutation) PlayerStatsIDs() (ids []int) {
+	if id := m.playerStats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *FixtureEventsMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+}
+
 // Where appends a list predicates to the FixtureEventsMutation builder.
 func (m *FixtureEventsMutation) Where(ps ...predicate.FixtureEvents) {
 	m.predicates = append(m.predicates, ps...)
@@ -5246,7 +5206,7 @@ func (m *FixtureEventsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *FixtureEventsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.player != nil {
 		edges = append(edges, fixtureevents.EdgePlayer)
 	}
@@ -5258,6 +5218,9 @@ func (m *FixtureEventsMutation) AddedEdges() []string {
 	}
 	if m.fixture != nil {
 		edges = append(edges, fixtureevents.EdgeFixture)
+	}
+	if m.playerStats != nil {
+		edges = append(edges, fixtureevents.EdgePlayerStats)
 	}
 	return edges
 }
@@ -5282,13 +5245,17 @@ func (m *FixtureEventsMutation) AddedIDs(name string) []ent.Value {
 		if id := m.fixture; id != nil {
 			return []ent.Value{*id}
 		}
+	case fixtureevents.EdgePlayerStats:
+		if id := m.playerStats; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FixtureEventsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	return edges
 }
 
@@ -5300,7 +5267,7 @@ func (m *FixtureEventsMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *FixtureEventsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 4)
+	edges := make([]string, 0, 5)
 	if m.clearedplayer {
 		edges = append(edges, fixtureevents.EdgePlayer)
 	}
@@ -5312,6 +5279,9 @@ func (m *FixtureEventsMutation) ClearedEdges() []string {
 	}
 	if m.clearedfixture {
 		edges = append(edges, fixtureevents.EdgeFixture)
+	}
+	if m.clearedplayerStats {
+		edges = append(edges, fixtureevents.EdgePlayerStats)
 	}
 	return edges
 }
@@ -5328,6 +5298,8 @@ func (m *FixtureEventsMutation) EdgeCleared(name string) bool {
 		return m.clearedteam
 	case fixtureevents.EdgeFixture:
 		return m.clearedfixture
+	case fixtureevents.EdgePlayerStats:
+		return m.clearedplayerStats
 	}
 	return false
 }
@@ -5348,6 +5320,9 @@ func (m *FixtureEventsMutation) ClearEdge(name string) error {
 	case fixtureevents.EdgeFixture:
 		m.ClearFixture()
 		return nil
+	case fixtureevents.EdgePlayerStats:
+		m.ClearPlayerStats()
+		return nil
 	}
 	return fmt.Errorf("unknown FixtureEvents unique edge %s", name)
 }
@@ -5367,6 +5342,9 @@ func (m *FixtureEventsMutation) ResetEdge(name string) error {
 		return nil
 	case fixtureevents.EdgeFixture:
 		m.ResetFixture()
+		return nil
+	case fixtureevents.EdgePlayerStats:
+		m.ResetPlayerStats()
 		return nil
 	}
 	return fmt.Errorf("unknown FixtureEvents edge %s", name)
@@ -6004,9 +5982,6 @@ type LeagueMutation struct {
 	season           map[int]struct{}
 	removedseason    map[int]struct{}
 	clearedseason    bool
-	player           map[int]struct{}
-	removedplayer    map[int]struct{}
-	clearedplayer    bool
 	done             bool
 	oldValue         func(context.Context) (*League, error)
 	predicates       []predicate.League
@@ -6452,60 +6427,6 @@ func (m *LeagueMutation) ResetSeason() {
 	m.removedseason = nil
 }
 
-// AddPlayerIDs adds the "player" edge to the Player entity by ids.
-func (m *LeagueMutation) AddPlayerIDs(ids ...int) {
-	if m.player == nil {
-		m.player = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.player[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPlayer clears the "player" edge to the Player entity.
-func (m *LeagueMutation) ClearPlayer() {
-	m.clearedplayer = true
-}
-
-// PlayerCleared reports if the "player" edge to the Player entity was cleared.
-func (m *LeagueMutation) PlayerCleared() bool {
-	return m.clearedplayer
-}
-
-// RemovePlayerIDs removes the "player" edge to the Player entity by IDs.
-func (m *LeagueMutation) RemovePlayerIDs(ids ...int) {
-	if m.removedplayer == nil {
-		m.removedplayer = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.player, ids[i])
-		m.removedplayer[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPlayer returns the removed IDs of the "player" edge to the Player entity.
-func (m *LeagueMutation) RemovedPlayerIDs() (ids []int) {
-	for id := range m.removedplayer {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PlayerIDs returns the "player" edge IDs in the mutation.
-func (m *LeagueMutation) PlayerIDs() (ids []int) {
-	for id := range m.player {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPlayer resets all changes to the "player" edge.
-func (m *LeagueMutation) ResetPlayer() {
-	m.player = nil
-	m.clearedplayer = false
-	m.removedplayer = nil
-}
-
 // Where appends a list predicates to the LeagueMutation builder.
 func (m *LeagueMutation) Where(ps ...predicate.League) {
 	m.predicates = append(m.predicates, ps...)
@@ -6748,15 +6669,12 @@ func (m *LeagueMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *LeagueMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.country != nil {
 		edges = append(edges, league.EdgeCountry)
 	}
 	if m.season != nil {
 		edges = append(edges, league.EdgeSeason)
-	}
-	if m.player != nil {
-		edges = append(edges, league.EdgePlayer)
 	}
 	return edges
 }
@@ -6775,24 +6693,15 @@ func (m *LeagueMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case league.EdgePlayer:
-		ids := make([]ent.Value, 0, len(m.player))
-		for id := range m.player {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *LeagueMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.removedseason != nil {
 		edges = append(edges, league.EdgeSeason)
-	}
-	if m.removedplayer != nil {
-		edges = append(edges, league.EdgePlayer)
 	}
 	return edges
 }
@@ -6807,27 +6716,18 @@ func (m *LeagueMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case league.EdgePlayer:
-		ids := make([]ent.Value, 0, len(m.removedplayer))
-		for id := range m.removedplayer {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *LeagueMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 2)
 	if m.clearedcountry {
 		edges = append(edges, league.EdgeCountry)
 	}
 	if m.clearedseason {
 		edges = append(edges, league.EdgeSeason)
-	}
-	if m.clearedplayer {
-		edges = append(edges, league.EdgePlayer)
 	}
 	return edges
 }
@@ -6840,8 +6740,6 @@ func (m *LeagueMutation) EdgeCleared(name string) bool {
 		return m.clearedcountry
 	case league.EdgeSeason:
 		return m.clearedseason
-	case league.EdgePlayer:
-		return m.clearedplayer
 	}
 	return false
 }
@@ -6867,9 +6765,6 @@ func (m *LeagueMutation) ResetEdge(name string) error {
 	case league.EdgeSeason:
 		m.ResetSeason()
 		return nil
-	case league.EdgePlayer:
-		m.ResetPlayer()
-		return nil
 	}
 	return fmt.Errorf("unknown League edge %s", name)
 }
@@ -6877,25 +6772,27 @@ func (m *LeagueMutation) ResetEdge(name string) error {
 // MatchPlayerMutation represents an operation that mutates the MatchPlayer nodes in the graph.
 type MatchPlayerMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	number        *int
-	addnumber     *int
-	position      *string
-	x             *int
-	addx          *int
-	y             *int
-	addy          *int
-	lastUpdated   *time.Time
-	clearedFields map[string]struct{}
-	player        *int
-	clearedplayer bool
-	lineup        *int
-	clearedlineup bool
-	done          bool
-	oldValue      func(context.Context) (*MatchPlayer, error)
-	predicates    []predicate.MatchPlayer
+	op                 Op
+	typ                string
+	id                 *int
+	number             *int
+	addnumber          *int
+	position           *string
+	x                  *int
+	addx               *int
+	y                  *int
+	addy               *int
+	lastUpdated        *time.Time
+	clearedFields      map[string]struct{}
+	player             *int
+	clearedplayer      bool
+	lineup             *int
+	clearedlineup      bool
+	playerStats        *int
+	clearedplayerStats bool
+	done               bool
+	oldValue           func(context.Context) (*MatchPlayer, error)
+	predicates         []predicate.MatchPlayer
 }
 
 var _ ent.Mutation = (*MatchPlayerMutation)(nil)
@@ -7368,6 +7265,45 @@ func (m *MatchPlayerMutation) ResetLineup() {
 	m.clearedlineup = false
 }
 
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
+func (m *MatchPlayerMutation) SetPlayerStatsID(id int) {
+	m.playerStats = &id
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *MatchPlayerMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
+}
+
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *MatchPlayerMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
+}
+
+// PlayerStatsID returns the "playerStats" edge ID in the mutation.
+func (m *MatchPlayerMutation) PlayerStatsID() (id int, exists bool) {
+	if m.playerStats != nil {
+		return *m.playerStats, true
+	}
+	return
+}
+
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerStatsID instead. It exists only for internal usage by the builders.
+func (m *MatchPlayerMutation) PlayerStatsIDs() (ids []int) {
+	if id := m.playerStats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *MatchPlayerMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+}
+
 // Where appends a list predicates to the MatchPlayerMutation builder.
 func (m *MatchPlayerMutation) Where(ps ...predicate.MatchPlayer) {
 	m.predicates = append(m.predicates, ps...)
@@ -7635,12 +7571,15 @@ func (m *MatchPlayerMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MatchPlayerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.player != nil {
 		edges = append(edges, matchplayer.EdgePlayer)
 	}
 	if m.lineup != nil {
 		edges = append(edges, matchplayer.EdgeLineup)
+	}
+	if m.playerStats != nil {
+		edges = append(edges, matchplayer.EdgePlayerStats)
 	}
 	return edges
 }
@@ -7657,13 +7596,17 @@ func (m *MatchPlayerMutation) AddedIDs(name string) []ent.Value {
 		if id := m.lineup; id != nil {
 			return []ent.Value{*id}
 		}
+	case matchplayer.EdgePlayerStats:
+		if id := m.playerStats; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MatchPlayerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	return edges
 }
 
@@ -7675,12 +7618,15 @@ func (m *MatchPlayerMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MatchPlayerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedplayer {
 		edges = append(edges, matchplayer.EdgePlayer)
 	}
 	if m.clearedlineup {
 		edges = append(edges, matchplayer.EdgeLineup)
+	}
+	if m.clearedplayerStats {
+		edges = append(edges, matchplayer.EdgePlayerStats)
 	}
 	return edges
 }
@@ -7693,6 +7639,8 @@ func (m *MatchPlayerMutation) EdgeCleared(name string) bool {
 		return m.clearedplayer
 	case matchplayer.EdgeLineup:
 		return m.clearedlineup
+	case matchplayer.EdgePlayerStats:
+		return m.clearedplayerStats
 	}
 	return false
 }
@@ -7706,6 +7654,9 @@ func (m *MatchPlayerMutation) ClearEdge(name string) error {
 		return nil
 	case matchplayer.EdgeLineup:
 		m.ClearLineup()
+		return nil
+	case matchplayer.EdgePlayerStats:
+		m.ClearPlayerStats()
 		return nil
 	}
 	return fmt.Errorf("unknown MatchPlayer unique edge %s", name)
@@ -7721,6 +7672,9 @@ func (m *MatchPlayerMutation) ResetEdge(name string) error {
 	case matchplayer.EdgeLineup:
 		m.ResetLineup()
 		return nil
+	case matchplayer.EdgePlayerStats:
+		m.ResetPlayerStats()
+		return nil
 	}
 	return fmt.Errorf("unknown MatchPlayer edge %s", name)
 }
@@ -7728,25 +7682,26 @@ func (m *MatchPlayerMutation) ResetEdge(name string) error {
 // PSDefenseMutation represents an operation that mutates the PSDefense nodes in the graph.
 type PSDefenseMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	tacklesTotal     *int
-	addtacklesTotal  *int
-	blocks           *int
-	addblocks        *int
-	interceptions    *int
-	addinterceptions *int
-	totalDuels       *int
-	addtotalDuels    *int
-	wonDuels         *int
-	addwonDuels      *int
-	clearedFields    map[string]struct{}
-	player           *int
-	clearedplayer    bool
-	done             bool
-	oldValue         func(context.Context) (*PSDefense, error)
-	predicates       []predicate.PSDefense
+	op                 Op
+	typ                string
+	id                 *int
+	tacklesTotal       *int
+	addtacklesTotal    *int
+	blocks             *int
+	addblocks          *int
+	interceptions      *int
+	addinterceptions   *int
+	totalDuels         *int
+	addtotalDuels      *int
+	wonDuels           *int
+	addwonDuels        *int
+	clearedFields      map[string]struct{}
+	playerStats        map[int]struct{}
+	removedplayerStats map[int]struct{}
+	clearedplayerStats bool
+	done               bool
+	oldValue           func(context.Context) (*PSDefense, error)
+	predicates         []predicate.PSDefense
 }
 
 var _ ent.Mutation = (*PSDefenseMutation)(nil)
@@ -8127,43 +8082,58 @@ func (m *PSDefenseMutation) ResetWonDuels() {
 	m.addwonDuels = nil
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by id.
-func (m *PSDefenseMutation) SetPlayerID(id int) {
-	m.player = &id
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by ids.
+func (m *PSDefenseMutation) AddPlayerStatIDs(ids ...int) {
+	if m.playerStats == nil {
+		m.playerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.playerStats[ids[i]] = struct{}{}
+	}
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (m *PSDefenseMutation) ClearPlayer() {
-	m.clearedplayer = true
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSDefenseMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
 }
 
-// PlayerCleared reports if the "player" edge to the Player entity was cleared.
-func (m *PSDefenseMutation) PlayerCleared() bool {
-	return m.clearedplayer
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSDefenseMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
 }
 
-// PlayerID returns the "player" edge ID in the mutation.
-func (m *PSDefenseMutation) PlayerID() (id int, exists bool) {
-	if m.player != nil {
-		return *m.player, true
+// RemovePlayerStatIDs removes the "playerStats" edge to the PlayerStats entity by IDs.
+func (m *PSDefenseMutation) RemovePlayerStatIDs(ids ...int) {
+	if m.removedplayerStats == nil {
+		m.removedplayerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.playerStats, ids[i])
+		m.removedplayerStats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayerStats returns the removed IDs of the "playerStats" edge to the PlayerStats entity.
+func (m *PSDefenseMutation) RemovedPlayerStatsIDs() (ids []int) {
+	for id := range m.removedplayerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// PlayerIDs returns the "player" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerID instead. It exists only for internal usage by the builders.
-func (m *PSDefenseMutation) PlayerIDs() (ids []int) {
-	if id := m.player; id != nil {
-		ids = append(ids, *id)
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+func (m *PSDefenseMutation) PlayerStatsIDs() (ids []int) {
+	for id := range m.playerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPlayer resets all changes to the "player" edge.
-func (m *PSDefenseMutation) ResetPlayer() {
-	m.player = nil
-	m.clearedplayer = false
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSDefenseMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+	m.removedplayerStats = nil
 }
 
 // Where appends a list predicates to the PSDefenseMutation builder.
@@ -8431,8 +8401,8 @@ func (m *PSDefenseMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PSDefenseMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.player != nil {
-		edges = append(edges, psdefense.EdgePlayer)
+	if m.playerStats != nil {
+		edges = append(edges, psdefense.EdgePlayerStats)
 	}
 	return edges
 }
@@ -8441,10 +8411,12 @@ func (m *PSDefenseMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *PSDefenseMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case psdefense.EdgePlayer:
-		if id := m.player; id != nil {
-			return []ent.Value{*id}
+	case psdefense.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.playerStats))
+		for id := range m.playerStats {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -8452,20 +8424,31 @@ func (m *PSDefenseMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PSDefenseMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedplayerStats != nil {
+		edges = append(edges, psdefense.EdgePlayerStats)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PSDefenseMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case psdefense.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.removedplayerStats))
+		for id := range m.removedplayerStats {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PSDefenseMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedplayer {
-		edges = append(edges, psdefense.EdgePlayer)
+	if m.clearedplayerStats {
+		edges = append(edges, psdefense.EdgePlayerStats)
 	}
 	return edges
 }
@@ -8474,8 +8457,8 @@ func (m *PSDefenseMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *PSDefenseMutation) EdgeCleared(name string) bool {
 	switch name {
-	case psdefense.EdgePlayer:
-		return m.clearedplayer
+	case psdefense.EdgePlayerStats:
+		return m.clearedplayerStats
 	}
 	return false
 }
@@ -8484,9 +8467,6 @@ func (m *PSDefenseMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PSDefenseMutation) ClearEdge(name string) error {
 	switch name {
-	case psdefense.EdgePlayer:
-		m.ClearPlayer()
-		return nil
 	}
 	return fmt.Errorf("unknown PSDefense unique edge %s", name)
 }
@@ -8495,8 +8475,8 @@ func (m *PSDefenseMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PSDefenseMutation) ResetEdge(name string) error {
 	switch name {
-	case psdefense.EdgePlayer:
-		m.ResetPlayer()
+	case psdefense.EdgePlayerStats:
+		m.ResetPlayerStats()
 		return nil
 	}
 	return fmt.Errorf("unknown PSDefense edge %s", name)
@@ -8505,26 +8485,27 @@ func (m *PSDefenseMutation) ResetEdge(name string) error {
 // PSGamesMutation represents an operation that mutates the PSGames nodes in the graph.
 type PSGamesMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	appearences    *int
-	addappearences *int
-	lineups        *int
-	addlineups     *int
-	minutes        *int
-	addminutes     *int
-	number         *int
-	addnumber      *int
-	position       *string
-	rating         *string
-	captain        *bool
-	clearedFields  map[string]struct{}
-	player         *int
-	clearedplayer  bool
-	done           bool
-	oldValue       func(context.Context) (*PSGames, error)
-	predicates     []predicate.PSGames
+	op                 Op
+	typ                string
+	id                 *int
+	appearences        *int
+	addappearences     *int
+	lineups            *int
+	addlineups         *int
+	minutes            *int
+	addminutes         *int
+	number             *int
+	addnumber          *int
+	position           *string
+	rating             *string
+	captain            *bool
+	clearedFields      map[string]struct{}
+	playerStats        map[int]struct{}
+	removedplayerStats map[int]struct{}
+	clearedplayerStats bool
+	done               bool
+	oldValue           func(context.Context) (*PSGames, error)
+	predicates         []predicate.PSGames
 }
 
 var _ ent.Mutation = (*PSGamesMutation)(nil)
@@ -8957,43 +8938,58 @@ func (m *PSGamesMutation) ResetCaptain() {
 	m.captain = nil
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by id.
-func (m *PSGamesMutation) SetPlayerID(id int) {
-	m.player = &id
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by ids.
+func (m *PSGamesMutation) AddPlayerStatIDs(ids ...int) {
+	if m.playerStats == nil {
+		m.playerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.playerStats[ids[i]] = struct{}{}
+	}
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (m *PSGamesMutation) ClearPlayer() {
-	m.clearedplayer = true
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSGamesMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
 }
 
-// PlayerCleared reports if the "player" edge to the Player entity was cleared.
-func (m *PSGamesMutation) PlayerCleared() bool {
-	return m.clearedplayer
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSGamesMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
 }
 
-// PlayerID returns the "player" edge ID in the mutation.
-func (m *PSGamesMutation) PlayerID() (id int, exists bool) {
-	if m.player != nil {
-		return *m.player, true
+// RemovePlayerStatIDs removes the "playerStats" edge to the PlayerStats entity by IDs.
+func (m *PSGamesMutation) RemovePlayerStatIDs(ids ...int) {
+	if m.removedplayerStats == nil {
+		m.removedplayerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.playerStats, ids[i])
+		m.removedplayerStats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayerStats returns the removed IDs of the "playerStats" edge to the PlayerStats entity.
+func (m *PSGamesMutation) RemovedPlayerStatsIDs() (ids []int) {
+	for id := range m.removedplayerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// PlayerIDs returns the "player" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerID instead. It exists only for internal usage by the builders.
-func (m *PSGamesMutation) PlayerIDs() (ids []int) {
-	if id := m.player; id != nil {
-		ids = append(ids, *id)
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+func (m *PSGamesMutation) PlayerStatsIDs() (ids []int) {
+	for id := range m.playerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPlayer resets all changes to the "player" edge.
-func (m *PSGamesMutation) ResetPlayer() {
-	m.player = nil
-	m.clearedplayer = false
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSGamesMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+	m.removedplayerStats = nil
 }
 
 // Where appends a list predicates to the PSGamesMutation builder.
@@ -9283,8 +9279,8 @@ func (m *PSGamesMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PSGamesMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.player != nil {
-		edges = append(edges, psgames.EdgePlayer)
+	if m.playerStats != nil {
+		edges = append(edges, psgames.EdgePlayerStats)
 	}
 	return edges
 }
@@ -9293,10 +9289,12 @@ func (m *PSGamesMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *PSGamesMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case psgames.EdgePlayer:
-		if id := m.player; id != nil {
-			return []ent.Value{*id}
+	case psgames.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.playerStats))
+		for id := range m.playerStats {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -9304,20 +9302,31 @@ func (m *PSGamesMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PSGamesMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedplayerStats != nil {
+		edges = append(edges, psgames.EdgePlayerStats)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PSGamesMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case psgames.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.removedplayerStats))
+		for id := range m.removedplayerStats {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PSGamesMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedplayer {
-		edges = append(edges, psgames.EdgePlayer)
+	if m.clearedplayerStats {
+		edges = append(edges, psgames.EdgePlayerStats)
 	}
 	return edges
 }
@@ -9326,8 +9335,8 @@ func (m *PSGamesMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *PSGamesMutation) EdgeCleared(name string) bool {
 	switch name {
-	case psgames.EdgePlayer:
-		return m.clearedplayer
+	case psgames.EdgePlayerStats:
+		return m.clearedplayerStats
 	}
 	return false
 }
@@ -9336,9 +9345,6 @@ func (m *PSGamesMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PSGamesMutation) ClearEdge(name string) error {
 	switch name {
-	case psgames.EdgePlayer:
-		m.ClearPlayer()
-		return nil
 	}
 	return fmt.Errorf("unknown PSGames unique edge %s", name)
 }
@@ -9347,8 +9353,8 @@ func (m *PSGamesMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PSGamesMutation) ResetEdge(name string) error {
 	switch name {
-	case psgames.EdgePlayer:
-		m.ResetPlayer()
+	case psgames.EdgePlayerStats:
+		m.ResetPlayerStats()
 		return nil
 	}
 	return fmt.Errorf("unknown PSGames edge %s", name)
@@ -9357,27 +9363,28 @@ func (m *PSGamesMutation) ResetEdge(name string) error {
 // PSGoalsMutation represents an operation that mutates the PSGoals nodes in the graph.
 type PSGoalsMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	totalGoals       *int
-	addtotalGoals    *int
-	concededGoals    *int
-	addconcededGoals *int
-	assistGoals      *int
-	addassistGoals   *int
-	saveGoals        *int
-	addsaveGoals     *int
-	shotsTotal       *int
-	addshotsTotal    *int
-	shotsOn          *int
-	addshotsOn       *int
-	clearedFields    map[string]struct{}
-	player           *int
-	clearedplayer    bool
-	done             bool
-	oldValue         func(context.Context) (*PSGoals, error)
-	predicates       []predicate.PSGoals
+	op                 Op
+	typ                string
+	id                 *int
+	totalGoals         *int
+	addtotalGoals      *int
+	concededGoals      *int
+	addconcededGoals   *int
+	assistGoals        *int
+	addassistGoals     *int
+	saveGoals          *int
+	addsaveGoals       *int
+	shotsTotal         *int
+	addshotsTotal      *int
+	shotsOn            *int
+	addshotsOn         *int
+	clearedFields      map[string]struct{}
+	playerStats        map[int]struct{}
+	removedplayerStats map[int]struct{}
+	clearedplayerStats bool
+	done               bool
+	oldValue           func(context.Context) (*PSGoals, error)
+	predicates         []predicate.PSGoals
 }
 
 var _ ent.Mutation = (*PSGoalsMutation)(nil)
@@ -9814,43 +9821,58 @@ func (m *PSGoalsMutation) ResetShotsOn() {
 	m.addshotsOn = nil
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by id.
-func (m *PSGoalsMutation) SetPlayerID(id int) {
-	m.player = &id
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by ids.
+func (m *PSGoalsMutation) AddPlayerStatIDs(ids ...int) {
+	if m.playerStats == nil {
+		m.playerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.playerStats[ids[i]] = struct{}{}
+	}
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (m *PSGoalsMutation) ClearPlayer() {
-	m.clearedplayer = true
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSGoalsMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
 }
 
-// PlayerCleared reports if the "player" edge to the Player entity was cleared.
-func (m *PSGoalsMutation) PlayerCleared() bool {
-	return m.clearedplayer
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSGoalsMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
 }
 
-// PlayerID returns the "player" edge ID in the mutation.
-func (m *PSGoalsMutation) PlayerID() (id int, exists bool) {
-	if m.player != nil {
-		return *m.player, true
+// RemovePlayerStatIDs removes the "playerStats" edge to the PlayerStats entity by IDs.
+func (m *PSGoalsMutation) RemovePlayerStatIDs(ids ...int) {
+	if m.removedplayerStats == nil {
+		m.removedplayerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.playerStats, ids[i])
+		m.removedplayerStats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayerStats returns the removed IDs of the "playerStats" edge to the PlayerStats entity.
+func (m *PSGoalsMutation) RemovedPlayerStatsIDs() (ids []int) {
+	for id := range m.removedplayerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// PlayerIDs returns the "player" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerID instead. It exists only for internal usage by the builders.
-func (m *PSGoalsMutation) PlayerIDs() (ids []int) {
-	if id := m.player; id != nil {
-		ids = append(ids, *id)
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+func (m *PSGoalsMutation) PlayerStatsIDs() (ids []int) {
+	for id := range m.playerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPlayer resets all changes to the "player" edge.
-func (m *PSGoalsMutation) ResetPlayer() {
-	m.player = nil
-	m.clearedplayer = false
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSGoalsMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+	m.removedplayerStats = nil
 }
 
 // Where appends a list predicates to the PSGoalsMutation builder.
@@ -10147,8 +10169,8 @@ func (m *PSGoalsMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PSGoalsMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.player != nil {
-		edges = append(edges, psgoals.EdgePlayer)
+	if m.playerStats != nil {
+		edges = append(edges, psgoals.EdgePlayerStats)
 	}
 	return edges
 }
@@ -10157,10 +10179,12 @@ func (m *PSGoalsMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *PSGoalsMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case psgoals.EdgePlayer:
-		if id := m.player; id != nil {
-			return []ent.Value{*id}
+	case psgoals.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.playerStats))
+		for id := range m.playerStats {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -10168,20 +10192,31 @@ func (m *PSGoalsMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PSGoalsMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedplayerStats != nil {
+		edges = append(edges, psgoals.EdgePlayerStats)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PSGoalsMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case psgoals.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.removedplayerStats))
+		for id := range m.removedplayerStats {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PSGoalsMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedplayer {
-		edges = append(edges, psgoals.EdgePlayer)
+	if m.clearedplayerStats {
+		edges = append(edges, psgoals.EdgePlayerStats)
 	}
 	return edges
 }
@@ -10190,8 +10225,8 @@ func (m *PSGoalsMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *PSGoalsMutation) EdgeCleared(name string) bool {
 	switch name {
-	case psgoals.EdgePlayer:
-		return m.clearedplayer
+	case psgoals.EdgePlayerStats:
+		return m.clearedplayerStats
 	}
 	return false
 }
@@ -10200,9 +10235,6 @@ func (m *PSGoalsMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PSGoalsMutation) ClearEdge(name string) error {
 	switch name {
-	case psgoals.EdgePlayer:
-		m.ClearPlayer()
-		return nil
 	}
 	return fmt.Errorf("unknown PSGoals unique edge %s", name)
 }
@@ -10211,8 +10243,8 @@ func (m *PSGoalsMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PSGoalsMutation) ResetEdge(name string) error {
 	switch name {
-	case psgoals.EdgePlayer:
-		m.ResetPlayer()
+	case psgoals.EdgePlayerStats:
+		m.ResetPlayerStats()
 		return nil
 	}
 	return fmt.Errorf("unknown PSGoals edge %s", name)
@@ -10237,8 +10269,9 @@ type PSOffenseMutation struct {
 	passesAccuracy     *int
 	addpassesAccuracy  *int
 	clearedFields      map[string]struct{}
-	player             *int
-	clearedplayer      bool
+	playerStats        map[int]struct{}
+	removedplayerStats map[int]struct{}
+	clearedplayerStats bool
 	done               bool
 	oldValue           func(context.Context) (*PSOffense, error)
 	predicates         []predicate.PSOffense
@@ -10678,43 +10711,58 @@ func (m *PSOffenseMutation) ResetPassesAccuracy() {
 	m.addpassesAccuracy = nil
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by id.
-func (m *PSOffenseMutation) SetPlayerID(id int) {
-	m.player = &id
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by ids.
+func (m *PSOffenseMutation) AddPlayerStatIDs(ids ...int) {
+	if m.playerStats == nil {
+		m.playerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.playerStats[ids[i]] = struct{}{}
+	}
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (m *PSOffenseMutation) ClearPlayer() {
-	m.clearedplayer = true
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSOffenseMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
 }
 
-// PlayerCleared reports if the "player" edge to the Player entity was cleared.
-func (m *PSOffenseMutation) PlayerCleared() bool {
-	return m.clearedplayer
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSOffenseMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
 }
 
-// PlayerID returns the "player" edge ID in the mutation.
-func (m *PSOffenseMutation) PlayerID() (id int, exists bool) {
-	if m.player != nil {
-		return *m.player, true
+// RemovePlayerStatIDs removes the "playerStats" edge to the PlayerStats entity by IDs.
+func (m *PSOffenseMutation) RemovePlayerStatIDs(ids ...int) {
+	if m.removedplayerStats == nil {
+		m.removedplayerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.playerStats, ids[i])
+		m.removedplayerStats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayerStats returns the removed IDs of the "playerStats" edge to the PlayerStats entity.
+func (m *PSOffenseMutation) RemovedPlayerStatsIDs() (ids []int) {
+	for id := range m.removedplayerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// PlayerIDs returns the "player" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerID instead. It exists only for internal usage by the builders.
-func (m *PSOffenseMutation) PlayerIDs() (ids []int) {
-	if id := m.player; id != nil {
-		ids = append(ids, *id)
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+func (m *PSOffenseMutation) PlayerStatsIDs() (ids []int) {
+	for id := range m.playerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPlayer resets all changes to the "player" edge.
-func (m *PSOffenseMutation) ResetPlayer() {
-	m.player = nil
-	m.clearedplayer = false
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSOffenseMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+	m.removedplayerStats = nil
 }
 
 // Where appends a list predicates to the PSOffenseMutation builder.
@@ -11011,8 +11059,8 @@ func (m *PSOffenseMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PSOffenseMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.player != nil {
-		edges = append(edges, psoffense.EdgePlayer)
+	if m.playerStats != nil {
+		edges = append(edges, psoffense.EdgePlayerStats)
 	}
 	return edges
 }
@@ -11021,10 +11069,12 @@ func (m *PSOffenseMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *PSOffenseMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case psoffense.EdgePlayer:
-		if id := m.player; id != nil {
-			return []ent.Value{*id}
+	case psoffense.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.playerStats))
+		for id := range m.playerStats {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -11032,20 +11082,31 @@ func (m *PSOffenseMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PSOffenseMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedplayerStats != nil {
+		edges = append(edges, psoffense.EdgePlayerStats)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PSOffenseMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case psoffense.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.removedplayerStats))
+		for id := range m.removedplayerStats {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PSOffenseMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedplayer {
-		edges = append(edges, psoffense.EdgePlayer)
+	if m.clearedplayerStats {
+		edges = append(edges, psoffense.EdgePlayerStats)
 	}
 	return edges
 }
@@ -11054,8 +11115,8 @@ func (m *PSOffenseMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *PSOffenseMutation) EdgeCleared(name string) bool {
 	switch name {
-	case psoffense.EdgePlayer:
-		return m.clearedplayer
+	case psoffense.EdgePlayerStats:
+		return m.clearedplayerStats
 	}
 	return false
 }
@@ -11064,9 +11125,6 @@ func (m *PSOffenseMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PSOffenseMutation) ClearEdge(name string) error {
 	switch name {
-	case psoffense.EdgePlayer:
-		m.ClearPlayer()
-		return nil
 	}
 	return fmt.Errorf("unknown PSOffense unique edge %s", name)
 }
@@ -11075,8 +11133,8 @@ func (m *PSOffenseMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PSOffenseMutation) ResetEdge(name string) error {
 	switch name {
-	case psoffense.EdgePlayer:
-		m.ResetPlayer()
+	case psoffense.EdgePlayerStats:
+		m.ResetPlayerStats()
 		return nil
 	}
 	return fmt.Errorf("unknown PSOffense edge %s", name)
@@ -11109,8 +11167,9 @@ type PSPenaltyMutation struct {
 	penaltySaved       *int
 	addpenaltySaved    *int
 	clearedFields      map[string]struct{}
-	player             *int
-	clearedplayer      bool
+	playerStats        map[int]struct{}
+	removedplayerStats map[int]struct{}
+	clearedplayerStats bool
 	done               bool
 	oldValue           func(context.Context) (*PSPenalty, error)
 	predicates         []predicate.PSPenalty
@@ -11774,43 +11833,58 @@ func (m *PSPenaltyMutation) ResetPenaltySaved() {
 	m.addpenaltySaved = nil
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by id.
-func (m *PSPenaltyMutation) SetPlayerID(id int) {
-	m.player = &id
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by ids.
+func (m *PSPenaltyMutation) AddPlayerStatIDs(ids ...int) {
+	if m.playerStats == nil {
+		m.playerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.playerStats[ids[i]] = struct{}{}
+	}
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (m *PSPenaltyMutation) ClearPlayer() {
-	m.clearedplayer = true
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSPenaltyMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
 }
 
-// PlayerCleared reports if the "player" edge to the Player entity was cleared.
-func (m *PSPenaltyMutation) PlayerCleared() bool {
-	return m.clearedplayer
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSPenaltyMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
 }
 
-// PlayerID returns the "player" edge ID in the mutation.
-func (m *PSPenaltyMutation) PlayerID() (id int, exists bool) {
-	if m.player != nil {
-		return *m.player, true
+// RemovePlayerStatIDs removes the "playerStats" edge to the PlayerStats entity by IDs.
+func (m *PSPenaltyMutation) RemovePlayerStatIDs(ids ...int) {
+	if m.removedplayerStats == nil {
+		m.removedplayerStats = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.playerStats, ids[i])
+		m.removedplayerStats[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayerStats returns the removed IDs of the "playerStats" edge to the PlayerStats entity.
+func (m *PSPenaltyMutation) RemovedPlayerStatsIDs() (ids []int) {
+	for id := range m.removedplayerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// PlayerIDs returns the "player" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerID instead. It exists only for internal usage by the builders.
-func (m *PSPenaltyMutation) PlayerIDs() (ids []int) {
-	if id := m.player; id != nil {
-		ids = append(ids, *id)
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+func (m *PSPenaltyMutation) PlayerStatsIDs() (ids []int) {
+	for id := range m.playerStats {
+		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPlayer resets all changes to the "player" edge.
-func (m *PSPenaltyMutation) ResetPlayer() {
-	m.player = nil
-	m.clearedplayer = false
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSPenaltyMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+	m.removedplayerStats = nil
 }
 
 // Where appends a list predicates to the PSPenaltyMutation builder.
@@ -12223,8 +12297,8 @@ func (m *PSPenaltyMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PSPenaltyMutation) AddedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.player != nil {
-		edges = append(edges, pspenalty.EdgePlayer)
+	if m.playerStats != nil {
+		edges = append(edges, pspenalty.EdgePlayerStats)
 	}
 	return edges
 }
@@ -12233,10 +12307,12 @@ func (m *PSPenaltyMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *PSPenaltyMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case pspenalty.EdgePlayer:
-		if id := m.player; id != nil {
-			return []ent.Value{*id}
+	case pspenalty.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.playerStats))
+		for id := range m.playerStats {
+			ids = append(ids, id)
 		}
+		return ids
 	}
 	return nil
 }
@@ -12244,20 +12320,31 @@ func (m *PSPenaltyMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PSPenaltyMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 1)
+	if m.removedplayerStats != nil {
+		edges = append(edges, pspenalty.EdgePlayerStats)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *PSPenaltyMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case pspenalty.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.removedplayerStats))
+		for id := range m.removedplayerStats {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PSPenaltyMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 1)
-	if m.clearedplayer {
-		edges = append(edges, pspenalty.EdgePlayer)
+	if m.clearedplayerStats {
+		edges = append(edges, pspenalty.EdgePlayerStats)
 	}
 	return edges
 }
@@ -12266,8 +12353,8 @@ func (m *PSPenaltyMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *PSPenaltyMutation) EdgeCleared(name string) bool {
 	switch name {
-	case pspenalty.EdgePlayer:
-		return m.clearedplayer
+	case pspenalty.EdgePlayerStats:
+		return m.clearedplayerStats
 	}
 	return false
 }
@@ -12276,9 +12363,6 @@ func (m *PSPenaltyMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *PSPenaltyMutation) ClearEdge(name string) error {
 	switch name {
-	case pspenalty.EdgePlayer:
-		m.ClearPlayer()
-		return nil
 	}
 	return fmt.Errorf("unknown PSPenalty unique edge %s", name)
 }
@@ -12287,8 +12371,8 @@ func (m *PSPenaltyMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *PSPenaltyMutation) ResetEdge(name string) error {
 	switch name {
-	case pspenalty.EdgePlayer:
-		m.ResetPlayer()
+	case pspenalty.EdgePlayerStats:
+		m.ResetPlayerStats()
 		return nil
 	}
 	return fmt.Errorf("unknown PSPenalty edge %s", name)
@@ -12331,29 +12415,9 @@ type PlayerMutation struct {
 	assistEvents        map[int]struct{}
 	removedassistEvents map[int]struct{}
 	clearedassistEvents bool
-	psgames             map[int]struct{}
-	removedpsgames      map[int]struct{}
-	clearedpsgames      bool
-	psgoals             map[int]struct{}
-	removedpsgoals      map[int]struct{}
-	clearedpsgoals      bool
-	psdefense           map[int]struct{}
-	removedpsdefense    map[int]struct{}
-	clearedpsdefense    bool
-	psoffense           map[int]struct{}
-	removedpsoffense    map[int]struct{}
-	clearedpsoffense    bool
-	pspenalty           map[int]struct{}
-	removedpspenalty    map[int]struct{}
-	clearedpspenalty    bool
-	season              *int
-	clearedseason       bool
-	team                *int
-	clearedteam         bool
-	club                *int
-	clearedclub         bool
-	league              *int
-	clearedleague       bool
+	playerStats         map[int]struct{}
+	removedplayerStats  map[int]struct{}
+	clearedplayerStats  bool
 	done                bool
 	oldValue            func(context.Context) (*Player, error)
 	predicates          []predicate.Player
@@ -13249,430 +13313,58 @@ func (m *PlayerMutation) ResetAssistEvents() {
 	m.removedassistEvents = nil
 }
 
-// AddPsgameIDs adds the "psgames" edge to the PSGames entity by ids.
-func (m *PlayerMutation) AddPsgameIDs(ids ...int) {
-	if m.psgames == nil {
-		m.psgames = make(map[int]struct{})
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by ids.
+func (m *PlayerMutation) AddPlayerStatIDs(ids ...int) {
+	if m.playerStats == nil {
+		m.playerStats = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.psgames[ids[i]] = struct{}{}
+		m.playerStats[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPsgames clears the "psgames" edge to the PSGames entity.
-func (m *PlayerMutation) ClearPsgames() {
-	m.clearedpsgames = true
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PlayerMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
 }
 
-// PsgamesCleared reports if the "psgames" edge to the PSGames entity was cleared.
-func (m *PlayerMutation) PsgamesCleared() bool {
-	return m.clearedpsgames
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PlayerMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
 }
 
-// RemovePsgameIDs removes the "psgames" edge to the PSGames entity by IDs.
-func (m *PlayerMutation) RemovePsgameIDs(ids ...int) {
-	if m.removedpsgames == nil {
-		m.removedpsgames = make(map[int]struct{})
+// RemovePlayerStatIDs removes the "playerStats" edge to the PlayerStats entity by IDs.
+func (m *PlayerMutation) RemovePlayerStatIDs(ids ...int) {
+	if m.removedplayerStats == nil {
+		m.removedplayerStats = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.psgames, ids[i])
-		m.removedpsgames[ids[i]] = struct{}{}
+		delete(m.playerStats, ids[i])
+		m.removedplayerStats[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedPsgames returns the removed IDs of the "psgames" edge to the PSGames entity.
-func (m *PlayerMutation) RemovedPsgamesIDs() (ids []int) {
-	for id := range m.removedpsgames {
+// RemovedPlayerStats returns the removed IDs of the "playerStats" edge to the PlayerStats entity.
+func (m *PlayerMutation) RemovedPlayerStatsIDs() (ids []int) {
+	for id := range m.removedplayerStats {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// PsgamesIDs returns the "psgames" edge IDs in the mutation.
-func (m *PlayerMutation) PsgamesIDs() (ids []int) {
-	for id := range m.psgames {
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+func (m *PlayerMutation) PlayerStatsIDs() (ids []int) {
+	for id := range m.playerStats {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPsgames resets all changes to the "psgames" edge.
-func (m *PlayerMutation) ResetPsgames() {
-	m.psgames = nil
-	m.clearedpsgames = false
-	m.removedpsgames = nil
-}
-
-// AddPsgoalIDs adds the "psgoals" edge to the PSGoals entity by ids.
-func (m *PlayerMutation) AddPsgoalIDs(ids ...int) {
-	if m.psgoals == nil {
-		m.psgoals = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.psgoals[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPsgoals clears the "psgoals" edge to the PSGoals entity.
-func (m *PlayerMutation) ClearPsgoals() {
-	m.clearedpsgoals = true
-}
-
-// PsgoalsCleared reports if the "psgoals" edge to the PSGoals entity was cleared.
-func (m *PlayerMutation) PsgoalsCleared() bool {
-	return m.clearedpsgoals
-}
-
-// RemovePsgoalIDs removes the "psgoals" edge to the PSGoals entity by IDs.
-func (m *PlayerMutation) RemovePsgoalIDs(ids ...int) {
-	if m.removedpsgoals == nil {
-		m.removedpsgoals = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.psgoals, ids[i])
-		m.removedpsgoals[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPsgoals returns the removed IDs of the "psgoals" edge to the PSGoals entity.
-func (m *PlayerMutation) RemovedPsgoalsIDs() (ids []int) {
-	for id := range m.removedpsgoals {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PsgoalsIDs returns the "psgoals" edge IDs in the mutation.
-func (m *PlayerMutation) PsgoalsIDs() (ids []int) {
-	for id := range m.psgoals {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPsgoals resets all changes to the "psgoals" edge.
-func (m *PlayerMutation) ResetPsgoals() {
-	m.psgoals = nil
-	m.clearedpsgoals = false
-	m.removedpsgoals = nil
-}
-
-// AddPsdefenseIDs adds the "psdefense" edge to the PSDefense entity by ids.
-func (m *PlayerMutation) AddPsdefenseIDs(ids ...int) {
-	if m.psdefense == nil {
-		m.psdefense = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.psdefense[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPsdefense clears the "psdefense" edge to the PSDefense entity.
-func (m *PlayerMutation) ClearPsdefense() {
-	m.clearedpsdefense = true
-}
-
-// PsdefenseCleared reports if the "psdefense" edge to the PSDefense entity was cleared.
-func (m *PlayerMutation) PsdefenseCleared() bool {
-	return m.clearedpsdefense
-}
-
-// RemovePsdefenseIDs removes the "psdefense" edge to the PSDefense entity by IDs.
-func (m *PlayerMutation) RemovePsdefenseIDs(ids ...int) {
-	if m.removedpsdefense == nil {
-		m.removedpsdefense = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.psdefense, ids[i])
-		m.removedpsdefense[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPsdefense returns the removed IDs of the "psdefense" edge to the PSDefense entity.
-func (m *PlayerMutation) RemovedPsdefenseIDs() (ids []int) {
-	for id := range m.removedpsdefense {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PsdefenseIDs returns the "psdefense" edge IDs in the mutation.
-func (m *PlayerMutation) PsdefenseIDs() (ids []int) {
-	for id := range m.psdefense {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPsdefense resets all changes to the "psdefense" edge.
-func (m *PlayerMutation) ResetPsdefense() {
-	m.psdefense = nil
-	m.clearedpsdefense = false
-	m.removedpsdefense = nil
-}
-
-// AddPsoffenseIDs adds the "psoffense" edge to the PSOffense entity by ids.
-func (m *PlayerMutation) AddPsoffenseIDs(ids ...int) {
-	if m.psoffense == nil {
-		m.psoffense = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.psoffense[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPsoffense clears the "psoffense" edge to the PSOffense entity.
-func (m *PlayerMutation) ClearPsoffense() {
-	m.clearedpsoffense = true
-}
-
-// PsoffenseCleared reports if the "psoffense" edge to the PSOffense entity was cleared.
-func (m *PlayerMutation) PsoffenseCleared() bool {
-	return m.clearedpsoffense
-}
-
-// RemovePsoffenseIDs removes the "psoffense" edge to the PSOffense entity by IDs.
-func (m *PlayerMutation) RemovePsoffenseIDs(ids ...int) {
-	if m.removedpsoffense == nil {
-		m.removedpsoffense = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.psoffense, ids[i])
-		m.removedpsoffense[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPsoffense returns the removed IDs of the "psoffense" edge to the PSOffense entity.
-func (m *PlayerMutation) RemovedPsoffenseIDs() (ids []int) {
-	for id := range m.removedpsoffense {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PsoffenseIDs returns the "psoffense" edge IDs in the mutation.
-func (m *PlayerMutation) PsoffenseIDs() (ids []int) {
-	for id := range m.psoffense {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPsoffense resets all changes to the "psoffense" edge.
-func (m *PlayerMutation) ResetPsoffense() {
-	m.psoffense = nil
-	m.clearedpsoffense = false
-	m.removedpsoffense = nil
-}
-
-// AddPspenaltyIDs adds the "pspenalty" edge to the PSPenalty entity by ids.
-func (m *PlayerMutation) AddPspenaltyIDs(ids ...int) {
-	if m.pspenalty == nil {
-		m.pspenalty = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.pspenalty[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPspenalty clears the "pspenalty" edge to the PSPenalty entity.
-func (m *PlayerMutation) ClearPspenalty() {
-	m.clearedpspenalty = true
-}
-
-// PspenaltyCleared reports if the "pspenalty" edge to the PSPenalty entity was cleared.
-func (m *PlayerMutation) PspenaltyCleared() bool {
-	return m.clearedpspenalty
-}
-
-// RemovePspenaltyIDs removes the "pspenalty" edge to the PSPenalty entity by IDs.
-func (m *PlayerMutation) RemovePspenaltyIDs(ids ...int) {
-	if m.removedpspenalty == nil {
-		m.removedpspenalty = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.pspenalty, ids[i])
-		m.removedpspenalty[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPspenalty returns the removed IDs of the "pspenalty" edge to the PSPenalty entity.
-func (m *PlayerMutation) RemovedPspenaltyIDs() (ids []int) {
-	for id := range m.removedpspenalty {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PspenaltyIDs returns the "pspenalty" edge IDs in the mutation.
-func (m *PlayerMutation) PspenaltyIDs() (ids []int) {
-	for id := range m.pspenalty {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPspenalty resets all changes to the "pspenalty" edge.
-func (m *PlayerMutation) ResetPspenalty() {
-	m.pspenalty = nil
-	m.clearedpspenalty = false
-	m.removedpspenalty = nil
-}
-
-// SetSeasonID sets the "season" edge to the Season entity by id.
-func (m *PlayerMutation) SetSeasonID(id int) {
-	m.season = &id
-}
-
-// ClearSeason clears the "season" edge to the Season entity.
-func (m *PlayerMutation) ClearSeason() {
-	m.clearedseason = true
-}
-
-// SeasonCleared reports if the "season" edge to the Season entity was cleared.
-func (m *PlayerMutation) SeasonCleared() bool {
-	return m.clearedseason
-}
-
-// SeasonID returns the "season" edge ID in the mutation.
-func (m *PlayerMutation) SeasonID() (id int, exists bool) {
-	if m.season != nil {
-		return *m.season, true
-	}
-	return
-}
-
-// SeasonIDs returns the "season" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// SeasonID instead. It exists only for internal usage by the builders.
-func (m *PlayerMutation) SeasonIDs() (ids []int) {
-	if id := m.season; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetSeason resets all changes to the "season" edge.
-func (m *PlayerMutation) ResetSeason() {
-	m.season = nil
-	m.clearedseason = false
-}
-
-// SetTeamID sets the "team" edge to the Team entity by id.
-func (m *PlayerMutation) SetTeamID(id int) {
-	m.team = &id
-}
-
-// ClearTeam clears the "team" edge to the Team entity.
-func (m *PlayerMutation) ClearTeam() {
-	m.clearedteam = true
-}
-
-// TeamCleared reports if the "team" edge to the Team entity was cleared.
-func (m *PlayerMutation) TeamCleared() bool {
-	return m.clearedteam
-}
-
-// TeamID returns the "team" edge ID in the mutation.
-func (m *PlayerMutation) TeamID() (id int, exists bool) {
-	if m.team != nil {
-		return *m.team, true
-	}
-	return
-}
-
-// TeamIDs returns the "team" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// TeamID instead. It exists only for internal usage by the builders.
-func (m *PlayerMutation) TeamIDs() (ids []int) {
-	if id := m.team; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetTeam resets all changes to the "team" edge.
-func (m *PlayerMutation) ResetTeam() {
-	m.team = nil
-	m.clearedteam = false
-}
-
-// SetClubID sets the "club" edge to the Club entity by id.
-func (m *PlayerMutation) SetClubID(id int) {
-	m.club = &id
-}
-
-// ClearClub clears the "club" edge to the Club entity.
-func (m *PlayerMutation) ClearClub() {
-	m.clearedclub = true
-}
-
-// ClubCleared reports if the "club" edge to the Club entity was cleared.
-func (m *PlayerMutation) ClubCleared() bool {
-	return m.clearedclub
-}
-
-// ClubID returns the "club" edge ID in the mutation.
-func (m *PlayerMutation) ClubID() (id int, exists bool) {
-	if m.club != nil {
-		return *m.club, true
-	}
-	return
-}
-
-// ClubIDs returns the "club" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// ClubID instead. It exists only for internal usage by the builders.
-func (m *PlayerMutation) ClubIDs() (ids []int) {
-	if id := m.club; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetClub resets all changes to the "club" edge.
-func (m *PlayerMutation) ResetClub() {
-	m.club = nil
-	m.clearedclub = false
-}
-
-// SetLeagueID sets the "league" edge to the League entity by id.
-func (m *PlayerMutation) SetLeagueID(id int) {
-	m.league = &id
-}
-
-// ClearLeague clears the "league" edge to the League entity.
-func (m *PlayerMutation) ClearLeague() {
-	m.clearedleague = true
-}
-
-// LeagueCleared reports if the "league" edge to the League entity was cleared.
-func (m *PlayerMutation) LeagueCleared() bool {
-	return m.clearedleague
-}
-
-// LeagueID returns the "league" edge ID in the mutation.
-func (m *PlayerMutation) LeagueID() (id int, exists bool) {
-	if m.league != nil {
-		return *m.league, true
-	}
-	return
-}
-
-// LeagueIDs returns the "league" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// LeagueID instead. It exists only for internal usage by the builders.
-func (m *PlayerMutation) LeagueIDs() (ids []int) {
-	if id := m.league; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetLeague resets all changes to the "league" edge.
-func (m *PlayerMutation) ResetLeague() {
-	m.league = nil
-	m.clearedleague = false
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PlayerMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+	m.removedplayerStats = nil
 }
 
 // Where appends a list predicates to the PlayerMutation builder.
@@ -14037,7 +13729,7 @@ func (m *PlayerMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PlayerMutation) AddedEdges() []string {
-	edges := make([]string, 0, 15)
+	edges := make([]string, 0, 7)
 	if m.birth != nil {
 		edges = append(edges, player.EdgeBirth)
 	}
@@ -14056,32 +13748,8 @@ func (m *PlayerMutation) AddedEdges() []string {
 	if m.assistEvents != nil {
 		edges = append(edges, player.EdgeAssistEvents)
 	}
-	if m.psgames != nil {
-		edges = append(edges, player.EdgePsgames)
-	}
-	if m.psgoals != nil {
-		edges = append(edges, player.EdgePsgoals)
-	}
-	if m.psdefense != nil {
-		edges = append(edges, player.EdgePsdefense)
-	}
-	if m.psoffense != nil {
-		edges = append(edges, player.EdgePsoffense)
-	}
-	if m.pspenalty != nil {
-		edges = append(edges, player.EdgePspenalty)
-	}
-	if m.season != nil {
-		edges = append(edges, player.EdgeSeason)
-	}
-	if m.team != nil {
-		edges = append(edges, player.EdgeTeam)
-	}
-	if m.club != nil {
-		edges = append(edges, player.EdgeClub)
-	}
-	if m.league != nil {
-		edges = append(edges, player.EdgeLeague)
+	if m.playerStats != nil {
+		edges = append(edges, player.EdgePlayerStats)
 	}
 	return edges
 }
@@ -14122,59 +13790,19 @@ func (m *PlayerMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case player.EdgePsgames:
-		ids := make([]ent.Value, 0, len(m.psgames))
-		for id := range m.psgames {
+	case player.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.playerStats))
+		for id := range m.playerStats {
 			ids = append(ids, id)
 		}
 		return ids
-	case player.EdgePsgoals:
-		ids := make([]ent.Value, 0, len(m.psgoals))
-		for id := range m.psgoals {
-			ids = append(ids, id)
-		}
-		return ids
-	case player.EdgePsdefense:
-		ids := make([]ent.Value, 0, len(m.psdefense))
-		for id := range m.psdefense {
-			ids = append(ids, id)
-		}
-		return ids
-	case player.EdgePsoffense:
-		ids := make([]ent.Value, 0, len(m.psoffense))
-		for id := range m.psoffense {
-			ids = append(ids, id)
-		}
-		return ids
-	case player.EdgePspenalty:
-		ids := make([]ent.Value, 0, len(m.pspenalty))
-		for id := range m.pspenalty {
-			ids = append(ids, id)
-		}
-		return ids
-	case player.EdgeSeason:
-		if id := m.season; id != nil {
-			return []ent.Value{*id}
-		}
-	case player.EdgeTeam:
-		if id := m.team; id != nil {
-			return []ent.Value{*id}
-		}
-	case player.EdgeClub:
-		if id := m.club; id != nil {
-			return []ent.Value{*id}
-		}
-	case player.EdgeLeague:
-		if id := m.league; id != nil {
-			return []ent.Value{*id}
-		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PlayerMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 15)
+	edges := make([]string, 0, 7)
 	if m.removedsquad != nil {
 		edges = append(edges, player.EdgeSquad)
 	}
@@ -14187,20 +13815,8 @@ func (m *PlayerMutation) RemovedEdges() []string {
 	if m.removedassistEvents != nil {
 		edges = append(edges, player.EdgeAssistEvents)
 	}
-	if m.removedpsgames != nil {
-		edges = append(edges, player.EdgePsgames)
-	}
-	if m.removedpsgoals != nil {
-		edges = append(edges, player.EdgePsgoals)
-	}
-	if m.removedpsdefense != nil {
-		edges = append(edges, player.EdgePsdefense)
-	}
-	if m.removedpsoffense != nil {
-		edges = append(edges, player.EdgePsoffense)
-	}
-	if m.removedpspenalty != nil {
-		edges = append(edges, player.EdgePspenalty)
+	if m.removedplayerStats != nil {
+		edges = append(edges, player.EdgePlayerStats)
 	}
 	return edges
 }
@@ -14233,33 +13849,9 @@ func (m *PlayerMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case player.EdgePsgames:
-		ids := make([]ent.Value, 0, len(m.removedpsgames))
-		for id := range m.removedpsgames {
-			ids = append(ids, id)
-		}
-		return ids
-	case player.EdgePsgoals:
-		ids := make([]ent.Value, 0, len(m.removedpsgoals))
-		for id := range m.removedpsgoals {
-			ids = append(ids, id)
-		}
-		return ids
-	case player.EdgePsdefense:
-		ids := make([]ent.Value, 0, len(m.removedpsdefense))
-		for id := range m.removedpsdefense {
-			ids = append(ids, id)
-		}
-		return ids
-	case player.EdgePsoffense:
-		ids := make([]ent.Value, 0, len(m.removedpsoffense))
-		for id := range m.removedpsoffense {
-			ids = append(ids, id)
-		}
-		return ids
-	case player.EdgePspenalty:
-		ids := make([]ent.Value, 0, len(m.removedpspenalty))
-		for id := range m.removedpspenalty {
+	case player.EdgePlayerStats:
+		ids := make([]ent.Value, 0, len(m.removedplayerStats))
+		for id := range m.removedplayerStats {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14269,7 +13861,7 @@ func (m *PlayerMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PlayerMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 15)
+	edges := make([]string, 0, 7)
 	if m.clearedbirth {
 		edges = append(edges, player.EdgeBirth)
 	}
@@ -14288,32 +13880,8 @@ func (m *PlayerMutation) ClearedEdges() []string {
 	if m.clearedassistEvents {
 		edges = append(edges, player.EdgeAssistEvents)
 	}
-	if m.clearedpsgames {
-		edges = append(edges, player.EdgePsgames)
-	}
-	if m.clearedpsgoals {
-		edges = append(edges, player.EdgePsgoals)
-	}
-	if m.clearedpsdefense {
-		edges = append(edges, player.EdgePsdefense)
-	}
-	if m.clearedpsoffense {
-		edges = append(edges, player.EdgePsoffense)
-	}
-	if m.clearedpspenalty {
-		edges = append(edges, player.EdgePspenalty)
-	}
-	if m.clearedseason {
-		edges = append(edges, player.EdgeSeason)
-	}
-	if m.clearedteam {
-		edges = append(edges, player.EdgeTeam)
-	}
-	if m.clearedclub {
-		edges = append(edges, player.EdgeClub)
-	}
-	if m.clearedleague {
-		edges = append(edges, player.EdgeLeague)
+	if m.clearedplayerStats {
+		edges = append(edges, player.EdgePlayerStats)
 	}
 	return edges
 }
@@ -14334,24 +13902,8 @@ func (m *PlayerMutation) EdgeCleared(name string) bool {
 		return m.clearedmatchPlayer
 	case player.EdgeAssistEvents:
 		return m.clearedassistEvents
-	case player.EdgePsgames:
-		return m.clearedpsgames
-	case player.EdgePsgoals:
-		return m.clearedpsgoals
-	case player.EdgePsdefense:
-		return m.clearedpsdefense
-	case player.EdgePsoffense:
-		return m.clearedpsoffense
-	case player.EdgePspenalty:
-		return m.clearedpspenalty
-	case player.EdgeSeason:
-		return m.clearedseason
-	case player.EdgeTeam:
-		return m.clearedteam
-	case player.EdgeClub:
-		return m.clearedclub
-	case player.EdgeLeague:
-		return m.clearedleague
+	case player.EdgePlayerStats:
+		return m.clearedplayerStats
 	}
 	return false
 }
@@ -14365,18 +13917,6 @@ func (m *PlayerMutation) ClearEdge(name string) error {
 		return nil
 	case player.EdgeNationality:
 		m.ClearNationality()
-		return nil
-	case player.EdgeSeason:
-		m.ClearSeason()
-		return nil
-	case player.EdgeTeam:
-		m.ClearTeam()
-		return nil
-	case player.EdgeClub:
-		m.ClearClub()
-		return nil
-	case player.EdgeLeague:
-		m.ClearLeague()
 		return nil
 	}
 	return fmt.Errorf("unknown Player unique edge %s", name)
@@ -14404,35 +13944,1229 @@ func (m *PlayerMutation) ResetEdge(name string) error {
 	case player.EdgeAssistEvents:
 		m.ResetAssistEvents()
 		return nil
-	case player.EdgePsgames:
-		m.ResetPsgames()
-		return nil
-	case player.EdgePsgoals:
-		m.ResetPsgoals()
-		return nil
-	case player.EdgePsdefense:
-		m.ResetPsdefense()
-		return nil
-	case player.EdgePsoffense:
-		m.ResetPsoffense()
-		return nil
-	case player.EdgePspenalty:
-		m.ResetPspenalty()
-		return nil
-	case player.EdgeSeason:
-		m.ResetSeason()
-		return nil
-	case player.EdgeTeam:
-		m.ResetTeam()
-		return nil
-	case player.EdgeClub:
-		m.ResetClub()
-		return nil
-	case player.EdgeLeague:
-		m.ResetLeague()
+	case player.EdgePlayerStats:
+		m.ResetPlayerStats()
 		return nil
 	}
 	return fmt.Errorf("unknown Player edge %s", name)
+}
+
+// PlayerStatsMutation represents an operation that mutates the PlayerStats nodes in the graph.
+type PlayerStatsMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int
+	slug                *string
+	lastUpdated         *time.Time
+	clearedFields       map[string]struct{}
+	player              *int
+	clearedplayer       bool
+	team                map[int]struct{}
+	removedteam         map[int]struct{}
+	clearedteam         bool
+	playerEvents        map[int]struct{}
+	removedplayerEvents map[int]struct{}
+	clearedplayerEvents bool
+	matchPlayer         map[int]struct{}
+	removedmatchPlayer  map[int]struct{}
+	clearedmatchPlayer  bool
+	assistEvents        map[int]struct{}
+	removedassistEvents map[int]struct{}
+	clearedassistEvents bool
+	psgames             map[int]struct{}
+	removedpsgames      map[int]struct{}
+	clearedpsgames      bool
+	psgoals             map[int]struct{}
+	removedpsgoals      map[int]struct{}
+	clearedpsgoals      bool
+	psdefense           map[int]struct{}
+	removedpsdefense    map[int]struct{}
+	clearedpsdefense    bool
+	psoffense           map[int]struct{}
+	removedpsoffense    map[int]struct{}
+	clearedpsoffense    bool
+	pspenalty           map[int]struct{}
+	removedpspenalty    map[int]struct{}
+	clearedpspenalty    bool
+	done                bool
+	oldValue            func(context.Context) (*PlayerStats, error)
+	predicates          []predicate.PlayerStats
+}
+
+var _ ent.Mutation = (*PlayerStatsMutation)(nil)
+
+// playerstatsOption allows management of the mutation configuration using functional options.
+type playerstatsOption func(*PlayerStatsMutation)
+
+// newPlayerStatsMutation creates new mutation for the PlayerStats entity.
+func newPlayerStatsMutation(c config, op Op, opts ...playerstatsOption) *PlayerStatsMutation {
+	m := &PlayerStatsMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePlayerStats,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPlayerStatsID sets the ID field of the mutation.
+func withPlayerStatsID(id int) playerstatsOption {
+	return func(m *PlayerStatsMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PlayerStats
+		)
+		m.oldValue = func(ctx context.Context) (*PlayerStats, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PlayerStats.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPlayerStats sets the old PlayerStats of the mutation.
+func withPlayerStats(node *PlayerStats) playerstatsOption {
+	return func(m *PlayerStatsMutation) {
+		m.oldValue = func(context.Context) (*PlayerStats, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PlayerStatsMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PlayerStatsMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PlayerStatsMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PlayerStatsMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PlayerStats.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetSlug sets the "slug" field.
+func (m *PlayerStatsMutation) SetSlug(s string) {
+	m.slug = &s
+}
+
+// Slug returns the value of the "slug" field in the mutation.
+func (m *PlayerStatsMutation) Slug() (r string, exists bool) {
+	v := m.slug
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSlug returns the old "slug" field's value of the PlayerStats entity.
+// If the PlayerStats object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlayerStatsMutation) OldSlug(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSlug requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
+	}
+	return oldValue.Slug, nil
+}
+
+// ResetSlug resets all changes to the "slug" field.
+func (m *PlayerStatsMutation) ResetSlug() {
+	m.slug = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PlayerStatsMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PlayerStatsMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the PlayerStats entity.
+// If the PlayerStats object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlayerStatsMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PlayerStatsMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[playerstats.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PlayerStatsMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[playerstats.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PlayerStatsMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, playerstats.FieldLastUpdated)
+}
+
+// SetPlayerID sets the "player" edge to the Player entity by id.
+func (m *PlayerStatsMutation) SetPlayerID(id int) {
+	m.player = &id
+}
+
+// ClearPlayer clears the "player" edge to the Player entity.
+func (m *PlayerStatsMutation) ClearPlayer() {
+	m.clearedplayer = true
+}
+
+// PlayerCleared reports if the "player" edge to the Player entity was cleared.
+func (m *PlayerStatsMutation) PlayerCleared() bool {
+	return m.clearedplayer
+}
+
+// PlayerID returns the "player" edge ID in the mutation.
+func (m *PlayerStatsMutation) PlayerID() (id int, exists bool) {
+	if m.player != nil {
+		return *m.player, true
+	}
+	return
+}
+
+// PlayerIDs returns the "player" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerID instead. It exists only for internal usage by the builders.
+func (m *PlayerStatsMutation) PlayerIDs() (ids []int) {
+	if id := m.player; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayer resets all changes to the "player" edge.
+func (m *PlayerStatsMutation) ResetPlayer() {
+	m.player = nil
+	m.clearedplayer = false
+}
+
+// AddTeamIDs adds the "team" edge to the Team entity by ids.
+func (m *PlayerStatsMutation) AddTeamIDs(ids ...int) {
+	if m.team == nil {
+		m.team = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.team[ids[i]] = struct{}{}
+	}
+}
+
+// ClearTeam clears the "team" edge to the Team entity.
+func (m *PlayerStatsMutation) ClearTeam() {
+	m.clearedteam = true
+}
+
+// TeamCleared reports if the "team" edge to the Team entity was cleared.
+func (m *PlayerStatsMutation) TeamCleared() bool {
+	return m.clearedteam
+}
+
+// RemoveTeamIDs removes the "team" edge to the Team entity by IDs.
+func (m *PlayerStatsMutation) RemoveTeamIDs(ids ...int) {
+	if m.removedteam == nil {
+		m.removedteam = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.team, ids[i])
+		m.removedteam[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedTeam returns the removed IDs of the "team" edge to the Team entity.
+func (m *PlayerStatsMutation) RemovedTeamIDs() (ids []int) {
+	for id := range m.removedteam {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// TeamIDs returns the "team" edge IDs in the mutation.
+func (m *PlayerStatsMutation) TeamIDs() (ids []int) {
+	for id := range m.team {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetTeam resets all changes to the "team" edge.
+func (m *PlayerStatsMutation) ResetTeam() {
+	m.team = nil
+	m.clearedteam = false
+	m.removedteam = nil
+}
+
+// AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by ids.
+func (m *PlayerStatsMutation) AddPlayerEventIDs(ids ...int) {
+	if m.playerEvents == nil {
+		m.playerEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.playerEvents[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPlayerEvents clears the "playerEvents" edge to the FixtureEvents entity.
+func (m *PlayerStatsMutation) ClearPlayerEvents() {
+	m.clearedplayerEvents = true
+}
+
+// PlayerEventsCleared reports if the "playerEvents" edge to the FixtureEvents entity was cleared.
+func (m *PlayerStatsMutation) PlayerEventsCleared() bool {
+	return m.clearedplayerEvents
+}
+
+// RemovePlayerEventIDs removes the "playerEvents" edge to the FixtureEvents entity by IDs.
+func (m *PlayerStatsMutation) RemovePlayerEventIDs(ids ...int) {
+	if m.removedplayerEvents == nil {
+		m.removedplayerEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.playerEvents, ids[i])
+		m.removedplayerEvents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPlayerEvents returns the removed IDs of the "playerEvents" edge to the FixtureEvents entity.
+func (m *PlayerStatsMutation) RemovedPlayerEventsIDs() (ids []int) {
+	for id := range m.removedplayerEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PlayerEventsIDs returns the "playerEvents" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PlayerEventsIDs() (ids []int) {
+	for id := range m.playerEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPlayerEvents resets all changes to the "playerEvents" edge.
+func (m *PlayerStatsMutation) ResetPlayerEvents() {
+	m.playerEvents = nil
+	m.clearedplayerEvents = false
+	m.removedplayerEvents = nil
+}
+
+// AddMatchPlayerIDs adds the "matchPlayer" edge to the MatchPlayer entity by ids.
+func (m *PlayerStatsMutation) AddMatchPlayerIDs(ids ...int) {
+	if m.matchPlayer == nil {
+		m.matchPlayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.matchPlayer[ids[i]] = struct{}{}
+	}
+}
+
+// ClearMatchPlayer clears the "matchPlayer" edge to the MatchPlayer entity.
+func (m *PlayerStatsMutation) ClearMatchPlayer() {
+	m.clearedmatchPlayer = true
+}
+
+// MatchPlayerCleared reports if the "matchPlayer" edge to the MatchPlayer entity was cleared.
+func (m *PlayerStatsMutation) MatchPlayerCleared() bool {
+	return m.clearedmatchPlayer
+}
+
+// RemoveMatchPlayerIDs removes the "matchPlayer" edge to the MatchPlayer entity by IDs.
+func (m *PlayerStatsMutation) RemoveMatchPlayerIDs(ids ...int) {
+	if m.removedmatchPlayer == nil {
+		m.removedmatchPlayer = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.matchPlayer, ids[i])
+		m.removedmatchPlayer[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedMatchPlayer returns the removed IDs of the "matchPlayer" edge to the MatchPlayer entity.
+func (m *PlayerStatsMutation) RemovedMatchPlayerIDs() (ids []int) {
+	for id := range m.removedmatchPlayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// MatchPlayerIDs returns the "matchPlayer" edge IDs in the mutation.
+func (m *PlayerStatsMutation) MatchPlayerIDs() (ids []int) {
+	for id := range m.matchPlayer {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetMatchPlayer resets all changes to the "matchPlayer" edge.
+func (m *PlayerStatsMutation) ResetMatchPlayer() {
+	m.matchPlayer = nil
+	m.clearedmatchPlayer = false
+	m.removedmatchPlayer = nil
+}
+
+// AddAssistEventIDs adds the "assistEvents" edge to the FixtureEvents entity by ids.
+func (m *PlayerStatsMutation) AddAssistEventIDs(ids ...int) {
+	if m.assistEvents == nil {
+		m.assistEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.assistEvents[ids[i]] = struct{}{}
+	}
+}
+
+// ClearAssistEvents clears the "assistEvents" edge to the FixtureEvents entity.
+func (m *PlayerStatsMutation) ClearAssistEvents() {
+	m.clearedassistEvents = true
+}
+
+// AssistEventsCleared reports if the "assistEvents" edge to the FixtureEvents entity was cleared.
+func (m *PlayerStatsMutation) AssistEventsCleared() bool {
+	return m.clearedassistEvents
+}
+
+// RemoveAssistEventIDs removes the "assistEvents" edge to the FixtureEvents entity by IDs.
+func (m *PlayerStatsMutation) RemoveAssistEventIDs(ids ...int) {
+	if m.removedassistEvents == nil {
+		m.removedassistEvents = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.assistEvents, ids[i])
+		m.removedassistEvents[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedAssistEvents returns the removed IDs of the "assistEvents" edge to the FixtureEvents entity.
+func (m *PlayerStatsMutation) RemovedAssistEventsIDs() (ids []int) {
+	for id := range m.removedassistEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// AssistEventsIDs returns the "assistEvents" edge IDs in the mutation.
+func (m *PlayerStatsMutation) AssistEventsIDs() (ids []int) {
+	for id := range m.assistEvents {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetAssistEvents resets all changes to the "assistEvents" edge.
+func (m *PlayerStatsMutation) ResetAssistEvents() {
+	m.assistEvents = nil
+	m.clearedassistEvents = false
+	m.removedassistEvents = nil
+}
+
+// AddPsgameIDs adds the "psgames" edge to the PSGames entity by ids.
+func (m *PlayerStatsMutation) AddPsgameIDs(ids ...int) {
+	if m.psgames == nil {
+		m.psgames = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.psgames[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPsgames clears the "psgames" edge to the PSGames entity.
+func (m *PlayerStatsMutation) ClearPsgames() {
+	m.clearedpsgames = true
+}
+
+// PsgamesCleared reports if the "psgames" edge to the PSGames entity was cleared.
+func (m *PlayerStatsMutation) PsgamesCleared() bool {
+	return m.clearedpsgames
+}
+
+// RemovePsgameIDs removes the "psgames" edge to the PSGames entity by IDs.
+func (m *PlayerStatsMutation) RemovePsgameIDs(ids ...int) {
+	if m.removedpsgames == nil {
+		m.removedpsgames = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.psgames, ids[i])
+		m.removedpsgames[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPsgames returns the removed IDs of the "psgames" edge to the PSGames entity.
+func (m *PlayerStatsMutation) RemovedPsgamesIDs() (ids []int) {
+	for id := range m.removedpsgames {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PsgamesIDs returns the "psgames" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsgamesIDs() (ids []int) {
+	for id := range m.psgames {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPsgames resets all changes to the "psgames" edge.
+func (m *PlayerStatsMutation) ResetPsgames() {
+	m.psgames = nil
+	m.clearedpsgames = false
+	m.removedpsgames = nil
+}
+
+// AddPsgoalIDs adds the "psgoals" edge to the PSGoals entity by ids.
+func (m *PlayerStatsMutation) AddPsgoalIDs(ids ...int) {
+	if m.psgoals == nil {
+		m.psgoals = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.psgoals[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPsgoals clears the "psgoals" edge to the PSGoals entity.
+func (m *PlayerStatsMutation) ClearPsgoals() {
+	m.clearedpsgoals = true
+}
+
+// PsgoalsCleared reports if the "psgoals" edge to the PSGoals entity was cleared.
+func (m *PlayerStatsMutation) PsgoalsCleared() bool {
+	return m.clearedpsgoals
+}
+
+// RemovePsgoalIDs removes the "psgoals" edge to the PSGoals entity by IDs.
+func (m *PlayerStatsMutation) RemovePsgoalIDs(ids ...int) {
+	if m.removedpsgoals == nil {
+		m.removedpsgoals = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.psgoals, ids[i])
+		m.removedpsgoals[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPsgoals returns the removed IDs of the "psgoals" edge to the PSGoals entity.
+func (m *PlayerStatsMutation) RemovedPsgoalsIDs() (ids []int) {
+	for id := range m.removedpsgoals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PsgoalsIDs returns the "psgoals" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsgoalsIDs() (ids []int) {
+	for id := range m.psgoals {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPsgoals resets all changes to the "psgoals" edge.
+func (m *PlayerStatsMutation) ResetPsgoals() {
+	m.psgoals = nil
+	m.clearedpsgoals = false
+	m.removedpsgoals = nil
+}
+
+// AddPsdefenseIDs adds the "psdefense" edge to the PSDefense entity by ids.
+func (m *PlayerStatsMutation) AddPsdefenseIDs(ids ...int) {
+	if m.psdefense == nil {
+		m.psdefense = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.psdefense[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPsdefense clears the "psdefense" edge to the PSDefense entity.
+func (m *PlayerStatsMutation) ClearPsdefense() {
+	m.clearedpsdefense = true
+}
+
+// PsdefenseCleared reports if the "psdefense" edge to the PSDefense entity was cleared.
+func (m *PlayerStatsMutation) PsdefenseCleared() bool {
+	return m.clearedpsdefense
+}
+
+// RemovePsdefenseIDs removes the "psdefense" edge to the PSDefense entity by IDs.
+func (m *PlayerStatsMutation) RemovePsdefenseIDs(ids ...int) {
+	if m.removedpsdefense == nil {
+		m.removedpsdefense = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.psdefense, ids[i])
+		m.removedpsdefense[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPsdefense returns the removed IDs of the "psdefense" edge to the PSDefense entity.
+func (m *PlayerStatsMutation) RemovedPsdefenseIDs() (ids []int) {
+	for id := range m.removedpsdefense {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PsdefenseIDs returns the "psdefense" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsdefenseIDs() (ids []int) {
+	for id := range m.psdefense {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPsdefense resets all changes to the "psdefense" edge.
+func (m *PlayerStatsMutation) ResetPsdefense() {
+	m.psdefense = nil
+	m.clearedpsdefense = false
+	m.removedpsdefense = nil
+}
+
+// AddPsoffenseIDs adds the "psoffense" edge to the PSOffense entity by ids.
+func (m *PlayerStatsMutation) AddPsoffenseIDs(ids ...int) {
+	if m.psoffense == nil {
+		m.psoffense = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.psoffense[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPsoffense clears the "psoffense" edge to the PSOffense entity.
+func (m *PlayerStatsMutation) ClearPsoffense() {
+	m.clearedpsoffense = true
+}
+
+// PsoffenseCleared reports if the "psoffense" edge to the PSOffense entity was cleared.
+func (m *PlayerStatsMutation) PsoffenseCleared() bool {
+	return m.clearedpsoffense
+}
+
+// RemovePsoffenseIDs removes the "psoffense" edge to the PSOffense entity by IDs.
+func (m *PlayerStatsMutation) RemovePsoffenseIDs(ids ...int) {
+	if m.removedpsoffense == nil {
+		m.removedpsoffense = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.psoffense, ids[i])
+		m.removedpsoffense[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPsoffense returns the removed IDs of the "psoffense" edge to the PSOffense entity.
+func (m *PlayerStatsMutation) RemovedPsoffenseIDs() (ids []int) {
+	for id := range m.removedpsoffense {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PsoffenseIDs returns the "psoffense" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsoffenseIDs() (ids []int) {
+	for id := range m.psoffense {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPsoffense resets all changes to the "psoffense" edge.
+func (m *PlayerStatsMutation) ResetPsoffense() {
+	m.psoffense = nil
+	m.clearedpsoffense = false
+	m.removedpsoffense = nil
+}
+
+// AddPspenaltyIDs adds the "pspenalty" edge to the PSPenalty entity by ids.
+func (m *PlayerStatsMutation) AddPspenaltyIDs(ids ...int) {
+	if m.pspenalty == nil {
+		m.pspenalty = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.pspenalty[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPspenalty clears the "pspenalty" edge to the PSPenalty entity.
+func (m *PlayerStatsMutation) ClearPspenalty() {
+	m.clearedpspenalty = true
+}
+
+// PspenaltyCleared reports if the "pspenalty" edge to the PSPenalty entity was cleared.
+func (m *PlayerStatsMutation) PspenaltyCleared() bool {
+	return m.clearedpspenalty
+}
+
+// RemovePspenaltyIDs removes the "pspenalty" edge to the PSPenalty entity by IDs.
+func (m *PlayerStatsMutation) RemovePspenaltyIDs(ids ...int) {
+	if m.removedpspenalty == nil {
+		m.removedpspenalty = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.pspenalty, ids[i])
+		m.removedpspenalty[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPspenalty returns the removed IDs of the "pspenalty" edge to the PSPenalty entity.
+func (m *PlayerStatsMutation) RemovedPspenaltyIDs() (ids []int) {
+	for id := range m.removedpspenalty {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PspenaltyIDs returns the "pspenalty" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PspenaltyIDs() (ids []int) {
+	for id := range m.pspenalty {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPspenalty resets all changes to the "pspenalty" edge.
+func (m *PlayerStatsMutation) ResetPspenalty() {
+	m.pspenalty = nil
+	m.clearedpspenalty = false
+	m.removedpspenalty = nil
+}
+
+// Where appends a list predicates to the PlayerStatsMutation builder.
+func (m *PlayerStatsMutation) Where(ps ...predicate.PlayerStats) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PlayerStatsMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PlayerStatsMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PlayerStats, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PlayerStatsMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PlayerStatsMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PlayerStats).
+func (m *PlayerStatsMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PlayerStatsMutation) Fields() []string {
+	fields := make([]string, 0, 2)
+	if m.slug != nil {
+		fields = append(fields, playerstats.FieldSlug)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, playerstats.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PlayerStatsMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case playerstats.FieldSlug:
+		return m.Slug()
+	case playerstats.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PlayerStatsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case playerstats.FieldSlug:
+		return m.OldSlug(ctx)
+	case playerstats.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown PlayerStats field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PlayerStatsMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case playerstats.FieldSlug:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSlug(v)
+		return nil
+	case playerstats.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PlayerStats field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PlayerStatsMutation) AddedFields() []string {
+	return nil
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PlayerStatsMutation) AddedField(name string) (ent.Value, bool) {
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PlayerStatsMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown PlayerStats numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PlayerStatsMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(playerstats.FieldLastUpdated) {
+		fields = append(fields, playerstats.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PlayerStatsMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PlayerStatsMutation) ClearField(name string) error {
+	switch name {
+	case playerstats.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PlayerStats nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PlayerStatsMutation) ResetField(name string) error {
+	switch name {
+	case playerstats.FieldSlug:
+		m.ResetSlug()
+		return nil
+	case playerstats.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PlayerStats field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PlayerStatsMutation) AddedEdges() []string {
+	edges := make([]string, 0, 10)
+	if m.player != nil {
+		edges = append(edges, playerstats.EdgePlayer)
+	}
+	if m.team != nil {
+		edges = append(edges, playerstats.EdgeTeam)
+	}
+	if m.playerEvents != nil {
+		edges = append(edges, playerstats.EdgePlayerEvents)
+	}
+	if m.matchPlayer != nil {
+		edges = append(edges, playerstats.EdgeMatchPlayer)
+	}
+	if m.assistEvents != nil {
+		edges = append(edges, playerstats.EdgeAssistEvents)
+	}
+	if m.psgames != nil {
+		edges = append(edges, playerstats.EdgePsgames)
+	}
+	if m.psgoals != nil {
+		edges = append(edges, playerstats.EdgePsgoals)
+	}
+	if m.psdefense != nil {
+		edges = append(edges, playerstats.EdgePsdefense)
+	}
+	if m.psoffense != nil {
+		edges = append(edges, playerstats.EdgePsoffense)
+	}
+	if m.pspenalty != nil {
+		edges = append(edges, playerstats.EdgePspenalty)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PlayerStatsMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case playerstats.EdgePlayer:
+		if id := m.player; id != nil {
+			return []ent.Value{*id}
+		}
+	case playerstats.EdgeTeam:
+		ids := make([]ent.Value, 0, len(m.team))
+		for id := range m.team {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePlayerEvents:
+		ids := make([]ent.Value, 0, len(m.playerEvents))
+		for id := range m.playerEvents {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgeMatchPlayer:
+		ids := make([]ent.Value, 0, len(m.matchPlayer))
+		for id := range m.matchPlayer {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgeAssistEvents:
+		ids := make([]ent.Value, 0, len(m.assistEvents))
+		for id := range m.assistEvents {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsgames:
+		ids := make([]ent.Value, 0, len(m.psgames))
+		for id := range m.psgames {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsgoals:
+		ids := make([]ent.Value, 0, len(m.psgoals))
+		for id := range m.psgoals {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsdefense:
+		ids := make([]ent.Value, 0, len(m.psdefense))
+		for id := range m.psdefense {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsoffense:
+		ids := make([]ent.Value, 0, len(m.psoffense))
+		for id := range m.psoffense {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePspenalty:
+		ids := make([]ent.Value, 0, len(m.pspenalty))
+		for id := range m.pspenalty {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PlayerStatsMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 10)
+	if m.removedteam != nil {
+		edges = append(edges, playerstats.EdgeTeam)
+	}
+	if m.removedplayerEvents != nil {
+		edges = append(edges, playerstats.EdgePlayerEvents)
+	}
+	if m.removedmatchPlayer != nil {
+		edges = append(edges, playerstats.EdgeMatchPlayer)
+	}
+	if m.removedassistEvents != nil {
+		edges = append(edges, playerstats.EdgeAssistEvents)
+	}
+	if m.removedpsgames != nil {
+		edges = append(edges, playerstats.EdgePsgames)
+	}
+	if m.removedpsgoals != nil {
+		edges = append(edges, playerstats.EdgePsgoals)
+	}
+	if m.removedpsdefense != nil {
+		edges = append(edges, playerstats.EdgePsdefense)
+	}
+	if m.removedpsoffense != nil {
+		edges = append(edges, playerstats.EdgePsoffense)
+	}
+	if m.removedpspenalty != nil {
+		edges = append(edges, playerstats.EdgePspenalty)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PlayerStatsMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case playerstats.EdgeTeam:
+		ids := make([]ent.Value, 0, len(m.removedteam))
+		for id := range m.removedteam {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePlayerEvents:
+		ids := make([]ent.Value, 0, len(m.removedplayerEvents))
+		for id := range m.removedplayerEvents {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgeMatchPlayer:
+		ids := make([]ent.Value, 0, len(m.removedmatchPlayer))
+		for id := range m.removedmatchPlayer {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgeAssistEvents:
+		ids := make([]ent.Value, 0, len(m.removedassistEvents))
+		for id := range m.removedassistEvents {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsgames:
+		ids := make([]ent.Value, 0, len(m.removedpsgames))
+		for id := range m.removedpsgames {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsgoals:
+		ids := make([]ent.Value, 0, len(m.removedpsgoals))
+		for id := range m.removedpsgoals {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsdefense:
+		ids := make([]ent.Value, 0, len(m.removedpsdefense))
+		for id := range m.removedpsdefense {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsoffense:
+		ids := make([]ent.Value, 0, len(m.removedpsoffense))
+		for id := range m.removedpsoffense {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePspenalty:
+		ids := make([]ent.Value, 0, len(m.removedpspenalty))
+		for id := range m.removedpspenalty {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PlayerStatsMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 10)
+	if m.clearedplayer {
+		edges = append(edges, playerstats.EdgePlayer)
+	}
+	if m.clearedteam {
+		edges = append(edges, playerstats.EdgeTeam)
+	}
+	if m.clearedplayerEvents {
+		edges = append(edges, playerstats.EdgePlayerEvents)
+	}
+	if m.clearedmatchPlayer {
+		edges = append(edges, playerstats.EdgeMatchPlayer)
+	}
+	if m.clearedassistEvents {
+		edges = append(edges, playerstats.EdgeAssistEvents)
+	}
+	if m.clearedpsgames {
+		edges = append(edges, playerstats.EdgePsgames)
+	}
+	if m.clearedpsgoals {
+		edges = append(edges, playerstats.EdgePsgoals)
+	}
+	if m.clearedpsdefense {
+		edges = append(edges, playerstats.EdgePsdefense)
+	}
+	if m.clearedpsoffense {
+		edges = append(edges, playerstats.EdgePsoffense)
+	}
+	if m.clearedpspenalty {
+		edges = append(edges, playerstats.EdgePspenalty)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PlayerStatsMutation) EdgeCleared(name string) bool {
+	switch name {
+	case playerstats.EdgePlayer:
+		return m.clearedplayer
+	case playerstats.EdgeTeam:
+		return m.clearedteam
+	case playerstats.EdgePlayerEvents:
+		return m.clearedplayerEvents
+	case playerstats.EdgeMatchPlayer:
+		return m.clearedmatchPlayer
+	case playerstats.EdgeAssistEvents:
+		return m.clearedassistEvents
+	case playerstats.EdgePsgames:
+		return m.clearedpsgames
+	case playerstats.EdgePsgoals:
+		return m.clearedpsgoals
+	case playerstats.EdgePsdefense:
+		return m.clearedpsdefense
+	case playerstats.EdgePsoffense:
+		return m.clearedpsoffense
+	case playerstats.EdgePspenalty:
+		return m.clearedpspenalty
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PlayerStatsMutation) ClearEdge(name string) error {
+	switch name {
+	case playerstats.EdgePlayer:
+		m.ClearPlayer()
+		return nil
+	}
+	return fmt.Errorf("unknown PlayerStats unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PlayerStatsMutation) ResetEdge(name string) error {
+	switch name {
+	case playerstats.EdgePlayer:
+		m.ResetPlayer()
+		return nil
+	case playerstats.EdgeTeam:
+		m.ResetTeam()
+		return nil
+	case playerstats.EdgePlayerEvents:
+		m.ResetPlayerEvents()
+		return nil
+	case playerstats.EdgeMatchPlayer:
+		m.ResetMatchPlayer()
+		return nil
+	case playerstats.EdgeAssistEvents:
+		m.ResetAssistEvents()
+		return nil
+	case playerstats.EdgePsgames:
+		m.ResetPsgames()
+		return nil
+	case playerstats.EdgePsgoals:
+		m.ResetPsgoals()
+		return nil
+	case playerstats.EdgePsdefense:
+		m.ResetPsdefense()
+		return nil
+	case playerstats.EdgePsoffense:
+		m.ResetPsoffense()
+		return nil
+	case playerstats.EdgePspenalty:
+		m.ResetPspenalty()
+		return nil
+	}
+	return fmt.Errorf("unknown PlayerStats edge %s", name)
 }
 
 // SeasonMutation represents an operation that mutates the Season nodes in the graph.
@@ -14460,9 +15194,6 @@ type SeasonMutation struct {
 	teams            map[int]struct{}
 	removedteams     map[int]struct{}
 	clearedteams     bool
-	player           map[int]struct{}
-	removedplayer    map[int]struct{}
-	clearedplayer    bool
 	squad            map[int]struct{}
 	removedsquad     map[int]struct{}
 	clearedsquad     bool
@@ -15019,60 +15750,6 @@ func (m *SeasonMutation) ResetTeams() {
 	m.removedteams = nil
 }
 
-// AddPlayerIDs adds the "player" edge to the Player entity by ids.
-func (m *SeasonMutation) AddPlayerIDs(ids ...int) {
-	if m.player == nil {
-		m.player = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.player[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPlayer clears the "player" edge to the Player entity.
-func (m *SeasonMutation) ClearPlayer() {
-	m.clearedplayer = true
-}
-
-// PlayerCleared reports if the "player" edge to the Player entity was cleared.
-func (m *SeasonMutation) PlayerCleared() bool {
-	return m.clearedplayer
-}
-
-// RemovePlayerIDs removes the "player" edge to the Player entity by IDs.
-func (m *SeasonMutation) RemovePlayerIDs(ids ...int) {
-	if m.removedplayer == nil {
-		m.removedplayer = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.player, ids[i])
-		m.removedplayer[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPlayer returns the removed IDs of the "player" edge to the Player entity.
-func (m *SeasonMutation) RemovedPlayerIDs() (ids []int) {
-	for id := range m.removedplayer {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PlayerIDs returns the "player" edge IDs in the mutation.
-func (m *SeasonMutation) PlayerIDs() (ids []int) {
-	for id := range m.player {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPlayer resets all changes to the "player" edge.
-func (m *SeasonMutation) ResetPlayer() {
-	m.player = nil
-	m.clearedplayer = false
-	m.removedplayer = nil
-}
-
 // AddSquadIDs adds the "squad" edge to the Squad entity by ids.
 func (m *SeasonMutation) AddSquadIDs(ids ...int) {
 	if m.squad == nil {
@@ -15369,7 +16046,7 @@ func (m *SeasonMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *SeasonMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.league != nil {
 		edges = append(edges, season.EdgeLeague)
 	}
@@ -15381,9 +16058,6 @@ func (m *SeasonMutation) AddedEdges() []string {
 	}
 	if m.teams != nil {
 		edges = append(edges, season.EdgeTeams)
-	}
-	if m.player != nil {
-		edges = append(edges, season.EdgePlayer)
 	}
 	if m.squad != nil {
 		edges = append(edges, season.EdgeSquad)
@@ -15417,12 +16091,6 @@ func (m *SeasonMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case season.EdgePlayer:
-		ids := make([]ent.Value, 0, len(m.player))
-		for id := range m.player {
-			ids = append(ids, id)
-		}
-		return ids
 	case season.EdgeSquad:
 		ids := make([]ent.Value, 0, len(m.squad))
 		for id := range m.squad {
@@ -15435,7 +16103,7 @@ func (m *SeasonMutation) AddedIDs(name string) []ent.Value {
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *SeasonMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.removedfixtures != nil {
 		edges = append(edges, season.EdgeFixtures)
 	}
@@ -15444,9 +16112,6 @@ func (m *SeasonMutation) RemovedEdges() []string {
 	}
 	if m.removedteams != nil {
 		edges = append(edges, season.EdgeTeams)
-	}
-	if m.removedplayer != nil {
-		edges = append(edges, season.EdgePlayer)
 	}
 	if m.removedsquad != nil {
 		edges = append(edges, season.EdgeSquad)
@@ -15476,12 +16141,6 @@ func (m *SeasonMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case season.EdgePlayer:
-		ids := make([]ent.Value, 0, len(m.removedplayer))
-		for id := range m.removedplayer {
-			ids = append(ids, id)
-		}
-		return ids
 	case season.EdgeSquad:
 		ids := make([]ent.Value, 0, len(m.removedsquad))
 		for id := range m.removedsquad {
@@ -15494,7 +16153,7 @@ func (m *SeasonMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *SeasonMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
+	edges := make([]string, 0, 5)
 	if m.clearedleague {
 		edges = append(edges, season.EdgeLeague)
 	}
@@ -15506,9 +16165,6 @@ func (m *SeasonMutation) ClearedEdges() []string {
 	}
 	if m.clearedteams {
 		edges = append(edges, season.EdgeTeams)
-	}
-	if m.clearedplayer {
-		edges = append(edges, season.EdgePlayer)
 	}
 	if m.clearedsquad {
 		edges = append(edges, season.EdgeSquad)
@@ -15528,8 +16184,6 @@ func (m *SeasonMutation) EdgeCleared(name string) bool {
 		return m.clearedstandings
 	case season.EdgeTeams:
 		return m.clearedteams
-	case season.EdgePlayer:
-		return m.clearedplayer
 	case season.EdgeSquad:
 		return m.clearedsquad
 	}
@@ -15562,9 +16216,6 @@ func (m *SeasonMutation) ResetEdge(name string) error {
 		return nil
 	case season.EdgeTeams:
 		m.ResetTeams()
-		return nil
-	case season.EdgePlayer:
-		m.ResetPlayer()
 		return nil
 	case season.EdgeSquad:
 		m.ResetSquad()
@@ -32602,6 +33253,8 @@ type TeamMutation struct {
 	clearedseason                bool
 	club                         *int
 	clearedclub                  bool
+	playerStats                  *int
+	clearedplayerStats           bool
 	standings                    map[int]struct{}
 	removedstandings             map[int]struct{}
 	clearedstandings             bool
@@ -32617,9 +33270,6 @@ type TeamMutation struct {
 	fixtureLineups               map[int]struct{}
 	removedfixtureLineups        map[int]struct{}
 	clearedfixtureLineups        bool
-	players                      map[int]struct{}
-	removedplayers               map[int]struct{}
-	clearedplayers               bool
 	squad                        map[int]struct{}
 	removedsquad                 map[int]struct{}
 	clearedsquad                 bool
@@ -32919,6 +33569,45 @@ func (m *TeamMutation) ResetClub() {
 	m.clearedclub = false
 }
 
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
+func (m *TeamMutation) SetPlayerStatsID(id int) {
+	m.playerStats = &id
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *TeamMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
+}
+
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *TeamMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
+}
+
+// PlayerStatsID returns the "playerStats" edge ID in the mutation.
+func (m *TeamMutation) PlayerStatsID() (id int, exists bool) {
+	if m.playerStats != nil {
+		return *m.playerStats, true
+	}
+	return
+}
+
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerStatsID instead. It exists only for internal usage by the builders.
+func (m *TeamMutation) PlayerStatsIDs() (ids []int) {
+	if id := m.playerStats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *TeamMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+}
+
 // AddStandingIDs adds the "standings" edge to the Standings entity by ids.
 func (m *TeamMutation) AddStandingIDs(ids ...int) {
 	if m.standings == nil {
@@ -33187,60 +33876,6 @@ func (m *TeamMutation) ResetFixtureLineups() {
 	m.fixtureLineups = nil
 	m.clearedfixtureLineups = false
 	m.removedfixtureLineups = nil
-}
-
-// AddPlayerIDs adds the "players" edge to the Player entity by ids.
-func (m *TeamMutation) AddPlayerIDs(ids ...int) {
-	if m.players == nil {
-		m.players = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.players[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPlayers clears the "players" edge to the Player entity.
-func (m *TeamMutation) ClearPlayers() {
-	m.clearedplayers = true
-}
-
-// PlayersCleared reports if the "players" edge to the Player entity was cleared.
-func (m *TeamMutation) PlayersCleared() bool {
-	return m.clearedplayers
-}
-
-// RemovePlayerIDs removes the "players" edge to the Player entity by IDs.
-func (m *TeamMutation) RemovePlayerIDs(ids ...int) {
-	if m.removedplayers == nil {
-		m.removedplayers = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.players, ids[i])
-		m.removedplayers[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPlayers returns the removed IDs of the "players" edge to the Player entity.
-func (m *TeamMutation) RemovedPlayersIDs() (ids []int) {
-	for id := range m.removedplayers {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PlayersIDs returns the "players" edge IDs in the mutation.
-func (m *TeamMutation) PlayersIDs() (ids []int) {
-	for id := range m.players {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPlayers resets all changes to the "players" edge.
-func (m *TeamMutation) ResetPlayers() {
-	m.players = nil
-	m.clearedplayers = false
-	m.removedplayers = nil
 }
 
 // AddSquadIDs adds the "squad" edge to the Squad entity by ids.
@@ -33796,6 +34431,9 @@ func (m *TeamMutation) AddedEdges() []string {
 	if m.club != nil {
 		edges = append(edges, team.EdgeClub)
 	}
+	if m.playerStats != nil {
+		edges = append(edges, team.EdgePlayerStats)
+	}
 	if m.standings != nil {
 		edges = append(edges, team.EdgeStandings)
 	}
@@ -33810,9 +34448,6 @@ func (m *TeamMutation) AddedEdges() []string {
 	}
 	if m.fixtureLineups != nil {
 		edges = append(edges, team.EdgeFixtureLineups)
-	}
-	if m.players != nil {
-		edges = append(edges, team.EdgePlayers)
 	}
 	if m.squad != nil {
 		edges = append(edges, team.EdgeSquad)
@@ -33856,6 +34491,10 @@ func (m *TeamMutation) AddedIDs(name string) []ent.Value {
 		if id := m.club; id != nil {
 			return []ent.Value{*id}
 		}
+	case team.EdgePlayerStats:
+		if id := m.playerStats; id != nil {
+			return []ent.Value{*id}
+		}
 	case team.EdgeStandings:
 		ids := make([]ent.Value, 0, len(m.standings))
 		for id := range m.standings {
@@ -33883,12 +34522,6 @@ func (m *TeamMutation) AddedIDs(name string) []ent.Value {
 	case team.EdgeFixtureLineups:
 		ids := make([]ent.Value, 0, len(m.fixtureLineups))
 		for id := range m.fixtureLineups {
-			ids = append(ids, id)
-		}
-		return ids
-	case team.EdgePlayers:
-		ids := make([]ent.Value, 0, len(m.players))
-		for id := range m.players {
 			ids = append(ids, id)
 		}
 		return ids
@@ -33954,9 +34587,6 @@ func (m *TeamMutation) RemovedEdges() []string {
 	if m.removedfixtureLineups != nil {
 		edges = append(edges, team.EdgeFixtureLineups)
 	}
-	if m.removedplayers != nil {
-		edges = append(edges, team.EdgePlayers)
-	}
 	if m.removedsquad != nil {
 		edges = append(edges, team.EdgeSquad)
 	}
@@ -34000,12 +34630,6 @@ func (m *TeamMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case team.EdgePlayers:
-		ids := make([]ent.Value, 0, len(m.removedplayers))
-		for id := range m.removedplayers {
-			ids = append(ids, id)
-		}
-		return ids
 	case team.EdgeSquad:
 		ids := make([]ent.Value, 0, len(m.removedsquad))
 		for id := range m.removedsquad {
@@ -34031,6 +34655,9 @@ func (m *TeamMutation) ClearedEdges() []string {
 	if m.clearedclub {
 		edges = append(edges, team.EdgeClub)
 	}
+	if m.clearedplayerStats {
+		edges = append(edges, team.EdgePlayerStats)
+	}
 	if m.clearedstandings {
 		edges = append(edges, team.EdgeStandings)
 	}
@@ -34045,9 +34672,6 @@ func (m *TeamMutation) ClearedEdges() []string {
 	}
 	if m.clearedfixtureLineups {
 		edges = append(edges, team.EdgeFixtureLineups)
-	}
-	if m.clearedplayers {
-		edges = append(edges, team.EdgePlayers)
 	}
 	if m.clearedsquad {
 		edges = append(edges, team.EdgeSquad)
@@ -34087,6 +34711,8 @@ func (m *TeamMutation) EdgeCleared(name string) bool {
 		return m.clearedseason
 	case team.EdgeClub:
 		return m.clearedclub
+	case team.EdgePlayerStats:
+		return m.clearedplayerStats
 	case team.EdgeStandings:
 		return m.clearedstandings
 	case team.EdgeHomeFixtures:
@@ -34097,8 +34723,6 @@ func (m *TeamMutation) EdgeCleared(name string) bool {
 		return m.clearedteamFixtureEvents
 	case team.EdgeFixtureLineups:
 		return m.clearedfixtureLineups
-	case team.EdgePlayers:
-		return m.clearedplayers
 	case team.EdgeSquad:
 		return m.clearedsquad
 	case team.EdgeBiggestStats:
@@ -34130,6 +34754,9 @@ func (m *TeamMutation) ClearEdge(name string) error {
 		return nil
 	case team.EdgeClub:
 		m.ClearClub()
+		return nil
+	case team.EdgePlayerStats:
+		m.ClearPlayerStats()
 		return nil
 	case team.EdgeBiggestStats:
 		m.ClearBiggestStats()
@@ -34166,6 +34793,9 @@ func (m *TeamMutation) ResetEdge(name string) error {
 	case team.EdgeClub:
 		m.ResetClub()
 		return nil
+	case team.EdgePlayerStats:
+		m.ResetPlayerStats()
+		return nil
 	case team.EdgeStandings:
 		m.ResetStandings()
 		return nil
@@ -34180,9 +34810,6 @@ func (m *TeamMutation) ResetEdge(name string) error {
 		return nil
 	case team.EdgeFixtureLineups:
 		m.ResetFixtureLineups()
-		return nil
-	case team.EdgePlayers:
-		m.ResetPlayers()
 		return nil
 	case team.EdgeSquad:
 		m.ResetSquad()

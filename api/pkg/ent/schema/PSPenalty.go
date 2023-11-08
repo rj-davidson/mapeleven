@@ -31,6 +31,6 @@ func (PSPenalty) Fields() []ent.Field {
 // Edges of the PSPenalty.
 func (PSPenalty) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("player", Player.Type).Ref("pspenalty").Unique(),
+		edge.From("playerStats", PlayerStats.Type).Ref("pspenalty"),
 	}
 }

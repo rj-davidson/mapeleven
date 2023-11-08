@@ -14,6 +14,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
@@ -147,6 +148,14 @@ func init() {
 	player.DefaultLastUpdated = playerDescLastUpdated.Default.(func() time.Time)
 	// player.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	player.UpdateDefaultLastUpdated = playerDescLastUpdated.UpdateDefault.(func() time.Time)
+	playerstatsFields := schema.PlayerStats{}.Fields()
+	_ = playerstatsFields
+	// playerstatsDescLastUpdated is the schema descriptor for lastUpdated field.
+	playerstatsDescLastUpdated := playerstatsFields[1].Descriptor()
+	// playerstats.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
+	playerstats.DefaultLastUpdated = playerstatsDescLastUpdated.Default.(func() time.Time)
+	// playerstats.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
+	playerstats.UpdateDefaultLastUpdated = playerstatsDescLastUpdated.UpdateDefault.(func() time.Time)
 	seasonFields := schema.Season{}.Fields()
 	_ = seasonFields
 	// seasonDescLastUpdated is the schema descriptor for lastUpdated field.

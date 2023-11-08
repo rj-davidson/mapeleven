@@ -169,7 +169,9 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 	if devRun {
 		// Add your development mode code here
+
 		fetchPlayerStats(playerModel, playerStatsModel)
+
 	}
 }
 

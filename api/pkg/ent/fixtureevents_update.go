@@ -11,6 +11,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql"
@@ -167,6 +168,25 @@ func (feu *FixtureEventsUpdate) SetFixture(f *Fixture) *FixtureEventsUpdate {
 	return feu.SetFixtureID(f.ID)
 }
 
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (feu *FixtureEventsUpdate) SetPlayerStatsID(id int) *FixtureEventsUpdate {
+	feu.mutation.SetPlayerStatsID(id)
+	return feu
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (feu *FixtureEventsUpdate) SetNillablePlayerStatsID(id *int) *FixtureEventsUpdate {
+	if id != nil {
+		feu = feu.SetPlayerStatsID(*id)
+	}
+	return feu
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (feu *FixtureEventsUpdate) SetPlayerStats(p *PlayerStats) *FixtureEventsUpdate {
+	return feu.SetPlayerStatsID(p.ID)
+}
+
 // Mutation returns the FixtureEventsMutation object of the builder.
 func (feu *FixtureEventsUpdate) Mutation() *FixtureEventsMutation {
 	return feu.mutation
@@ -193,6 +213,12 @@ func (feu *FixtureEventsUpdate) ClearTeam() *FixtureEventsUpdate {
 // ClearFixture clears the "fixture" edge to the Fixture entity.
 func (feu *FixtureEventsUpdate) ClearFixture() *FixtureEventsUpdate {
 	feu.mutation.ClearFixture()
+	return feu
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (feu *FixtureEventsUpdate) ClearPlayerStats() *FixtureEventsUpdate {
+	feu.mutation.ClearPlayerStats()
 	return feu
 }
 
@@ -407,6 +433,35 @@ func (feu *FixtureEventsUpdate) sqlSave(ctx context.Context) (n int, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if feu.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.PlayerStatsTable,
+			Columns: []string{fixtureevents.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := feu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.PlayerStatsTable,
+			Columns: []string{fixtureevents.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, feu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{fixtureevents.Label}
@@ -563,6 +618,25 @@ func (feuo *FixtureEventsUpdateOne) SetFixture(f *Fixture) *FixtureEventsUpdateO
 	return feuo.SetFixtureID(f.ID)
 }
 
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (feuo *FixtureEventsUpdateOne) SetPlayerStatsID(id int) *FixtureEventsUpdateOne {
+	feuo.mutation.SetPlayerStatsID(id)
+	return feuo
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (feuo *FixtureEventsUpdateOne) SetNillablePlayerStatsID(id *int) *FixtureEventsUpdateOne {
+	if id != nil {
+		feuo = feuo.SetPlayerStatsID(*id)
+	}
+	return feuo
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (feuo *FixtureEventsUpdateOne) SetPlayerStats(p *PlayerStats) *FixtureEventsUpdateOne {
+	return feuo.SetPlayerStatsID(p.ID)
+}
+
 // Mutation returns the FixtureEventsMutation object of the builder.
 func (feuo *FixtureEventsUpdateOne) Mutation() *FixtureEventsMutation {
 	return feuo.mutation
@@ -589,6 +663,12 @@ func (feuo *FixtureEventsUpdateOne) ClearTeam() *FixtureEventsUpdateOne {
 // ClearFixture clears the "fixture" edge to the Fixture entity.
 func (feuo *FixtureEventsUpdateOne) ClearFixture() *FixtureEventsUpdateOne {
 	feuo.mutation.ClearFixture()
+	return feuo
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (feuo *FixtureEventsUpdateOne) ClearPlayerStats() *FixtureEventsUpdateOne {
+	feuo.mutation.ClearPlayerStats()
 	return feuo
 }
 
@@ -826,6 +906,35 @@ func (feuo *FixtureEventsUpdateOne) sqlSave(ctx context.Context) (_node *Fixture
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixture.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if feuo.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.PlayerStatsTable,
+			Columns: []string{fixtureevents.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := feuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.PlayerStatsTable,
+			Columns: []string{fixtureevents.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

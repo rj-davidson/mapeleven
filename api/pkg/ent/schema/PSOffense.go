@@ -28,6 +28,6 @@ func (PSOffense) Fields() []ent.Field {
 // Edges of the PSOffense.
 func (PSOffense) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("player", Player.Type).Ref("psoffense").Unique(),
+		edge.From("playerStats", PlayerStats.Type).Ref("psoffense"),
 	}
 }

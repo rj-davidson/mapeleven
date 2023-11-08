@@ -25,6 +25,6 @@ func (PSDefense) Fields() []ent.Field {
 // Edges of the PSDefense.
 func (PSDefense) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("player", Player.Type).Ref("psdefense").Unique(),
+		edge.From("playerStats", PlayerStats.Type).Ref("psdefense"),
 	}
 }

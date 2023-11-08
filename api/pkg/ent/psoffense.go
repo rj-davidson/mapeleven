@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -31,31 +30,26 @@ type PSOffense struct {
 	PassesAccuracy int `json:"passesAccuracy,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSOffenseQuery when eager-loading is set.
-	Edges            PSOffenseEdges `json:"edges"`
-	player_psoffense *int
-	selectValues     sql.SelectValues
+	Edges        PSOffenseEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PSOffenseEdges holds the relations/edges for other nodes in the graph.
 type PSOffenseEdges struct {
-	// Player holds the value of the player edge.
-	Player *Player `json:"player,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PlayerOrErr returns the Player value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PSOffenseEdges) PlayerOrErr() (*Player, error) {
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
+// was not loaded in eager-loading.
+func (e PSOffenseEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
 	if e.loadedTypes[0] {
-		if e.Player == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: player.Label}
-		}
-		return e.Player, nil
+		return e.PlayerStats, nil
 	}
-	return nil, &NotLoadedError{edge: "player"}
+	return nil, &NotLoadedError{edge: "playerStats"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -64,8 +58,6 @@ func (*PSOffense) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case psoffense.FieldID, psoffense.FieldDribbleAttempts, psoffense.FieldDribbleSuccess, psoffense.FieldDribblePast, psoffense.FieldPassesTotal, psoffense.FieldPassesKey, psoffense.FieldPassesAccuracy:
-			values[i] = new(sql.NullInt64)
-		case psoffense.ForeignKeys[0]: // player_psoffense
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -124,13 +116,6 @@ func (po *PSOffense) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				po.PassesAccuracy = int(value.Int64)
 			}
-		case psoffense.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_psoffense", value)
-			} else if value.Valid {
-				po.player_psoffense = new(int)
-				*po.player_psoffense = int(value.Int64)
-			}
 		default:
 			po.selectValues.Set(columns[i], values[i])
 		}
@@ -144,9 +129,9 @@ func (po *PSOffense) Value(name string) (ent.Value, error) {
 	return po.selectValues.Get(name)
 }
 
-// QueryPlayer queries the "player" edge of the PSOffense entity.
-func (po *PSOffense) QueryPlayer() *PlayerQuery {
-	return NewPSOffenseClient(po.config).QueryPlayer(po)
+// QueryPlayerStats queries the "playerStats" edge of the PSOffense entity.
+func (po *PSOffense) QueryPlayerStats() *PlayerStatsQuery {
+	return NewPSOffenseClient(po.config).QueryPlayerStats(po)
 }
 
 // Update returns a builder for updating this PSOffense.

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -39,31 +38,26 @@ type PSPenalty struct {
 	PenaltySaved int `json:"penaltySaved,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSPenaltyQuery when eager-loading is set.
-	Edges            PSPenaltyEdges `json:"edges"`
-	player_pspenalty *int
-	selectValues     sql.SelectValues
+	Edges        PSPenaltyEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PSPenaltyEdges holds the relations/edges for other nodes in the graph.
 type PSPenaltyEdges struct {
-	// Player holds the value of the player edge.
-	Player *Player `json:"player,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PlayerOrErr returns the Player value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PSPenaltyEdges) PlayerOrErr() (*Player, error) {
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
+// was not loaded in eager-loading.
+func (e PSPenaltyEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
 	if e.loadedTypes[0] {
-		if e.Player == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: player.Label}
-		}
-		return e.Player, nil
+		return e.PlayerStats, nil
 	}
-	return nil, &NotLoadedError{edge: "player"}
+	return nil, &NotLoadedError{edge: "playerStats"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -72,8 +66,6 @@ func (*PSPenalty) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case pspenalty.FieldID, pspenalty.FieldFoulsDrawn, pspenalty.FieldFoulsCommitted, pspenalty.FieldCardsYellow, pspenalty.FieldCardYellowred, pspenalty.FieldCardsRed, pspenalty.FieldPenaltyWon, pspenalty.FieldPenaltyCommited, pspenalty.FieldPenaltyScored, pspenalty.FieldPenaltyMissed, pspenalty.FieldPenaltySaved:
-			values[i] = new(sql.NullInt64)
-		case pspenalty.ForeignKeys[0]: // player_pspenalty
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -156,13 +148,6 @@ func (pp *PSPenalty) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pp.PenaltySaved = int(value.Int64)
 			}
-		case pspenalty.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_pspenalty", value)
-			} else if value.Valid {
-				pp.player_pspenalty = new(int)
-				*pp.player_pspenalty = int(value.Int64)
-			}
 		default:
 			pp.selectValues.Set(columns[i], values[i])
 		}
@@ -176,9 +161,9 @@ func (pp *PSPenalty) Value(name string) (ent.Value, error) {
 	return pp.selectValues.Get(name)
 }
 
-// QueryPlayer queries the "player" edge of the PSPenalty entity.
-func (pp *PSPenalty) QueryPlayer() *PlayerQuery {
-	return NewPSPenaltyClient(pp.config).QueryPlayer(pp)
+// QueryPlayerStats queries the "playerStats" edge of the PSPenalty entity.
+func (pp *PSPenalty) QueryPlayerStats() *PlayerStatsQuery {
+	return NewPSPenaltyClient(pp.config).QueryPlayerStats(pp)
 }
 
 // Update returns a builder for updating this PSPenalty.

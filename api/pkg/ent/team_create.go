@@ -12,7 +12,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixturelineups"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
@@ -94,6 +94,25 @@ func (tc *TeamCreate) SetClub(c *Club) *TeamCreate {
 	return tc.SetClubID(c.ID)
 }
 
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (tc *TeamCreate) SetPlayerStatsID(id int) *TeamCreate {
+	tc.mutation.SetPlayerStatsID(id)
+	return tc
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (tc *TeamCreate) SetNillablePlayerStatsID(id *int) *TeamCreate {
+	if id != nil {
+		tc = tc.SetPlayerStatsID(*id)
+	}
+	return tc
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (tc *TeamCreate) SetPlayerStats(p *PlayerStats) *TeamCreate {
+	return tc.SetPlayerStatsID(p.ID)
+}
+
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
 func (tc *TeamCreate) AddStandingIDs(ids ...int) *TeamCreate {
 	tc.mutation.AddStandingIDs(ids...)
@@ -167,21 +186,6 @@ func (tc *TeamCreate) AddFixtureLineups(f ...*FixtureLineups) *TeamCreate {
 		ids[i] = f[i].ID
 	}
 	return tc.AddFixtureLineupIDs(ids...)
-}
-
-// AddPlayerIDs adds the "players" edge to the Player entity by IDs.
-func (tc *TeamCreate) AddPlayerIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddPlayerIDs(ids...)
-	return tc
-}
-
-// AddPlayers adds the "players" edges to the Player entity.
-func (tc *TeamCreate) AddPlayers(p ...*Player) *TeamCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tc.AddPlayerIDs(ids...)
 }
 
 // AddSquadIDs adds the "squad" edge to the Squad entity by IDs.
@@ -461,6 +465,23 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 		_node.club_team = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := tc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   team.PlayerStatsTable,
+			Columns: []string{team.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.player_stats_team = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := tc.mutation.StandingsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -534,22 +555,6 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.PlayersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.PlayersTable,
-			Columns: []string{team.PlayersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

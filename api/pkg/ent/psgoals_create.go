@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -64,23 +64,19 @@ func (pgc *PSGoalsCreate) SetShotsOn(i int) *PSGoalsCreate {
 	return pgc
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (pgc *PSGoalsCreate) SetPlayerID(id int) *PSGoalsCreate {
-	pgc.mutation.SetPlayerID(id)
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (pgc *PSGoalsCreate) AddPlayerStatIDs(ids ...int) *PSGoalsCreate {
+	pgc.mutation.AddPlayerStatIDs(ids...)
 	return pgc
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (pgc *PSGoalsCreate) SetNillablePlayerID(id *int) *PSGoalsCreate {
-	if id != nil {
-		pgc = pgc.SetPlayerID(*id)
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (pgc *PSGoalsCreate) AddPlayerStats(p ...*PlayerStats) *PSGoalsCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return pgc
-}
-
-// SetPlayer sets the "player" edge to the Player entity.
-func (pgc *PSGoalsCreate) SetPlayer(p *Player) *PSGoalsCreate {
-	return pgc.SetPlayerID(p.ID)
+	return pgc.AddPlayerStatIDs(ids...)
 }
 
 // Mutation returns the PSGoalsMutation object of the builder.
@@ -194,21 +190,20 @@ func (pgc *PSGoalsCreate) createSpec() (*PSGoals, *sqlgraph.CreateSpec) {
 		_spec.SetField(psgoals.FieldShotsOn, field.TypeInt, value)
 		_node.ShotsOn = value
 	}
-	if nodes := pgc.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := pgc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   psgoals.PlayerTable,
-			Columns: []string{psgoals.PlayerColumn},
+			Table:   psgoals.PlayerStatsTable,
+			Columns: psgoals.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.player_psgoals = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

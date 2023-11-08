@@ -27,6 +27,6 @@ func (PSGoals) Fields() []ent.Field {
 // Edges of the PSGoals.
 func (PSGoals) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("player", Player.Type).Ref("psgoals").Unique(),
+		edge.From("playerStats", PlayerStats.Type).Ref("psgoals"),
 	}
 }

@@ -26,17 +26,15 @@ const (
 	FieldRating = "rating"
 	// FieldCaptain holds the string denoting the captain field in the database.
 	FieldCaptain = "captain"
-	// EdgePlayer holds the string denoting the player edge name in mutations.
-	EdgePlayer = "player"
+	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
+	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the psgames in the database.
 	Table = "ps_games"
-	// PlayerTable is the table that holds the player relation/edge.
-	PlayerTable = "ps_games"
-	// PlayerInverseTable is the table name for the Player entity.
-	// It exists in this package in order to avoid circular dependency with the "player" package.
-	PlayerInverseTable = "players"
-	// PlayerColumn is the table column denoting the player relation/edge.
-	PlayerColumn = "player_psgames"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge. The primary key declared below.
+	PlayerStatsTable = "player_stats_psgames"
+	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
+	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
+	PlayerStatsInverseTable = "player_stats"
 )
 
 // Columns holds all SQL columns for psgames fields.
@@ -51,21 +49,16 @@ var Columns = []string{
 	FieldCaptain,
 }
 
-// ForeignKeys holds the SQL foreign-keys that are owned by the "ps_games"
-// table and are not defined as standalone fields in the schema.
-var ForeignKeys = []string{
-	"player_psgames",
-}
+var (
+	// PlayerStatsPrimaryKey and PlayerStatsColumn2 are the table columns denoting the
+	// primary key for the playerStats relation (M2M).
+	PlayerStatsPrimaryKey = []string{"player_stats_id", "ps_games_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
-			return true
-		}
-	}
-	for i := range ForeignKeys {
-		if column == ForeignKeys[i] {
 			return true
 		}
 	}
@@ -115,16 +108,23 @@ func ByCaptain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCaptain, opts...).ToFunc()
 }
 
-// ByPlayerField orders the results by player field.
-func ByPlayerField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByPlayerStatsCount orders the results by playerStats count.
+func ByPlayerStatsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newPlayerStatsStep(), opts...)
 	}
 }
-func newPlayerStep() *sqlgraph.Step {
+
+// ByPlayerStats orders the results by playerStats terms.
+func ByPlayerStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+func newPlayerStatsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlayerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, PlayerTable, PlayerColumn),
+		sqlgraph.To(PlayerStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
 	)
 }

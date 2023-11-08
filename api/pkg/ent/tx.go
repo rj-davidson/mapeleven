@@ -42,6 +42,8 @@ type Tx struct {
 	PSPenalty *PSPenaltyClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
+	// PlayerStats is the client for interacting with the PlayerStats builders.
+	PlayerStats *PlayerStatsClient
 	// Season is the client for interacting with the Season builders.
 	Season *SeasonClient
 	// Squad is the client for interacting with the Squad builders.
@@ -212,6 +214,7 @@ func (tx *Tx) init() {
 	tx.PSOffense = NewPSOffenseClient(tx.config)
 	tx.PSPenalty = NewPSPenaltyClient(tx.config)
 	tx.Player = NewPlayerClient(tx.config)
+	tx.PlayerStats = NewPlayerStatsClient(tx.config)
 	tx.Season = NewSeasonClient(tx.config)
 	tx.Squad = NewSquadClient(tx.config)
 	tx.Standings = NewStandingsClient(tx.config)

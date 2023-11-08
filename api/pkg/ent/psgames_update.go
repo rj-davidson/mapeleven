@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	"entgo.io/ent/dialect/sql"
@@ -98,23 +98,19 @@ func (pgu *PSGamesUpdate) SetCaptain(b bool) *PSGamesUpdate {
 	return pgu
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (pgu *PSGamesUpdate) SetPlayerID(id int) *PSGamesUpdate {
-	pgu.mutation.SetPlayerID(id)
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (pgu *PSGamesUpdate) AddPlayerStatIDs(ids ...int) *PSGamesUpdate {
+	pgu.mutation.AddPlayerStatIDs(ids...)
 	return pgu
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (pgu *PSGamesUpdate) SetNillablePlayerID(id *int) *PSGamesUpdate {
-	if id != nil {
-		pgu = pgu.SetPlayerID(*id)
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (pgu *PSGamesUpdate) AddPlayerStats(p ...*PlayerStats) *PSGamesUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return pgu
-}
-
-// SetPlayer sets the "player" edge to the Player entity.
-func (pgu *PSGamesUpdate) SetPlayer(p *Player) *PSGamesUpdate {
-	return pgu.SetPlayerID(p.ID)
+	return pgu.AddPlayerStatIDs(ids...)
 }
 
 // Mutation returns the PSGamesMutation object of the builder.
@@ -122,10 +118,25 @@ func (pgu *PSGamesUpdate) Mutation() *PSGamesMutation {
 	return pgu.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (pgu *PSGamesUpdate) ClearPlayer() *PSGamesUpdate {
-	pgu.mutation.ClearPlayer()
+// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+func (pgu *PSGamesUpdate) ClearPlayerStats() *PSGamesUpdate {
+	pgu.mutation.ClearPlayerStats()
 	return pgu
+}
+
+// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
+func (pgu *PSGamesUpdate) RemovePlayerStatIDs(ids ...int) *PSGamesUpdate {
+	pgu.mutation.RemovePlayerStatIDs(ids...)
+	return pgu
+}
+
+// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
+func (pgu *PSGamesUpdate) RemovePlayerStats(p ...*PlayerStats) *PSGamesUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pgu.RemovePlayerStatIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -197,28 +208,44 @@ func (pgu *PSGamesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pgu.mutation.Captain(); ok {
 		_spec.SetField(psgames.FieldCaptain, field.TypeBool, value)
 	}
-	if pgu.mutation.PlayerCleared() {
+	if pgu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: psgames.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pgu.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := pgu.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !pgu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: psgames.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pgu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   psgames.PlayerStatsTable,
+			Columns: psgames.PlayerStatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -316,23 +343,19 @@ func (pguo *PSGamesUpdateOne) SetCaptain(b bool) *PSGamesUpdateOne {
 	return pguo
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (pguo *PSGamesUpdateOne) SetPlayerID(id int) *PSGamesUpdateOne {
-	pguo.mutation.SetPlayerID(id)
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (pguo *PSGamesUpdateOne) AddPlayerStatIDs(ids ...int) *PSGamesUpdateOne {
+	pguo.mutation.AddPlayerStatIDs(ids...)
 	return pguo
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (pguo *PSGamesUpdateOne) SetNillablePlayerID(id *int) *PSGamesUpdateOne {
-	if id != nil {
-		pguo = pguo.SetPlayerID(*id)
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (pguo *PSGamesUpdateOne) AddPlayerStats(p ...*PlayerStats) *PSGamesUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return pguo
-}
-
-// SetPlayer sets the "player" edge to the Player entity.
-func (pguo *PSGamesUpdateOne) SetPlayer(p *Player) *PSGamesUpdateOne {
-	return pguo.SetPlayerID(p.ID)
+	return pguo.AddPlayerStatIDs(ids...)
 }
 
 // Mutation returns the PSGamesMutation object of the builder.
@@ -340,10 +363,25 @@ func (pguo *PSGamesUpdateOne) Mutation() *PSGamesMutation {
 	return pguo.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (pguo *PSGamesUpdateOne) ClearPlayer() *PSGamesUpdateOne {
-	pguo.mutation.ClearPlayer()
+// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+func (pguo *PSGamesUpdateOne) ClearPlayerStats() *PSGamesUpdateOne {
+	pguo.mutation.ClearPlayerStats()
 	return pguo
+}
+
+// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
+func (pguo *PSGamesUpdateOne) RemovePlayerStatIDs(ids ...int) *PSGamesUpdateOne {
+	pguo.mutation.RemovePlayerStatIDs(ids...)
+	return pguo
+}
+
+// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
+func (pguo *PSGamesUpdateOne) RemovePlayerStats(p ...*PlayerStats) *PSGamesUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pguo.RemovePlayerStatIDs(ids...)
 }
 
 // Where appends a list predicates to the PSGamesUpdate builder.
@@ -445,28 +483,44 @@ func (pguo *PSGamesUpdateOne) sqlSave(ctx context.Context) (_node *PSGames, err 
 	if value, ok := pguo.mutation.Captain(); ok {
 		_spec.SetField(psgames.FieldCaptain, field.TypeBool, value)
 	}
-	if pguo.mutation.PlayerCleared() {
+	if pguo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: psgames.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pguo.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := pguo.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !pguo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: psgames.PlayerStatsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pguo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   psgames.PlayerStatsTable,
+			Columns: psgames.PlayerStatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

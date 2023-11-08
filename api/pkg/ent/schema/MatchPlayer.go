@@ -38,5 +38,8 @@ func (MatchPlayer) Edges() []ent.Edge {
 			Ref("lineupPlayer").
 			Unique().
 			Required(),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("matchPlayer").
+			Unique(),
 	}
 }

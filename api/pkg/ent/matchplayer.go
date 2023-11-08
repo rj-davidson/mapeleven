@@ -10,6 +10,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixturelineups"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
@@ -34,6 +35,7 @@ type MatchPlayer struct {
 	Edges                         MatchPlayerEdges `json:"edges"`
 	fixture_lineups_lineup_player *int
 	player_match_player           *int
+	player_stats_match_player     *int
 	selectValues                  sql.SelectValues
 }
 
@@ -43,9 +45,11 @@ type MatchPlayerEdges struct {
 	Player *Player `json:"player,omitempty"`
 	// Lineup holds the value of the lineup edge.
 	Lineup *FixtureLineups `json:"lineup,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats *PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // PlayerOrErr returns the Player value or an error if the edge
@@ -74,6 +78,19 @@ func (e MatchPlayerEdges) LineupOrErr() (*FixtureLineups, error) {
 	return nil, &NotLoadedError{edge: "lineup"}
 }
 
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e MatchPlayerEdges) PlayerStatsOrErr() (*PlayerStats, error) {
+	if e.loadedTypes[2] {
+		if e.PlayerStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: playerstats.Label}
+		}
+		return e.PlayerStats, nil
+	}
+	return nil, &NotLoadedError{edge: "playerStats"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*MatchPlayer) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -88,6 +105,8 @@ func (*MatchPlayer) scanValues(columns []string) ([]any, error) {
 		case matchplayer.ForeignKeys[0]: // fixture_lineups_lineup_player
 			values[i] = new(sql.NullInt64)
 		case matchplayer.ForeignKeys[1]: // player_match_player
+			values[i] = new(sql.NullInt64)
+		case matchplayer.ForeignKeys[2]: // player_stats_match_player
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -154,6 +173,13 @@ func (mp *MatchPlayer) assignValues(columns []string, values []any) error {
 				mp.player_match_player = new(int)
 				*mp.player_match_player = int(value.Int64)
 			}
+		case matchplayer.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_match_player", value)
+			} else if value.Valid {
+				mp.player_stats_match_player = new(int)
+				*mp.player_stats_match_player = int(value.Int64)
+			}
 		default:
 			mp.selectValues.Set(columns[i], values[i])
 		}
@@ -175,6 +201,11 @@ func (mp *MatchPlayer) QueryPlayer() *PlayerQuery {
 // QueryLineup queries the "lineup" edge of the MatchPlayer entity.
 func (mp *MatchPlayer) QueryLineup() *FixtureLineupsQuery {
 	return NewMatchPlayerClient(mp.config).QueryLineup(mp)
+}
+
+// QueryPlayerStats queries the "playerStats" edge of the MatchPlayer entity.
+func (mp *MatchPlayer) QueryPlayerStats() *PlayerStatsQuery {
+	return NewMatchPlayerClient(mp.config).QueryPlayerStats(mp)
 }
 
 // Update returns a builder for updating this MatchPlayer.

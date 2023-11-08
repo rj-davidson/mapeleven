@@ -10,7 +10,6 @@ import (
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
@@ -132,21 +131,6 @@ func (sc *SeasonCreate) AddTeams(t ...*Team) *SeasonCreate {
 		ids[i] = t[i].ID
 	}
 	return sc.AddTeamIDs(ids...)
-}
-
-// AddPlayerIDs adds the "player" edge to the Player entity by IDs.
-func (sc *SeasonCreate) AddPlayerIDs(ids ...int) *SeasonCreate {
-	sc.mutation.AddPlayerIDs(ids...)
-	return sc
-}
-
-// AddPlayer adds the "player" edges to the Player entity.
-func (sc *SeasonCreate) AddPlayer(p ...*Player) *SeasonCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return sc.AddPlayerIDs(ids...)
 }
 
 // AddSquadIDs adds the "squad" edge to the Squad entity by IDs.
@@ -330,22 +314,6 @@ func (sc *SeasonCreate) createSpec() (*Season, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := sc.mutation.PlayerIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   season.PlayerTable,
-			Columns: []string{season.PlayerColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

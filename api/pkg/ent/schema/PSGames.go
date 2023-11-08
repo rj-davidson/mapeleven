@@ -30,6 +30,6 @@ func (PSGames) Fields() []ent.Field {
 // Edges of the PSGames.
 func (PSGames) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("player", Player.Type).Ref("psgames").Unique(),
+		edge.From("playerStats", PlayerStats.Type).Ref("psgames"),
 	}
 }

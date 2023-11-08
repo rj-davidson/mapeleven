@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"strings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -31,31 +30,26 @@ type PSGoals struct {
 	ShotsOn int `json:"shotsOn,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSGoalsQuery when eager-loading is set.
-	Edges          PSGoalsEdges `json:"edges"`
-	player_psgoals *int
-	selectValues   sql.SelectValues
+	Edges        PSGoalsEdges `json:"edges"`
+	selectValues sql.SelectValues
 }
 
 // PSGoalsEdges holds the relations/edges for other nodes in the graph.
 type PSGoalsEdges struct {
-	// Player holds the value of the player edge.
-	Player *Player `json:"player,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PlayerOrErr returns the Player value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PSGoalsEdges) PlayerOrErr() (*Player, error) {
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
+// was not loaded in eager-loading.
+func (e PSGoalsEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
 	if e.loadedTypes[0] {
-		if e.Player == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: player.Label}
-		}
-		return e.Player, nil
+		return e.PlayerStats, nil
 	}
-	return nil, &NotLoadedError{edge: "player"}
+	return nil, &NotLoadedError{edge: "playerStats"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -64,8 +58,6 @@ func (*PSGoals) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case psgoals.FieldID, psgoals.FieldTotalGoals, psgoals.FieldConcededGoals, psgoals.FieldAssistGoals, psgoals.FieldSaveGoals, psgoals.FieldShotsTotal, psgoals.FieldShotsOn:
-			values[i] = new(sql.NullInt64)
-		case psgoals.ForeignKeys[0]: // player_psgoals
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -124,13 +116,6 @@ func (pg *PSGoals) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pg.ShotsOn = int(value.Int64)
 			}
-		case psgoals.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_psgoals", value)
-			} else if value.Valid {
-				pg.player_psgoals = new(int)
-				*pg.player_psgoals = int(value.Int64)
-			}
 		default:
 			pg.selectValues.Set(columns[i], values[i])
 		}
@@ -144,9 +129,9 @@ func (pg *PSGoals) Value(name string) (ent.Value, error) {
 	return pg.selectValues.Get(name)
 }
 
-// QueryPlayer queries the "player" edge of the PSGoals entity.
-func (pg *PSGoals) QueryPlayer() *PlayerQuery {
-	return NewPSGoalsClient(pg.config).QueryPlayer(pg)
+// QueryPlayerStats queries the "playerStats" edge of the PSGoals entity.
+func (pg *PSGoals) QueryPlayerStats() *PlayerStatsQuery {
+	return NewPSGoalsClient(pg.config).QueryPlayerStats(pg)
 }
 
 // Update returns a builder for updating this PSGoals.

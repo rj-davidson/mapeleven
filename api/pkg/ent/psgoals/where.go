@@ -323,21 +323,21 @@ func ShotsOnLTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLTE(FieldShotsOn, v))
 }
 
-// HasPlayer applies the HasEdge predicate on the "player" edge.
-func HasPlayer() predicate.PSGoals {
+// HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.
+func HasPlayerStats() predicate.PSGoals {
 	return predicate.PSGoals(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PlayerTable, PlayerColumn),
+			sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPlayerWith applies the HasEdge predicate on the "player" edge with a given conditions (other predicates).
-func HasPlayerWith(preds ...predicate.Player) predicate.PSGoals {
+// HasPlayerStatsWith applies the HasEdge predicate on the "playerStats" edge with a given conditions (other predicates).
+func HasPlayerStatsWith(preds ...predicate.PlayerStats) predicate.PSGoals {
 	return predicate.PSGoals(func(s *sql.Selector) {
-		step := newPlayerStep()
+		step := newPlayerStatsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

@@ -4,10 +4,11 @@ package ent
 
 import (
 	"context"
+	"database/sql/driver"
 	"fmt"
 	"math"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	"entgo.io/ent/dialect/sql"
@@ -18,12 +19,11 @@ import (
 // PSDefenseQuery is the builder for querying PSDefense entities.
 type PSDefenseQuery struct {
 	config
-	ctx        *QueryContext
-	order      []psdefense.OrderOption
-	inters     []Interceptor
-	predicates []predicate.PSDefense
-	withPlayer *PlayerQuery
-	withFKs    bool
+	ctx             *QueryContext
+	order           []psdefense.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.PSDefense
+	withPlayerStats *PlayerStatsQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,9 +60,9 @@ func (pdq *PSDefenseQuery) Order(o ...psdefense.OrderOption) *PSDefenseQuery {
 	return pdq
 }
 
-// QueryPlayer chains the current query on the "player" edge.
-func (pdq *PSDefenseQuery) QueryPlayer() *PlayerQuery {
-	query := (&PlayerClient{config: pdq.config}).Query()
+// QueryPlayerStats chains the current query on the "playerStats" edge.
+func (pdq *PSDefenseQuery) QueryPlayerStats() *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: pdq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := pdq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -73,8 +73,8 @@ func (pdq *PSDefenseQuery) QueryPlayer() *PlayerQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psdefense.Table, psdefense.FieldID, selector),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psdefense.PlayerTable, psdefense.PlayerColumn),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, psdefense.PlayerStatsTable, psdefense.PlayerStatsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(pdq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,26 +269,26 @@ func (pdq *PSDefenseQuery) Clone() *PSDefenseQuery {
 		return nil
 	}
 	return &PSDefenseQuery{
-		config:     pdq.config,
-		ctx:        pdq.ctx.Clone(),
-		order:      append([]psdefense.OrderOption{}, pdq.order...),
-		inters:     append([]Interceptor{}, pdq.inters...),
-		predicates: append([]predicate.PSDefense{}, pdq.predicates...),
-		withPlayer: pdq.withPlayer.Clone(),
+		config:          pdq.config,
+		ctx:             pdq.ctx.Clone(),
+		order:           append([]psdefense.OrderOption{}, pdq.order...),
+		inters:          append([]Interceptor{}, pdq.inters...),
+		predicates:      append([]predicate.PSDefense{}, pdq.predicates...),
+		withPlayerStats: pdq.withPlayerStats.Clone(),
 		// clone intermediate query.
 		sql:  pdq.sql.Clone(),
 		path: pdq.path,
 	}
 }
 
-// WithPlayer tells the query-builder to eager-load the nodes that are connected to
-// the "player" edge. The optional arguments are used to configure the query builder of the edge.
-func (pdq *PSDefenseQuery) WithPlayer(opts ...func(*PlayerQuery)) *PSDefenseQuery {
-	query := (&PlayerClient{config: pdq.config}).Query()
+// WithPlayerStats tells the query-builder to eager-load the nodes that are connected to
+// the "playerStats" edge. The optional arguments are used to configure the query builder of the edge.
+func (pdq *PSDefenseQuery) WithPlayerStats(opts ...func(*PlayerStatsQuery)) *PSDefenseQuery {
+	query := (&PlayerStatsClient{config: pdq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	pdq.withPlayer = query
+	pdq.withPlayerStats = query
 	return pdq
 }
 
@@ -369,18 +369,11 @@ func (pdq *PSDefenseQuery) prepareQuery(ctx context.Context) error {
 func (pdq *PSDefenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PSDefense, error) {
 	var (
 		nodes       = []*PSDefense{}
-		withFKs     = pdq.withFKs
 		_spec       = pdq.querySpec()
 		loadedTypes = [1]bool{
-			pdq.withPlayer != nil,
+			pdq.withPlayerStats != nil,
 		}
 	)
-	if pdq.withPlayer != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, psdefense.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*PSDefense).scanValues(nil, columns)
 	}
@@ -399,43 +392,73 @@ func (pdq *PSDefenseQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*P
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := pdq.withPlayer; query != nil {
-		if err := pdq.loadPlayer(ctx, query, nodes, nil,
-			func(n *PSDefense, e *Player) { n.Edges.Player = e }); err != nil {
+	if query := pdq.withPlayerStats; query != nil {
+		if err := pdq.loadPlayerStats(ctx, query, nodes,
+			func(n *PSDefense) { n.Edges.PlayerStats = []*PlayerStats{} },
+			func(n *PSDefense, e *PlayerStats) { n.Edges.PlayerStats = append(n.Edges.PlayerStats, e) }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (pdq *PSDefenseQuery) loadPlayer(ctx context.Context, query *PlayerQuery, nodes []*PSDefense, init func(*PSDefense), assign func(*PSDefense, *Player)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*PSDefense)
-	for i := range nodes {
-		if nodes[i].player_psdefense == nil {
-			continue
+func (pdq *PSDefenseQuery) loadPlayerStats(ctx context.Context, query *PlayerStatsQuery, nodes []*PSDefense, init func(*PSDefense), assign func(*PSDefense, *PlayerStats)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*PSDefense)
+	nids := make(map[int]map[*PSDefense]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
 		}
-		fk := *nodes[i].player_psdefense
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(psdefense.PlayerStatsTable)
+		s.Join(joinT).On(s.C(playerstats.FieldID), joinT.C(psdefense.PlayerStatsPrimaryKey[0]))
+		s.Where(sql.InValues(joinT.C(psdefense.PlayerStatsPrimaryKey[1]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(psdefense.PlayerStatsPrimaryKey[1]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
 	}
-	query.Where(player.IDIn(ids...))
-	neighbors, err := query.All(ctx)
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*PSDefense]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*PlayerStats](ctx, query, qr, query.inters)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		nodes, ok := nids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_psdefense" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected "playerStats" node returned %v`, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil
