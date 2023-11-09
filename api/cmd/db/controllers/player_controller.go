@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models/player_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/utils"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
@@ -49,6 +50,9 @@ type LeaguePlayerResponse struct {
 		Player struct {
 			ID int `json:"id"`
 		} `json:"player"`
+		Statistics struct {
+			TeamPlayerStats []player_stats.PlayerStats
+		} `json:"statistics"`
 	} `json:"response"`
 }
 

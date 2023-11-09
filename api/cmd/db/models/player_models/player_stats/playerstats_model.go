@@ -4,64 +4,158 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
-	"context"
 	_ "context"
 )
 
-type PlayerStats struct {
-	PSPenalty PSPenalty `json:"penalty"`
-	PSDefense PSDefense `json:"defense"`
-	PSGoals   PSGoals   `json:"goals"`
-	PSOffense PSOffense `json:"offense"`
-	PSGames   PSGames   `json:"games"`
+//type PlayerStats struct {
+//	PSPenalty PSPenalty `json:"penalty"`
+//	PSDefense PSDefense `json:"defense"`
+//	PSGoals   PSGoals   `json:"goals"`
+//	PSOffense PSOffense `json:"offense"`
+//	PSGames   PSGames   `json:"games"`
+//}
+//type PSPenalty struct {
+//	FoulsDrawn      int `json:"fouls_drawn"`
+//	FoulsCommitted  int `json:"fouls_committed"`
+//	CardsYellow     int `json:"cards_yellow"`
+//	CardYellowred   int `json:"card_yellowred"`
+//	CardsRed        int `json:"cards_red"`
+//	PenaltyWon      int `json:"penalty_won"`
+//	PenaltyCommited int `json:"penalty_commited"`
+//	PenaltyScored   int `json:"penalty_scored"`
+//	PenaltyMissed   int `json:"penalty_missed"`
+//	PenaltySaved    int `json:"penalty_saved"`
+//}
+//type PSDefense struct {
+//	TacklesTotal  int `json:"tackles_total"`
+//	Blocks        int `json:"blocks"`
+//	Interceptions int `json:"interceptions"`
+//	TotalDuels    int `json:"total_duels"`
+//	WonDuels      int `json:"won_duels"`
+//}
+//
+//type PSGoals struct {
+//	TotalGoals    int `json:"total_goals"`
+//	ConcededGoals int `json:"conceded_goals"`
+//	AssistGoals   int `json:"assist_goals"`
+//	SaveGoals     int `json:"save_goals"`
+//	ShotsTotal    int `json:"shots_total"`
+//	ShotsOn       int `json:"shots_on"`
+//}
+//
+//type PSOffense struct {
+//	DribbleAttempts int `json:"dribbles_attempts"`
+//	DribbleSuccess  int `json:"dribbles_success"`
+//	DribblePast     int `json:"dribbled_past"`
+//	PassesTotal     int `json:"passes_total"`
+//	PassesKey       int `json:"passes_key"`
+//	PassesAccuracy  int `json:"passes_accuracy"`
+//}
+
+type PSTeam struct {
+	ApiFootballId int    `json:"id"`
+	Name          string `json:"name"`
+	Logo          string `json:"logo"`
 }
-type PSPenalty struct {
-	FoulsDrawn      int `json:"fouls_drawn"`
-	FoulsCommitted  int `json:"fouls_committed"`
-	CardsYellow     int `json:"cards_yellow"`
-	CardYellowred   int `json:"card_yellowred"`
-	CardsRed        int `json:"cards_red"`
-	PenaltyWon      int `json:"penalty_won"`
-	PenaltyCommited int `json:"penalty_commited"`
-	PenaltyScored   int `json:"penalty_scored"`
-	PenaltyMissed   int `json:"penalty_missed"`
-	PenaltySaved    int `json:"penalty_saved"`
+
+type PSLeague struct {
+	ApiFootballId int    `json:"id"`
+	Name          string `json:"name"`
+	Country       string `json:"country"`
+	Logo          string `json:"logo"`
+	Flag          string `json:"flag"`
+	Season        int    `json:"season"`
 }
-type PSDefense struct {
-	TacklesTotal  int `json:"tackles_total"`
-	Blocks        int `json:"blocks"`
-	Interceptions int `json:"interceptions"`
-	TotalDuels    int `json:"total_duels"`
-	WonDuels      int `json:"won_duels"`
+
+type PSGames struct {
+	Appearances int    `json:"appearances"`
+	Lineups     int    `json:"lineups"`
+	Minutes     int    `json:"minutes"`
+	Number      *int   `json:"number"`
+	Position    string `json:"position"`
+	Rating      string `json:"rating"`
+	Captain     bool   `json:"captain"`
+}
+
+type PSSubstitutes struct {
+	In    int `json:"in"`
+	Out   int `json:"out"`
+	Bench int `json:"bench"`
+}
+
+type PSShots struct {
+	Total int `json:"total"`
+	On    int `json:"on"`
 }
 
 type PSGoals struct {
-	TotalGoals    int `json:"total_goals"`
-	ConcededGoals int `json:"conceded_goals"`
-	AssistGoals   int `json:"assist_goals"`
-	SaveGoals     int `json:"save_goals"`
-	ShotsTotal    int `json:"shots_total"`
-	ShotsOn       int `json:"shots_on"`
+	Total    int  `json:"total"`
+	Conceded int  `json:"conceded"`
+	Assists  int  `json:"assists"`
+	Saves    *int `json:"saves"`
 }
 
-type PSOffense struct {
-	DribbleAttempts int `json:"dribbles_attempts"`
-	DribbleSuccess  int `json:"dribbles_success"`
-	DribblePast     int `json:"dribbled_past"`
-	PassesTotal     int `json:"passes_total"`
-	PassesKey       int `json:"passes_key"`
-	PassesAccuracy  int `json:"passes_accuracy"`
+type PSPasses struct {
+	Total    int `json:"total"`
+	Key      int `json:"key"`
+	Accuracy int `json:"accuracy"`
+}
+
+type PSTackles struct {
+	Total         int  `json:"total"`
+	Blocks        *int `json:"blocks"`
+	Interceptions int  `json:"interceptions"`
+}
+
+type PSDuels struct {
+	Total int `json:"total"`
+	Won   int `json:"won"`
+}
+
+type PSDribbles struct {
+	Attempts int  `json:"attempts"`
+	Success  int  `json:"success"`
+	Past     *int `json:"past"`
+}
+
+type PSFouls struct {
+	Drawn     int `json:"drawn"`
+	Committed int `json:"committed"`
+}
+
+type PSCards struct {
+	Yellow    int `json:"yellow"`
+	YellowRed int `json:"yellowred"`
+	Red       int `json:"red"`
+}
+
+type PSPenalty struct {
+	Won      *int `json:"won"`
+	Commited *int `json:"commited"`
+	Scored   int  `json:"scored"`
+	Missed   int  `json:"missed"`
+	Saved    *int `json:"saved"`
+}
+
+type PlayerStats struct {
+	Team        PSTeam        `json:"team"`
+	League      PSLeague      `json:"league"`
+	Games       PSGames       `json:"games"`
+	Substitutes PSSubstitutes `json:"substitutes"`
+	Shots       PSShots       `json:"shots"`
+	Goals       PSGoals       `json:"goals"`
+	Passes      PSPasses      `json:"passes"`
+	Tackles     PSTackles     `json:"tackles"`
+	Duels       PSDuels       `json:"duels"`
+	Dribbles    PSDribbles    `json:"dribbles"`
+	Fouls       PSFouls       `json:"fouls"`
+	Cards       PSCards       `json:"cards"`
+	Penalty     PSPenalty     `json:"penalty"`
 }
 
 type PlayerStatsModel struct {
@@ -80,93 +174,111 @@ type PlayerStatsPackage struct {
 	PSGames   *ent.PSGames
 }
 
-func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.PlayerStats, playerStats PlayerStats) (*PlayerStatsPackage, error) {
-	//Add form to Player object
-	_, err := m.client.PlayerStats.
-		UpdateOne(p).
-		Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var playerStatsPackage PlayerStatsPackage
+//
+//func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.PlayerStats, playerStats PlayerStats) (*PlayerStatsPackage, error) {
+//	//Add form to Player object
+//	_, err := m.client.PlayerStats.
+//		UpdateOne(p).
+//		Save(ctx)
+//	if err != nil {
+//		return nil, err
+//	}
+//	var playerStatsPackage PlayerStatsPackage
+//
+//	//playerStatsPackage.PSPenalty, err = m.upsertPSPenalty(ctx, p, playerStats.PSPenalty)
+//	//if err != nil {
+//	//	return nil, err
+//	//}
+//	//playerStatsPackage.PSDefense, err = m.upsertPSDefense(ctx, p, playerStats.PSDefense)
+//	//if err != nil {
+//	//	return nil, err
+//	//}
+//	//playerStatsPackage.PSGoals, err = m.upsertPSGoals(ctx, p, playerStats.PSGoals)
+//	//if err != nil {
+//	//	return nil, err
+//	//}
+//	//playerStatsPackage.PSOffense, err = m.upsertPSOffense(ctx, p, playerStats.PSOffense)
+//	//if err != nil {
+//	//	return nil, err
+//	//}
+//	//playerStatsPackage.PSGames, err = m.upsertPSGames(ctx, p, playerStats.PSGames)
+//	//if err != nil {
+//	//	return nil, err
+//	//}
+//	return &playerStatsPackage, nil
+//}
 
-	playerStatsPackage.PSPenalty, err = m.upsertPSPenalty(ctx, p, playerStats.PSPenalty)
-	if err != nil {
-		return nil, err
-	}
-	playerStatsPackage.PSDefense, err = m.upsertPSDefense(ctx, p, playerStats.PSDefense)
-	if err != nil {
-		return nil, err
-	}
-	playerStatsPackage.PSGoals, err = m.upsertPSGoals(ctx, p, playerStats.PSGoals)
-	if err != nil {
-		return nil, err
-	}
-	playerStatsPackage.PSOffense, err = m.upsertPSOffense(ctx, p, playerStats.PSOffense)
-	if err != nil {
-		return nil, err
-	}
-	playerStatsPackage.PSGames, err = m.upsertPSGames(ctx, p, playerStats.PSGames)
-	if err != nil {
-		return nil, err
-	}
-	return &playerStatsPackage, nil
-}
+//func (m *PlayerStatsModel) upsertPSPenalty(ctx context.Context, p *ent.PlayerStats, data PSPenalty) (*ent.PSPenalty, error) {
+//	prev, err := m.client.PSPenalty.Query().Where(pspenalty.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
+//	if err != nil && !ent.IsNotFound(err) {
+//		return nil, fmt.Errorf("error fetching existing PSPenalty: %v", err)
+//	}
+//	if prev == nil {
+//		return CreatePSPenalty(ctx, m.client, data, p)
+//	} else {
+//		return UpdatePSPenalty(ctx, m.client, data, prev)
+//	}
+//}
+//
+//func (m *PlayerStatsModel) upsertPSDefense(ctx context.Context, p *ent.PlayerStats, data PSDefense) (*ent.PSDefense, error) {
+//	prev, err := m.client.PSDefense.Query().Where(psdefense.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
+//	if err != nil && !ent.IsNotFound(err) {
+//		return nil, fmt.Errorf("error fetching existing PSDefense: %v", err)
+//	}
+//	if prev == nil {
+//		return CreatePSDefense(ctx, m.client, data, p)
+//	} else {
+//		return UpdatePSDefense(ctx, m.client, data, prev)
+//	}
+//}
 
-func (m *PlayerStatsModel) upsertPSPenalty(ctx context.Context, p *ent.PlayerStats, data PSPenalty) (*ent.PSPenalty, error) {
-	prev, _ := m.client.PSPenalty.Query().Where(pspenalty.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-	if prev == nil {
-		return CreatePSPenalty(ctx, m.client, data, p)
-	} else {
-		return UpdatePSPenalty(ctx, m.client, data, prev)
-	}
-}
+//func (m *PlayerStatsModel) upsertPSOffense(ctx context.Context, p *ent.PlayerStats, data PSOffense) (*ent.PSOffense, error) {
+//	prev, err := m.client.PSOffense.Query().Where(psoffense.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
+//	if err != nil && !ent.IsNotFound(err) {
+//		return nil, fmt.Errorf("error fetching existing PSOffense: %v", err)
+//	}
+//	if prev == nil {
+//		return CreatePSOffense(ctx, m.client, data, p)
+//	} else {
+//		return UpdatePSOffense(ctx, m.client, data, prev)
+//	}
+//}
 
-func (m *PlayerStatsModel) upsertPSDefense(ctx context.Context, p *ent.PlayerStats, data PSDefense) (*ent.PSDefense, error) {
-	prev, _ := m.client.PSDefense.Query().Where(psdefense.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-	if prev == nil {
-		return CreatePSDefense(ctx, m.client, data, p)
-	} else {
-		return UpdatePSDefense(ctx, m.client, data, prev)
-	}
-}
+//func (m *PlayerStatsModel) upsertPSGoals(ctx context.Context, p *ent.PlayerStats, data PSGoals) (*ent.PSGoals, error) {
+//	prev, err := m.client.PSGoals.Query().Where(psgoals.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
+//	if err != nil && !ent.IsNotFound(err) {
+//		return nil, fmt.Errorf("error fetching existing PSGoals: %v", err)
+//	}
+//	if prev == nil {
+//		return CreatePSGoals(ctx, m.client, data, p)
+//	} else {
+//		return UpdatePSGoals(ctx, m.client, data, prev)
+//	}
+//}
 
-func (m *PlayerStatsModel) upsertPSOffense(ctx context.Context, p *ent.PlayerStats, data PSOffense) (*ent.PSOffense, error) {
-	prev, _ := m.client.PSOffense.Query().Where(psoffense.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-	if prev == nil {
-		return CreatePSOffense(ctx, m.client, data, p)
-	} else {
-		return UpdatePSOffense(ctx, m.client, data, prev)
-	}
-}
+//func (m *PlayerStatsModel) upsertPSGames(ctx context.Context, p *ent.PlayerStats, data PSGames) (*ent.PSGames, error) {
+//	prev, err := m.client.PSGames.Query().Where(psgames.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
+//	if err != nil && !ent.IsNotFound(err) {
+//		return nil, fmt.Errorf("error fetching existing PSGames: %v", err)
+//	}
+//	if prev == nil {
+//		return CreatePSGames(ctx, m.client, data, p)
+//	} else {
+//		return UpdatePSGames(ctx, m.client, data, prev)
+//	}
+//}
 
-func (m *PlayerStatsModel) upsertPSGoals(ctx context.Context, p *ent.PlayerStats, data PSGoals) (*ent.PSGoals, error) {
-	// Use the correct predicate for PSGoals, not PSDefense
-	prev, _ := m.client.PSGoals.Query().Where(psgoals.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-	if prev == nil {
-		return CreatePSGoals(ctx, m.client, data, p)
-	} else {
-		return UpdatePSGoals(ctx, m.client, data, prev)
-	}
-}
-
-func (m *PlayerStatsModel) upsertPSGames(ctx context.Context, p *ent.PlayerStats, data PSGames) (*ent.PSGames, error) {
-	// Use the correct predicate for PSGames, not PSDefense
-	prev, _ := m.client.PSGames.Query().Where(psgames.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-	if prev == nil {
-		return CreatePSGames(ctx, m.client, data, p)
-	} else {
-		return UpdatePSGames(ctx, m.client, data, prev)
-	}
-}
-
-func (m *PlayerStatsModel) ListPlayers(ctx context.Context) ([]*ent.Player, error) {
-	players, err := m.client.Player.
-		Query().
-		WithPlayerStats(). // This preloads the PlayerStats
-		All(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return players, nil
-}
+//func (m *PlayerStatsModel) ListPlayers(ctx context.Context) ([]*ent.Player, error) {
+//	players, err := m.client.Player.
+//		Query().
+//		WithPlayerStats(func(query *ent.PlayerStatsQuery) {
+//			query.WithPlayer().WithTeam(func(tq *ent.TeamQuery) {
+//				tq.WithSeason()
+//			})
+//		}).
+//		All(ctx)
+//	if err != nil {
+//		return nil, fmt.Errorf("error listing players: %v", err)
+//	}
+//	return players, nil
+//}
