@@ -3,6 +3,7 @@ package controllers
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models/player_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
+	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -16,11 +17,14 @@ type APIPlayerStatsResponse struct {
 }
 
 type PlayerStatsResponse struct {
-	Games   player_stats.PSGames   `json:"games"`
-	Goals   player_stats.PSGoals   `json:"goals"`
-	Offense player_stats.PSOffense `json:"offense"`
-	Defense player_stats.PSDefense `json:"defense"`
-	Penalty player_stats.PSPenalty `json:"penalty"`
+	Slug        string                 `json:"slug"`
+	LastUpdated int                    `json:"lastUpdated"`
+	Season      string                 `json:"season"`
+	Games       player_stats.PSGames   `json:"games"`
+	Goals       player_stats.PSGoals   `json:"goals"`
+	Offense     player_stats.PSOffense `json:"offense"`
+	Defense     player_stats.PSDefense `json:"defense"`
+	Penalty     player_stats.PSPenalty `json:"penalty"`
 }
 
 type PlayerStatsController struct {
@@ -45,13 +49,20 @@ func (psc *PlayerStatsController) InitializeStats(ctx context.Context) error {
 	}
 
 	fmt.Println("Initializing player stats...")
-	players, err := psc.playerStatsModel.ListPlayers(ctx)
+	players, err := psc.playerStatsModel.ListPlayers(ctx) // This method should preload PlayerStats
 	if err != nil {
 		return err
 	}
 	for _, player := range players {
-		if err := psc.FetchPlayerStatsByID(ctx, player); err != nil {
-			return err
+		// Check if the PlayerStats edge is loaded
+		if player.Edges.PlayerStats == nil {
+			return fmt.Errorf("player stats edge not loaded for player ID %d", player.ID)
+		}
+		// Iterate over all PlayerStats records for the player
+		for _, ps := range player.Edges.PlayerStats {
+			if err := psc.FetchPlayerStatsByID(ctx, ps); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -59,21 +70,19 @@ func (psc *PlayerStatsController) InitializeStats(ctx context.Context) error {
 	return nil
 }
 
-func (psc *PlayerStatsController) FetchPlayerStatsByID(ctx context.Context, player *ent.Player) error {
+func (psc *PlayerStatsController) FetchPlayerStatsByID(ctx context.Context, ps *ent.PlayerStats) error {
 	if psc == nil {
 		return fmt.Errorf("PlayerStatsController is nil")
 	}
 
 	// Check for nil edges
-	if player.Edges.Season == nil || player.Edges.Team == nil {
+	if ps.Edges.Player == nil || ps.Edges.Team.Edges.Season == nil {
 		return fmt.Errorf("player edges are not fully loaded")
 	}
 
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players/statistics?league=%d&season=%d&team=%d&player=%d",
-		player.Edges.Season.Edges.League.FootballApiId,
-		player.Edges.Season.Year,
-		player.Edges.Team.Edges.Club.ApiFootballId,
-		player.ApiFootballId)
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?id=%d&season=%d",
+		ps.Edges.Player.ApiFootballId,
+		ps.Edges.Team.Edges.Season.Year)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -98,10 +107,10 @@ func (psc *PlayerStatsController) FetchPlayerStatsByID(ctx context.Context, play
 		return err
 	}
 
-	return psc.parsePlayerStatsResponse(ctx, data, player)
+	return psc.parsePlayerStatsResponse(ctx, data, ps)
 }
 
-func (psc *PlayerStatsController) parsePlayerStatsResponse(ctx context.Context, data []byte, player *ent.Player) error {
+func (psc *PlayerStatsController) parsePlayerStatsResponse(ctx context.Context, data []byte, player *ent.PlayerStats) error {
 	var playerStatsResponse APIPlayerStatsResponse
 	err := json.Unmarshal(data, &playerStatsResponse)
 	if err != nil {
@@ -119,12 +128,12 @@ func (psc *PlayerStatsController) parsePlayerStatsResponse(ctx context.Context, 
 	return psc.upsertPlayerStats(ctx, player, &playerStats)
 }
 
-func (psc *PlayerStatsController) upsertPlayerStats(ctx context.Context, player *ent.Player, playerStats *player_stats.PlayerStats) error {
+func (psc *PlayerStatsController) upsertPlayerStats(ctx context.Context, player *ent.PlayerStats, playerStats *player_stats.PlayerStats) error {
 	_, err := psc.playerStatsModel.UpsertPlayerStats(ctx, player, *playerStats)
 	if err != nil {
-		return fmt.Errorf("error upserting player stats for %s: %v", player.Name, err)
+		return fmt.Errorf("error upserting player stats for %s: %v", player.Edges.Player.Name, err)
 	}
 
-	fmt.Printf("Player stats for %s successfully upserted.\n", player.Name)
+	fmt.Printf("Player stats for %s successfully upserted.\n", player.Edges.Player.Name)
 	return nil
 }

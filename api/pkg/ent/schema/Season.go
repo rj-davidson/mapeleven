@@ -40,5 +40,7 @@ func (Season) Edges() []ent.Edge {
 		edge.To("standings", Standings.Type),
 		edge.To("teams", Team.Type),
 		edge.To("squad", Squad.Type),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("season"),
 	}
 }

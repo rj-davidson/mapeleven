@@ -9,6 +9,7 @@ import (
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
@@ -26,6 +27,7 @@ type PlayerStats struct {
 	// The values are being populated by the PlayerStatsQuery when eager-loading is set.
 	Edges               PlayerStatsEdges `json:"edges"`
 	player_player_stats *int
+	team_player_stats   *int
 	selectValues        sql.SelectValues
 }
 
@@ -34,7 +36,7 @@ type PlayerStatsEdges struct {
 	// Player holds the value of the player edge.
 	Player *Player `json:"player,omitempty"`
 	// Team holds the value of the team edge.
-	Team []*Team `json:"team,omitempty"`
+	Team *Team `json:"team,omitempty"`
 	// PlayerEvents holds the value of the playerEvents edge.
 	PlayerEvents []*FixtureEvents `json:"playerEvents,omitempty"`
 	// MatchPlayer holds the value of the matchPlayer edge.
@@ -51,9 +53,11 @@ type PlayerStatsEdges struct {
 	Psoffense []*PSOffense `json:"psoffense,omitempty"`
 	// Pspenalty holds the value of the pspenalty edge.
 	Pspenalty []*PSPenalty `json:"pspenalty,omitempty"`
+	// Season holds the value of the season edge.
+	Season []*Season `json:"season,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [10]bool
+	loadedTypes [11]bool
 }
 
 // PlayerOrErr returns the Player value or an error if the edge
@@ -70,9 +74,13 @@ func (e PlayerStatsEdges) PlayerOrErr() (*Player, error) {
 }
 
 // TeamOrErr returns the Team value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) TeamOrErr() ([]*Team, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerStatsEdges) TeamOrErr() (*Team, error) {
 	if e.loadedTypes[1] {
+		if e.Team == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: team.Label}
+		}
 		return e.Team, nil
 	}
 	return nil, &NotLoadedError{edge: "team"}
@@ -150,6 +158,15 @@ func (e PlayerStatsEdges) PspenaltyOrErr() ([]*PSPenalty, error) {
 	return nil, &NotLoadedError{edge: "pspenalty"}
 }
 
+// SeasonOrErr returns the Season value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerStatsEdges) SeasonOrErr() ([]*Season, error) {
+	if e.loadedTypes[10] {
+		return e.Season, nil
+	}
+	return nil, &NotLoadedError{edge: "season"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*PlayerStats) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -162,6 +179,8 @@ func (*PlayerStats) scanValues(columns []string) ([]any, error) {
 		case playerstats.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
 		case playerstats.ForeignKeys[0]: // player_player_stats
+			values[i] = new(sql.NullInt64)
+		case playerstats.ForeignKeys[1]: // team_player_stats
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -202,6 +221,13 @@ func (ps *PlayerStats) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				ps.player_player_stats = new(int)
 				*ps.player_player_stats = int(value.Int64)
+			}
+		case playerstats.ForeignKeys[1]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field team_player_stats", value)
+			} else if value.Valid {
+				ps.team_player_stats = new(int)
+				*ps.team_player_stats = int(value.Int64)
 			}
 		default:
 			ps.selectValues.Set(columns[i], values[i])
@@ -264,6 +290,11 @@ func (ps *PlayerStats) QueryPsoffense() *PSOffenseQuery {
 // QueryPspenalty queries the "pspenalty" edge of the PlayerStats entity.
 func (ps *PlayerStats) QueryPspenalty() *PSPenaltyQuery {
 	return NewPlayerStatsClient(ps.config).QueryPspenalty(ps)
+}
+
+// QuerySeason queries the "season" edge of the PlayerStats entity.
+func (ps *PlayerStats) QuerySeason() *SeasonQuery {
+	return NewPlayerStatsClient(ps.config).QuerySeason(ps)
 }
 
 // Update returns a builder for updating this PlayerStats.

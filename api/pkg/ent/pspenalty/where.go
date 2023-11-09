@@ -53,452 +53,452 @@ func IDLTE(id int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldID, id))
 }
 
-// FoulsDrawn applies equality check predicate on the "foulsDrawn" field. It's identical to FoulsDrawnEQ.
+// FoulsDrawn applies equality check predicate on the "FoulsDrawn" field. It's identical to FoulsDrawnEQ.
 func FoulsDrawn(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldFoulsDrawn, v))
 }
 
-// FoulsCommitted applies equality check predicate on the "foulsCommitted" field. It's identical to FoulsCommittedEQ.
+// FoulsCommitted applies equality check predicate on the "FoulsCommitted" field. It's identical to FoulsCommittedEQ.
 func FoulsCommitted(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldFoulsCommitted, v))
 }
 
-// CardsYellow applies equality check predicate on the "cardsYellow" field. It's identical to CardsYellowEQ.
+// CardsYellow applies equality check predicate on the "CardsYellow" field. It's identical to CardsYellowEQ.
 func CardsYellow(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldCardsYellow, v))
 }
 
-// CardYellowred applies equality check predicate on the "cardYellowred" field. It's identical to CardYellowredEQ.
-func CardYellowred(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldEQ(FieldCardYellowred, v))
+// CardYellowRed applies equality check predicate on the "CardYellowRed" field. It's identical to CardYellowRedEQ.
+func CardYellowRed(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldEQ(FieldCardYellowRed, v))
 }
 
-// CardsRed applies equality check predicate on the "cardsRed" field. It's identical to CardsRedEQ.
+// CardsRed applies equality check predicate on the "CardsRed" field. It's identical to CardsRedEQ.
 func CardsRed(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldCardsRed, v))
 }
 
-// PenaltyWon applies equality check predicate on the "penaltyWon" field. It's identical to PenaltyWonEQ.
+// PenaltyWon applies equality check predicate on the "PenaltyWon" field. It's identical to PenaltyWonEQ.
 func PenaltyWon(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyWon, v))
 }
 
-// PenaltyCommited applies equality check predicate on the "penaltyCommited" field. It's identical to PenaltyCommitedEQ.
-func PenaltyCommited(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyCommited, v))
+// PenaltyCommitted applies equality check predicate on the "PenaltyCommitted" field. It's identical to PenaltyCommittedEQ.
+func PenaltyCommitted(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyCommitted, v))
 }
 
-// PenaltyScored applies equality check predicate on the "penaltyScored" field. It's identical to PenaltyScoredEQ.
+// PenaltyScored applies equality check predicate on the "PenaltyScored" field. It's identical to PenaltyScoredEQ.
 func PenaltyScored(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyScored, v))
 }
 
-// PenaltyMissed applies equality check predicate on the "penaltyMissed" field. It's identical to PenaltyMissedEQ.
+// PenaltyMissed applies equality check predicate on the "PenaltyMissed" field. It's identical to PenaltyMissedEQ.
 func PenaltyMissed(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyMissed, v))
 }
 
-// PenaltySaved applies equality check predicate on the "penaltySaved" field. It's identical to PenaltySavedEQ.
+// PenaltySaved applies equality check predicate on the "PenaltySaved" field. It's identical to PenaltySavedEQ.
 func PenaltySaved(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltySaved, v))
 }
 
-// FoulsDrawnEQ applies the EQ predicate on the "foulsDrawn" field.
+// FoulsDrawnEQ applies the EQ predicate on the "FoulsDrawn" field.
 func FoulsDrawnEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldFoulsDrawn, v))
 }
 
-// FoulsDrawnNEQ applies the NEQ predicate on the "foulsDrawn" field.
+// FoulsDrawnNEQ applies the NEQ predicate on the "FoulsDrawn" field.
 func FoulsDrawnNEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNEQ(FieldFoulsDrawn, v))
 }
 
-// FoulsDrawnIn applies the In predicate on the "foulsDrawn" field.
+// FoulsDrawnIn applies the In predicate on the "FoulsDrawn" field.
 func FoulsDrawnIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldIn(FieldFoulsDrawn, vs...))
 }
 
-// FoulsDrawnNotIn applies the NotIn predicate on the "foulsDrawn" field.
+// FoulsDrawnNotIn applies the NotIn predicate on the "FoulsDrawn" field.
 func FoulsDrawnNotIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNotIn(FieldFoulsDrawn, vs...))
 }
 
-// FoulsDrawnGT applies the GT predicate on the "foulsDrawn" field.
+// FoulsDrawnGT applies the GT predicate on the "FoulsDrawn" field.
 func FoulsDrawnGT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGT(FieldFoulsDrawn, v))
 }
 
-// FoulsDrawnGTE applies the GTE predicate on the "foulsDrawn" field.
+// FoulsDrawnGTE applies the GTE predicate on the "FoulsDrawn" field.
 func FoulsDrawnGTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGTE(FieldFoulsDrawn, v))
 }
 
-// FoulsDrawnLT applies the LT predicate on the "foulsDrawn" field.
+// FoulsDrawnLT applies the LT predicate on the "FoulsDrawn" field.
 func FoulsDrawnLT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLT(FieldFoulsDrawn, v))
 }
 
-// FoulsDrawnLTE applies the LTE predicate on the "foulsDrawn" field.
+// FoulsDrawnLTE applies the LTE predicate on the "FoulsDrawn" field.
 func FoulsDrawnLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldFoulsDrawn, v))
 }
 
-// FoulsCommittedEQ applies the EQ predicate on the "foulsCommitted" field.
+// FoulsCommittedEQ applies the EQ predicate on the "FoulsCommitted" field.
 func FoulsCommittedEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldFoulsCommitted, v))
 }
 
-// FoulsCommittedNEQ applies the NEQ predicate on the "foulsCommitted" field.
+// FoulsCommittedNEQ applies the NEQ predicate on the "FoulsCommitted" field.
 func FoulsCommittedNEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNEQ(FieldFoulsCommitted, v))
 }
 
-// FoulsCommittedIn applies the In predicate on the "foulsCommitted" field.
+// FoulsCommittedIn applies the In predicate on the "FoulsCommitted" field.
 func FoulsCommittedIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldIn(FieldFoulsCommitted, vs...))
 }
 
-// FoulsCommittedNotIn applies the NotIn predicate on the "foulsCommitted" field.
+// FoulsCommittedNotIn applies the NotIn predicate on the "FoulsCommitted" field.
 func FoulsCommittedNotIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNotIn(FieldFoulsCommitted, vs...))
 }
 
-// FoulsCommittedGT applies the GT predicate on the "foulsCommitted" field.
+// FoulsCommittedGT applies the GT predicate on the "FoulsCommitted" field.
 func FoulsCommittedGT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGT(FieldFoulsCommitted, v))
 }
 
-// FoulsCommittedGTE applies the GTE predicate on the "foulsCommitted" field.
+// FoulsCommittedGTE applies the GTE predicate on the "FoulsCommitted" field.
 func FoulsCommittedGTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGTE(FieldFoulsCommitted, v))
 }
 
-// FoulsCommittedLT applies the LT predicate on the "foulsCommitted" field.
+// FoulsCommittedLT applies the LT predicate on the "FoulsCommitted" field.
 func FoulsCommittedLT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLT(FieldFoulsCommitted, v))
 }
 
-// FoulsCommittedLTE applies the LTE predicate on the "foulsCommitted" field.
+// FoulsCommittedLTE applies the LTE predicate on the "FoulsCommitted" field.
 func FoulsCommittedLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldFoulsCommitted, v))
 }
 
-// CardsYellowEQ applies the EQ predicate on the "cardsYellow" field.
+// CardsYellowEQ applies the EQ predicate on the "CardsYellow" field.
 func CardsYellowEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldCardsYellow, v))
 }
 
-// CardsYellowNEQ applies the NEQ predicate on the "cardsYellow" field.
+// CardsYellowNEQ applies the NEQ predicate on the "CardsYellow" field.
 func CardsYellowNEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNEQ(FieldCardsYellow, v))
 }
 
-// CardsYellowIn applies the In predicate on the "cardsYellow" field.
+// CardsYellowIn applies the In predicate on the "CardsYellow" field.
 func CardsYellowIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldIn(FieldCardsYellow, vs...))
 }
 
-// CardsYellowNotIn applies the NotIn predicate on the "cardsYellow" field.
+// CardsYellowNotIn applies the NotIn predicate on the "CardsYellow" field.
 func CardsYellowNotIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNotIn(FieldCardsYellow, vs...))
 }
 
-// CardsYellowGT applies the GT predicate on the "cardsYellow" field.
+// CardsYellowGT applies the GT predicate on the "CardsYellow" field.
 func CardsYellowGT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGT(FieldCardsYellow, v))
 }
 
-// CardsYellowGTE applies the GTE predicate on the "cardsYellow" field.
+// CardsYellowGTE applies the GTE predicate on the "CardsYellow" field.
 func CardsYellowGTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGTE(FieldCardsYellow, v))
 }
 
-// CardsYellowLT applies the LT predicate on the "cardsYellow" field.
+// CardsYellowLT applies the LT predicate on the "CardsYellow" field.
 func CardsYellowLT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLT(FieldCardsYellow, v))
 }
 
-// CardsYellowLTE applies the LTE predicate on the "cardsYellow" field.
+// CardsYellowLTE applies the LTE predicate on the "CardsYellow" field.
 func CardsYellowLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldCardsYellow, v))
 }
 
-// CardYellowredEQ applies the EQ predicate on the "cardYellowred" field.
-func CardYellowredEQ(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldEQ(FieldCardYellowred, v))
+// CardYellowRedEQ applies the EQ predicate on the "CardYellowRed" field.
+func CardYellowRedEQ(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldEQ(FieldCardYellowRed, v))
 }
 
-// CardYellowredNEQ applies the NEQ predicate on the "cardYellowred" field.
-func CardYellowredNEQ(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldNEQ(FieldCardYellowred, v))
+// CardYellowRedNEQ applies the NEQ predicate on the "CardYellowRed" field.
+func CardYellowRedNEQ(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldNEQ(FieldCardYellowRed, v))
 }
 
-// CardYellowredIn applies the In predicate on the "cardYellowred" field.
-func CardYellowredIn(vs ...int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldIn(FieldCardYellowred, vs...))
+// CardYellowRedIn applies the In predicate on the "CardYellowRed" field.
+func CardYellowRedIn(vs ...int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldIn(FieldCardYellowRed, vs...))
 }
 
-// CardYellowredNotIn applies the NotIn predicate on the "cardYellowred" field.
-func CardYellowredNotIn(vs ...int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldNotIn(FieldCardYellowred, vs...))
+// CardYellowRedNotIn applies the NotIn predicate on the "CardYellowRed" field.
+func CardYellowRedNotIn(vs ...int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldNotIn(FieldCardYellowRed, vs...))
 }
 
-// CardYellowredGT applies the GT predicate on the "cardYellowred" field.
-func CardYellowredGT(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldGT(FieldCardYellowred, v))
+// CardYellowRedGT applies the GT predicate on the "CardYellowRed" field.
+func CardYellowRedGT(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldGT(FieldCardYellowRed, v))
 }
 
-// CardYellowredGTE applies the GTE predicate on the "cardYellowred" field.
-func CardYellowredGTE(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldGTE(FieldCardYellowred, v))
+// CardYellowRedGTE applies the GTE predicate on the "CardYellowRed" field.
+func CardYellowRedGTE(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldGTE(FieldCardYellowRed, v))
 }
 
-// CardYellowredLT applies the LT predicate on the "cardYellowred" field.
-func CardYellowredLT(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldLT(FieldCardYellowred, v))
+// CardYellowRedLT applies the LT predicate on the "CardYellowRed" field.
+func CardYellowRedLT(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldLT(FieldCardYellowRed, v))
 }
 
-// CardYellowredLTE applies the LTE predicate on the "cardYellowred" field.
-func CardYellowredLTE(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldLTE(FieldCardYellowred, v))
+// CardYellowRedLTE applies the LTE predicate on the "CardYellowRed" field.
+func CardYellowRedLTE(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldLTE(FieldCardYellowRed, v))
 }
 
-// CardsRedEQ applies the EQ predicate on the "cardsRed" field.
+// CardsRedEQ applies the EQ predicate on the "CardsRed" field.
 func CardsRedEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldCardsRed, v))
 }
 
-// CardsRedNEQ applies the NEQ predicate on the "cardsRed" field.
+// CardsRedNEQ applies the NEQ predicate on the "CardsRed" field.
 func CardsRedNEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNEQ(FieldCardsRed, v))
 }
 
-// CardsRedIn applies the In predicate on the "cardsRed" field.
+// CardsRedIn applies the In predicate on the "CardsRed" field.
 func CardsRedIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldIn(FieldCardsRed, vs...))
 }
 
-// CardsRedNotIn applies the NotIn predicate on the "cardsRed" field.
+// CardsRedNotIn applies the NotIn predicate on the "CardsRed" field.
 func CardsRedNotIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNotIn(FieldCardsRed, vs...))
 }
 
-// CardsRedGT applies the GT predicate on the "cardsRed" field.
+// CardsRedGT applies the GT predicate on the "CardsRed" field.
 func CardsRedGT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGT(FieldCardsRed, v))
 }
 
-// CardsRedGTE applies the GTE predicate on the "cardsRed" field.
+// CardsRedGTE applies the GTE predicate on the "CardsRed" field.
 func CardsRedGTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGTE(FieldCardsRed, v))
 }
 
-// CardsRedLT applies the LT predicate on the "cardsRed" field.
+// CardsRedLT applies the LT predicate on the "CardsRed" field.
 func CardsRedLT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLT(FieldCardsRed, v))
 }
 
-// CardsRedLTE applies the LTE predicate on the "cardsRed" field.
+// CardsRedLTE applies the LTE predicate on the "CardsRed" field.
 func CardsRedLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldCardsRed, v))
 }
 
-// PenaltyWonEQ applies the EQ predicate on the "penaltyWon" field.
+// PenaltyWonEQ applies the EQ predicate on the "PenaltyWon" field.
 func PenaltyWonEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyWon, v))
 }
 
-// PenaltyWonNEQ applies the NEQ predicate on the "penaltyWon" field.
+// PenaltyWonNEQ applies the NEQ predicate on the "PenaltyWon" field.
 func PenaltyWonNEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNEQ(FieldPenaltyWon, v))
 }
 
-// PenaltyWonIn applies the In predicate on the "penaltyWon" field.
+// PenaltyWonIn applies the In predicate on the "PenaltyWon" field.
 func PenaltyWonIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldIn(FieldPenaltyWon, vs...))
 }
 
-// PenaltyWonNotIn applies the NotIn predicate on the "penaltyWon" field.
+// PenaltyWonNotIn applies the NotIn predicate on the "PenaltyWon" field.
 func PenaltyWonNotIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNotIn(FieldPenaltyWon, vs...))
 }
 
-// PenaltyWonGT applies the GT predicate on the "penaltyWon" field.
+// PenaltyWonGT applies the GT predicate on the "PenaltyWon" field.
 func PenaltyWonGT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGT(FieldPenaltyWon, v))
 }
 
-// PenaltyWonGTE applies the GTE predicate on the "penaltyWon" field.
+// PenaltyWonGTE applies the GTE predicate on the "PenaltyWon" field.
 func PenaltyWonGTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGTE(FieldPenaltyWon, v))
 }
 
-// PenaltyWonLT applies the LT predicate on the "penaltyWon" field.
+// PenaltyWonLT applies the LT predicate on the "PenaltyWon" field.
 func PenaltyWonLT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLT(FieldPenaltyWon, v))
 }
 
-// PenaltyWonLTE applies the LTE predicate on the "penaltyWon" field.
+// PenaltyWonLTE applies the LTE predicate on the "PenaltyWon" field.
 func PenaltyWonLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldPenaltyWon, v))
 }
 
-// PenaltyCommitedEQ applies the EQ predicate on the "penaltyCommited" field.
-func PenaltyCommitedEQ(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyCommited, v))
+// PenaltyCommittedEQ applies the EQ predicate on the "PenaltyCommitted" field.
+func PenaltyCommittedEQ(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyCommitted, v))
 }
 
-// PenaltyCommitedNEQ applies the NEQ predicate on the "penaltyCommited" field.
-func PenaltyCommitedNEQ(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldNEQ(FieldPenaltyCommited, v))
+// PenaltyCommittedNEQ applies the NEQ predicate on the "PenaltyCommitted" field.
+func PenaltyCommittedNEQ(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldNEQ(FieldPenaltyCommitted, v))
 }
 
-// PenaltyCommitedIn applies the In predicate on the "penaltyCommited" field.
-func PenaltyCommitedIn(vs ...int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldIn(FieldPenaltyCommited, vs...))
+// PenaltyCommittedIn applies the In predicate on the "PenaltyCommitted" field.
+func PenaltyCommittedIn(vs ...int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldIn(FieldPenaltyCommitted, vs...))
 }
 
-// PenaltyCommitedNotIn applies the NotIn predicate on the "penaltyCommited" field.
-func PenaltyCommitedNotIn(vs ...int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldNotIn(FieldPenaltyCommited, vs...))
+// PenaltyCommittedNotIn applies the NotIn predicate on the "PenaltyCommitted" field.
+func PenaltyCommittedNotIn(vs ...int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldNotIn(FieldPenaltyCommitted, vs...))
 }
 
-// PenaltyCommitedGT applies the GT predicate on the "penaltyCommited" field.
-func PenaltyCommitedGT(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldGT(FieldPenaltyCommited, v))
+// PenaltyCommittedGT applies the GT predicate on the "PenaltyCommitted" field.
+func PenaltyCommittedGT(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldGT(FieldPenaltyCommitted, v))
 }
 
-// PenaltyCommitedGTE applies the GTE predicate on the "penaltyCommited" field.
-func PenaltyCommitedGTE(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldGTE(FieldPenaltyCommited, v))
+// PenaltyCommittedGTE applies the GTE predicate on the "PenaltyCommitted" field.
+func PenaltyCommittedGTE(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldGTE(FieldPenaltyCommitted, v))
 }
 
-// PenaltyCommitedLT applies the LT predicate on the "penaltyCommited" field.
-func PenaltyCommitedLT(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldLT(FieldPenaltyCommited, v))
+// PenaltyCommittedLT applies the LT predicate on the "PenaltyCommitted" field.
+func PenaltyCommittedLT(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldLT(FieldPenaltyCommitted, v))
 }
 
-// PenaltyCommitedLTE applies the LTE predicate on the "penaltyCommited" field.
-func PenaltyCommitedLTE(v int) predicate.PSPenalty {
-	return predicate.PSPenalty(sql.FieldLTE(FieldPenaltyCommited, v))
+// PenaltyCommittedLTE applies the LTE predicate on the "PenaltyCommitted" field.
+func PenaltyCommittedLTE(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldLTE(FieldPenaltyCommitted, v))
 }
 
-// PenaltyScoredEQ applies the EQ predicate on the "penaltyScored" field.
+// PenaltyScoredEQ applies the EQ predicate on the "PenaltyScored" field.
 func PenaltyScoredEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyScored, v))
 }
 
-// PenaltyScoredNEQ applies the NEQ predicate on the "penaltyScored" field.
+// PenaltyScoredNEQ applies the NEQ predicate on the "PenaltyScored" field.
 func PenaltyScoredNEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNEQ(FieldPenaltyScored, v))
 }
 
-// PenaltyScoredIn applies the In predicate on the "penaltyScored" field.
+// PenaltyScoredIn applies the In predicate on the "PenaltyScored" field.
 func PenaltyScoredIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldIn(FieldPenaltyScored, vs...))
 }
 
-// PenaltyScoredNotIn applies the NotIn predicate on the "penaltyScored" field.
+// PenaltyScoredNotIn applies the NotIn predicate on the "PenaltyScored" field.
 func PenaltyScoredNotIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNotIn(FieldPenaltyScored, vs...))
 }
 
-// PenaltyScoredGT applies the GT predicate on the "penaltyScored" field.
+// PenaltyScoredGT applies the GT predicate on the "PenaltyScored" field.
 func PenaltyScoredGT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGT(FieldPenaltyScored, v))
 }
 
-// PenaltyScoredGTE applies the GTE predicate on the "penaltyScored" field.
+// PenaltyScoredGTE applies the GTE predicate on the "PenaltyScored" field.
 func PenaltyScoredGTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGTE(FieldPenaltyScored, v))
 }
 
-// PenaltyScoredLT applies the LT predicate on the "penaltyScored" field.
+// PenaltyScoredLT applies the LT predicate on the "PenaltyScored" field.
 func PenaltyScoredLT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLT(FieldPenaltyScored, v))
 }
 
-// PenaltyScoredLTE applies the LTE predicate on the "penaltyScored" field.
+// PenaltyScoredLTE applies the LTE predicate on the "PenaltyScored" field.
 func PenaltyScoredLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldPenaltyScored, v))
 }
 
-// PenaltyMissedEQ applies the EQ predicate on the "penaltyMissed" field.
+// PenaltyMissedEQ applies the EQ predicate on the "PenaltyMissed" field.
 func PenaltyMissedEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltyMissed, v))
 }
 
-// PenaltyMissedNEQ applies the NEQ predicate on the "penaltyMissed" field.
+// PenaltyMissedNEQ applies the NEQ predicate on the "PenaltyMissed" field.
 func PenaltyMissedNEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNEQ(FieldPenaltyMissed, v))
 }
 
-// PenaltyMissedIn applies the In predicate on the "penaltyMissed" field.
+// PenaltyMissedIn applies the In predicate on the "PenaltyMissed" field.
 func PenaltyMissedIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldIn(FieldPenaltyMissed, vs...))
 }
 
-// PenaltyMissedNotIn applies the NotIn predicate on the "penaltyMissed" field.
+// PenaltyMissedNotIn applies the NotIn predicate on the "PenaltyMissed" field.
 func PenaltyMissedNotIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNotIn(FieldPenaltyMissed, vs...))
 }
 
-// PenaltyMissedGT applies the GT predicate on the "penaltyMissed" field.
+// PenaltyMissedGT applies the GT predicate on the "PenaltyMissed" field.
 func PenaltyMissedGT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGT(FieldPenaltyMissed, v))
 }
 
-// PenaltyMissedGTE applies the GTE predicate on the "penaltyMissed" field.
+// PenaltyMissedGTE applies the GTE predicate on the "PenaltyMissed" field.
 func PenaltyMissedGTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGTE(FieldPenaltyMissed, v))
 }
 
-// PenaltyMissedLT applies the LT predicate on the "penaltyMissed" field.
+// PenaltyMissedLT applies the LT predicate on the "PenaltyMissed" field.
 func PenaltyMissedLT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLT(FieldPenaltyMissed, v))
 }
 
-// PenaltyMissedLTE applies the LTE predicate on the "penaltyMissed" field.
+// PenaltyMissedLTE applies the LTE predicate on the "PenaltyMissed" field.
 func PenaltyMissedLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldPenaltyMissed, v))
 }
 
-// PenaltySavedEQ applies the EQ predicate on the "penaltySaved" field.
+// PenaltySavedEQ applies the EQ predicate on the "PenaltySaved" field.
 func PenaltySavedEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldPenaltySaved, v))
 }
 
-// PenaltySavedNEQ applies the NEQ predicate on the "penaltySaved" field.
+// PenaltySavedNEQ applies the NEQ predicate on the "PenaltySaved" field.
 func PenaltySavedNEQ(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNEQ(FieldPenaltySaved, v))
 }
 
-// PenaltySavedIn applies the In predicate on the "penaltySaved" field.
+// PenaltySavedIn applies the In predicate on the "PenaltySaved" field.
 func PenaltySavedIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldIn(FieldPenaltySaved, vs...))
 }
 
-// PenaltySavedNotIn applies the NotIn predicate on the "penaltySaved" field.
+// PenaltySavedNotIn applies the NotIn predicate on the "PenaltySaved" field.
 func PenaltySavedNotIn(vs ...int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldNotIn(FieldPenaltySaved, vs...))
 }
 
-// PenaltySavedGT applies the GT predicate on the "penaltySaved" field.
+// PenaltySavedGT applies the GT predicate on the "PenaltySaved" field.
 func PenaltySavedGT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGT(FieldPenaltySaved, v))
 }
 
-// PenaltySavedGTE applies the GTE predicate on the "penaltySaved" field.
+// PenaltySavedGTE applies the GTE predicate on the "PenaltySaved" field.
 func PenaltySavedGTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldGTE(FieldPenaltySaved, v))
 }
 
-// PenaltySavedLT applies the LT predicate on the "penaltySaved" field.
+// PenaltySavedLT applies the LT predicate on the "PenaltySaved" field.
 func PenaltySavedLT(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLT(FieldPenaltySaved, v))
 }
 
-// PenaltySavedLTE applies the LTE predicate on the "penaltySaved" field.
+// PenaltySavedLTE applies the LTE predicate on the "PenaltySaved" field.
 func PenaltySavedLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldPenaltySaved, v))
 }
@@ -508,7 +508,7 @@ func HasPlayerStats() predicate.PSPenalty {
 	return predicate.PSPenalty(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

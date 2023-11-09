@@ -5,10 +5,10 @@ import (
 	"context"
 )
 
-func CreatePSOffense(ctx context.Context, c *ent.Client, psoffense PSOffense, p *ent.Player) (*ent.PSOffense, error) {
+func CreatePSOffense(ctx context.Context, c *ent.Client, psoffense PSOffense, p *ent.PlayerStats) (*ent.PSOffense, error) {
 	return c.PSOffense.
 		Create().
-		SetPlayer(p).
+		SetPlayerStats(p).
 		SetDribbleAttempts(psoffense.DribbleAttempts).
 		SetDribbleSuccess(psoffense.DribbleSuccess).
 		SetDribblePast(psoffense.DribblePast).

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,45 +17,50 @@ type PSPenalty struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// FoulsDrawn holds the value of the "foulsDrawn" field.
-	FoulsDrawn int `json:"foulsDrawn,omitempty"`
-	// FoulsCommitted holds the value of the "foulsCommitted" field.
-	FoulsCommitted int `json:"foulsCommitted,omitempty"`
-	// CardsYellow holds the value of the "cardsYellow" field.
-	CardsYellow int `json:"cardsYellow,omitempty"`
-	// CardYellowred holds the value of the "cardYellowred" field.
-	CardYellowred int `json:"cardYellowred,omitempty"`
-	// CardsRed holds the value of the "cardsRed" field.
-	CardsRed int `json:"cardsRed,omitempty"`
-	// PenaltyWon holds the value of the "penaltyWon" field.
-	PenaltyWon int `json:"penaltyWon,omitempty"`
-	// PenaltyCommited holds the value of the "penaltyCommited" field.
-	PenaltyCommited int `json:"penaltyCommited,omitempty"`
-	// PenaltyScored holds the value of the "penaltyScored" field.
-	PenaltyScored int `json:"penaltyScored,omitempty"`
-	// PenaltyMissed holds the value of the "penaltyMissed" field.
-	PenaltyMissed int `json:"penaltyMissed,omitempty"`
-	// PenaltySaved holds the value of the "penaltySaved" field.
-	PenaltySaved int `json:"penaltySaved,omitempty"`
+	// FoulsDrawn holds the value of the "FoulsDrawn" field.
+	FoulsDrawn int `json:"FoulsDrawn,omitempty"`
+	// FoulsCommitted holds the value of the "FoulsCommitted" field.
+	FoulsCommitted int `json:"FoulsCommitted,omitempty"`
+	// CardsYellow holds the value of the "CardsYellow" field.
+	CardsYellow int `json:"CardsYellow,omitempty"`
+	// CardYellowRed holds the value of the "CardYellowRed" field.
+	CardYellowRed int `json:"CardYellowRed,omitempty"`
+	// CardsRed holds the value of the "CardsRed" field.
+	CardsRed int `json:"CardsRed,omitempty"`
+	// PenaltyWon holds the value of the "PenaltyWon" field.
+	PenaltyWon int `json:"PenaltyWon,omitempty"`
+	// PenaltyCommitted holds the value of the "PenaltyCommitted" field.
+	PenaltyCommitted int `json:"PenaltyCommitted,omitempty"`
+	// PenaltyScored holds the value of the "PenaltyScored" field.
+	PenaltyScored int `json:"PenaltyScored,omitempty"`
+	// PenaltyMissed holds the value of the "PenaltyMissed" field.
+	PenaltyMissed int `json:"PenaltyMissed,omitempty"`
+	// PenaltySaved holds the value of the "PenaltySaved" field.
+	PenaltySaved int `json:"PenaltySaved,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSPenaltyQuery when eager-loading is set.
-	Edges        PSPenaltyEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                  PSPenaltyEdges `json:"edges"`
+	player_stats_pspenalty *int
+	selectValues           sql.SelectValues
 }
 
 // PSPenaltyEdges holds the relations/edges for other nodes in the graph.
 type PSPenaltyEdges struct {
 	// PlayerStats holds the value of the playerStats edge.
-	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
+	PlayerStats *PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // PlayerStatsOrErr returns the PlayerStats value or an error if the edge
-// was not loaded in eager-loading.
-func (e PSPenaltyEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PSPenaltyEdges) PlayerStatsOrErr() (*PlayerStats, error) {
 	if e.loadedTypes[0] {
+		if e.PlayerStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: playerstats.Label}
+		}
 		return e.PlayerStats, nil
 	}
 	return nil, &NotLoadedError{edge: "playerStats"}
@@ -65,7 +71,9 @@ func (*PSPenalty) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pspenalty.FieldID, pspenalty.FieldFoulsDrawn, pspenalty.FieldFoulsCommitted, pspenalty.FieldCardsYellow, pspenalty.FieldCardYellowred, pspenalty.FieldCardsRed, pspenalty.FieldPenaltyWon, pspenalty.FieldPenaltyCommited, pspenalty.FieldPenaltyScored, pspenalty.FieldPenaltyMissed, pspenalty.FieldPenaltySaved:
+		case pspenalty.FieldID, pspenalty.FieldFoulsDrawn, pspenalty.FieldFoulsCommitted, pspenalty.FieldCardsYellow, pspenalty.FieldCardYellowRed, pspenalty.FieldCardsRed, pspenalty.FieldPenaltyWon, pspenalty.FieldPenaltyCommitted, pspenalty.FieldPenaltyScored, pspenalty.FieldPenaltyMissed, pspenalty.FieldPenaltySaved:
+			values[i] = new(sql.NullInt64)
+		case pspenalty.ForeignKeys[0]: // player_stats_pspenalty
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -90,63 +98,70 @@ func (pp *PSPenalty) assignValues(columns []string, values []any) error {
 			pp.ID = int(value.Int64)
 		case pspenalty.FieldFoulsDrawn:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field foulsDrawn", values[i])
+				return fmt.Errorf("unexpected type %T for field FoulsDrawn", values[i])
 			} else if value.Valid {
 				pp.FoulsDrawn = int(value.Int64)
 			}
 		case pspenalty.FieldFoulsCommitted:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field foulsCommitted", values[i])
+				return fmt.Errorf("unexpected type %T for field FoulsCommitted", values[i])
 			} else if value.Valid {
 				pp.FoulsCommitted = int(value.Int64)
 			}
 		case pspenalty.FieldCardsYellow:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field cardsYellow", values[i])
+				return fmt.Errorf("unexpected type %T for field CardsYellow", values[i])
 			} else if value.Valid {
 				pp.CardsYellow = int(value.Int64)
 			}
-		case pspenalty.FieldCardYellowred:
+		case pspenalty.FieldCardYellowRed:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field cardYellowred", values[i])
+				return fmt.Errorf("unexpected type %T for field CardYellowRed", values[i])
 			} else if value.Valid {
-				pp.CardYellowred = int(value.Int64)
+				pp.CardYellowRed = int(value.Int64)
 			}
 		case pspenalty.FieldCardsRed:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field cardsRed", values[i])
+				return fmt.Errorf("unexpected type %T for field CardsRed", values[i])
 			} else if value.Valid {
 				pp.CardsRed = int(value.Int64)
 			}
 		case pspenalty.FieldPenaltyWon:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field penaltyWon", values[i])
+				return fmt.Errorf("unexpected type %T for field PenaltyWon", values[i])
 			} else if value.Valid {
 				pp.PenaltyWon = int(value.Int64)
 			}
-		case pspenalty.FieldPenaltyCommited:
+		case pspenalty.FieldPenaltyCommitted:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field penaltyCommited", values[i])
+				return fmt.Errorf("unexpected type %T for field PenaltyCommitted", values[i])
 			} else if value.Valid {
-				pp.PenaltyCommited = int(value.Int64)
+				pp.PenaltyCommitted = int(value.Int64)
 			}
 		case pspenalty.FieldPenaltyScored:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field penaltyScored", values[i])
+				return fmt.Errorf("unexpected type %T for field PenaltyScored", values[i])
 			} else if value.Valid {
 				pp.PenaltyScored = int(value.Int64)
 			}
 		case pspenalty.FieldPenaltyMissed:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field penaltyMissed", values[i])
+				return fmt.Errorf("unexpected type %T for field PenaltyMissed", values[i])
 			} else if value.Valid {
 				pp.PenaltyMissed = int(value.Int64)
 			}
 		case pspenalty.FieldPenaltySaved:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field penaltySaved", values[i])
+				return fmt.Errorf("unexpected type %T for field PenaltySaved", values[i])
 			} else if value.Valid {
 				pp.PenaltySaved = int(value.Int64)
+			}
+		case pspenalty.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_pspenalty", value)
+			} else if value.Valid {
+				pp.player_stats_pspenalty = new(int)
+				*pp.player_stats_pspenalty = int(value.Int64)
 			}
 		default:
 			pp.selectValues.Set(columns[i], values[i])
@@ -189,34 +204,34 @@ func (pp *PSPenalty) String() string {
 	var builder strings.Builder
 	builder.WriteString("PSPenalty(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pp.ID))
-	builder.WriteString("foulsDrawn=")
+	builder.WriteString("FoulsDrawn=")
 	builder.WriteString(fmt.Sprintf("%v", pp.FoulsDrawn))
 	builder.WriteString(", ")
-	builder.WriteString("foulsCommitted=")
+	builder.WriteString("FoulsCommitted=")
 	builder.WriteString(fmt.Sprintf("%v", pp.FoulsCommitted))
 	builder.WriteString(", ")
-	builder.WriteString("cardsYellow=")
+	builder.WriteString("CardsYellow=")
 	builder.WriteString(fmt.Sprintf("%v", pp.CardsYellow))
 	builder.WriteString(", ")
-	builder.WriteString("cardYellowred=")
-	builder.WriteString(fmt.Sprintf("%v", pp.CardYellowred))
+	builder.WriteString("CardYellowRed=")
+	builder.WriteString(fmt.Sprintf("%v", pp.CardYellowRed))
 	builder.WriteString(", ")
-	builder.WriteString("cardsRed=")
+	builder.WriteString("CardsRed=")
 	builder.WriteString(fmt.Sprintf("%v", pp.CardsRed))
 	builder.WriteString(", ")
-	builder.WriteString("penaltyWon=")
+	builder.WriteString("PenaltyWon=")
 	builder.WriteString(fmt.Sprintf("%v", pp.PenaltyWon))
 	builder.WriteString(", ")
-	builder.WriteString("penaltyCommited=")
-	builder.WriteString(fmt.Sprintf("%v", pp.PenaltyCommited))
+	builder.WriteString("PenaltyCommitted=")
+	builder.WriteString(fmt.Sprintf("%v", pp.PenaltyCommitted))
 	builder.WriteString(", ")
-	builder.WriteString("penaltyScored=")
+	builder.WriteString("PenaltyScored=")
 	builder.WriteString(fmt.Sprintf("%v", pp.PenaltyScored))
 	builder.WriteString(", ")
-	builder.WriteString("penaltyMissed=")
+	builder.WriteString("PenaltyMissed=")
 	builder.WriteString(fmt.Sprintf("%v", pp.PenaltyMissed))
 	builder.WriteString(", ")
-	builder.WriteString("penaltySaved=")
+	builder.WriteString("PenaltySaved=")
 	builder.WriteString(fmt.Sprintf("%v", pp.PenaltySaved))
 	builder.WriteByte(')')
 	return builder.String()

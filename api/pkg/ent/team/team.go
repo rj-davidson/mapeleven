@@ -69,12 +69,12 @@ const (
 	// ClubColumn is the table column denoting the club relation/edge.
 	ClubColumn = "club_team"
 	// PlayerStatsTable is the table that holds the playerStats relation/edge.
-	PlayerStatsTable = "teams"
+	PlayerStatsTable = "player_stats"
 	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
 	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
 	PlayerStatsInverseTable = "player_stats"
 	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
-	PlayerStatsColumn = "player_stats_team"
+	PlayerStatsColumn = "team_player_stats"
 	// StandingsTable is the table that holds the standings relation/edge.
 	StandingsTable = "standings"
 	// StandingsInverseTable is the table name for the Standings entity.
@@ -186,7 +186,6 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"club_team",
-	"player_stats_team",
 	"season_teams",
 }
 
@@ -244,10 +243,17 @@ func ByClubField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByPlayerStatsField orders the results by playerStats field.
-func ByPlayerStatsField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByPlayerStatsCount orders the results by playerStats count.
+func ByPlayerStatsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborsCount(s, newPlayerStatsStep(), opts...)
+	}
+}
+
+// ByPlayerStats orders the results by playerStats terms.
+func ByPlayerStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -415,7 +421,7 @@ func newPlayerStatsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayerStatsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
+		sqlgraph.Edge(sqlgraph.O2M, false, PlayerStatsTable, PlayerStatsColumn),
 	)
 }
 func newStandingsStep() *sqlgraph.Step {

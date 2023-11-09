@@ -1,4 +1,3 @@
-// schemas/psgoals.go
 package schema
 
 import (
@@ -15,18 +14,20 @@ type PSGoals struct {
 // Fields of the PSGoals.
 func (PSGoals) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("totalGoals"),
-		field.Int("concededGoals"),
-		field.Int("assistGoals"),
-		field.Int("saveGoals").Default(0),
-		field.Int("shotsTotal"),
-		field.Int("shotsOn"),
+		field.Int("TotalGoals"),
+		field.Int("ConcededGoals"),
+		field.Int("AssistGoals"),
+		field.Int("SaveGoals").Default(0),
+		field.Int("ShotsTotal"),
+		field.Int("ShotsOn"),
 	}
 }
 
 // Edges of the PSGoals.
 func (PSGoals) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("playerStats", PlayerStats.Type).Ref("psgoals"),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("psgoals").
+			Unique(),
 	}
 }

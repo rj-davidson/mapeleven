@@ -53,227 +53,227 @@ func IDLTE(id int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldID, id))
 }
 
-// TacklesTotal applies equality check predicate on the "tacklesTotal" field. It's identical to TacklesTotalEQ.
+// TacklesTotal applies equality check predicate on the "TacklesTotal" field. It's identical to TacklesTotalEQ.
 func TacklesTotal(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldTacklesTotal, v))
 }
 
-// Blocks applies equality check predicate on the "blocks" field. It's identical to BlocksEQ.
+// Blocks applies equality check predicate on the "Blocks" field. It's identical to BlocksEQ.
 func Blocks(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldBlocks, v))
 }
 
-// Interceptions applies equality check predicate on the "interceptions" field. It's identical to InterceptionsEQ.
+// Interceptions applies equality check predicate on the "Interceptions" field. It's identical to InterceptionsEQ.
 func Interceptions(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldInterceptions, v))
 }
 
-// TotalDuels applies equality check predicate on the "totalDuels" field. It's identical to TotalDuelsEQ.
+// TotalDuels applies equality check predicate on the "TotalDuels" field. It's identical to TotalDuelsEQ.
 func TotalDuels(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldTotalDuels, v))
 }
 
-// WonDuels applies equality check predicate on the "wonDuels" field. It's identical to WonDuelsEQ.
+// WonDuels applies equality check predicate on the "WonDuels" field. It's identical to WonDuelsEQ.
 func WonDuels(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldWonDuels, v))
 }
 
-// TacklesTotalEQ applies the EQ predicate on the "tacklesTotal" field.
+// TacklesTotalEQ applies the EQ predicate on the "TacklesTotal" field.
 func TacklesTotalEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldTacklesTotal, v))
 }
 
-// TacklesTotalNEQ applies the NEQ predicate on the "tacklesTotal" field.
+// TacklesTotalNEQ applies the NEQ predicate on the "TacklesTotal" field.
 func TacklesTotalNEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNEQ(FieldTacklesTotal, v))
 }
 
-// TacklesTotalIn applies the In predicate on the "tacklesTotal" field.
+// TacklesTotalIn applies the In predicate on the "TacklesTotal" field.
 func TacklesTotalIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldIn(FieldTacklesTotal, vs...))
 }
 
-// TacklesTotalNotIn applies the NotIn predicate on the "tacklesTotal" field.
+// TacklesTotalNotIn applies the NotIn predicate on the "TacklesTotal" field.
 func TacklesTotalNotIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNotIn(FieldTacklesTotal, vs...))
 }
 
-// TacklesTotalGT applies the GT predicate on the "tacklesTotal" field.
+// TacklesTotalGT applies the GT predicate on the "TacklesTotal" field.
 func TacklesTotalGT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGT(FieldTacklesTotal, v))
 }
 
-// TacklesTotalGTE applies the GTE predicate on the "tacklesTotal" field.
+// TacklesTotalGTE applies the GTE predicate on the "TacklesTotal" field.
 func TacklesTotalGTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGTE(FieldTacklesTotal, v))
 }
 
-// TacklesTotalLT applies the LT predicate on the "tacklesTotal" field.
+// TacklesTotalLT applies the LT predicate on the "TacklesTotal" field.
 func TacklesTotalLT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLT(FieldTacklesTotal, v))
 }
 
-// TacklesTotalLTE applies the LTE predicate on the "tacklesTotal" field.
+// TacklesTotalLTE applies the LTE predicate on the "TacklesTotal" field.
 func TacklesTotalLTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldTacklesTotal, v))
 }
 
-// BlocksEQ applies the EQ predicate on the "blocks" field.
+// BlocksEQ applies the EQ predicate on the "Blocks" field.
 func BlocksEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldBlocks, v))
 }
 
-// BlocksNEQ applies the NEQ predicate on the "blocks" field.
+// BlocksNEQ applies the NEQ predicate on the "Blocks" field.
 func BlocksNEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNEQ(FieldBlocks, v))
 }
 
-// BlocksIn applies the In predicate on the "blocks" field.
+// BlocksIn applies the In predicate on the "Blocks" field.
 func BlocksIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldIn(FieldBlocks, vs...))
 }
 
-// BlocksNotIn applies the NotIn predicate on the "blocks" field.
+// BlocksNotIn applies the NotIn predicate on the "Blocks" field.
 func BlocksNotIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNotIn(FieldBlocks, vs...))
 }
 
-// BlocksGT applies the GT predicate on the "blocks" field.
+// BlocksGT applies the GT predicate on the "Blocks" field.
 func BlocksGT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGT(FieldBlocks, v))
 }
 
-// BlocksGTE applies the GTE predicate on the "blocks" field.
+// BlocksGTE applies the GTE predicate on the "Blocks" field.
 func BlocksGTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGTE(FieldBlocks, v))
 }
 
-// BlocksLT applies the LT predicate on the "blocks" field.
+// BlocksLT applies the LT predicate on the "Blocks" field.
 func BlocksLT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLT(FieldBlocks, v))
 }
 
-// BlocksLTE applies the LTE predicate on the "blocks" field.
+// BlocksLTE applies the LTE predicate on the "Blocks" field.
 func BlocksLTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldBlocks, v))
 }
 
-// InterceptionsEQ applies the EQ predicate on the "interceptions" field.
+// InterceptionsEQ applies the EQ predicate on the "Interceptions" field.
 func InterceptionsEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldInterceptions, v))
 }
 
-// InterceptionsNEQ applies the NEQ predicate on the "interceptions" field.
+// InterceptionsNEQ applies the NEQ predicate on the "Interceptions" field.
 func InterceptionsNEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNEQ(FieldInterceptions, v))
 }
 
-// InterceptionsIn applies the In predicate on the "interceptions" field.
+// InterceptionsIn applies the In predicate on the "Interceptions" field.
 func InterceptionsIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldIn(FieldInterceptions, vs...))
 }
 
-// InterceptionsNotIn applies the NotIn predicate on the "interceptions" field.
+// InterceptionsNotIn applies the NotIn predicate on the "Interceptions" field.
 func InterceptionsNotIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNotIn(FieldInterceptions, vs...))
 }
 
-// InterceptionsGT applies the GT predicate on the "interceptions" field.
+// InterceptionsGT applies the GT predicate on the "Interceptions" field.
 func InterceptionsGT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGT(FieldInterceptions, v))
 }
 
-// InterceptionsGTE applies the GTE predicate on the "interceptions" field.
+// InterceptionsGTE applies the GTE predicate on the "Interceptions" field.
 func InterceptionsGTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGTE(FieldInterceptions, v))
 }
 
-// InterceptionsLT applies the LT predicate on the "interceptions" field.
+// InterceptionsLT applies the LT predicate on the "Interceptions" field.
 func InterceptionsLT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLT(FieldInterceptions, v))
 }
 
-// InterceptionsLTE applies the LTE predicate on the "interceptions" field.
+// InterceptionsLTE applies the LTE predicate on the "Interceptions" field.
 func InterceptionsLTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldInterceptions, v))
 }
 
-// TotalDuelsEQ applies the EQ predicate on the "totalDuels" field.
+// TotalDuelsEQ applies the EQ predicate on the "TotalDuels" field.
 func TotalDuelsEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldTotalDuels, v))
 }
 
-// TotalDuelsNEQ applies the NEQ predicate on the "totalDuels" field.
+// TotalDuelsNEQ applies the NEQ predicate on the "TotalDuels" field.
 func TotalDuelsNEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNEQ(FieldTotalDuels, v))
 }
 
-// TotalDuelsIn applies the In predicate on the "totalDuels" field.
+// TotalDuelsIn applies the In predicate on the "TotalDuels" field.
 func TotalDuelsIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldIn(FieldTotalDuels, vs...))
 }
 
-// TotalDuelsNotIn applies the NotIn predicate on the "totalDuels" field.
+// TotalDuelsNotIn applies the NotIn predicate on the "TotalDuels" field.
 func TotalDuelsNotIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNotIn(FieldTotalDuels, vs...))
 }
 
-// TotalDuelsGT applies the GT predicate on the "totalDuels" field.
+// TotalDuelsGT applies the GT predicate on the "TotalDuels" field.
 func TotalDuelsGT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGT(FieldTotalDuels, v))
 }
 
-// TotalDuelsGTE applies the GTE predicate on the "totalDuels" field.
+// TotalDuelsGTE applies the GTE predicate on the "TotalDuels" field.
 func TotalDuelsGTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGTE(FieldTotalDuels, v))
 }
 
-// TotalDuelsLT applies the LT predicate on the "totalDuels" field.
+// TotalDuelsLT applies the LT predicate on the "TotalDuels" field.
 func TotalDuelsLT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLT(FieldTotalDuels, v))
 }
 
-// TotalDuelsLTE applies the LTE predicate on the "totalDuels" field.
+// TotalDuelsLTE applies the LTE predicate on the "TotalDuels" field.
 func TotalDuelsLTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldTotalDuels, v))
 }
 
-// WonDuelsEQ applies the EQ predicate on the "wonDuels" field.
+// WonDuelsEQ applies the EQ predicate on the "WonDuels" field.
 func WonDuelsEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldWonDuels, v))
 }
 
-// WonDuelsNEQ applies the NEQ predicate on the "wonDuels" field.
+// WonDuelsNEQ applies the NEQ predicate on the "WonDuels" field.
 func WonDuelsNEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNEQ(FieldWonDuels, v))
 }
 
-// WonDuelsIn applies the In predicate on the "wonDuels" field.
+// WonDuelsIn applies the In predicate on the "WonDuels" field.
 func WonDuelsIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldIn(FieldWonDuels, vs...))
 }
 
-// WonDuelsNotIn applies the NotIn predicate on the "wonDuels" field.
+// WonDuelsNotIn applies the NotIn predicate on the "WonDuels" field.
 func WonDuelsNotIn(vs ...int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldNotIn(FieldWonDuels, vs...))
 }
 
-// WonDuelsGT applies the GT predicate on the "wonDuels" field.
+// WonDuelsGT applies the GT predicate on the "WonDuels" field.
 func WonDuelsGT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGT(FieldWonDuels, v))
 }
 
-// WonDuelsGTE applies the GTE predicate on the "wonDuels" field.
+// WonDuelsGTE applies the GTE predicate on the "WonDuels" field.
 func WonDuelsGTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldGTE(FieldWonDuels, v))
 }
 
-// WonDuelsLT applies the LT predicate on the "wonDuels" field.
+// WonDuelsLT applies the LT predicate on the "WonDuels" field.
 func WonDuelsLT(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLT(FieldWonDuels, v))
 }
 
-// WonDuelsLTE applies the LTE predicate on the "wonDuels" field.
+// WonDuelsLTE applies the LTE predicate on the "WonDuels" field.
 func WonDuelsLTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldWonDuels, v))
 }
@@ -283,7 +283,7 @@ func HasPlayerStats() predicate.PSDefense {
 	return predicate.PSDefense(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

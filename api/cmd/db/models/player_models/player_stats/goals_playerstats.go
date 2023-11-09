@@ -5,10 +5,10 @@ import (
 	"context"
 )
 
-func CreatePSGoals(ctx context.Context, c *ent.Client, psgoals PSGoals, p *ent.Player) (*ent.PSGoals, error) {
+func CreatePSGoals(ctx context.Context, c *ent.Client, psgoals PSGoals, p *ent.PlayerStats) (*ent.PSGoals, error) {
 	return c.PSGoals.
 		Create().
-		SetPlayer(p).
+		SetPlayerStats(p).
 		SetTotalGoals(psgoals.TotalGoals).
 		SetConcededGoals(psgoals.ConcededGoals).
 		SetAssistGoals(psgoals.AssistGoals).

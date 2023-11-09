@@ -15,11 +15,11 @@ type PSGames struct {
 	Captain     bool
 }
 
-func CreatePSGames(ctx context.Context, c *ent.Client, psgames PSGames, p *ent.Player) (*ent.PSGames, error) {
+func CreatePSGames(ctx context.Context, c *ent.Client, psgames PSGames, p *ent.PlayerStats) (*ent.PSGames, error) {
 	return c.PSGames.
 		Create().
-		SetPlayer(p).
-		SetAppearences(psgames.Appearences).
+		SetPlayerStats(p).
+		SetAppearances(psgames.Appearences).
 		SetLineups(psgames.Lineups).
 		SetMinutes(psgames.Minutes).
 		SetNumber(psgames.Number).
@@ -32,7 +32,7 @@ func CreatePSGames(ctx context.Context, c *ent.Client, psgames PSGames, p *ent.P
 func UpdatePSGames(ctx context.Context, c *ent.Client, psgames PSGames, ps *ent.PSGames) (*ent.PSGames, error) {
 	return c.PSGames.
 		UpdateOne(ps).
-		SetAppearences(psgames.Appearences).
+		SetAppearances(psgames.Appearences).
 		SetLineups(psgames.Lineups).
 		SetMinutes(psgames.Minutes).
 		SetNumber(psgames.Number).
@@ -40,4 +40,5 @@ func UpdatePSGames(ctx context.Context, c *ent.Client, psgames PSGames, ps *ent.
 		SetRating(psgames.Rating).
 		SetCaptain(psgames.Captain).
 		Save(ctx)
+
 }

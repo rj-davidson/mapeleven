@@ -17,6 +17,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -68,19 +69,23 @@ func (psc *PlayerStatsCreate) SetPlayer(p *Player) *PlayerStatsCreate {
 	return psc.SetPlayerID(p.ID)
 }
 
-// AddTeamIDs adds the "team" edge to the Team entity by IDs.
-func (psc *PlayerStatsCreate) AddTeamIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddTeamIDs(ids...)
+// SetTeamID sets the "team" edge to the Team entity by ID.
+func (psc *PlayerStatsCreate) SetTeamID(id int) *PlayerStatsCreate {
+	psc.mutation.SetTeamID(id)
 	return psc
 }
 
-// AddTeam adds the "team" edges to the Team entity.
-func (psc *PlayerStatsCreate) AddTeam(t ...*Team) *PlayerStatsCreate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTeamID sets the "team" edge to the Team entity by ID if the given value is not nil.
+func (psc *PlayerStatsCreate) SetNillableTeamID(id *int) *PlayerStatsCreate {
+	if id != nil {
+		psc = psc.SetTeamID(*id)
 	}
-	return psc.AddTeamIDs(ids...)
+	return psc
+}
+
+// SetTeam sets the "team" edge to the Team entity.
+func (psc *PlayerStatsCreate) SetTeam(t *Team) *PlayerStatsCreate {
+	return psc.SetTeamID(t.ID)
 }
 
 // AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by IDs.
@@ -203,6 +208,21 @@ func (psc *PlayerStatsCreate) AddPspenalty(p ...*PSPenalty) *PlayerStatsCreate {
 	return psc.AddPspenaltyIDs(ids...)
 }
 
+// AddSeasonIDs adds the "season" edge to the Season entity by IDs.
+func (psc *PlayerStatsCreate) AddSeasonIDs(ids ...int) *PlayerStatsCreate {
+	psc.mutation.AddSeasonIDs(ids...)
+	return psc
+}
+
+// AddSeason adds the "season" edges to the Season entity.
+func (psc *PlayerStatsCreate) AddSeason(s ...*Season) *PlayerStatsCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return psc.AddSeasonIDs(ids...)
+}
+
 // Mutation returns the PlayerStatsMutation object of the builder.
 func (psc *PlayerStatsCreate) Mutation() *PlayerStatsMutation {
 	return psc.mutation
@@ -302,8 +322,8 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   playerstats.TeamTable,
 			Columns: []string{playerstats.TeamColumn},
 			Bidi:    false,
@@ -314,6 +334,7 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.team_player_stats = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := psc.mutation.PlayerEventsIDs(); len(nodes) > 0 {
@@ -366,10 +387,10 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsgamesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgamesTable,
-			Columns: playerstats.PsgamesPrimaryKey,
+			Columns: []string{playerstats.PsgamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt),
@@ -382,10 +403,10 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsgoalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgoalsTable,
-			Columns: playerstats.PsgoalsPrimaryKey,
+			Columns: []string{playerstats.PsgoalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgoals.FieldID, field.TypeInt),
@@ -398,10 +419,10 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsdefenseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsdefenseTable,
-			Columns: playerstats.PsdefensePrimaryKey,
+			Columns: []string{playerstats.PsdefenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psdefense.FieldID, field.TypeInt),
@@ -414,10 +435,10 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsoffenseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsoffenseTable,
-			Columns: playerstats.PsoffensePrimaryKey,
+			Columns: []string{playerstats.PsoffenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psoffense.FieldID, field.TypeInt),
@@ -430,13 +451,29 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PspenaltyIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PspenaltyTable,
-			Columns: playerstats.PspenaltyPrimaryKey,
+			Columns: []string{playerstats.PspenaltyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pspenalty.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := psc.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   playerstats.SeasonTable,
+			Columns: playerstats.SeasonPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

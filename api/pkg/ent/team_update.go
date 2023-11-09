@@ -106,23 +106,19 @@ func (tu *TeamUpdate) SetClub(c *Club) *TeamUpdate {
 	return tu.SetClubID(c.ID)
 }
 
-// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
-func (tu *TeamUpdate) SetPlayerStatsID(id int) *TeamUpdate {
-	tu.mutation.SetPlayerStatsID(id)
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (tu *TeamUpdate) AddPlayerStatIDs(ids ...int) *TeamUpdate {
+	tu.mutation.AddPlayerStatIDs(ids...)
 	return tu
 }
 
-// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
-func (tu *TeamUpdate) SetNillablePlayerStatsID(id *int) *TeamUpdate {
-	if id != nil {
-		tu = tu.SetPlayerStatsID(*id)
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (tu *TeamUpdate) AddPlayerStats(p ...*PlayerStats) *TeamUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return tu
-}
-
-// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
-func (tu *TeamUpdate) SetPlayerStats(p *PlayerStats) *TeamUpdate {
-	return tu.SetPlayerStatsID(p.ID)
+	return tu.AddPlayerStatIDs(ids...)
 }
 
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
@@ -380,10 +376,25 @@ func (tu *TeamUpdate) ClearClub() *TeamUpdate {
 	return tu
 }
 
-// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
 func (tu *TeamUpdate) ClearPlayerStats() *TeamUpdate {
 	tu.mutation.ClearPlayerStats()
 	return tu
+}
+
+// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
+func (tu *TeamUpdate) RemovePlayerStatIDs(ids ...int) *TeamUpdate {
+	tu.mutation.RemovePlayerStatIDs(ids...)
+	return tu
+}
+
+// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
+func (tu *TeamUpdate) RemovePlayerStats(p ...*PlayerStats) *TeamUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tu.RemovePlayerStatIDs(ids...)
 }
 
 // ClearStandings clears all "standings" edges to the Standings entity.
@@ -703,8 +714,8 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   team.PlayerStatsTable,
 			Columns: []string{team.PlayerStatsColumn},
 			Bidi:    false,
@@ -714,10 +725,26 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := tu.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !tu.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.PlayerStatsTable,
+			Columns: []string{team.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := tu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   team.PlayerStatsTable,
 			Columns: []string{team.PlayerStatsColumn},
 			Bidi:    false,
@@ -1330,23 +1357,19 @@ func (tuo *TeamUpdateOne) SetClub(c *Club) *TeamUpdateOne {
 	return tuo.SetClubID(c.ID)
 }
 
-// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
-func (tuo *TeamUpdateOne) SetPlayerStatsID(id int) *TeamUpdateOne {
-	tuo.mutation.SetPlayerStatsID(id)
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (tuo *TeamUpdateOne) AddPlayerStatIDs(ids ...int) *TeamUpdateOne {
+	tuo.mutation.AddPlayerStatIDs(ids...)
 	return tuo
 }
 
-// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
-func (tuo *TeamUpdateOne) SetNillablePlayerStatsID(id *int) *TeamUpdateOne {
-	if id != nil {
-		tuo = tuo.SetPlayerStatsID(*id)
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (tuo *TeamUpdateOne) AddPlayerStats(p ...*PlayerStats) *TeamUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
 	}
-	return tuo
-}
-
-// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
-func (tuo *TeamUpdateOne) SetPlayerStats(p *PlayerStats) *TeamUpdateOne {
-	return tuo.SetPlayerStatsID(p.ID)
+	return tuo.AddPlayerStatIDs(ids...)
 }
 
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
@@ -1604,10 +1627,25 @@ func (tuo *TeamUpdateOne) ClearClub() *TeamUpdateOne {
 	return tuo
 }
 
-// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
 func (tuo *TeamUpdateOne) ClearPlayerStats() *TeamUpdateOne {
 	tuo.mutation.ClearPlayerStats()
 	return tuo
+}
+
+// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
+func (tuo *TeamUpdateOne) RemovePlayerStatIDs(ids ...int) *TeamUpdateOne {
+	tuo.mutation.RemovePlayerStatIDs(ids...)
+	return tuo
+}
+
+// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
+func (tuo *TeamUpdateOne) RemovePlayerStats(p ...*PlayerStats) *TeamUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tuo.RemovePlayerStatIDs(ids...)
 }
 
 // ClearStandings clears all "standings" edges to the Standings entity.
@@ -1957,8 +1995,8 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 	}
 	if tuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   team.PlayerStatsTable,
 			Columns: []string{team.PlayerStatsColumn},
 			Bidi:    false,
@@ -1968,10 +2006,26 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
+	if nodes := tuo.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !tuo.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.PlayerStatsTable,
+			Columns: []string{team.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
 	if nodes := tuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: true,
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
 			Table:   team.PlayerStatsTable,
 			Columns: []string{team.PlayerStatsColumn},
 			Bidi:    false,

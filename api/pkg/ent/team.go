@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/tsbiggest"
@@ -33,11 +32,10 @@ type Team struct {
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TeamQuery when eager-loading is set.
-	Edges             TeamEdges `json:"edges"`
-	club_team         *int
-	player_stats_team *int
-	season_teams      *int
-	selectValues      sql.SelectValues
+	Edges        TeamEdges `json:"edges"`
+	club_team    *int
+	season_teams *int
+	selectValues sql.SelectValues
 }
 
 // TeamEdges holds the relations/edges for other nodes in the graph.
@@ -47,7 +45,7 @@ type TeamEdges struct {
 	// Club holds the value of the club edge.
 	Club *Club `json:"club,omitempty"`
 	// PlayerStats holds the value of the playerStats edge.
-	PlayerStats *PlayerStats `json:"playerStats,omitempty"`
+	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
 	// Standings holds the value of the standings edge.
 	Standings []*Standings `json:"standings,omitempty"`
 	// HomeFixtures holds the value of the homeFixtures edge.
@@ -108,13 +106,9 @@ func (e TeamEdges) ClubOrErr() (*Club, error) {
 }
 
 // PlayerStatsOrErr returns the PlayerStats value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e TeamEdges) PlayerStatsOrErr() (*PlayerStats, error) {
+// was not loaded in eager-loading.
+func (e TeamEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
 	if e.loadedTypes[2] {
-		if e.PlayerStats == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: playerstats.Label}
-		}
 		return e.PlayerStats, nil
 	}
 	return nil, &NotLoadedError{edge: "playerStats"}
@@ -287,9 +281,7 @@ func (*Team) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case team.ForeignKeys[0]: // club_team
 			values[i] = new(sql.NullInt64)
-		case team.ForeignKeys[1]: // player_stats_team
-			values[i] = new(sql.NullInt64)
-		case team.ForeignKeys[2]: // season_teams
+		case team.ForeignKeys[1]: // season_teams
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -332,13 +324,6 @@ func (t *Team) assignValues(columns []string, values []any) error {
 				*t.club_team = int(value.Int64)
 			}
 		case team.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_stats_team", value)
-			} else if value.Valid {
-				t.player_stats_team = new(int)
-				*t.player_stats_team = int(value.Int64)
-			}
-		case team.ForeignKeys[2]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field season_teams", value)
 			} else if value.Valid {

@@ -5,17 +5,17 @@ import (
 	"context"
 )
 
-func CreatePSPenalty(ctx context.Context, c *ent.Client, pspenalty PSPenalty, p *ent.Player) (*ent.PSPenalty, error) {
+func CreatePSPenalty(ctx context.Context, c *ent.Client, pspenalty PSPenalty, p *ent.PlayerStats) (*ent.PSPenalty, error) {
 	return c.PSPenalty.
 		Create().
-		SetPlayer(p).
+		SetPlayerStats(p).
+		SetPenaltyCommitted(pspenalty.PenaltyCommited).
 		SetFoulsDrawn(pspenalty.FoulsDrawn).
 		SetFoulsCommitted(pspenalty.FoulsCommitted).
 		SetCardsYellow(pspenalty.CardsYellow).
-		SetCardYellowred(pspenalty.CardYellowred).
+		SetCardYellowRed(pspenalty.CardYellowred).
 		SetCardsRed(pspenalty.CardsRed).
 		SetPenaltyWon(pspenalty.PenaltyWon).
-		SetPenaltyCommited(pspenalty.PenaltyCommited).
 		SetPenaltyScored(pspenalty.PenaltyScored).
 		SetPenaltyMissed(pspenalty.PenaltyMissed).
 		SetPenaltySaved(pspenalty.PenaltySaved).
@@ -25,13 +25,13 @@ func CreatePSPenalty(ctx context.Context, c *ent.Client, pspenalty PSPenalty, p 
 func UpdatePSPenalty(ctx context.Context, c *ent.Client, pspenalty PSPenalty, ps *ent.PSPenalty) (*ent.PSPenalty, error) {
 	return c.PSPenalty.
 		UpdateOne(ps).
+		SetPenaltyCommitted(pspenalty.PenaltyCommited).
 		SetFoulsDrawn(pspenalty.FoulsDrawn).
 		SetFoulsCommitted(pspenalty.FoulsCommitted).
 		SetCardsYellow(pspenalty.CardsYellow).
-		SetCardYellowred(pspenalty.CardYellowred).
+		SetCardYellowRed(pspenalty.CardYellowred).
 		SetCardsRed(pspenalty.CardsRed).
 		SetPenaltyWon(pspenalty.PenaltyWon).
-		SetPenaltyCommited(pspenalty.PenaltyCommited).
 		SetPenaltyScored(pspenalty.PenaltyScored).
 		SetPenaltyMissed(pspenalty.PenaltyMissed).
 		SetPenaltySaved(pspenalty.PenaltySaved).

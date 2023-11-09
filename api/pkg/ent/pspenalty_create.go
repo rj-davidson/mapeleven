@@ -20,43 +20,43 @@ type PSPenaltyCreate struct {
 	hooks    []Hook
 }
 
-// SetFoulsDrawn sets the "foulsDrawn" field.
+// SetFoulsDrawn sets the "FoulsDrawn" field.
 func (ppc *PSPenaltyCreate) SetFoulsDrawn(i int) *PSPenaltyCreate {
 	ppc.mutation.SetFoulsDrawn(i)
 	return ppc
 }
 
-// SetFoulsCommitted sets the "foulsCommitted" field.
+// SetFoulsCommitted sets the "FoulsCommitted" field.
 func (ppc *PSPenaltyCreate) SetFoulsCommitted(i int) *PSPenaltyCreate {
 	ppc.mutation.SetFoulsCommitted(i)
 	return ppc
 }
 
-// SetCardsYellow sets the "cardsYellow" field.
+// SetCardsYellow sets the "CardsYellow" field.
 func (ppc *PSPenaltyCreate) SetCardsYellow(i int) *PSPenaltyCreate {
 	ppc.mutation.SetCardsYellow(i)
 	return ppc
 }
 
-// SetCardYellowred sets the "cardYellowred" field.
-func (ppc *PSPenaltyCreate) SetCardYellowred(i int) *PSPenaltyCreate {
-	ppc.mutation.SetCardYellowred(i)
+// SetCardYellowRed sets the "CardYellowRed" field.
+func (ppc *PSPenaltyCreate) SetCardYellowRed(i int) *PSPenaltyCreate {
+	ppc.mutation.SetCardYellowRed(i)
 	return ppc
 }
 
-// SetCardsRed sets the "cardsRed" field.
+// SetCardsRed sets the "CardsRed" field.
 func (ppc *PSPenaltyCreate) SetCardsRed(i int) *PSPenaltyCreate {
 	ppc.mutation.SetCardsRed(i)
 	return ppc
 }
 
-// SetPenaltyWon sets the "penaltyWon" field.
+// SetPenaltyWon sets the "PenaltyWon" field.
 func (ppc *PSPenaltyCreate) SetPenaltyWon(i int) *PSPenaltyCreate {
 	ppc.mutation.SetPenaltyWon(i)
 	return ppc
 }
 
-// SetNillablePenaltyWon sets the "penaltyWon" field if the given value is not nil.
+// SetNillablePenaltyWon sets the "PenaltyWon" field if the given value is not nil.
 func (ppc *PSPenaltyCreate) SetNillablePenaltyWon(i *int) *PSPenaltyCreate {
 	if i != nil {
 		ppc.SetPenaltyWon(*i)
@@ -64,27 +64,27 @@ func (ppc *PSPenaltyCreate) SetNillablePenaltyWon(i *int) *PSPenaltyCreate {
 	return ppc
 }
 
-// SetPenaltyCommited sets the "penaltyCommited" field.
-func (ppc *PSPenaltyCreate) SetPenaltyCommited(i int) *PSPenaltyCreate {
-	ppc.mutation.SetPenaltyCommited(i)
+// SetPenaltyCommitted sets the "PenaltyCommitted" field.
+func (ppc *PSPenaltyCreate) SetPenaltyCommitted(i int) *PSPenaltyCreate {
+	ppc.mutation.SetPenaltyCommitted(i)
 	return ppc
 }
 
-// SetNillablePenaltyCommited sets the "penaltyCommited" field if the given value is not nil.
-func (ppc *PSPenaltyCreate) SetNillablePenaltyCommited(i *int) *PSPenaltyCreate {
+// SetNillablePenaltyCommitted sets the "PenaltyCommitted" field if the given value is not nil.
+func (ppc *PSPenaltyCreate) SetNillablePenaltyCommitted(i *int) *PSPenaltyCreate {
 	if i != nil {
-		ppc.SetPenaltyCommited(*i)
+		ppc.SetPenaltyCommitted(*i)
 	}
 	return ppc
 }
 
-// SetPenaltyScored sets the "penaltyScored" field.
+// SetPenaltyScored sets the "PenaltyScored" field.
 func (ppc *PSPenaltyCreate) SetPenaltyScored(i int) *PSPenaltyCreate {
 	ppc.mutation.SetPenaltyScored(i)
 	return ppc
 }
 
-// SetNillablePenaltyScored sets the "penaltyScored" field if the given value is not nil.
+// SetNillablePenaltyScored sets the "PenaltyScored" field if the given value is not nil.
 func (ppc *PSPenaltyCreate) SetNillablePenaltyScored(i *int) *PSPenaltyCreate {
 	if i != nil {
 		ppc.SetPenaltyScored(*i)
@@ -92,19 +92,19 @@ func (ppc *PSPenaltyCreate) SetNillablePenaltyScored(i *int) *PSPenaltyCreate {
 	return ppc
 }
 
-// SetPenaltyMissed sets the "penaltyMissed" field.
+// SetPenaltyMissed sets the "PenaltyMissed" field.
 func (ppc *PSPenaltyCreate) SetPenaltyMissed(i int) *PSPenaltyCreate {
 	ppc.mutation.SetPenaltyMissed(i)
 	return ppc
 }
 
-// SetPenaltySaved sets the "penaltySaved" field.
+// SetPenaltySaved sets the "PenaltySaved" field.
 func (ppc *PSPenaltyCreate) SetPenaltySaved(i int) *PSPenaltyCreate {
 	ppc.mutation.SetPenaltySaved(i)
 	return ppc
 }
 
-// SetNillablePenaltySaved sets the "penaltySaved" field if the given value is not nil.
+// SetNillablePenaltySaved sets the "PenaltySaved" field if the given value is not nil.
 func (ppc *PSPenaltyCreate) SetNillablePenaltySaved(i *int) *PSPenaltyCreate {
 	if i != nil {
 		ppc.SetPenaltySaved(*i)
@@ -112,19 +112,23 @@ func (ppc *PSPenaltyCreate) SetNillablePenaltySaved(i *int) *PSPenaltyCreate {
 	return ppc
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (ppc *PSPenaltyCreate) AddPlayerStatIDs(ids ...int) *PSPenaltyCreate {
-	ppc.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (ppc *PSPenaltyCreate) SetPlayerStatsID(id int) *PSPenaltyCreate {
+	ppc.mutation.SetPlayerStatsID(id)
 	return ppc
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (ppc *PSPenaltyCreate) AddPlayerStats(p ...*PlayerStats) *PSPenaltyCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (ppc *PSPenaltyCreate) SetNillablePlayerStatsID(id *int) *PSPenaltyCreate {
+	if id != nil {
+		ppc = ppc.SetPlayerStatsID(*id)
 	}
-	return ppc.AddPlayerStatIDs(ids...)
+	return ppc
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (ppc *PSPenaltyCreate) SetPlayerStats(p *PlayerStats) *PSPenaltyCreate {
+	return ppc.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSPenaltyMutation object of the builder.
@@ -166,9 +170,9 @@ func (ppc *PSPenaltyCreate) defaults() {
 		v := pspenalty.DefaultPenaltyWon
 		ppc.mutation.SetPenaltyWon(v)
 	}
-	if _, ok := ppc.mutation.PenaltyCommited(); !ok {
-		v := pspenalty.DefaultPenaltyCommited
-		ppc.mutation.SetPenaltyCommited(v)
+	if _, ok := ppc.mutation.PenaltyCommitted(); !ok {
+		v := pspenalty.DefaultPenaltyCommitted
+		ppc.mutation.SetPenaltyCommitted(v)
 	}
 	if _, ok := ppc.mutation.PenaltyScored(); !ok {
 		v := pspenalty.DefaultPenaltyScored
@@ -183,34 +187,34 @@ func (ppc *PSPenaltyCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (ppc *PSPenaltyCreate) check() error {
 	if _, ok := ppc.mutation.FoulsDrawn(); !ok {
-		return &ValidationError{Name: "foulsDrawn", err: errors.New(`ent: missing required field "PSPenalty.foulsDrawn"`)}
+		return &ValidationError{Name: "FoulsDrawn", err: errors.New(`ent: missing required field "PSPenalty.FoulsDrawn"`)}
 	}
 	if _, ok := ppc.mutation.FoulsCommitted(); !ok {
-		return &ValidationError{Name: "foulsCommitted", err: errors.New(`ent: missing required field "PSPenalty.foulsCommitted"`)}
+		return &ValidationError{Name: "FoulsCommitted", err: errors.New(`ent: missing required field "PSPenalty.FoulsCommitted"`)}
 	}
 	if _, ok := ppc.mutation.CardsYellow(); !ok {
-		return &ValidationError{Name: "cardsYellow", err: errors.New(`ent: missing required field "PSPenalty.cardsYellow"`)}
+		return &ValidationError{Name: "CardsYellow", err: errors.New(`ent: missing required field "PSPenalty.CardsYellow"`)}
 	}
-	if _, ok := ppc.mutation.CardYellowred(); !ok {
-		return &ValidationError{Name: "cardYellowred", err: errors.New(`ent: missing required field "PSPenalty.cardYellowred"`)}
+	if _, ok := ppc.mutation.CardYellowRed(); !ok {
+		return &ValidationError{Name: "CardYellowRed", err: errors.New(`ent: missing required field "PSPenalty.CardYellowRed"`)}
 	}
 	if _, ok := ppc.mutation.CardsRed(); !ok {
-		return &ValidationError{Name: "cardsRed", err: errors.New(`ent: missing required field "PSPenalty.cardsRed"`)}
+		return &ValidationError{Name: "CardsRed", err: errors.New(`ent: missing required field "PSPenalty.CardsRed"`)}
 	}
 	if _, ok := ppc.mutation.PenaltyWon(); !ok {
-		return &ValidationError{Name: "penaltyWon", err: errors.New(`ent: missing required field "PSPenalty.penaltyWon"`)}
+		return &ValidationError{Name: "PenaltyWon", err: errors.New(`ent: missing required field "PSPenalty.PenaltyWon"`)}
 	}
-	if _, ok := ppc.mutation.PenaltyCommited(); !ok {
-		return &ValidationError{Name: "penaltyCommited", err: errors.New(`ent: missing required field "PSPenalty.penaltyCommited"`)}
+	if _, ok := ppc.mutation.PenaltyCommitted(); !ok {
+		return &ValidationError{Name: "PenaltyCommitted", err: errors.New(`ent: missing required field "PSPenalty.PenaltyCommitted"`)}
 	}
 	if _, ok := ppc.mutation.PenaltyScored(); !ok {
-		return &ValidationError{Name: "penaltyScored", err: errors.New(`ent: missing required field "PSPenalty.penaltyScored"`)}
+		return &ValidationError{Name: "PenaltyScored", err: errors.New(`ent: missing required field "PSPenalty.PenaltyScored"`)}
 	}
 	if _, ok := ppc.mutation.PenaltyMissed(); !ok {
-		return &ValidationError{Name: "penaltyMissed", err: errors.New(`ent: missing required field "PSPenalty.penaltyMissed"`)}
+		return &ValidationError{Name: "PenaltyMissed", err: errors.New(`ent: missing required field "PSPenalty.PenaltyMissed"`)}
 	}
 	if _, ok := ppc.mutation.PenaltySaved(); !ok {
-		return &ValidationError{Name: "penaltySaved", err: errors.New(`ent: missing required field "PSPenalty.penaltySaved"`)}
+		return &ValidationError{Name: "PenaltySaved", err: errors.New(`ent: missing required field "PSPenalty.PenaltySaved"`)}
 	}
 	return nil
 }
@@ -250,9 +254,9 @@ func (ppc *PSPenaltyCreate) createSpec() (*PSPenalty, *sqlgraph.CreateSpec) {
 		_spec.SetField(pspenalty.FieldCardsYellow, field.TypeInt, value)
 		_node.CardsYellow = value
 	}
-	if value, ok := ppc.mutation.CardYellowred(); ok {
-		_spec.SetField(pspenalty.FieldCardYellowred, field.TypeInt, value)
-		_node.CardYellowred = value
+	if value, ok := ppc.mutation.CardYellowRed(); ok {
+		_spec.SetField(pspenalty.FieldCardYellowRed, field.TypeInt, value)
+		_node.CardYellowRed = value
 	}
 	if value, ok := ppc.mutation.CardsRed(); ok {
 		_spec.SetField(pspenalty.FieldCardsRed, field.TypeInt, value)
@@ -262,9 +266,9 @@ func (ppc *PSPenaltyCreate) createSpec() (*PSPenalty, *sqlgraph.CreateSpec) {
 		_spec.SetField(pspenalty.FieldPenaltyWon, field.TypeInt, value)
 		_node.PenaltyWon = value
 	}
-	if value, ok := ppc.mutation.PenaltyCommited(); ok {
-		_spec.SetField(pspenalty.FieldPenaltyCommited, field.TypeInt, value)
-		_node.PenaltyCommited = value
+	if value, ok := ppc.mutation.PenaltyCommitted(); ok {
+		_spec.SetField(pspenalty.FieldPenaltyCommitted, field.TypeInt, value)
+		_node.PenaltyCommitted = value
 	}
 	if value, ok := ppc.mutation.PenaltyScored(); ok {
 		_spec.SetField(pspenalty.FieldPenaltyScored, field.TypeInt, value)
@@ -280,10 +284,10 @@ func (ppc *PSPenaltyCreate) createSpec() (*PSPenalty, *sqlgraph.CreateSpec) {
 	}
 	if nodes := ppc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
-			Columns: pspenalty.PlayerStatsPrimaryKey,
+			Columns: []string{pspenalty.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
@@ -292,6 +296,7 @@ func (ppc *PSPenaltyCreate) createSpec() (*PSPenalty, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.player_stats_pspenalty = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

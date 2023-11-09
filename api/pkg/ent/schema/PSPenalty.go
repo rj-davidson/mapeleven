@@ -1,4 +1,3 @@
-// schemas/pspenalty.go
 package schema
 
 import (
@@ -15,22 +14,24 @@ type PSPenalty struct {
 // Fields of the PSPenalty.
 func (PSPenalty) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("foulsDrawn"),
-		field.Int("foulsCommitted"),
-		field.Int("cardsYellow"),
-		field.Int("cardYellowred"),
-		field.Int("cardsRed"),
-		field.Int("penaltyWon").Default(0),
-		field.Int("penaltyCommited").Default(0),
-		field.Int("penaltyScored").Default(0),
-		field.Int("penaltyMissed"),
-		field.Int("penaltySaved").Default(0),
+		field.Int("FoulsDrawn"),
+		field.Int("FoulsCommitted"),
+		field.Int("CardsYellow"),
+		field.Int("CardYellowRed"),
+		field.Int("CardsRed"),
+		field.Int("PenaltyWon").Default(0),
+		field.Int("PenaltyCommitted").Default(0),
+		field.Int("PenaltyScored").Default(0),
+		field.Int("PenaltyMissed"),
+		field.Int("PenaltySaved").Default(0),
 	}
 }
 
 // Edges of the PSPenalty.
 func (PSPenalty) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("playerStats", PlayerStats.Type).Ref("pspenalty"),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("pspenalty").
+			Unique(),
 	}
 }

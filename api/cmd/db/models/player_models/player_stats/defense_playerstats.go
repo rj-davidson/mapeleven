@@ -5,10 +5,10 @@ import (
 	"context"
 )
 
-func CreatePSDefense(ctx context.Context, c *ent.Client, psdefense PSDefense, p *ent.Player) (*ent.PSDefense, error) {
+func CreatePSDefense(ctx context.Context, c *ent.Client, psdefense PSDefense, p *ent.PlayerStats) (*ent.PSDefense, error) {
 	return c.PSDefense.
 		Create().
-		SetPlayer(p).
+		SetPlayerStats(p).
 		SetTacklesTotal(psdefense.TacklesTotal).
 		SetBlocks(psdefense.Blocks).
 		SetInterceptions(psdefense.Interceptions).

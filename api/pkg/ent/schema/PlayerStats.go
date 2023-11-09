@@ -31,7 +31,9 @@ func (PlayerStats) Edges() []ent.Edge {
 		edge.From("player", Player.Type).
 			Ref("playerStats").
 			Unique(),
-		edge.To("team", Team.Type),
+		edge.From("team", Team.Type).
+			Ref("playerStats").
+			Unique(),
 		edge.To("playerEvents", FixtureEvents.Type),
 		edge.To("matchPlayer", MatchPlayer.Type),
 		edge.To("assistEvents", FixtureEvents.Type),
@@ -40,5 +42,6 @@ func (PlayerStats) Edges() []ent.Edge {
 		edge.To("psdefense", PSDefense.Type),
 		edge.To("psoffense", PSOffense.Type),
 		edge.To("pspenalty", PSPenalty.Type),
+		edge.To("season", Season.Type),
 	}
 }

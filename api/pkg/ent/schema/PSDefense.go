@@ -14,17 +14,19 @@ type PSDefense struct {
 // Fields of the PSDefense.
 func (PSDefense) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("tacklesTotal"),
-		field.Int("blocks").Default(0),
-		field.Int("interceptions"),
-		field.Int("totalDuels"),
-		field.Int("wonDuels"),
+		field.Int("TacklesTotal"),
+		field.Int("Blocks").Default(0),
+		field.Int("Interceptions"),
+		field.Int("TotalDuels"),
+		field.Int("WonDuels"),
 	}
 }
 
 // Edges of the PSDefense.
 func (PSDefense) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("playerStats", PlayerStats.Type).Ref("psdefense"),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("psdefense").
+			Unique(),
 	}
 }

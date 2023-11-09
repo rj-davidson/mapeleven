@@ -28,27 +28,27 @@ func (pdu *PSDefenseUpdate) Where(ps ...predicate.PSDefense) *PSDefenseUpdate {
 	return pdu
 }
 
-// SetTacklesTotal sets the "tacklesTotal" field.
+// SetTacklesTotal sets the "TacklesTotal" field.
 func (pdu *PSDefenseUpdate) SetTacklesTotal(i int) *PSDefenseUpdate {
 	pdu.mutation.ResetTacklesTotal()
 	pdu.mutation.SetTacklesTotal(i)
 	return pdu
 }
 
-// AddTacklesTotal adds i to the "tacklesTotal" field.
+// AddTacklesTotal adds i to the "TacklesTotal" field.
 func (pdu *PSDefenseUpdate) AddTacklesTotal(i int) *PSDefenseUpdate {
 	pdu.mutation.AddTacklesTotal(i)
 	return pdu
 }
 
-// SetBlocks sets the "blocks" field.
+// SetBlocks sets the "Blocks" field.
 func (pdu *PSDefenseUpdate) SetBlocks(i int) *PSDefenseUpdate {
 	pdu.mutation.ResetBlocks()
 	pdu.mutation.SetBlocks(i)
 	return pdu
 }
 
-// SetNillableBlocks sets the "blocks" field if the given value is not nil.
+// SetNillableBlocks sets the "Blocks" field if the given value is not nil.
 func (pdu *PSDefenseUpdate) SetNillableBlocks(i *int) *PSDefenseUpdate {
 	if i != nil {
 		pdu.SetBlocks(*i)
@@ -56,64 +56,68 @@ func (pdu *PSDefenseUpdate) SetNillableBlocks(i *int) *PSDefenseUpdate {
 	return pdu
 }
 
-// AddBlocks adds i to the "blocks" field.
+// AddBlocks adds i to the "Blocks" field.
 func (pdu *PSDefenseUpdate) AddBlocks(i int) *PSDefenseUpdate {
 	pdu.mutation.AddBlocks(i)
 	return pdu
 }
 
-// SetInterceptions sets the "interceptions" field.
+// SetInterceptions sets the "Interceptions" field.
 func (pdu *PSDefenseUpdate) SetInterceptions(i int) *PSDefenseUpdate {
 	pdu.mutation.ResetInterceptions()
 	pdu.mutation.SetInterceptions(i)
 	return pdu
 }
 
-// AddInterceptions adds i to the "interceptions" field.
+// AddInterceptions adds i to the "Interceptions" field.
 func (pdu *PSDefenseUpdate) AddInterceptions(i int) *PSDefenseUpdate {
 	pdu.mutation.AddInterceptions(i)
 	return pdu
 }
 
-// SetTotalDuels sets the "totalDuels" field.
+// SetTotalDuels sets the "TotalDuels" field.
 func (pdu *PSDefenseUpdate) SetTotalDuels(i int) *PSDefenseUpdate {
 	pdu.mutation.ResetTotalDuels()
 	pdu.mutation.SetTotalDuels(i)
 	return pdu
 }
 
-// AddTotalDuels adds i to the "totalDuels" field.
+// AddTotalDuels adds i to the "TotalDuels" field.
 func (pdu *PSDefenseUpdate) AddTotalDuels(i int) *PSDefenseUpdate {
 	pdu.mutation.AddTotalDuels(i)
 	return pdu
 }
 
-// SetWonDuels sets the "wonDuels" field.
+// SetWonDuels sets the "WonDuels" field.
 func (pdu *PSDefenseUpdate) SetWonDuels(i int) *PSDefenseUpdate {
 	pdu.mutation.ResetWonDuels()
 	pdu.mutation.SetWonDuels(i)
 	return pdu
 }
 
-// AddWonDuels adds i to the "wonDuels" field.
+// AddWonDuels adds i to the "WonDuels" field.
 func (pdu *PSDefenseUpdate) AddWonDuels(i int) *PSDefenseUpdate {
 	pdu.mutation.AddWonDuels(i)
 	return pdu
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (pdu *PSDefenseUpdate) AddPlayerStatIDs(ids ...int) *PSDefenseUpdate {
-	pdu.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pdu *PSDefenseUpdate) SetPlayerStatsID(id int) *PSDefenseUpdate {
+	pdu.mutation.SetPlayerStatsID(id)
 	return pdu
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (pdu *PSDefenseUpdate) AddPlayerStats(p ...*PlayerStats) *PSDefenseUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pdu *PSDefenseUpdate) SetNillablePlayerStatsID(id *int) *PSDefenseUpdate {
+	if id != nil {
+		pdu = pdu.SetPlayerStatsID(*id)
 	}
-	return pdu.AddPlayerStatIDs(ids...)
+	return pdu
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pdu *PSDefenseUpdate) SetPlayerStats(p *PlayerStats) *PSDefenseUpdate {
+	return pdu.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSDefenseMutation object of the builder.
@@ -121,25 +125,10 @@ func (pdu *PSDefenseUpdate) Mutation() *PSDefenseMutation {
 	return pdu.mutation
 }
 
-// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
 func (pdu *PSDefenseUpdate) ClearPlayerStats() *PSDefenseUpdate {
 	pdu.mutation.ClearPlayerStats()
 	return pdu
-}
-
-// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
-func (pdu *PSDefenseUpdate) RemovePlayerStatIDs(ids ...int) *PSDefenseUpdate {
-	pdu.mutation.RemovePlayerStatIDs(ids...)
-	return pdu
-}
-
-// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
-func (pdu *PSDefenseUpdate) RemovePlayerStats(p ...*PlayerStats) *PSDefenseUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pdu.RemovePlayerStatIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -210,39 +199,23 @@ func (pdu *PSDefenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pdu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
-			Columns: psdefense.PlayerStatsPrimaryKey,
+			Columns: []string{psdefense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pdu.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !pdu.mutation.PlayerStatsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   psdefense.PlayerStatsTable,
-			Columns: psdefense.PlayerStatsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := pdu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
-			Columns: psdefense.PlayerStatsPrimaryKey,
+			Columns: []string{psdefense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
@@ -273,27 +246,27 @@ type PSDefenseUpdateOne struct {
 	mutation *PSDefenseMutation
 }
 
-// SetTacklesTotal sets the "tacklesTotal" field.
+// SetTacklesTotal sets the "TacklesTotal" field.
 func (pduo *PSDefenseUpdateOne) SetTacklesTotal(i int) *PSDefenseUpdateOne {
 	pduo.mutation.ResetTacklesTotal()
 	pduo.mutation.SetTacklesTotal(i)
 	return pduo
 }
 
-// AddTacklesTotal adds i to the "tacklesTotal" field.
+// AddTacklesTotal adds i to the "TacklesTotal" field.
 func (pduo *PSDefenseUpdateOne) AddTacklesTotal(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddTacklesTotal(i)
 	return pduo
 }
 
-// SetBlocks sets the "blocks" field.
+// SetBlocks sets the "Blocks" field.
 func (pduo *PSDefenseUpdateOne) SetBlocks(i int) *PSDefenseUpdateOne {
 	pduo.mutation.ResetBlocks()
 	pduo.mutation.SetBlocks(i)
 	return pduo
 }
 
-// SetNillableBlocks sets the "blocks" field if the given value is not nil.
+// SetNillableBlocks sets the "Blocks" field if the given value is not nil.
 func (pduo *PSDefenseUpdateOne) SetNillableBlocks(i *int) *PSDefenseUpdateOne {
 	if i != nil {
 		pduo.SetBlocks(*i)
@@ -301,64 +274,68 @@ func (pduo *PSDefenseUpdateOne) SetNillableBlocks(i *int) *PSDefenseUpdateOne {
 	return pduo
 }
 
-// AddBlocks adds i to the "blocks" field.
+// AddBlocks adds i to the "Blocks" field.
 func (pduo *PSDefenseUpdateOne) AddBlocks(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddBlocks(i)
 	return pduo
 }
 
-// SetInterceptions sets the "interceptions" field.
+// SetInterceptions sets the "Interceptions" field.
 func (pduo *PSDefenseUpdateOne) SetInterceptions(i int) *PSDefenseUpdateOne {
 	pduo.mutation.ResetInterceptions()
 	pduo.mutation.SetInterceptions(i)
 	return pduo
 }
 
-// AddInterceptions adds i to the "interceptions" field.
+// AddInterceptions adds i to the "Interceptions" field.
 func (pduo *PSDefenseUpdateOne) AddInterceptions(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddInterceptions(i)
 	return pduo
 }
 
-// SetTotalDuels sets the "totalDuels" field.
+// SetTotalDuels sets the "TotalDuels" field.
 func (pduo *PSDefenseUpdateOne) SetTotalDuels(i int) *PSDefenseUpdateOne {
 	pduo.mutation.ResetTotalDuels()
 	pduo.mutation.SetTotalDuels(i)
 	return pduo
 }
 
-// AddTotalDuels adds i to the "totalDuels" field.
+// AddTotalDuels adds i to the "TotalDuels" field.
 func (pduo *PSDefenseUpdateOne) AddTotalDuels(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddTotalDuels(i)
 	return pduo
 }
 
-// SetWonDuels sets the "wonDuels" field.
+// SetWonDuels sets the "WonDuels" field.
 func (pduo *PSDefenseUpdateOne) SetWonDuels(i int) *PSDefenseUpdateOne {
 	pduo.mutation.ResetWonDuels()
 	pduo.mutation.SetWonDuels(i)
 	return pduo
 }
 
-// AddWonDuels adds i to the "wonDuels" field.
+// AddWonDuels adds i to the "WonDuels" field.
 func (pduo *PSDefenseUpdateOne) AddWonDuels(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddWonDuels(i)
 	return pduo
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (pduo *PSDefenseUpdateOne) AddPlayerStatIDs(ids ...int) *PSDefenseUpdateOne {
-	pduo.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pduo *PSDefenseUpdateOne) SetPlayerStatsID(id int) *PSDefenseUpdateOne {
+	pduo.mutation.SetPlayerStatsID(id)
 	return pduo
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (pduo *PSDefenseUpdateOne) AddPlayerStats(p ...*PlayerStats) *PSDefenseUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pduo *PSDefenseUpdateOne) SetNillablePlayerStatsID(id *int) *PSDefenseUpdateOne {
+	if id != nil {
+		pduo = pduo.SetPlayerStatsID(*id)
 	}
-	return pduo.AddPlayerStatIDs(ids...)
+	return pduo
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pduo *PSDefenseUpdateOne) SetPlayerStats(p *PlayerStats) *PSDefenseUpdateOne {
+	return pduo.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSDefenseMutation object of the builder.
@@ -366,25 +343,10 @@ func (pduo *PSDefenseUpdateOne) Mutation() *PSDefenseMutation {
 	return pduo.mutation
 }
 
-// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
 func (pduo *PSDefenseUpdateOne) ClearPlayerStats() *PSDefenseUpdateOne {
 	pduo.mutation.ClearPlayerStats()
 	return pduo
-}
-
-// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
-func (pduo *PSDefenseUpdateOne) RemovePlayerStatIDs(ids ...int) *PSDefenseUpdateOne {
-	pduo.mutation.RemovePlayerStatIDs(ids...)
-	return pduo
-}
-
-// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
-func (pduo *PSDefenseUpdateOne) RemovePlayerStats(p ...*PlayerStats) *PSDefenseUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pduo.RemovePlayerStatIDs(ids...)
 }
 
 // Where appends a list predicates to the PSDefenseUpdate builder.
@@ -485,39 +447,23 @@ func (pduo *PSDefenseUpdateOne) sqlSave(ctx context.Context) (_node *PSDefense, 
 	}
 	if pduo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
-			Columns: psdefense.PlayerStatsPrimaryKey,
+			Columns: []string{psdefense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pduo.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !pduo.mutation.PlayerStatsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   psdefense.PlayerStatsTable,
-			Columns: psdefense.PlayerStatsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := pduo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
-			Columns: psdefense.PlayerStatsPrimaryKey,
+			Columns: []string{psdefense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),

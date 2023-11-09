@@ -28,11 +28,13 @@ const (
 	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the psgoals in the database.
 	Table = "ps_goals"
-	// PlayerStatsTable is the table that holds the playerStats relation/edge. The primary key declared below.
-	PlayerStatsTable = "player_stats_psgoals"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge.
+	PlayerStatsTable = "ps_goals"
 	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
 	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
 	PlayerStatsInverseTable = "player_stats"
+	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
+	PlayerStatsColumn = "player_stats_psgoals"
 )
 
 // Columns holds all SQL columns for psgoals fields.
@@ -46,11 +48,11 @@ var Columns = []string{
 	FieldShotsOn,
 }
 
-var (
-	// PlayerStatsPrimaryKey and PlayerStatsColumn2 are the table columns denoting the
-	// primary key for the playerStats relation (M2M).
-	PlayerStatsPrimaryKey = []string{"player_stats_id", "ps_goals_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "ps_goals"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"player_stats_psgoals",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -59,11 +61,16 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
-	// DefaultSaveGoals holds the default value on creation for the "saveGoals" field.
+	// DefaultSaveGoals holds the default value on creation for the "SaveGoals" field.
 	DefaultSaveGoals int
 )
 
@@ -75,53 +82,46 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByTotalGoals orders the results by the totalGoals field.
+// ByTotalGoals orders the results by the TotalGoals field.
 func ByTotalGoals(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTotalGoals, opts...).ToFunc()
 }
 
-// ByConcededGoals orders the results by the concededGoals field.
+// ByConcededGoals orders the results by the ConcededGoals field.
 func ByConcededGoals(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldConcededGoals, opts...).ToFunc()
 }
 
-// ByAssistGoals orders the results by the assistGoals field.
+// ByAssistGoals orders the results by the AssistGoals field.
 func ByAssistGoals(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldAssistGoals, opts...).ToFunc()
 }
 
-// BySaveGoals orders the results by the saveGoals field.
+// BySaveGoals orders the results by the SaveGoals field.
 func BySaveGoals(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSaveGoals, opts...).ToFunc()
 }
 
-// ByShotsTotal orders the results by the shotsTotal field.
+// ByShotsTotal orders the results by the ShotsTotal field.
 func ByShotsTotal(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldShotsTotal, opts...).ToFunc()
 }
 
-// ByShotsOn orders the results by the shotsOn field.
+// ByShotsOn orders the results by the ShotsOn field.
 func ByShotsOn(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldShotsOn, opts...).ToFunc()
 }
 
-// ByPlayerStatsCount orders the results by playerStats count.
-func ByPlayerStatsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPlayerStatsField orders the results by playerStats field.
+func ByPlayerStatsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlayerStatsStep(), opts...)
-	}
-}
-
-// ByPlayerStats orders the results by playerStats terms.
-func ByPlayerStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newPlayerStatsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayerStatsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 	)
 }

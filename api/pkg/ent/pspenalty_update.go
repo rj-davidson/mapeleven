@@ -28,79 +28,79 @@ func (ppu *PSPenaltyUpdate) Where(ps ...predicate.PSPenalty) *PSPenaltyUpdate {
 	return ppu
 }
 
-// SetFoulsDrawn sets the "foulsDrawn" field.
+// SetFoulsDrawn sets the "FoulsDrawn" field.
 func (ppu *PSPenaltyUpdate) SetFoulsDrawn(i int) *PSPenaltyUpdate {
 	ppu.mutation.ResetFoulsDrawn()
 	ppu.mutation.SetFoulsDrawn(i)
 	return ppu
 }
 
-// AddFoulsDrawn adds i to the "foulsDrawn" field.
+// AddFoulsDrawn adds i to the "FoulsDrawn" field.
 func (ppu *PSPenaltyUpdate) AddFoulsDrawn(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddFoulsDrawn(i)
 	return ppu
 }
 
-// SetFoulsCommitted sets the "foulsCommitted" field.
+// SetFoulsCommitted sets the "FoulsCommitted" field.
 func (ppu *PSPenaltyUpdate) SetFoulsCommitted(i int) *PSPenaltyUpdate {
 	ppu.mutation.ResetFoulsCommitted()
 	ppu.mutation.SetFoulsCommitted(i)
 	return ppu
 }
 
-// AddFoulsCommitted adds i to the "foulsCommitted" field.
+// AddFoulsCommitted adds i to the "FoulsCommitted" field.
 func (ppu *PSPenaltyUpdate) AddFoulsCommitted(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddFoulsCommitted(i)
 	return ppu
 }
 
-// SetCardsYellow sets the "cardsYellow" field.
+// SetCardsYellow sets the "CardsYellow" field.
 func (ppu *PSPenaltyUpdate) SetCardsYellow(i int) *PSPenaltyUpdate {
 	ppu.mutation.ResetCardsYellow()
 	ppu.mutation.SetCardsYellow(i)
 	return ppu
 }
 
-// AddCardsYellow adds i to the "cardsYellow" field.
+// AddCardsYellow adds i to the "CardsYellow" field.
 func (ppu *PSPenaltyUpdate) AddCardsYellow(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddCardsYellow(i)
 	return ppu
 }
 
-// SetCardYellowred sets the "cardYellowred" field.
-func (ppu *PSPenaltyUpdate) SetCardYellowred(i int) *PSPenaltyUpdate {
-	ppu.mutation.ResetCardYellowred()
-	ppu.mutation.SetCardYellowred(i)
+// SetCardYellowRed sets the "CardYellowRed" field.
+func (ppu *PSPenaltyUpdate) SetCardYellowRed(i int) *PSPenaltyUpdate {
+	ppu.mutation.ResetCardYellowRed()
+	ppu.mutation.SetCardYellowRed(i)
 	return ppu
 }
 
-// AddCardYellowred adds i to the "cardYellowred" field.
-func (ppu *PSPenaltyUpdate) AddCardYellowred(i int) *PSPenaltyUpdate {
-	ppu.mutation.AddCardYellowred(i)
+// AddCardYellowRed adds i to the "CardYellowRed" field.
+func (ppu *PSPenaltyUpdate) AddCardYellowRed(i int) *PSPenaltyUpdate {
+	ppu.mutation.AddCardYellowRed(i)
 	return ppu
 }
 
-// SetCardsRed sets the "cardsRed" field.
+// SetCardsRed sets the "CardsRed" field.
 func (ppu *PSPenaltyUpdate) SetCardsRed(i int) *PSPenaltyUpdate {
 	ppu.mutation.ResetCardsRed()
 	ppu.mutation.SetCardsRed(i)
 	return ppu
 }
 
-// AddCardsRed adds i to the "cardsRed" field.
+// AddCardsRed adds i to the "CardsRed" field.
 func (ppu *PSPenaltyUpdate) AddCardsRed(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddCardsRed(i)
 	return ppu
 }
 
-// SetPenaltyWon sets the "penaltyWon" field.
+// SetPenaltyWon sets the "PenaltyWon" field.
 func (ppu *PSPenaltyUpdate) SetPenaltyWon(i int) *PSPenaltyUpdate {
 	ppu.mutation.ResetPenaltyWon()
 	ppu.mutation.SetPenaltyWon(i)
 	return ppu
 }
 
-// SetNillablePenaltyWon sets the "penaltyWon" field if the given value is not nil.
+// SetNillablePenaltyWon sets the "PenaltyWon" field if the given value is not nil.
 func (ppu *PSPenaltyUpdate) SetNillablePenaltyWon(i *int) *PSPenaltyUpdate {
 	if i != nil {
 		ppu.SetPenaltyWon(*i)
@@ -108,41 +108,41 @@ func (ppu *PSPenaltyUpdate) SetNillablePenaltyWon(i *int) *PSPenaltyUpdate {
 	return ppu
 }
 
-// AddPenaltyWon adds i to the "penaltyWon" field.
+// AddPenaltyWon adds i to the "PenaltyWon" field.
 func (ppu *PSPenaltyUpdate) AddPenaltyWon(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddPenaltyWon(i)
 	return ppu
 }
 
-// SetPenaltyCommited sets the "penaltyCommited" field.
-func (ppu *PSPenaltyUpdate) SetPenaltyCommited(i int) *PSPenaltyUpdate {
-	ppu.mutation.ResetPenaltyCommited()
-	ppu.mutation.SetPenaltyCommited(i)
+// SetPenaltyCommitted sets the "PenaltyCommitted" field.
+func (ppu *PSPenaltyUpdate) SetPenaltyCommitted(i int) *PSPenaltyUpdate {
+	ppu.mutation.ResetPenaltyCommitted()
+	ppu.mutation.SetPenaltyCommitted(i)
 	return ppu
 }
 
-// SetNillablePenaltyCommited sets the "penaltyCommited" field if the given value is not nil.
-func (ppu *PSPenaltyUpdate) SetNillablePenaltyCommited(i *int) *PSPenaltyUpdate {
+// SetNillablePenaltyCommitted sets the "PenaltyCommitted" field if the given value is not nil.
+func (ppu *PSPenaltyUpdate) SetNillablePenaltyCommitted(i *int) *PSPenaltyUpdate {
 	if i != nil {
-		ppu.SetPenaltyCommited(*i)
+		ppu.SetPenaltyCommitted(*i)
 	}
 	return ppu
 }
 
-// AddPenaltyCommited adds i to the "penaltyCommited" field.
-func (ppu *PSPenaltyUpdate) AddPenaltyCommited(i int) *PSPenaltyUpdate {
-	ppu.mutation.AddPenaltyCommited(i)
+// AddPenaltyCommitted adds i to the "PenaltyCommitted" field.
+func (ppu *PSPenaltyUpdate) AddPenaltyCommitted(i int) *PSPenaltyUpdate {
+	ppu.mutation.AddPenaltyCommitted(i)
 	return ppu
 }
 
-// SetPenaltyScored sets the "penaltyScored" field.
+// SetPenaltyScored sets the "PenaltyScored" field.
 func (ppu *PSPenaltyUpdate) SetPenaltyScored(i int) *PSPenaltyUpdate {
 	ppu.mutation.ResetPenaltyScored()
 	ppu.mutation.SetPenaltyScored(i)
 	return ppu
 }
 
-// SetNillablePenaltyScored sets the "penaltyScored" field if the given value is not nil.
+// SetNillablePenaltyScored sets the "PenaltyScored" field if the given value is not nil.
 func (ppu *PSPenaltyUpdate) SetNillablePenaltyScored(i *int) *PSPenaltyUpdate {
 	if i != nil {
 		ppu.SetPenaltyScored(*i)
@@ -150,33 +150,33 @@ func (ppu *PSPenaltyUpdate) SetNillablePenaltyScored(i *int) *PSPenaltyUpdate {
 	return ppu
 }
 
-// AddPenaltyScored adds i to the "penaltyScored" field.
+// AddPenaltyScored adds i to the "PenaltyScored" field.
 func (ppu *PSPenaltyUpdate) AddPenaltyScored(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddPenaltyScored(i)
 	return ppu
 }
 
-// SetPenaltyMissed sets the "penaltyMissed" field.
+// SetPenaltyMissed sets the "PenaltyMissed" field.
 func (ppu *PSPenaltyUpdate) SetPenaltyMissed(i int) *PSPenaltyUpdate {
 	ppu.mutation.ResetPenaltyMissed()
 	ppu.mutation.SetPenaltyMissed(i)
 	return ppu
 }
 
-// AddPenaltyMissed adds i to the "penaltyMissed" field.
+// AddPenaltyMissed adds i to the "PenaltyMissed" field.
 func (ppu *PSPenaltyUpdate) AddPenaltyMissed(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddPenaltyMissed(i)
 	return ppu
 }
 
-// SetPenaltySaved sets the "penaltySaved" field.
+// SetPenaltySaved sets the "PenaltySaved" field.
 func (ppu *PSPenaltyUpdate) SetPenaltySaved(i int) *PSPenaltyUpdate {
 	ppu.mutation.ResetPenaltySaved()
 	ppu.mutation.SetPenaltySaved(i)
 	return ppu
 }
 
-// SetNillablePenaltySaved sets the "penaltySaved" field if the given value is not nil.
+// SetNillablePenaltySaved sets the "PenaltySaved" field if the given value is not nil.
 func (ppu *PSPenaltyUpdate) SetNillablePenaltySaved(i *int) *PSPenaltyUpdate {
 	if i != nil {
 		ppu.SetPenaltySaved(*i)
@@ -184,25 +184,29 @@ func (ppu *PSPenaltyUpdate) SetNillablePenaltySaved(i *int) *PSPenaltyUpdate {
 	return ppu
 }
 
-// AddPenaltySaved adds i to the "penaltySaved" field.
+// AddPenaltySaved adds i to the "PenaltySaved" field.
 func (ppu *PSPenaltyUpdate) AddPenaltySaved(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddPenaltySaved(i)
 	return ppu
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (ppu *PSPenaltyUpdate) AddPlayerStatIDs(ids ...int) *PSPenaltyUpdate {
-	ppu.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (ppu *PSPenaltyUpdate) SetPlayerStatsID(id int) *PSPenaltyUpdate {
+	ppu.mutation.SetPlayerStatsID(id)
 	return ppu
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (ppu *PSPenaltyUpdate) AddPlayerStats(p ...*PlayerStats) *PSPenaltyUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (ppu *PSPenaltyUpdate) SetNillablePlayerStatsID(id *int) *PSPenaltyUpdate {
+	if id != nil {
+		ppu = ppu.SetPlayerStatsID(*id)
 	}
-	return ppu.AddPlayerStatIDs(ids...)
+	return ppu
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (ppu *PSPenaltyUpdate) SetPlayerStats(p *PlayerStats) *PSPenaltyUpdate {
+	return ppu.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSPenaltyMutation object of the builder.
@@ -210,25 +214,10 @@ func (ppu *PSPenaltyUpdate) Mutation() *PSPenaltyMutation {
 	return ppu.mutation
 }
 
-// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
 func (ppu *PSPenaltyUpdate) ClearPlayerStats() *PSPenaltyUpdate {
 	ppu.mutation.ClearPlayerStats()
 	return ppu
-}
-
-// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
-func (ppu *PSPenaltyUpdate) RemovePlayerStatIDs(ids ...int) *PSPenaltyUpdate {
-	ppu.mutation.RemovePlayerStatIDs(ids...)
-	return ppu
-}
-
-// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
-func (ppu *PSPenaltyUpdate) RemovePlayerStats(p ...*PlayerStats) *PSPenaltyUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return ppu.RemovePlayerStatIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -285,11 +274,11 @@ func (ppu *PSPenaltyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ppu.mutation.AddedCardsYellow(); ok {
 		_spec.AddField(pspenalty.FieldCardsYellow, field.TypeInt, value)
 	}
-	if value, ok := ppu.mutation.CardYellowred(); ok {
-		_spec.SetField(pspenalty.FieldCardYellowred, field.TypeInt, value)
+	if value, ok := ppu.mutation.CardYellowRed(); ok {
+		_spec.SetField(pspenalty.FieldCardYellowRed, field.TypeInt, value)
 	}
-	if value, ok := ppu.mutation.AddedCardYellowred(); ok {
-		_spec.AddField(pspenalty.FieldCardYellowred, field.TypeInt, value)
+	if value, ok := ppu.mutation.AddedCardYellowRed(); ok {
+		_spec.AddField(pspenalty.FieldCardYellowRed, field.TypeInt, value)
 	}
 	if value, ok := ppu.mutation.CardsRed(); ok {
 		_spec.SetField(pspenalty.FieldCardsRed, field.TypeInt, value)
@@ -303,11 +292,11 @@ func (ppu *PSPenaltyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ppu.mutation.AddedPenaltyWon(); ok {
 		_spec.AddField(pspenalty.FieldPenaltyWon, field.TypeInt, value)
 	}
-	if value, ok := ppu.mutation.PenaltyCommited(); ok {
-		_spec.SetField(pspenalty.FieldPenaltyCommited, field.TypeInt, value)
+	if value, ok := ppu.mutation.PenaltyCommitted(); ok {
+		_spec.SetField(pspenalty.FieldPenaltyCommitted, field.TypeInt, value)
 	}
-	if value, ok := ppu.mutation.AddedPenaltyCommited(); ok {
-		_spec.AddField(pspenalty.FieldPenaltyCommited, field.TypeInt, value)
+	if value, ok := ppu.mutation.AddedPenaltyCommitted(); ok {
+		_spec.AddField(pspenalty.FieldPenaltyCommitted, field.TypeInt, value)
 	}
 	if value, ok := ppu.mutation.PenaltyScored(); ok {
 		_spec.SetField(pspenalty.FieldPenaltyScored, field.TypeInt, value)
@@ -329,39 +318,23 @@ func (ppu *PSPenaltyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ppu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
-			Columns: pspenalty.PlayerStatsPrimaryKey,
+			Columns: []string{pspenalty.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ppu.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !ppu.mutation.PlayerStatsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   pspenalty.PlayerStatsTable,
-			Columns: pspenalty.PlayerStatsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := ppu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
-			Columns: pspenalty.PlayerStatsPrimaryKey,
+			Columns: []string{pspenalty.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
@@ -392,79 +365,79 @@ type PSPenaltyUpdateOne struct {
 	mutation *PSPenaltyMutation
 }
 
-// SetFoulsDrawn sets the "foulsDrawn" field.
+// SetFoulsDrawn sets the "FoulsDrawn" field.
 func (ppuo *PSPenaltyUpdateOne) SetFoulsDrawn(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.ResetFoulsDrawn()
 	ppuo.mutation.SetFoulsDrawn(i)
 	return ppuo
 }
 
-// AddFoulsDrawn adds i to the "foulsDrawn" field.
+// AddFoulsDrawn adds i to the "FoulsDrawn" field.
 func (ppuo *PSPenaltyUpdateOne) AddFoulsDrawn(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddFoulsDrawn(i)
 	return ppuo
 }
 
-// SetFoulsCommitted sets the "foulsCommitted" field.
+// SetFoulsCommitted sets the "FoulsCommitted" field.
 func (ppuo *PSPenaltyUpdateOne) SetFoulsCommitted(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.ResetFoulsCommitted()
 	ppuo.mutation.SetFoulsCommitted(i)
 	return ppuo
 }
 
-// AddFoulsCommitted adds i to the "foulsCommitted" field.
+// AddFoulsCommitted adds i to the "FoulsCommitted" field.
 func (ppuo *PSPenaltyUpdateOne) AddFoulsCommitted(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddFoulsCommitted(i)
 	return ppuo
 }
 
-// SetCardsYellow sets the "cardsYellow" field.
+// SetCardsYellow sets the "CardsYellow" field.
 func (ppuo *PSPenaltyUpdateOne) SetCardsYellow(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.ResetCardsYellow()
 	ppuo.mutation.SetCardsYellow(i)
 	return ppuo
 }
 
-// AddCardsYellow adds i to the "cardsYellow" field.
+// AddCardsYellow adds i to the "CardsYellow" field.
 func (ppuo *PSPenaltyUpdateOne) AddCardsYellow(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddCardsYellow(i)
 	return ppuo
 }
 
-// SetCardYellowred sets the "cardYellowred" field.
-func (ppuo *PSPenaltyUpdateOne) SetCardYellowred(i int) *PSPenaltyUpdateOne {
-	ppuo.mutation.ResetCardYellowred()
-	ppuo.mutation.SetCardYellowred(i)
+// SetCardYellowRed sets the "CardYellowRed" field.
+func (ppuo *PSPenaltyUpdateOne) SetCardYellowRed(i int) *PSPenaltyUpdateOne {
+	ppuo.mutation.ResetCardYellowRed()
+	ppuo.mutation.SetCardYellowRed(i)
 	return ppuo
 }
 
-// AddCardYellowred adds i to the "cardYellowred" field.
-func (ppuo *PSPenaltyUpdateOne) AddCardYellowred(i int) *PSPenaltyUpdateOne {
-	ppuo.mutation.AddCardYellowred(i)
+// AddCardYellowRed adds i to the "CardYellowRed" field.
+func (ppuo *PSPenaltyUpdateOne) AddCardYellowRed(i int) *PSPenaltyUpdateOne {
+	ppuo.mutation.AddCardYellowRed(i)
 	return ppuo
 }
 
-// SetCardsRed sets the "cardsRed" field.
+// SetCardsRed sets the "CardsRed" field.
 func (ppuo *PSPenaltyUpdateOne) SetCardsRed(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.ResetCardsRed()
 	ppuo.mutation.SetCardsRed(i)
 	return ppuo
 }
 
-// AddCardsRed adds i to the "cardsRed" field.
+// AddCardsRed adds i to the "CardsRed" field.
 func (ppuo *PSPenaltyUpdateOne) AddCardsRed(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddCardsRed(i)
 	return ppuo
 }
 
-// SetPenaltyWon sets the "penaltyWon" field.
+// SetPenaltyWon sets the "PenaltyWon" field.
 func (ppuo *PSPenaltyUpdateOne) SetPenaltyWon(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.ResetPenaltyWon()
 	ppuo.mutation.SetPenaltyWon(i)
 	return ppuo
 }
 
-// SetNillablePenaltyWon sets the "penaltyWon" field if the given value is not nil.
+// SetNillablePenaltyWon sets the "PenaltyWon" field if the given value is not nil.
 func (ppuo *PSPenaltyUpdateOne) SetNillablePenaltyWon(i *int) *PSPenaltyUpdateOne {
 	if i != nil {
 		ppuo.SetPenaltyWon(*i)
@@ -472,41 +445,41 @@ func (ppuo *PSPenaltyUpdateOne) SetNillablePenaltyWon(i *int) *PSPenaltyUpdateOn
 	return ppuo
 }
 
-// AddPenaltyWon adds i to the "penaltyWon" field.
+// AddPenaltyWon adds i to the "PenaltyWon" field.
 func (ppuo *PSPenaltyUpdateOne) AddPenaltyWon(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddPenaltyWon(i)
 	return ppuo
 }
 
-// SetPenaltyCommited sets the "penaltyCommited" field.
-func (ppuo *PSPenaltyUpdateOne) SetPenaltyCommited(i int) *PSPenaltyUpdateOne {
-	ppuo.mutation.ResetPenaltyCommited()
-	ppuo.mutation.SetPenaltyCommited(i)
+// SetPenaltyCommitted sets the "PenaltyCommitted" field.
+func (ppuo *PSPenaltyUpdateOne) SetPenaltyCommitted(i int) *PSPenaltyUpdateOne {
+	ppuo.mutation.ResetPenaltyCommitted()
+	ppuo.mutation.SetPenaltyCommitted(i)
 	return ppuo
 }
 
-// SetNillablePenaltyCommited sets the "penaltyCommited" field if the given value is not nil.
-func (ppuo *PSPenaltyUpdateOne) SetNillablePenaltyCommited(i *int) *PSPenaltyUpdateOne {
+// SetNillablePenaltyCommitted sets the "PenaltyCommitted" field if the given value is not nil.
+func (ppuo *PSPenaltyUpdateOne) SetNillablePenaltyCommitted(i *int) *PSPenaltyUpdateOne {
 	if i != nil {
-		ppuo.SetPenaltyCommited(*i)
+		ppuo.SetPenaltyCommitted(*i)
 	}
 	return ppuo
 }
 
-// AddPenaltyCommited adds i to the "penaltyCommited" field.
-func (ppuo *PSPenaltyUpdateOne) AddPenaltyCommited(i int) *PSPenaltyUpdateOne {
-	ppuo.mutation.AddPenaltyCommited(i)
+// AddPenaltyCommitted adds i to the "PenaltyCommitted" field.
+func (ppuo *PSPenaltyUpdateOne) AddPenaltyCommitted(i int) *PSPenaltyUpdateOne {
+	ppuo.mutation.AddPenaltyCommitted(i)
 	return ppuo
 }
 
-// SetPenaltyScored sets the "penaltyScored" field.
+// SetPenaltyScored sets the "PenaltyScored" field.
 func (ppuo *PSPenaltyUpdateOne) SetPenaltyScored(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.ResetPenaltyScored()
 	ppuo.mutation.SetPenaltyScored(i)
 	return ppuo
 }
 
-// SetNillablePenaltyScored sets the "penaltyScored" field if the given value is not nil.
+// SetNillablePenaltyScored sets the "PenaltyScored" field if the given value is not nil.
 func (ppuo *PSPenaltyUpdateOne) SetNillablePenaltyScored(i *int) *PSPenaltyUpdateOne {
 	if i != nil {
 		ppuo.SetPenaltyScored(*i)
@@ -514,33 +487,33 @@ func (ppuo *PSPenaltyUpdateOne) SetNillablePenaltyScored(i *int) *PSPenaltyUpdat
 	return ppuo
 }
 
-// AddPenaltyScored adds i to the "penaltyScored" field.
+// AddPenaltyScored adds i to the "PenaltyScored" field.
 func (ppuo *PSPenaltyUpdateOne) AddPenaltyScored(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddPenaltyScored(i)
 	return ppuo
 }
 
-// SetPenaltyMissed sets the "penaltyMissed" field.
+// SetPenaltyMissed sets the "PenaltyMissed" field.
 func (ppuo *PSPenaltyUpdateOne) SetPenaltyMissed(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.ResetPenaltyMissed()
 	ppuo.mutation.SetPenaltyMissed(i)
 	return ppuo
 }
 
-// AddPenaltyMissed adds i to the "penaltyMissed" field.
+// AddPenaltyMissed adds i to the "PenaltyMissed" field.
 func (ppuo *PSPenaltyUpdateOne) AddPenaltyMissed(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddPenaltyMissed(i)
 	return ppuo
 }
 
-// SetPenaltySaved sets the "penaltySaved" field.
+// SetPenaltySaved sets the "PenaltySaved" field.
 func (ppuo *PSPenaltyUpdateOne) SetPenaltySaved(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.ResetPenaltySaved()
 	ppuo.mutation.SetPenaltySaved(i)
 	return ppuo
 }
 
-// SetNillablePenaltySaved sets the "penaltySaved" field if the given value is not nil.
+// SetNillablePenaltySaved sets the "PenaltySaved" field if the given value is not nil.
 func (ppuo *PSPenaltyUpdateOne) SetNillablePenaltySaved(i *int) *PSPenaltyUpdateOne {
 	if i != nil {
 		ppuo.SetPenaltySaved(*i)
@@ -548,25 +521,29 @@ func (ppuo *PSPenaltyUpdateOne) SetNillablePenaltySaved(i *int) *PSPenaltyUpdate
 	return ppuo
 }
 
-// AddPenaltySaved adds i to the "penaltySaved" field.
+// AddPenaltySaved adds i to the "PenaltySaved" field.
 func (ppuo *PSPenaltyUpdateOne) AddPenaltySaved(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddPenaltySaved(i)
 	return ppuo
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (ppuo *PSPenaltyUpdateOne) AddPlayerStatIDs(ids ...int) *PSPenaltyUpdateOne {
-	ppuo.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (ppuo *PSPenaltyUpdateOne) SetPlayerStatsID(id int) *PSPenaltyUpdateOne {
+	ppuo.mutation.SetPlayerStatsID(id)
 	return ppuo
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (ppuo *PSPenaltyUpdateOne) AddPlayerStats(p ...*PlayerStats) *PSPenaltyUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (ppuo *PSPenaltyUpdateOne) SetNillablePlayerStatsID(id *int) *PSPenaltyUpdateOne {
+	if id != nil {
+		ppuo = ppuo.SetPlayerStatsID(*id)
 	}
-	return ppuo.AddPlayerStatIDs(ids...)
+	return ppuo
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (ppuo *PSPenaltyUpdateOne) SetPlayerStats(p *PlayerStats) *PSPenaltyUpdateOne {
+	return ppuo.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSPenaltyMutation object of the builder.
@@ -574,25 +551,10 @@ func (ppuo *PSPenaltyUpdateOne) Mutation() *PSPenaltyMutation {
 	return ppuo.mutation
 }
 
-// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
 func (ppuo *PSPenaltyUpdateOne) ClearPlayerStats() *PSPenaltyUpdateOne {
 	ppuo.mutation.ClearPlayerStats()
 	return ppuo
-}
-
-// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
-func (ppuo *PSPenaltyUpdateOne) RemovePlayerStatIDs(ids ...int) *PSPenaltyUpdateOne {
-	ppuo.mutation.RemovePlayerStatIDs(ids...)
-	return ppuo
-}
-
-// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
-func (ppuo *PSPenaltyUpdateOne) RemovePlayerStats(p ...*PlayerStats) *PSPenaltyUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return ppuo.RemovePlayerStatIDs(ids...)
 }
 
 // Where appends a list predicates to the PSPenaltyUpdate builder.
@@ -679,11 +641,11 @@ func (ppuo *PSPenaltyUpdateOne) sqlSave(ctx context.Context) (_node *PSPenalty, 
 	if value, ok := ppuo.mutation.AddedCardsYellow(); ok {
 		_spec.AddField(pspenalty.FieldCardsYellow, field.TypeInt, value)
 	}
-	if value, ok := ppuo.mutation.CardYellowred(); ok {
-		_spec.SetField(pspenalty.FieldCardYellowred, field.TypeInt, value)
+	if value, ok := ppuo.mutation.CardYellowRed(); ok {
+		_spec.SetField(pspenalty.FieldCardYellowRed, field.TypeInt, value)
 	}
-	if value, ok := ppuo.mutation.AddedCardYellowred(); ok {
-		_spec.AddField(pspenalty.FieldCardYellowred, field.TypeInt, value)
+	if value, ok := ppuo.mutation.AddedCardYellowRed(); ok {
+		_spec.AddField(pspenalty.FieldCardYellowRed, field.TypeInt, value)
 	}
 	if value, ok := ppuo.mutation.CardsRed(); ok {
 		_spec.SetField(pspenalty.FieldCardsRed, field.TypeInt, value)
@@ -697,11 +659,11 @@ func (ppuo *PSPenaltyUpdateOne) sqlSave(ctx context.Context) (_node *PSPenalty, 
 	if value, ok := ppuo.mutation.AddedPenaltyWon(); ok {
 		_spec.AddField(pspenalty.FieldPenaltyWon, field.TypeInt, value)
 	}
-	if value, ok := ppuo.mutation.PenaltyCommited(); ok {
-		_spec.SetField(pspenalty.FieldPenaltyCommited, field.TypeInt, value)
+	if value, ok := ppuo.mutation.PenaltyCommitted(); ok {
+		_spec.SetField(pspenalty.FieldPenaltyCommitted, field.TypeInt, value)
 	}
-	if value, ok := ppuo.mutation.AddedPenaltyCommited(); ok {
-		_spec.AddField(pspenalty.FieldPenaltyCommited, field.TypeInt, value)
+	if value, ok := ppuo.mutation.AddedPenaltyCommitted(); ok {
+		_spec.AddField(pspenalty.FieldPenaltyCommitted, field.TypeInt, value)
 	}
 	if value, ok := ppuo.mutation.PenaltyScored(); ok {
 		_spec.SetField(pspenalty.FieldPenaltyScored, field.TypeInt, value)
@@ -723,39 +685,23 @@ func (ppuo *PSPenaltyUpdateOne) sqlSave(ctx context.Context) (_node *PSPenalty, 
 	}
 	if ppuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
-			Columns: pspenalty.PlayerStatsPrimaryKey,
+			Columns: []string{pspenalty.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := ppuo.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !ppuo.mutation.PlayerStatsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   pspenalty.PlayerStatsTable,
-			Columns: pspenalty.PlayerStatsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := ppuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
-			Columns: pspenalty.PlayerStatsPrimaryKey,
+			Columns: []string{pspenalty.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),

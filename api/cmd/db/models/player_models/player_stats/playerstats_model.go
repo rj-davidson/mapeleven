@@ -3,8 +3,8 @@ package player_stats
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
@@ -20,7 +20,6 @@ import (
 )
 
 type PlayerStats struct {
-	Form      string    `json:"form"`
 	PSPenalty PSPenalty `json:"penalty"`
 	PSDefense PSDefense `json:"defense"`
 	PSGoals   PSGoals   `json:"goals"`
@@ -81,41 +80,41 @@ type PlayerStatsPackage struct {
 	PSGames   *ent.PSGames
 }
 
-func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, playerStats PlayerStats) (*PlayerStatsPackage, error) {
+func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.PlayerStats, playerStats PlayerStats) (*PlayerStatsPackage, error) {
 	//Add form to Player object
-	_, err := m.client.Player.
-		UpdateOne(p).SetForm(playerStats.Form).
+	_, err := m.client.PlayerStats.
+		UpdateOne(p).
 		Save(ctx)
 	if err != nil {
 		return nil, err
 	}
-
 	var playerStatsPackage PlayerStatsPackage
+
 	playerStatsPackage.PSPenalty, err = m.upsertPSPenalty(ctx, p, playerStats.PSPenalty)
 	if err != nil {
-		return &playerStatsPackage, err
+		return nil, err
 	}
 	playerStatsPackage.PSDefense, err = m.upsertPSDefense(ctx, p, playerStats.PSDefense)
 	if err != nil {
-		return &playerStatsPackage, err
+		return nil, err
 	}
 	playerStatsPackage.PSGoals, err = m.upsertPSGoals(ctx, p, playerStats.PSGoals)
 	if err != nil {
-		return &playerStatsPackage, err
+		return nil, err
 	}
 	playerStatsPackage.PSOffense, err = m.upsertPSOffense(ctx, p, playerStats.PSOffense)
 	if err != nil {
-		return &playerStatsPackage, err
+		return nil, err
 	}
 	playerStatsPackage.PSGames, err = m.upsertPSGames(ctx, p, playerStats.PSGames)
 	if err != nil {
-		return &playerStatsPackage, err
+		return nil, err
 	}
-	return nil, nil
+	return &playerStatsPackage, nil
 }
 
-func (m *PlayerStatsModel) upsertPSPenalty(ctx context.Context, p *ent.Player, data PSPenalty) (*ent.PSPenalty, error) {
-	prev, _ := m.client.PSPenalty.Query().Where(pspenalty.HasPlayerWith(player.IDEQ(p.ID))).First(ctx)
+func (m *PlayerStatsModel) upsertPSPenalty(ctx context.Context, p *ent.PlayerStats, data PSPenalty) (*ent.PSPenalty, error) {
+	prev, _ := m.client.PSPenalty.Query().Where(pspenalty.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
 	if prev == nil {
 		return CreatePSPenalty(ctx, m.client, data, p)
 	} else {
@@ -123,8 +122,8 @@ func (m *PlayerStatsModel) upsertPSPenalty(ctx context.Context, p *ent.Player, d
 	}
 }
 
-func (m *PlayerStatsModel) upsertPSDefense(ctx context.Context, p *ent.Player, data PSDefense) (*ent.PSDefense, error) {
-	prev, _ := m.client.PSDefense.Query().Where(psdefense.HasPlayerWith(player.IDEQ(p.ID))).First(ctx)
+func (m *PlayerStatsModel) upsertPSDefense(ctx context.Context, p *ent.PlayerStats, data PSDefense) (*ent.PSDefense, error) {
+	prev, _ := m.client.PSDefense.Query().Where(psdefense.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
 	if prev == nil {
 		return CreatePSDefense(ctx, m.client, data, p)
 	} else {
@@ -132,8 +131,8 @@ func (m *PlayerStatsModel) upsertPSDefense(ctx context.Context, p *ent.Player, d
 	}
 }
 
-func (m *PlayerStatsModel) upsertPSOffense(ctx context.Context, p *ent.Player, data PSOffense) (*ent.PSOffense, error) {
-	prev, _ := m.client.PSOffense.Query().Where(psoffense.HasPlayerWith(player.IDEQ(p.ID))).First(ctx)
+func (m *PlayerStatsModel) upsertPSOffense(ctx context.Context, p *ent.PlayerStats, data PSOffense) (*ent.PSOffense, error) {
+	prev, _ := m.client.PSOffense.Query().Where(psoffense.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
 	if prev == nil {
 		return CreatePSOffense(ctx, m.client, data, p)
 	} else {
@@ -141,9 +140,9 @@ func (m *PlayerStatsModel) upsertPSOffense(ctx context.Context, p *ent.Player, d
 	}
 }
 
-func (m *PlayerStatsModel) upsertPSGoals(ctx context.Context, p *ent.Player, data PSGoals) (*ent.PSGoals, error) {
+func (m *PlayerStatsModel) upsertPSGoals(ctx context.Context, p *ent.PlayerStats, data PSGoals) (*ent.PSGoals, error) {
 	// Use the correct predicate for PSGoals, not PSDefense
-	prev, _ := m.client.PSGoals.Query().Where(psgoals.HasPlayerWith(player.IDEQ(p.ID))).First(ctx)
+	prev, _ := m.client.PSGoals.Query().Where(psgoals.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
 	if prev == nil {
 		return CreatePSGoals(ctx, m.client, data, p)
 	} else {
@@ -151,9 +150,9 @@ func (m *PlayerStatsModel) upsertPSGoals(ctx context.Context, p *ent.Player, dat
 	}
 }
 
-func (m *PlayerStatsModel) upsertPSGames(ctx context.Context, p *ent.Player, data PSGames) (*ent.PSGames, error) {
+func (m *PlayerStatsModel) upsertPSGames(ctx context.Context, p *ent.PlayerStats, data PSGames) (*ent.PSGames, error) {
 	// Use the correct predicate for PSGames, not PSDefense
-	prev, _ := m.client.PSGames.Query().Where(psgames.HasPlayerWith(player.IDEQ(p.ID))).First(ctx)
+	prev, _ := m.client.PSGames.Query().Where(psgames.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
 	if prev == nil {
 		return CreatePSGames(ctx, m.client, data, p)
 	} else {
@@ -164,14 +163,7 @@ func (m *PlayerStatsModel) upsertPSGames(ctx context.Context, p *ent.Player, dat
 func (m *PlayerStatsModel) ListPlayers(ctx context.Context) ([]*ent.Player, error) {
 	players, err := m.client.Player.
 		Query().
-		WithSeason(
-			func(q *ent.SeasonQuery) {
-				q.WithLeague()
-			}).
-		WithTeam(
-			func(q *ent.TeamQuery) {
-				q.WithClub()
-			}).
+		WithPlayerStats(). // This preloads the PlayerStats
 		All(ctx)
 	if err != nil {
 		return nil, err

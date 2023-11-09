@@ -1,9 +1,7 @@
-// schemas/psoffense.go
 package schema
 
 import (
 	"entgo.io/ent"
-	_ "entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -16,18 +14,20 @@ type PSOffense struct {
 // Fields of the PSOffense.
 func (PSOffense) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("dribbleAttempts"),
-		field.Int("dribbleSuccess"),
-		field.Int("dribblePast").Default(0),
-		field.Int("passesTotal"),
-		field.Int("passesKey"),
-		field.Int("passesAccuracy"),
+		field.Int("DribbleAttempts"),
+		field.Int("DribbleSuccess"),
+		field.Int("DribblePast").Default(0),
+		field.Int("PassesTotal"),
+		field.Int("PassesKey"),
+		field.Int("PassesAccuracy"),
 	}
 }
 
 // Edges of the PSOffense.
 func (PSOffense) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("playerStats", PlayerStats.Type).Ref("psoffense"),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("psoffense").
+			Unique(),
 	}
 }

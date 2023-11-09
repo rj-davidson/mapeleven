@@ -208,7 +208,7 @@ func HasTeam() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, TeamTable, TeamColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, TeamTable, TeamColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -300,7 +300,7 @@ func HasPsgames() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, PsgamesTable, PsgamesPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, PsgamesTable, PsgamesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -323,7 +323,7 @@ func HasPsgoals() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, PsgoalsTable, PsgoalsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, PsgoalsTable, PsgoalsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -346,7 +346,7 @@ func HasPsdefense() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, PsdefenseTable, PsdefensePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, PsdefenseTable, PsdefenseColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -369,7 +369,7 @@ func HasPsoffense() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, PsoffenseTable, PsoffensePrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, PsoffenseTable, PsoffenseColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -392,7 +392,7 @@ func HasPspenalty() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, PspenaltyTable, PspenaltyPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2M, false, PspenaltyTable, PspenaltyColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -402,6 +402,29 @@ func HasPspenalty() predicate.PlayerStats {
 func HasPspenaltyWith(preds ...predicate.PSPenalty) predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := newPspenaltyStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSeason applies the HasEdge predicate on the "season" edge.
+func HasSeason() predicate.PlayerStats {
+	return predicate.PlayerStats(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, SeasonTable, SeasonPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
+func HasSeasonWith(preds ...predicate.Season) predicate.PlayerStats {
+	return predicate.PlayerStats(func(s *sql.Selector) {
+		step := newSeasonStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

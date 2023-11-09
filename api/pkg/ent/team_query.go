@@ -150,7 +150,7 @@ func (tq *TeamQuery) QueryPlayerStats() *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(team.Table, team.FieldID, selector),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, team.PlayerStatsTable, team.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, team.PlayerStatsTable, team.PlayerStatsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(tq.driver.Dialect(), step)
 		return fromU, nil
@@ -967,7 +967,7 @@ func (tq *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 			tq.withPenaltyStats != nil,
 		}
 	)
-	if tq.withSeason != nil || tq.withClub != nil || tq.withPlayerStats != nil {
+	if tq.withSeason != nil || tq.withClub != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -1004,8 +1004,9 @@ func (tq *TeamQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Team, e
 		}
 	}
 	if query := tq.withPlayerStats; query != nil {
-		if err := tq.loadPlayerStats(ctx, query, nodes, nil,
-			func(n *Team, e *PlayerStats) { n.Edges.PlayerStats = e }); err != nil {
+		if err := tq.loadPlayerStats(ctx, query, nodes,
+			func(n *Team) { n.Edges.PlayerStats = []*PlayerStats{} },
+			func(n *Team, e *PlayerStats) { n.Edges.PlayerStats = append(n.Edges.PlayerStats, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -1168,34 +1169,33 @@ func (tq *TeamQuery) loadClub(ctx context.Context, query *ClubQuery, nodes []*Te
 	return nil
 }
 func (tq *TeamQuery) loadPlayerStats(ctx context.Context, query *PlayerStatsQuery, nodes []*Team, init func(*Team), assign func(*Team, *PlayerStats)) error {
-	ids := make([]int, 0, len(nodes))
-	nodeids := make(map[int][]*Team)
+	fks := make([]driver.Value, 0, len(nodes))
+	nodeids := make(map[int]*Team)
 	for i := range nodes {
-		if nodes[i].player_stats_team == nil {
-			continue
+		fks = append(fks, nodes[i].ID)
+		nodeids[nodes[i].ID] = nodes[i]
+		if init != nil {
+			init(nodes[i])
 		}
-		fk := *nodes[i].player_stats_team
-		if _, ok := nodeids[fk]; !ok {
-			ids = append(ids, fk)
-		}
-		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	if len(ids) == 0 {
-		return nil
-	}
-	query.Where(playerstats.IDIn(ids...))
+	query.withFKs = true
+	query.Where(predicate.PlayerStats(func(s *sql.Selector) {
+		s.Where(sql.InValues(s.C(team.PlayerStatsColumn), fks...))
+	}))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nodeids[n.ID]
+		fk := n.team_player_stats
+		if fk == nil {
+			return fmt.Errorf(`foreign-key "team_player_stats" is nil for node %v`, n.ID)
+		}
+		node, ok := nodeids[*fk]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_stats_team" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected referenced foreign-key "team_player_stats" returned %v for node %v`, *fk, n.ID)
 		}
-		for i := range nodes {
-			assign(nodes[i], n)
-		}
+		assign(node, n)
 	}
 	return nil
 }

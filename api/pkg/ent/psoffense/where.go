@@ -53,272 +53,272 @@ func IDLTE(id int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLTE(FieldID, id))
 }
 
-// DribbleAttempts applies equality check predicate on the "dribbleAttempts" field. It's identical to DribbleAttemptsEQ.
+// DribbleAttempts applies equality check predicate on the "DribbleAttempts" field. It's identical to DribbleAttemptsEQ.
 func DribbleAttempts(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldDribbleAttempts, v))
 }
 
-// DribbleSuccess applies equality check predicate on the "dribbleSuccess" field. It's identical to DribbleSuccessEQ.
+// DribbleSuccess applies equality check predicate on the "DribbleSuccess" field. It's identical to DribbleSuccessEQ.
 func DribbleSuccess(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldDribbleSuccess, v))
 }
 
-// DribblePast applies equality check predicate on the "dribblePast" field. It's identical to DribblePastEQ.
+// DribblePast applies equality check predicate on the "DribblePast" field. It's identical to DribblePastEQ.
 func DribblePast(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldDribblePast, v))
 }
 
-// PassesTotal applies equality check predicate on the "passesTotal" field. It's identical to PassesTotalEQ.
+// PassesTotal applies equality check predicate on the "PassesTotal" field. It's identical to PassesTotalEQ.
 func PassesTotal(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldPassesTotal, v))
 }
 
-// PassesKey applies equality check predicate on the "passesKey" field. It's identical to PassesKeyEQ.
+// PassesKey applies equality check predicate on the "PassesKey" field. It's identical to PassesKeyEQ.
 func PassesKey(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldPassesKey, v))
 }
 
-// PassesAccuracy applies equality check predicate on the "passesAccuracy" field. It's identical to PassesAccuracyEQ.
+// PassesAccuracy applies equality check predicate on the "PassesAccuracy" field. It's identical to PassesAccuracyEQ.
 func PassesAccuracy(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldPassesAccuracy, v))
 }
 
-// DribbleAttemptsEQ applies the EQ predicate on the "dribbleAttempts" field.
+// DribbleAttemptsEQ applies the EQ predicate on the "DribbleAttempts" field.
 func DribbleAttemptsEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldDribbleAttempts, v))
 }
 
-// DribbleAttemptsNEQ applies the NEQ predicate on the "dribbleAttempts" field.
+// DribbleAttemptsNEQ applies the NEQ predicate on the "DribbleAttempts" field.
 func DribbleAttemptsNEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNEQ(FieldDribbleAttempts, v))
 }
 
-// DribbleAttemptsIn applies the In predicate on the "dribbleAttempts" field.
+// DribbleAttemptsIn applies the In predicate on the "DribbleAttempts" field.
 func DribbleAttemptsIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldIn(FieldDribbleAttempts, vs...))
 }
 
-// DribbleAttemptsNotIn applies the NotIn predicate on the "dribbleAttempts" field.
+// DribbleAttemptsNotIn applies the NotIn predicate on the "DribbleAttempts" field.
 func DribbleAttemptsNotIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNotIn(FieldDribbleAttempts, vs...))
 }
 
-// DribbleAttemptsGT applies the GT predicate on the "dribbleAttempts" field.
+// DribbleAttemptsGT applies the GT predicate on the "DribbleAttempts" field.
 func DribbleAttemptsGT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGT(FieldDribbleAttempts, v))
 }
 
-// DribbleAttemptsGTE applies the GTE predicate on the "dribbleAttempts" field.
+// DribbleAttemptsGTE applies the GTE predicate on the "DribbleAttempts" field.
 func DribbleAttemptsGTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGTE(FieldDribbleAttempts, v))
 }
 
-// DribbleAttemptsLT applies the LT predicate on the "dribbleAttempts" field.
+// DribbleAttemptsLT applies the LT predicate on the "DribbleAttempts" field.
 func DribbleAttemptsLT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLT(FieldDribbleAttempts, v))
 }
 
-// DribbleAttemptsLTE applies the LTE predicate on the "dribbleAttempts" field.
+// DribbleAttemptsLTE applies the LTE predicate on the "DribbleAttempts" field.
 func DribbleAttemptsLTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLTE(FieldDribbleAttempts, v))
 }
 
-// DribbleSuccessEQ applies the EQ predicate on the "dribbleSuccess" field.
+// DribbleSuccessEQ applies the EQ predicate on the "DribbleSuccess" field.
 func DribbleSuccessEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldDribbleSuccess, v))
 }
 
-// DribbleSuccessNEQ applies the NEQ predicate on the "dribbleSuccess" field.
+// DribbleSuccessNEQ applies the NEQ predicate on the "DribbleSuccess" field.
 func DribbleSuccessNEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNEQ(FieldDribbleSuccess, v))
 }
 
-// DribbleSuccessIn applies the In predicate on the "dribbleSuccess" field.
+// DribbleSuccessIn applies the In predicate on the "DribbleSuccess" field.
 func DribbleSuccessIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldIn(FieldDribbleSuccess, vs...))
 }
 
-// DribbleSuccessNotIn applies the NotIn predicate on the "dribbleSuccess" field.
+// DribbleSuccessNotIn applies the NotIn predicate on the "DribbleSuccess" field.
 func DribbleSuccessNotIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNotIn(FieldDribbleSuccess, vs...))
 }
 
-// DribbleSuccessGT applies the GT predicate on the "dribbleSuccess" field.
+// DribbleSuccessGT applies the GT predicate on the "DribbleSuccess" field.
 func DribbleSuccessGT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGT(FieldDribbleSuccess, v))
 }
 
-// DribbleSuccessGTE applies the GTE predicate on the "dribbleSuccess" field.
+// DribbleSuccessGTE applies the GTE predicate on the "DribbleSuccess" field.
 func DribbleSuccessGTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGTE(FieldDribbleSuccess, v))
 }
 
-// DribbleSuccessLT applies the LT predicate on the "dribbleSuccess" field.
+// DribbleSuccessLT applies the LT predicate on the "DribbleSuccess" field.
 func DribbleSuccessLT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLT(FieldDribbleSuccess, v))
 }
 
-// DribbleSuccessLTE applies the LTE predicate on the "dribbleSuccess" field.
+// DribbleSuccessLTE applies the LTE predicate on the "DribbleSuccess" field.
 func DribbleSuccessLTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLTE(FieldDribbleSuccess, v))
 }
 
-// DribblePastEQ applies the EQ predicate on the "dribblePast" field.
+// DribblePastEQ applies the EQ predicate on the "DribblePast" field.
 func DribblePastEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldDribblePast, v))
 }
 
-// DribblePastNEQ applies the NEQ predicate on the "dribblePast" field.
+// DribblePastNEQ applies the NEQ predicate on the "DribblePast" field.
 func DribblePastNEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNEQ(FieldDribblePast, v))
 }
 
-// DribblePastIn applies the In predicate on the "dribblePast" field.
+// DribblePastIn applies the In predicate on the "DribblePast" field.
 func DribblePastIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldIn(FieldDribblePast, vs...))
 }
 
-// DribblePastNotIn applies the NotIn predicate on the "dribblePast" field.
+// DribblePastNotIn applies the NotIn predicate on the "DribblePast" field.
 func DribblePastNotIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNotIn(FieldDribblePast, vs...))
 }
 
-// DribblePastGT applies the GT predicate on the "dribblePast" field.
+// DribblePastGT applies the GT predicate on the "DribblePast" field.
 func DribblePastGT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGT(FieldDribblePast, v))
 }
 
-// DribblePastGTE applies the GTE predicate on the "dribblePast" field.
+// DribblePastGTE applies the GTE predicate on the "DribblePast" field.
 func DribblePastGTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGTE(FieldDribblePast, v))
 }
 
-// DribblePastLT applies the LT predicate on the "dribblePast" field.
+// DribblePastLT applies the LT predicate on the "DribblePast" field.
 func DribblePastLT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLT(FieldDribblePast, v))
 }
 
-// DribblePastLTE applies the LTE predicate on the "dribblePast" field.
+// DribblePastLTE applies the LTE predicate on the "DribblePast" field.
 func DribblePastLTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLTE(FieldDribblePast, v))
 }
 
-// PassesTotalEQ applies the EQ predicate on the "passesTotal" field.
+// PassesTotalEQ applies the EQ predicate on the "PassesTotal" field.
 func PassesTotalEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldPassesTotal, v))
 }
 
-// PassesTotalNEQ applies the NEQ predicate on the "passesTotal" field.
+// PassesTotalNEQ applies the NEQ predicate on the "PassesTotal" field.
 func PassesTotalNEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNEQ(FieldPassesTotal, v))
 }
 
-// PassesTotalIn applies the In predicate on the "passesTotal" field.
+// PassesTotalIn applies the In predicate on the "PassesTotal" field.
 func PassesTotalIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldIn(FieldPassesTotal, vs...))
 }
 
-// PassesTotalNotIn applies the NotIn predicate on the "passesTotal" field.
+// PassesTotalNotIn applies the NotIn predicate on the "PassesTotal" field.
 func PassesTotalNotIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNotIn(FieldPassesTotal, vs...))
 }
 
-// PassesTotalGT applies the GT predicate on the "passesTotal" field.
+// PassesTotalGT applies the GT predicate on the "PassesTotal" field.
 func PassesTotalGT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGT(FieldPassesTotal, v))
 }
 
-// PassesTotalGTE applies the GTE predicate on the "passesTotal" field.
+// PassesTotalGTE applies the GTE predicate on the "PassesTotal" field.
 func PassesTotalGTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGTE(FieldPassesTotal, v))
 }
 
-// PassesTotalLT applies the LT predicate on the "passesTotal" field.
+// PassesTotalLT applies the LT predicate on the "PassesTotal" field.
 func PassesTotalLT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLT(FieldPassesTotal, v))
 }
 
-// PassesTotalLTE applies the LTE predicate on the "passesTotal" field.
+// PassesTotalLTE applies the LTE predicate on the "PassesTotal" field.
 func PassesTotalLTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLTE(FieldPassesTotal, v))
 }
 
-// PassesKeyEQ applies the EQ predicate on the "passesKey" field.
+// PassesKeyEQ applies the EQ predicate on the "PassesKey" field.
 func PassesKeyEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldPassesKey, v))
 }
 
-// PassesKeyNEQ applies the NEQ predicate on the "passesKey" field.
+// PassesKeyNEQ applies the NEQ predicate on the "PassesKey" field.
 func PassesKeyNEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNEQ(FieldPassesKey, v))
 }
 
-// PassesKeyIn applies the In predicate on the "passesKey" field.
+// PassesKeyIn applies the In predicate on the "PassesKey" field.
 func PassesKeyIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldIn(FieldPassesKey, vs...))
 }
 
-// PassesKeyNotIn applies the NotIn predicate on the "passesKey" field.
+// PassesKeyNotIn applies the NotIn predicate on the "PassesKey" field.
 func PassesKeyNotIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNotIn(FieldPassesKey, vs...))
 }
 
-// PassesKeyGT applies the GT predicate on the "passesKey" field.
+// PassesKeyGT applies the GT predicate on the "PassesKey" field.
 func PassesKeyGT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGT(FieldPassesKey, v))
 }
 
-// PassesKeyGTE applies the GTE predicate on the "passesKey" field.
+// PassesKeyGTE applies the GTE predicate on the "PassesKey" field.
 func PassesKeyGTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGTE(FieldPassesKey, v))
 }
 
-// PassesKeyLT applies the LT predicate on the "passesKey" field.
+// PassesKeyLT applies the LT predicate on the "PassesKey" field.
 func PassesKeyLT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLT(FieldPassesKey, v))
 }
 
-// PassesKeyLTE applies the LTE predicate on the "passesKey" field.
+// PassesKeyLTE applies the LTE predicate on the "PassesKey" field.
 func PassesKeyLTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLTE(FieldPassesKey, v))
 }
 
-// PassesAccuracyEQ applies the EQ predicate on the "passesAccuracy" field.
+// PassesAccuracyEQ applies the EQ predicate on the "PassesAccuracy" field.
 func PassesAccuracyEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldEQ(FieldPassesAccuracy, v))
 }
 
-// PassesAccuracyNEQ applies the NEQ predicate on the "passesAccuracy" field.
+// PassesAccuracyNEQ applies the NEQ predicate on the "PassesAccuracy" field.
 func PassesAccuracyNEQ(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNEQ(FieldPassesAccuracy, v))
 }
 
-// PassesAccuracyIn applies the In predicate on the "passesAccuracy" field.
+// PassesAccuracyIn applies the In predicate on the "PassesAccuracy" field.
 func PassesAccuracyIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldIn(FieldPassesAccuracy, vs...))
 }
 
-// PassesAccuracyNotIn applies the NotIn predicate on the "passesAccuracy" field.
+// PassesAccuracyNotIn applies the NotIn predicate on the "PassesAccuracy" field.
 func PassesAccuracyNotIn(vs ...int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldNotIn(FieldPassesAccuracy, vs...))
 }
 
-// PassesAccuracyGT applies the GT predicate on the "passesAccuracy" field.
+// PassesAccuracyGT applies the GT predicate on the "PassesAccuracy" field.
 func PassesAccuracyGT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGT(FieldPassesAccuracy, v))
 }
 
-// PassesAccuracyGTE applies the GTE predicate on the "passesAccuracy" field.
+// PassesAccuracyGTE applies the GTE predicate on the "PassesAccuracy" field.
 func PassesAccuracyGTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldGTE(FieldPassesAccuracy, v))
 }
 
-// PassesAccuracyLT applies the LT predicate on the "passesAccuracy" field.
+// PassesAccuracyLT applies the LT predicate on the "PassesAccuracy" field.
 func PassesAccuracyLT(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLT(FieldPassesAccuracy, v))
 }
 
-// PassesAccuracyLTE applies the LTE predicate on the "passesAccuracy" field.
+// PassesAccuracyLTE applies the LTE predicate on the "PassesAccuracy" field.
 func PassesAccuracyLTE(v int) predicate.PSOffense {
 	return predicate.PSOffense(sql.FieldLTE(FieldPassesAccuracy, v))
 }
@@ -328,7 +328,7 @@ func HasPlayerStats() predicate.PSOffense {
 	return predicate.PSOffense(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

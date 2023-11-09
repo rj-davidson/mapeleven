@@ -38,6 +38,8 @@ const (
 	EdgePsoffense = "psoffense"
 	// EdgePspenalty holds the string denoting the pspenalty edge name in mutations.
 	EdgePspenalty = "pspenalty"
+	// EdgeSeason holds the string denoting the season edge name in mutations.
+	EdgeSeason = "season"
 	// Table holds the table name of the playerstats in the database.
 	Table = "player_stats"
 	// PlayerTable is the table that holds the player relation/edge.
@@ -48,12 +50,12 @@ const (
 	// PlayerColumn is the table column denoting the player relation/edge.
 	PlayerColumn = "player_player_stats"
 	// TeamTable is the table that holds the team relation/edge.
-	TeamTable = "teams"
+	TeamTable = "player_stats"
 	// TeamInverseTable is the table name for the Team entity.
 	// It exists in this package in order to avoid circular dependency with the "team" package.
 	TeamInverseTable = "teams"
 	// TeamColumn is the table column denoting the team relation/edge.
-	TeamColumn = "player_stats_team"
+	TeamColumn = "team_player_stats"
 	// PlayerEventsTable is the table that holds the playerEvents relation/edge.
 	PlayerEventsTable = "fixture_events"
 	// PlayerEventsInverseTable is the table name for the FixtureEvents entity.
@@ -75,31 +77,46 @@ const (
 	AssistEventsInverseTable = "fixture_events"
 	// AssistEventsColumn is the table column denoting the assistEvents relation/edge.
 	AssistEventsColumn = "player_stats_assist_events"
-	// PsgamesTable is the table that holds the psgames relation/edge. The primary key declared below.
-	PsgamesTable = "player_stats_psgames"
+	// PsgamesTable is the table that holds the psgames relation/edge.
+	PsgamesTable = "ps_games"
 	// PsgamesInverseTable is the table name for the PSGames entity.
 	// It exists in this package in order to avoid circular dependency with the "psgames" package.
 	PsgamesInverseTable = "ps_games"
-	// PsgoalsTable is the table that holds the psgoals relation/edge. The primary key declared below.
-	PsgoalsTable = "player_stats_psgoals"
+	// PsgamesColumn is the table column denoting the psgames relation/edge.
+	PsgamesColumn = "player_stats_psgames"
+	// PsgoalsTable is the table that holds the psgoals relation/edge.
+	PsgoalsTable = "ps_goals"
 	// PsgoalsInverseTable is the table name for the PSGoals entity.
 	// It exists in this package in order to avoid circular dependency with the "psgoals" package.
 	PsgoalsInverseTable = "ps_goals"
-	// PsdefenseTable is the table that holds the psdefense relation/edge. The primary key declared below.
-	PsdefenseTable = "player_stats_psdefense"
+	// PsgoalsColumn is the table column denoting the psgoals relation/edge.
+	PsgoalsColumn = "player_stats_psgoals"
+	// PsdefenseTable is the table that holds the psdefense relation/edge.
+	PsdefenseTable = "ps_defenses"
 	// PsdefenseInverseTable is the table name for the PSDefense entity.
 	// It exists in this package in order to avoid circular dependency with the "psdefense" package.
 	PsdefenseInverseTable = "ps_defenses"
-	// PsoffenseTable is the table that holds the psoffense relation/edge. The primary key declared below.
-	PsoffenseTable = "player_stats_psoffense"
+	// PsdefenseColumn is the table column denoting the psdefense relation/edge.
+	PsdefenseColumn = "player_stats_psdefense"
+	// PsoffenseTable is the table that holds the psoffense relation/edge.
+	PsoffenseTable = "ps_offenses"
 	// PsoffenseInverseTable is the table name for the PSOffense entity.
 	// It exists in this package in order to avoid circular dependency with the "psoffense" package.
 	PsoffenseInverseTable = "ps_offenses"
-	// PspenaltyTable is the table that holds the pspenalty relation/edge. The primary key declared below.
-	PspenaltyTable = "player_stats_pspenalty"
+	// PsoffenseColumn is the table column denoting the psoffense relation/edge.
+	PsoffenseColumn = "player_stats_psoffense"
+	// PspenaltyTable is the table that holds the pspenalty relation/edge.
+	PspenaltyTable = "ps_penalties"
 	// PspenaltyInverseTable is the table name for the PSPenalty entity.
 	// It exists in this package in order to avoid circular dependency with the "pspenalty" package.
 	PspenaltyInverseTable = "ps_penalties"
+	// PspenaltyColumn is the table column denoting the pspenalty relation/edge.
+	PspenaltyColumn = "player_stats_pspenalty"
+	// SeasonTable is the table that holds the season relation/edge. The primary key declared below.
+	SeasonTable = "player_stats_season"
+	// SeasonInverseTable is the table name for the Season entity.
+	// It exists in this package in order to avoid circular dependency with the "season" package.
+	SeasonInverseTable = "seasons"
 )
 
 // Columns holds all SQL columns for playerstats fields.
@@ -113,24 +130,13 @@ var Columns = []string{
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
 	"player_player_stats",
+	"team_player_stats",
 }
 
 var (
-	// PsgamesPrimaryKey and PsgamesColumn2 are the table columns denoting the
-	// primary key for the psgames relation (M2M).
-	PsgamesPrimaryKey = []string{"player_stats_id", "ps_games_id"}
-	// PsgoalsPrimaryKey and PsgoalsColumn2 are the table columns denoting the
-	// primary key for the psgoals relation (M2M).
-	PsgoalsPrimaryKey = []string{"player_stats_id", "ps_goals_id"}
-	// PsdefensePrimaryKey and PsdefenseColumn2 are the table columns denoting the
-	// primary key for the psdefense relation (M2M).
-	PsdefensePrimaryKey = []string{"player_stats_id", "ps_defense_id"}
-	// PsoffensePrimaryKey and PsoffenseColumn2 are the table columns denoting the
-	// primary key for the psoffense relation (M2M).
-	PsoffensePrimaryKey = []string{"player_stats_id", "ps_offense_id"}
-	// PspenaltyPrimaryKey and PspenaltyColumn2 are the table columns denoting the
-	// primary key for the pspenalty relation (M2M).
-	PspenaltyPrimaryKey = []string{"player_stats_id", "ps_penalty_id"}
+	// SeasonPrimaryKey and SeasonColumn2 are the table columns denoting the
+	// primary key for the season relation (M2M).
+	SeasonPrimaryKey = []string{"player_stats_id", "season_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -180,17 +186,10 @@ func ByPlayerField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
-// ByTeamCount orders the results by team count.
-func ByTeamCount(opts ...sql.OrderTermOption) OrderOption {
+// ByTeamField orders the results by team field.
+func ByTeamField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newTeamStep(), opts...)
-	}
-}
-
-// ByTeam orders the results by team terms.
-func ByTeam(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), sql.OrderByField(field, opts...))
 	}
 }
 
@@ -305,6 +304,20 @@ func ByPspenalty(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newPspenaltyStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySeasonCount orders the results by season count.
+func BySeasonCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSeasonStep(), opts...)
+	}
+}
+
+// BySeason orders the results by season terms.
+func BySeason(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSeasonStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newPlayerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -316,7 +329,7 @@ func newTeamStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, TeamTable, TeamColumn),
+		sqlgraph.Edge(sqlgraph.M2O, true, TeamTable, TeamColumn),
 	)
 }
 func newPlayerEventsStep() *sqlgraph.Step {
@@ -344,34 +357,41 @@ func newPsgamesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsgamesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PsgamesTable, PsgamesPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsgamesTable, PsgamesColumn),
 	)
 }
 func newPsgoalsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsgoalsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PsgoalsTable, PsgoalsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsgoalsTable, PsgoalsColumn),
 	)
 }
 func newPsdefenseStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsdefenseInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PsdefenseTable, PsdefensePrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsdefenseTable, PsdefenseColumn),
 	)
 }
 func newPsoffenseStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsoffenseInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PsoffenseTable, PsoffensePrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsoffenseTable, PsoffenseColumn),
 	)
 }
 func newPspenaltyStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PspenaltyInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, PspenaltyTable, PspenaltyPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2M, false, PspenaltyTable, PspenaltyColumn),
+	)
+}
+func newSeasonStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SeasonInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, SeasonTable, SeasonPrimaryKey...),
 	)
 }

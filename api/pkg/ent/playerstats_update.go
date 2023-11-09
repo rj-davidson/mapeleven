@@ -18,6 +18,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -68,19 +69,23 @@ func (psu *PlayerStatsUpdate) SetPlayer(p *Player) *PlayerStatsUpdate {
 	return psu.SetPlayerID(p.ID)
 }
 
-// AddTeamIDs adds the "team" edge to the Team entity by IDs.
-func (psu *PlayerStatsUpdate) AddTeamIDs(ids ...int) *PlayerStatsUpdate {
-	psu.mutation.AddTeamIDs(ids...)
+// SetTeamID sets the "team" edge to the Team entity by ID.
+func (psu *PlayerStatsUpdate) SetTeamID(id int) *PlayerStatsUpdate {
+	psu.mutation.SetTeamID(id)
 	return psu
 }
 
-// AddTeam adds the "team" edges to the Team entity.
-func (psu *PlayerStatsUpdate) AddTeam(t ...*Team) *PlayerStatsUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTeamID sets the "team" edge to the Team entity by ID if the given value is not nil.
+func (psu *PlayerStatsUpdate) SetNillableTeamID(id *int) *PlayerStatsUpdate {
+	if id != nil {
+		psu = psu.SetTeamID(*id)
 	}
-	return psu.AddTeamIDs(ids...)
+	return psu
+}
+
+// SetTeam sets the "team" edge to the Team entity.
+func (psu *PlayerStatsUpdate) SetTeam(t *Team) *PlayerStatsUpdate {
+	return psu.SetTeamID(t.ID)
 }
 
 // AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by IDs.
@@ -203,6 +208,21 @@ func (psu *PlayerStatsUpdate) AddPspenalty(p ...*PSPenalty) *PlayerStatsUpdate {
 	return psu.AddPspenaltyIDs(ids...)
 }
 
+// AddSeasonIDs adds the "season" edge to the Season entity by IDs.
+func (psu *PlayerStatsUpdate) AddSeasonIDs(ids ...int) *PlayerStatsUpdate {
+	psu.mutation.AddSeasonIDs(ids...)
+	return psu
+}
+
+// AddSeason adds the "season" edges to the Season entity.
+func (psu *PlayerStatsUpdate) AddSeason(s ...*Season) *PlayerStatsUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return psu.AddSeasonIDs(ids...)
+}
+
 // Mutation returns the PlayerStatsMutation object of the builder.
 func (psu *PlayerStatsUpdate) Mutation() *PlayerStatsMutation {
 	return psu.mutation
@@ -214,25 +234,10 @@ func (psu *PlayerStatsUpdate) ClearPlayer() *PlayerStatsUpdate {
 	return psu
 }
 
-// ClearTeam clears all "team" edges to the Team entity.
+// ClearTeam clears the "team" edge to the Team entity.
 func (psu *PlayerStatsUpdate) ClearTeam() *PlayerStatsUpdate {
 	psu.mutation.ClearTeam()
 	return psu
-}
-
-// RemoveTeamIDs removes the "team" edge to Team entities by IDs.
-func (psu *PlayerStatsUpdate) RemoveTeamIDs(ids ...int) *PlayerStatsUpdate {
-	psu.mutation.RemoveTeamIDs(ids...)
-	return psu
-}
-
-// RemoveTeam removes "team" edges to Team entities.
-func (psu *PlayerStatsUpdate) RemoveTeam(t ...*Team) *PlayerStatsUpdate {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return psu.RemoveTeamIDs(ids...)
 }
 
 // ClearPlayerEvents clears all "playerEvents" edges to the FixtureEvents entity.
@@ -403,6 +408,27 @@ func (psu *PlayerStatsUpdate) RemovePspenalty(p ...*PSPenalty) *PlayerStatsUpdat
 	return psu.RemovePspenaltyIDs(ids...)
 }
 
+// ClearSeason clears all "season" edges to the Season entity.
+func (psu *PlayerStatsUpdate) ClearSeason() *PlayerStatsUpdate {
+	psu.mutation.ClearSeason()
+	return psu
+}
+
+// RemoveSeasonIDs removes the "season" edge to Season entities by IDs.
+func (psu *PlayerStatsUpdate) RemoveSeasonIDs(ids ...int) *PlayerStatsUpdate {
+	psu.mutation.RemoveSeasonIDs(ids...)
+	return psu
+}
+
+// RemoveSeason removes "season" edges to Season entities.
+func (psu *PlayerStatsUpdate) RemoveSeason(s ...*Season) *PlayerStatsUpdate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return psu.RemoveSeasonIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (psu *PlayerStatsUpdate) Save(ctx context.Context) (int, error) {
 	psu.defaults()
@@ -485,37 +511,21 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if psu.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   playerstats.TeamTable,
 			Columns: []string{playerstats.TeamColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := psu.mutation.RemovedTeamIDs(); len(nodes) > 0 && !psu.mutation.TeamCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   playerstats.TeamTable,
-			Columns: []string{playerstats.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := psu.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   playerstats.TeamTable,
 			Columns: []string{playerstats.TeamColumn},
 			Bidi:    false,
@@ -665,10 +675,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if psu.mutation.PsgamesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgamesTable,
-			Columns: playerstats.PsgamesPrimaryKey,
+			Columns: []string{playerstats.PsgamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt),
@@ -678,10 +688,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.RemovedPsgamesIDs(); len(nodes) > 0 && !psu.mutation.PsgamesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgamesTable,
-			Columns: playerstats.PsgamesPrimaryKey,
+			Columns: []string{playerstats.PsgamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt),
@@ -694,10 +704,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.PsgamesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgamesTable,
-			Columns: playerstats.PsgamesPrimaryKey,
+			Columns: []string{playerstats.PsgamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt),
@@ -710,10 +720,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if psu.mutation.PsgoalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgoalsTable,
-			Columns: playerstats.PsgoalsPrimaryKey,
+			Columns: []string{playerstats.PsgoalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgoals.FieldID, field.TypeInt),
@@ -723,10 +733,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.RemovedPsgoalsIDs(); len(nodes) > 0 && !psu.mutation.PsgoalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgoalsTable,
-			Columns: playerstats.PsgoalsPrimaryKey,
+			Columns: []string{playerstats.PsgoalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgoals.FieldID, field.TypeInt),
@@ -739,10 +749,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.PsgoalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgoalsTable,
-			Columns: playerstats.PsgoalsPrimaryKey,
+			Columns: []string{playerstats.PsgoalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgoals.FieldID, field.TypeInt),
@@ -755,10 +765,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if psu.mutation.PsdefenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsdefenseTable,
-			Columns: playerstats.PsdefensePrimaryKey,
+			Columns: []string{playerstats.PsdefenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psdefense.FieldID, field.TypeInt),
@@ -768,10 +778,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.RemovedPsdefenseIDs(); len(nodes) > 0 && !psu.mutation.PsdefenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsdefenseTable,
-			Columns: playerstats.PsdefensePrimaryKey,
+			Columns: []string{playerstats.PsdefenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psdefense.FieldID, field.TypeInt),
@@ -784,10 +794,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.PsdefenseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsdefenseTable,
-			Columns: playerstats.PsdefensePrimaryKey,
+			Columns: []string{playerstats.PsdefenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psdefense.FieldID, field.TypeInt),
@@ -800,10 +810,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if psu.mutation.PsoffenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsoffenseTable,
-			Columns: playerstats.PsoffensePrimaryKey,
+			Columns: []string{playerstats.PsoffenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psoffense.FieldID, field.TypeInt),
@@ -813,10 +823,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.RemovedPsoffenseIDs(); len(nodes) > 0 && !psu.mutation.PsoffenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsoffenseTable,
-			Columns: playerstats.PsoffensePrimaryKey,
+			Columns: []string{playerstats.PsoffenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psoffense.FieldID, field.TypeInt),
@@ -829,10 +839,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.PsoffenseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsoffenseTable,
-			Columns: playerstats.PsoffensePrimaryKey,
+			Columns: []string{playerstats.PsoffenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psoffense.FieldID, field.TypeInt),
@@ -845,10 +855,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if psu.mutation.PspenaltyCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PspenaltyTable,
-			Columns: playerstats.PspenaltyPrimaryKey,
+			Columns: []string{playerstats.PspenaltyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pspenalty.FieldID, field.TypeInt),
@@ -858,10 +868,10 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.RemovedPspenaltyIDs(); len(nodes) > 0 && !psu.mutation.PspenaltyCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PspenaltyTable,
-			Columns: playerstats.PspenaltyPrimaryKey,
+			Columns: []string{playerstats.PspenaltyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pspenalty.FieldID, field.TypeInt),
@@ -874,13 +884,58 @@ func (psu *PlayerStatsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.PspenaltyIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PspenaltyTable,
-			Columns: playerstats.PspenaltyPrimaryKey,
+			Columns: []string{playerstats.PspenaltyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pspenalty.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if psu.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   playerstats.SeasonTable,
+			Columns: playerstats.SeasonPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := psu.mutation.RemovedSeasonIDs(); len(nodes) > 0 && !psu.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   playerstats.SeasonTable,
+			Columns: playerstats.SeasonPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := psu.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   playerstats.SeasonTable,
+			Columns: playerstats.SeasonPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -939,19 +994,23 @@ func (psuo *PlayerStatsUpdateOne) SetPlayer(p *Player) *PlayerStatsUpdateOne {
 	return psuo.SetPlayerID(p.ID)
 }
 
-// AddTeamIDs adds the "team" edge to the Team entity by IDs.
-func (psuo *PlayerStatsUpdateOne) AddTeamIDs(ids ...int) *PlayerStatsUpdateOne {
-	psuo.mutation.AddTeamIDs(ids...)
+// SetTeamID sets the "team" edge to the Team entity by ID.
+func (psuo *PlayerStatsUpdateOne) SetTeamID(id int) *PlayerStatsUpdateOne {
+	psuo.mutation.SetTeamID(id)
 	return psuo
 }
 
-// AddTeam adds the "team" edges to the Team entity.
-func (psuo *PlayerStatsUpdateOne) AddTeam(t ...*Team) *PlayerStatsUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
+// SetNillableTeamID sets the "team" edge to the Team entity by ID if the given value is not nil.
+func (psuo *PlayerStatsUpdateOne) SetNillableTeamID(id *int) *PlayerStatsUpdateOne {
+	if id != nil {
+		psuo = psuo.SetTeamID(*id)
 	}
-	return psuo.AddTeamIDs(ids...)
+	return psuo
+}
+
+// SetTeam sets the "team" edge to the Team entity.
+func (psuo *PlayerStatsUpdateOne) SetTeam(t *Team) *PlayerStatsUpdateOne {
+	return psuo.SetTeamID(t.ID)
 }
 
 // AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by IDs.
@@ -1074,6 +1133,21 @@ func (psuo *PlayerStatsUpdateOne) AddPspenalty(p ...*PSPenalty) *PlayerStatsUpda
 	return psuo.AddPspenaltyIDs(ids...)
 }
 
+// AddSeasonIDs adds the "season" edge to the Season entity by IDs.
+func (psuo *PlayerStatsUpdateOne) AddSeasonIDs(ids ...int) *PlayerStatsUpdateOne {
+	psuo.mutation.AddSeasonIDs(ids...)
+	return psuo
+}
+
+// AddSeason adds the "season" edges to the Season entity.
+func (psuo *PlayerStatsUpdateOne) AddSeason(s ...*Season) *PlayerStatsUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return psuo.AddSeasonIDs(ids...)
+}
+
 // Mutation returns the PlayerStatsMutation object of the builder.
 func (psuo *PlayerStatsUpdateOne) Mutation() *PlayerStatsMutation {
 	return psuo.mutation
@@ -1085,25 +1159,10 @@ func (psuo *PlayerStatsUpdateOne) ClearPlayer() *PlayerStatsUpdateOne {
 	return psuo
 }
 
-// ClearTeam clears all "team" edges to the Team entity.
+// ClearTeam clears the "team" edge to the Team entity.
 func (psuo *PlayerStatsUpdateOne) ClearTeam() *PlayerStatsUpdateOne {
 	psuo.mutation.ClearTeam()
 	return psuo
-}
-
-// RemoveTeamIDs removes the "team" edge to Team entities by IDs.
-func (psuo *PlayerStatsUpdateOne) RemoveTeamIDs(ids ...int) *PlayerStatsUpdateOne {
-	psuo.mutation.RemoveTeamIDs(ids...)
-	return psuo
-}
-
-// RemoveTeam removes "team" edges to Team entities.
-func (psuo *PlayerStatsUpdateOne) RemoveTeam(t ...*Team) *PlayerStatsUpdateOne {
-	ids := make([]int, len(t))
-	for i := range t {
-		ids[i] = t[i].ID
-	}
-	return psuo.RemoveTeamIDs(ids...)
 }
 
 // ClearPlayerEvents clears all "playerEvents" edges to the FixtureEvents entity.
@@ -1274,6 +1333,27 @@ func (psuo *PlayerStatsUpdateOne) RemovePspenalty(p ...*PSPenalty) *PlayerStatsU
 	return psuo.RemovePspenaltyIDs(ids...)
 }
 
+// ClearSeason clears all "season" edges to the Season entity.
+func (psuo *PlayerStatsUpdateOne) ClearSeason() *PlayerStatsUpdateOne {
+	psuo.mutation.ClearSeason()
+	return psuo
+}
+
+// RemoveSeasonIDs removes the "season" edge to Season entities by IDs.
+func (psuo *PlayerStatsUpdateOne) RemoveSeasonIDs(ids ...int) *PlayerStatsUpdateOne {
+	psuo.mutation.RemoveSeasonIDs(ids...)
+	return psuo
+}
+
+// RemoveSeason removes "season" edges to Season entities.
+func (psuo *PlayerStatsUpdateOne) RemoveSeason(s ...*Season) *PlayerStatsUpdateOne {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return psuo.RemoveSeasonIDs(ids...)
+}
+
 // Where appends a list predicates to the PlayerStatsUpdate builder.
 func (psuo *PlayerStatsUpdateOne) Where(ps ...predicate.PlayerStats) *PlayerStatsUpdateOne {
 	psuo.mutation.Where(ps...)
@@ -1386,37 +1466,21 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if psuo.mutation.TeamCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   playerstats.TeamTable,
 			Columns: []string{playerstats.TeamColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := psuo.mutation.RemovedTeamIDs(); len(nodes) > 0 && !psuo.mutation.TeamCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   playerstats.TeamTable,
-			Columns: []string{playerstats.TeamColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := psuo.mutation.TeamIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
 			Table:   playerstats.TeamTable,
 			Columns: []string{playerstats.TeamColumn},
 			Bidi:    false,
@@ -1566,10 +1630,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if psuo.mutation.PsgamesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgamesTable,
-			Columns: playerstats.PsgamesPrimaryKey,
+			Columns: []string{playerstats.PsgamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt),
@@ -1579,10 +1643,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.RemovedPsgamesIDs(); len(nodes) > 0 && !psuo.mutation.PsgamesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgamesTable,
-			Columns: playerstats.PsgamesPrimaryKey,
+			Columns: []string{playerstats.PsgamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt),
@@ -1595,10 +1659,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.PsgamesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgamesTable,
-			Columns: playerstats.PsgamesPrimaryKey,
+			Columns: []string{playerstats.PsgamesColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt),
@@ -1611,10 +1675,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if psuo.mutation.PsgoalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgoalsTable,
-			Columns: playerstats.PsgoalsPrimaryKey,
+			Columns: []string{playerstats.PsgoalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgoals.FieldID, field.TypeInt),
@@ -1624,10 +1688,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.RemovedPsgoalsIDs(); len(nodes) > 0 && !psuo.mutation.PsgoalsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgoalsTable,
-			Columns: playerstats.PsgoalsPrimaryKey,
+			Columns: []string{playerstats.PsgoalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgoals.FieldID, field.TypeInt),
@@ -1640,10 +1704,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.PsgoalsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsgoalsTable,
-			Columns: playerstats.PsgoalsPrimaryKey,
+			Columns: []string{playerstats.PsgoalsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psgoals.FieldID, field.TypeInt),
@@ -1656,10 +1720,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if psuo.mutation.PsdefenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsdefenseTable,
-			Columns: playerstats.PsdefensePrimaryKey,
+			Columns: []string{playerstats.PsdefenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psdefense.FieldID, field.TypeInt),
@@ -1669,10 +1733,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.RemovedPsdefenseIDs(); len(nodes) > 0 && !psuo.mutation.PsdefenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsdefenseTable,
-			Columns: playerstats.PsdefensePrimaryKey,
+			Columns: []string{playerstats.PsdefenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psdefense.FieldID, field.TypeInt),
@@ -1685,10 +1749,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.PsdefenseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsdefenseTable,
-			Columns: playerstats.PsdefensePrimaryKey,
+			Columns: []string{playerstats.PsdefenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psdefense.FieldID, field.TypeInt),
@@ -1701,10 +1765,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if psuo.mutation.PsoffenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsoffenseTable,
-			Columns: playerstats.PsoffensePrimaryKey,
+			Columns: []string{playerstats.PsoffenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psoffense.FieldID, field.TypeInt),
@@ -1714,10 +1778,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.RemovedPsoffenseIDs(); len(nodes) > 0 && !psuo.mutation.PsoffenseCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsoffenseTable,
-			Columns: playerstats.PsoffensePrimaryKey,
+			Columns: []string{playerstats.PsoffenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psoffense.FieldID, field.TypeInt),
@@ -1730,10 +1794,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.PsoffenseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PsoffenseTable,
-			Columns: playerstats.PsoffensePrimaryKey,
+			Columns: []string{playerstats.PsoffenseColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(psoffense.FieldID, field.TypeInt),
@@ -1746,10 +1810,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if psuo.mutation.PspenaltyCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PspenaltyTable,
-			Columns: playerstats.PspenaltyPrimaryKey,
+			Columns: []string{playerstats.PspenaltyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pspenalty.FieldID, field.TypeInt),
@@ -1759,10 +1823,10 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.RemovedPspenaltyIDs(); len(nodes) > 0 && !psuo.mutation.PspenaltyCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PspenaltyTable,
-			Columns: playerstats.PspenaltyPrimaryKey,
+			Columns: []string{playerstats.PspenaltyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pspenalty.FieldID, field.TypeInt),
@@ -1775,13 +1839,58 @@ func (psuo *PlayerStatsUpdateOne) sqlSave(ctx context.Context) (_node *PlayerSta
 	}
 	if nodes := psuo.mutation.PspenaltyIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.O2M,
 			Inverse: false,
 			Table:   playerstats.PspenaltyTable,
-			Columns: playerstats.PspenaltyPrimaryKey,
+			Columns: []string{playerstats.PspenaltyColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(pspenalty.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if psuo.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   playerstats.SeasonTable,
+			Columns: playerstats.SeasonPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := psuo.mutation.RemovedSeasonIDs(); len(nodes) > 0 && !psuo.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   playerstats.SeasonTable,
+			Columns: playerstats.SeasonPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := psuo.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   playerstats.SeasonTable,
+			Columns: playerstats.SeasonPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

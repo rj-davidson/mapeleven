@@ -26,11 +26,13 @@ const (
 	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the psdefense in the database.
 	Table = "ps_defenses"
-	// PlayerStatsTable is the table that holds the playerStats relation/edge. The primary key declared below.
-	PlayerStatsTable = "player_stats_psdefense"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge.
+	PlayerStatsTable = "ps_defenses"
 	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
 	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
 	PlayerStatsInverseTable = "player_stats"
+	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
+	PlayerStatsColumn = "player_stats_psdefense"
 )
 
 // Columns holds all SQL columns for psdefense fields.
@@ -43,11 +45,11 @@ var Columns = []string{
 	FieldWonDuels,
 }
 
-var (
-	// PlayerStatsPrimaryKey and PlayerStatsColumn2 are the table columns denoting the
-	// primary key for the playerStats relation (M2M).
-	PlayerStatsPrimaryKey = []string{"player_stats_id", "ps_defense_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "ps_defenses"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"player_stats_psdefense",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -56,11 +58,16 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
 
 var (
-	// DefaultBlocks holds the default value on creation for the "blocks" field.
+	// DefaultBlocks holds the default value on creation for the "Blocks" field.
 	DefaultBlocks int
 )
 
@@ -72,48 +79,41 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByTacklesTotal orders the results by the tacklesTotal field.
+// ByTacklesTotal orders the results by the TacklesTotal field.
 func ByTacklesTotal(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTacklesTotal, opts...).ToFunc()
 }
 
-// ByBlocks orders the results by the blocks field.
+// ByBlocks orders the results by the Blocks field.
 func ByBlocks(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldBlocks, opts...).ToFunc()
 }
 
-// ByInterceptions orders the results by the interceptions field.
+// ByInterceptions orders the results by the Interceptions field.
 func ByInterceptions(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldInterceptions, opts...).ToFunc()
 }
 
-// ByTotalDuels orders the results by the totalDuels field.
+// ByTotalDuels orders the results by the TotalDuels field.
 func ByTotalDuels(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldTotalDuels, opts...).ToFunc()
 }
 
-// ByWonDuels orders the results by the wonDuels field.
+// ByWonDuels orders the results by the WonDuels field.
 func ByWonDuels(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWonDuels, opts...).ToFunc()
 }
 
-// ByPlayerStatsCount orders the results by playerStats count.
-func ByPlayerStatsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPlayerStatsField orders the results by playerStats field.
+func ByPlayerStatsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlayerStatsStep(), opts...)
-	}
-}
-
-// ByPlayerStats orders the results by playerStats terms.
-func ByPlayerStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newPlayerStatsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayerStatsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 	)
 }

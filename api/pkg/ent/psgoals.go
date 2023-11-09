@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strings"
 
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -16,37 +17,42 @@ type PSGoals struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// TotalGoals holds the value of the "totalGoals" field.
-	TotalGoals int `json:"totalGoals,omitempty"`
-	// ConcededGoals holds the value of the "concededGoals" field.
-	ConcededGoals int `json:"concededGoals,omitempty"`
-	// AssistGoals holds the value of the "assistGoals" field.
-	AssistGoals int `json:"assistGoals,omitempty"`
-	// SaveGoals holds the value of the "saveGoals" field.
-	SaveGoals int `json:"saveGoals,omitempty"`
-	// ShotsTotal holds the value of the "shotsTotal" field.
-	ShotsTotal int `json:"shotsTotal,omitempty"`
-	// ShotsOn holds the value of the "shotsOn" field.
-	ShotsOn int `json:"shotsOn,omitempty"`
+	// TotalGoals holds the value of the "TotalGoals" field.
+	TotalGoals int `json:"TotalGoals,omitempty"`
+	// ConcededGoals holds the value of the "ConcededGoals" field.
+	ConcededGoals int `json:"ConcededGoals,omitempty"`
+	// AssistGoals holds the value of the "AssistGoals" field.
+	AssistGoals int `json:"AssistGoals,omitempty"`
+	// SaveGoals holds the value of the "SaveGoals" field.
+	SaveGoals int `json:"SaveGoals,omitempty"`
+	// ShotsTotal holds the value of the "ShotsTotal" field.
+	ShotsTotal int `json:"ShotsTotal,omitempty"`
+	// ShotsOn holds the value of the "ShotsOn" field.
+	ShotsOn int `json:"ShotsOn,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSGoalsQuery when eager-loading is set.
-	Edges        PSGoalsEdges `json:"edges"`
-	selectValues sql.SelectValues
+	Edges                PSGoalsEdges `json:"edges"`
+	player_stats_psgoals *int
+	selectValues         sql.SelectValues
 }
 
 // PSGoalsEdges holds the relations/edges for other nodes in the graph.
 type PSGoalsEdges struct {
 	// PlayerStats holds the value of the playerStats edge.
-	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
+	PlayerStats *PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
 // PlayerStatsOrErr returns the PlayerStats value or an error if the edge
-// was not loaded in eager-loading.
-func (e PSGoalsEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PSGoalsEdges) PlayerStatsOrErr() (*PlayerStats, error) {
 	if e.loadedTypes[0] {
+		if e.PlayerStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: playerstats.Label}
+		}
 		return e.PlayerStats, nil
 	}
 	return nil, &NotLoadedError{edge: "playerStats"}
@@ -58,6 +64,8 @@ func (*PSGoals) scanValues(columns []string) ([]any, error) {
 	for i := range columns {
 		switch columns[i] {
 		case psgoals.FieldID, psgoals.FieldTotalGoals, psgoals.FieldConcededGoals, psgoals.FieldAssistGoals, psgoals.FieldSaveGoals, psgoals.FieldShotsTotal, psgoals.FieldShotsOn:
+			values[i] = new(sql.NullInt64)
+		case psgoals.ForeignKeys[0]: // player_stats_psgoals
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -82,39 +90,46 @@ func (pg *PSGoals) assignValues(columns []string, values []any) error {
 			pg.ID = int(value.Int64)
 		case psgoals.FieldTotalGoals:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field totalGoals", values[i])
+				return fmt.Errorf("unexpected type %T for field TotalGoals", values[i])
 			} else if value.Valid {
 				pg.TotalGoals = int(value.Int64)
 			}
 		case psgoals.FieldConcededGoals:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field concededGoals", values[i])
+				return fmt.Errorf("unexpected type %T for field ConcededGoals", values[i])
 			} else if value.Valid {
 				pg.ConcededGoals = int(value.Int64)
 			}
 		case psgoals.FieldAssistGoals:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field assistGoals", values[i])
+				return fmt.Errorf("unexpected type %T for field AssistGoals", values[i])
 			} else if value.Valid {
 				pg.AssistGoals = int(value.Int64)
 			}
 		case psgoals.FieldSaveGoals:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field saveGoals", values[i])
+				return fmt.Errorf("unexpected type %T for field SaveGoals", values[i])
 			} else if value.Valid {
 				pg.SaveGoals = int(value.Int64)
 			}
 		case psgoals.FieldShotsTotal:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field shotsTotal", values[i])
+				return fmt.Errorf("unexpected type %T for field ShotsTotal", values[i])
 			} else if value.Valid {
 				pg.ShotsTotal = int(value.Int64)
 			}
 		case psgoals.FieldShotsOn:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field shotsOn", values[i])
+				return fmt.Errorf("unexpected type %T for field ShotsOn", values[i])
 			} else if value.Valid {
 				pg.ShotsOn = int(value.Int64)
+			}
+		case psgoals.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_psgoals", value)
+			} else if value.Valid {
+				pg.player_stats_psgoals = new(int)
+				*pg.player_stats_psgoals = int(value.Int64)
 			}
 		default:
 			pg.selectValues.Set(columns[i], values[i])
@@ -157,22 +172,22 @@ func (pg *PSGoals) String() string {
 	var builder strings.Builder
 	builder.WriteString("PSGoals(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pg.ID))
-	builder.WriteString("totalGoals=")
+	builder.WriteString("TotalGoals=")
 	builder.WriteString(fmt.Sprintf("%v", pg.TotalGoals))
 	builder.WriteString(", ")
-	builder.WriteString("concededGoals=")
+	builder.WriteString("ConcededGoals=")
 	builder.WriteString(fmt.Sprintf("%v", pg.ConcededGoals))
 	builder.WriteString(", ")
-	builder.WriteString("assistGoals=")
+	builder.WriteString("AssistGoals=")
 	builder.WriteString(fmt.Sprintf("%v", pg.AssistGoals))
 	builder.WriteString(", ")
-	builder.WriteString("saveGoals=")
+	builder.WriteString("SaveGoals=")
 	builder.WriteString(fmt.Sprintf("%v", pg.SaveGoals))
 	builder.WriteString(", ")
-	builder.WriteString("shotsTotal=")
+	builder.WriteString("ShotsTotal=")
 	builder.WriteString(fmt.Sprintf("%v", pg.ShotsTotal))
 	builder.WriteString(", ")
-	builder.WriteString("shotsOn=")
+	builder.WriteString("ShotsOn=")
 	builder.WriteString(fmt.Sprintf("%v", pg.ShotsOn))
 	builder.WriteByte(')')
 	return builder.String()

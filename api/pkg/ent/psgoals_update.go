@@ -28,53 +28,53 @@ func (pgu *PSGoalsUpdate) Where(ps ...predicate.PSGoals) *PSGoalsUpdate {
 	return pgu
 }
 
-// SetTotalGoals sets the "totalGoals" field.
+// SetTotalGoals sets the "TotalGoals" field.
 func (pgu *PSGoalsUpdate) SetTotalGoals(i int) *PSGoalsUpdate {
 	pgu.mutation.ResetTotalGoals()
 	pgu.mutation.SetTotalGoals(i)
 	return pgu
 }
 
-// AddTotalGoals adds i to the "totalGoals" field.
+// AddTotalGoals adds i to the "TotalGoals" field.
 func (pgu *PSGoalsUpdate) AddTotalGoals(i int) *PSGoalsUpdate {
 	pgu.mutation.AddTotalGoals(i)
 	return pgu
 }
 
-// SetConcededGoals sets the "concededGoals" field.
+// SetConcededGoals sets the "ConcededGoals" field.
 func (pgu *PSGoalsUpdate) SetConcededGoals(i int) *PSGoalsUpdate {
 	pgu.mutation.ResetConcededGoals()
 	pgu.mutation.SetConcededGoals(i)
 	return pgu
 }
 
-// AddConcededGoals adds i to the "concededGoals" field.
+// AddConcededGoals adds i to the "ConcededGoals" field.
 func (pgu *PSGoalsUpdate) AddConcededGoals(i int) *PSGoalsUpdate {
 	pgu.mutation.AddConcededGoals(i)
 	return pgu
 }
 
-// SetAssistGoals sets the "assistGoals" field.
+// SetAssistGoals sets the "AssistGoals" field.
 func (pgu *PSGoalsUpdate) SetAssistGoals(i int) *PSGoalsUpdate {
 	pgu.mutation.ResetAssistGoals()
 	pgu.mutation.SetAssistGoals(i)
 	return pgu
 }
 
-// AddAssistGoals adds i to the "assistGoals" field.
+// AddAssistGoals adds i to the "AssistGoals" field.
 func (pgu *PSGoalsUpdate) AddAssistGoals(i int) *PSGoalsUpdate {
 	pgu.mutation.AddAssistGoals(i)
 	return pgu
 }
 
-// SetSaveGoals sets the "saveGoals" field.
+// SetSaveGoals sets the "SaveGoals" field.
 func (pgu *PSGoalsUpdate) SetSaveGoals(i int) *PSGoalsUpdate {
 	pgu.mutation.ResetSaveGoals()
 	pgu.mutation.SetSaveGoals(i)
 	return pgu
 }
 
-// SetNillableSaveGoals sets the "saveGoals" field if the given value is not nil.
+// SetNillableSaveGoals sets the "SaveGoals" field if the given value is not nil.
 func (pgu *PSGoalsUpdate) SetNillableSaveGoals(i *int) *PSGoalsUpdate {
 	if i != nil {
 		pgu.SetSaveGoals(*i)
@@ -82,51 +82,55 @@ func (pgu *PSGoalsUpdate) SetNillableSaveGoals(i *int) *PSGoalsUpdate {
 	return pgu
 }
 
-// AddSaveGoals adds i to the "saveGoals" field.
+// AddSaveGoals adds i to the "SaveGoals" field.
 func (pgu *PSGoalsUpdate) AddSaveGoals(i int) *PSGoalsUpdate {
 	pgu.mutation.AddSaveGoals(i)
 	return pgu
 }
 
-// SetShotsTotal sets the "shotsTotal" field.
+// SetShotsTotal sets the "ShotsTotal" field.
 func (pgu *PSGoalsUpdate) SetShotsTotal(i int) *PSGoalsUpdate {
 	pgu.mutation.ResetShotsTotal()
 	pgu.mutation.SetShotsTotal(i)
 	return pgu
 }
 
-// AddShotsTotal adds i to the "shotsTotal" field.
+// AddShotsTotal adds i to the "ShotsTotal" field.
 func (pgu *PSGoalsUpdate) AddShotsTotal(i int) *PSGoalsUpdate {
 	pgu.mutation.AddShotsTotal(i)
 	return pgu
 }
 
-// SetShotsOn sets the "shotsOn" field.
+// SetShotsOn sets the "ShotsOn" field.
 func (pgu *PSGoalsUpdate) SetShotsOn(i int) *PSGoalsUpdate {
 	pgu.mutation.ResetShotsOn()
 	pgu.mutation.SetShotsOn(i)
 	return pgu
 }
 
-// AddShotsOn adds i to the "shotsOn" field.
+// AddShotsOn adds i to the "ShotsOn" field.
 func (pgu *PSGoalsUpdate) AddShotsOn(i int) *PSGoalsUpdate {
 	pgu.mutation.AddShotsOn(i)
 	return pgu
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (pgu *PSGoalsUpdate) AddPlayerStatIDs(ids ...int) *PSGoalsUpdate {
-	pgu.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pgu *PSGoalsUpdate) SetPlayerStatsID(id int) *PSGoalsUpdate {
+	pgu.mutation.SetPlayerStatsID(id)
 	return pgu
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (pgu *PSGoalsUpdate) AddPlayerStats(p ...*PlayerStats) *PSGoalsUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pgu *PSGoalsUpdate) SetNillablePlayerStatsID(id *int) *PSGoalsUpdate {
+	if id != nil {
+		pgu = pgu.SetPlayerStatsID(*id)
 	}
-	return pgu.AddPlayerStatIDs(ids...)
+	return pgu
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pgu *PSGoalsUpdate) SetPlayerStats(p *PlayerStats) *PSGoalsUpdate {
+	return pgu.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSGoalsMutation object of the builder.
@@ -134,25 +138,10 @@ func (pgu *PSGoalsUpdate) Mutation() *PSGoalsMutation {
 	return pgu.mutation
 }
 
-// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
 func (pgu *PSGoalsUpdate) ClearPlayerStats() *PSGoalsUpdate {
 	pgu.mutation.ClearPlayerStats()
 	return pgu
-}
-
-// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
-func (pgu *PSGoalsUpdate) RemovePlayerStatIDs(ids ...int) *PSGoalsUpdate {
-	pgu.mutation.RemovePlayerStatIDs(ids...)
-	return pgu
-}
-
-// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
-func (pgu *PSGoalsUpdate) RemovePlayerStats(p ...*PlayerStats) *PSGoalsUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pgu.RemovePlayerStatIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -229,39 +218,23 @@ func (pgu *PSGoalsUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pgu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psgoals.PlayerStatsTable,
-			Columns: psgoals.PlayerStatsPrimaryKey,
+			Columns: []string{psgoals.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pgu.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !pgu.mutation.PlayerStatsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   psgoals.PlayerStatsTable,
-			Columns: psgoals.PlayerStatsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := pgu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psgoals.PlayerStatsTable,
-			Columns: psgoals.PlayerStatsPrimaryKey,
+			Columns: []string{psgoals.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
@@ -292,53 +265,53 @@ type PSGoalsUpdateOne struct {
 	mutation *PSGoalsMutation
 }
 
-// SetTotalGoals sets the "totalGoals" field.
+// SetTotalGoals sets the "TotalGoals" field.
 func (pguo *PSGoalsUpdateOne) SetTotalGoals(i int) *PSGoalsUpdateOne {
 	pguo.mutation.ResetTotalGoals()
 	pguo.mutation.SetTotalGoals(i)
 	return pguo
 }
 
-// AddTotalGoals adds i to the "totalGoals" field.
+// AddTotalGoals adds i to the "TotalGoals" field.
 func (pguo *PSGoalsUpdateOne) AddTotalGoals(i int) *PSGoalsUpdateOne {
 	pguo.mutation.AddTotalGoals(i)
 	return pguo
 }
 
-// SetConcededGoals sets the "concededGoals" field.
+// SetConcededGoals sets the "ConcededGoals" field.
 func (pguo *PSGoalsUpdateOne) SetConcededGoals(i int) *PSGoalsUpdateOne {
 	pguo.mutation.ResetConcededGoals()
 	pguo.mutation.SetConcededGoals(i)
 	return pguo
 }
 
-// AddConcededGoals adds i to the "concededGoals" field.
+// AddConcededGoals adds i to the "ConcededGoals" field.
 func (pguo *PSGoalsUpdateOne) AddConcededGoals(i int) *PSGoalsUpdateOne {
 	pguo.mutation.AddConcededGoals(i)
 	return pguo
 }
 
-// SetAssistGoals sets the "assistGoals" field.
+// SetAssistGoals sets the "AssistGoals" field.
 func (pguo *PSGoalsUpdateOne) SetAssistGoals(i int) *PSGoalsUpdateOne {
 	pguo.mutation.ResetAssistGoals()
 	pguo.mutation.SetAssistGoals(i)
 	return pguo
 }
 
-// AddAssistGoals adds i to the "assistGoals" field.
+// AddAssistGoals adds i to the "AssistGoals" field.
 func (pguo *PSGoalsUpdateOne) AddAssistGoals(i int) *PSGoalsUpdateOne {
 	pguo.mutation.AddAssistGoals(i)
 	return pguo
 }
 
-// SetSaveGoals sets the "saveGoals" field.
+// SetSaveGoals sets the "SaveGoals" field.
 func (pguo *PSGoalsUpdateOne) SetSaveGoals(i int) *PSGoalsUpdateOne {
 	pguo.mutation.ResetSaveGoals()
 	pguo.mutation.SetSaveGoals(i)
 	return pguo
 }
 
-// SetNillableSaveGoals sets the "saveGoals" field if the given value is not nil.
+// SetNillableSaveGoals sets the "SaveGoals" field if the given value is not nil.
 func (pguo *PSGoalsUpdateOne) SetNillableSaveGoals(i *int) *PSGoalsUpdateOne {
 	if i != nil {
 		pguo.SetSaveGoals(*i)
@@ -346,51 +319,55 @@ func (pguo *PSGoalsUpdateOne) SetNillableSaveGoals(i *int) *PSGoalsUpdateOne {
 	return pguo
 }
 
-// AddSaveGoals adds i to the "saveGoals" field.
+// AddSaveGoals adds i to the "SaveGoals" field.
 func (pguo *PSGoalsUpdateOne) AddSaveGoals(i int) *PSGoalsUpdateOne {
 	pguo.mutation.AddSaveGoals(i)
 	return pguo
 }
 
-// SetShotsTotal sets the "shotsTotal" field.
+// SetShotsTotal sets the "ShotsTotal" field.
 func (pguo *PSGoalsUpdateOne) SetShotsTotal(i int) *PSGoalsUpdateOne {
 	pguo.mutation.ResetShotsTotal()
 	pguo.mutation.SetShotsTotal(i)
 	return pguo
 }
 
-// AddShotsTotal adds i to the "shotsTotal" field.
+// AddShotsTotal adds i to the "ShotsTotal" field.
 func (pguo *PSGoalsUpdateOne) AddShotsTotal(i int) *PSGoalsUpdateOne {
 	pguo.mutation.AddShotsTotal(i)
 	return pguo
 }
 
-// SetShotsOn sets the "shotsOn" field.
+// SetShotsOn sets the "ShotsOn" field.
 func (pguo *PSGoalsUpdateOne) SetShotsOn(i int) *PSGoalsUpdateOne {
 	pguo.mutation.ResetShotsOn()
 	pguo.mutation.SetShotsOn(i)
 	return pguo
 }
 
-// AddShotsOn adds i to the "shotsOn" field.
+// AddShotsOn adds i to the "ShotsOn" field.
 func (pguo *PSGoalsUpdateOne) AddShotsOn(i int) *PSGoalsUpdateOne {
 	pguo.mutation.AddShotsOn(i)
 	return pguo
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (pguo *PSGoalsUpdateOne) AddPlayerStatIDs(ids ...int) *PSGoalsUpdateOne {
-	pguo.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pguo *PSGoalsUpdateOne) SetPlayerStatsID(id int) *PSGoalsUpdateOne {
+	pguo.mutation.SetPlayerStatsID(id)
 	return pguo
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (pguo *PSGoalsUpdateOne) AddPlayerStats(p ...*PlayerStats) *PSGoalsUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pguo *PSGoalsUpdateOne) SetNillablePlayerStatsID(id *int) *PSGoalsUpdateOne {
+	if id != nil {
+		pguo = pguo.SetPlayerStatsID(*id)
 	}
-	return pguo.AddPlayerStatIDs(ids...)
+	return pguo
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pguo *PSGoalsUpdateOne) SetPlayerStats(p *PlayerStats) *PSGoalsUpdateOne {
+	return pguo.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSGoalsMutation object of the builder.
@@ -398,25 +375,10 @@ func (pguo *PSGoalsUpdateOne) Mutation() *PSGoalsMutation {
 	return pguo.mutation
 }
 
-// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
 func (pguo *PSGoalsUpdateOne) ClearPlayerStats() *PSGoalsUpdateOne {
 	pguo.mutation.ClearPlayerStats()
 	return pguo
-}
-
-// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
-func (pguo *PSGoalsUpdateOne) RemovePlayerStatIDs(ids ...int) *PSGoalsUpdateOne {
-	pguo.mutation.RemovePlayerStatIDs(ids...)
-	return pguo
-}
-
-// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
-func (pguo *PSGoalsUpdateOne) RemovePlayerStats(p ...*PlayerStats) *PSGoalsUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return pguo.RemovePlayerStatIDs(ids...)
 }
 
 // Where appends a list predicates to the PSGoalsUpdate builder.
@@ -523,39 +485,23 @@ func (pguo *PSGoalsUpdateOne) sqlSave(ctx context.Context) (_node *PSGoals, err 
 	}
 	if pguo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psgoals.PlayerStatsTable,
-			Columns: psgoals.PlayerStatsPrimaryKey,
+			Columns: []string{psgoals.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := pguo.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !pguo.mutation.PlayerStatsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   psgoals.PlayerStatsTable,
-			Columns: psgoals.PlayerStatsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
 	if nodes := pguo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psgoals.PlayerStatsTable,
-			Columns: psgoals.PlayerStatsPrimaryKey,
+			Columns: []string{psgoals.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),

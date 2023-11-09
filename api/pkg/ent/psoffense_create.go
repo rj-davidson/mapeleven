@@ -20,25 +20,25 @@ type PSOffenseCreate struct {
 	hooks    []Hook
 }
 
-// SetDribbleAttempts sets the "dribbleAttempts" field.
+// SetDribbleAttempts sets the "DribbleAttempts" field.
 func (poc *PSOffenseCreate) SetDribbleAttempts(i int) *PSOffenseCreate {
 	poc.mutation.SetDribbleAttempts(i)
 	return poc
 }
 
-// SetDribbleSuccess sets the "dribbleSuccess" field.
+// SetDribbleSuccess sets the "DribbleSuccess" field.
 func (poc *PSOffenseCreate) SetDribbleSuccess(i int) *PSOffenseCreate {
 	poc.mutation.SetDribbleSuccess(i)
 	return poc
 }
 
-// SetDribblePast sets the "dribblePast" field.
+// SetDribblePast sets the "DribblePast" field.
 func (poc *PSOffenseCreate) SetDribblePast(i int) *PSOffenseCreate {
 	poc.mutation.SetDribblePast(i)
 	return poc
 }
 
-// SetNillableDribblePast sets the "dribblePast" field if the given value is not nil.
+// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
 func (poc *PSOffenseCreate) SetNillableDribblePast(i *int) *PSOffenseCreate {
 	if i != nil {
 		poc.SetDribblePast(*i)
@@ -46,37 +46,41 @@ func (poc *PSOffenseCreate) SetNillableDribblePast(i *int) *PSOffenseCreate {
 	return poc
 }
 
-// SetPassesTotal sets the "passesTotal" field.
+// SetPassesTotal sets the "PassesTotal" field.
 func (poc *PSOffenseCreate) SetPassesTotal(i int) *PSOffenseCreate {
 	poc.mutation.SetPassesTotal(i)
 	return poc
 }
 
-// SetPassesKey sets the "passesKey" field.
+// SetPassesKey sets the "PassesKey" field.
 func (poc *PSOffenseCreate) SetPassesKey(i int) *PSOffenseCreate {
 	poc.mutation.SetPassesKey(i)
 	return poc
 }
 
-// SetPassesAccuracy sets the "passesAccuracy" field.
+// SetPassesAccuracy sets the "PassesAccuracy" field.
 func (poc *PSOffenseCreate) SetPassesAccuracy(i int) *PSOffenseCreate {
 	poc.mutation.SetPassesAccuracy(i)
 	return poc
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (poc *PSOffenseCreate) AddPlayerStatIDs(ids ...int) *PSOffenseCreate {
-	poc.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (poc *PSOffenseCreate) SetPlayerStatsID(id int) *PSOffenseCreate {
+	poc.mutation.SetPlayerStatsID(id)
 	return poc
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (poc *PSOffenseCreate) AddPlayerStats(p ...*PlayerStats) *PSOffenseCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (poc *PSOffenseCreate) SetNillablePlayerStatsID(id *int) *PSOffenseCreate {
+	if id != nil {
+		poc = poc.SetPlayerStatsID(*id)
 	}
-	return poc.AddPlayerStatIDs(ids...)
+	return poc
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (poc *PSOffenseCreate) SetPlayerStats(p *PlayerStats) *PSOffenseCreate {
+	return poc.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSOffenseMutation object of the builder.
@@ -123,22 +127,22 @@ func (poc *PSOffenseCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (poc *PSOffenseCreate) check() error {
 	if _, ok := poc.mutation.DribbleAttempts(); !ok {
-		return &ValidationError{Name: "dribbleAttempts", err: errors.New(`ent: missing required field "PSOffense.dribbleAttempts"`)}
+		return &ValidationError{Name: "DribbleAttempts", err: errors.New(`ent: missing required field "PSOffense.DribbleAttempts"`)}
 	}
 	if _, ok := poc.mutation.DribbleSuccess(); !ok {
-		return &ValidationError{Name: "dribbleSuccess", err: errors.New(`ent: missing required field "PSOffense.dribbleSuccess"`)}
+		return &ValidationError{Name: "DribbleSuccess", err: errors.New(`ent: missing required field "PSOffense.DribbleSuccess"`)}
 	}
 	if _, ok := poc.mutation.DribblePast(); !ok {
-		return &ValidationError{Name: "dribblePast", err: errors.New(`ent: missing required field "PSOffense.dribblePast"`)}
+		return &ValidationError{Name: "DribblePast", err: errors.New(`ent: missing required field "PSOffense.DribblePast"`)}
 	}
 	if _, ok := poc.mutation.PassesTotal(); !ok {
-		return &ValidationError{Name: "passesTotal", err: errors.New(`ent: missing required field "PSOffense.passesTotal"`)}
+		return &ValidationError{Name: "PassesTotal", err: errors.New(`ent: missing required field "PSOffense.PassesTotal"`)}
 	}
 	if _, ok := poc.mutation.PassesKey(); !ok {
-		return &ValidationError{Name: "passesKey", err: errors.New(`ent: missing required field "PSOffense.passesKey"`)}
+		return &ValidationError{Name: "PassesKey", err: errors.New(`ent: missing required field "PSOffense.PassesKey"`)}
 	}
 	if _, ok := poc.mutation.PassesAccuracy(); !ok {
-		return &ValidationError{Name: "passesAccuracy", err: errors.New(`ent: missing required field "PSOffense.passesAccuracy"`)}
+		return &ValidationError{Name: "PassesAccuracy", err: errors.New(`ent: missing required field "PSOffense.PassesAccuracy"`)}
 	}
 	return nil
 }
@@ -192,10 +196,10 @@ func (poc *PSOffenseCreate) createSpec() (*PSOffense, *sqlgraph.CreateSpec) {
 	}
 	if nodes := poc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psoffense.PlayerStatsTable,
-			Columns: psoffense.PlayerStatsPrimaryKey,
+			Columns: []string{psoffense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
@@ -204,6 +208,7 @@ func (poc *PSOffenseCreate) createSpec() (*PSOffense, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.player_stats_psoffense = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

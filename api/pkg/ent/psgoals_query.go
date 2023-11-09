@@ -4,7 +4,6 @@ package ent
 
 import (
 	"context"
-	"database/sql/driver"
 	"fmt"
 	"math"
 
@@ -24,6 +23,7 @@ type PSGoalsQuery struct {
 	inters          []Interceptor
 	predicates      []predicate.PSGoals
 	withPlayerStats *PlayerStatsQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -74,7 +74,7 @@ func (pgq *PSGoalsQuery) QueryPlayerStats() *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psgoals.Table, psgoals.FieldID, selector),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, psgoals.PlayerStatsTable, psgoals.PlayerStatsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2O, true, psgoals.PlayerStatsTable, psgoals.PlayerStatsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pgq.driver.Dialect(), step)
 		return fromU, nil
@@ -298,7 +298,7 @@ func (pgq *PSGoalsQuery) WithPlayerStats(opts ...func(*PlayerStatsQuery)) *PSGoa
 // Example:
 //
 //	var v []struct {
-//		TotalGoals int `json:"totalGoals,omitempty"`
+//		TotalGoals int `json:"TotalGoals,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -321,7 +321,7 @@ func (pgq *PSGoalsQuery) GroupBy(field string, fields ...string) *PSGoalsGroupBy
 // Example:
 //
 //	var v []struct {
-//		TotalGoals int `json:"totalGoals,omitempty"`
+//		TotalGoals int `json:"TotalGoals,omitempty"`
 //	}
 //
 //	client.PSGoals.Query().
@@ -369,11 +369,18 @@ func (pgq *PSGoalsQuery) prepareQuery(ctx context.Context) error {
 func (pgq *PSGoalsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PSGoals, error) {
 	var (
 		nodes       = []*PSGoals{}
+		withFKs     = pgq.withFKs
 		_spec       = pgq.querySpec()
 		loadedTypes = [1]bool{
 			pgq.withPlayerStats != nil,
 		}
 	)
+	if pgq.withPlayerStats != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, psgoals.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]any, error) {
 		return (*PSGoals).scanValues(nil, columns)
 	}
@@ -393,9 +400,8 @@ func (pgq *PSGoalsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PSG
 		return nodes, nil
 	}
 	if query := pgq.withPlayerStats; query != nil {
-		if err := pgq.loadPlayerStats(ctx, query, nodes,
-			func(n *PSGoals) { n.Edges.PlayerStats = []*PlayerStats{} },
-			func(n *PSGoals, e *PlayerStats) { n.Edges.PlayerStats = append(n.Edges.PlayerStats, e) }); err != nil {
+		if err := pgq.loadPlayerStats(ctx, query, nodes, nil,
+			func(n *PSGoals, e *PlayerStats) { n.Edges.PlayerStats = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -403,62 +409,33 @@ func (pgq *PSGoalsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*PSG
 }
 
 func (pgq *PSGoalsQuery) loadPlayerStats(ctx context.Context, query *PlayerStatsQuery, nodes []*PSGoals, init func(*PSGoals), assign func(*PSGoals, *PlayerStats)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*PSGoals)
-	nids := make(map[int]map[*PSGoals]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*PSGoals)
+	for i := range nodes {
+		if nodes[i].player_stats_psgoals == nil {
+			continue
 		}
+		fk := *nodes[i].player_stats_psgoals
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
 	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(psgoals.PlayerStatsTable)
-		s.Join(joinT).On(s.C(playerstats.FieldID), joinT.C(psgoals.PlayerStatsPrimaryKey[0]))
-		s.Where(sql.InValues(joinT.C(psgoals.PlayerStatsPrimaryKey[1]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(psgoals.PlayerStatsPrimaryKey[1]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
+	if len(ids) == 0 {
+		return nil
 	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*PSGoals]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*PlayerStats](ctx, query, qr, query.inters)
+	query.Where(playerstats.IDIn(ids...))
+	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
 	}
 	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
+		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected "playerStats" node returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "player_stats_psgoals" returned %v`, n.ID)
 		}
-		for kn := range nodes {
-			assign(kn, n)
+		for i := range nodes {
+			assign(nodes[i], n)
 		}
 	}
 	return nil

@@ -12,8 +12,8 @@ const (
 	Label = "ps_games"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldAppearences holds the string denoting the appearences field in the database.
-	FieldAppearences = "appearences"
+	// FieldAppearances holds the string denoting the appearances field in the database.
+	FieldAppearances = "appearances"
 	// FieldLineups holds the string denoting the lineups field in the database.
 	FieldLineups = "lineups"
 	// FieldMinutes holds the string denoting the minutes field in the database.
@@ -30,17 +30,19 @@ const (
 	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the psgames in the database.
 	Table = "ps_games"
-	// PlayerStatsTable is the table that holds the playerStats relation/edge. The primary key declared below.
-	PlayerStatsTable = "player_stats_psgames"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge.
+	PlayerStatsTable = "ps_games"
 	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
 	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
 	PlayerStatsInverseTable = "player_stats"
+	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
+	PlayerStatsColumn = "player_stats_psgames"
 )
 
 // Columns holds all SQL columns for psgames fields.
 var Columns = []string{
 	FieldID,
-	FieldAppearences,
+	FieldAppearances,
 	FieldLineups,
 	FieldMinutes,
 	FieldNumber,
@@ -49,11 +51,11 @@ var Columns = []string{
 	FieldCaptain,
 }
 
-var (
-	// PlayerStatsPrimaryKey and PlayerStatsColumn2 are the table columns denoting the
-	// primary key for the playerStats relation (M2M).
-	PlayerStatsPrimaryKey = []string{"player_stats_id", "ps_games_id"}
-)
+// ForeignKeys holds the SQL foreign-keys that are owned by the "ps_games"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"player_stats_psgames",
+}
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -62,8 +64,24 @@ func ValidColumn(column string) bool {
 			return true
 		}
 	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
+			return true
+		}
+	}
 	return false
 }
+
+var (
+	// DefaultNumber holds the default value on creation for the "Number" field.
+	DefaultNumber int
+	// DefaultPosition holds the default value on creation for the "Position" field.
+	DefaultPosition string
+	// DefaultRating holds the default value on creation for the "Rating" field.
+	DefaultRating string
+	// DefaultCaptain holds the default value on creation for the "Captain" field.
+	DefaultCaptain bool
+)
 
 // OrderOption defines the ordering options for the PSGames queries.
 type OrderOption func(*sql.Selector)
@@ -73,58 +91,51 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByAppearences orders the results by the appearences field.
-func ByAppearences(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldAppearences, opts...).ToFunc()
+// ByAppearances orders the results by the Appearances field.
+func ByAppearances(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAppearances, opts...).ToFunc()
 }
 
-// ByLineups orders the results by the lineups field.
+// ByLineups orders the results by the Lineups field.
 func ByLineups(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLineups, opts...).ToFunc()
 }
 
-// ByMinutes orders the results by the minutes field.
+// ByMinutes orders the results by the Minutes field.
 func ByMinutes(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldMinutes, opts...).ToFunc()
 }
 
-// ByNumber orders the results by the number field.
+// ByNumber orders the results by the Number field.
 func ByNumber(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldNumber, opts...).ToFunc()
 }
 
-// ByPosition orders the results by the position field.
+// ByPosition orders the results by the Position field.
 func ByPosition(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPosition, opts...).ToFunc()
 }
 
-// ByRating orders the results by the rating field.
+// ByRating orders the results by the Rating field.
 func ByRating(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldRating, opts...).ToFunc()
 }
 
-// ByCaptain orders the results by the captain field.
+// ByCaptain orders the results by the Captain field.
 func ByCaptain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCaptain, opts...).ToFunc()
 }
 
-// ByPlayerStatsCount orders the results by playerStats count.
-func ByPlayerStatsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPlayerStatsField orders the results by playerStats field.
+func ByPlayerStatsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlayerStatsStep(), opts...)
-	}
-}
-
-// ByPlayerStats orders the results by playerStats terms.
-func ByPlayerStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newPlayerStatsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayerStatsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 	)
 }

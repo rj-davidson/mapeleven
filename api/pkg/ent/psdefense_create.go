@@ -20,19 +20,19 @@ type PSDefenseCreate struct {
 	hooks    []Hook
 }
 
-// SetTacklesTotal sets the "tacklesTotal" field.
+// SetTacklesTotal sets the "TacklesTotal" field.
 func (pdc *PSDefenseCreate) SetTacklesTotal(i int) *PSDefenseCreate {
 	pdc.mutation.SetTacklesTotal(i)
 	return pdc
 }
 
-// SetBlocks sets the "blocks" field.
+// SetBlocks sets the "Blocks" field.
 func (pdc *PSDefenseCreate) SetBlocks(i int) *PSDefenseCreate {
 	pdc.mutation.SetBlocks(i)
 	return pdc
 }
 
-// SetNillableBlocks sets the "blocks" field if the given value is not nil.
+// SetNillableBlocks sets the "Blocks" field if the given value is not nil.
 func (pdc *PSDefenseCreate) SetNillableBlocks(i *int) *PSDefenseCreate {
 	if i != nil {
 		pdc.SetBlocks(*i)
@@ -40,37 +40,41 @@ func (pdc *PSDefenseCreate) SetNillableBlocks(i *int) *PSDefenseCreate {
 	return pdc
 }
 
-// SetInterceptions sets the "interceptions" field.
+// SetInterceptions sets the "Interceptions" field.
 func (pdc *PSDefenseCreate) SetInterceptions(i int) *PSDefenseCreate {
 	pdc.mutation.SetInterceptions(i)
 	return pdc
 }
 
-// SetTotalDuels sets the "totalDuels" field.
+// SetTotalDuels sets the "TotalDuels" field.
 func (pdc *PSDefenseCreate) SetTotalDuels(i int) *PSDefenseCreate {
 	pdc.mutation.SetTotalDuels(i)
 	return pdc
 }
 
-// SetWonDuels sets the "wonDuels" field.
+// SetWonDuels sets the "WonDuels" field.
 func (pdc *PSDefenseCreate) SetWonDuels(i int) *PSDefenseCreate {
 	pdc.mutation.SetWonDuels(i)
 	return pdc
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (pdc *PSDefenseCreate) AddPlayerStatIDs(ids ...int) *PSDefenseCreate {
-	pdc.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pdc *PSDefenseCreate) SetPlayerStatsID(id int) *PSDefenseCreate {
+	pdc.mutation.SetPlayerStatsID(id)
 	return pdc
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (pdc *PSDefenseCreate) AddPlayerStats(p ...*PlayerStats) *PSDefenseCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pdc *PSDefenseCreate) SetNillablePlayerStatsID(id *int) *PSDefenseCreate {
+	if id != nil {
+		pdc = pdc.SetPlayerStatsID(*id)
 	}
-	return pdc.AddPlayerStatIDs(ids...)
+	return pdc
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pdc *PSDefenseCreate) SetPlayerStats(p *PlayerStats) *PSDefenseCreate {
+	return pdc.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSDefenseMutation object of the builder.
@@ -117,19 +121,19 @@ func (pdc *PSDefenseCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pdc *PSDefenseCreate) check() error {
 	if _, ok := pdc.mutation.TacklesTotal(); !ok {
-		return &ValidationError{Name: "tacklesTotal", err: errors.New(`ent: missing required field "PSDefense.tacklesTotal"`)}
+		return &ValidationError{Name: "TacklesTotal", err: errors.New(`ent: missing required field "PSDefense.TacklesTotal"`)}
 	}
 	if _, ok := pdc.mutation.Blocks(); !ok {
-		return &ValidationError{Name: "blocks", err: errors.New(`ent: missing required field "PSDefense.blocks"`)}
+		return &ValidationError{Name: "Blocks", err: errors.New(`ent: missing required field "PSDefense.Blocks"`)}
 	}
 	if _, ok := pdc.mutation.Interceptions(); !ok {
-		return &ValidationError{Name: "interceptions", err: errors.New(`ent: missing required field "PSDefense.interceptions"`)}
+		return &ValidationError{Name: "Interceptions", err: errors.New(`ent: missing required field "PSDefense.Interceptions"`)}
 	}
 	if _, ok := pdc.mutation.TotalDuels(); !ok {
-		return &ValidationError{Name: "totalDuels", err: errors.New(`ent: missing required field "PSDefense.totalDuels"`)}
+		return &ValidationError{Name: "TotalDuels", err: errors.New(`ent: missing required field "PSDefense.TotalDuels"`)}
 	}
 	if _, ok := pdc.mutation.WonDuels(); !ok {
-		return &ValidationError{Name: "wonDuels", err: errors.New(`ent: missing required field "PSDefense.wonDuels"`)}
+		return &ValidationError{Name: "WonDuels", err: errors.New(`ent: missing required field "PSDefense.WonDuels"`)}
 	}
 	return nil
 }
@@ -179,10 +183,10 @@ func (pdc *PSDefenseCreate) createSpec() (*PSDefense, *sqlgraph.CreateSpec) {
 	}
 	if nodes := pdc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
-			Columns: psdefense.PlayerStatsPrimaryKey,
+			Columns: []string{psdefense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
@@ -191,6 +195,7 @@ func (pdc *PSDefenseCreate) createSpec() (*PSDefense, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.player_stats_psdefense = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

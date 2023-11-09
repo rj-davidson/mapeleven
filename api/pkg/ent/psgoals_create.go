@@ -20,31 +20,31 @@ type PSGoalsCreate struct {
 	hooks    []Hook
 }
 
-// SetTotalGoals sets the "totalGoals" field.
+// SetTotalGoals sets the "TotalGoals" field.
 func (pgc *PSGoalsCreate) SetTotalGoals(i int) *PSGoalsCreate {
 	pgc.mutation.SetTotalGoals(i)
 	return pgc
 }
 
-// SetConcededGoals sets the "concededGoals" field.
+// SetConcededGoals sets the "ConcededGoals" field.
 func (pgc *PSGoalsCreate) SetConcededGoals(i int) *PSGoalsCreate {
 	pgc.mutation.SetConcededGoals(i)
 	return pgc
 }
 
-// SetAssistGoals sets the "assistGoals" field.
+// SetAssistGoals sets the "AssistGoals" field.
 func (pgc *PSGoalsCreate) SetAssistGoals(i int) *PSGoalsCreate {
 	pgc.mutation.SetAssistGoals(i)
 	return pgc
 }
 
-// SetSaveGoals sets the "saveGoals" field.
+// SetSaveGoals sets the "SaveGoals" field.
 func (pgc *PSGoalsCreate) SetSaveGoals(i int) *PSGoalsCreate {
 	pgc.mutation.SetSaveGoals(i)
 	return pgc
 }
 
-// SetNillableSaveGoals sets the "saveGoals" field if the given value is not nil.
+// SetNillableSaveGoals sets the "SaveGoals" field if the given value is not nil.
 func (pgc *PSGoalsCreate) SetNillableSaveGoals(i *int) *PSGoalsCreate {
 	if i != nil {
 		pgc.SetSaveGoals(*i)
@@ -52,31 +52,35 @@ func (pgc *PSGoalsCreate) SetNillableSaveGoals(i *int) *PSGoalsCreate {
 	return pgc
 }
 
-// SetShotsTotal sets the "shotsTotal" field.
+// SetShotsTotal sets the "ShotsTotal" field.
 func (pgc *PSGoalsCreate) SetShotsTotal(i int) *PSGoalsCreate {
 	pgc.mutation.SetShotsTotal(i)
 	return pgc
 }
 
-// SetShotsOn sets the "shotsOn" field.
+// SetShotsOn sets the "ShotsOn" field.
 func (pgc *PSGoalsCreate) SetShotsOn(i int) *PSGoalsCreate {
 	pgc.mutation.SetShotsOn(i)
 	return pgc
 }
 
-// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
-func (pgc *PSGoalsCreate) AddPlayerStatIDs(ids ...int) *PSGoalsCreate {
-	pgc.mutation.AddPlayerStatIDs(ids...)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pgc *PSGoalsCreate) SetPlayerStatsID(id int) *PSGoalsCreate {
+	pgc.mutation.SetPlayerStatsID(id)
 	return pgc
 }
 
-// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
-func (pgc *PSGoalsCreate) AddPlayerStats(p ...*PlayerStats) *PSGoalsCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pgc *PSGoalsCreate) SetNillablePlayerStatsID(id *int) *PSGoalsCreate {
+	if id != nil {
+		pgc = pgc.SetPlayerStatsID(*id)
 	}
-	return pgc.AddPlayerStatIDs(ids...)
+	return pgc
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pgc *PSGoalsCreate) SetPlayerStats(p *PlayerStats) *PSGoalsCreate {
+	return pgc.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSGoalsMutation object of the builder.
@@ -123,22 +127,22 @@ func (pgc *PSGoalsCreate) defaults() {
 // check runs all checks and user-defined validators on the builder.
 func (pgc *PSGoalsCreate) check() error {
 	if _, ok := pgc.mutation.TotalGoals(); !ok {
-		return &ValidationError{Name: "totalGoals", err: errors.New(`ent: missing required field "PSGoals.totalGoals"`)}
+		return &ValidationError{Name: "TotalGoals", err: errors.New(`ent: missing required field "PSGoals.TotalGoals"`)}
 	}
 	if _, ok := pgc.mutation.ConcededGoals(); !ok {
-		return &ValidationError{Name: "concededGoals", err: errors.New(`ent: missing required field "PSGoals.concededGoals"`)}
+		return &ValidationError{Name: "ConcededGoals", err: errors.New(`ent: missing required field "PSGoals.ConcededGoals"`)}
 	}
 	if _, ok := pgc.mutation.AssistGoals(); !ok {
-		return &ValidationError{Name: "assistGoals", err: errors.New(`ent: missing required field "PSGoals.assistGoals"`)}
+		return &ValidationError{Name: "AssistGoals", err: errors.New(`ent: missing required field "PSGoals.AssistGoals"`)}
 	}
 	if _, ok := pgc.mutation.SaveGoals(); !ok {
-		return &ValidationError{Name: "saveGoals", err: errors.New(`ent: missing required field "PSGoals.saveGoals"`)}
+		return &ValidationError{Name: "SaveGoals", err: errors.New(`ent: missing required field "PSGoals.SaveGoals"`)}
 	}
 	if _, ok := pgc.mutation.ShotsTotal(); !ok {
-		return &ValidationError{Name: "shotsTotal", err: errors.New(`ent: missing required field "PSGoals.shotsTotal"`)}
+		return &ValidationError{Name: "ShotsTotal", err: errors.New(`ent: missing required field "PSGoals.ShotsTotal"`)}
 	}
 	if _, ok := pgc.mutation.ShotsOn(); !ok {
-		return &ValidationError{Name: "shotsOn", err: errors.New(`ent: missing required field "PSGoals.shotsOn"`)}
+		return &ValidationError{Name: "ShotsOn", err: errors.New(`ent: missing required field "PSGoals.ShotsOn"`)}
 	}
 	return nil
 }
@@ -192,10 +196,10 @@ func (pgc *PSGoalsCreate) createSpec() (*PSGoals, *sqlgraph.CreateSpec) {
 	}
 	if nodes := pgc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
+			Rel:     sqlgraph.M2O,
 			Inverse: true,
 			Table:   psgoals.PlayerStatsTable,
-			Columns: psgoals.PlayerStatsPrimaryKey,
+			Columns: []string{psgoals.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
@@ -204,6 +208,7 @@ func (pgc *PSGoalsCreate) createSpec() (*PSGoals, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_node.player_stats_psgoals = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
