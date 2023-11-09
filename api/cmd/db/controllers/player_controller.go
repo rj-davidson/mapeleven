@@ -50,9 +50,7 @@ type LeaguePlayerResponse struct {
 		Player struct {
 			ID int `json:"id"`
 		} `json:"player"`
-		Statistics struct {
-			TeamPlayerStats []player_stats.PlayerStats
-		} `json:"statistics"`
+		Statistics []player_stats.PlayerStats `json:"statistics"`
 	} `json:"response"`
 }
 
