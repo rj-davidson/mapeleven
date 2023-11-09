@@ -19,8 +19,6 @@ type PlayerStats struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Slug holds the value of the "slug" field.
-	Slug string `json:"slug,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -43,21 +41,25 @@ type PlayerStatsEdges struct {
 	MatchPlayer []*MatchPlayer `json:"matchPlayer,omitempty"`
 	// AssistEvents holds the value of the assistEvents edge.
 	AssistEvents []*FixtureEvents `json:"assistEvents,omitempty"`
-	// Psgames holds the value of the psgames edge.
-	Psgames []*PSGames `json:"psgames,omitempty"`
-	// Psgoals holds the value of the psgoals edge.
-	Psgoals []*PSGoals `json:"psgoals,omitempty"`
-	// Psdefense holds the value of the psdefense edge.
-	Psdefense []*PSDefense `json:"psdefense,omitempty"`
-	// Psoffense holds the value of the psoffense edge.
-	Psoffense []*PSOffense `json:"psoffense,omitempty"`
-	// Pspenalty holds the value of the pspenalty edge.
-	Pspenalty []*PSPenalty `json:"pspenalty,omitempty"`
+	// PsGames holds the value of the psGames edge.
+	PsGames []*PSGames `json:"psGames,omitempty"`
+	// PsShooting holds the value of the psShooting edge.
+	PsShooting []*PSShooting `json:"psShooting,omitempty"`
+	// PsDefense holds the value of the psDefense edge.
+	PsDefense []*PSDefense `json:"psDefense,omitempty"`
+	// PsTechnical holds the value of the psTechnical edge.
+	PsTechnical []*PSTechnical `json:"psTechnical,omitempty"`
+	// PsPenalty holds the value of the psPenalty edge.
+	PsPenalty []*PSPenalty `json:"psPenalty,omitempty"`
+	// PsSubstitutes holds the value of the psSubstitutes edge.
+	PsSubstitutes []*PSSubstitutes `json:"psSubstitutes,omitempty"`
 	// Season holds the value of the season edge.
 	Season []*Season `json:"season,omitempty"`
+	// PsFairplay holds the value of the psFairplay edge.
+	PsFairplay []*PSFairplay `json:"psFairplay,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [11]bool
+	loadedTypes [13]bool
 }
 
 // PlayerOrErr returns the Player value or an error if the edge
@@ -113,58 +115,76 @@ func (e PlayerStatsEdges) AssistEventsOrErr() ([]*FixtureEvents, error) {
 	return nil, &NotLoadedError{edge: "assistEvents"}
 }
 
-// PsgamesOrErr returns the Psgames value or an error if the edge
+// PsGamesOrErr returns the PsGames value or an error if the edge
 // was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsgamesOrErr() ([]*PSGames, error) {
+func (e PlayerStatsEdges) PsGamesOrErr() ([]*PSGames, error) {
 	if e.loadedTypes[5] {
-		return e.Psgames, nil
+		return e.PsGames, nil
 	}
-	return nil, &NotLoadedError{edge: "psgames"}
+	return nil, &NotLoadedError{edge: "psGames"}
 }
 
-// PsgoalsOrErr returns the Psgoals value or an error if the edge
+// PsShootingOrErr returns the PsShooting value or an error if the edge
 // was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsgoalsOrErr() ([]*PSGoals, error) {
+func (e PlayerStatsEdges) PsShootingOrErr() ([]*PSShooting, error) {
 	if e.loadedTypes[6] {
-		return e.Psgoals, nil
+		return e.PsShooting, nil
 	}
-	return nil, &NotLoadedError{edge: "psgoals"}
+	return nil, &NotLoadedError{edge: "psShooting"}
 }
 
-// PsdefenseOrErr returns the Psdefense value or an error if the edge
+// PsDefenseOrErr returns the PsDefense value or an error if the edge
 // was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsdefenseOrErr() ([]*PSDefense, error) {
+func (e PlayerStatsEdges) PsDefenseOrErr() ([]*PSDefense, error) {
 	if e.loadedTypes[7] {
-		return e.Psdefense, nil
+		return e.PsDefense, nil
 	}
-	return nil, &NotLoadedError{edge: "psdefense"}
+	return nil, &NotLoadedError{edge: "psDefense"}
 }
 
-// PsoffenseOrErr returns the Psoffense value or an error if the edge
+// PsTechnicalOrErr returns the PsTechnical value or an error if the edge
 // was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsoffenseOrErr() ([]*PSOffense, error) {
+func (e PlayerStatsEdges) PsTechnicalOrErr() ([]*PSTechnical, error) {
 	if e.loadedTypes[8] {
-		return e.Psoffense, nil
+		return e.PsTechnical, nil
 	}
-	return nil, &NotLoadedError{edge: "psoffense"}
+	return nil, &NotLoadedError{edge: "psTechnical"}
 }
 
-// PspenaltyOrErr returns the Pspenalty value or an error if the edge
+// PsPenaltyOrErr returns the PsPenalty value or an error if the edge
 // was not loaded in eager-loading.
-func (e PlayerStatsEdges) PspenaltyOrErr() ([]*PSPenalty, error) {
+func (e PlayerStatsEdges) PsPenaltyOrErr() ([]*PSPenalty, error) {
 	if e.loadedTypes[9] {
-		return e.Pspenalty, nil
+		return e.PsPenalty, nil
 	}
-	return nil, &NotLoadedError{edge: "pspenalty"}
+	return nil, &NotLoadedError{edge: "psPenalty"}
+}
+
+// PsSubstitutesOrErr returns the PsSubstitutes value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerStatsEdges) PsSubstitutesOrErr() ([]*PSSubstitutes, error) {
+	if e.loadedTypes[10] {
+		return e.PsSubstitutes, nil
+	}
+	return nil, &NotLoadedError{edge: "psSubstitutes"}
 }
 
 // SeasonOrErr returns the Season value or an error if the edge
 // was not loaded in eager-loading.
 func (e PlayerStatsEdges) SeasonOrErr() ([]*Season, error) {
-	if e.loadedTypes[10] {
+	if e.loadedTypes[11] {
 		return e.Season, nil
 	}
 	return nil, &NotLoadedError{edge: "season"}
+}
+
+// PsFairplayOrErr returns the PsFairplay value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerStatsEdges) PsFairplayOrErr() ([]*PSFairplay, error) {
+	if e.loadedTypes[12] {
+		return e.PsFairplay, nil
+	}
+	return nil, &NotLoadedError{edge: "psFairplay"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -174,8 +194,6 @@ func (*PlayerStats) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case playerstats.FieldID:
 			values[i] = new(sql.NullInt64)
-		case playerstats.FieldSlug:
-			values[i] = new(sql.NullString)
 		case playerstats.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
 		case playerstats.ForeignKeys[0]: // player_player_stats
@@ -203,12 +221,6 @@ func (ps *PlayerStats) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			ps.ID = int(value.Int64)
-		case playerstats.FieldSlug:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field slug", values[i])
-			} else if value.Valid {
-				ps.Slug = value.String
-			}
 		case playerstats.FieldLastUpdated:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
@@ -267,34 +279,44 @@ func (ps *PlayerStats) QueryAssistEvents() *FixtureEventsQuery {
 	return NewPlayerStatsClient(ps.config).QueryAssistEvents(ps)
 }
 
-// QueryPsgames queries the "psgames" edge of the PlayerStats entity.
-func (ps *PlayerStats) QueryPsgames() *PSGamesQuery {
-	return NewPlayerStatsClient(ps.config).QueryPsgames(ps)
+// QueryPsGames queries the "psGames" edge of the PlayerStats entity.
+func (ps *PlayerStats) QueryPsGames() *PSGamesQuery {
+	return NewPlayerStatsClient(ps.config).QueryPsGames(ps)
 }
 
-// QueryPsgoals queries the "psgoals" edge of the PlayerStats entity.
-func (ps *PlayerStats) QueryPsgoals() *PSGoalsQuery {
-	return NewPlayerStatsClient(ps.config).QueryPsgoals(ps)
+// QueryPsShooting queries the "psShooting" edge of the PlayerStats entity.
+func (ps *PlayerStats) QueryPsShooting() *PSShootingQuery {
+	return NewPlayerStatsClient(ps.config).QueryPsShooting(ps)
 }
 
-// QueryPsdefense queries the "psdefense" edge of the PlayerStats entity.
-func (ps *PlayerStats) QueryPsdefense() *PSDefenseQuery {
-	return NewPlayerStatsClient(ps.config).QueryPsdefense(ps)
+// QueryPsDefense queries the "psDefense" edge of the PlayerStats entity.
+func (ps *PlayerStats) QueryPsDefense() *PSDefenseQuery {
+	return NewPlayerStatsClient(ps.config).QueryPsDefense(ps)
 }
 
-// QueryPsoffense queries the "psoffense" edge of the PlayerStats entity.
-func (ps *PlayerStats) QueryPsoffense() *PSOffenseQuery {
-	return NewPlayerStatsClient(ps.config).QueryPsoffense(ps)
+// QueryPsTechnical queries the "psTechnical" edge of the PlayerStats entity.
+func (ps *PlayerStats) QueryPsTechnical() *PSTechnicalQuery {
+	return NewPlayerStatsClient(ps.config).QueryPsTechnical(ps)
 }
 
-// QueryPspenalty queries the "pspenalty" edge of the PlayerStats entity.
-func (ps *PlayerStats) QueryPspenalty() *PSPenaltyQuery {
-	return NewPlayerStatsClient(ps.config).QueryPspenalty(ps)
+// QueryPsPenalty queries the "psPenalty" edge of the PlayerStats entity.
+func (ps *PlayerStats) QueryPsPenalty() *PSPenaltyQuery {
+	return NewPlayerStatsClient(ps.config).QueryPsPenalty(ps)
+}
+
+// QueryPsSubstitutes queries the "psSubstitutes" edge of the PlayerStats entity.
+func (ps *PlayerStats) QueryPsSubstitutes() *PSSubstitutesQuery {
+	return NewPlayerStatsClient(ps.config).QueryPsSubstitutes(ps)
 }
 
 // QuerySeason queries the "season" edge of the PlayerStats entity.
 func (ps *PlayerStats) QuerySeason() *SeasonQuery {
 	return NewPlayerStatsClient(ps.config).QuerySeason(ps)
+}
+
+// QueryPsFairplay queries the "psFairplay" edge of the PlayerStats entity.
+func (ps *PlayerStats) QueryPsFairplay() *PSFairplayQuery {
+	return NewPlayerStatsClient(ps.config).QueryPsFairplay(ps)
 }
 
 // Update returns a builder for updating this PlayerStats.
@@ -320,9 +342,6 @@ func (ps *PlayerStats) String() string {
 	var builder strings.Builder
 	builder.WriteString("PlayerStats(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", ps.ID))
-	builder.WriteString("slug=")
-	builder.WriteString(ps.Slug)
-	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(ps.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')

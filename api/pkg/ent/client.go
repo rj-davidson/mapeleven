@@ -23,10 +23,12 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psfairplay"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pssubstitutes"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
@@ -70,14 +72,18 @@ type Client struct {
 	MatchPlayer *MatchPlayerClient
 	// PSDefense is the client for interacting with the PSDefense builders.
 	PSDefense *PSDefenseClient
+	// PSFairplay is the client for interacting with the PSFairplay builders.
+	PSFairplay *PSFairplayClient
 	// PSGames is the client for interacting with the PSGames builders.
 	PSGames *PSGamesClient
-	// PSGoals is the client for interacting with the PSGoals builders.
-	PSGoals *PSGoalsClient
-	// PSOffense is the client for interacting with the PSOffense builders.
-	PSOffense *PSOffenseClient
 	// PSPenalty is the client for interacting with the PSPenalty builders.
 	PSPenalty *PSPenaltyClient
+	// PSShooting is the client for interacting with the PSShooting builders.
+	PSShooting *PSShootingClient
+	// PSSubstitutes is the client for interacting with the PSSubstitutes builders.
+	PSSubstitutes *PSSubstitutesClient
+	// PSTechnical is the client for interacting with the PSTechnical builders.
+	PSTechnical *PSTechnicalClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
 	// PlayerStats is the client for interacting with the PlayerStats builders.
@@ -129,10 +135,12 @@ func (c *Client) init() {
 	c.League = NewLeagueClient(c.config)
 	c.MatchPlayer = NewMatchPlayerClient(c.config)
 	c.PSDefense = NewPSDefenseClient(c.config)
+	c.PSFairplay = NewPSFairplayClient(c.config)
 	c.PSGames = NewPSGamesClient(c.config)
-	c.PSGoals = NewPSGoalsClient(c.config)
-	c.PSOffense = NewPSOffenseClient(c.config)
 	c.PSPenalty = NewPSPenaltyClient(c.config)
+	c.PSShooting = NewPSShootingClient(c.config)
+	c.PSSubstitutes = NewPSSubstitutesClient(c.config)
+	c.PSTechnical = NewPSTechnicalClient(c.config)
 	c.Player = NewPlayerClient(c.config)
 	c.PlayerStats = NewPlayerStatsClient(c.config)
 	c.Season = NewSeasonClient(c.config)
@@ -242,10 +250,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		League:          NewLeagueClient(cfg),
 		MatchPlayer:     NewMatchPlayerClient(cfg),
 		PSDefense:       NewPSDefenseClient(cfg),
+		PSFairplay:      NewPSFairplayClient(cfg),
 		PSGames:         NewPSGamesClient(cfg),
-		PSGoals:         NewPSGoalsClient(cfg),
-		PSOffense:       NewPSOffenseClient(cfg),
 		PSPenalty:       NewPSPenaltyClient(cfg),
+		PSShooting:      NewPSShootingClient(cfg),
+		PSSubstitutes:   NewPSSubstitutesClient(cfg),
+		PSTechnical:     NewPSTechnicalClient(cfg),
 		Player:          NewPlayerClient(cfg),
 		PlayerStats:     NewPlayerStatsClient(cfg),
 		Season:          NewSeasonClient(cfg),
@@ -289,10 +299,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		League:          NewLeagueClient(cfg),
 		MatchPlayer:     NewMatchPlayerClient(cfg),
 		PSDefense:       NewPSDefenseClient(cfg),
+		PSFairplay:      NewPSFairplayClient(cfg),
 		PSGames:         NewPSGamesClient(cfg),
-		PSGoals:         NewPSGoalsClient(cfg),
-		PSOffense:       NewPSOffenseClient(cfg),
 		PSPenalty:       NewPSPenaltyClient(cfg),
+		PSShooting:      NewPSShootingClient(cfg),
+		PSSubstitutes:   NewPSSubstitutesClient(cfg),
+		PSTechnical:     NewPSTechnicalClient(cfg),
 		Player:          NewPlayerClient(cfg),
 		PlayerStats:     NewPlayerStatsClient(cfg),
 		Season:          NewSeasonClient(cfg),
@@ -337,10 +349,11 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Birth, c.Club, c.Coach, c.Country, c.Fixture, c.FixtureEvents,
-		c.FixtureLineups, c.League, c.MatchPlayer, c.PSDefense, c.PSGames, c.PSGoals,
-		c.PSOffense, c.PSPenalty, c.Player, c.PlayerStats, c.Season, c.Squad,
-		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
-		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
+		c.FixtureLineups, c.League, c.MatchPlayer, c.PSDefense, c.PSFairplay,
+		c.PSGames, c.PSPenalty, c.PSShooting, c.PSSubstitutes, c.PSTechnical, c.Player,
+		c.PlayerStats, c.Season, c.Squad, c.Standings, c.TSBiggest, c.TSCards,
+		c.TSCleanSheet, c.TSFailedToScore, c.TSFixtures, c.TSGoals, c.TSLineups,
+		c.TSPenalty, c.Team,
 	} {
 		n.Use(hooks...)
 	}
@@ -351,10 +364,11 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Birth, c.Club, c.Coach, c.Country, c.Fixture, c.FixtureEvents,
-		c.FixtureLineups, c.League, c.MatchPlayer, c.PSDefense, c.PSGames, c.PSGoals,
-		c.PSOffense, c.PSPenalty, c.Player, c.PlayerStats, c.Season, c.Squad,
-		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
-		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
+		c.FixtureLineups, c.League, c.MatchPlayer, c.PSDefense, c.PSFairplay,
+		c.PSGames, c.PSPenalty, c.PSShooting, c.PSSubstitutes, c.PSTechnical, c.Player,
+		c.PlayerStats, c.Season, c.Squad, c.Standings, c.TSBiggest, c.TSCards,
+		c.TSCleanSheet, c.TSFailedToScore, c.TSFixtures, c.TSGoals, c.TSLineups,
+		c.TSPenalty, c.Team,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -383,14 +397,18 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.MatchPlayer.mutate(ctx, m)
 	case *PSDefenseMutation:
 		return c.PSDefense.mutate(ctx, m)
+	case *PSFairplayMutation:
+		return c.PSFairplay.mutate(ctx, m)
 	case *PSGamesMutation:
 		return c.PSGames.mutate(ctx, m)
-	case *PSGoalsMutation:
-		return c.PSGoals.mutate(ctx, m)
-	case *PSOffenseMutation:
-		return c.PSOffense.mutate(ctx, m)
 	case *PSPenaltyMutation:
 		return c.PSPenalty.mutate(ctx, m)
+	case *PSShootingMutation:
+		return c.PSShooting.mutate(ctx, m)
+	case *PSSubstitutesMutation:
+		return c.PSSubstitutes.mutate(ctx, m)
+	case *PSTechnicalMutation:
+		return c.PSTechnical.mutate(ctx, m)
 	case *PlayerMutation:
 		return c.Player.mutate(ctx, m)
 	case *PlayerStatsMutation:
@@ -2154,6 +2172,155 @@ func (c *PSDefenseClient) mutate(ctx context.Context, m *PSDefenseMutation) (Val
 	}
 }
 
+// PSFairplayClient is a client for the PSFairplay schema.
+type PSFairplayClient struct {
+	config
+}
+
+// NewPSFairplayClient returns a client for the PSFairplay from the given config.
+func NewPSFairplayClient(c config) *PSFairplayClient {
+	return &PSFairplayClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `psfairplay.Hooks(f(g(h())))`.
+func (c *PSFairplayClient) Use(hooks ...Hook) {
+	c.hooks.PSFairplay = append(c.hooks.PSFairplay, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `psfairplay.Intercept(f(g(h())))`.
+func (c *PSFairplayClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PSFairplay = append(c.inters.PSFairplay, interceptors...)
+}
+
+// Create returns a builder for creating a PSFairplay entity.
+func (c *PSFairplayClient) Create() *PSFairplayCreate {
+	mutation := newPSFairplayMutation(c.config, OpCreate)
+	return &PSFairplayCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PSFairplay entities.
+func (c *PSFairplayClient) CreateBulk(builders ...*PSFairplayCreate) *PSFairplayCreateBulk {
+	return &PSFairplayCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PSFairplayClient) MapCreateBulk(slice any, setFunc func(*PSFairplayCreate, int)) *PSFairplayCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PSFairplayCreateBulk{err: fmt.Errorf("calling to PSFairplayClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PSFairplayCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PSFairplayCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PSFairplay.
+func (c *PSFairplayClient) Update() *PSFairplayUpdate {
+	mutation := newPSFairplayMutation(c.config, OpUpdate)
+	return &PSFairplayUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PSFairplayClient) UpdateOne(pf *PSFairplay) *PSFairplayUpdateOne {
+	mutation := newPSFairplayMutation(c.config, OpUpdateOne, withPSFairplay(pf))
+	return &PSFairplayUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PSFairplayClient) UpdateOneID(id int) *PSFairplayUpdateOne {
+	mutation := newPSFairplayMutation(c.config, OpUpdateOne, withPSFairplayID(id))
+	return &PSFairplayUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PSFairplay.
+func (c *PSFairplayClient) Delete() *PSFairplayDelete {
+	mutation := newPSFairplayMutation(c.config, OpDelete)
+	return &PSFairplayDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PSFairplayClient) DeleteOne(pf *PSFairplay) *PSFairplayDeleteOne {
+	return c.DeleteOneID(pf.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PSFairplayClient) DeleteOneID(id int) *PSFairplayDeleteOne {
+	builder := c.Delete().Where(psfairplay.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PSFairplayDeleteOne{builder}
+}
+
+// Query returns a query builder for PSFairplay.
+func (c *PSFairplayClient) Query() *PSFairplayQuery {
+	return &PSFairplayQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePSFairplay},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PSFairplay entity by its id.
+func (c *PSFairplayClient) Get(ctx context.Context, id int) (*PSFairplay, error) {
+	return c.Query().Where(psfairplay.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PSFairplayClient) GetX(ctx context.Context, id int) *PSFairplay {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayerStats queries the playerStats edge of a PSFairplay.
+func (c *PSFairplayClient) QueryPlayerStats(pf *PSFairplay) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pf.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(psfairplay.Table, psfairplay.FieldID, id),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, psfairplay.PlayerStatsTable, psfairplay.PlayerStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pf.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PSFairplayClient) Hooks() []Hook {
+	return c.hooks.PSFairplay
+}
+
+// Interceptors returns the client interceptors.
+func (c *PSFairplayClient) Interceptors() []Interceptor {
+	return c.inters.PSFairplay
+}
+
+func (c *PSFairplayClient) mutate(ctx context.Context, m *PSFairplayMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PSFairplayCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PSFairplayUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PSFairplayUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PSFairplayDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PSFairplay mutation op: %q", m.Op())
+	}
+}
+
 // PSGamesClient is a client for the PSGames schema.
 type PSGamesClient struct {
 	config
@@ -2303,304 +2470,6 @@ func (c *PSGamesClient) mutate(ctx context.Context, m *PSGamesMutation) (Value, 
 	}
 }
 
-// PSGoalsClient is a client for the PSGoals schema.
-type PSGoalsClient struct {
-	config
-}
-
-// NewPSGoalsClient returns a client for the PSGoals from the given config.
-func NewPSGoalsClient(c config) *PSGoalsClient {
-	return &PSGoalsClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `psgoals.Hooks(f(g(h())))`.
-func (c *PSGoalsClient) Use(hooks ...Hook) {
-	c.hooks.PSGoals = append(c.hooks.PSGoals, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `psgoals.Intercept(f(g(h())))`.
-func (c *PSGoalsClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PSGoals = append(c.inters.PSGoals, interceptors...)
-}
-
-// Create returns a builder for creating a PSGoals entity.
-func (c *PSGoalsClient) Create() *PSGoalsCreate {
-	mutation := newPSGoalsMutation(c.config, OpCreate)
-	return &PSGoalsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of PSGoals entities.
-func (c *PSGoalsClient) CreateBulk(builders ...*PSGoalsCreate) *PSGoalsCreateBulk {
-	return &PSGoalsCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *PSGoalsClient) MapCreateBulk(slice any, setFunc func(*PSGoalsCreate, int)) *PSGoalsCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &PSGoalsCreateBulk{err: fmt.Errorf("calling to PSGoalsClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*PSGoalsCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &PSGoalsCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PSGoals.
-func (c *PSGoalsClient) Update() *PSGoalsUpdate {
-	mutation := newPSGoalsMutation(c.config, OpUpdate)
-	return &PSGoalsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PSGoalsClient) UpdateOne(pg *PSGoals) *PSGoalsUpdateOne {
-	mutation := newPSGoalsMutation(c.config, OpUpdateOne, withPSGoals(pg))
-	return &PSGoalsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PSGoalsClient) UpdateOneID(id int) *PSGoalsUpdateOne {
-	mutation := newPSGoalsMutation(c.config, OpUpdateOne, withPSGoalsID(id))
-	return &PSGoalsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PSGoals.
-func (c *PSGoalsClient) Delete() *PSGoalsDelete {
-	mutation := newPSGoalsMutation(c.config, OpDelete)
-	return &PSGoalsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *PSGoalsClient) DeleteOne(pg *PSGoals) *PSGoalsDeleteOne {
-	return c.DeleteOneID(pg.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PSGoalsClient) DeleteOneID(id int) *PSGoalsDeleteOne {
-	builder := c.Delete().Where(psgoals.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PSGoalsDeleteOne{builder}
-}
-
-// Query returns a query builder for PSGoals.
-func (c *PSGoalsClient) Query() *PSGoalsQuery {
-	return &PSGoalsQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypePSGoals},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a PSGoals entity by its id.
-func (c *PSGoalsClient) Get(ctx context.Context, id int) (*PSGoals, error) {
-	return c.Query().Where(psgoals.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PSGoalsClient) GetX(ctx context.Context, id int) *PSGoals {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryPlayerStats queries the playerStats edge of a PSGoals.
-func (c *PSGoalsClient) QueryPlayerStats(pg *PSGoals) *PlayerStatsQuery {
-	query := (&PlayerStatsClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pg.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(psgoals.Table, psgoals.FieldID, id),
-			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psgoals.PlayerStatsTable, psgoals.PlayerStatsColumn),
-		)
-		fromV = sqlgraph.Neighbors(pg.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *PSGoalsClient) Hooks() []Hook {
-	return c.hooks.PSGoals
-}
-
-// Interceptors returns the client interceptors.
-func (c *PSGoalsClient) Interceptors() []Interceptor {
-	return c.inters.PSGoals
-}
-
-func (c *PSGoalsClient) mutate(ctx context.Context, m *PSGoalsMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&PSGoalsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&PSGoalsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&PSGoalsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&PSGoalsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown PSGoals mutation op: %q", m.Op())
-	}
-}
-
-// PSOffenseClient is a client for the PSOffense schema.
-type PSOffenseClient struct {
-	config
-}
-
-// NewPSOffenseClient returns a client for the PSOffense from the given config.
-func NewPSOffenseClient(c config) *PSOffenseClient {
-	return &PSOffenseClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `psoffense.Hooks(f(g(h())))`.
-func (c *PSOffenseClient) Use(hooks ...Hook) {
-	c.hooks.PSOffense = append(c.hooks.PSOffense, hooks...)
-}
-
-// Intercept adds a list of query interceptors to the interceptors stack.
-// A call to `Intercept(f, g, h)` equals to `psoffense.Intercept(f(g(h())))`.
-func (c *PSOffenseClient) Intercept(interceptors ...Interceptor) {
-	c.inters.PSOffense = append(c.inters.PSOffense, interceptors...)
-}
-
-// Create returns a builder for creating a PSOffense entity.
-func (c *PSOffenseClient) Create() *PSOffenseCreate {
-	mutation := newPSOffenseMutation(c.config, OpCreate)
-	return &PSOffenseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of PSOffense entities.
-func (c *PSOffenseClient) CreateBulk(builders ...*PSOffenseCreate) *PSOffenseCreateBulk {
-	return &PSOffenseCreateBulk{config: c.config, builders: builders}
-}
-
-// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
-// a builder and applies setFunc on it.
-func (c *PSOffenseClient) MapCreateBulk(slice any, setFunc func(*PSOffenseCreate, int)) *PSOffenseCreateBulk {
-	rv := reflect.ValueOf(slice)
-	if rv.Kind() != reflect.Slice {
-		return &PSOffenseCreateBulk{err: fmt.Errorf("calling to PSOffenseClient.MapCreateBulk with wrong type %T, need slice", slice)}
-	}
-	builders := make([]*PSOffenseCreate, rv.Len())
-	for i := 0; i < rv.Len(); i++ {
-		builders[i] = c.Create()
-		setFunc(builders[i], i)
-	}
-	return &PSOffenseCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for PSOffense.
-func (c *PSOffenseClient) Update() *PSOffenseUpdate {
-	mutation := newPSOffenseMutation(c.config, OpUpdate)
-	return &PSOffenseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *PSOffenseClient) UpdateOne(po *PSOffense) *PSOffenseUpdateOne {
-	mutation := newPSOffenseMutation(c.config, OpUpdateOne, withPSOffense(po))
-	return &PSOffenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *PSOffenseClient) UpdateOneID(id int) *PSOffenseUpdateOne {
-	mutation := newPSOffenseMutation(c.config, OpUpdateOne, withPSOffenseID(id))
-	return &PSOffenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for PSOffense.
-func (c *PSOffenseClient) Delete() *PSOffenseDelete {
-	mutation := newPSOffenseMutation(c.config, OpDelete)
-	return &PSOffenseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a builder for deleting the given entity.
-func (c *PSOffenseClient) DeleteOne(po *PSOffense) *PSOffenseDeleteOne {
-	return c.DeleteOneID(po.ID)
-}
-
-// DeleteOneID returns a builder for deleting the given entity by its id.
-func (c *PSOffenseClient) DeleteOneID(id int) *PSOffenseDeleteOne {
-	builder := c.Delete().Where(psoffense.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &PSOffenseDeleteOne{builder}
-}
-
-// Query returns a query builder for PSOffense.
-func (c *PSOffenseClient) Query() *PSOffenseQuery {
-	return &PSOffenseQuery{
-		config: c.config,
-		ctx:    &QueryContext{Type: TypePSOffense},
-		inters: c.Interceptors(),
-	}
-}
-
-// Get returns a PSOffense entity by its id.
-func (c *PSOffenseClient) Get(ctx context.Context, id int) (*PSOffense, error) {
-	return c.Query().Where(psoffense.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *PSOffenseClient) GetX(ctx context.Context, id int) *PSOffense {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryPlayerStats queries the playerStats edge of a PSOffense.
-func (c *PSOffenseClient) QueryPlayerStats(po *PSOffense) *PlayerStatsQuery {
-	query := (&PlayerStatsClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := po.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(psoffense.Table, psoffense.FieldID, id),
-			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psoffense.PlayerStatsTable, psoffense.PlayerStatsColumn),
-		)
-		fromV = sqlgraph.Neighbors(po.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *PSOffenseClient) Hooks() []Hook {
-	return c.hooks.PSOffense
-}
-
-// Interceptors returns the client interceptors.
-func (c *PSOffenseClient) Interceptors() []Interceptor {
-	return c.inters.PSOffense
-}
-
-func (c *PSOffenseClient) mutate(ctx context.Context, m *PSOffenseMutation) (Value, error) {
-	switch m.Op() {
-	case OpCreate:
-		return (&PSOffenseCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdate:
-		return (&PSOffenseUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpUpdateOne:
-		return (&PSOffenseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
-	case OpDelete, OpDeleteOne:
-		return (&PSOffenseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
-	default:
-		return nil, fmt.Errorf("ent: unknown PSOffense mutation op: %q", m.Op())
-	}
-}
-
 // PSPenaltyClient is a client for the PSPenalty schema.
 type PSPenaltyClient struct {
 	config
@@ -2747,6 +2616,453 @@ func (c *PSPenaltyClient) mutate(ctx context.Context, m *PSPenaltyMutation) (Val
 		return (&PSPenaltyDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown PSPenalty mutation op: %q", m.Op())
+	}
+}
+
+// PSShootingClient is a client for the PSShooting schema.
+type PSShootingClient struct {
+	config
+}
+
+// NewPSShootingClient returns a client for the PSShooting from the given config.
+func NewPSShootingClient(c config) *PSShootingClient {
+	return &PSShootingClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `psshooting.Hooks(f(g(h())))`.
+func (c *PSShootingClient) Use(hooks ...Hook) {
+	c.hooks.PSShooting = append(c.hooks.PSShooting, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `psshooting.Intercept(f(g(h())))`.
+func (c *PSShootingClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PSShooting = append(c.inters.PSShooting, interceptors...)
+}
+
+// Create returns a builder for creating a PSShooting entity.
+func (c *PSShootingClient) Create() *PSShootingCreate {
+	mutation := newPSShootingMutation(c.config, OpCreate)
+	return &PSShootingCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PSShooting entities.
+func (c *PSShootingClient) CreateBulk(builders ...*PSShootingCreate) *PSShootingCreateBulk {
+	return &PSShootingCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PSShootingClient) MapCreateBulk(slice any, setFunc func(*PSShootingCreate, int)) *PSShootingCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PSShootingCreateBulk{err: fmt.Errorf("calling to PSShootingClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PSShootingCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PSShootingCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PSShooting.
+func (c *PSShootingClient) Update() *PSShootingUpdate {
+	mutation := newPSShootingMutation(c.config, OpUpdate)
+	return &PSShootingUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PSShootingClient) UpdateOne(ps *PSShooting) *PSShootingUpdateOne {
+	mutation := newPSShootingMutation(c.config, OpUpdateOne, withPSShooting(ps))
+	return &PSShootingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PSShootingClient) UpdateOneID(id int) *PSShootingUpdateOne {
+	mutation := newPSShootingMutation(c.config, OpUpdateOne, withPSShootingID(id))
+	return &PSShootingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PSShooting.
+func (c *PSShootingClient) Delete() *PSShootingDelete {
+	mutation := newPSShootingMutation(c.config, OpDelete)
+	return &PSShootingDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PSShootingClient) DeleteOne(ps *PSShooting) *PSShootingDeleteOne {
+	return c.DeleteOneID(ps.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PSShootingClient) DeleteOneID(id int) *PSShootingDeleteOne {
+	builder := c.Delete().Where(psshooting.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PSShootingDeleteOne{builder}
+}
+
+// Query returns a query builder for PSShooting.
+func (c *PSShootingClient) Query() *PSShootingQuery {
+	return &PSShootingQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePSShooting},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PSShooting entity by its id.
+func (c *PSShootingClient) Get(ctx context.Context, id int) (*PSShooting, error) {
+	return c.Query().Where(psshooting.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PSShootingClient) GetX(ctx context.Context, id int) *PSShooting {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayerStats queries the playerStats edge of a PSShooting.
+func (c *PSShootingClient) QueryPlayerStats(ps *PSShooting) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(psshooting.Table, psshooting.FieldID, id),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, psshooting.PlayerStatsTable, psshooting.PlayerStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PSShootingClient) Hooks() []Hook {
+	return c.hooks.PSShooting
+}
+
+// Interceptors returns the client interceptors.
+func (c *PSShootingClient) Interceptors() []Interceptor {
+	return c.inters.PSShooting
+}
+
+func (c *PSShootingClient) mutate(ctx context.Context, m *PSShootingMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PSShootingCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PSShootingUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PSShootingUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PSShootingDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PSShooting mutation op: %q", m.Op())
+	}
+}
+
+// PSSubstitutesClient is a client for the PSSubstitutes schema.
+type PSSubstitutesClient struct {
+	config
+}
+
+// NewPSSubstitutesClient returns a client for the PSSubstitutes from the given config.
+func NewPSSubstitutesClient(c config) *PSSubstitutesClient {
+	return &PSSubstitutesClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pssubstitutes.Hooks(f(g(h())))`.
+func (c *PSSubstitutesClient) Use(hooks ...Hook) {
+	c.hooks.PSSubstitutes = append(c.hooks.PSSubstitutes, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pssubstitutes.Intercept(f(g(h())))`.
+func (c *PSSubstitutesClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PSSubstitutes = append(c.inters.PSSubstitutes, interceptors...)
+}
+
+// Create returns a builder for creating a PSSubstitutes entity.
+func (c *PSSubstitutesClient) Create() *PSSubstitutesCreate {
+	mutation := newPSSubstitutesMutation(c.config, OpCreate)
+	return &PSSubstitutesCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PSSubstitutes entities.
+func (c *PSSubstitutesClient) CreateBulk(builders ...*PSSubstitutesCreate) *PSSubstitutesCreateBulk {
+	return &PSSubstitutesCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PSSubstitutesClient) MapCreateBulk(slice any, setFunc func(*PSSubstitutesCreate, int)) *PSSubstitutesCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PSSubstitutesCreateBulk{err: fmt.Errorf("calling to PSSubstitutesClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PSSubstitutesCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PSSubstitutesCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PSSubstitutes.
+func (c *PSSubstitutesClient) Update() *PSSubstitutesUpdate {
+	mutation := newPSSubstitutesMutation(c.config, OpUpdate)
+	return &PSSubstitutesUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PSSubstitutesClient) UpdateOne(ps *PSSubstitutes) *PSSubstitutesUpdateOne {
+	mutation := newPSSubstitutesMutation(c.config, OpUpdateOne, withPSSubstitutes(ps))
+	return &PSSubstitutesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PSSubstitutesClient) UpdateOneID(id int) *PSSubstitutesUpdateOne {
+	mutation := newPSSubstitutesMutation(c.config, OpUpdateOne, withPSSubstitutesID(id))
+	return &PSSubstitutesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PSSubstitutes.
+func (c *PSSubstitutesClient) Delete() *PSSubstitutesDelete {
+	mutation := newPSSubstitutesMutation(c.config, OpDelete)
+	return &PSSubstitutesDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PSSubstitutesClient) DeleteOne(ps *PSSubstitutes) *PSSubstitutesDeleteOne {
+	return c.DeleteOneID(ps.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PSSubstitutesClient) DeleteOneID(id int) *PSSubstitutesDeleteOne {
+	builder := c.Delete().Where(pssubstitutes.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PSSubstitutesDeleteOne{builder}
+}
+
+// Query returns a query builder for PSSubstitutes.
+func (c *PSSubstitutesClient) Query() *PSSubstitutesQuery {
+	return &PSSubstitutesQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePSSubstitutes},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PSSubstitutes entity by its id.
+func (c *PSSubstitutesClient) Get(ctx context.Context, id int) (*PSSubstitutes, error) {
+	return c.Query().Where(pssubstitutes.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PSSubstitutesClient) GetX(ctx context.Context, id int) *PSSubstitutes {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayerStats queries the playerStats edge of a PSSubstitutes.
+func (c *PSSubstitutesClient) QueryPlayerStats(ps *PSSubstitutes) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pssubstitutes.Table, pssubstitutes.FieldID, id),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pssubstitutes.PlayerStatsTable, pssubstitutes.PlayerStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PSSubstitutesClient) Hooks() []Hook {
+	return c.hooks.PSSubstitutes
+}
+
+// Interceptors returns the client interceptors.
+func (c *PSSubstitutesClient) Interceptors() []Interceptor {
+	return c.inters.PSSubstitutes
+}
+
+func (c *PSSubstitutesClient) mutate(ctx context.Context, m *PSSubstitutesMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PSSubstitutesCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PSSubstitutesUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PSSubstitutesUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PSSubstitutesDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PSSubstitutes mutation op: %q", m.Op())
+	}
+}
+
+// PSTechnicalClient is a client for the PSTechnical schema.
+type PSTechnicalClient struct {
+	config
+}
+
+// NewPSTechnicalClient returns a client for the PSTechnical from the given config.
+func NewPSTechnicalClient(c config) *PSTechnicalClient {
+	return &PSTechnicalClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `pstechnical.Hooks(f(g(h())))`.
+func (c *PSTechnicalClient) Use(hooks ...Hook) {
+	c.hooks.PSTechnical = append(c.hooks.PSTechnical, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `pstechnical.Intercept(f(g(h())))`.
+func (c *PSTechnicalClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PSTechnical = append(c.inters.PSTechnical, interceptors...)
+}
+
+// Create returns a builder for creating a PSTechnical entity.
+func (c *PSTechnicalClient) Create() *PSTechnicalCreate {
+	mutation := newPSTechnicalMutation(c.config, OpCreate)
+	return &PSTechnicalCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PSTechnical entities.
+func (c *PSTechnicalClient) CreateBulk(builders ...*PSTechnicalCreate) *PSTechnicalCreateBulk {
+	return &PSTechnicalCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PSTechnicalClient) MapCreateBulk(slice any, setFunc func(*PSTechnicalCreate, int)) *PSTechnicalCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PSTechnicalCreateBulk{err: fmt.Errorf("calling to PSTechnicalClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PSTechnicalCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PSTechnicalCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PSTechnical.
+func (c *PSTechnicalClient) Update() *PSTechnicalUpdate {
+	mutation := newPSTechnicalMutation(c.config, OpUpdate)
+	return &PSTechnicalUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PSTechnicalClient) UpdateOne(pt *PSTechnical) *PSTechnicalUpdateOne {
+	mutation := newPSTechnicalMutation(c.config, OpUpdateOne, withPSTechnical(pt))
+	return &PSTechnicalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PSTechnicalClient) UpdateOneID(id int) *PSTechnicalUpdateOne {
+	mutation := newPSTechnicalMutation(c.config, OpUpdateOne, withPSTechnicalID(id))
+	return &PSTechnicalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PSTechnical.
+func (c *PSTechnicalClient) Delete() *PSTechnicalDelete {
+	mutation := newPSTechnicalMutation(c.config, OpDelete)
+	return &PSTechnicalDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PSTechnicalClient) DeleteOne(pt *PSTechnical) *PSTechnicalDeleteOne {
+	return c.DeleteOneID(pt.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PSTechnicalClient) DeleteOneID(id int) *PSTechnicalDeleteOne {
+	builder := c.Delete().Where(pstechnical.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PSTechnicalDeleteOne{builder}
+}
+
+// Query returns a query builder for PSTechnical.
+func (c *PSTechnicalClient) Query() *PSTechnicalQuery {
+	return &PSTechnicalQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePSTechnical},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PSTechnical entity by its id.
+func (c *PSTechnicalClient) Get(ctx context.Context, id int) (*PSTechnical, error) {
+	return c.Query().Where(pstechnical.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PSTechnicalClient) GetX(ctx context.Context, id int) *PSTechnical {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayerStats queries the playerStats edge of a PSTechnical.
+func (c *PSTechnicalClient) QueryPlayerStats(pt *PSTechnical) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := pt.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(pstechnical.Table, pstechnical.FieldID, id),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pstechnical.PlayerStatsTable, pstechnical.PlayerStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(pt.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PSTechnicalClient) Hooks() []Hook {
+	return c.hooks.PSTechnical
+}
+
+// Interceptors returns the client interceptors.
+func (c *PSTechnicalClient) Interceptors() []Interceptor {
+	return c.inters.PSTechnical
+}
+
+func (c *PSTechnicalClient) mutate(ctx context.Context, m *PSTechnicalMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PSTechnicalCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PSTechnicalUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PSTechnicalUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PSTechnicalDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PSTechnical mutation op: %q", m.Op())
 	}
 }
 
@@ -3183,15 +3499,15 @@ func (c *PlayerStatsClient) QueryAssistEvents(ps *PlayerStats) *FixtureEventsQue
 	return query
 }
 
-// QueryPsgames queries the psgames edge of a PlayerStats.
-func (c *PlayerStatsClient) QueryPsgames(ps *PlayerStats) *PSGamesQuery {
+// QueryPsGames queries the psGames edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsGames(ps *PlayerStats) *PSGamesQuery {
 	query := (&PSGamesClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ps.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(psgames.Table, psgames.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsgamesTable, playerstats.PsgamesColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsGamesTable, playerstats.PsGamesColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3199,15 +3515,15 @@ func (c *PlayerStatsClient) QueryPsgames(ps *PlayerStats) *PSGamesQuery {
 	return query
 }
 
-// QueryPsgoals queries the psgoals edge of a PlayerStats.
-func (c *PlayerStatsClient) QueryPsgoals(ps *PlayerStats) *PSGoalsQuery {
-	query := (&PSGoalsClient{config: c.config}).Query()
+// QueryPsShooting queries the psShooting edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsShooting(ps *PlayerStats) *PSShootingQuery {
+	query := (&PSShootingClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ps.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
-			sqlgraph.To(psgoals.Table, psgoals.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsgoalsTable, playerstats.PsgoalsColumn),
+			sqlgraph.To(psshooting.Table, psshooting.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsShootingTable, playerstats.PsShootingColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3215,15 +3531,15 @@ func (c *PlayerStatsClient) QueryPsgoals(ps *PlayerStats) *PSGoalsQuery {
 	return query
 }
 
-// QueryPsdefense queries the psdefense edge of a PlayerStats.
-func (c *PlayerStatsClient) QueryPsdefense(ps *PlayerStats) *PSDefenseQuery {
+// QueryPsDefense queries the psDefense edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsDefense(ps *PlayerStats) *PSDefenseQuery {
 	query := (&PSDefenseClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ps.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(psdefense.Table, psdefense.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsdefenseTable, playerstats.PsdefenseColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsDefenseTable, playerstats.PsDefenseColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3231,15 +3547,15 @@ func (c *PlayerStatsClient) QueryPsdefense(ps *PlayerStats) *PSDefenseQuery {
 	return query
 }
 
-// QueryPsoffense queries the psoffense edge of a PlayerStats.
-func (c *PlayerStatsClient) QueryPsoffense(ps *PlayerStats) *PSOffenseQuery {
-	query := (&PSOffenseClient{config: c.config}).Query()
+// QueryPsTechnical queries the psTechnical edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsTechnical(ps *PlayerStats) *PSTechnicalQuery {
+	query := (&PSTechnicalClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ps.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
-			sqlgraph.To(psoffense.Table, psoffense.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsoffenseTable, playerstats.PsoffenseColumn),
+			sqlgraph.To(pstechnical.Table, pstechnical.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsTechnicalTable, playerstats.PsTechnicalColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3247,15 +3563,31 @@ func (c *PlayerStatsClient) QueryPsoffense(ps *PlayerStats) *PSOffenseQuery {
 	return query
 }
 
-// QueryPspenalty queries the pspenalty edge of a PlayerStats.
-func (c *PlayerStatsClient) QueryPspenalty(ps *PlayerStats) *PSPenaltyQuery {
+// QueryPsPenalty queries the psPenalty edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsPenalty(ps *PlayerStats) *PSPenaltyQuery {
 	query := (&PSPenaltyClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := ps.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(pspenalty.Table, pspenalty.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PspenaltyTable, playerstats.PspenaltyColumn),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsPenaltyTable, playerstats.PsPenaltyColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPsSubstitutes queries the psSubstitutes edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsSubstitutes(ps *PlayerStats) *PSSubstitutesQuery {
+	query := (&PSSubstitutesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(pssubstitutes.Table, pssubstitutes.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsSubstitutesTable, playerstats.PsSubstitutesColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3272,6 +3604,22 @@ func (c *PlayerStatsClient) QuerySeason(ps *PlayerStats) *SeasonQuery {
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(season.Table, season.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, playerstats.SeasonTable, playerstats.SeasonPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPsFairplay queries the psFairplay edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsFairplay(ps *PlayerStats) *PSFairplayQuery {
+	query := (&PSFairplayClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(psfairplay.Table, psfairplay.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsFairplayTable, playerstats.PsFairplayColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -5480,15 +5828,16 @@ func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error)
 type (
 	hooks struct {
 		Birth, Club, Coach, Country, Fixture, FixtureEvents, FixtureLineups, League,
-		MatchPlayer, PSDefense, PSGames, PSGoals, PSOffense, PSPenalty, Player,
-		PlayerStats, Season, Squad, Standings, TSBiggest, TSCards, TSCleanSheet,
-		TSFailedToScore, TSFixtures, TSGoals, TSLineups, TSPenalty, Team []ent.Hook
+		MatchPlayer, PSDefense, PSFairplay, PSGames, PSPenalty, PSShooting,
+		PSSubstitutes, PSTechnical, Player, PlayerStats, Season, Squad, Standings,
+		TSBiggest, TSCards, TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals,
+		TSLineups, TSPenalty, Team []ent.Hook
 	}
 	inters struct {
 		Birth, Club, Coach, Country, Fixture, FixtureEvents, FixtureLineups, League,
-		MatchPlayer, PSDefense, PSGames, PSGoals, PSOffense, PSPenalty, Player,
-		PlayerStats, Season, Squad, Standings, TSBiggest, TSCards, TSCleanSheet,
-		TSFailedToScore, TSFixtures, TSGoals, TSLineups, TSPenalty,
-		Team []ent.Interceptor
+		MatchPlayer, PSDefense, PSFairplay, PSGames, PSPenalty, PSShooting,
+		PSSubstitutes, PSTechnical, Player, PlayerStats, Season, Squad, Standings,
+		TSBiggest, TSCards, TSCleanSheet, TSFailedToScore, TSFixtures, TSGoals,
+		TSLineups, TSPenalty, Team []ent.Interceptor
 	}
 )

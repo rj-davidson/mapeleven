@@ -3,6 +3,8 @@
 package psdefense
 
 import (
+	"time"
+
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -68,14 +70,19 @@ func Interceptions(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldInterceptions, v))
 }
 
-// TotalDuels applies equality check predicate on the "TotalDuels" field. It's identical to TotalDuelsEQ.
-func TotalDuels(v int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldEQ(FieldTotalDuels, v))
+// DuelsTotal applies equality check predicate on the "DuelsTotal" field. It's identical to DuelsTotalEQ.
+func DuelsTotal(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldEQ(FieldDuelsTotal, v))
 }
 
 // WonDuels applies equality check predicate on the "WonDuels" field. It's identical to WonDuelsEQ.
 func WonDuels(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldWonDuels, v))
+}
+
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // TacklesTotalEQ applies the EQ predicate on the "TacklesTotal" field.
@@ -198,44 +205,44 @@ func InterceptionsLTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldInterceptions, v))
 }
 
-// TotalDuelsEQ applies the EQ predicate on the "TotalDuels" field.
-func TotalDuelsEQ(v int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldEQ(FieldTotalDuels, v))
+// DuelsTotalEQ applies the EQ predicate on the "DuelsTotal" field.
+func DuelsTotalEQ(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldEQ(FieldDuelsTotal, v))
 }
 
-// TotalDuelsNEQ applies the NEQ predicate on the "TotalDuels" field.
-func TotalDuelsNEQ(v int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldNEQ(FieldTotalDuels, v))
+// DuelsTotalNEQ applies the NEQ predicate on the "DuelsTotal" field.
+func DuelsTotalNEQ(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldNEQ(FieldDuelsTotal, v))
 }
 
-// TotalDuelsIn applies the In predicate on the "TotalDuels" field.
-func TotalDuelsIn(vs ...int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldIn(FieldTotalDuels, vs...))
+// DuelsTotalIn applies the In predicate on the "DuelsTotal" field.
+func DuelsTotalIn(vs ...int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldIn(FieldDuelsTotal, vs...))
 }
 
-// TotalDuelsNotIn applies the NotIn predicate on the "TotalDuels" field.
-func TotalDuelsNotIn(vs ...int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldNotIn(FieldTotalDuels, vs...))
+// DuelsTotalNotIn applies the NotIn predicate on the "DuelsTotal" field.
+func DuelsTotalNotIn(vs ...int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldNotIn(FieldDuelsTotal, vs...))
 }
 
-// TotalDuelsGT applies the GT predicate on the "TotalDuels" field.
-func TotalDuelsGT(v int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldGT(FieldTotalDuels, v))
+// DuelsTotalGT applies the GT predicate on the "DuelsTotal" field.
+func DuelsTotalGT(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldGT(FieldDuelsTotal, v))
 }
 
-// TotalDuelsGTE applies the GTE predicate on the "TotalDuels" field.
-func TotalDuelsGTE(v int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldGTE(FieldTotalDuels, v))
+// DuelsTotalGTE applies the GTE predicate on the "DuelsTotal" field.
+func DuelsTotalGTE(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldGTE(FieldDuelsTotal, v))
 }
 
-// TotalDuelsLT applies the LT predicate on the "TotalDuels" field.
-func TotalDuelsLT(v int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldLT(FieldTotalDuels, v))
+// DuelsTotalLT applies the LT predicate on the "DuelsTotal" field.
+func DuelsTotalLT(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldLT(FieldDuelsTotal, v))
 }
 
-// TotalDuelsLTE applies the LTE predicate on the "TotalDuels" field.
-func TotalDuelsLTE(v int) predicate.PSDefense {
-	return predicate.PSDefense(sql.FieldLTE(FieldTotalDuels, v))
+// DuelsTotalLTE applies the LTE predicate on the "DuelsTotal" field.
+func DuelsTotalLTE(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldLTE(FieldDuelsTotal, v))
 }
 
 // WonDuelsEQ applies the EQ predicate on the "WonDuels" field.
@@ -276,6 +283,56 @@ func WonDuelsLT(v int) predicate.PSDefense {
 // WonDuelsLTE applies the LTE predicate on the "WonDuels" field.
 func WonDuelsLTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldWonDuels, v))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.

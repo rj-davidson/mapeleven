@@ -37,27 +37,10 @@ type LeaguePlayerResponse struct {
 	} `json:"response"`
 }
 
-// Statistics wraps all statistics related to a player.
-type Statistics struct {
-	Team        player_stats.PSTeam        `json:"team"`
-	League      player_stats.PSLeague      `json:"league"`
-	Games       player_stats.PSGames       `json:"games"`
-	Substitutes player_stats.PSSubstitutes `json:"substitutes"`
-	Shots       player_stats.PSShots       `json:"shots"`
-	Goals       player_stats.PSGoals       `json:"goals"`
-	Passes      player_stats.PSPasses      `json:"passes"`
-	Tackles     player_stats.PSTackles     `json:"tackles"`
-	Duels       player_stats.PSDuels       `json:"duels"`
-	Dribbles    player_stats.PSDribbles    `json:"dribbles"`
-	Fouls       player_stats.PSFouls       `json:"fouls"`
-	Cards       player_stats.PSCards       `json:"cards"`
-	Penalty     player_stats.PSPenalty     `json:"penalty"`
-}
-
 // Player wraps PlayerInfo and includes a slice of Statistics.
 type Player struct {
-	Player     PlayerInfo   `json:"player"`
-	Statistics []Statistics `json:"statistics"`
+	Player     PlayerInfo                 `json:"player"`
+	Statistics []player_stats.PlayerStats `json:"statistics"`
 }
 
 // PlayerResponse is the expected structure of the JSON response.
@@ -204,7 +187,7 @@ func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_model
 	return p, err
 }
 
-func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player, stats Statistics) error {
+func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player, stats player_stats.PlayerStats) error {
 	return nil
 
 }

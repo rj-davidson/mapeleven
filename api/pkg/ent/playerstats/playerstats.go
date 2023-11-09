@@ -14,8 +14,6 @@ const (
 	Label = "player_stats"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
-	// FieldSlug holds the string denoting the slug field in the database.
-	FieldSlug = "slug"
 	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
 	FieldLastUpdated = "last_updated"
 	// EdgePlayer holds the string denoting the player edge name in mutations.
@@ -28,18 +26,22 @@ const (
 	EdgeMatchPlayer = "matchPlayer"
 	// EdgeAssistEvents holds the string denoting the assistevents edge name in mutations.
 	EdgeAssistEvents = "assistEvents"
-	// EdgePsgames holds the string denoting the psgames edge name in mutations.
-	EdgePsgames = "psgames"
-	// EdgePsgoals holds the string denoting the psgoals edge name in mutations.
-	EdgePsgoals = "psgoals"
-	// EdgePsdefense holds the string denoting the psdefense edge name in mutations.
-	EdgePsdefense = "psdefense"
-	// EdgePsoffense holds the string denoting the psoffense edge name in mutations.
-	EdgePsoffense = "psoffense"
-	// EdgePspenalty holds the string denoting the pspenalty edge name in mutations.
-	EdgePspenalty = "pspenalty"
+	// EdgePsGames holds the string denoting the psgames edge name in mutations.
+	EdgePsGames = "psGames"
+	// EdgePsShooting holds the string denoting the psshooting edge name in mutations.
+	EdgePsShooting = "psShooting"
+	// EdgePsDefense holds the string denoting the psdefense edge name in mutations.
+	EdgePsDefense = "psDefense"
+	// EdgePsTechnical holds the string denoting the pstechnical edge name in mutations.
+	EdgePsTechnical = "psTechnical"
+	// EdgePsPenalty holds the string denoting the pspenalty edge name in mutations.
+	EdgePsPenalty = "psPenalty"
+	// EdgePsSubstitutes holds the string denoting the pssubstitutes edge name in mutations.
+	EdgePsSubstitutes = "psSubstitutes"
 	// EdgeSeason holds the string denoting the season edge name in mutations.
 	EdgeSeason = "season"
+	// EdgePsFairplay holds the string denoting the psfairplay edge name in mutations.
+	EdgePsFairplay = "psFairplay"
 	// Table holds the table name of the playerstats in the database.
 	Table = "player_stats"
 	// PlayerTable is the table that holds the player relation/edge.
@@ -77,52 +79,65 @@ const (
 	AssistEventsInverseTable = "fixture_events"
 	// AssistEventsColumn is the table column denoting the assistEvents relation/edge.
 	AssistEventsColumn = "player_stats_assist_events"
-	// PsgamesTable is the table that holds the psgames relation/edge.
-	PsgamesTable = "ps_games"
-	// PsgamesInverseTable is the table name for the PSGames entity.
+	// PsGamesTable is the table that holds the psGames relation/edge.
+	PsGamesTable = "ps_games"
+	// PsGamesInverseTable is the table name for the PSGames entity.
 	// It exists in this package in order to avoid circular dependency with the "psgames" package.
-	PsgamesInverseTable = "ps_games"
-	// PsgamesColumn is the table column denoting the psgames relation/edge.
-	PsgamesColumn = "player_stats_psgames"
-	// PsgoalsTable is the table that holds the psgoals relation/edge.
-	PsgoalsTable = "ps_goals"
-	// PsgoalsInverseTable is the table name for the PSGoals entity.
-	// It exists in this package in order to avoid circular dependency with the "psgoals" package.
-	PsgoalsInverseTable = "ps_goals"
-	// PsgoalsColumn is the table column denoting the psgoals relation/edge.
-	PsgoalsColumn = "player_stats_psgoals"
-	// PsdefenseTable is the table that holds the psdefense relation/edge.
-	PsdefenseTable = "ps_defenses"
-	// PsdefenseInverseTable is the table name for the PSDefense entity.
+	PsGamesInverseTable = "ps_games"
+	// PsGamesColumn is the table column denoting the psGames relation/edge.
+	PsGamesColumn = "player_stats_ps_games"
+	// PsShootingTable is the table that holds the psShooting relation/edge.
+	PsShootingTable = "ps_shootings"
+	// PsShootingInverseTable is the table name for the PSShooting entity.
+	// It exists in this package in order to avoid circular dependency with the "psshooting" package.
+	PsShootingInverseTable = "ps_shootings"
+	// PsShootingColumn is the table column denoting the psShooting relation/edge.
+	PsShootingColumn = "player_stats_ps_shooting"
+	// PsDefenseTable is the table that holds the psDefense relation/edge.
+	PsDefenseTable = "ps_defenses"
+	// PsDefenseInverseTable is the table name for the PSDefense entity.
 	// It exists in this package in order to avoid circular dependency with the "psdefense" package.
-	PsdefenseInverseTable = "ps_defenses"
-	// PsdefenseColumn is the table column denoting the psdefense relation/edge.
-	PsdefenseColumn = "player_stats_psdefense"
-	// PsoffenseTable is the table that holds the psoffense relation/edge.
-	PsoffenseTable = "ps_offenses"
-	// PsoffenseInverseTable is the table name for the PSOffense entity.
-	// It exists in this package in order to avoid circular dependency with the "psoffense" package.
-	PsoffenseInverseTable = "ps_offenses"
-	// PsoffenseColumn is the table column denoting the psoffense relation/edge.
-	PsoffenseColumn = "player_stats_psoffense"
-	// PspenaltyTable is the table that holds the pspenalty relation/edge.
-	PspenaltyTable = "ps_penalties"
-	// PspenaltyInverseTable is the table name for the PSPenalty entity.
+	PsDefenseInverseTable = "ps_defenses"
+	// PsDefenseColumn is the table column denoting the psDefense relation/edge.
+	PsDefenseColumn = "player_stats_ps_defense"
+	// PsTechnicalTable is the table that holds the psTechnical relation/edge.
+	PsTechnicalTable = "ps_technicals"
+	// PsTechnicalInverseTable is the table name for the PSTechnical entity.
+	// It exists in this package in order to avoid circular dependency with the "pstechnical" package.
+	PsTechnicalInverseTable = "ps_technicals"
+	// PsTechnicalColumn is the table column denoting the psTechnical relation/edge.
+	PsTechnicalColumn = "player_stats_ps_technical"
+	// PsPenaltyTable is the table that holds the psPenalty relation/edge.
+	PsPenaltyTable = "ps_penalties"
+	// PsPenaltyInverseTable is the table name for the PSPenalty entity.
 	// It exists in this package in order to avoid circular dependency with the "pspenalty" package.
-	PspenaltyInverseTable = "ps_penalties"
-	// PspenaltyColumn is the table column denoting the pspenalty relation/edge.
-	PspenaltyColumn = "player_stats_pspenalty"
+	PsPenaltyInverseTable = "ps_penalties"
+	// PsPenaltyColumn is the table column denoting the psPenalty relation/edge.
+	PsPenaltyColumn = "player_stats_ps_penalty"
+	// PsSubstitutesTable is the table that holds the psSubstitutes relation/edge.
+	PsSubstitutesTable = "ps_substitutes"
+	// PsSubstitutesInverseTable is the table name for the PSSubstitutes entity.
+	// It exists in this package in order to avoid circular dependency with the "pssubstitutes" package.
+	PsSubstitutesInverseTable = "ps_substitutes"
+	// PsSubstitutesColumn is the table column denoting the psSubstitutes relation/edge.
+	PsSubstitutesColumn = "player_stats_ps_substitutes"
 	// SeasonTable is the table that holds the season relation/edge. The primary key declared below.
 	SeasonTable = "player_stats_season"
 	// SeasonInverseTable is the table name for the Season entity.
 	// It exists in this package in order to avoid circular dependency with the "season" package.
 	SeasonInverseTable = "seasons"
+	// PsFairplayTable is the table that holds the psFairplay relation/edge.
+	PsFairplayTable = "ps_fairplays"
+	// PsFairplayInverseTable is the table name for the PSFairplay entity.
+	// It exists in this package in order to avoid circular dependency with the "psfairplay" package.
+	PsFairplayInverseTable = "ps_fairplays"
+	// PsFairplayColumn is the table column denoting the psFairplay relation/edge.
+	PsFairplayColumn = "player_stats_ps_fairplay"
 )
 
 // Columns holds all SQL columns for playerstats fields.
 var Columns = []string{
 	FieldID,
-	FieldSlug,
 	FieldLastUpdated,
 }
 
@@ -167,11 +182,6 @@ type OrderOption func(*sql.Selector)
 // ByID orders the results by the id field.
 func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
-}
-
-// BySlug orders the results by the slug field.
-func BySlug(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldSlug, opts...).ToFunc()
 }
 
 // ByLastUpdated orders the results by the lastUpdated field.
@@ -235,73 +245,87 @@ func ByAssistEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByPsgamesCount orders the results by psgames count.
-func ByPsgamesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsGamesCount orders the results by psGames count.
+func ByPsGamesCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsgamesStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newPsGamesStep(), opts...)
 	}
 }
 
-// ByPsgames orders the results by psgames terms.
-func ByPsgames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPsGames orders the results by psGames terms.
+func ByPsGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsgamesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByPsgoalsCount orders the results by psgoals count.
-func ByPsgoalsCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsShootingCount orders the results by psShooting count.
+func ByPsShootingCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsgoalsStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newPsShootingStep(), opts...)
 	}
 }
 
-// ByPsgoals orders the results by psgoals terms.
-func ByPsgoals(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPsShooting orders the results by psShooting terms.
+func ByPsShooting(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsgoalsStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsShootingStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByPsdefenseCount orders the results by psdefense count.
-func ByPsdefenseCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsDefenseCount orders the results by psDefense count.
+func ByPsDefenseCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsdefenseStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newPsDefenseStep(), opts...)
 	}
 }
 
-// ByPsdefense orders the results by psdefense terms.
-func ByPsdefense(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPsDefense orders the results by psDefense terms.
+func ByPsDefense(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsdefenseStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsDefenseStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByPsoffenseCount orders the results by psoffense count.
-func ByPsoffenseCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsTechnicalCount orders the results by psTechnical count.
+func ByPsTechnicalCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsoffenseStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newPsTechnicalStep(), opts...)
 	}
 }
 
-// ByPsoffense orders the results by psoffense terms.
-func ByPsoffense(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPsTechnical orders the results by psTechnical terms.
+func ByPsTechnical(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsoffenseStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsTechnicalStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
-// ByPspenaltyCount orders the results by pspenalty count.
-func ByPspenaltyCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsPenaltyCount orders the results by psPenalty count.
+func ByPsPenaltyCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPspenaltyStep(), opts...)
+		sqlgraph.OrderByNeighborsCount(s, newPsPenaltyStep(), opts...)
 	}
 }
 
-// ByPspenalty orders the results by pspenalty terms.
-func ByPspenalty(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPsPenalty orders the results by psPenalty terms.
+func ByPsPenalty(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPspenaltyStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsPenaltyStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPsSubstitutesCount orders the results by psSubstitutes count.
+func ByPsSubstitutesCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPsSubstitutesStep(), opts...)
+	}
+}
+
+// ByPsSubstitutes orders the results by psSubstitutes terms.
+func ByPsSubstitutes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPsSubstitutesStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -316,6 +340,20 @@ func BySeasonCount(opts ...sql.OrderTermOption) OrderOption {
 func BySeason(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newSeasonStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPsFairplayCount orders the results by psFairplay count.
+func ByPsFairplayCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPsFairplayStep(), opts...)
+	}
+}
+
+// ByPsFairplay orders the results by psFairplay terms.
+func ByPsFairplay(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPsFairplayStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 func newPlayerStep() *sqlgraph.Step {
@@ -353,39 +391,46 @@ func newAssistEventsStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.O2M, false, AssistEventsTable, AssistEventsColumn),
 	)
 }
-func newPsgamesStep() *sqlgraph.Step {
+func newPsGamesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PsgamesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsgamesTable, PsgamesColumn),
+		sqlgraph.To(PsGamesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsGamesTable, PsGamesColumn),
 	)
 }
-func newPsgoalsStep() *sqlgraph.Step {
+func newPsShootingStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PsgoalsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsgoalsTable, PsgoalsColumn),
+		sqlgraph.To(PsShootingInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsShootingTable, PsShootingColumn),
 	)
 }
-func newPsdefenseStep() *sqlgraph.Step {
+func newPsDefenseStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PsdefenseInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsdefenseTable, PsdefenseColumn),
+		sqlgraph.To(PsDefenseInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsDefenseTable, PsDefenseColumn),
 	)
 }
-func newPsoffenseStep() *sqlgraph.Step {
+func newPsTechnicalStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PsoffenseInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsoffenseTable, PsoffenseColumn),
+		sqlgraph.To(PsTechnicalInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsTechnicalTable, PsTechnicalColumn),
 	)
 }
-func newPspenaltyStep() *sqlgraph.Step {
+func newPsPenaltyStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PspenaltyInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PspenaltyTable, PspenaltyColumn),
+		sqlgraph.To(PsPenaltyInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsPenaltyTable, PsPenaltyColumn),
+	)
+}
+func newPsSubstitutesStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PsSubstitutesInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsSubstitutesTable, PsSubstitutesColumn),
 	)
 }
 func newSeasonStep() *sqlgraph.Step {
@@ -393,5 +438,12 @@ func newSeasonStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(SeasonInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2M, false, SeasonTable, SeasonPrimaryKey...),
+	)
+}
+func newPsFairplayStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PsFairplayInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PsFairplayTable, PsFairplayColumn),
 	)
 }

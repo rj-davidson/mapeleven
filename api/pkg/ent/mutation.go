@@ -22,10 +22,12 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psfairplay"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pssubstitutes"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
@@ -61,10 +63,12 @@ const (
 	TypeLeague          = "League"
 	TypeMatchPlayer     = "MatchPlayer"
 	TypePSDefense       = "PSDefense"
+	TypePSFairplay      = "PSFairplay"
 	TypePSGames         = "PSGames"
-	TypePSGoals         = "PSGoals"
-	TypePSOffense       = "PSOffense"
 	TypePSPenalty       = "PSPenalty"
+	TypePSShooting      = "PSShooting"
+	TypePSSubstitutes   = "PSSubstitutes"
+	TypePSTechnical     = "PSTechnical"
 	TypePlayer          = "Player"
 	TypePlayerStats     = "PlayerStats"
 	TypeSeason          = "Season"
@@ -7691,10 +7695,11 @@ type PSDefenseMutation struct {
 	add_Blocks         *int
 	_Interceptions     *int
 	add_Interceptions  *int
-	_TotalDuels        *int
-	add_TotalDuels     *int
+	_DuelsTotal        *int
+	add_DuelsTotal     *int
 	_WonDuels          *int
 	add_WonDuels       *int
+	lastUpdated        *time.Time
 	clearedFields      map[string]struct{}
 	playerStats        *int
 	clearedplayerStats bool
@@ -7969,60 +7974,60 @@ func (m *PSDefenseMutation) ResetInterceptions() {
 	m.add_Interceptions = nil
 }
 
-// SetTotalDuels sets the "TotalDuels" field.
-func (m *PSDefenseMutation) SetTotalDuels(i int) {
-	m._TotalDuels = &i
-	m.add_TotalDuels = nil
+// SetDuelsTotal sets the "DuelsTotal" field.
+func (m *PSDefenseMutation) SetDuelsTotal(i int) {
+	m._DuelsTotal = &i
+	m.add_DuelsTotal = nil
 }
 
-// TotalDuels returns the value of the "TotalDuels" field in the mutation.
-func (m *PSDefenseMutation) TotalDuels() (r int, exists bool) {
-	v := m._TotalDuels
+// DuelsTotal returns the value of the "DuelsTotal" field in the mutation.
+func (m *PSDefenseMutation) DuelsTotal() (r int, exists bool) {
+	v := m._DuelsTotal
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldTotalDuels returns the old "TotalDuels" field's value of the PSDefense entity.
+// OldDuelsTotal returns the old "DuelsTotal" field's value of the PSDefense entity.
 // If the PSDefense object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSDefenseMutation) OldTotalDuels(ctx context.Context) (v int, err error) {
+func (m *PSDefenseMutation) OldDuelsTotal(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTotalDuels is only allowed on UpdateOne operations")
+		return v, errors.New("OldDuelsTotal is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTotalDuels requires an ID field in the mutation")
+		return v, errors.New("OldDuelsTotal requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTotalDuels: %w", err)
+		return v, fmt.Errorf("querying old value for OldDuelsTotal: %w", err)
 	}
-	return oldValue.TotalDuels, nil
+	return oldValue.DuelsTotal, nil
 }
 
-// AddTotalDuels adds i to the "TotalDuels" field.
-func (m *PSDefenseMutation) AddTotalDuels(i int) {
-	if m.add_TotalDuels != nil {
-		*m.add_TotalDuels += i
+// AddDuelsTotal adds i to the "DuelsTotal" field.
+func (m *PSDefenseMutation) AddDuelsTotal(i int) {
+	if m.add_DuelsTotal != nil {
+		*m.add_DuelsTotal += i
 	} else {
-		m.add_TotalDuels = &i
+		m.add_DuelsTotal = &i
 	}
 }
 
-// AddedTotalDuels returns the value that was added to the "TotalDuels" field in this mutation.
-func (m *PSDefenseMutation) AddedTotalDuels() (r int, exists bool) {
-	v := m.add_TotalDuels
+// AddedDuelsTotal returns the value that was added to the "DuelsTotal" field in this mutation.
+func (m *PSDefenseMutation) AddedDuelsTotal() (r int, exists bool) {
+	v := m.add_DuelsTotal
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetTotalDuels resets all changes to the "TotalDuels" field.
-func (m *PSDefenseMutation) ResetTotalDuels() {
-	m._TotalDuels = nil
-	m.add_TotalDuels = nil
+// ResetDuelsTotal resets all changes to the "DuelsTotal" field.
+func (m *PSDefenseMutation) ResetDuelsTotal() {
+	m._DuelsTotal = nil
+	m.add_DuelsTotal = nil
 }
 
 // SetWonDuels sets the "WonDuels" field.
@@ -8079,6 +8084,55 @@ func (m *PSDefenseMutation) AddedWonDuels() (r int, exists bool) {
 func (m *PSDefenseMutation) ResetWonDuels() {
 	m._WonDuels = nil
 	m.add_WonDuels = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PSDefenseMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PSDefenseMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the PSDefense entity.
+// If the PSDefense object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSDefenseMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PSDefenseMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[psdefense.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PSDefenseMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[psdefense.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PSDefenseMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, psdefense.FieldLastUpdated)
 }
 
 // SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
@@ -8154,7 +8208,7 @@ func (m *PSDefenseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PSDefenseMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m._TacklesTotal != nil {
 		fields = append(fields, psdefense.FieldTacklesTotal)
 	}
@@ -8164,11 +8218,14 @@ func (m *PSDefenseMutation) Fields() []string {
 	if m._Interceptions != nil {
 		fields = append(fields, psdefense.FieldInterceptions)
 	}
-	if m._TotalDuels != nil {
-		fields = append(fields, psdefense.FieldTotalDuels)
+	if m._DuelsTotal != nil {
+		fields = append(fields, psdefense.FieldDuelsTotal)
 	}
 	if m._WonDuels != nil {
 		fields = append(fields, psdefense.FieldWonDuels)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, psdefense.FieldLastUpdated)
 	}
 	return fields
 }
@@ -8184,10 +8241,12 @@ func (m *PSDefenseMutation) Field(name string) (ent.Value, bool) {
 		return m.Blocks()
 	case psdefense.FieldInterceptions:
 		return m.Interceptions()
-	case psdefense.FieldTotalDuels:
-		return m.TotalDuels()
+	case psdefense.FieldDuelsTotal:
+		return m.DuelsTotal()
 	case psdefense.FieldWonDuels:
 		return m.WonDuels()
+	case psdefense.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -8203,10 +8262,12 @@ func (m *PSDefenseMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldBlocks(ctx)
 	case psdefense.FieldInterceptions:
 		return m.OldInterceptions(ctx)
-	case psdefense.FieldTotalDuels:
-		return m.OldTotalDuels(ctx)
+	case psdefense.FieldDuelsTotal:
+		return m.OldDuelsTotal(ctx)
 	case psdefense.FieldWonDuels:
 		return m.OldWonDuels(ctx)
+	case psdefense.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown PSDefense field %s", name)
 }
@@ -8237,12 +8298,12 @@ func (m *PSDefenseMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetInterceptions(v)
 		return nil
-	case psdefense.FieldTotalDuels:
+	case psdefense.FieldDuelsTotal:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetTotalDuels(v)
+		m.SetDuelsTotal(v)
 		return nil
 	case psdefense.FieldWonDuels:
 		v, ok := value.(int)
@@ -8250,6 +8311,13 @@ func (m *PSDefenseMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetWonDuels(v)
+		return nil
+	case psdefense.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PSDefense field %s", name)
@@ -8268,8 +8336,8 @@ func (m *PSDefenseMutation) AddedFields() []string {
 	if m.add_Interceptions != nil {
 		fields = append(fields, psdefense.FieldInterceptions)
 	}
-	if m.add_TotalDuels != nil {
-		fields = append(fields, psdefense.FieldTotalDuels)
+	if m.add_DuelsTotal != nil {
+		fields = append(fields, psdefense.FieldDuelsTotal)
 	}
 	if m.add_WonDuels != nil {
 		fields = append(fields, psdefense.FieldWonDuels)
@@ -8288,8 +8356,8 @@ func (m *PSDefenseMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedBlocks()
 	case psdefense.FieldInterceptions:
 		return m.AddedInterceptions()
-	case psdefense.FieldTotalDuels:
-		return m.AddedTotalDuels()
+	case psdefense.FieldDuelsTotal:
+		return m.AddedDuelsTotal()
 	case psdefense.FieldWonDuels:
 		return m.AddedWonDuels()
 	}
@@ -8322,12 +8390,12 @@ func (m *PSDefenseMutation) AddField(name string, value ent.Value) error {
 		}
 		m.AddInterceptions(v)
 		return nil
-	case psdefense.FieldTotalDuels:
+	case psdefense.FieldDuelsTotal:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddTotalDuels(v)
+		m.AddDuelsTotal(v)
 		return nil
 	case psdefense.FieldWonDuels:
 		v, ok := value.(int)
@@ -8343,7 +8411,11 @@ func (m *PSDefenseMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PSDefenseMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(psdefense.FieldLastUpdated) {
+		fields = append(fields, psdefense.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -8356,6 +8428,11 @@ func (m *PSDefenseMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PSDefenseMutation) ClearField(name string) error {
+	switch name {
+	case psdefense.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown PSDefense nullable field %s", name)
 }
 
@@ -8372,11 +8449,14 @@ func (m *PSDefenseMutation) ResetField(name string) error {
 	case psdefense.FieldInterceptions:
 		m.ResetInterceptions()
 		return nil
-	case psdefense.FieldTotalDuels:
-		m.ResetTotalDuels()
+	case psdefense.FieldDuelsTotal:
+		m.ResetDuelsTotal()
 		return nil
 	case psdefense.FieldWonDuels:
 		m.ResetWonDuels()
+		return nil
+	case psdefense.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown PSDefense field %s", name)
@@ -8456,6 +8536,859 @@ func (m *PSDefenseMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown PSDefense edge %s", name)
 }
 
+// PSFairplayMutation represents an operation that mutates the PSFairplay nodes in the graph.
+type PSFairplayMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int
+	_FoulsCommitted     *int
+	add_FoulsCommitted  *int
+	_Yellow             *int
+	add_Yellow          *int
+	_YellowRed          *int
+	add_YellowRed       *int
+	_Red                *int
+	add_Red             *int
+	_PenaltyConceded    *int
+	add_PenaltyConceded *int
+	lastUpdated         *time.Time
+	clearedFields       map[string]struct{}
+	playerStats         *int
+	clearedplayerStats  bool
+	done                bool
+	oldValue            func(context.Context) (*PSFairplay, error)
+	predicates          []predicate.PSFairplay
+}
+
+var _ ent.Mutation = (*PSFairplayMutation)(nil)
+
+// psfairplayOption allows management of the mutation configuration using functional options.
+type psfairplayOption func(*PSFairplayMutation)
+
+// newPSFairplayMutation creates new mutation for the PSFairplay entity.
+func newPSFairplayMutation(c config, op Op, opts ...psfairplayOption) *PSFairplayMutation {
+	m := &PSFairplayMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePSFairplay,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPSFairplayID sets the ID field of the mutation.
+func withPSFairplayID(id int) psfairplayOption {
+	return func(m *PSFairplayMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PSFairplay
+		)
+		m.oldValue = func(ctx context.Context) (*PSFairplay, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PSFairplay.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPSFairplay sets the old PSFairplay of the mutation.
+func withPSFairplay(node *PSFairplay) psfairplayOption {
+	return func(m *PSFairplayMutation) {
+		m.oldValue = func(context.Context) (*PSFairplay, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PSFairplayMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PSFairplayMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PSFairplayMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PSFairplayMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PSFairplay.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFoulsCommitted sets the "FoulsCommitted" field.
+func (m *PSFairplayMutation) SetFoulsCommitted(i int) {
+	m._FoulsCommitted = &i
+	m.add_FoulsCommitted = nil
+}
+
+// FoulsCommitted returns the value of the "FoulsCommitted" field in the mutation.
+func (m *PSFairplayMutation) FoulsCommitted() (r int, exists bool) {
+	v := m._FoulsCommitted
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFoulsCommitted returns the old "FoulsCommitted" field's value of the PSFairplay entity.
+// If the PSFairplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSFairplayMutation) OldFoulsCommitted(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFoulsCommitted is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFoulsCommitted requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFoulsCommitted: %w", err)
+	}
+	return oldValue.FoulsCommitted, nil
+}
+
+// AddFoulsCommitted adds i to the "FoulsCommitted" field.
+func (m *PSFairplayMutation) AddFoulsCommitted(i int) {
+	if m.add_FoulsCommitted != nil {
+		*m.add_FoulsCommitted += i
+	} else {
+		m.add_FoulsCommitted = &i
+	}
+}
+
+// AddedFoulsCommitted returns the value that was added to the "FoulsCommitted" field in this mutation.
+func (m *PSFairplayMutation) AddedFoulsCommitted() (r int, exists bool) {
+	v := m.add_FoulsCommitted
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFoulsCommitted resets all changes to the "FoulsCommitted" field.
+func (m *PSFairplayMutation) ResetFoulsCommitted() {
+	m._FoulsCommitted = nil
+	m.add_FoulsCommitted = nil
+}
+
+// SetYellow sets the "Yellow" field.
+func (m *PSFairplayMutation) SetYellow(i int) {
+	m._Yellow = &i
+	m.add_Yellow = nil
+}
+
+// Yellow returns the value of the "Yellow" field in the mutation.
+func (m *PSFairplayMutation) Yellow() (r int, exists bool) {
+	v := m._Yellow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellow returns the old "Yellow" field's value of the PSFairplay entity.
+// If the PSFairplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSFairplayMutation) OldYellow(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellow is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellow requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellow: %w", err)
+	}
+	return oldValue.Yellow, nil
+}
+
+// AddYellow adds i to the "Yellow" field.
+func (m *PSFairplayMutation) AddYellow(i int) {
+	if m.add_Yellow != nil {
+		*m.add_Yellow += i
+	} else {
+		m.add_Yellow = &i
+	}
+}
+
+// AddedYellow returns the value that was added to the "Yellow" field in this mutation.
+func (m *PSFairplayMutation) AddedYellow() (r int, exists bool) {
+	v := m.add_Yellow
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetYellow resets all changes to the "Yellow" field.
+func (m *PSFairplayMutation) ResetYellow() {
+	m._Yellow = nil
+	m.add_Yellow = nil
+}
+
+// SetYellowRed sets the "YellowRed" field.
+func (m *PSFairplayMutation) SetYellowRed(i int) {
+	m._YellowRed = &i
+	m.add_YellowRed = nil
+}
+
+// YellowRed returns the value of the "YellowRed" field in the mutation.
+func (m *PSFairplayMutation) YellowRed() (r int, exists bool) {
+	v := m._YellowRed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYellowRed returns the old "YellowRed" field's value of the PSFairplay entity.
+// If the PSFairplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSFairplayMutation) OldYellowRed(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYellowRed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYellowRed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYellowRed: %w", err)
+	}
+	return oldValue.YellowRed, nil
+}
+
+// AddYellowRed adds i to the "YellowRed" field.
+func (m *PSFairplayMutation) AddYellowRed(i int) {
+	if m.add_YellowRed != nil {
+		*m.add_YellowRed += i
+	} else {
+		m.add_YellowRed = &i
+	}
+}
+
+// AddedYellowRed returns the value that was added to the "YellowRed" field in this mutation.
+func (m *PSFairplayMutation) AddedYellowRed() (r int, exists bool) {
+	v := m.add_YellowRed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetYellowRed resets all changes to the "YellowRed" field.
+func (m *PSFairplayMutation) ResetYellowRed() {
+	m._YellowRed = nil
+	m.add_YellowRed = nil
+}
+
+// SetRed sets the "Red" field.
+func (m *PSFairplayMutation) SetRed(i int) {
+	m._Red = &i
+	m.add_Red = nil
+}
+
+// Red returns the value of the "Red" field in the mutation.
+func (m *PSFairplayMutation) Red() (r int, exists bool) {
+	v := m._Red
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRed returns the old "Red" field's value of the PSFairplay entity.
+// If the PSFairplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSFairplayMutation) OldRed(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRed is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRed requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRed: %w", err)
+	}
+	return oldValue.Red, nil
+}
+
+// AddRed adds i to the "Red" field.
+func (m *PSFairplayMutation) AddRed(i int) {
+	if m.add_Red != nil {
+		*m.add_Red += i
+	} else {
+		m.add_Red = &i
+	}
+}
+
+// AddedRed returns the value that was added to the "Red" field in this mutation.
+func (m *PSFairplayMutation) AddedRed() (r int, exists bool) {
+	v := m.add_Red
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetRed resets all changes to the "Red" field.
+func (m *PSFairplayMutation) ResetRed() {
+	m._Red = nil
+	m.add_Red = nil
+}
+
+// SetPenaltyConceded sets the "PenaltyConceded" field.
+func (m *PSFairplayMutation) SetPenaltyConceded(i int) {
+	m._PenaltyConceded = &i
+	m.add_PenaltyConceded = nil
+}
+
+// PenaltyConceded returns the value of the "PenaltyConceded" field in the mutation.
+func (m *PSFairplayMutation) PenaltyConceded() (r int, exists bool) {
+	v := m._PenaltyConceded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPenaltyConceded returns the old "PenaltyConceded" field's value of the PSFairplay entity.
+// If the PSFairplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSFairplayMutation) OldPenaltyConceded(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPenaltyConceded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPenaltyConceded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPenaltyConceded: %w", err)
+	}
+	return oldValue.PenaltyConceded, nil
+}
+
+// AddPenaltyConceded adds i to the "PenaltyConceded" field.
+func (m *PSFairplayMutation) AddPenaltyConceded(i int) {
+	if m.add_PenaltyConceded != nil {
+		*m.add_PenaltyConceded += i
+	} else {
+		m.add_PenaltyConceded = &i
+	}
+}
+
+// AddedPenaltyConceded returns the value that was added to the "PenaltyConceded" field in this mutation.
+func (m *PSFairplayMutation) AddedPenaltyConceded() (r int, exists bool) {
+	v := m.add_PenaltyConceded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPenaltyConceded resets all changes to the "PenaltyConceded" field.
+func (m *PSFairplayMutation) ResetPenaltyConceded() {
+	m._PenaltyConceded = nil
+	m.add_PenaltyConceded = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PSFairplayMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PSFairplayMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the PSFairplay entity.
+// If the PSFairplay object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSFairplayMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PSFairplayMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[psfairplay.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PSFairplayMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[psfairplay.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PSFairplayMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, psfairplay.FieldLastUpdated)
+}
+
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
+func (m *PSFairplayMutation) SetPlayerStatsID(id int) {
+	m.playerStats = &id
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSFairplayMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
+}
+
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSFairplayMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
+}
+
+// PlayerStatsID returns the "playerStats" edge ID in the mutation.
+func (m *PSFairplayMutation) PlayerStatsID() (id int, exists bool) {
+	if m.playerStats != nil {
+		return *m.playerStats, true
+	}
+	return
+}
+
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerStatsID instead. It exists only for internal usage by the builders.
+func (m *PSFairplayMutation) PlayerStatsIDs() (ids []int) {
+	if id := m.playerStats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSFairplayMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+}
+
+// Where appends a list predicates to the PSFairplayMutation builder.
+func (m *PSFairplayMutation) Where(ps ...predicate.PSFairplay) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PSFairplayMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PSFairplayMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PSFairplay, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PSFairplayMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PSFairplayMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PSFairplay).
+func (m *PSFairplayMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PSFairplayMutation) Fields() []string {
+	fields := make([]string, 0, 6)
+	if m._FoulsCommitted != nil {
+		fields = append(fields, psfairplay.FieldFoulsCommitted)
+	}
+	if m._Yellow != nil {
+		fields = append(fields, psfairplay.FieldYellow)
+	}
+	if m._YellowRed != nil {
+		fields = append(fields, psfairplay.FieldYellowRed)
+	}
+	if m._Red != nil {
+		fields = append(fields, psfairplay.FieldRed)
+	}
+	if m._PenaltyConceded != nil {
+		fields = append(fields, psfairplay.FieldPenaltyConceded)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, psfairplay.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PSFairplayMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case psfairplay.FieldFoulsCommitted:
+		return m.FoulsCommitted()
+	case psfairplay.FieldYellow:
+		return m.Yellow()
+	case psfairplay.FieldYellowRed:
+		return m.YellowRed()
+	case psfairplay.FieldRed:
+		return m.Red()
+	case psfairplay.FieldPenaltyConceded:
+		return m.PenaltyConceded()
+	case psfairplay.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PSFairplayMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case psfairplay.FieldFoulsCommitted:
+		return m.OldFoulsCommitted(ctx)
+	case psfairplay.FieldYellow:
+		return m.OldYellow(ctx)
+	case psfairplay.FieldYellowRed:
+		return m.OldYellowRed(ctx)
+	case psfairplay.FieldRed:
+		return m.OldRed(ctx)
+	case psfairplay.FieldPenaltyConceded:
+		return m.OldPenaltyConceded(ctx)
+	case psfairplay.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown PSFairplay field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PSFairplayMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case psfairplay.FieldFoulsCommitted:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFoulsCommitted(v)
+		return nil
+	case psfairplay.FieldYellow:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellow(v)
+		return nil
+	case psfairplay.FieldYellowRed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYellowRed(v)
+		return nil
+	case psfairplay.FieldRed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRed(v)
+		return nil
+	case psfairplay.FieldPenaltyConceded:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPenaltyConceded(v)
+		return nil
+	case psfairplay.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PSFairplay field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PSFairplayMutation) AddedFields() []string {
+	var fields []string
+	if m.add_FoulsCommitted != nil {
+		fields = append(fields, psfairplay.FieldFoulsCommitted)
+	}
+	if m.add_Yellow != nil {
+		fields = append(fields, psfairplay.FieldYellow)
+	}
+	if m.add_YellowRed != nil {
+		fields = append(fields, psfairplay.FieldYellowRed)
+	}
+	if m.add_Red != nil {
+		fields = append(fields, psfairplay.FieldRed)
+	}
+	if m.add_PenaltyConceded != nil {
+		fields = append(fields, psfairplay.FieldPenaltyConceded)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PSFairplayMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case psfairplay.FieldFoulsCommitted:
+		return m.AddedFoulsCommitted()
+	case psfairplay.FieldYellow:
+		return m.AddedYellow()
+	case psfairplay.FieldYellowRed:
+		return m.AddedYellowRed()
+	case psfairplay.FieldRed:
+		return m.AddedRed()
+	case psfairplay.FieldPenaltyConceded:
+		return m.AddedPenaltyConceded()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PSFairplayMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case psfairplay.FieldFoulsCommitted:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFoulsCommitted(v)
+		return nil
+	case psfairplay.FieldYellow:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellow(v)
+		return nil
+	case psfairplay.FieldYellowRed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddYellowRed(v)
+		return nil
+	case psfairplay.FieldRed:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddRed(v)
+		return nil
+	case psfairplay.FieldPenaltyConceded:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPenaltyConceded(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PSFairplay numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PSFairplayMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(psfairplay.FieldLastUpdated) {
+		fields = append(fields, psfairplay.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PSFairplayMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PSFairplayMutation) ClearField(name string) error {
+	switch name {
+	case psfairplay.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PSFairplay nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PSFairplayMutation) ResetField(name string) error {
+	switch name {
+	case psfairplay.FieldFoulsCommitted:
+		m.ResetFoulsCommitted()
+		return nil
+	case psfairplay.FieldYellow:
+		m.ResetYellow()
+		return nil
+	case psfairplay.FieldYellowRed:
+		m.ResetYellowRed()
+		return nil
+	case psfairplay.FieldRed:
+		m.ResetRed()
+		return nil
+	case psfairplay.FieldPenaltyConceded:
+		m.ResetPenaltyConceded()
+		return nil
+	case psfairplay.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PSFairplay field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PSFairplayMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.playerStats != nil {
+		edges = append(edges, psfairplay.EdgePlayerStats)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PSFairplayMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case psfairplay.EdgePlayerStats:
+		if id := m.playerStats; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PSFairplayMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PSFairplayMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PSFairplayMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedplayerStats {
+		edges = append(edges, psfairplay.EdgePlayerStats)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PSFairplayMutation) EdgeCleared(name string) bool {
+	switch name {
+	case psfairplay.EdgePlayerStats:
+		return m.clearedplayerStats
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PSFairplayMutation) ClearEdge(name string) error {
+	switch name {
+	case psfairplay.EdgePlayerStats:
+		m.ClearPlayerStats()
+		return nil
+	}
+	return fmt.Errorf("unknown PSFairplay unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PSFairplayMutation) ResetEdge(name string) error {
+	switch name {
+	case psfairplay.EdgePlayerStats:
+		m.ResetPlayerStats()
+		return nil
+	}
+	return fmt.Errorf("unknown PSFairplay edge %s", name)
+}
+
 // PSGamesMutation represents an operation that mutates the PSGames nodes in the graph.
 type PSGamesMutation struct {
 	config
@@ -8473,6 +9406,7 @@ type PSGamesMutation struct {
 	_Position          *string
 	_Rating            *string
 	_Captain           *bool
+	lastUpdated        *time.Time
 	clearedFields      map[string]struct{}
 	playerStats        *int
 	clearedplayerStats bool
@@ -8911,6 +9845,55 @@ func (m *PSGamesMutation) ResetCaptain() {
 	m._Captain = nil
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PSGamesMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PSGamesMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the PSGames entity.
+// If the PSGames object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSGamesMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PSGamesMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[psgames.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PSGamesMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[psgames.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PSGamesMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, psgames.FieldLastUpdated)
+}
+
 // SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
 func (m *PSGamesMutation) SetPlayerStatsID(id int) {
 	m.playerStats = &id
@@ -8984,7 +9967,7 @@ func (m *PSGamesMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PSGamesMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m._Appearances != nil {
 		fields = append(fields, psgames.FieldAppearances)
 	}
@@ -9005,6 +9988,9 @@ func (m *PSGamesMutation) Fields() []string {
 	}
 	if m._Captain != nil {
 		fields = append(fields, psgames.FieldCaptain)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, psgames.FieldLastUpdated)
 	}
 	return fields
 }
@@ -9028,6 +10014,8 @@ func (m *PSGamesMutation) Field(name string) (ent.Value, bool) {
 		return m.Rating()
 	case psgames.FieldCaptain:
 		return m.Captain()
+	case psgames.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -9051,6 +10039,8 @@ func (m *PSGamesMutation) OldField(ctx context.Context, name string) (ent.Value,
 		return m.OldRating(ctx)
 	case psgames.FieldCaptain:
 		return m.OldCaptain(ctx)
+	case psgames.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown PSGames field %s", name)
 }
@@ -9108,6 +10098,13 @@ func (m *PSGamesMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCaptain(v)
+		return nil
+	case psgames.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PSGames field %s", name)
@@ -9189,7 +10186,11 @@ func (m *PSGamesMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PSGamesMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(psgames.FieldLastUpdated) {
+		fields = append(fields, psgames.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -9202,6 +10203,11 @@ func (m *PSGamesMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PSGamesMutation) ClearField(name string) error {
+	switch name {
+	case psgames.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown PSGames nullable field %s", name)
 }
 
@@ -9229,6 +10235,9 @@ func (m *PSGamesMutation) ResetField(name string) error {
 		return nil
 	case psgames.FieldCaptain:
 		m.ResetCaptain()
+		return nil
+	case psgames.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown PSGames field %s", name)
@@ -9308,1766 +10317,27 @@ func (m *PSGamesMutation) ResetEdge(name string) error {
 	return fmt.Errorf("unknown PSGames edge %s", name)
 }
 
-// PSGoalsMutation represents an operation that mutates the PSGoals nodes in the graph.
-type PSGoalsMutation struct {
+// PSPenaltyMutation represents an operation that mutates the PSPenalty nodes in the graph.
+type PSPenaltyMutation struct {
 	config
 	op                 Op
 	typ                string
 	id                 *int
-	_TotalGoals        *int
-	add_TotalGoals     *int
-	_ConcededGoals     *int
-	add_ConcededGoals  *int
-	_AssistGoals       *int
-	add_AssistGoals    *int
-	_SaveGoals         *int
-	add_SaveGoals      *int
-	_ShotsTotal        *int
-	add_ShotsTotal     *int
-	_ShotsOn           *int
-	add_ShotsOn        *int
+	_Won               *int
+	add_Won            *int
+	_Scored            *int
+	add_Scored         *int
+	_Missed            *int
+	add_Missed         *int
+	_Saved             *int
+	add_Saved          *int
+	lastUpdated        *time.Time
 	clearedFields      map[string]struct{}
 	playerStats        *int
 	clearedplayerStats bool
 	done               bool
-	oldValue           func(context.Context) (*PSGoals, error)
-	predicates         []predicate.PSGoals
-}
-
-var _ ent.Mutation = (*PSGoalsMutation)(nil)
-
-// psgoalsOption allows management of the mutation configuration using functional options.
-type psgoalsOption func(*PSGoalsMutation)
-
-// newPSGoalsMutation creates new mutation for the PSGoals entity.
-func newPSGoalsMutation(c config, op Op, opts ...psgoalsOption) *PSGoalsMutation {
-	m := &PSGoalsMutation{
-		config:        c,
-		op:            op,
-		typ:           TypePSGoals,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withPSGoalsID sets the ID field of the mutation.
-func withPSGoalsID(id int) psgoalsOption {
-	return func(m *PSGoalsMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *PSGoals
-		)
-		m.oldValue = func(ctx context.Context) (*PSGoals, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().PSGoals.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withPSGoals sets the old PSGoals of the mutation.
-func withPSGoals(node *PSGoals) psgoalsOption {
-	return func(m *PSGoalsMutation) {
-		m.oldValue = func(context.Context) (*PSGoals, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m PSGoalsMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m PSGoalsMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *PSGoalsMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *PSGoalsMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().PSGoals.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetTotalGoals sets the "TotalGoals" field.
-func (m *PSGoalsMutation) SetTotalGoals(i int) {
-	m._TotalGoals = &i
-	m.add_TotalGoals = nil
-}
-
-// TotalGoals returns the value of the "TotalGoals" field in the mutation.
-func (m *PSGoalsMutation) TotalGoals() (r int, exists bool) {
-	v := m._TotalGoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTotalGoals returns the old "TotalGoals" field's value of the PSGoals entity.
-// If the PSGoals object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSGoalsMutation) OldTotalGoals(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTotalGoals is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTotalGoals requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTotalGoals: %w", err)
-	}
-	return oldValue.TotalGoals, nil
-}
-
-// AddTotalGoals adds i to the "TotalGoals" field.
-func (m *PSGoalsMutation) AddTotalGoals(i int) {
-	if m.add_TotalGoals != nil {
-		*m.add_TotalGoals += i
-	} else {
-		m.add_TotalGoals = &i
-	}
-}
-
-// AddedTotalGoals returns the value that was added to the "TotalGoals" field in this mutation.
-func (m *PSGoalsMutation) AddedTotalGoals() (r int, exists bool) {
-	v := m.add_TotalGoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetTotalGoals resets all changes to the "TotalGoals" field.
-func (m *PSGoalsMutation) ResetTotalGoals() {
-	m._TotalGoals = nil
-	m.add_TotalGoals = nil
-}
-
-// SetConcededGoals sets the "ConcededGoals" field.
-func (m *PSGoalsMutation) SetConcededGoals(i int) {
-	m._ConcededGoals = &i
-	m.add_ConcededGoals = nil
-}
-
-// ConcededGoals returns the value of the "ConcededGoals" field in the mutation.
-func (m *PSGoalsMutation) ConcededGoals() (r int, exists bool) {
-	v := m._ConcededGoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldConcededGoals returns the old "ConcededGoals" field's value of the PSGoals entity.
-// If the PSGoals object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSGoalsMutation) OldConcededGoals(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldConcededGoals is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldConcededGoals requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldConcededGoals: %w", err)
-	}
-	return oldValue.ConcededGoals, nil
-}
-
-// AddConcededGoals adds i to the "ConcededGoals" field.
-func (m *PSGoalsMutation) AddConcededGoals(i int) {
-	if m.add_ConcededGoals != nil {
-		*m.add_ConcededGoals += i
-	} else {
-		m.add_ConcededGoals = &i
-	}
-}
-
-// AddedConcededGoals returns the value that was added to the "ConcededGoals" field in this mutation.
-func (m *PSGoalsMutation) AddedConcededGoals() (r int, exists bool) {
-	v := m.add_ConcededGoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetConcededGoals resets all changes to the "ConcededGoals" field.
-func (m *PSGoalsMutation) ResetConcededGoals() {
-	m._ConcededGoals = nil
-	m.add_ConcededGoals = nil
-}
-
-// SetAssistGoals sets the "AssistGoals" field.
-func (m *PSGoalsMutation) SetAssistGoals(i int) {
-	m._AssistGoals = &i
-	m.add_AssistGoals = nil
-}
-
-// AssistGoals returns the value of the "AssistGoals" field in the mutation.
-func (m *PSGoalsMutation) AssistGoals() (r int, exists bool) {
-	v := m._AssistGoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldAssistGoals returns the old "AssistGoals" field's value of the PSGoals entity.
-// If the PSGoals object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSGoalsMutation) OldAssistGoals(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldAssistGoals is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldAssistGoals requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldAssistGoals: %w", err)
-	}
-	return oldValue.AssistGoals, nil
-}
-
-// AddAssistGoals adds i to the "AssistGoals" field.
-func (m *PSGoalsMutation) AddAssistGoals(i int) {
-	if m.add_AssistGoals != nil {
-		*m.add_AssistGoals += i
-	} else {
-		m.add_AssistGoals = &i
-	}
-}
-
-// AddedAssistGoals returns the value that was added to the "AssistGoals" field in this mutation.
-func (m *PSGoalsMutation) AddedAssistGoals() (r int, exists bool) {
-	v := m.add_AssistGoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetAssistGoals resets all changes to the "AssistGoals" field.
-func (m *PSGoalsMutation) ResetAssistGoals() {
-	m._AssistGoals = nil
-	m.add_AssistGoals = nil
-}
-
-// SetSaveGoals sets the "SaveGoals" field.
-func (m *PSGoalsMutation) SetSaveGoals(i int) {
-	m._SaveGoals = &i
-	m.add_SaveGoals = nil
-}
-
-// SaveGoals returns the value of the "SaveGoals" field in the mutation.
-func (m *PSGoalsMutation) SaveGoals() (r int, exists bool) {
-	v := m._SaveGoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSaveGoals returns the old "SaveGoals" field's value of the PSGoals entity.
-// If the PSGoals object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSGoalsMutation) OldSaveGoals(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSaveGoals is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSaveGoals requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSaveGoals: %w", err)
-	}
-	return oldValue.SaveGoals, nil
-}
-
-// AddSaveGoals adds i to the "SaveGoals" field.
-func (m *PSGoalsMutation) AddSaveGoals(i int) {
-	if m.add_SaveGoals != nil {
-		*m.add_SaveGoals += i
-	} else {
-		m.add_SaveGoals = &i
-	}
-}
-
-// AddedSaveGoals returns the value that was added to the "SaveGoals" field in this mutation.
-func (m *PSGoalsMutation) AddedSaveGoals() (r int, exists bool) {
-	v := m.add_SaveGoals
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetSaveGoals resets all changes to the "SaveGoals" field.
-func (m *PSGoalsMutation) ResetSaveGoals() {
-	m._SaveGoals = nil
-	m.add_SaveGoals = nil
-}
-
-// SetShotsTotal sets the "ShotsTotal" field.
-func (m *PSGoalsMutation) SetShotsTotal(i int) {
-	m._ShotsTotal = &i
-	m.add_ShotsTotal = nil
-}
-
-// ShotsTotal returns the value of the "ShotsTotal" field in the mutation.
-func (m *PSGoalsMutation) ShotsTotal() (r int, exists bool) {
-	v := m._ShotsTotal
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldShotsTotal returns the old "ShotsTotal" field's value of the PSGoals entity.
-// If the PSGoals object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSGoalsMutation) OldShotsTotal(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldShotsTotal is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldShotsTotal requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldShotsTotal: %w", err)
-	}
-	return oldValue.ShotsTotal, nil
-}
-
-// AddShotsTotal adds i to the "ShotsTotal" field.
-func (m *PSGoalsMutation) AddShotsTotal(i int) {
-	if m.add_ShotsTotal != nil {
-		*m.add_ShotsTotal += i
-	} else {
-		m.add_ShotsTotal = &i
-	}
-}
-
-// AddedShotsTotal returns the value that was added to the "ShotsTotal" field in this mutation.
-func (m *PSGoalsMutation) AddedShotsTotal() (r int, exists bool) {
-	v := m.add_ShotsTotal
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetShotsTotal resets all changes to the "ShotsTotal" field.
-func (m *PSGoalsMutation) ResetShotsTotal() {
-	m._ShotsTotal = nil
-	m.add_ShotsTotal = nil
-}
-
-// SetShotsOn sets the "ShotsOn" field.
-func (m *PSGoalsMutation) SetShotsOn(i int) {
-	m._ShotsOn = &i
-	m.add_ShotsOn = nil
-}
-
-// ShotsOn returns the value of the "ShotsOn" field in the mutation.
-func (m *PSGoalsMutation) ShotsOn() (r int, exists bool) {
-	v := m._ShotsOn
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldShotsOn returns the old "ShotsOn" field's value of the PSGoals entity.
-// If the PSGoals object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSGoalsMutation) OldShotsOn(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldShotsOn is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldShotsOn requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldShotsOn: %w", err)
-	}
-	return oldValue.ShotsOn, nil
-}
-
-// AddShotsOn adds i to the "ShotsOn" field.
-func (m *PSGoalsMutation) AddShotsOn(i int) {
-	if m.add_ShotsOn != nil {
-		*m.add_ShotsOn += i
-	} else {
-		m.add_ShotsOn = &i
-	}
-}
-
-// AddedShotsOn returns the value that was added to the "ShotsOn" field in this mutation.
-func (m *PSGoalsMutation) AddedShotsOn() (r int, exists bool) {
-	v := m.add_ShotsOn
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetShotsOn resets all changes to the "ShotsOn" field.
-func (m *PSGoalsMutation) ResetShotsOn() {
-	m._ShotsOn = nil
-	m.add_ShotsOn = nil
-}
-
-// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
-func (m *PSGoalsMutation) SetPlayerStatsID(id int) {
-	m.playerStats = &id
-}
-
-// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
-func (m *PSGoalsMutation) ClearPlayerStats() {
-	m.clearedplayerStats = true
-}
-
-// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
-func (m *PSGoalsMutation) PlayerStatsCleared() bool {
-	return m.clearedplayerStats
-}
-
-// PlayerStatsID returns the "playerStats" edge ID in the mutation.
-func (m *PSGoalsMutation) PlayerStatsID() (id int, exists bool) {
-	if m.playerStats != nil {
-		return *m.playerStats, true
-	}
-	return
-}
-
-// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerStatsID instead. It exists only for internal usage by the builders.
-func (m *PSGoalsMutation) PlayerStatsIDs() (ids []int) {
-	if id := m.playerStats; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetPlayerStats resets all changes to the "playerStats" edge.
-func (m *PSGoalsMutation) ResetPlayerStats() {
-	m.playerStats = nil
-	m.clearedplayerStats = false
-}
-
-// Where appends a list predicates to the PSGoalsMutation builder.
-func (m *PSGoalsMutation) Where(ps ...predicate.PSGoals) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the PSGoalsMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *PSGoalsMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.PSGoals, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *PSGoalsMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *PSGoalsMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (PSGoals).
-func (m *PSGoalsMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *PSGoalsMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m._TotalGoals != nil {
-		fields = append(fields, psgoals.FieldTotalGoals)
-	}
-	if m._ConcededGoals != nil {
-		fields = append(fields, psgoals.FieldConcededGoals)
-	}
-	if m._AssistGoals != nil {
-		fields = append(fields, psgoals.FieldAssistGoals)
-	}
-	if m._SaveGoals != nil {
-		fields = append(fields, psgoals.FieldSaveGoals)
-	}
-	if m._ShotsTotal != nil {
-		fields = append(fields, psgoals.FieldShotsTotal)
-	}
-	if m._ShotsOn != nil {
-		fields = append(fields, psgoals.FieldShotsOn)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *PSGoalsMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case psgoals.FieldTotalGoals:
-		return m.TotalGoals()
-	case psgoals.FieldConcededGoals:
-		return m.ConcededGoals()
-	case psgoals.FieldAssistGoals:
-		return m.AssistGoals()
-	case psgoals.FieldSaveGoals:
-		return m.SaveGoals()
-	case psgoals.FieldShotsTotal:
-		return m.ShotsTotal()
-	case psgoals.FieldShotsOn:
-		return m.ShotsOn()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *PSGoalsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case psgoals.FieldTotalGoals:
-		return m.OldTotalGoals(ctx)
-	case psgoals.FieldConcededGoals:
-		return m.OldConcededGoals(ctx)
-	case psgoals.FieldAssistGoals:
-		return m.OldAssistGoals(ctx)
-	case psgoals.FieldSaveGoals:
-		return m.OldSaveGoals(ctx)
-	case psgoals.FieldShotsTotal:
-		return m.OldShotsTotal(ctx)
-	case psgoals.FieldShotsOn:
-		return m.OldShotsOn(ctx)
-	}
-	return nil, fmt.Errorf("unknown PSGoals field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *PSGoalsMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case psgoals.FieldTotalGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTotalGoals(v)
-		return nil
-	case psgoals.FieldConcededGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetConcededGoals(v)
-		return nil
-	case psgoals.FieldAssistGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetAssistGoals(v)
-		return nil
-	case psgoals.FieldSaveGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSaveGoals(v)
-		return nil
-	case psgoals.FieldShotsTotal:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetShotsTotal(v)
-		return nil
-	case psgoals.FieldShotsOn:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetShotsOn(v)
-		return nil
-	}
-	return fmt.Errorf("unknown PSGoals field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *PSGoalsMutation) AddedFields() []string {
-	var fields []string
-	if m.add_TotalGoals != nil {
-		fields = append(fields, psgoals.FieldTotalGoals)
-	}
-	if m.add_ConcededGoals != nil {
-		fields = append(fields, psgoals.FieldConcededGoals)
-	}
-	if m.add_AssistGoals != nil {
-		fields = append(fields, psgoals.FieldAssistGoals)
-	}
-	if m.add_SaveGoals != nil {
-		fields = append(fields, psgoals.FieldSaveGoals)
-	}
-	if m.add_ShotsTotal != nil {
-		fields = append(fields, psgoals.FieldShotsTotal)
-	}
-	if m.add_ShotsOn != nil {
-		fields = append(fields, psgoals.FieldShotsOn)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *PSGoalsMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case psgoals.FieldTotalGoals:
-		return m.AddedTotalGoals()
-	case psgoals.FieldConcededGoals:
-		return m.AddedConcededGoals()
-	case psgoals.FieldAssistGoals:
-		return m.AddedAssistGoals()
-	case psgoals.FieldSaveGoals:
-		return m.AddedSaveGoals()
-	case psgoals.FieldShotsTotal:
-		return m.AddedShotsTotal()
-	case psgoals.FieldShotsOn:
-		return m.AddedShotsOn()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *PSGoalsMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case psgoals.FieldTotalGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddTotalGoals(v)
-		return nil
-	case psgoals.FieldConcededGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddConcededGoals(v)
-		return nil
-	case psgoals.FieldAssistGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddAssistGoals(v)
-		return nil
-	case psgoals.FieldSaveGoals:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddSaveGoals(v)
-		return nil
-	case psgoals.FieldShotsTotal:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddShotsTotal(v)
-		return nil
-	case psgoals.FieldShotsOn:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddShotsOn(v)
-		return nil
-	}
-	return fmt.Errorf("unknown PSGoals numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *PSGoalsMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *PSGoalsMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *PSGoalsMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown PSGoals nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *PSGoalsMutation) ResetField(name string) error {
-	switch name {
-	case psgoals.FieldTotalGoals:
-		m.ResetTotalGoals()
-		return nil
-	case psgoals.FieldConcededGoals:
-		m.ResetConcededGoals()
-		return nil
-	case psgoals.FieldAssistGoals:
-		m.ResetAssistGoals()
-		return nil
-	case psgoals.FieldSaveGoals:
-		m.ResetSaveGoals()
-		return nil
-	case psgoals.FieldShotsTotal:
-		m.ResetShotsTotal()
-		return nil
-	case psgoals.FieldShotsOn:
-		m.ResetShotsOn()
-		return nil
-	}
-	return fmt.Errorf("unknown PSGoals field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *PSGoalsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.playerStats != nil {
-		edges = append(edges, psgoals.EdgePlayerStats)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *PSGoalsMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case psgoals.EdgePlayerStats:
-		if id := m.playerStats; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *PSGoalsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *PSGoalsMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *PSGoalsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedplayerStats {
-		edges = append(edges, psgoals.EdgePlayerStats)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *PSGoalsMutation) EdgeCleared(name string) bool {
-	switch name {
-	case psgoals.EdgePlayerStats:
-		return m.clearedplayerStats
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *PSGoalsMutation) ClearEdge(name string) error {
-	switch name {
-	case psgoals.EdgePlayerStats:
-		m.ClearPlayerStats()
-		return nil
-	}
-	return fmt.Errorf("unknown PSGoals unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *PSGoalsMutation) ResetEdge(name string) error {
-	switch name {
-	case psgoals.EdgePlayerStats:
-		m.ResetPlayerStats()
-		return nil
-	}
-	return fmt.Errorf("unknown PSGoals edge %s", name)
-}
-
-// PSOffenseMutation represents an operation that mutates the PSOffense nodes in the graph.
-type PSOffenseMutation struct {
-	config
-	op                  Op
-	typ                 string
-	id                  *int
-	_DribbleAttempts    *int
-	add_DribbleAttempts *int
-	_DribbleSuccess     *int
-	add_DribbleSuccess  *int
-	_DribblePast        *int
-	add_DribblePast     *int
-	_PassesTotal        *int
-	add_PassesTotal     *int
-	_PassesKey          *int
-	add_PassesKey       *int
-	_PassesAccuracy     *int
-	add_PassesAccuracy  *int
-	clearedFields       map[string]struct{}
-	playerStats         *int
-	clearedplayerStats  bool
-	done                bool
-	oldValue            func(context.Context) (*PSOffense, error)
-	predicates          []predicate.PSOffense
-}
-
-var _ ent.Mutation = (*PSOffenseMutation)(nil)
-
-// psoffenseOption allows management of the mutation configuration using functional options.
-type psoffenseOption func(*PSOffenseMutation)
-
-// newPSOffenseMutation creates new mutation for the PSOffense entity.
-func newPSOffenseMutation(c config, op Op, opts ...psoffenseOption) *PSOffenseMutation {
-	m := &PSOffenseMutation{
-		config:        c,
-		op:            op,
-		typ:           TypePSOffense,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withPSOffenseID sets the ID field of the mutation.
-func withPSOffenseID(id int) psoffenseOption {
-	return func(m *PSOffenseMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *PSOffense
-		)
-		m.oldValue = func(ctx context.Context) (*PSOffense, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().PSOffense.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withPSOffense sets the old PSOffense of the mutation.
-func withPSOffense(node *PSOffense) psoffenseOption {
-	return func(m *PSOffenseMutation) {
-		m.oldValue = func(context.Context) (*PSOffense, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m PSOffenseMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m PSOffenseMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *PSOffenseMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *PSOffenseMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().PSOffense.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetDribbleAttempts sets the "DribbleAttempts" field.
-func (m *PSOffenseMutation) SetDribbleAttempts(i int) {
-	m._DribbleAttempts = &i
-	m.add_DribbleAttempts = nil
-}
-
-// DribbleAttempts returns the value of the "DribbleAttempts" field in the mutation.
-func (m *PSOffenseMutation) DribbleAttempts() (r int, exists bool) {
-	v := m._DribbleAttempts
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDribbleAttempts returns the old "DribbleAttempts" field's value of the PSOffense entity.
-// If the PSOffense object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSOffenseMutation) OldDribbleAttempts(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDribbleAttempts is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDribbleAttempts requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDribbleAttempts: %w", err)
-	}
-	return oldValue.DribbleAttempts, nil
-}
-
-// AddDribbleAttempts adds i to the "DribbleAttempts" field.
-func (m *PSOffenseMutation) AddDribbleAttempts(i int) {
-	if m.add_DribbleAttempts != nil {
-		*m.add_DribbleAttempts += i
-	} else {
-		m.add_DribbleAttempts = &i
-	}
-}
-
-// AddedDribbleAttempts returns the value that was added to the "DribbleAttempts" field in this mutation.
-func (m *PSOffenseMutation) AddedDribbleAttempts() (r int, exists bool) {
-	v := m.add_DribbleAttempts
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetDribbleAttempts resets all changes to the "DribbleAttempts" field.
-func (m *PSOffenseMutation) ResetDribbleAttempts() {
-	m._DribbleAttempts = nil
-	m.add_DribbleAttempts = nil
-}
-
-// SetDribbleSuccess sets the "DribbleSuccess" field.
-func (m *PSOffenseMutation) SetDribbleSuccess(i int) {
-	m._DribbleSuccess = &i
-	m.add_DribbleSuccess = nil
-}
-
-// DribbleSuccess returns the value of the "DribbleSuccess" field in the mutation.
-func (m *PSOffenseMutation) DribbleSuccess() (r int, exists bool) {
-	v := m._DribbleSuccess
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDribbleSuccess returns the old "DribbleSuccess" field's value of the PSOffense entity.
-// If the PSOffense object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSOffenseMutation) OldDribbleSuccess(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDribbleSuccess is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDribbleSuccess requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDribbleSuccess: %w", err)
-	}
-	return oldValue.DribbleSuccess, nil
-}
-
-// AddDribbleSuccess adds i to the "DribbleSuccess" field.
-func (m *PSOffenseMutation) AddDribbleSuccess(i int) {
-	if m.add_DribbleSuccess != nil {
-		*m.add_DribbleSuccess += i
-	} else {
-		m.add_DribbleSuccess = &i
-	}
-}
-
-// AddedDribbleSuccess returns the value that was added to the "DribbleSuccess" field in this mutation.
-func (m *PSOffenseMutation) AddedDribbleSuccess() (r int, exists bool) {
-	v := m.add_DribbleSuccess
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetDribbleSuccess resets all changes to the "DribbleSuccess" field.
-func (m *PSOffenseMutation) ResetDribbleSuccess() {
-	m._DribbleSuccess = nil
-	m.add_DribbleSuccess = nil
-}
-
-// SetDribblePast sets the "DribblePast" field.
-func (m *PSOffenseMutation) SetDribblePast(i int) {
-	m._DribblePast = &i
-	m.add_DribblePast = nil
-}
-
-// DribblePast returns the value of the "DribblePast" field in the mutation.
-func (m *PSOffenseMutation) DribblePast() (r int, exists bool) {
-	v := m._DribblePast
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldDribblePast returns the old "DribblePast" field's value of the PSOffense entity.
-// If the PSOffense object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSOffenseMutation) OldDribblePast(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldDribblePast is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldDribblePast requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldDribblePast: %w", err)
-	}
-	return oldValue.DribblePast, nil
-}
-
-// AddDribblePast adds i to the "DribblePast" field.
-func (m *PSOffenseMutation) AddDribblePast(i int) {
-	if m.add_DribblePast != nil {
-		*m.add_DribblePast += i
-	} else {
-		m.add_DribblePast = &i
-	}
-}
-
-// AddedDribblePast returns the value that was added to the "DribblePast" field in this mutation.
-func (m *PSOffenseMutation) AddedDribblePast() (r int, exists bool) {
-	v := m.add_DribblePast
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetDribblePast resets all changes to the "DribblePast" field.
-func (m *PSOffenseMutation) ResetDribblePast() {
-	m._DribblePast = nil
-	m.add_DribblePast = nil
-}
-
-// SetPassesTotal sets the "PassesTotal" field.
-func (m *PSOffenseMutation) SetPassesTotal(i int) {
-	m._PassesTotal = &i
-	m.add_PassesTotal = nil
-}
-
-// PassesTotal returns the value of the "PassesTotal" field in the mutation.
-func (m *PSOffenseMutation) PassesTotal() (r int, exists bool) {
-	v := m._PassesTotal
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPassesTotal returns the old "PassesTotal" field's value of the PSOffense entity.
-// If the PSOffense object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSOffenseMutation) OldPassesTotal(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPassesTotal is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPassesTotal requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPassesTotal: %w", err)
-	}
-	return oldValue.PassesTotal, nil
-}
-
-// AddPassesTotal adds i to the "PassesTotal" field.
-func (m *PSOffenseMutation) AddPassesTotal(i int) {
-	if m.add_PassesTotal != nil {
-		*m.add_PassesTotal += i
-	} else {
-		m.add_PassesTotal = &i
-	}
-}
-
-// AddedPassesTotal returns the value that was added to the "PassesTotal" field in this mutation.
-func (m *PSOffenseMutation) AddedPassesTotal() (r int, exists bool) {
-	v := m.add_PassesTotal
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPassesTotal resets all changes to the "PassesTotal" field.
-func (m *PSOffenseMutation) ResetPassesTotal() {
-	m._PassesTotal = nil
-	m.add_PassesTotal = nil
-}
-
-// SetPassesKey sets the "PassesKey" field.
-func (m *PSOffenseMutation) SetPassesKey(i int) {
-	m._PassesKey = &i
-	m.add_PassesKey = nil
-}
-
-// PassesKey returns the value of the "PassesKey" field in the mutation.
-func (m *PSOffenseMutation) PassesKey() (r int, exists bool) {
-	v := m._PassesKey
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPassesKey returns the old "PassesKey" field's value of the PSOffense entity.
-// If the PSOffense object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSOffenseMutation) OldPassesKey(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPassesKey is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPassesKey requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPassesKey: %w", err)
-	}
-	return oldValue.PassesKey, nil
-}
-
-// AddPassesKey adds i to the "PassesKey" field.
-func (m *PSOffenseMutation) AddPassesKey(i int) {
-	if m.add_PassesKey != nil {
-		*m.add_PassesKey += i
-	} else {
-		m.add_PassesKey = &i
-	}
-}
-
-// AddedPassesKey returns the value that was added to the "PassesKey" field in this mutation.
-func (m *PSOffenseMutation) AddedPassesKey() (r int, exists bool) {
-	v := m.add_PassesKey
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPassesKey resets all changes to the "PassesKey" field.
-func (m *PSOffenseMutation) ResetPassesKey() {
-	m._PassesKey = nil
-	m.add_PassesKey = nil
-}
-
-// SetPassesAccuracy sets the "PassesAccuracy" field.
-func (m *PSOffenseMutation) SetPassesAccuracy(i int) {
-	m._PassesAccuracy = &i
-	m.add_PassesAccuracy = nil
-}
-
-// PassesAccuracy returns the value of the "PassesAccuracy" field in the mutation.
-func (m *PSOffenseMutation) PassesAccuracy() (r int, exists bool) {
-	v := m._PassesAccuracy
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPassesAccuracy returns the old "PassesAccuracy" field's value of the PSOffense entity.
-// If the PSOffense object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSOffenseMutation) OldPassesAccuracy(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPassesAccuracy is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPassesAccuracy requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPassesAccuracy: %w", err)
-	}
-	return oldValue.PassesAccuracy, nil
-}
-
-// AddPassesAccuracy adds i to the "PassesAccuracy" field.
-func (m *PSOffenseMutation) AddPassesAccuracy(i int) {
-	if m.add_PassesAccuracy != nil {
-		*m.add_PassesAccuracy += i
-	} else {
-		m.add_PassesAccuracy = &i
-	}
-}
-
-// AddedPassesAccuracy returns the value that was added to the "PassesAccuracy" field in this mutation.
-func (m *PSOffenseMutation) AddedPassesAccuracy() (r int, exists bool) {
-	v := m.add_PassesAccuracy
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPassesAccuracy resets all changes to the "PassesAccuracy" field.
-func (m *PSOffenseMutation) ResetPassesAccuracy() {
-	m._PassesAccuracy = nil
-	m.add_PassesAccuracy = nil
-}
-
-// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
-func (m *PSOffenseMutation) SetPlayerStatsID(id int) {
-	m.playerStats = &id
-}
-
-// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
-func (m *PSOffenseMutation) ClearPlayerStats() {
-	m.clearedplayerStats = true
-}
-
-// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
-func (m *PSOffenseMutation) PlayerStatsCleared() bool {
-	return m.clearedplayerStats
-}
-
-// PlayerStatsID returns the "playerStats" edge ID in the mutation.
-func (m *PSOffenseMutation) PlayerStatsID() (id int, exists bool) {
-	if m.playerStats != nil {
-		return *m.playerStats, true
-	}
-	return
-}
-
-// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// PlayerStatsID instead. It exists only for internal usage by the builders.
-func (m *PSOffenseMutation) PlayerStatsIDs() (ids []int) {
-	if id := m.playerStats; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetPlayerStats resets all changes to the "playerStats" edge.
-func (m *PSOffenseMutation) ResetPlayerStats() {
-	m.playerStats = nil
-	m.clearedplayerStats = false
-}
-
-// Where appends a list predicates to the PSOffenseMutation builder.
-func (m *PSOffenseMutation) Where(ps ...predicate.PSOffense) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// WhereP appends storage-level predicates to the PSOffenseMutation builder. Using this method,
-// users can use type-assertion to append predicates that do not depend on any generated package.
-func (m *PSOffenseMutation) WhereP(ps ...func(*sql.Selector)) {
-	p := make([]predicate.PSOffense, len(ps))
-	for i := range ps {
-		p[i] = ps[i]
-	}
-	m.Where(p...)
-}
-
-// Op returns the operation name.
-func (m *PSOffenseMutation) Op() Op {
-	return m.op
-}
-
-// SetOp allows setting the mutation operation.
-func (m *PSOffenseMutation) SetOp(op Op) {
-	m.op = op
-}
-
-// Type returns the node type of this mutation (PSOffense).
-func (m *PSOffenseMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *PSOffenseMutation) Fields() []string {
-	fields := make([]string, 0, 6)
-	if m._DribbleAttempts != nil {
-		fields = append(fields, psoffense.FieldDribbleAttempts)
-	}
-	if m._DribbleSuccess != nil {
-		fields = append(fields, psoffense.FieldDribbleSuccess)
-	}
-	if m._DribblePast != nil {
-		fields = append(fields, psoffense.FieldDribblePast)
-	}
-	if m._PassesTotal != nil {
-		fields = append(fields, psoffense.FieldPassesTotal)
-	}
-	if m._PassesKey != nil {
-		fields = append(fields, psoffense.FieldPassesKey)
-	}
-	if m._PassesAccuracy != nil {
-		fields = append(fields, psoffense.FieldPassesAccuracy)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *PSOffenseMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case psoffense.FieldDribbleAttempts:
-		return m.DribbleAttempts()
-	case psoffense.FieldDribbleSuccess:
-		return m.DribbleSuccess()
-	case psoffense.FieldDribblePast:
-		return m.DribblePast()
-	case psoffense.FieldPassesTotal:
-		return m.PassesTotal()
-	case psoffense.FieldPassesKey:
-		return m.PassesKey()
-	case psoffense.FieldPassesAccuracy:
-		return m.PassesAccuracy()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *PSOffenseMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case psoffense.FieldDribbleAttempts:
-		return m.OldDribbleAttempts(ctx)
-	case psoffense.FieldDribbleSuccess:
-		return m.OldDribbleSuccess(ctx)
-	case psoffense.FieldDribblePast:
-		return m.OldDribblePast(ctx)
-	case psoffense.FieldPassesTotal:
-		return m.OldPassesTotal(ctx)
-	case psoffense.FieldPassesKey:
-		return m.OldPassesKey(ctx)
-	case psoffense.FieldPassesAccuracy:
-		return m.OldPassesAccuracy(ctx)
-	}
-	return nil, fmt.Errorf("unknown PSOffense field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *PSOffenseMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case psoffense.FieldDribbleAttempts:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDribbleAttempts(v)
-		return nil
-	case psoffense.FieldDribbleSuccess:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDribbleSuccess(v)
-		return nil
-	case psoffense.FieldDribblePast:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetDribblePast(v)
-		return nil
-	case psoffense.FieldPassesTotal:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPassesTotal(v)
-		return nil
-	case psoffense.FieldPassesKey:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPassesKey(v)
-		return nil
-	case psoffense.FieldPassesAccuracy:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPassesAccuracy(v)
-		return nil
-	}
-	return fmt.Errorf("unknown PSOffense field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *PSOffenseMutation) AddedFields() []string {
-	var fields []string
-	if m.add_DribbleAttempts != nil {
-		fields = append(fields, psoffense.FieldDribbleAttempts)
-	}
-	if m.add_DribbleSuccess != nil {
-		fields = append(fields, psoffense.FieldDribbleSuccess)
-	}
-	if m.add_DribblePast != nil {
-		fields = append(fields, psoffense.FieldDribblePast)
-	}
-	if m.add_PassesTotal != nil {
-		fields = append(fields, psoffense.FieldPassesTotal)
-	}
-	if m.add_PassesKey != nil {
-		fields = append(fields, psoffense.FieldPassesKey)
-	}
-	if m.add_PassesAccuracy != nil {
-		fields = append(fields, psoffense.FieldPassesAccuracy)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *PSOffenseMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case psoffense.FieldDribbleAttempts:
-		return m.AddedDribbleAttempts()
-	case psoffense.FieldDribbleSuccess:
-		return m.AddedDribbleSuccess()
-	case psoffense.FieldDribblePast:
-		return m.AddedDribblePast()
-	case psoffense.FieldPassesTotal:
-		return m.AddedPassesTotal()
-	case psoffense.FieldPassesKey:
-		return m.AddedPassesKey()
-	case psoffense.FieldPassesAccuracy:
-		return m.AddedPassesAccuracy()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *PSOffenseMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case psoffense.FieldDribbleAttempts:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddDribbleAttempts(v)
-		return nil
-	case psoffense.FieldDribbleSuccess:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddDribbleSuccess(v)
-		return nil
-	case psoffense.FieldDribblePast:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddDribblePast(v)
-		return nil
-	case psoffense.FieldPassesTotal:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPassesTotal(v)
-		return nil
-	case psoffense.FieldPassesKey:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPassesKey(v)
-		return nil
-	case psoffense.FieldPassesAccuracy:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPassesAccuracy(v)
-		return nil
-	}
-	return fmt.Errorf("unknown PSOffense numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *PSOffenseMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *PSOffenseMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *PSOffenseMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown PSOffense nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *PSOffenseMutation) ResetField(name string) error {
-	switch name {
-	case psoffense.FieldDribbleAttempts:
-		m.ResetDribbleAttempts()
-		return nil
-	case psoffense.FieldDribbleSuccess:
-		m.ResetDribbleSuccess()
-		return nil
-	case psoffense.FieldDribblePast:
-		m.ResetDribblePast()
-		return nil
-	case psoffense.FieldPassesTotal:
-		m.ResetPassesTotal()
-		return nil
-	case psoffense.FieldPassesKey:
-		m.ResetPassesKey()
-		return nil
-	case psoffense.FieldPassesAccuracy:
-		m.ResetPassesAccuracy()
-		return nil
-	}
-	return fmt.Errorf("unknown PSOffense field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *PSOffenseMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.playerStats != nil {
-		edges = append(edges, psoffense.EdgePlayerStats)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *PSOffenseMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case psoffense.EdgePlayerStats:
-		if id := m.playerStats; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *PSOffenseMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *PSOffenseMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *PSOffenseMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedplayerStats {
-		edges = append(edges, psoffense.EdgePlayerStats)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *PSOffenseMutation) EdgeCleared(name string) bool {
-	switch name {
-	case psoffense.EdgePlayerStats:
-		return m.clearedplayerStats
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *PSOffenseMutation) ClearEdge(name string) error {
-	switch name {
-	case psoffense.EdgePlayerStats:
-		m.ClearPlayerStats()
-		return nil
-	}
-	return fmt.Errorf("unknown PSOffense unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *PSOffenseMutation) ResetEdge(name string) error {
-	switch name {
-	case psoffense.EdgePlayerStats:
-		m.ResetPlayerStats()
-		return nil
-	}
-	return fmt.Errorf("unknown PSOffense edge %s", name)
-}
-
-// PSPenaltyMutation represents an operation that mutates the PSPenalty nodes in the graph.
-type PSPenaltyMutation struct {
-	config
-	op                   Op
-	typ                  string
-	id                   *int
-	_FoulsDrawn          *int
-	add_FoulsDrawn       *int
-	_FoulsCommitted      *int
-	add_FoulsCommitted   *int
-	_CardsYellow         *int
-	add_CardsYellow      *int
-	_CardYellowRed       *int
-	add_CardYellowRed    *int
-	_CardsRed            *int
-	add_CardsRed         *int
-	_PenaltyWon          *int
-	add_PenaltyWon       *int
-	_PenaltyCommitted    *int
-	add_PenaltyCommitted *int
-	_PenaltyScored       *int
-	add_PenaltyScored    *int
-	_PenaltyMissed       *int
-	add_PenaltyMissed    *int
-	_PenaltySaved        *int
-	add_PenaltySaved     *int
-	clearedFields        map[string]struct{}
-	playerStats          *int
-	clearedplayerStats   bool
-	done                 bool
-	oldValue             func(context.Context) (*PSPenalty, error)
-	predicates           []predicate.PSPenalty
+	oldValue           func(context.Context) (*PSPenalty, error)
+	predicates         []predicate.PSPenalty
 }
 
 var _ ent.Mutation = (*PSPenaltyMutation)(nil)
@@ -11168,564 +10438,277 @@ func (m *PSPenaltyMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
-// SetFoulsDrawn sets the "FoulsDrawn" field.
-func (m *PSPenaltyMutation) SetFoulsDrawn(i int) {
-	m._FoulsDrawn = &i
-	m.add_FoulsDrawn = nil
+// SetWon sets the "Won" field.
+func (m *PSPenaltyMutation) SetWon(i int) {
+	m._Won = &i
+	m.add_Won = nil
 }
 
-// FoulsDrawn returns the value of the "FoulsDrawn" field in the mutation.
-func (m *PSPenaltyMutation) FoulsDrawn() (r int, exists bool) {
-	v := m._FoulsDrawn
+// Won returns the value of the "Won" field in the mutation.
+func (m *PSPenaltyMutation) Won() (r int, exists bool) {
+	v := m._Won
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFoulsDrawn returns the old "FoulsDrawn" field's value of the PSPenalty entity.
+// OldWon returns the old "Won" field's value of the PSPenalty entity.
 // If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldFoulsDrawn(ctx context.Context) (v int, err error) {
+func (m *PSPenaltyMutation) OldWon(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFoulsDrawn is only allowed on UpdateOne operations")
+		return v, errors.New("OldWon is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFoulsDrawn requires an ID field in the mutation")
+		return v, errors.New("OldWon requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFoulsDrawn: %w", err)
+		return v, fmt.Errorf("querying old value for OldWon: %w", err)
 	}
-	return oldValue.FoulsDrawn, nil
+	return oldValue.Won, nil
 }
 
-// AddFoulsDrawn adds i to the "FoulsDrawn" field.
-func (m *PSPenaltyMutation) AddFoulsDrawn(i int) {
-	if m.add_FoulsDrawn != nil {
-		*m.add_FoulsDrawn += i
+// AddWon adds i to the "Won" field.
+func (m *PSPenaltyMutation) AddWon(i int) {
+	if m.add_Won != nil {
+		*m.add_Won += i
 	} else {
-		m.add_FoulsDrawn = &i
+		m.add_Won = &i
 	}
 }
 
-// AddedFoulsDrawn returns the value that was added to the "FoulsDrawn" field in this mutation.
-func (m *PSPenaltyMutation) AddedFoulsDrawn() (r int, exists bool) {
-	v := m.add_FoulsDrawn
+// AddedWon returns the value that was added to the "Won" field in this mutation.
+func (m *PSPenaltyMutation) AddedWon() (r int, exists bool) {
+	v := m.add_Won
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetFoulsDrawn resets all changes to the "FoulsDrawn" field.
-func (m *PSPenaltyMutation) ResetFoulsDrawn() {
-	m._FoulsDrawn = nil
-	m.add_FoulsDrawn = nil
+// ResetWon resets all changes to the "Won" field.
+func (m *PSPenaltyMutation) ResetWon() {
+	m._Won = nil
+	m.add_Won = nil
 }
 
-// SetFoulsCommitted sets the "FoulsCommitted" field.
-func (m *PSPenaltyMutation) SetFoulsCommitted(i int) {
-	m._FoulsCommitted = &i
-	m.add_FoulsCommitted = nil
+// SetScored sets the "Scored" field.
+func (m *PSPenaltyMutation) SetScored(i int) {
+	m._Scored = &i
+	m.add_Scored = nil
 }
 
-// FoulsCommitted returns the value of the "FoulsCommitted" field in the mutation.
-func (m *PSPenaltyMutation) FoulsCommitted() (r int, exists bool) {
-	v := m._FoulsCommitted
+// Scored returns the value of the "Scored" field in the mutation.
+func (m *PSPenaltyMutation) Scored() (r int, exists bool) {
+	v := m._Scored
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldFoulsCommitted returns the old "FoulsCommitted" field's value of the PSPenalty entity.
+// OldScored returns the old "Scored" field's value of the PSPenalty entity.
 // If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldFoulsCommitted(ctx context.Context) (v int, err error) {
+func (m *PSPenaltyMutation) OldScored(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldFoulsCommitted is only allowed on UpdateOne operations")
+		return v, errors.New("OldScored is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldFoulsCommitted requires an ID field in the mutation")
+		return v, errors.New("OldScored requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFoulsCommitted: %w", err)
+		return v, fmt.Errorf("querying old value for OldScored: %w", err)
 	}
-	return oldValue.FoulsCommitted, nil
+	return oldValue.Scored, nil
 }
 
-// AddFoulsCommitted adds i to the "FoulsCommitted" field.
-func (m *PSPenaltyMutation) AddFoulsCommitted(i int) {
-	if m.add_FoulsCommitted != nil {
-		*m.add_FoulsCommitted += i
+// AddScored adds i to the "Scored" field.
+func (m *PSPenaltyMutation) AddScored(i int) {
+	if m.add_Scored != nil {
+		*m.add_Scored += i
 	} else {
-		m.add_FoulsCommitted = &i
+		m.add_Scored = &i
 	}
 }
 
-// AddedFoulsCommitted returns the value that was added to the "FoulsCommitted" field in this mutation.
-func (m *PSPenaltyMutation) AddedFoulsCommitted() (r int, exists bool) {
-	v := m.add_FoulsCommitted
+// AddedScored returns the value that was added to the "Scored" field in this mutation.
+func (m *PSPenaltyMutation) AddedScored() (r int, exists bool) {
+	v := m.add_Scored
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetFoulsCommitted resets all changes to the "FoulsCommitted" field.
-func (m *PSPenaltyMutation) ResetFoulsCommitted() {
-	m._FoulsCommitted = nil
-	m.add_FoulsCommitted = nil
+// ResetScored resets all changes to the "Scored" field.
+func (m *PSPenaltyMutation) ResetScored() {
+	m._Scored = nil
+	m.add_Scored = nil
 }
 
-// SetCardsYellow sets the "CardsYellow" field.
-func (m *PSPenaltyMutation) SetCardsYellow(i int) {
-	m._CardsYellow = &i
-	m.add_CardsYellow = nil
+// SetMissed sets the "Missed" field.
+func (m *PSPenaltyMutation) SetMissed(i int) {
+	m._Missed = &i
+	m.add_Missed = nil
 }
 
-// CardsYellow returns the value of the "CardsYellow" field in the mutation.
-func (m *PSPenaltyMutation) CardsYellow() (r int, exists bool) {
-	v := m._CardsYellow
+// Missed returns the value of the "Missed" field in the mutation.
+func (m *PSPenaltyMutation) Missed() (r int, exists bool) {
+	v := m._Missed
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCardsYellow returns the old "CardsYellow" field's value of the PSPenalty entity.
+// OldMissed returns the old "Missed" field's value of the PSPenalty entity.
 // If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldCardsYellow(ctx context.Context) (v int, err error) {
+func (m *PSPenaltyMutation) OldMissed(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCardsYellow is only allowed on UpdateOne operations")
+		return v, errors.New("OldMissed is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCardsYellow requires an ID field in the mutation")
+		return v, errors.New("OldMissed requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCardsYellow: %w", err)
+		return v, fmt.Errorf("querying old value for OldMissed: %w", err)
 	}
-	return oldValue.CardsYellow, nil
+	return oldValue.Missed, nil
 }
 
-// AddCardsYellow adds i to the "CardsYellow" field.
-func (m *PSPenaltyMutation) AddCardsYellow(i int) {
-	if m.add_CardsYellow != nil {
-		*m.add_CardsYellow += i
+// AddMissed adds i to the "Missed" field.
+func (m *PSPenaltyMutation) AddMissed(i int) {
+	if m.add_Missed != nil {
+		*m.add_Missed += i
 	} else {
-		m.add_CardsYellow = &i
+		m.add_Missed = &i
 	}
 }
 
-// AddedCardsYellow returns the value that was added to the "CardsYellow" field in this mutation.
-func (m *PSPenaltyMutation) AddedCardsYellow() (r int, exists bool) {
-	v := m.add_CardsYellow
+// AddedMissed returns the value that was added to the "Missed" field in this mutation.
+func (m *PSPenaltyMutation) AddedMissed() (r int, exists bool) {
+	v := m.add_Missed
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetCardsYellow resets all changes to the "CardsYellow" field.
-func (m *PSPenaltyMutation) ResetCardsYellow() {
-	m._CardsYellow = nil
-	m.add_CardsYellow = nil
+// ResetMissed resets all changes to the "Missed" field.
+func (m *PSPenaltyMutation) ResetMissed() {
+	m._Missed = nil
+	m.add_Missed = nil
 }
 
-// SetCardYellowRed sets the "CardYellowRed" field.
-func (m *PSPenaltyMutation) SetCardYellowRed(i int) {
-	m._CardYellowRed = &i
-	m.add_CardYellowRed = nil
+// SetSaved sets the "Saved" field.
+func (m *PSPenaltyMutation) SetSaved(i int) {
+	m._Saved = &i
+	m.add_Saved = nil
 }
 
-// CardYellowRed returns the value of the "CardYellowRed" field in the mutation.
-func (m *PSPenaltyMutation) CardYellowRed() (r int, exists bool) {
-	v := m._CardYellowRed
+// Saved returns the value of the "Saved" field in the mutation.
+func (m *PSPenaltyMutation) Saved() (r int, exists bool) {
+	v := m._Saved
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCardYellowRed returns the old "CardYellowRed" field's value of the PSPenalty entity.
+// OldSaved returns the old "Saved" field's value of the PSPenalty entity.
 // If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldCardYellowRed(ctx context.Context) (v int, err error) {
+func (m *PSPenaltyMutation) OldSaved(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCardYellowRed is only allowed on UpdateOne operations")
+		return v, errors.New("OldSaved is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCardYellowRed requires an ID field in the mutation")
+		return v, errors.New("OldSaved requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCardYellowRed: %w", err)
+		return v, fmt.Errorf("querying old value for OldSaved: %w", err)
 	}
-	return oldValue.CardYellowRed, nil
+	return oldValue.Saved, nil
 }
 
-// AddCardYellowRed adds i to the "CardYellowRed" field.
-func (m *PSPenaltyMutation) AddCardYellowRed(i int) {
-	if m.add_CardYellowRed != nil {
-		*m.add_CardYellowRed += i
+// AddSaved adds i to the "Saved" field.
+func (m *PSPenaltyMutation) AddSaved(i int) {
+	if m.add_Saved != nil {
+		*m.add_Saved += i
 	} else {
-		m.add_CardYellowRed = &i
+		m.add_Saved = &i
 	}
 }
 
-// AddedCardYellowRed returns the value that was added to the "CardYellowRed" field in this mutation.
-func (m *PSPenaltyMutation) AddedCardYellowRed() (r int, exists bool) {
-	v := m.add_CardYellowRed
+// AddedSaved returns the value that was added to the "Saved" field in this mutation.
+func (m *PSPenaltyMutation) AddedSaved() (r int, exists bool) {
+	v := m.add_Saved
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// ResetCardYellowRed resets all changes to the "CardYellowRed" field.
-func (m *PSPenaltyMutation) ResetCardYellowRed() {
-	m._CardYellowRed = nil
-	m.add_CardYellowRed = nil
+// ResetSaved resets all changes to the "Saved" field.
+func (m *PSPenaltyMutation) ResetSaved() {
+	m._Saved = nil
+	m.add_Saved = nil
 }
 
-// SetCardsRed sets the "CardsRed" field.
-func (m *PSPenaltyMutation) SetCardsRed(i int) {
-	m._CardsRed = &i
-	m.add_CardsRed = nil
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PSPenaltyMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
 }
 
-// CardsRed returns the value of the "CardsRed" field in the mutation.
-func (m *PSPenaltyMutation) CardsRed() (r int, exists bool) {
-	v := m._CardsRed
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PSPenaltyMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
 	if v == nil {
 		return
 	}
 	return *v, true
 }
 
-// OldCardsRed returns the old "CardsRed" field's value of the PSPenalty entity.
+// OldLastUpdated returns the old "lastUpdated" field's value of the PSPenalty entity.
 // If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldCardsRed(ctx context.Context) (v int, err error) {
+func (m *PSPenaltyMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldCardsRed is only allowed on UpdateOne operations")
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
 	}
 	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldCardsRed requires an ID field in the mutation")
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
 	}
 	oldValue, err := m.oldValue(ctx)
 	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCardsRed: %w", err)
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
 	}
-	return oldValue.CardsRed, nil
+	return oldValue.LastUpdated, nil
 }
 
-// AddCardsRed adds i to the "CardsRed" field.
-func (m *PSPenaltyMutation) AddCardsRed(i int) {
-	if m.add_CardsRed != nil {
-		*m.add_CardsRed += i
-	} else {
-		m.add_CardsRed = &i
-	}
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PSPenaltyMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[pspenalty.FieldLastUpdated] = struct{}{}
 }
 
-// AddedCardsRed returns the value that was added to the "CardsRed" field in this mutation.
-func (m *PSPenaltyMutation) AddedCardsRed() (r int, exists bool) {
-	v := m.add_CardsRed
-	if v == nil {
-		return
-	}
-	return *v, true
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PSPenaltyMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[pspenalty.FieldLastUpdated]
+	return ok
 }
 
-// ResetCardsRed resets all changes to the "CardsRed" field.
-func (m *PSPenaltyMutation) ResetCardsRed() {
-	m._CardsRed = nil
-	m.add_CardsRed = nil
-}
-
-// SetPenaltyWon sets the "PenaltyWon" field.
-func (m *PSPenaltyMutation) SetPenaltyWon(i int) {
-	m._PenaltyWon = &i
-	m.add_PenaltyWon = nil
-}
-
-// PenaltyWon returns the value of the "PenaltyWon" field in the mutation.
-func (m *PSPenaltyMutation) PenaltyWon() (r int, exists bool) {
-	v := m._PenaltyWon
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPenaltyWon returns the old "PenaltyWon" field's value of the PSPenalty entity.
-// If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldPenaltyWon(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPenaltyWon is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPenaltyWon requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPenaltyWon: %w", err)
-	}
-	return oldValue.PenaltyWon, nil
-}
-
-// AddPenaltyWon adds i to the "PenaltyWon" field.
-func (m *PSPenaltyMutation) AddPenaltyWon(i int) {
-	if m.add_PenaltyWon != nil {
-		*m.add_PenaltyWon += i
-	} else {
-		m.add_PenaltyWon = &i
-	}
-}
-
-// AddedPenaltyWon returns the value that was added to the "PenaltyWon" field in this mutation.
-func (m *PSPenaltyMutation) AddedPenaltyWon() (r int, exists bool) {
-	v := m.add_PenaltyWon
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPenaltyWon resets all changes to the "PenaltyWon" field.
-func (m *PSPenaltyMutation) ResetPenaltyWon() {
-	m._PenaltyWon = nil
-	m.add_PenaltyWon = nil
-}
-
-// SetPenaltyCommitted sets the "PenaltyCommitted" field.
-func (m *PSPenaltyMutation) SetPenaltyCommitted(i int) {
-	m._PenaltyCommitted = &i
-	m.add_PenaltyCommitted = nil
-}
-
-// PenaltyCommitted returns the value of the "PenaltyCommitted" field in the mutation.
-func (m *PSPenaltyMutation) PenaltyCommitted() (r int, exists bool) {
-	v := m._PenaltyCommitted
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPenaltyCommitted returns the old "PenaltyCommitted" field's value of the PSPenalty entity.
-// If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldPenaltyCommitted(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPenaltyCommitted is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPenaltyCommitted requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPenaltyCommitted: %w", err)
-	}
-	return oldValue.PenaltyCommitted, nil
-}
-
-// AddPenaltyCommitted adds i to the "PenaltyCommitted" field.
-func (m *PSPenaltyMutation) AddPenaltyCommitted(i int) {
-	if m.add_PenaltyCommitted != nil {
-		*m.add_PenaltyCommitted += i
-	} else {
-		m.add_PenaltyCommitted = &i
-	}
-}
-
-// AddedPenaltyCommitted returns the value that was added to the "PenaltyCommitted" field in this mutation.
-func (m *PSPenaltyMutation) AddedPenaltyCommitted() (r int, exists bool) {
-	v := m.add_PenaltyCommitted
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPenaltyCommitted resets all changes to the "PenaltyCommitted" field.
-func (m *PSPenaltyMutation) ResetPenaltyCommitted() {
-	m._PenaltyCommitted = nil
-	m.add_PenaltyCommitted = nil
-}
-
-// SetPenaltyScored sets the "PenaltyScored" field.
-func (m *PSPenaltyMutation) SetPenaltyScored(i int) {
-	m._PenaltyScored = &i
-	m.add_PenaltyScored = nil
-}
-
-// PenaltyScored returns the value of the "PenaltyScored" field in the mutation.
-func (m *PSPenaltyMutation) PenaltyScored() (r int, exists bool) {
-	v := m._PenaltyScored
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPenaltyScored returns the old "PenaltyScored" field's value of the PSPenalty entity.
-// If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldPenaltyScored(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPenaltyScored is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPenaltyScored requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPenaltyScored: %w", err)
-	}
-	return oldValue.PenaltyScored, nil
-}
-
-// AddPenaltyScored adds i to the "PenaltyScored" field.
-func (m *PSPenaltyMutation) AddPenaltyScored(i int) {
-	if m.add_PenaltyScored != nil {
-		*m.add_PenaltyScored += i
-	} else {
-		m.add_PenaltyScored = &i
-	}
-}
-
-// AddedPenaltyScored returns the value that was added to the "PenaltyScored" field in this mutation.
-func (m *PSPenaltyMutation) AddedPenaltyScored() (r int, exists bool) {
-	v := m.add_PenaltyScored
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPenaltyScored resets all changes to the "PenaltyScored" field.
-func (m *PSPenaltyMutation) ResetPenaltyScored() {
-	m._PenaltyScored = nil
-	m.add_PenaltyScored = nil
-}
-
-// SetPenaltyMissed sets the "PenaltyMissed" field.
-func (m *PSPenaltyMutation) SetPenaltyMissed(i int) {
-	m._PenaltyMissed = &i
-	m.add_PenaltyMissed = nil
-}
-
-// PenaltyMissed returns the value of the "PenaltyMissed" field in the mutation.
-func (m *PSPenaltyMutation) PenaltyMissed() (r int, exists bool) {
-	v := m._PenaltyMissed
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPenaltyMissed returns the old "PenaltyMissed" field's value of the PSPenalty entity.
-// If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldPenaltyMissed(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPenaltyMissed is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPenaltyMissed requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPenaltyMissed: %w", err)
-	}
-	return oldValue.PenaltyMissed, nil
-}
-
-// AddPenaltyMissed adds i to the "PenaltyMissed" field.
-func (m *PSPenaltyMutation) AddPenaltyMissed(i int) {
-	if m.add_PenaltyMissed != nil {
-		*m.add_PenaltyMissed += i
-	} else {
-		m.add_PenaltyMissed = &i
-	}
-}
-
-// AddedPenaltyMissed returns the value that was added to the "PenaltyMissed" field in this mutation.
-func (m *PSPenaltyMutation) AddedPenaltyMissed() (r int, exists bool) {
-	v := m.add_PenaltyMissed
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPenaltyMissed resets all changes to the "PenaltyMissed" field.
-func (m *PSPenaltyMutation) ResetPenaltyMissed() {
-	m._PenaltyMissed = nil
-	m.add_PenaltyMissed = nil
-}
-
-// SetPenaltySaved sets the "PenaltySaved" field.
-func (m *PSPenaltyMutation) SetPenaltySaved(i int) {
-	m._PenaltySaved = &i
-	m.add_PenaltySaved = nil
-}
-
-// PenaltySaved returns the value of the "PenaltySaved" field in the mutation.
-func (m *PSPenaltyMutation) PenaltySaved() (r int, exists bool) {
-	v := m._PenaltySaved
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldPenaltySaved returns the old "PenaltySaved" field's value of the PSPenalty entity.
-// If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PSPenaltyMutation) OldPenaltySaved(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldPenaltySaved is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldPenaltySaved requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldPenaltySaved: %w", err)
-	}
-	return oldValue.PenaltySaved, nil
-}
-
-// AddPenaltySaved adds i to the "PenaltySaved" field.
-func (m *PSPenaltyMutation) AddPenaltySaved(i int) {
-	if m.add_PenaltySaved != nil {
-		*m.add_PenaltySaved += i
-	} else {
-		m.add_PenaltySaved = &i
-	}
-}
-
-// AddedPenaltySaved returns the value that was added to the "PenaltySaved" field in this mutation.
-func (m *PSPenaltyMutation) AddedPenaltySaved() (r int, exists bool) {
-	v := m.add_PenaltySaved
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetPenaltySaved resets all changes to the "PenaltySaved" field.
-func (m *PSPenaltyMutation) ResetPenaltySaved() {
-	m._PenaltySaved = nil
-	m.add_PenaltySaved = nil
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PSPenaltyMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, pspenalty.FieldLastUpdated)
 }
 
 // SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
@@ -11801,36 +10784,21 @@ func (m *PSPenaltyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PSPenaltyMutation) Fields() []string {
-	fields := make([]string, 0, 10)
-	if m._FoulsDrawn != nil {
-		fields = append(fields, pspenalty.FieldFoulsDrawn)
+	fields := make([]string, 0, 5)
+	if m._Won != nil {
+		fields = append(fields, pspenalty.FieldWon)
 	}
-	if m._FoulsCommitted != nil {
-		fields = append(fields, pspenalty.FieldFoulsCommitted)
+	if m._Scored != nil {
+		fields = append(fields, pspenalty.FieldScored)
 	}
-	if m._CardsYellow != nil {
-		fields = append(fields, pspenalty.FieldCardsYellow)
+	if m._Missed != nil {
+		fields = append(fields, pspenalty.FieldMissed)
 	}
-	if m._CardYellowRed != nil {
-		fields = append(fields, pspenalty.FieldCardYellowRed)
+	if m._Saved != nil {
+		fields = append(fields, pspenalty.FieldSaved)
 	}
-	if m._CardsRed != nil {
-		fields = append(fields, pspenalty.FieldCardsRed)
-	}
-	if m._PenaltyWon != nil {
-		fields = append(fields, pspenalty.FieldPenaltyWon)
-	}
-	if m._PenaltyCommitted != nil {
-		fields = append(fields, pspenalty.FieldPenaltyCommitted)
-	}
-	if m._PenaltyScored != nil {
-		fields = append(fields, pspenalty.FieldPenaltyScored)
-	}
-	if m._PenaltyMissed != nil {
-		fields = append(fields, pspenalty.FieldPenaltyMissed)
-	}
-	if m._PenaltySaved != nil {
-		fields = append(fields, pspenalty.FieldPenaltySaved)
+	if m.lastUpdated != nil {
+		fields = append(fields, pspenalty.FieldLastUpdated)
 	}
 	return fields
 }
@@ -11840,26 +10808,16 @@ func (m *PSPenaltyMutation) Fields() []string {
 // schema.
 func (m *PSPenaltyMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case pspenalty.FieldFoulsDrawn:
-		return m.FoulsDrawn()
-	case pspenalty.FieldFoulsCommitted:
-		return m.FoulsCommitted()
-	case pspenalty.FieldCardsYellow:
-		return m.CardsYellow()
-	case pspenalty.FieldCardYellowRed:
-		return m.CardYellowRed()
-	case pspenalty.FieldCardsRed:
-		return m.CardsRed()
-	case pspenalty.FieldPenaltyWon:
-		return m.PenaltyWon()
-	case pspenalty.FieldPenaltyCommitted:
-		return m.PenaltyCommitted()
-	case pspenalty.FieldPenaltyScored:
-		return m.PenaltyScored()
-	case pspenalty.FieldPenaltyMissed:
-		return m.PenaltyMissed()
-	case pspenalty.FieldPenaltySaved:
-		return m.PenaltySaved()
+	case pspenalty.FieldWon:
+		return m.Won()
+	case pspenalty.FieldScored:
+		return m.Scored()
+	case pspenalty.FieldMissed:
+		return m.Missed()
+	case pspenalty.FieldSaved:
+		return m.Saved()
+	case pspenalty.FieldLastUpdated:
+		return m.LastUpdated()
 	}
 	return nil, false
 }
@@ -11869,26 +10827,16 @@ func (m *PSPenaltyMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PSPenaltyMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case pspenalty.FieldFoulsDrawn:
-		return m.OldFoulsDrawn(ctx)
-	case pspenalty.FieldFoulsCommitted:
-		return m.OldFoulsCommitted(ctx)
-	case pspenalty.FieldCardsYellow:
-		return m.OldCardsYellow(ctx)
-	case pspenalty.FieldCardYellowRed:
-		return m.OldCardYellowRed(ctx)
-	case pspenalty.FieldCardsRed:
-		return m.OldCardsRed(ctx)
-	case pspenalty.FieldPenaltyWon:
-		return m.OldPenaltyWon(ctx)
-	case pspenalty.FieldPenaltyCommitted:
-		return m.OldPenaltyCommitted(ctx)
-	case pspenalty.FieldPenaltyScored:
-		return m.OldPenaltyScored(ctx)
-	case pspenalty.FieldPenaltyMissed:
-		return m.OldPenaltyMissed(ctx)
-	case pspenalty.FieldPenaltySaved:
-		return m.OldPenaltySaved(ctx)
+	case pspenalty.FieldWon:
+		return m.OldWon(ctx)
+	case pspenalty.FieldScored:
+		return m.OldScored(ctx)
+	case pspenalty.FieldMissed:
+		return m.OldMissed(ctx)
+	case pspenalty.FieldSaved:
+		return m.OldSaved(ctx)
+	case pspenalty.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
 	}
 	return nil, fmt.Errorf("unknown PSPenalty field %s", name)
 }
@@ -11898,75 +10846,40 @@ func (m *PSPenaltyMutation) OldField(ctx context.Context, name string) (ent.Valu
 // type.
 func (m *PSPenaltyMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case pspenalty.FieldFoulsDrawn:
+	case pspenalty.FieldWon:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFoulsDrawn(v)
+		m.SetWon(v)
 		return nil
-	case pspenalty.FieldFoulsCommitted:
+	case pspenalty.FieldScored:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetFoulsCommitted(v)
+		m.SetScored(v)
 		return nil
-	case pspenalty.FieldCardsYellow:
+	case pspenalty.FieldMissed:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCardsYellow(v)
+		m.SetMissed(v)
 		return nil
-	case pspenalty.FieldCardYellowRed:
+	case pspenalty.FieldSaved:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCardYellowRed(v)
+		m.SetSaved(v)
 		return nil
-	case pspenalty.FieldCardsRed:
-		v, ok := value.(int)
+	case pspenalty.FieldLastUpdated:
+		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.SetCardsRed(v)
-		return nil
-	case pspenalty.FieldPenaltyWon:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPenaltyWon(v)
-		return nil
-	case pspenalty.FieldPenaltyCommitted:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPenaltyCommitted(v)
-		return nil
-	case pspenalty.FieldPenaltyScored:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPenaltyScored(v)
-		return nil
-	case pspenalty.FieldPenaltyMissed:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPenaltyMissed(v)
-		return nil
-	case pspenalty.FieldPenaltySaved:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetPenaltySaved(v)
+		m.SetLastUpdated(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PSPenalty field %s", name)
@@ -11976,35 +10889,17 @@ func (m *PSPenaltyMutation) SetField(name string, value ent.Value) error {
 // this mutation.
 func (m *PSPenaltyMutation) AddedFields() []string {
 	var fields []string
-	if m.add_FoulsDrawn != nil {
-		fields = append(fields, pspenalty.FieldFoulsDrawn)
+	if m.add_Won != nil {
+		fields = append(fields, pspenalty.FieldWon)
 	}
-	if m.add_FoulsCommitted != nil {
-		fields = append(fields, pspenalty.FieldFoulsCommitted)
+	if m.add_Scored != nil {
+		fields = append(fields, pspenalty.FieldScored)
 	}
-	if m.add_CardsYellow != nil {
-		fields = append(fields, pspenalty.FieldCardsYellow)
+	if m.add_Missed != nil {
+		fields = append(fields, pspenalty.FieldMissed)
 	}
-	if m.add_CardYellowRed != nil {
-		fields = append(fields, pspenalty.FieldCardYellowRed)
-	}
-	if m.add_CardsRed != nil {
-		fields = append(fields, pspenalty.FieldCardsRed)
-	}
-	if m.add_PenaltyWon != nil {
-		fields = append(fields, pspenalty.FieldPenaltyWon)
-	}
-	if m.add_PenaltyCommitted != nil {
-		fields = append(fields, pspenalty.FieldPenaltyCommitted)
-	}
-	if m.add_PenaltyScored != nil {
-		fields = append(fields, pspenalty.FieldPenaltyScored)
-	}
-	if m.add_PenaltyMissed != nil {
-		fields = append(fields, pspenalty.FieldPenaltyMissed)
-	}
-	if m.add_PenaltySaved != nil {
-		fields = append(fields, pspenalty.FieldPenaltySaved)
+	if m.add_Saved != nil {
+		fields = append(fields, pspenalty.FieldSaved)
 	}
 	return fields
 }
@@ -12014,26 +10909,14 @@ func (m *PSPenaltyMutation) AddedFields() []string {
 // was not set, or was not defined in the schema.
 func (m *PSPenaltyMutation) AddedField(name string) (ent.Value, bool) {
 	switch name {
-	case pspenalty.FieldFoulsDrawn:
-		return m.AddedFoulsDrawn()
-	case pspenalty.FieldFoulsCommitted:
-		return m.AddedFoulsCommitted()
-	case pspenalty.FieldCardsYellow:
-		return m.AddedCardsYellow()
-	case pspenalty.FieldCardYellowRed:
-		return m.AddedCardYellowRed()
-	case pspenalty.FieldCardsRed:
-		return m.AddedCardsRed()
-	case pspenalty.FieldPenaltyWon:
-		return m.AddedPenaltyWon()
-	case pspenalty.FieldPenaltyCommitted:
-		return m.AddedPenaltyCommitted()
-	case pspenalty.FieldPenaltyScored:
-		return m.AddedPenaltyScored()
-	case pspenalty.FieldPenaltyMissed:
-		return m.AddedPenaltyMissed()
-	case pspenalty.FieldPenaltySaved:
-		return m.AddedPenaltySaved()
+	case pspenalty.FieldWon:
+		return m.AddedWon()
+	case pspenalty.FieldScored:
+		return m.AddedScored()
+	case pspenalty.FieldMissed:
+		return m.AddedMissed()
+	case pspenalty.FieldSaved:
+		return m.AddedSaved()
 	}
 	return nil, false
 }
@@ -12043,75 +10926,33 @@ func (m *PSPenaltyMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *PSPenaltyMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case pspenalty.FieldFoulsDrawn:
+	case pspenalty.FieldWon:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddFoulsDrawn(v)
+		m.AddWon(v)
 		return nil
-	case pspenalty.FieldFoulsCommitted:
+	case pspenalty.FieldScored:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddFoulsCommitted(v)
+		m.AddScored(v)
 		return nil
-	case pspenalty.FieldCardsYellow:
+	case pspenalty.FieldMissed:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddCardsYellow(v)
+		m.AddMissed(v)
 		return nil
-	case pspenalty.FieldCardYellowRed:
+	case pspenalty.FieldSaved:
 		v, ok := value.(int)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
-		m.AddCardYellowRed(v)
-		return nil
-	case pspenalty.FieldCardsRed:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddCardsRed(v)
-		return nil
-	case pspenalty.FieldPenaltyWon:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPenaltyWon(v)
-		return nil
-	case pspenalty.FieldPenaltyCommitted:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPenaltyCommitted(v)
-		return nil
-	case pspenalty.FieldPenaltyScored:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPenaltyScored(v)
-		return nil
-	case pspenalty.FieldPenaltyMissed:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPenaltyMissed(v)
-		return nil
-	case pspenalty.FieldPenaltySaved:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddPenaltySaved(v)
+		m.AddSaved(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PSPenalty numeric field %s", name)
@@ -12120,7 +10961,11 @@ func (m *PSPenaltyMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *PSPenaltyMutation) ClearedFields() []string {
-	return nil
+	var fields []string
+	if m.FieldCleared(pspenalty.FieldLastUpdated) {
+		fields = append(fields, pspenalty.FieldLastUpdated)
+	}
+	return fields
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -12133,6 +10978,11 @@ func (m *PSPenaltyMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *PSPenaltyMutation) ClearField(name string) error {
+	switch name {
+	case pspenalty.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
 	return fmt.Errorf("unknown PSPenalty nullable field %s", name)
 }
 
@@ -12140,35 +10990,20 @@ func (m *PSPenaltyMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PSPenaltyMutation) ResetField(name string) error {
 	switch name {
-	case pspenalty.FieldFoulsDrawn:
-		m.ResetFoulsDrawn()
+	case pspenalty.FieldWon:
+		m.ResetWon()
 		return nil
-	case pspenalty.FieldFoulsCommitted:
-		m.ResetFoulsCommitted()
+	case pspenalty.FieldScored:
+		m.ResetScored()
 		return nil
-	case pspenalty.FieldCardsYellow:
-		m.ResetCardsYellow()
+	case pspenalty.FieldMissed:
+		m.ResetMissed()
 		return nil
-	case pspenalty.FieldCardYellowRed:
-		m.ResetCardYellowRed()
+	case pspenalty.FieldSaved:
+		m.ResetSaved()
 		return nil
-	case pspenalty.FieldCardsRed:
-		m.ResetCardsRed()
-		return nil
-	case pspenalty.FieldPenaltyWon:
-		m.ResetPenaltyWon()
-		return nil
-	case pspenalty.FieldPenaltyCommitted:
-		m.ResetPenaltyCommitted()
-		return nil
-	case pspenalty.FieldPenaltyScored:
-		m.ResetPenaltyScored()
-		return nil
-	case pspenalty.FieldPenaltyMissed:
-		m.ResetPenaltyMissed()
-		return nil
-	case pspenalty.FieldPenaltySaved:
-		m.ResetPenaltySaved()
+	case pspenalty.FieldLastUpdated:
+		m.ResetLastUpdated()
 		return nil
 	}
 	return fmt.Errorf("unknown PSPenalty field %s", name)
@@ -12246,6 +11081,2652 @@ func (m *PSPenaltyMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown PSPenalty edge %s", name)
+}
+
+// PSShootingMutation represents an operation that mutates the PSShooting nodes in the graph.
+type PSShootingMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *int
+	_Goals             *int
+	add_Goals          *int
+	_Conceded          *int
+	add_Conceded       *int
+	_Assists           *int
+	add_Assists        *int
+	_Saves             *int
+	add_Saves          *int
+	_Shots             *int
+	add_Shots          *int
+	_OnTarget          *int
+	add_OnTarget       *int
+	lastUpdated        *time.Time
+	clearedFields      map[string]struct{}
+	playerStats        *int
+	clearedplayerStats bool
+	done               bool
+	oldValue           func(context.Context) (*PSShooting, error)
+	predicates         []predicate.PSShooting
+}
+
+var _ ent.Mutation = (*PSShootingMutation)(nil)
+
+// psshootingOption allows management of the mutation configuration using functional options.
+type psshootingOption func(*PSShootingMutation)
+
+// newPSShootingMutation creates new mutation for the PSShooting entity.
+func newPSShootingMutation(c config, op Op, opts ...psshootingOption) *PSShootingMutation {
+	m := &PSShootingMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePSShooting,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPSShootingID sets the ID field of the mutation.
+func withPSShootingID(id int) psshootingOption {
+	return func(m *PSShootingMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PSShooting
+		)
+		m.oldValue = func(ctx context.Context) (*PSShooting, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PSShooting.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPSShooting sets the old PSShooting of the mutation.
+func withPSShooting(node *PSShooting) psshootingOption {
+	return func(m *PSShootingMutation) {
+		m.oldValue = func(context.Context) (*PSShooting, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PSShootingMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PSShootingMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PSShootingMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PSShootingMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PSShooting.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetGoals sets the "Goals" field.
+func (m *PSShootingMutation) SetGoals(i int) {
+	m._Goals = &i
+	m.add_Goals = nil
+}
+
+// Goals returns the value of the "Goals" field in the mutation.
+func (m *PSShootingMutation) Goals() (r int, exists bool) {
+	v := m._Goals
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoals returns the old "Goals" field's value of the PSShooting entity.
+// If the PSShooting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSShootingMutation) OldGoals(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGoals is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGoals requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoals: %w", err)
+	}
+	return oldValue.Goals, nil
+}
+
+// AddGoals adds i to the "Goals" field.
+func (m *PSShootingMutation) AddGoals(i int) {
+	if m.add_Goals != nil {
+		*m.add_Goals += i
+	} else {
+		m.add_Goals = &i
+	}
+}
+
+// AddedGoals returns the value that was added to the "Goals" field in this mutation.
+func (m *PSShootingMutation) AddedGoals() (r int, exists bool) {
+	v := m.add_Goals
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetGoals resets all changes to the "Goals" field.
+func (m *PSShootingMutation) ResetGoals() {
+	m._Goals = nil
+	m.add_Goals = nil
+}
+
+// SetConceded sets the "Conceded" field.
+func (m *PSShootingMutation) SetConceded(i int) {
+	m._Conceded = &i
+	m.add_Conceded = nil
+}
+
+// Conceded returns the value of the "Conceded" field in the mutation.
+func (m *PSShootingMutation) Conceded() (r int, exists bool) {
+	v := m._Conceded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldConceded returns the old "Conceded" field's value of the PSShooting entity.
+// If the PSShooting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSShootingMutation) OldConceded(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldConceded is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldConceded requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldConceded: %w", err)
+	}
+	return oldValue.Conceded, nil
+}
+
+// AddConceded adds i to the "Conceded" field.
+func (m *PSShootingMutation) AddConceded(i int) {
+	if m.add_Conceded != nil {
+		*m.add_Conceded += i
+	} else {
+		m.add_Conceded = &i
+	}
+}
+
+// AddedConceded returns the value that was added to the "Conceded" field in this mutation.
+func (m *PSShootingMutation) AddedConceded() (r int, exists bool) {
+	v := m.add_Conceded
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetConceded resets all changes to the "Conceded" field.
+func (m *PSShootingMutation) ResetConceded() {
+	m._Conceded = nil
+	m.add_Conceded = nil
+}
+
+// SetAssists sets the "Assists" field.
+func (m *PSShootingMutation) SetAssists(i int) {
+	m._Assists = &i
+	m.add_Assists = nil
+}
+
+// Assists returns the value of the "Assists" field in the mutation.
+func (m *PSShootingMutation) Assists() (r int, exists bool) {
+	v := m._Assists
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldAssists returns the old "Assists" field's value of the PSShooting entity.
+// If the PSShooting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSShootingMutation) OldAssists(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldAssists is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldAssists requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldAssists: %w", err)
+	}
+	return oldValue.Assists, nil
+}
+
+// AddAssists adds i to the "Assists" field.
+func (m *PSShootingMutation) AddAssists(i int) {
+	if m.add_Assists != nil {
+		*m.add_Assists += i
+	} else {
+		m.add_Assists = &i
+	}
+}
+
+// AddedAssists returns the value that was added to the "Assists" field in this mutation.
+func (m *PSShootingMutation) AddedAssists() (r int, exists bool) {
+	v := m.add_Assists
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetAssists resets all changes to the "Assists" field.
+func (m *PSShootingMutation) ResetAssists() {
+	m._Assists = nil
+	m.add_Assists = nil
+}
+
+// SetSaves sets the "Saves" field.
+func (m *PSShootingMutation) SetSaves(i int) {
+	m._Saves = &i
+	m.add_Saves = nil
+}
+
+// Saves returns the value of the "Saves" field in the mutation.
+func (m *PSShootingMutation) Saves() (r int, exists bool) {
+	v := m._Saves
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldSaves returns the old "Saves" field's value of the PSShooting entity.
+// If the PSShooting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSShootingMutation) OldSaves(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldSaves is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldSaves requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldSaves: %w", err)
+	}
+	return oldValue.Saves, nil
+}
+
+// AddSaves adds i to the "Saves" field.
+func (m *PSShootingMutation) AddSaves(i int) {
+	if m.add_Saves != nil {
+		*m.add_Saves += i
+	} else {
+		m.add_Saves = &i
+	}
+}
+
+// AddedSaves returns the value that was added to the "Saves" field in this mutation.
+func (m *PSShootingMutation) AddedSaves() (r int, exists bool) {
+	v := m.add_Saves
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetSaves resets all changes to the "Saves" field.
+func (m *PSShootingMutation) ResetSaves() {
+	m._Saves = nil
+	m.add_Saves = nil
+}
+
+// SetShots sets the "Shots" field.
+func (m *PSShootingMutation) SetShots(i int) {
+	m._Shots = &i
+	m.add_Shots = nil
+}
+
+// Shots returns the value of the "Shots" field in the mutation.
+func (m *PSShootingMutation) Shots() (r int, exists bool) {
+	v := m._Shots
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldShots returns the old "Shots" field's value of the PSShooting entity.
+// If the PSShooting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSShootingMutation) OldShots(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldShots is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldShots requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldShots: %w", err)
+	}
+	return oldValue.Shots, nil
+}
+
+// AddShots adds i to the "Shots" field.
+func (m *PSShootingMutation) AddShots(i int) {
+	if m.add_Shots != nil {
+		*m.add_Shots += i
+	} else {
+		m.add_Shots = &i
+	}
+}
+
+// AddedShots returns the value that was added to the "Shots" field in this mutation.
+func (m *PSShootingMutation) AddedShots() (r int, exists bool) {
+	v := m.add_Shots
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetShots resets all changes to the "Shots" field.
+func (m *PSShootingMutation) ResetShots() {
+	m._Shots = nil
+	m.add_Shots = nil
+}
+
+// SetOnTarget sets the "OnTarget" field.
+func (m *PSShootingMutation) SetOnTarget(i int) {
+	m._OnTarget = &i
+	m.add_OnTarget = nil
+}
+
+// OnTarget returns the value of the "OnTarget" field in the mutation.
+func (m *PSShootingMutation) OnTarget() (r int, exists bool) {
+	v := m._OnTarget
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOnTarget returns the old "OnTarget" field's value of the PSShooting entity.
+// If the PSShooting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSShootingMutation) OldOnTarget(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOnTarget is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOnTarget requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOnTarget: %w", err)
+	}
+	return oldValue.OnTarget, nil
+}
+
+// AddOnTarget adds i to the "OnTarget" field.
+func (m *PSShootingMutation) AddOnTarget(i int) {
+	if m.add_OnTarget != nil {
+		*m.add_OnTarget += i
+	} else {
+		m.add_OnTarget = &i
+	}
+}
+
+// AddedOnTarget returns the value that was added to the "OnTarget" field in this mutation.
+func (m *PSShootingMutation) AddedOnTarget() (r int, exists bool) {
+	v := m.add_OnTarget
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOnTarget resets all changes to the "OnTarget" field.
+func (m *PSShootingMutation) ResetOnTarget() {
+	m._OnTarget = nil
+	m.add_OnTarget = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PSShootingMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PSShootingMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the PSShooting entity.
+// If the PSShooting object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSShootingMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PSShootingMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[psshooting.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PSShootingMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[psshooting.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PSShootingMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, psshooting.FieldLastUpdated)
+}
+
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
+func (m *PSShootingMutation) SetPlayerStatsID(id int) {
+	m.playerStats = &id
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSShootingMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
+}
+
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSShootingMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
+}
+
+// PlayerStatsID returns the "playerStats" edge ID in the mutation.
+func (m *PSShootingMutation) PlayerStatsID() (id int, exists bool) {
+	if m.playerStats != nil {
+		return *m.playerStats, true
+	}
+	return
+}
+
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerStatsID instead. It exists only for internal usage by the builders.
+func (m *PSShootingMutation) PlayerStatsIDs() (ids []int) {
+	if id := m.playerStats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSShootingMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+}
+
+// Where appends a list predicates to the PSShootingMutation builder.
+func (m *PSShootingMutation) Where(ps ...predicate.PSShooting) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PSShootingMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PSShootingMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PSShooting, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PSShootingMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PSShootingMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PSShooting).
+func (m *PSShootingMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PSShootingMutation) Fields() []string {
+	fields := make([]string, 0, 7)
+	if m._Goals != nil {
+		fields = append(fields, psshooting.FieldGoals)
+	}
+	if m._Conceded != nil {
+		fields = append(fields, psshooting.FieldConceded)
+	}
+	if m._Assists != nil {
+		fields = append(fields, psshooting.FieldAssists)
+	}
+	if m._Saves != nil {
+		fields = append(fields, psshooting.FieldSaves)
+	}
+	if m._Shots != nil {
+		fields = append(fields, psshooting.FieldShots)
+	}
+	if m._OnTarget != nil {
+		fields = append(fields, psshooting.FieldOnTarget)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, psshooting.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PSShootingMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case psshooting.FieldGoals:
+		return m.Goals()
+	case psshooting.FieldConceded:
+		return m.Conceded()
+	case psshooting.FieldAssists:
+		return m.Assists()
+	case psshooting.FieldSaves:
+		return m.Saves()
+	case psshooting.FieldShots:
+		return m.Shots()
+	case psshooting.FieldOnTarget:
+		return m.OnTarget()
+	case psshooting.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PSShootingMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case psshooting.FieldGoals:
+		return m.OldGoals(ctx)
+	case psshooting.FieldConceded:
+		return m.OldConceded(ctx)
+	case psshooting.FieldAssists:
+		return m.OldAssists(ctx)
+	case psshooting.FieldSaves:
+		return m.OldSaves(ctx)
+	case psshooting.FieldShots:
+		return m.OldShots(ctx)
+	case psshooting.FieldOnTarget:
+		return m.OldOnTarget(ctx)
+	case psshooting.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown PSShooting field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PSShootingMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case psshooting.FieldGoals:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoals(v)
+		return nil
+	case psshooting.FieldConceded:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetConceded(v)
+		return nil
+	case psshooting.FieldAssists:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetAssists(v)
+		return nil
+	case psshooting.FieldSaves:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetSaves(v)
+		return nil
+	case psshooting.FieldShots:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetShots(v)
+		return nil
+	case psshooting.FieldOnTarget:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOnTarget(v)
+		return nil
+	case psshooting.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PSShooting field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PSShootingMutation) AddedFields() []string {
+	var fields []string
+	if m.add_Goals != nil {
+		fields = append(fields, psshooting.FieldGoals)
+	}
+	if m.add_Conceded != nil {
+		fields = append(fields, psshooting.FieldConceded)
+	}
+	if m.add_Assists != nil {
+		fields = append(fields, psshooting.FieldAssists)
+	}
+	if m.add_Saves != nil {
+		fields = append(fields, psshooting.FieldSaves)
+	}
+	if m.add_Shots != nil {
+		fields = append(fields, psshooting.FieldShots)
+	}
+	if m.add_OnTarget != nil {
+		fields = append(fields, psshooting.FieldOnTarget)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PSShootingMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case psshooting.FieldGoals:
+		return m.AddedGoals()
+	case psshooting.FieldConceded:
+		return m.AddedConceded()
+	case psshooting.FieldAssists:
+		return m.AddedAssists()
+	case psshooting.FieldSaves:
+		return m.AddedSaves()
+	case psshooting.FieldShots:
+		return m.AddedShots()
+	case psshooting.FieldOnTarget:
+		return m.AddedOnTarget()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PSShootingMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case psshooting.FieldGoals:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoals(v)
+		return nil
+	case psshooting.FieldConceded:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddConceded(v)
+		return nil
+	case psshooting.FieldAssists:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddAssists(v)
+		return nil
+	case psshooting.FieldSaves:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddSaves(v)
+		return nil
+	case psshooting.FieldShots:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddShots(v)
+		return nil
+	case psshooting.FieldOnTarget:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOnTarget(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PSShooting numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PSShootingMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(psshooting.FieldLastUpdated) {
+		fields = append(fields, psshooting.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PSShootingMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PSShootingMutation) ClearField(name string) error {
+	switch name {
+	case psshooting.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PSShooting nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PSShootingMutation) ResetField(name string) error {
+	switch name {
+	case psshooting.FieldGoals:
+		m.ResetGoals()
+		return nil
+	case psshooting.FieldConceded:
+		m.ResetConceded()
+		return nil
+	case psshooting.FieldAssists:
+		m.ResetAssists()
+		return nil
+	case psshooting.FieldSaves:
+		m.ResetSaves()
+		return nil
+	case psshooting.FieldShots:
+		m.ResetShots()
+		return nil
+	case psshooting.FieldOnTarget:
+		m.ResetOnTarget()
+		return nil
+	case psshooting.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PSShooting field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PSShootingMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.playerStats != nil {
+		edges = append(edges, psshooting.EdgePlayerStats)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PSShootingMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case psshooting.EdgePlayerStats:
+		if id := m.playerStats; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PSShootingMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PSShootingMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PSShootingMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedplayerStats {
+		edges = append(edges, psshooting.EdgePlayerStats)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PSShootingMutation) EdgeCleared(name string) bool {
+	switch name {
+	case psshooting.EdgePlayerStats:
+		return m.clearedplayerStats
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PSShootingMutation) ClearEdge(name string) error {
+	switch name {
+	case psshooting.EdgePlayerStats:
+		m.ClearPlayerStats()
+		return nil
+	}
+	return fmt.Errorf("unknown PSShooting unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PSShootingMutation) ResetEdge(name string) error {
+	switch name {
+	case psshooting.EdgePlayerStats:
+		m.ResetPlayerStats()
+		return nil
+	}
+	return fmt.Errorf("unknown PSShooting edge %s", name)
+}
+
+// PSSubstitutesMutation represents an operation that mutates the PSSubstitutes nodes in the graph.
+type PSSubstitutesMutation struct {
+	config
+	op                 Op
+	typ                string
+	id                 *int
+	_In                *int
+	add_In             *int
+	_Out               *int
+	add_Out            *int
+	_Bench             *int
+	add_Bench          *int
+	lastUpdated        *time.Time
+	clearedFields      map[string]struct{}
+	playerStats        *int
+	clearedplayerStats bool
+	done               bool
+	oldValue           func(context.Context) (*PSSubstitutes, error)
+	predicates         []predicate.PSSubstitutes
+}
+
+var _ ent.Mutation = (*PSSubstitutesMutation)(nil)
+
+// pssubstitutesOption allows management of the mutation configuration using functional options.
+type pssubstitutesOption func(*PSSubstitutesMutation)
+
+// newPSSubstitutesMutation creates new mutation for the PSSubstitutes entity.
+func newPSSubstitutesMutation(c config, op Op, opts ...pssubstitutesOption) *PSSubstitutesMutation {
+	m := &PSSubstitutesMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePSSubstitutes,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPSSubstitutesID sets the ID field of the mutation.
+func withPSSubstitutesID(id int) pssubstitutesOption {
+	return func(m *PSSubstitutesMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PSSubstitutes
+		)
+		m.oldValue = func(ctx context.Context) (*PSSubstitutes, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PSSubstitutes.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPSSubstitutes sets the old PSSubstitutes of the mutation.
+func withPSSubstitutes(node *PSSubstitutes) pssubstitutesOption {
+	return func(m *PSSubstitutesMutation) {
+		m.oldValue = func(context.Context) (*PSSubstitutes, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PSSubstitutesMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PSSubstitutesMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PSSubstitutesMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PSSubstitutesMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PSSubstitutes.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetIn sets the "In" field.
+func (m *PSSubstitutesMutation) SetIn(i int) {
+	m._In = &i
+	m.add_In = nil
+}
+
+// In returns the value of the "In" field in the mutation.
+func (m *PSSubstitutesMutation) In() (r int, exists bool) {
+	v := m._In
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIn returns the old "In" field's value of the PSSubstitutes entity.
+// If the PSSubstitutes object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSSubstitutesMutation) OldIn(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIn: %w", err)
+	}
+	return oldValue.In, nil
+}
+
+// AddIn adds i to the "In" field.
+func (m *PSSubstitutesMutation) AddIn(i int) {
+	if m.add_In != nil {
+		*m.add_In += i
+	} else {
+		m.add_In = &i
+	}
+}
+
+// AddedIn returns the value that was added to the "In" field in this mutation.
+func (m *PSSubstitutesMutation) AddedIn() (r int, exists bool) {
+	v := m.add_In
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetIn resets all changes to the "In" field.
+func (m *PSSubstitutesMutation) ResetIn() {
+	m._In = nil
+	m.add_In = nil
+}
+
+// SetOut sets the "Out" field.
+func (m *PSSubstitutesMutation) SetOut(i int) {
+	m._Out = &i
+	m.add_Out = nil
+}
+
+// Out returns the value of the "Out" field in the mutation.
+func (m *PSSubstitutesMutation) Out() (r int, exists bool) {
+	v := m._Out
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOut returns the old "Out" field's value of the PSSubstitutes entity.
+// If the PSSubstitutes object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSSubstitutesMutation) OldOut(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOut is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOut requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOut: %w", err)
+	}
+	return oldValue.Out, nil
+}
+
+// AddOut adds i to the "Out" field.
+func (m *PSSubstitutesMutation) AddOut(i int) {
+	if m.add_Out != nil {
+		*m.add_Out += i
+	} else {
+		m.add_Out = &i
+	}
+}
+
+// AddedOut returns the value that was added to the "Out" field in this mutation.
+func (m *PSSubstitutesMutation) AddedOut() (r int, exists bool) {
+	v := m.add_Out
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetOut resets all changes to the "Out" field.
+func (m *PSSubstitutesMutation) ResetOut() {
+	m._Out = nil
+	m.add_Out = nil
+}
+
+// SetBench sets the "Bench" field.
+func (m *PSSubstitutesMutation) SetBench(i int) {
+	m._Bench = &i
+	m.add_Bench = nil
+}
+
+// Bench returns the value of the "Bench" field in the mutation.
+func (m *PSSubstitutesMutation) Bench() (r int, exists bool) {
+	v := m._Bench
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldBench returns the old "Bench" field's value of the PSSubstitutes entity.
+// If the PSSubstitutes object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSSubstitutesMutation) OldBench(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldBench is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldBench requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldBench: %w", err)
+	}
+	return oldValue.Bench, nil
+}
+
+// AddBench adds i to the "Bench" field.
+func (m *PSSubstitutesMutation) AddBench(i int) {
+	if m.add_Bench != nil {
+		*m.add_Bench += i
+	} else {
+		m.add_Bench = &i
+	}
+}
+
+// AddedBench returns the value that was added to the "Bench" field in this mutation.
+func (m *PSSubstitutesMutation) AddedBench() (r int, exists bool) {
+	v := m.add_Bench
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetBench resets all changes to the "Bench" field.
+func (m *PSSubstitutesMutation) ResetBench() {
+	m._Bench = nil
+	m.add_Bench = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PSSubstitutesMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PSSubstitutesMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the PSSubstitutes entity.
+// If the PSSubstitutes object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSSubstitutesMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PSSubstitutesMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[pssubstitutes.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PSSubstitutesMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[pssubstitutes.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PSSubstitutesMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, pssubstitutes.FieldLastUpdated)
+}
+
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
+func (m *PSSubstitutesMutation) SetPlayerStatsID(id int) {
+	m.playerStats = &id
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSSubstitutesMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
+}
+
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSSubstitutesMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
+}
+
+// PlayerStatsID returns the "playerStats" edge ID in the mutation.
+func (m *PSSubstitutesMutation) PlayerStatsID() (id int, exists bool) {
+	if m.playerStats != nil {
+		return *m.playerStats, true
+	}
+	return
+}
+
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerStatsID instead. It exists only for internal usage by the builders.
+func (m *PSSubstitutesMutation) PlayerStatsIDs() (ids []int) {
+	if id := m.playerStats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSSubstitutesMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+}
+
+// Where appends a list predicates to the PSSubstitutesMutation builder.
+func (m *PSSubstitutesMutation) Where(ps ...predicate.PSSubstitutes) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PSSubstitutesMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PSSubstitutesMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PSSubstitutes, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PSSubstitutesMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PSSubstitutesMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PSSubstitutes).
+func (m *PSSubstitutesMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PSSubstitutesMutation) Fields() []string {
+	fields := make([]string, 0, 4)
+	if m._In != nil {
+		fields = append(fields, pssubstitutes.FieldIn)
+	}
+	if m._Out != nil {
+		fields = append(fields, pssubstitutes.FieldOut)
+	}
+	if m._Bench != nil {
+		fields = append(fields, pssubstitutes.FieldBench)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, pssubstitutes.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PSSubstitutesMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case pssubstitutes.FieldIn:
+		return m.In()
+	case pssubstitutes.FieldOut:
+		return m.Out()
+	case pssubstitutes.FieldBench:
+		return m.Bench()
+	case pssubstitutes.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PSSubstitutesMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case pssubstitutes.FieldIn:
+		return m.OldIn(ctx)
+	case pssubstitutes.FieldOut:
+		return m.OldOut(ctx)
+	case pssubstitutes.FieldBench:
+		return m.OldBench(ctx)
+	case pssubstitutes.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown PSSubstitutes field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PSSubstitutesMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case pssubstitutes.FieldIn:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIn(v)
+		return nil
+	case pssubstitutes.FieldOut:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOut(v)
+		return nil
+	case pssubstitutes.FieldBench:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetBench(v)
+		return nil
+	case pssubstitutes.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PSSubstitutes field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PSSubstitutesMutation) AddedFields() []string {
+	var fields []string
+	if m.add_In != nil {
+		fields = append(fields, pssubstitutes.FieldIn)
+	}
+	if m.add_Out != nil {
+		fields = append(fields, pssubstitutes.FieldOut)
+	}
+	if m.add_Bench != nil {
+		fields = append(fields, pssubstitutes.FieldBench)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PSSubstitutesMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case pssubstitutes.FieldIn:
+		return m.AddedIn()
+	case pssubstitutes.FieldOut:
+		return m.AddedOut()
+	case pssubstitutes.FieldBench:
+		return m.AddedBench()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PSSubstitutesMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case pssubstitutes.FieldIn:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddIn(v)
+		return nil
+	case pssubstitutes.FieldOut:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOut(v)
+		return nil
+	case pssubstitutes.FieldBench:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddBench(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PSSubstitutes numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PSSubstitutesMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(pssubstitutes.FieldLastUpdated) {
+		fields = append(fields, pssubstitutes.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PSSubstitutesMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PSSubstitutesMutation) ClearField(name string) error {
+	switch name {
+	case pssubstitutes.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PSSubstitutes nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PSSubstitutesMutation) ResetField(name string) error {
+	switch name {
+	case pssubstitutes.FieldIn:
+		m.ResetIn()
+		return nil
+	case pssubstitutes.FieldOut:
+		m.ResetOut()
+		return nil
+	case pssubstitutes.FieldBench:
+		m.ResetBench()
+		return nil
+	case pssubstitutes.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PSSubstitutes field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PSSubstitutesMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.playerStats != nil {
+		edges = append(edges, pssubstitutes.EdgePlayerStats)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PSSubstitutesMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case pssubstitutes.EdgePlayerStats:
+		if id := m.playerStats; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PSSubstitutesMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PSSubstitutesMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PSSubstitutesMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedplayerStats {
+		edges = append(edges, pssubstitutes.EdgePlayerStats)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PSSubstitutesMutation) EdgeCleared(name string) bool {
+	switch name {
+	case pssubstitutes.EdgePlayerStats:
+		return m.clearedplayerStats
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PSSubstitutesMutation) ClearEdge(name string) error {
+	switch name {
+	case pssubstitutes.EdgePlayerStats:
+		m.ClearPlayerStats()
+		return nil
+	}
+	return fmt.Errorf("unknown PSSubstitutes unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PSSubstitutesMutation) ResetEdge(name string) error {
+	switch name {
+	case pssubstitutes.EdgePlayerStats:
+		m.ResetPlayerStats()
+		return nil
+	}
+	return fmt.Errorf("unknown PSSubstitutes edge %s", name)
+}
+
+// PSTechnicalMutation represents an operation that mutates the PSTechnical nodes in the graph.
+type PSTechnicalMutation struct {
+	config
+	op                  Op
+	typ                 string
+	id                  *int
+	_FoulsDrawn         *int
+	add_FoulsDrawn      *int
+	_DribbleAttempts    *int
+	add_DribbleAttempts *int
+	_DribbleSuccess     *int
+	add_DribbleSuccess  *int
+	_DribblePast        *int
+	add_DribblePast     *int
+	_PassesTotal        *int
+	add_PassesTotal     *int
+	_PassesKey          *int
+	add_PassesKey       *int
+	_PassesAccuracy     *int
+	add_PassesAccuracy  *int
+	lastUpdated         *time.Time
+	clearedFields       map[string]struct{}
+	playerStats         *int
+	clearedplayerStats  bool
+	done                bool
+	oldValue            func(context.Context) (*PSTechnical, error)
+	predicates          []predicate.PSTechnical
+}
+
+var _ ent.Mutation = (*PSTechnicalMutation)(nil)
+
+// pstechnicalOption allows management of the mutation configuration using functional options.
+type pstechnicalOption func(*PSTechnicalMutation)
+
+// newPSTechnicalMutation creates new mutation for the PSTechnical entity.
+func newPSTechnicalMutation(c config, op Op, opts ...pstechnicalOption) *PSTechnicalMutation {
+	m := &PSTechnicalMutation{
+		config:        c,
+		op:            op,
+		typ:           TypePSTechnical,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withPSTechnicalID sets the ID field of the mutation.
+func withPSTechnicalID(id int) pstechnicalOption {
+	return func(m *PSTechnicalMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *PSTechnical
+		)
+		m.oldValue = func(ctx context.Context) (*PSTechnical, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().PSTechnical.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withPSTechnical sets the old PSTechnical of the mutation.
+func withPSTechnical(node *PSTechnical) pstechnicalOption {
+	return func(m *PSTechnicalMutation) {
+		m.oldValue = func(context.Context) (*PSTechnical, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m PSTechnicalMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m PSTechnicalMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *PSTechnicalMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *PSTechnicalMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().PSTechnical.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetFoulsDrawn sets the "FoulsDrawn" field.
+func (m *PSTechnicalMutation) SetFoulsDrawn(i int) {
+	m._FoulsDrawn = &i
+	m.add_FoulsDrawn = nil
+}
+
+// FoulsDrawn returns the value of the "FoulsDrawn" field in the mutation.
+func (m *PSTechnicalMutation) FoulsDrawn() (r int, exists bool) {
+	v := m._FoulsDrawn
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldFoulsDrawn returns the old "FoulsDrawn" field's value of the PSTechnical entity.
+// If the PSTechnical object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSTechnicalMutation) OldFoulsDrawn(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldFoulsDrawn is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldFoulsDrawn requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldFoulsDrawn: %w", err)
+	}
+	return oldValue.FoulsDrawn, nil
+}
+
+// AddFoulsDrawn adds i to the "FoulsDrawn" field.
+func (m *PSTechnicalMutation) AddFoulsDrawn(i int) {
+	if m.add_FoulsDrawn != nil {
+		*m.add_FoulsDrawn += i
+	} else {
+		m.add_FoulsDrawn = &i
+	}
+}
+
+// AddedFoulsDrawn returns the value that was added to the "FoulsDrawn" field in this mutation.
+func (m *PSTechnicalMutation) AddedFoulsDrawn() (r int, exists bool) {
+	v := m.add_FoulsDrawn
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetFoulsDrawn resets all changes to the "FoulsDrawn" field.
+func (m *PSTechnicalMutation) ResetFoulsDrawn() {
+	m._FoulsDrawn = nil
+	m.add_FoulsDrawn = nil
+}
+
+// SetDribbleAttempts sets the "DribbleAttempts" field.
+func (m *PSTechnicalMutation) SetDribbleAttempts(i int) {
+	m._DribbleAttempts = &i
+	m.add_DribbleAttempts = nil
+}
+
+// DribbleAttempts returns the value of the "DribbleAttempts" field in the mutation.
+func (m *PSTechnicalMutation) DribbleAttempts() (r int, exists bool) {
+	v := m._DribbleAttempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDribbleAttempts returns the old "DribbleAttempts" field's value of the PSTechnical entity.
+// If the PSTechnical object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSTechnicalMutation) OldDribbleAttempts(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDribbleAttempts is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDribbleAttempts requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDribbleAttempts: %w", err)
+	}
+	return oldValue.DribbleAttempts, nil
+}
+
+// AddDribbleAttempts adds i to the "DribbleAttempts" field.
+func (m *PSTechnicalMutation) AddDribbleAttempts(i int) {
+	if m.add_DribbleAttempts != nil {
+		*m.add_DribbleAttempts += i
+	} else {
+		m.add_DribbleAttempts = &i
+	}
+}
+
+// AddedDribbleAttempts returns the value that was added to the "DribbleAttempts" field in this mutation.
+func (m *PSTechnicalMutation) AddedDribbleAttempts() (r int, exists bool) {
+	v := m.add_DribbleAttempts
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDribbleAttempts resets all changes to the "DribbleAttempts" field.
+func (m *PSTechnicalMutation) ResetDribbleAttempts() {
+	m._DribbleAttempts = nil
+	m.add_DribbleAttempts = nil
+}
+
+// SetDribbleSuccess sets the "DribbleSuccess" field.
+func (m *PSTechnicalMutation) SetDribbleSuccess(i int) {
+	m._DribbleSuccess = &i
+	m.add_DribbleSuccess = nil
+}
+
+// DribbleSuccess returns the value of the "DribbleSuccess" field in the mutation.
+func (m *PSTechnicalMutation) DribbleSuccess() (r int, exists bool) {
+	v := m._DribbleSuccess
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDribbleSuccess returns the old "DribbleSuccess" field's value of the PSTechnical entity.
+// If the PSTechnical object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSTechnicalMutation) OldDribbleSuccess(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDribbleSuccess is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDribbleSuccess requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDribbleSuccess: %w", err)
+	}
+	return oldValue.DribbleSuccess, nil
+}
+
+// AddDribbleSuccess adds i to the "DribbleSuccess" field.
+func (m *PSTechnicalMutation) AddDribbleSuccess(i int) {
+	if m.add_DribbleSuccess != nil {
+		*m.add_DribbleSuccess += i
+	} else {
+		m.add_DribbleSuccess = &i
+	}
+}
+
+// AddedDribbleSuccess returns the value that was added to the "DribbleSuccess" field in this mutation.
+func (m *PSTechnicalMutation) AddedDribbleSuccess() (r int, exists bool) {
+	v := m.add_DribbleSuccess
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDribbleSuccess resets all changes to the "DribbleSuccess" field.
+func (m *PSTechnicalMutation) ResetDribbleSuccess() {
+	m._DribbleSuccess = nil
+	m.add_DribbleSuccess = nil
+}
+
+// SetDribblePast sets the "DribblePast" field.
+func (m *PSTechnicalMutation) SetDribblePast(i int) {
+	m._DribblePast = &i
+	m.add_DribblePast = nil
+}
+
+// DribblePast returns the value of the "DribblePast" field in the mutation.
+func (m *PSTechnicalMutation) DribblePast() (r int, exists bool) {
+	v := m._DribblePast
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldDribblePast returns the old "DribblePast" field's value of the PSTechnical entity.
+// If the PSTechnical object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSTechnicalMutation) OldDribblePast(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldDribblePast is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldDribblePast requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldDribblePast: %w", err)
+	}
+	return oldValue.DribblePast, nil
+}
+
+// AddDribblePast adds i to the "DribblePast" field.
+func (m *PSTechnicalMutation) AddDribblePast(i int) {
+	if m.add_DribblePast != nil {
+		*m.add_DribblePast += i
+	} else {
+		m.add_DribblePast = &i
+	}
+}
+
+// AddedDribblePast returns the value that was added to the "DribblePast" field in this mutation.
+func (m *PSTechnicalMutation) AddedDribblePast() (r int, exists bool) {
+	v := m.add_DribblePast
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetDribblePast resets all changes to the "DribblePast" field.
+func (m *PSTechnicalMutation) ResetDribblePast() {
+	m._DribblePast = nil
+	m.add_DribblePast = nil
+}
+
+// SetPassesTotal sets the "PassesTotal" field.
+func (m *PSTechnicalMutation) SetPassesTotal(i int) {
+	m._PassesTotal = &i
+	m.add_PassesTotal = nil
+}
+
+// PassesTotal returns the value of the "PassesTotal" field in the mutation.
+func (m *PSTechnicalMutation) PassesTotal() (r int, exists bool) {
+	v := m._PassesTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPassesTotal returns the old "PassesTotal" field's value of the PSTechnical entity.
+// If the PSTechnical object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSTechnicalMutation) OldPassesTotal(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPassesTotal is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPassesTotal requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPassesTotal: %w", err)
+	}
+	return oldValue.PassesTotal, nil
+}
+
+// AddPassesTotal adds i to the "PassesTotal" field.
+func (m *PSTechnicalMutation) AddPassesTotal(i int) {
+	if m.add_PassesTotal != nil {
+		*m.add_PassesTotal += i
+	} else {
+		m.add_PassesTotal = &i
+	}
+}
+
+// AddedPassesTotal returns the value that was added to the "PassesTotal" field in this mutation.
+func (m *PSTechnicalMutation) AddedPassesTotal() (r int, exists bool) {
+	v := m.add_PassesTotal
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPassesTotal resets all changes to the "PassesTotal" field.
+func (m *PSTechnicalMutation) ResetPassesTotal() {
+	m._PassesTotal = nil
+	m.add_PassesTotal = nil
+}
+
+// SetPassesKey sets the "PassesKey" field.
+func (m *PSTechnicalMutation) SetPassesKey(i int) {
+	m._PassesKey = &i
+	m.add_PassesKey = nil
+}
+
+// PassesKey returns the value of the "PassesKey" field in the mutation.
+func (m *PSTechnicalMutation) PassesKey() (r int, exists bool) {
+	v := m._PassesKey
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPassesKey returns the old "PassesKey" field's value of the PSTechnical entity.
+// If the PSTechnical object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSTechnicalMutation) OldPassesKey(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPassesKey is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPassesKey requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPassesKey: %w", err)
+	}
+	return oldValue.PassesKey, nil
+}
+
+// AddPassesKey adds i to the "PassesKey" field.
+func (m *PSTechnicalMutation) AddPassesKey(i int) {
+	if m.add_PassesKey != nil {
+		*m.add_PassesKey += i
+	} else {
+		m.add_PassesKey = &i
+	}
+}
+
+// AddedPassesKey returns the value that was added to the "PassesKey" field in this mutation.
+func (m *PSTechnicalMutation) AddedPassesKey() (r int, exists bool) {
+	v := m.add_PassesKey
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPassesKey resets all changes to the "PassesKey" field.
+func (m *PSTechnicalMutation) ResetPassesKey() {
+	m._PassesKey = nil
+	m.add_PassesKey = nil
+}
+
+// SetPassesAccuracy sets the "PassesAccuracy" field.
+func (m *PSTechnicalMutation) SetPassesAccuracy(i int) {
+	m._PassesAccuracy = &i
+	m.add_PassesAccuracy = nil
+}
+
+// PassesAccuracy returns the value of the "PassesAccuracy" field in the mutation.
+func (m *PSTechnicalMutation) PassesAccuracy() (r int, exists bool) {
+	v := m._PassesAccuracy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPassesAccuracy returns the old "PassesAccuracy" field's value of the PSTechnical entity.
+// If the PSTechnical object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSTechnicalMutation) OldPassesAccuracy(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPassesAccuracy is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPassesAccuracy requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPassesAccuracy: %w", err)
+	}
+	return oldValue.PassesAccuracy, nil
+}
+
+// AddPassesAccuracy adds i to the "PassesAccuracy" field.
+func (m *PSTechnicalMutation) AddPassesAccuracy(i int) {
+	if m.add_PassesAccuracy != nil {
+		*m.add_PassesAccuracy += i
+	} else {
+		m.add_PassesAccuracy = &i
+	}
+}
+
+// AddedPassesAccuracy returns the value that was added to the "PassesAccuracy" field in this mutation.
+func (m *PSTechnicalMutation) AddedPassesAccuracy() (r int, exists bool) {
+	v := m.add_PassesAccuracy
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPassesAccuracy resets all changes to the "PassesAccuracy" field.
+func (m *PSTechnicalMutation) ResetPassesAccuracy() {
+	m._PassesAccuracy = nil
+	m.add_PassesAccuracy = nil
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (m *PSTechnicalMutation) SetLastUpdated(t time.Time) {
+	m.lastUpdated = &t
+}
+
+// LastUpdated returns the value of the "lastUpdated" field in the mutation.
+func (m *PSTechnicalMutation) LastUpdated() (r time.Time, exists bool) {
+	v := m.lastUpdated
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLastUpdated returns the old "lastUpdated" field's value of the PSTechnical entity.
+// If the PSTechnical object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSTechnicalMutation) OldLastUpdated(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldLastUpdated is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldLastUpdated requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLastUpdated: %w", err)
+	}
+	return oldValue.LastUpdated, nil
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (m *PSTechnicalMutation) ClearLastUpdated() {
+	m.lastUpdated = nil
+	m.clearedFields[pstechnical.FieldLastUpdated] = struct{}{}
+}
+
+// LastUpdatedCleared returns if the "lastUpdated" field was cleared in this mutation.
+func (m *PSTechnicalMutation) LastUpdatedCleared() bool {
+	_, ok := m.clearedFields[pstechnical.FieldLastUpdated]
+	return ok
+}
+
+// ResetLastUpdated resets all changes to the "lastUpdated" field.
+func (m *PSTechnicalMutation) ResetLastUpdated() {
+	m.lastUpdated = nil
+	delete(m.clearedFields, pstechnical.FieldLastUpdated)
+}
+
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by id.
+func (m *PSTechnicalMutation) SetPlayerStatsID(id int) {
+	m.playerStats = &id
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (m *PSTechnicalMutation) ClearPlayerStats() {
+	m.clearedplayerStats = true
+}
+
+// PlayerStatsCleared reports if the "playerStats" edge to the PlayerStats entity was cleared.
+func (m *PSTechnicalMutation) PlayerStatsCleared() bool {
+	return m.clearedplayerStats
+}
+
+// PlayerStatsID returns the "playerStats" edge ID in the mutation.
+func (m *PSTechnicalMutation) PlayerStatsID() (id int, exists bool) {
+	if m.playerStats != nil {
+		return *m.playerStats, true
+	}
+	return
+}
+
+// PlayerStatsIDs returns the "playerStats" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// PlayerStatsID instead. It exists only for internal usage by the builders.
+func (m *PSTechnicalMutation) PlayerStatsIDs() (ids []int) {
+	if id := m.playerStats; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetPlayerStats resets all changes to the "playerStats" edge.
+func (m *PSTechnicalMutation) ResetPlayerStats() {
+	m.playerStats = nil
+	m.clearedplayerStats = false
+}
+
+// Where appends a list predicates to the PSTechnicalMutation builder.
+func (m *PSTechnicalMutation) Where(ps ...predicate.PSTechnical) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// WhereP appends storage-level predicates to the PSTechnicalMutation builder. Using this method,
+// users can use type-assertion to append predicates that do not depend on any generated package.
+func (m *PSTechnicalMutation) WhereP(ps ...func(*sql.Selector)) {
+	p := make([]predicate.PSTechnical, len(ps))
+	for i := range ps {
+		p[i] = ps[i]
+	}
+	m.Where(p...)
+}
+
+// Op returns the operation name.
+func (m *PSTechnicalMutation) Op() Op {
+	return m.op
+}
+
+// SetOp allows setting the mutation operation.
+func (m *PSTechnicalMutation) SetOp(op Op) {
+	m.op = op
+}
+
+// Type returns the node type of this mutation (PSTechnical).
+func (m *PSTechnicalMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *PSTechnicalMutation) Fields() []string {
+	fields := make([]string, 0, 8)
+	if m._FoulsDrawn != nil {
+		fields = append(fields, pstechnical.FieldFoulsDrawn)
+	}
+	if m._DribbleAttempts != nil {
+		fields = append(fields, pstechnical.FieldDribbleAttempts)
+	}
+	if m._DribbleSuccess != nil {
+		fields = append(fields, pstechnical.FieldDribbleSuccess)
+	}
+	if m._DribblePast != nil {
+		fields = append(fields, pstechnical.FieldDribblePast)
+	}
+	if m._PassesTotal != nil {
+		fields = append(fields, pstechnical.FieldPassesTotal)
+	}
+	if m._PassesKey != nil {
+		fields = append(fields, pstechnical.FieldPassesKey)
+	}
+	if m._PassesAccuracy != nil {
+		fields = append(fields, pstechnical.FieldPassesAccuracy)
+	}
+	if m.lastUpdated != nil {
+		fields = append(fields, pstechnical.FieldLastUpdated)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *PSTechnicalMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case pstechnical.FieldFoulsDrawn:
+		return m.FoulsDrawn()
+	case pstechnical.FieldDribbleAttempts:
+		return m.DribbleAttempts()
+	case pstechnical.FieldDribbleSuccess:
+		return m.DribbleSuccess()
+	case pstechnical.FieldDribblePast:
+		return m.DribblePast()
+	case pstechnical.FieldPassesTotal:
+		return m.PassesTotal()
+	case pstechnical.FieldPassesKey:
+		return m.PassesKey()
+	case pstechnical.FieldPassesAccuracy:
+		return m.PassesAccuracy()
+	case pstechnical.FieldLastUpdated:
+		return m.LastUpdated()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *PSTechnicalMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case pstechnical.FieldFoulsDrawn:
+		return m.OldFoulsDrawn(ctx)
+	case pstechnical.FieldDribbleAttempts:
+		return m.OldDribbleAttempts(ctx)
+	case pstechnical.FieldDribbleSuccess:
+		return m.OldDribbleSuccess(ctx)
+	case pstechnical.FieldDribblePast:
+		return m.OldDribblePast(ctx)
+	case pstechnical.FieldPassesTotal:
+		return m.OldPassesTotal(ctx)
+	case pstechnical.FieldPassesKey:
+		return m.OldPassesKey(ctx)
+	case pstechnical.FieldPassesAccuracy:
+		return m.OldPassesAccuracy(ctx)
+	case pstechnical.FieldLastUpdated:
+		return m.OldLastUpdated(ctx)
+	}
+	return nil, fmt.Errorf("unknown PSTechnical field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PSTechnicalMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case pstechnical.FieldFoulsDrawn:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetFoulsDrawn(v)
+		return nil
+	case pstechnical.FieldDribbleAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDribbleAttempts(v)
+		return nil
+	case pstechnical.FieldDribbleSuccess:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDribbleSuccess(v)
+		return nil
+	case pstechnical.FieldDribblePast:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetDribblePast(v)
+		return nil
+	case pstechnical.FieldPassesTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPassesTotal(v)
+		return nil
+	case pstechnical.FieldPassesKey:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPassesKey(v)
+		return nil
+	case pstechnical.FieldPassesAccuracy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPassesAccuracy(v)
+		return nil
+	case pstechnical.FieldLastUpdated:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLastUpdated(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PSTechnical field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *PSTechnicalMutation) AddedFields() []string {
+	var fields []string
+	if m.add_FoulsDrawn != nil {
+		fields = append(fields, pstechnical.FieldFoulsDrawn)
+	}
+	if m.add_DribbleAttempts != nil {
+		fields = append(fields, pstechnical.FieldDribbleAttempts)
+	}
+	if m.add_DribbleSuccess != nil {
+		fields = append(fields, pstechnical.FieldDribbleSuccess)
+	}
+	if m.add_DribblePast != nil {
+		fields = append(fields, pstechnical.FieldDribblePast)
+	}
+	if m.add_PassesTotal != nil {
+		fields = append(fields, pstechnical.FieldPassesTotal)
+	}
+	if m.add_PassesKey != nil {
+		fields = append(fields, pstechnical.FieldPassesKey)
+	}
+	if m.add_PassesAccuracy != nil {
+		fields = append(fields, pstechnical.FieldPassesAccuracy)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *PSTechnicalMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case pstechnical.FieldFoulsDrawn:
+		return m.AddedFoulsDrawn()
+	case pstechnical.FieldDribbleAttempts:
+		return m.AddedDribbleAttempts()
+	case pstechnical.FieldDribbleSuccess:
+		return m.AddedDribbleSuccess()
+	case pstechnical.FieldDribblePast:
+		return m.AddedDribblePast()
+	case pstechnical.FieldPassesTotal:
+		return m.AddedPassesTotal()
+	case pstechnical.FieldPassesKey:
+		return m.AddedPassesKey()
+	case pstechnical.FieldPassesAccuracy:
+		return m.AddedPassesAccuracy()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *PSTechnicalMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case pstechnical.FieldFoulsDrawn:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddFoulsDrawn(v)
+		return nil
+	case pstechnical.FieldDribbleAttempts:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDribbleAttempts(v)
+		return nil
+	case pstechnical.FieldDribbleSuccess:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDribbleSuccess(v)
+		return nil
+	case pstechnical.FieldDribblePast:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddDribblePast(v)
+		return nil
+	case pstechnical.FieldPassesTotal:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPassesTotal(v)
+		return nil
+	case pstechnical.FieldPassesKey:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPassesKey(v)
+		return nil
+	case pstechnical.FieldPassesAccuracy:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPassesAccuracy(v)
+		return nil
+	}
+	return fmt.Errorf("unknown PSTechnical numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *PSTechnicalMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(pstechnical.FieldLastUpdated) {
+		fields = append(fields, pstechnical.FieldLastUpdated)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *PSTechnicalMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *PSTechnicalMutation) ClearField(name string) error {
+	switch name {
+	case pstechnical.FieldLastUpdated:
+		m.ClearLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PSTechnical nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *PSTechnicalMutation) ResetField(name string) error {
+	switch name {
+	case pstechnical.FieldFoulsDrawn:
+		m.ResetFoulsDrawn()
+		return nil
+	case pstechnical.FieldDribbleAttempts:
+		m.ResetDribbleAttempts()
+		return nil
+	case pstechnical.FieldDribbleSuccess:
+		m.ResetDribbleSuccess()
+		return nil
+	case pstechnical.FieldDribblePast:
+		m.ResetDribblePast()
+		return nil
+	case pstechnical.FieldPassesTotal:
+		m.ResetPassesTotal()
+		return nil
+	case pstechnical.FieldPassesKey:
+		m.ResetPassesKey()
+		return nil
+	case pstechnical.FieldPassesAccuracy:
+		m.ResetPassesAccuracy()
+		return nil
+	case pstechnical.FieldLastUpdated:
+		m.ResetLastUpdated()
+		return nil
+	}
+	return fmt.Errorf("unknown PSTechnical field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *PSTechnicalMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.playerStats != nil {
+		edges = append(edges, pstechnical.EdgePlayerStats)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *PSTechnicalMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case pstechnical.EdgePlayerStats:
+		if id := m.playerStats; id != nil {
+			return []ent.Value{*id}
+		}
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *PSTechnicalMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *PSTechnicalMutation) RemovedIDs(name string) []ent.Value {
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *PSTechnicalMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedplayerStats {
+		edges = append(edges, pstechnical.EdgePlayerStats)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *PSTechnicalMutation) EdgeCleared(name string) bool {
+	switch name {
+	case pstechnical.EdgePlayerStats:
+		return m.clearedplayerStats
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *PSTechnicalMutation) ClearEdge(name string) error {
+	switch name {
+	case pstechnical.EdgePlayerStats:
+		m.ClearPlayerStats()
+		return nil
+	}
+	return fmt.Errorf("unknown PSTechnical unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *PSTechnicalMutation) ResetEdge(name string) error {
+	switch name {
+	case pstechnical.EdgePlayerStats:
+		m.ResetPlayerStats()
+		return nil
+	}
+	return fmt.Errorf("unknown PSTechnical edge %s", name)
 }
 
 // PlayerMutation represents an operation that mutates the Player nodes in the graph.
@@ -13824,46 +15305,51 @@ func (m *PlayerMutation) ResetEdge(name string) error {
 // PlayerStatsMutation represents an operation that mutates the PlayerStats nodes in the graph.
 type PlayerStatsMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *int
-	slug                *string
-	lastUpdated         *time.Time
-	clearedFields       map[string]struct{}
-	player              *int
-	clearedplayer       bool
-	team                *int
-	clearedteam         bool
-	playerEvents        map[int]struct{}
-	removedplayerEvents map[int]struct{}
-	clearedplayerEvents bool
-	matchPlayer         map[int]struct{}
-	removedmatchPlayer  map[int]struct{}
-	clearedmatchPlayer  bool
-	assistEvents        map[int]struct{}
-	removedassistEvents map[int]struct{}
-	clearedassistEvents bool
-	psgames             map[int]struct{}
-	removedpsgames      map[int]struct{}
-	clearedpsgames      bool
-	psgoals             map[int]struct{}
-	removedpsgoals      map[int]struct{}
-	clearedpsgoals      bool
-	psdefense           map[int]struct{}
-	removedpsdefense    map[int]struct{}
-	clearedpsdefense    bool
-	psoffense           map[int]struct{}
-	removedpsoffense    map[int]struct{}
-	clearedpsoffense    bool
-	pspenalty           map[int]struct{}
-	removedpspenalty    map[int]struct{}
-	clearedpspenalty    bool
-	season              map[int]struct{}
-	removedseason       map[int]struct{}
-	clearedseason       bool
-	done                bool
-	oldValue            func(context.Context) (*PlayerStats, error)
-	predicates          []predicate.PlayerStats
+	op                   Op
+	typ                  string
+	id                   *int
+	lastUpdated          *time.Time
+	clearedFields        map[string]struct{}
+	player               *int
+	clearedplayer        bool
+	team                 *int
+	clearedteam          bool
+	playerEvents         map[int]struct{}
+	removedplayerEvents  map[int]struct{}
+	clearedplayerEvents  bool
+	matchPlayer          map[int]struct{}
+	removedmatchPlayer   map[int]struct{}
+	clearedmatchPlayer   bool
+	assistEvents         map[int]struct{}
+	removedassistEvents  map[int]struct{}
+	clearedassistEvents  bool
+	psGames              map[int]struct{}
+	removedpsGames       map[int]struct{}
+	clearedpsGames       bool
+	psShooting           map[int]struct{}
+	removedpsShooting    map[int]struct{}
+	clearedpsShooting    bool
+	psDefense            map[int]struct{}
+	removedpsDefense     map[int]struct{}
+	clearedpsDefense     bool
+	psTechnical          map[int]struct{}
+	removedpsTechnical   map[int]struct{}
+	clearedpsTechnical   bool
+	psPenalty            map[int]struct{}
+	removedpsPenalty     map[int]struct{}
+	clearedpsPenalty     bool
+	psSubstitutes        map[int]struct{}
+	removedpsSubstitutes map[int]struct{}
+	clearedpsSubstitutes bool
+	season               map[int]struct{}
+	removedseason        map[int]struct{}
+	clearedseason        bool
+	psFairplay           map[int]struct{}
+	removedpsFairplay    map[int]struct{}
+	clearedpsFairplay    bool
+	done                 bool
+	oldValue             func(context.Context) (*PlayerStats, error)
+	predicates           []predicate.PlayerStats
 }
 
 var _ ent.Mutation = (*PlayerStatsMutation)(nil)
@@ -13962,42 +15448,6 @@ func (m *PlayerStatsMutation) IDs(ctx context.Context) ([]int, error) {
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
-}
-
-// SetSlug sets the "slug" field.
-func (m *PlayerStatsMutation) SetSlug(s string) {
-	m.slug = &s
-}
-
-// Slug returns the value of the "slug" field in the mutation.
-func (m *PlayerStatsMutation) Slug() (r string, exists bool) {
-	v := m.slug
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldSlug returns the old "slug" field's value of the PlayerStats entity.
-// If the PlayerStats object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *PlayerStatsMutation) OldSlug(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldSlug is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldSlug requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldSlug: %w", err)
-	}
-	return oldValue.Slug, nil
-}
-
-// ResetSlug resets all changes to the "slug" field.
-func (m *PlayerStatsMutation) ResetSlug() {
-	m.slug = nil
 }
 
 // SetLastUpdated sets the "lastUpdated" field.
@@ -14289,274 +15739,328 @@ func (m *PlayerStatsMutation) ResetAssistEvents() {
 	m.removedassistEvents = nil
 }
 
-// AddPsgameIDs adds the "psgames" edge to the PSGames entity by ids.
-func (m *PlayerStatsMutation) AddPsgameIDs(ids ...int) {
-	if m.psgames == nil {
-		m.psgames = make(map[int]struct{})
+// AddPsGameIDs adds the "psGames" edge to the PSGames entity by ids.
+func (m *PlayerStatsMutation) AddPsGameIDs(ids ...int) {
+	if m.psGames == nil {
+		m.psGames = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.psgames[ids[i]] = struct{}{}
+		m.psGames[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPsgames clears the "psgames" edge to the PSGames entity.
-func (m *PlayerStatsMutation) ClearPsgames() {
-	m.clearedpsgames = true
+// ClearPsGames clears the "psGames" edge to the PSGames entity.
+func (m *PlayerStatsMutation) ClearPsGames() {
+	m.clearedpsGames = true
 }
 
-// PsgamesCleared reports if the "psgames" edge to the PSGames entity was cleared.
-func (m *PlayerStatsMutation) PsgamesCleared() bool {
-	return m.clearedpsgames
+// PsGamesCleared reports if the "psGames" edge to the PSGames entity was cleared.
+func (m *PlayerStatsMutation) PsGamesCleared() bool {
+	return m.clearedpsGames
 }
 
-// RemovePsgameIDs removes the "psgames" edge to the PSGames entity by IDs.
-func (m *PlayerStatsMutation) RemovePsgameIDs(ids ...int) {
-	if m.removedpsgames == nil {
-		m.removedpsgames = make(map[int]struct{})
+// RemovePsGameIDs removes the "psGames" edge to the PSGames entity by IDs.
+func (m *PlayerStatsMutation) RemovePsGameIDs(ids ...int) {
+	if m.removedpsGames == nil {
+		m.removedpsGames = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.psgames, ids[i])
-		m.removedpsgames[ids[i]] = struct{}{}
+		delete(m.psGames, ids[i])
+		m.removedpsGames[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedPsgames returns the removed IDs of the "psgames" edge to the PSGames entity.
-func (m *PlayerStatsMutation) RemovedPsgamesIDs() (ids []int) {
-	for id := range m.removedpsgames {
+// RemovedPsGames returns the removed IDs of the "psGames" edge to the PSGames entity.
+func (m *PlayerStatsMutation) RemovedPsGamesIDs() (ids []int) {
+	for id := range m.removedpsGames {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// PsgamesIDs returns the "psgames" edge IDs in the mutation.
-func (m *PlayerStatsMutation) PsgamesIDs() (ids []int) {
-	for id := range m.psgames {
+// PsGamesIDs returns the "psGames" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsGamesIDs() (ids []int) {
+	for id := range m.psGames {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPsgames resets all changes to the "psgames" edge.
-func (m *PlayerStatsMutation) ResetPsgames() {
-	m.psgames = nil
-	m.clearedpsgames = false
-	m.removedpsgames = nil
+// ResetPsGames resets all changes to the "psGames" edge.
+func (m *PlayerStatsMutation) ResetPsGames() {
+	m.psGames = nil
+	m.clearedpsGames = false
+	m.removedpsGames = nil
 }
 
-// AddPsgoalIDs adds the "psgoals" edge to the PSGoals entity by ids.
-func (m *PlayerStatsMutation) AddPsgoalIDs(ids ...int) {
-	if m.psgoals == nil {
-		m.psgoals = make(map[int]struct{})
+// AddPsShootingIDs adds the "psShooting" edge to the PSShooting entity by ids.
+func (m *PlayerStatsMutation) AddPsShootingIDs(ids ...int) {
+	if m.psShooting == nil {
+		m.psShooting = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.psgoals[ids[i]] = struct{}{}
+		m.psShooting[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPsgoals clears the "psgoals" edge to the PSGoals entity.
-func (m *PlayerStatsMutation) ClearPsgoals() {
-	m.clearedpsgoals = true
+// ClearPsShooting clears the "psShooting" edge to the PSShooting entity.
+func (m *PlayerStatsMutation) ClearPsShooting() {
+	m.clearedpsShooting = true
 }
 
-// PsgoalsCleared reports if the "psgoals" edge to the PSGoals entity was cleared.
-func (m *PlayerStatsMutation) PsgoalsCleared() bool {
-	return m.clearedpsgoals
+// PsShootingCleared reports if the "psShooting" edge to the PSShooting entity was cleared.
+func (m *PlayerStatsMutation) PsShootingCleared() bool {
+	return m.clearedpsShooting
 }
 
-// RemovePsgoalIDs removes the "psgoals" edge to the PSGoals entity by IDs.
-func (m *PlayerStatsMutation) RemovePsgoalIDs(ids ...int) {
-	if m.removedpsgoals == nil {
-		m.removedpsgoals = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.psgoals, ids[i])
-		m.removedpsgoals[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPsgoals returns the removed IDs of the "psgoals" edge to the PSGoals entity.
-func (m *PlayerStatsMutation) RemovedPsgoalsIDs() (ids []int) {
-	for id := range m.removedpsgoals {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// PsgoalsIDs returns the "psgoals" edge IDs in the mutation.
-func (m *PlayerStatsMutation) PsgoalsIDs() (ids []int) {
-	for id := range m.psgoals {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPsgoals resets all changes to the "psgoals" edge.
-func (m *PlayerStatsMutation) ResetPsgoals() {
-	m.psgoals = nil
-	m.clearedpsgoals = false
-	m.removedpsgoals = nil
-}
-
-// AddPsdefenseIDs adds the "psdefense" edge to the PSDefense entity by ids.
-func (m *PlayerStatsMutation) AddPsdefenseIDs(ids ...int) {
-	if m.psdefense == nil {
-		m.psdefense = make(map[int]struct{})
+// RemovePsShootingIDs removes the "psShooting" edge to the PSShooting entity by IDs.
+func (m *PlayerStatsMutation) RemovePsShootingIDs(ids ...int) {
+	if m.removedpsShooting == nil {
+		m.removedpsShooting = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.psdefense[ids[i]] = struct{}{}
+		delete(m.psShooting, ids[i])
+		m.removedpsShooting[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPsdefense clears the "psdefense" edge to the PSDefense entity.
-func (m *PlayerStatsMutation) ClearPsdefense() {
-	m.clearedpsdefense = true
+// RemovedPsShooting returns the removed IDs of the "psShooting" edge to the PSShooting entity.
+func (m *PlayerStatsMutation) RemovedPsShootingIDs() (ids []int) {
+	for id := range m.removedpsShooting {
+		ids = append(ids, id)
+	}
+	return
 }
 
-// PsdefenseCleared reports if the "psdefense" edge to the PSDefense entity was cleared.
-func (m *PlayerStatsMutation) PsdefenseCleared() bool {
-	return m.clearedpsdefense
+// PsShootingIDs returns the "psShooting" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsShootingIDs() (ids []int) {
+	for id := range m.psShooting {
+		ids = append(ids, id)
+	}
+	return
 }
 
-// RemovePsdefenseIDs removes the "psdefense" edge to the PSDefense entity by IDs.
-func (m *PlayerStatsMutation) RemovePsdefenseIDs(ids ...int) {
-	if m.removedpsdefense == nil {
-		m.removedpsdefense = make(map[int]struct{})
+// ResetPsShooting resets all changes to the "psShooting" edge.
+func (m *PlayerStatsMutation) ResetPsShooting() {
+	m.psShooting = nil
+	m.clearedpsShooting = false
+	m.removedpsShooting = nil
+}
+
+// AddPsDefenseIDs adds the "psDefense" edge to the PSDefense entity by ids.
+func (m *PlayerStatsMutation) AddPsDefenseIDs(ids ...int) {
+	if m.psDefense == nil {
+		m.psDefense = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.psdefense, ids[i])
-		m.removedpsdefense[ids[i]] = struct{}{}
+		m.psDefense[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedPsdefense returns the removed IDs of the "psdefense" edge to the PSDefense entity.
-func (m *PlayerStatsMutation) RemovedPsdefenseIDs() (ids []int) {
-	for id := range m.removedpsdefense {
-		ids = append(ids, id)
-	}
-	return
+// ClearPsDefense clears the "psDefense" edge to the PSDefense entity.
+func (m *PlayerStatsMutation) ClearPsDefense() {
+	m.clearedpsDefense = true
 }
 
-// PsdefenseIDs returns the "psdefense" edge IDs in the mutation.
-func (m *PlayerStatsMutation) PsdefenseIDs() (ids []int) {
-	for id := range m.psdefense {
-		ids = append(ids, id)
-	}
-	return
+// PsDefenseCleared reports if the "psDefense" edge to the PSDefense entity was cleared.
+func (m *PlayerStatsMutation) PsDefenseCleared() bool {
+	return m.clearedpsDefense
 }
 
-// ResetPsdefense resets all changes to the "psdefense" edge.
-func (m *PlayerStatsMutation) ResetPsdefense() {
-	m.psdefense = nil
-	m.clearedpsdefense = false
-	m.removedpsdefense = nil
-}
-
-// AddPsoffenseIDs adds the "psoffense" edge to the PSOffense entity by ids.
-func (m *PlayerStatsMutation) AddPsoffenseIDs(ids ...int) {
-	if m.psoffense == nil {
-		m.psoffense = make(map[int]struct{})
+// RemovePsDefenseIDs removes the "psDefense" edge to the PSDefense entity by IDs.
+func (m *PlayerStatsMutation) RemovePsDefenseIDs(ids ...int) {
+	if m.removedpsDefense == nil {
+		m.removedpsDefense = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.psoffense[ids[i]] = struct{}{}
+		delete(m.psDefense, ids[i])
+		m.removedpsDefense[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPsoffense clears the "psoffense" edge to the PSOffense entity.
-func (m *PlayerStatsMutation) ClearPsoffense() {
-	m.clearedpsoffense = true
+// RemovedPsDefense returns the removed IDs of the "psDefense" edge to the PSDefense entity.
+func (m *PlayerStatsMutation) RemovedPsDefenseIDs() (ids []int) {
+	for id := range m.removedpsDefense {
+		ids = append(ids, id)
+	}
+	return
 }
 
-// PsoffenseCleared reports if the "psoffense" edge to the PSOffense entity was cleared.
-func (m *PlayerStatsMutation) PsoffenseCleared() bool {
-	return m.clearedpsoffense
+// PsDefenseIDs returns the "psDefense" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsDefenseIDs() (ids []int) {
+	for id := range m.psDefense {
+		ids = append(ids, id)
+	}
+	return
 }
 
-// RemovePsoffenseIDs removes the "psoffense" edge to the PSOffense entity by IDs.
-func (m *PlayerStatsMutation) RemovePsoffenseIDs(ids ...int) {
-	if m.removedpsoffense == nil {
-		m.removedpsoffense = make(map[int]struct{})
+// ResetPsDefense resets all changes to the "psDefense" edge.
+func (m *PlayerStatsMutation) ResetPsDefense() {
+	m.psDefense = nil
+	m.clearedpsDefense = false
+	m.removedpsDefense = nil
+}
+
+// AddPsTechnicalIDs adds the "psTechnical" edge to the PSTechnical entity by ids.
+func (m *PlayerStatsMutation) AddPsTechnicalIDs(ids ...int) {
+	if m.psTechnical == nil {
+		m.psTechnical = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.psoffense, ids[i])
-		m.removedpsoffense[ids[i]] = struct{}{}
+		m.psTechnical[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedPsoffense returns the removed IDs of the "psoffense" edge to the PSOffense entity.
-func (m *PlayerStatsMutation) RemovedPsoffenseIDs() (ids []int) {
-	for id := range m.removedpsoffense {
-		ids = append(ids, id)
-	}
-	return
+// ClearPsTechnical clears the "psTechnical" edge to the PSTechnical entity.
+func (m *PlayerStatsMutation) ClearPsTechnical() {
+	m.clearedpsTechnical = true
 }
 
-// PsoffenseIDs returns the "psoffense" edge IDs in the mutation.
-func (m *PlayerStatsMutation) PsoffenseIDs() (ids []int) {
-	for id := range m.psoffense {
-		ids = append(ids, id)
-	}
-	return
+// PsTechnicalCleared reports if the "psTechnical" edge to the PSTechnical entity was cleared.
+func (m *PlayerStatsMutation) PsTechnicalCleared() bool {
+	return m.clearedpsTechnical
 }
 
-// ResetPsoffense resets all changes to the "psoffense" edge.
-func (m *PlayerStatsMutation) ResetPsoffense() {
-	m.psoffense = nil
-	m.clearedpsoffense = false
-	m.removedpsoffense = nil
-}
-
-// AddPspenaltyIDs adds the "pspenalty" edge to the PSPenalty entity by ids.
-func (m *PlayerStatsMutation) AddPspenaltyIDs(ids ...int) {
-	if m.pspenalty == nil {
-		m.pspenalty = make(map[int]struct{})
+// RemovePsTechnicalIDs removes the "psTechnical" edge to the PSTechnical entity by IDs.
+func (m *PlayerStatsMutation) RemovePsTechnicalIDs(ids ...int) {
+	if m.removedpsTechnical == nil {
+		m.removedpsTechnical = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.pspenalty[ids[i]] = struct{}{}
+		delete(m.psTechnical, ids[i])
+		m.removedpsTechnical[ids[i]] = struct{}{}
 	}
 }
 
-// ClearPspenalty clears the "pspenalty" edge to the PSPenalty entity.
-func (m *PlayerStatsMutation) ClearPspenalty() {
-	m.clearedpspenalty = true
+// RemovedPsTechnical returns the removed IDs of the "psTechnical" edge to the PSTechnical entity.
+func (m *PlayerStatsMutation) RemovedPsTechnicalIDs() (ids []int) {
+	for id := range m.removedpsTechnical {
+		ids = append(ids, id)
+	}
+	return
 }
 
-// PspenaltyCleared reports if the "pspenalty" edge to the PSPenalty entity was cleared.
-func (m *PlayerStatsMutation) PspenaltyCleared() bool {
-	return m.clearedpspenalty
+// PsTechnicalIDs returns the "psTechnical" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsTechnicalIDs() (ids []int) {
+	for id := range m.psTechnical {
+		ids = append(ids, id)
+	}
+	return
 }
 
-// RemovePspenaltyIDs removes the "pspenalty" edge to the PSPenalty entity by IDs.
-func (m *PlayerStatsMutation) RemovePspenaltyIDs(ids ...int) {
-	if m.removedpspenalty == nil {
-		m.removedpspenalty = make(map[int]struct{})
+// ResetPsTechnical resets all changes to the "psTechnical" edge.
+func (m *PlayerStatsMutation) ResetPsTechnical() {
+	m.psTechnical = nil
+	m.clearedpsTechnical = false
+	m.removedpsTechnical = nil
+}
+
+// AddPsPenaltyIDs adds the "psPenalty" edge to the PSPenalty entity by ids.
+func (m *PlayerStatsMutation) AddPsPenaltyIDs(ids ...int) {
+	if m.psPenalty == nil {
+		m.psPenalty = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.pspenalty, ids[i])
-		m.removedpspenalty[ids[i]] = struct{}{}
+		m.psPenalty[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedPspenalty returns the removed IDs of the "pspenalty" edge to the PSPenalty entity.
-func (m *PlayerStatsMutation) RemovedPspenaltyIDs() (ids []int) {
-	for id := range m.removedpspenalty {
+// ClearPsPenalty clears the "psPenalty" edge to the PSPenalty entity.
+func (m *PlayerStatsMutation) ClearPsPenalty() {
+	m.clearedpsPenalty = true
+}
+
+// PsPenaltyCleared reports if the "psPenalty" edge to the PSPenalty entity was cleared.
+func (m *PlayerStatsMutation) PsPenaltyCleared() bool {
+	return m.clearedpsPenalty
+}
+
+// RemovePsPenaltyIDs removes the "psPenalty" edge to the PSPenalty entity by IDs.
+func (m *PlayerStatsMutation) RemovePsPenaltyIDs(ids ...int) {
+	if m.removedpsPenalty == nil {
+		m.removedpsPenalty = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.psPenalty, ids[i])
+		m.removedpsPenalty[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPsPenalty returns the removed IDs of the "psPenalty" edge to the PSPenalty entity.
+func (m *PlayerStatsMutation) RemovedPsPenaltyIDs() (ids []int) {
+	for id := range m.removedpsPenalty {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// PspenaltyIDs returns the "pspenalty" edge IDs in the mutation.
-func (m *PlayerStatsMutation) PspenaltyIDs() (ids []int) {
-	for id := range m.pspenalty {
+// PsPenaltyIDs returns the "psPenalty" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsPenaltyIDs() (ids []int) {
+	for id := range m.psPenalty {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetPspenalty resets all changes to the "pspenalty" edge.
-func (m *PlayerStatsMutation) ResetPspenalty() {
-	m.pspenalty = nil
-	m.clearedpspenalty = false
-	m.removedpspenalty = nil
+// ResetPsPenalty resets all changes to the "psPenalty" edge.
+func (m *PlayerStatsMutation) ResetPsPenalty() {
+	m.psPenalty = nil
+	m.clearedpsPenalty = false
+	m.removedpsPenalty = nil
+}
+
+// AddPsSubstituteIDs adds the "psSubstitutes" edge to the PSSubstitutes entity by ids.
+func (m *PlayerStatsMutation) AddPsSubstituteIDs(ids ...int) {
+	if m.psSubstitutes == nil {
+		m.psSubstitutes = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.psSubstitutes[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPsSubstitutes clears the "psSubstitutes" edge to the PSSubstitutes entity.
+func (m *PlayerStatsMutation) ClearPsSubstitutes() {
+	m.clearedpsSubstitutes = true
+}
+
+// PsSubstitutesCleared reports if the "psSubstitutes" edge to the PSSubstitutes entity was cleared.
+func (m *PlayerStatsMutation) PsSubstitutesCleared() bool {
+	return m.clearedpsSubstitutes
+}
+
+// RemovePsSubstituteIDs removes the "psSubstitutes" edge to the PSSubstitutes entity by IDs.
+func (m *PlayerStatsMutation) RemovePsSubstituteIDs(ids ...int) {
+	if m.removedpsSubstitutes == nil {
+		m.removedpsSubstitutes = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.psSubstitutes, ids[i])
+		m.removedpsSubstitutes[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPsSubstitutes returns the removed IDs of the "psSubstitutes" edge to the PSSubstitutes entity.
+func (m *PlayerStatsMutation) RemovedPsSubstitutesIDs() (ids []int) {
+	for id := range m.removedpsSubstitutes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PsSubstitutesIDs returns the "psSubstitutes" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsSubstitutesIDs() (ids []int) {
+	for id := range m.psSubstitutes {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPsSubstitutes resets all changes to the "psSubstitutes" edge.
+func (m *PlayerStatsMutation) ResetPsSubstitutes() {
+	m.psSubstitutes = nil
+	m.clearedpsSubstitutes = false
+	m.removedpsSubstitutes = nil
 }
 
 // AddSeasonIDs adds the "season" edge to the Season entity by ids.
@@ -14613,6 +16117,60 @@ func (m *PlayerStatsMutation) ResetSeason() {
 	m.removedseason = nil
 }
 
+// AddPsFairplayIDs adds the "psFairplay" edge to the PSFairplay entity by ids.
+func (m *PlayerStatsMutation) AddPsFairplayIDs(ids ...int) {
+	if m.psFairplay == nil {
+		m.psFairplay = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.psFairplay[ids[i]] = struct{}{}
+	}
+}
+
+// ClearPsFairplay clears the "psFairplay" edge to the PSFairplay entity.
+func (m *PlayerStatsMutation) ClearPsFairplay() {
+	m.clearedpsFairplay = true
+}
+
+// PsFairplayCleared reports if the "psFairplay" edge to the PSFairplay entity was cleared.
+func (m *PlayerStatsMutation) PsFairplayCleared() bool {
+	return m.clearedpsFairplay
+}
+
+// RemovePsFairplayIDs removes the "psFairplay" edge to the PSFairplay entity by IDs.
+func (m *PlayerStatsMutation) RemovePsFairplayIDs(ids ...int) {
+	if m.removedpsFairplay == nil {
+		m.removedpsFairplay = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.psFairplay, ids[i])
+		m.removedpsFairplay[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedPsFairplay returns the removed IDs of the "psFairplay" edge to the PSFairplay entity.
+func (m *PlayerStatsMutation) RemovedPsFairplayIDs() (ids []int) {
+	for id := range m.removedpsFairplay {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// PsFairplayIDs returns the "psFairplay" edge IDs in the mutation.
+func (m *PlayerStatsMutation) PsFairplayIDs() (ids []int) {
+	for id := range m.psFairplay {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetPsFairplay resets all changes to the "psFairplay" edge.
+func (m *PlayerStatsMutation) ResetPsFairplay() {
+	m.psFairplay = nil
+	m.clearedpsFairplay = false
+	m.removedpsFairplay = nil
+}
+
 // Where appends a list predicates to the PlayerStatsMutation builder.
 func (m *PlayerStatsMutation) Where(ps ...predicate.PlayerStats) {
 	m.predicates = append(m.predicates, ps...)
@@ -14647,10 +16205,7 @@ func (m *PlayerStatsMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PlayerStatsMutation) Fields() []string {
-	fields := make([]string, 0, 2)
-	if m.slug != nil {
-		fields = append(fields, playerstats.FieldSlug)
-	}
+	fields := make([]string, 0, 1)
 	if m.lastUpdated != nil {
 		fields = append(fields, playerstats.FieldLastUpdated)
 	}
@@ -14662,8 +16217,6 @@ func (m *PlayerStatsMutation) Fields() []string {
 // schema.
 func (m *PlayerStatsMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case playerstats.FieldSlug:
-		return m.Slug()
 	case playerstats.FieldLastUpdated:
 		return m.LastUpdated()
 	}
@@ -14675,8 +16228,6 @@ func (m *PlayerStatsMutation) Field(name string) (ent.Value, bool) {
 // database failed.
 func (m *PlayerStatsMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case playerstats.FieldSlug:
-		return m.OldSlug(ctx)
 	case playerstats.FieldLastUpdated:
 		return m.OldLastUpdated(ctx)
 	}
@@ -14688,13 +16239,6 @@ func (m *PlayerStatsMutation) OldField(ctx context.Context, name string) (ent.Va
 // type.
 func (m *PlayerStatsMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case playerstats.FieldSlug:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetSlug(v)
-		return nil
 	case playerstats.FieldLastUpdated:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -14760,9 +16304,6 @@ func (m *PlayerStatsMutation) ClearField(name string) error {
 // It returns an error if the field is not defined in the schema.
 func (m *PlayerStatsMutation) ResetField(name string) error {
 	switch name {
-	case playerstats.FieldSlug:
-		m.ResetSlug()
-		return nil
 	case playerstats.FieldLastUpdated:
 		m.ResetLastUpdated()
 		return nil
@@ -14772,7 +16313,7 @@ func (m *PlayerStatsMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *PlayerStatsMutation) AddedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 13)
 	if m.player != nil {
 		edges = append(edges, playerstats.EdgePlayer)
 	}
@@ -14788,23 +16329,29 @@ func (m *PlayerStatsMutation) AddedEdges() []string {
 	if m.assistEvents != nil {
 		edges = append(edges, playerstats.EdgeAssistEvents)
 	}
-	if m.psgames != nil {
-		edges = append(edges, playerstats.EdgePsgames)
+	if m.psGames != nil {
+		edges = append(edges, playerstats.EdgePsGames)
 	}
-	if m.psgoals != nil {
-		edges = append(edges, playerstats.EdgePsgoals)
+	if m.psShooting != nil {
+		edges = append(edges, playerstats.EdgePsShooting)
 	}
-	if m.psdefense != nil {
-		edges = append(edges, playerstats.EdgePsdefense)
+	if m.psDefense != nil {
+		edges = append(edges, playerstats.EdgePsDefense)
 	}
-	if m.psoffense != nil {
-		edges = append(edges, playerstats.EdgePsoffense)
+	if m.psTechnical != nil {
+		edges = append(edges, playerstats.EdgePsTechnical)
 	}
-	if m.pspenalty != nil {
-		edges = append(edges, playerstats.EdgePspenalty)
+	if m.psPenalty != nil {
+		edges = append(edges, playerstats.EdgePsPenalty)
+	}
+	if m.psSubstitutes != nil {
+		edges = append(edges, playerstats.EdgePsSubstitutes)
 	}
 	if m.season != nil {
 		edges = append(edges, playerstats.EdgeSeason)
+	}
+	if m.psFairplay != nil {
+		edges = append(edges, playerstats.EdgePsFairplay)
 	}
 	return edges
 }
@@ -14839,33 +16386,39 @@ func (m *PlayerStatsMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePsgames:
-		ids := make([]ent.Value, 0, len(m.psgames))
-		for id := range m.psgames {
+	case playerstats.EdgePsGames:
+		ids := make([]ent.Value, 0, len(m.psGames))
+		for id := range m.psGames {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePsgoals:
-		ids := make([]ent.Value, 0, len(m.psgoals))
-		for id := range m.psgoals {
+	case playerstats.EdgePsShooting:
+		ids := make([]ent.Value, 0, len(m.psShooting))
+		for id := range m.psShooting {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePsdefense:
-		ids := make([]ent.Value, 0, len(m.psdefense))
-		for id := range m.psdefense {
+	case playerstats.EdgePsDefense:
+		ids := make([]ent.Value, 0, len(m.psDefense))
+		for id := range m.psDefense {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePsoffense:
-		ids := make([]ent.Value, 0, len(m.psoffense))
-		for id := range m.psoffense {
+	case playerstats.EdgePsTechnical:
+		ids := make([]ent.Value, 0, len(m.psTechnical))
+		for id := range m.psTechnical {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePspenalty:
-		ids := make([]ent.Value, 0, len(m.pspenalty))
-		for id := range m.pspenalty {
+	case playerstats.EdgePsPenalty:
+		ids := make([]ent.Value, 0, len(m.psPenalty))
+		for id := range m.psPenalty {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsSubstitutes:
+		ids := make([]ent.Value, 0, len(m.psSubstitutes))
+		for id := range m.psSubstitutes {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14875,13 +16428,19 @@ func (m *PlayerStatsMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case playerstats.EdgePsFairplay:
+		ids := make([]ent.Value, 0, len(m.psFairplay))
+		for id := range m.psFairplay {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *PlayerStatsMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 13)
 	if m.removedplayerEvents != nil {
 		edges = append(edges, playerstats.EdgePlayerEvents)
 	}
@@ -14891,23 +16450,29 @@ func (m *PlayerStatsMutation) RemovedEdges() []string {
 	if m.removedassistEvents != nil {
 		edges = append(edges, playerstats.EdgeAssistEvents)
 	}
-	if m.removedpsgames != nil {
-		edges = append(edges, playerstats.EdgePsgames)
+	if m.removedpsGames != nil {
+		edges = append(edges, playerstats.EdgePsGames)
 	}
-	if m.removedpsgoals != nil {
-		edges = append(edges, playerstats.EdgePsgoals)
+	if m.removedpsShooting != nil {
+		edges = append(edges, playerstats.EdgePsShooting)
 	}
-	if m.removedpsdefense != nil {
-		edges = append(edges, playerstats.EdgePsdefense)
+	if m.removedpsDefense != nil {
+		edges = append(edges, playerstats.EdgePsDefense)
 	}
-	if m.removedpsoffense != nil {
-		edges = append(edges, playerstats.EdgePsoffense)
+	if m.removedpsTechnical != nil {
+		edges = append(edges, playerstats.EdgePsTechnical)
 	}
-	if m.removedpspenalty != nil {
-		edges = append(edges, playerstats.EdgePspenalty)
+	if m.removedpsPenalty != nil {
+		edges = append(edges, playerstats.EdgePsPenalty)
+	}
+	if m.removedpsSubstitutes != nil {
+		edges = append(edges, playerstats.EdgePsSubstitutes)
 	}
 	if m.removedseason != nil {
 		edges = append(edges, playerstats.EdgeSeason)
+	}
+	if m.removedpsFairplay != nil {
+		edges = append(edges, playerstats.EdgePsFairplay)
 	}
 	return edges
 }
@@ -14934,33 +16499,39 @@ func (m *PlayerStatsMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePsgames:
-		ids := make([]ent.Value, 0, len(m.removedpsgames))
-		for id := range m.removedpsgames {
+	case playerstats.EdgePsGames:
+		ids := make([]ent.Value, 0, len(m.removedpsGames))
+		for id := range m.removedpsGames {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePsgoals:
-		ids := make([]ent.Value, 0, len(m.removedpsgoals))
-		for id := range m.removedpsgoals {
+	case playerstats.EdgePsShooting:
+		ids := make([]ent.Value, 0, len(m.removedpsShooting))
+		for id := range m.removedpsShooting {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePsdefense:
-		ids := make([]ent.Value, 0, len(m.removedpsdefense))
-		for id := range m.removedpsdefense {
+	case playerstats.EdgePsDefense:
+		ids := make([]ent.Value, 0, len(m.removedpsDefense))
+		for id := range m.removedpsDefense {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePsoffense:
-		ids := make([]ent.Value, 0, len(m.removedpsoffense))
-		for id := range m.removedpsoffense {
+	case playerstats.EdgePsTechnical:
+		ids := make([]ent.Value, 0, len(m.removedpsTechnical))
+		for id := range m.removedpsTechnical {
 			ids = append(ids, id)
 		}
 		return ids
-	case playerstats.EdgePspenalty:
-		ids := make([]ent.Value, 0, len(m.removedpspenalty))
-		for id := range m.removedpspenalty {
+	case playerstats.EdgePsPenalty:
+		ids := make([]ent.Value, 0, len(m.removedpsPenalty))
+		for id := range m.removedpsPenalty {
+			ids = append(ids, id)
+		}
+		return ids
+	case playerstats.EdgePsSubstitutes:
+		ids := make([]ent.Value, 0, len(m.removedpsSubstitutes))
+		for id := range m.removedpsSubstitutes {
 			ids = append(ids, id)
 		}
 		return ids
@@ -14970,13 +16541,19 @@ func (m *PlayerStatsMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case playerstats.EdgePsFairplay:
+		ids := make([]ent.Value, 0, len(m.removedpsFairplay))
+		for id := range m.removedpsFairplay {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *PlayerStatsMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 11)
+	edges := make([]string, 0, 13)
 	if m.clearedplayer {
 		edges = append(edges, playerstats.EdgePlayer)
 	}
@@ -14992,23 +16569,29 @@ func (m *PlayerStatsMutation) ClearedEdges() []string {
 	if m.clearedassistEvents {
 		edges = append(edges, playerstats.EdgeAssistEvents)
 	}
-	if m.clearedpsgames {
-		edges = append(edges, playerstats.EdgePsgames)
+	if m.clearedpsGames {
+		edges = append(edges, playerstats.EdgePsGames)
 	}
-	if m.clearedpsgoals {
-		edges = append(edges, playerstats.EdgePsgoals)
+	if m.clearedpsShooting {
+		edges = append(edges, playerstats.EdgePsShooting)
 	}
-	if m.clearedpsdefense {
-		edges = append(edges, playerstats.EdgePsdefense)
+	if m.clearedpsDefense {
+		edges = append(edges, playerstats.EdgePsDefense)
 	}
-	if m.clearedpsoffense {
-		edges = append(edges, playerstats.EdgePsoffense)
+	if m.clearedpsTechnical {
+		edges = append(edges, playerstats.EdgePsTechnical)
 	}
-	if m.clearedpspenalty {
-		edges = append(edges, playerstats.EdgePspenalty)
+	if m.clearedpsPenalty {
+		edges = append(edges, playerstats.EdgePsPenalty)
+	}
+	if m.clearedpsSubstitutes {
+		edges = append(edges, playerstats.EdgePsSubstitutes)
 	}
 	if m.clearedseason {
 		edges = append(edges, playerstats.EdgeSeason)
+	}
+	if m.clearedpsFairplay {
+		edges = append(edges, playerstats.EdgePsFairplay)
 	}
 	return edges
 }
@@ -15027,18 +16610,22 @@ func (m *PlayerStatsMutation) EdgeCleared(name string) bool {
 		return m.clearedmatchPlayer
 	case playerstats.EdgeAssistEvents:
 		return m.clearedassistEvents
-	case playerstats.EdgePsgames:
-		return m.clearedpsgames
-	case playerstats.EdgePsgoals:
-		return m.clearedpsgoals
-	case playerstats.EdgePsdefense:
-		return m.clearedpsdefense
-	case playerstats.EdgePsoffense:
-		return m.clearedpsoffense
-	case playerstats.EdgePspenalty:
-		return m.clearedpspenalty
+	case playerstats.EdgePsGames:
+		return m.clearedpsGames
+	case playerstats.EdgePsShooting:
+		return m.clearedpsShooting
+	case playerstats.EdgePsDefense:
+		return m.clearedpsDefense
+	case playerstats.EdgePsTechnical:
+		return m.clearedpsTechnical
+	case playerstats.EdgePsPenalty:
+		return m.clearedpsPenalty
+	case playerstats.EdgePsSubstitutes:
+		return m.clearedpsSubstitutes
 	case playerstats.EdgeSeason:
 		return m.clearedseason
+	case playerstats.EdgePsFairplay:
+		return m.clearedpsFairplay
 	}
 	return false
 }
@@ -15076,23 +16663,29 @@ func (m *PlayerStatsMutation) ResetEdge(name string) error {
 	case playerstats.EdgeAssistEvents:
 		m.ResetAssistEvents()
 		return nil
-	case playerstats.EdgePsgames:
-		m.ResetPsgames()
+	case playerstats.EdgePsGames:
+		m.ResetPsGames()
 		return nil
-	case playerstats.EdgePsgoals:
-		m.ResetPsgoals()
+	case playerstats.EdgePsShooting:
+		m.ResetPsShooting()
 		return nil
-	case playerstats.EdgePsdefense:
-		m.ResetPsdefense()
+	case playerstats.EdgePsDefense:
+		m.ResetPsDefense()
 		return nil
-	case playerstats.EdgePsoffense:
-		m.ResetPsoffense()
+	case playerstats.EdgePsTechnical:
+		m.ResetPsTechnical()
 		return nil
-	case playerstats.EdgePspenalty:
-		m.ResetPspenalty()
+	case playerstats.EdgePsPenalty:
+		m.ResetPsPenalty()
+		return nil
+	case playerstats.EdgePsSubstitutes:
+		m.ResetPsSubstitutes()
 		return nil
 	case playerstats.EdgeSeason:
 		m.ResetSeason()
+		return nil
+	case playerstats.EdgePsFairplay:
+		m.ResetPsFairplay()
 		return nil
 	}
 	return fmt.Errorf("unknown PlayerStats edge %s", name)

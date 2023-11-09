@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// Player holds the schema definition for the Player entity.
+// PlayerStats Player holds the schema definition for the Player entity.
 type PlayerStats struct {
 	ent.Schema
 }
@@ -15,9 +15,6 @@ type PlayerStats struct {
 // Fields of the Player.
 func (PlayerStats) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("slug").
-			Unique().
-			Immutable(),
 		field.Time("lastUpdated").
 			Default(time.Now).
 			Optional().
@@ -37,11 +34,13 @@ func (PlayerStats) Edges() []ent.Edge {
 		edge.To("playerEvents", FixtureEvents.Type),
 		edge.To("matchPlayer", MatchPlayer.Type),
 		edge.To("assistEvents", FixtureEvents.Type),
-		edge.To("psgames", PSGames.Type),
-		edge.To("psgoals", PSGoals.Type),
-		edge.To("psdefense", PSDefense.Type),
-		edge.To("psoffense", PSOffense.Type),
-		edge.To("pspenalty", PSPenalty.Type),
+		edge.To("psGames", PSGames.Type),
+		edge.To("psShooting", PSShooting.Type),
+		edge.To("psDefense", PSDefense.Type),
+		edge.To("psTechnical", PSTechnical.Type),
+		edge.To("psPenalty", PSPenalty.Type),
+		edge.To("psSubstitutes", PSSubstitutes.Type),
 		edge.To("season", Season.Type),
+		edge.To("psFairplay", PSFairplay.Type),
 	}
 }

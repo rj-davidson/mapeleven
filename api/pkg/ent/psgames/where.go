@@ -3,6 +3,8 @@
 package psgames
 
 import (
+	"time"
+
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -86,6 +88,11 @@ func Rating(v string) predicate.PSGames {
 // Captain applies equality check predicate on the "Captain" field. It's identical to CaptainEQ.
 func Captain(v bool) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldCaptain, v))
+}
+
+// LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
+func LastUpdated(v time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldEQ(FieldLastUpdated, v))
 }
 
 // AppearancesEQ applies the EQ predicate on the "Appearances" field.
@@ -386,6 +393,56 @@ func CaptainEQ(v bool) predicate.PSGames {
 // CaptainNEQ applies the NEQ predicate on the "Captain" field.
 func CaptainNEQ(v bool) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNEQ(FieldCaptain, v))
+}
+
+// LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
+func LastUpdatedEQ(v time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedNEQ applies the NEQ predicate on the "lastUpdated" field.
+func LastUpdatedNEQ(v time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldNEQ(FieldLastUpdated, v))
+}
+
+// LastUpdatedIn applies the In predicate on the "lastUpdated" field.
+func LastUpdatedIn(vs ...time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedNotIn applies the NotIn predicate on the "lastUpdated" field.
+func LastUpdatedNotIn(vs ...time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldNotIn(FieldLastUpdated, vs...))
+}
+
+// LastUpdatedGT applies the GT predicate on the "lastUpdated" field.
+func LastUpdatedGT(v time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldGT(FieldLastUpdated, v))
+}
+
+// LastUpdatedGTE applies the GTE predicate on the "lastUpdated" field.
+func LastUpdatedGTE(v time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldGTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedLT applies the LT predicate on the "lastUpdated" field.
+func LastUpdatedLT(v time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldLT(FieldLastUpdated, v))
+}
+
+// LastUpdatedLTE applies the LTE predicate on the "lastUpdated" field.
+func LastUpdatedLTE(v time.Time) predicate.PSGames {
+	return predicate.PSGames(sql.FieldLTE(FieldLastUpdated, v))
+}
+
+// LastUpdatedIsNil applies the IsNil predicate on the "lastUpdated" field.
+func LastUpdatedIsNil() predicate.PSGames {
+	return predicate.PSGames(sql.FieldIsNull(FieldLastUpdated))
+}
+
+// LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
+func LastUpdatedNotNil() predicate.PSGames {
+	return predicate.PSGames(sql.FieldNotNull(FieldLastUpdated))
 }
 
 // HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.

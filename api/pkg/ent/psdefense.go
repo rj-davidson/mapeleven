@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
@@ -23,15 +24,17 @@ type PSDefense struct {
 	Blocks int `json:"Blocks,omitempty"`
 	// Interceptions holds the value of the "Interceptions" field.
 	Interceptions int `json:"Interceptions,omitempty"`
-	// TotalDuels holds the value of the "TotalDuels" field.
-	TotalDuels int `json:"TotalDuels,omitempty"`
+	// DuelsTotal holds the value of the "DuelsTotal" field.
+	DuelsTotal int `json:"DuelsTotal,omitempty"`
 	// WonDuels holds the value of the "WonDuels" field.
 	WonDuels int `json:"WonDuels,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSDefenseQuery when eager-loading is set.
-	Edges                  PSDefenseEdges `json:"edges"`
-	player_stats_psdefense *int
-	selectValues           sql.SelectValues
+	Edges                   PSDefenseEdges `json:"edges"`
+	player_stats_ps_defense *int
+	selectValues            sql.SelectValues
 }
 
 // PSDefenseEdges holds the relations/edges for other nodes in the graph.
@@ -61,9 +64,11 @@ func (*PSDefense) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case psdefense.FieldID, psdefense.FieldTacklesTotal, psdefense.FieldBlocks, psdefense.FieldInterceptions, psdefense.FieldTotalDuels, psdefense.FieldWonDuels:
+		case psdefense.FieldID, psdefense.FieldTacklesTotal, psdefense.FieldBlocks, psdefense.FieldInterceptions, psdefense.FieldDuelsTotal, psdefense.FieldWonDuels:
 			values[i] = new(sql.NullInt64)
-		case psdefense.ForeignKeys[0]: // player_stats_psdefense
+		case psdefense.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
+		case psdefense.ForeignKeys[0]: // player_stats_ps_defense
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -104,11 +109,11 @@ func (pd *PSDefense) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pd.Interceptions = int(value.Int64)
 			}
-		case psdefense.FieldTotalDuels:
+		case psdefense.FieldDuelsTotal:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field TotalDuels", values[i])
+				return fmt.Errorf("unexpected type %T for field DuelsTotal", values[i])
 			} else if value.Valid {
-				pd.TotalDuels = int(value.Int64)
+				pd.DuelsTotal = int(value.Int64)
 			}
 		case psdefense.FieldWonDuels:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -116,12 +121,18 @@ func (pd *PSDefense) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pd.WonDuels = int(value.Int64)
 			}
+		case psdefense.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				pd.LastUpdated = value.Time
+			}
 		case psdefense.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_stats_psdefense", value)
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_ps_defense", value)
 			} else if value.Valid {
-				pd.player_stats_psdefense = new(int)
-				*pd.player_stats_psdefense = int(value.Int64)
+				pd.player_stats_ps_defense = new(int)
+				*pd.player_stats_ps_defense = int(value.Int64)
 			}
 		default:
 			pd.selectValues.Set(columns[i], values[i])
@@ -173,11 +184,14 @@ func (pd *PSDefense) String() string {
 	builder.WriteString("Interceptions=")
 	builder.WriteString(fmt.Sprintf("%v", pd.Interceptions))
 	builder.WriteString(", ")
-	builder.WriteString("TotalDuels=")
-	builder.WriteString(fmt.Sprintf("%v", pd.TotalDuels))
+	builder.WriteString("DuelsTotal=")
+	builder.WriteString(fmt.Sprintf("%v", pd.DuelsTotal))
 	builder.WriteString(", ")
 	builder.WriteString("WonDuels=")
 	builder.WriteString(fmt.Sprintf("%v", pd.WonDuels))
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(pd.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

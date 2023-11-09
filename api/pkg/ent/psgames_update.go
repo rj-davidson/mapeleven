@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
@@ -130,6 +131,18 @@ func (pgu *PSGamesUpdate) SetNillableCaptain(b *bool) *PSGamesUpdate {
 	return pgu
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (pgu *PSGamesUpdate) SetLastUpdated(t time.Time) *PSGamesUpdate {
+	pgu.mutation.SetLastUpdated(t)
+	return pgu
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (pgu *PSGamesUpdate) ClearLastUpdated() *PSGamesUpdate {
+	pgu.mutation.ClearLastUpdated()
+	return pgu
+}
+
 // SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
 func (pgu *PSGamesUpdate) SetPlayerStatsID(id int) *PSGamesUpdate {
 	pgu.mutation.SetPlayerStatsID(id)
@@ -162,6 +175,7 @@ func (pgu *PSGamesUpdate) ClearPlayerStats() *PSGamesUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pgu *PSGamesUpdate) Save(ctx context.Context) (int, error) {
+	pgu.defaults()
 	return withHooks(ctx, pgu.sqlSave, pgu.mutation, pgu.hooks)
 }
 
@@ -184,6 +198,14 @@ func (pgu *PSGamesUpdate) Exec(ctx context.Context) error {
 func (pgu *PSGamesUpdate) ExecX(ctx context.Context) {
 	if err := pgu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pgu *PSGamesUpdate) defaults() {
+	if _, ok := pgu.mutation.LastUpdated(); !ok && !pgu.mutation.LastUpdatedCleared() {
+		v := psgames.UpdateDefaultLastUpdated()
+		pgu.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -228,6 +250,12 @@ func (pgu *PSGamesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := pgu.mutation.Captain(); ok {
 		_spec.SetField(psgames.FieldCaptain, field.TypeBool, value)
+	}
+	if value, ok := pgu.mutation.LastUpdated(); ok {
+		_spec.SetField(psgames.FieldLastUpdated, field.TypeTime, value)
+	}
+	if pgu.mutation.LastUpdatedCleared() {
+		_spec.ClearField(psgames.FieldLastUpdated, field.TypeTime)
 	}
 	if pgu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -380,6 +408,18 @@ func (pguo *PSGamesUpdateOne) SetNillableCaptain(b *bool) *PSGamesUpdateOne {
 	return pguo
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (pguo *PSGamesUpdateOne) SetLastUpdated(t time.Time) *PSGamesUpdateOne {
+	pguo.mutation.SetLastUpdated(t)
+	return pguo
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (pguo *PSGamesUpdateOne) ClearLastUpdated() *PSGamesUpdateOne {
+	pguo.mutation.ClearLastUpdated()
+	return pguo
+}
+
 // SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
 func (pguo *PSGamesUpdateOne) SetPlayerStatsID(id int) *PSGamesUpdateOne {
 	pguo.mutation.SetPlayerStatsID(id)
@@ -425,6 +465,7 @@ func (pguo *PSGamesUpdateOne) Select(field string, fields ...string) *PSGamesUpd
 
 // Save executes the query and returns the updated PSGames entity.
 func (pguo *PSGamesUpdateOne) Save(ctx context.Context) (*PSGames, error) {
+	pguo.defaults()
 	return withHooks(ctx, pguo.sqlSave, pguo.mutation, pguo.hooks)
 }
 
@@ -447,6 +488,14 @@ func (pguo *PSGamesUpdateOne) Exec(ctx context.Context) error {
 func (pguo *PSGamesUpdateOne) ExecX(ctx context.Context) {
 	if err := pguo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pguo *PSGamesUpdateOne) defaults() {
+	if _, ok := pguo.mutation.LastUpdated(); !ok && !pguo.mutation.LastUpdatedCleared() {
+		v := psgames.UpdateDefaultLastUpdated()
+		pguo.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -508,6 +557,12 @@ func (pguo *PSGamesUpdateOne) sqlSave(ctx context.Context) (_node *PSGames, err 
 	}
 	if value, ok := pguo.mutation.Captain(); ok {
 		_spec.SetField(psgames.FieldCaptain, field.TypeBool, value)
+	}
+	if value, ok := pguo.mutation.LastUpdated(); ok {
+		_spec.SetField(psgames.FieldLastUpdated, field.TypeTime, value)
+	}
+	if pguo.mutation.LastUpdatedCleared() {
+		_spec.ClearField(psgames.FieldLastUpdated, field.TypeTime)
 	}
 	if pguo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{

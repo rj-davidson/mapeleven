@@ -412,10 +412,10 @@ func (pgq *PSGamesQuery) loadPlayerStats(ctx context.Context, query *PlayerStats
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*PSGames)
 	for i := range nodes {
-		if nodes[i].player_stats_psgames == nil {
+		if nodes[i].player_stats_ps_games == nil {
 			continue
 		}
-		fk := *nodes[i].player_stats_psgames
+		fk := *nodes[i].player_stats_ps_games
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -432,7 +432,7 @@ func (pgq *PSGamesQuery) loadPlayerStats(ctx context.Context, query *PlayerStats
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_stats_psgames" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "player_stats_ps_games" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

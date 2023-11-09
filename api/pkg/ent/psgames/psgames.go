@@ -3,6 +3,8 @@
 package psgames
 
 import (
+	"time"
+
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 )
@@ -26,6 +28,8 @@ const (
 	FieldRating = "rating"
 	// FieldCaptain holds the string denoting the captain field in the database.
 	FieldCaptain = "captain"
+	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
+	FieldLastUpdated = "last_updated"
 	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
 	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the psgames in the database.
@@ -36,7 +40,7 @@ const (
 	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
 	PlayerStatsInverseTable = "player_stats"
 	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
-	PlayerStatsColumn = "player_stats_psgames"
+	PlayerStatsColumn = "player_stats_ps_games"
 )
 
 // Columns holds all SQL columns for psgames fields.
@@ -49,12 +53,13 @@ var Columns = []string{
 	FieldPosition,
 	FieldRating,
 	FieldCaptain,
+	FieldLastUpdated,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ps_games"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"player_stats_psgames",
+	"player_stats_ps_games",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -81,6 +86,10 @@ var (
 	DefaultRating string
 	// DefaultCaptain holds the default value on creation for the "Captain" field.
 	DefaultCaptain bool
+	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
+	DefaultLastUpdated func() time.Time
+	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
+	UpdateDefaultLastUpdated func() time.Time
 )
 
 // OrderOption defines the ordering options for the PSGames queries.
@@ -124,6 +133,11 @@ func ByRating(opts ...sql.OrderTermOption) OrderOption {
 // ByCaptain orders the results by the Captain field.
 func ByCaptain(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldCaptain, opts...).ToFunc()
+}
+
+// ByLastUpdated orders the results by the lastUpdated field.
+func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
 // ByPlayerStatsField orders the results by playerStats field.

@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // PSPenalty holds the schema definition for the PSPenalty entity.
@@ -14,16 +15,14 @@ type PSPenalty struct {
 // Fields of the PSPenalty.
 func (PSPenalty) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("FoulsDrawn"),
-		field.Int("FoulsCommitted"),
-		field.Int("CardsYellow"),
-		field.Int("CardYellowRed"),
-		field.Int("CardsRed"),
-		field.Int("PenaltyWon").Default(0),
-		field.Int("PenaltyCommitted").Default(0),
-		field.Int("PenaltyScored").Default(0),
-		field.Int("PenaltyMissed"),
-		field.Int("PenaltySaved").Default(0),
+		field.Int("Won").Default(0),
+		field.Int("Scored").Default(0),
+		field.Int("Missed"),
+		field.Int("Saved").Default(0),
+		field.Time("lastUpdated").
+			Default(time.Now).
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 
@@ -31,7 +30,7 @@ func (PSPenalty) Fields() []ent.Field {
 func (PSPenalty) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("playerStats", PlayerStats.Type).
-			Ref("pspenalty").
+			Ref("psPenalty").
 			Unique(),
 	}
 }

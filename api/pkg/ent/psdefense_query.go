@@ -412,10 +412,10 @@ func (pdq *PSDefenseQuery) loadPlayerStats(ctx context.Context, query *PlayerSta
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*PSDefense)
 	for i := range nodes {
-		if nodes[i].player_stats_psdefense == nil {
+		if nodes[i].player_stats_ps_defense == nil {
 			continue
 		}
-		fk := *nodes[i].player_stats_psdefense
+		fk := *nodes[i].player_stats_ps_defense
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -432,7 +432,7 @@ func (pdq *PSDefenseQuery) loadPlayerStats(ctx context.Context, query *PlayerSta
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_stats_psdefense" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "player_stats_ps_defense" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

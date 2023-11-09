@@ -3,60 +3,20 @@ package player_stats
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
-	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
-	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
+	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"context"
 	_ "context"
 )
-
-//type PlayerStats struct {
-//	PSPenalty PSPenalty `json:"penalty"`
-//	PSDefense PSDefense `json:"defense"`
-//	PSGoals   PSGoals   `json:"goals"`
-//	PSOffense PSOffense `json:"offense"`
-//	PSGames   PSGames   `json:"games"`
-//}
-//type PSPenalty struct {
-//	FoulsDrawn      int `json:"fouls_drawn"`
-//	FoulsCommitted  int `json:"fouls_committed"`
-//	CardsYellow     int `json:"cards_yellow"`
-//	CardYellowred   int `json:"card_yellowred"`
-//	CardsRed        int `json:"cards_red"`
-//	PenaltyWon      int `json:"penalty_won"`
-//	PenaltyCommited int `json:"penalty_commited"`
-//	PenaltyScored   int `json:"penalty_scored"`
-//	PenaltyMissed   int `json:"penalty_missed"`
-//	PenaltySaved    int `json:"penalty_saved"`
-//}
-//type PSDefense struct {
-//	TacklesTotal  int `json:"tackles_total"`
-//	Blocks        int `json:"blocks"`
-//	Interceptions int `json:"interceptions"`
-//	TotalDuels    int `json:"total_duels"`
-//	WonDuels      int `json:"won_duels"`
-//}
-//
-//type PSGoals struct {
-//	TotalGoals    int `json:"total_goals"`
-//	ConcededGoals int `json:"conceded_goals"`
-//	AssistGoals   int `json:"assist_goals"`
-//	SaveGoals     int `json:"save_goals"`
-//	ShotsTotal    int `json:"shots_total"`
-//	ShotsOn       int `json:"shots_on"`
-//}
-//
-//type PSOffense struct {
-//	DribbleAttempts int `json:"dribbles_attempts"`
-//	DribbleSuccess  int `json:"dribbles_success"`
-//	DribblePast     int `json:"dribbled_past"`
-//	PassesTotal     int `json:"passes_total"`
-//	PassesKey       int `json:"passes_key"`
-//	PassesAccuracy  int `json:"passes_accuracy"`
-//}
 
 type PSTeam struct {
 	ApiFootballId int    `json:"id"`
@@ -136,11 +96,11 @@ type PSCards struct {
 }
 
 type PSPenalty struct {
-	Won      *int `json:"won"`
-	Commited *int `json:"commited"`
-	Scored   int  `json:"scored"`
-	Missed   int  `json:"missed"`
-	Saved    *int `json:"saved"`
+	Won       *int `json:"won"`
+	Committed *int `json:"commited"`
+	Scored    int  `json:"scored"`
+	Missed    int  `json:"missed"`
+	Saved     *int `json:"saved"`
 }
 
 type PlayerStats struct {
@@ -167,182 +127,365 @@ func NewPlayerStatsModel(client *ent.Client) *PlayerStatsModel {
 	return &PlayerStatsModel{client: client}
 }
 
-func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, stats *ent.PlayerStats) (*ent.PlayerStats, error) {
-	_, err := m.client.PlayerStats.
-		UpdateOne(stats).
-		Save(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return stats, nil
-}
+func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, s PlayerStats) error {
+	t, err := m.client.Team.
+		Query().
+		WithClub(
+			func(q *ent.ClubQuery) {
+				q.Where(club.ApiFootballId(s.Team.ApiFootballId))
+			}).
+		WithSeason(
+			func(q *ent.SeasonQuery) {
+				q.Where(season.Year(s.League.Season))
+			}).Only(ctx)
 
-// WithTransaction method to execute a transaction
-func (m *PlayerStatsModel) WithTransaction(ctx context.Context, fn func(tx *ent.Tx) error) error {
-	// Start a new transaction
-	tx, err := m.client.Tx(ctx)
+	ps, err := m.client.PlayerStats.
+		Query().
+		WithPlayer(
+			func(q *ent.PlayerQuery) {
+				q.Where(player.IDEQ(p.ID))
+			},
+		).
+		WithTeam(
+			func(q *ent.TeamQuery) {
+				q.Where(team.IDEQ(t.ID))
+			},
+		).
+		Only(ctx)
+	if ps != nil {
+		_, err = ps.Update().
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		ps, err = m.client.PlayerStats.
+			Create().
+			SetPlayer(p).
+			SetTeam(t).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+
+	_, err = m.upsertDefense(ctx, ps, s.Duels, s.Tackles)
 	if err != nil {
 		return err
 	}
-	// Execute logic
-	if err := fn(tx); err != nil {
-		_ = tx.Rollback() // rollback the transaction in case of errors
+
+	_, err = m.upsertGames(ctx, ps, s.Games)
+	if err != nil {
 		return err
 	}
-	return tx.Commit() // commit the transaction
+
+	_, err = m.upsertShooting(ctx, ps, s.Goals, s.Shots)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.upsertPenalty(ctx, ps, s.Penalty, s.Fouls)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.upsertFairplay(ctx, ps, s.Cards, s.Fouls, s.Penalty)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.upsertSubstitutes(ctx, ps, s.Substitutes)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.upsertTechnical(ctx, ps, s.Passes, s.Dribbles, s.Fouls)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-// write the method to create the playerstats package
-//func (m *PlayerStatsModel) CreatePlayerStats(ctx context.Context, client *ent.Client, data *ent.PlayerStats, p *ent.Player) (*ent.PlayerStats, error) {
-//	//create the playerstats
-//	psp := &PlayerStats{
-//		Team: PSTeam{
-//			ApiFootballId: data.Edges.Team.ID,
-//			Name:          data.Edges.Team.Name,
-//			Logo:          data.Edges.Team.Logo,
-//		},
-//		League: PSLeague{
-//			ApiFootballId: data.Edges..ApiFootballId,
-//			Name:          data.League.Name,
-//			Country:       data.League.Country,
-//			Logo:          data.League.Logo,
-//			Flag:          data.League.Flag,
-//			Season:        data.League.Season,
-//		},
-//		Games: PSGames{
-//			Appearances: data.Games.Appearances,
-//			Lineups:     data.Games.Lineups,
-//			Minutes:     data.Games.Minutes,
-//			Number:      data.Games.Number,
-//			Position:    data.Games.Position,
-//			Rating:      data.Games.Rating,
-//			Captain:     data.Games.Captain,
-//		},
-//		Substitutes: PSSubstitutes{
-//			In:    data.Substitutes.In,
-//			Out:   data.Substitutes.Out,
-//			Bench: data.Substitutes.Bench,
-//		},
-//		Shots: PSShots{
-//			Total: data.Shots.Total,
-//			On:    data.Shots.On,
-//		},
-//		Goals: PSGoals{
-//			Total:    data.Goals.Total,
-//			Conceded: data.Goals.Conceded,
-//			Assists:  data.Goals.Assists,
-//			Saves:    data.Goals.Saves,
-//		},
-//		Passes: PSPasses{
-//			Total:    data.Passes.Total,
-//			Key:      data.Passes.Key,
-//			Accuracy: data.Passes.Accuracy,
-//		},
-//		Tackles: PSTackles{
-//			Total:         data.Tackles.Total,
-//			Blocks:        data.Tackles.Blocks,
-//			Interceptions: data.Tackles.Interceptions,
-//		},
-//		Duels: PSDuels{
-//			Total: data.Duels.Total,
-//			Won:   data.Duels.Won,
-//		},
-//		Dribbles: PSDribbles{
-//			Attempts: data.Dribbles.Attempts,
-//			Success:  data.Dribbles.Success,
-//			Past:     data.Dribbles.Past,
-//		},
-//		Fouls: PSFouls{
-//			Drawn:     data.Fouls.Drawn,
-//			Committed: data.Fouls.Committed,
-//		},
-//		Cards: PSCards{
-//			Yellow:    data.Cards.Yellow,
-//			YellowRed: data.Cards.YellowRed,
-//			Red:       data.Cards.Red,
-//		},
-//		Penalty: PSPenalty{
-//			Won:      data.Penalty.Won,
-//			Commited: data.Penalty.Commited,
-//			Scored:   data.Penalty.Scored,
-//			Missed:   data.Penalty.Missed,
-//			Saved:    data.Penalty.Saved,
-//		},
-//	}
-//	return psp, nil
-//}
+// upsertDefense inserts or updates a player's defense stats in the database.
+func (m *PlayerStatsModel) upsertDefense(ctx context.Context, ps *ent.PlayerStats, duels PSDuels, tackles PSTackles) (*ent.PSDefense, error) {
+	def, err := m.client.PSDefense.
+		Query().
+		WithPlayerStats(
+			func(q *ent.PlayerStatsQuery) {
+				q.Where(playerstats.IDEQ(ps.ID))
+			},
+		).
+		Only(ctx)
 
-//func (m *PlayerStatsModel) upsertPSPenalty(ctx context.Context, p *ent.PlayerStats, data PSPenalty) (*ent.PSPenalty, error) {
-//	prev, err := m.client.PSPenalty.Query().Where(pspenalty.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-//	if err != nil && !ent.IsNotFound(err) {
-//		return nil, fmt.Errorf("error fetching existing PSPenalty: %v", err)
-//	}
-//	if prev == nil {
-//		return CreatePSPenalty(ctx, m.client, data, p)
-//	} else {
-//		return UpdatePSPenalty(ctx, m.client, data, prev)
-//	}
-//}
-//
-//func (m *PlayerStatsModel) upsertPSDefense(ctx context.Context, p *ent.PlayerStats, data PSDefense) (*ent.PSDefense, error) {
-//	prev, err := m.client.PSDefense.Query().Where(psdefense.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-//	if err != nil && !ent.IsNotFound(err) {
-//		return nil, fmt.Errorf("error fetching existing PSDefense: %v", err)
-//	}
-//	if prev == nil {
-//		return CreatePSDefense(ctx, m.client, data, p)
-//	} else {
-//		return UpdatePSDefense(ctx, m.client, data, prev)
-//	}
-//}
+	if def != nil {
+		_, err = def.Update().
+			SetTacklesTotal(tackles.Total).
+			SetBlocks(*tackles.Blocks).
+			SetInterceptions(tackles.Interceptions).
+			SetDuelsTotal(duels.Total).
+			SetWonDuels(duels.Won).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return def, nil
+	} else {
+		def, err := m.client.PSDefense.
+			Create().
+			SetTacklesTotal(tackles.Total).
+			SetBlocks(*tackles.Blocks).
+			SetInterceptions(tackles.Interceptions).
+			SetDuelsTotal(duels.Total).
+			SetWonDuels(duels.Won).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return def, nil
+	}
+}
 
-//func (m *PlayerStatsModel) upsertPSOffense(ctx context.Context, p *ent.PlayerStats, data PSOffense) (*ent.PSOffense, error) {
-//	prev, err := m.client.PSOffense.Query().Where(psoffense.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-//	if err != nil && !ent.IsNotFound(err) {
-//		return nil, fmt.Errorf("error fetching existing PSOffense: %v", err)
-//	}
-//	if prev == nil {
-//		return CreatePSOffense(ctx, m.client, data, p)
-//	} else {
-//		return UpdatePSOffense(ctx, m.client, data, prev)
-//	}
-//}
+// upsertGames inserts or updates a player's games stats in the database.
+func (m *PlayerStatsModel) upsertGames(ctx context.Context, ps *ent.PlayerStats, games PSGames) (*ent.PSGames, error) {
+	g, err := m.client.PSGames.
+		Query().
+		WithPlayerStats(
+			func(q *ent.PlayerStatsQuery) {
+				q.Where(playerstats.IDEQ(ps.ID))
+			},
+		).
+		Only(ctx)
 
-//func (m *PlayerStatsModel) upsertPSGoals(ctx context.Context, p *ent.PlayerStats, data PSGoals) (*ent.PSGoals, error) {
-//	prev, err := m.client.PSGoals.Query().Where(psgoals.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-//	if err != nil && !ent.IsNotFound(err) {
-//		return nil, fmt.Errorf("error fetching existing PSGoals: %v", err)
-//	}
-//	if prev == nil {
-//		return CreatePSGoals(ctx, m.client, data, p)
-//	} else {
-//		return UpdatePSGoals(ctx, m.client, data, prev)
-//	}
-//}
+	if g != nil {
+		_, err = g.Update().
+			SetAppearances(games.Appearances).
+			SetLineups(games.Lineups).
+			SetMinutes(games.Minutes).
+			SetNumber(*games.Number).
+			SetPosition(games.Position).
+			SetRating(games.Rating).
+			SetCaptain(games.Captain).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return g, nil
+	} else {
+		g, err := m.client.PSGames.
+			Create().
+			SetAppearances(games.Appearances).
+			SetLineups(games.Lineups).
+			SetMinutes(games.Minutes).
+			SetNumber(*games.Number).
+			SetPosition(games.Position).
+			SetRating(games.Rating).
+			SetCaptain(games.Captain).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return g, nil
+	}
+}
 
-//func (m *PlayerStatsModel) upsertPSGames(ctx context.Context, p *ent.PlayerStats, data PSGames) (*ent.PSGames, error) {
-//	prev, err := m.client.PSGames.Query().Where(psgames.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)
-//	if err != nil && !ent.IsNotFound(err) {
-//		return nil, fmt.Errorf("error fetching existing PSGames: %v", err)
-//	}
-//	if prev == nil {
-//		return CreatePSGames(ctx, m.client, data, p)
-//	} else {
-//		return UpdatePSGames(ctx, m.client, data, prev)
-//	}
-//}
+// upsertShooting inserts or updates a player's shooting stats in the database.
+func (m *PlayerStatsModel) upsertShooting(ctx context.Context, ps *ent.PlayerStats, goals PSGoals, shots PSShots) (*ent.PSShooting, error) {
+	g, err := m.client.PSShooting.
+		Query().
+		WithPlayerStats(
+			func(q *ent.PlayerStatsQuery) {
+				q.Where(playerstats.IDEQ(ps.ID))
+			},
+		).
+		Only(ctx)
 
-//func (m *PlayerStatsModel) ListPlayers(ctx context.Context) ([]*ent.Player, error) {
-//	players, err := m.client.Player.
-//		Query().
-//		WithPlayerStats(func(query *ent.PlayerStatsQuery) {
-//			query.WithPlayer().WithTeam(func(tq *ent.TeamQuery) {
-//				tq.WithSeason()
-//			})
-//		}).
-//		All(ctx)
-//	if err != nil {
-//		return nil, fmt.Errorf("error listing players: %v", err)
-//	}
-//	return players, nil
-//}
+	if g != nil {
+		_, err = g.Update().
+			SetGoals(goals.Total).
+			SetConceded(goals.Conceded).
+			SetAssists(goals.Assists).
+			SetSaves(*goals.Saves).
+			SetShots(shots.Total).
+			SetOnTarget(shots.On).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return g, nil
+	} else {
+		g, err := m.client.PSShooting.
+			Create().
+			SetGoals(goals.Total).
+			SetConceded(goals.Conceded).
+			SetAssists(goals.Assists).
+			SetSaves(*goals.Saves).
+			SetShots(shots.Total).
+			SetOnTarget(shots.On).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return g, nil
+	}
+}
+
+// upsertPenalty inserts or updates a player's penalty and foul stats in the database.
+func (m *PlayerStatsModel) upsertPenalty(ctx context.Context, ps *ent.PlayerStats, penalty PSPenalty, fouls PSFouls) (*ent.PSPenalty, error) {
+	p, err := m.client.PSPenalty.
+		Query().
+		WithPlayerStats(
+			func(q *ent.PlayerStatsQuery) {
+				q.Where(playerstats.IDEQ(ps.ID))
+			},
+		).
+		Only(ctx)
+
+	if p != nil {
+		_, err = p.Update().
+			SetWon(*penalty.Won).
+			SetScored(penalty.Scored).
+			SetMissed(penalty.Missed).
+			SetSaved(*penalty.Saved).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return p, nil
+	} else {
+		p, err := m.client.PSPenalty.
+			Create().
+			SetWon(*penalty.Won).
+			SetScored(penalty.Scored).
+			SetMissed(penalty.Missed).
+			SetSaved(*penalty.Saved).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return p, nil
+	}
+}
+
+// upsertFairplay inserts or updates a player's fairplay stats in the database.
+func (m *PlayerStatsModel) upsertFairplay(ctx context.Context, ps *ent.PlayerStats, cards PSCards, fouls PSFouls, penalty PSPenalty) (*ent.PSFairplay, error) {
+	f, err := m.client.PSFairplay.
+		Query().
+		WithPlayerStats(
+			func(q *ent.PlayerStatsQuery) {
+				q.Where(playerstats.IDEQ(ps.ID))
+			},
+		).
+		Only(ctx)
+
+	if f != nil {
+		_, err = f.Update().
+			SetFoulsCommitted(fouls.Committed).
+			SetYellow(cards.Yellow).
+			SetYellowRed(cards.YellowRed).
+			SetRed(cards.Red).
+			SetPenaltyConceded(*penalty.Committed).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return f, nil
+	} else {
+		f, err := m.client.PSFairplay.
+			Create().
+			SetFoulsCommitted(fouls.Committed).
+			SetYellow(cards.Yellow).
+			SetYellowRed(cards.YellowRed).
+			SetRed(cards.Red).
+			SetPenaltyConceded(*penalty.Committed).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return f, nil
+	}
+}
+
+// upsertSubstitutes inserts or updates a player's substitutes stats in the database.
+func (m *PlayerStatsModel) upsertSubstitutes(ctx context.Context, ps *ent.PlayerStats, subs PSSubstitutes) (*ent.PSSubstitutes, error) {
+	s, err := m.client.PSSubstitutes.
+		Query().
+		WithPlayerStats(
+			func(q *ent.PlayerStatsQuery) {
+				q.Where(playerstats.IDEQ(ps.ID))
+			},
+		).
+		Only(ctx)
+
+	if s != nil {
+		_, err = s.Update().
+			SetIn(subs.In).
+			SetOut(subs.Out).
+			SetBench(subs.Bench).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+	} else {
+		s, err := m.client.PSSubstitutes.
+			Create().
+			SetIn(subs.In).
+			SetOut(subs.Out).
+			SetBench(subs.Bench).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return s, nil
+	}
+}
+
+// upsertTechnical inserts or updates a player's technical stats in the database.
+func (m *PlayerStatsModel) upsertTechnical(ctx context.Context, ps *ent.PlayerStats, passes PSPasses, dribbles PSDribbles, fouls PSFouls) (*ent.PSTechnical, error) {
+	t, err := m.client.PSTechnical.
+		Query().
+		WithPlayerStats(
+			func(q *ent.PlayerStatsQuery) {
+				q.Where(playerstats.IDEQ(ps.ID))
+			},
+		).
+		Only(ctx)
+
+	if t != nil {
+		_, err = t.Update().
+			SetFoulsDrawn(fouls.Drawn).
+			SetDribbleAttempts(dribbles.Attempts).
+			SetDribbleSuccess(dribbles.Success).
+			SetDribblePast(*dribbles.Past).
+			SetPassesTotal(passes.Total).
+			SetPassesKey(passes.Key).
+			SetPassesAccuracy(passes.Accuracy).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return t, nil
+	} else {
+		t, err := m.client.PSTechnical.
+			Create().
+			SetFoulsDrawn(fouls.Drawn).
+			SetDribbleAttempts(dribbles.Attempts).
+			SetDribbleSuccess(dribbles.Success).
+			SetDribblePast(*dribbles.Past).
+			SetPassesTotal(passes.Total).
+			SetPassesKey(passes.Key).
+			SetPassesAccuracy(passes.Accuracy).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return t, nil
+	}
+}

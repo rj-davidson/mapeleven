@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
@@ -75,16 +76,16 @@ func (pdu *PSDefenseUpdate) AddInterceptions(i int) *PSDefenseUpdate {
 	return pdu
 }
 
-// SetTotalDuels sets the "TotalDuels" field.
-func (pdu *PSDefenseUpdate) SetTotalDuels(i int) *PSDefenseUpdate {
-	pdu.mutation.ResetTotalDuels()
-	pdu.mutation.SetTotalDuels(i)
+// SetDuelsTotal sets the "DuelsTotal" field.
+func (pdu *PSDefenseUpdate) SetDuelsTotal(i int) *PSDefenseUpdate {
+	pdu.mutation.ResetDuelsTotal()
+	pdu.mutation.SetDuelsTotal(i)
 	return pdu
 }
 
-// AddTotalDuels adds i to the "TotalDuels" field.
-func (pdu *PSDefenseUpdate) AddTotalDuels(i int) *PSDefenseUpdate {
-	pdu.mutation.AddTotalDuels(i)
+// AddDuelsTotal adds i to the "DuelsTotal" field.
+func (pdu *PSDefenseUpdate) AddDuelsTotal(i int) *PSDefenseUpdate {
+	pdu.mutation.AddDuelsTotal(i)
 	return pdu
 }
 
@@ -98,6 +99,18 @@ func (pdu *PSDefenseUpdate) SetWonDuels(i int) *PSDefenseUpdate {
 // AddWonDuels adds i to the "WonDuels" field.
 func (pdu *PSDefenseUpdate) AddWonDuels(i int) *PSDefenseUpdate {
 	pdu.mutation.AddWonDuels(i)
+	return pdu
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (pdu *PSDefenseUpdate) SetLastUpdated(t time.Time) *PSDefenseUpdate {
+	pdu.mutation.SetLastUpdated(t)
+	return pdu
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (pdu *PSDefenseUpdate) ClearLastUpdated() *PSDefenseUpdate {
+	pdu.mutation.ClearLastUpdated()
 	return pdu
 }
 
@@ -133,6 +146,7 @@ func (pdu *PSDefenseUpdate) ClearPlayerStats() *PSDefenseUpdate {
 
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pdu *PSDefenseUpdate) Save(ctx context.Context) (int, error) {
+	pdu.defaults()
 	return withHooks(ctx, pdu.sqlSave, pdu.mutation, pdu.hooks)
 }
 
@@ -155,6 +169,14 @@ func (pdu *PSDefenseUpdate) Exec(ctx context.Context) error {
 func (pdu *PSDefenseUpdate) ExecX(ctx context.Context) {
 	if err := pdu.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pdu *PSDefenseUpdate) defaults() {
+	if _, ok := pdu.mutation.LastUpdated(); !ok && !pdu.mutation.LastUpdatedCleared() {
+		v := psdefense.UpdateDefaultLastUpdated()
+		pdu.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -185,17 +207,23 @@ func (pdu *PSDefenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pdu.mutation.AddedInterceptions(); ok {
 		_spec.AddField(psdefense.FieldInterceptions, field.TypeInt, value)
 	}
-	if value, ok := pdu.mutation.TotalDuels(); ok {
-		_spec.SetField(psdefense.FieldTotalDuels, field.TypeInt, value)
+	if value, ok := pdu.mutation.DuelsTotal(); ok {
+		_spec.SetField(psdefense.FieldDuelsTotal, field.TypeInt, value)
 	}
-	if value, ok := pdu.mutation.AddedTotalDuels(); ok {
-		_spec.AddField(psdefense.FieldTotalDuels, field.TypeInt, value)
+	if value, ok := pdu.mutation.AddedDuelsTotal(); ok {
+		_spec.AddField(psdefense.FieldDuelsTotal, field.TypeInt, value)
 	}
 	if value, ok := pdu.mutation.WonDuels(); ok {
 		_spec.SetField(psdefense.FieldWonDuels, field.TypeInt, value)
 	}
 	if value, ok := pdu.mutation.AddedWonDuels(); ok {
 		_spec.AddField(psdefense.FieldWonDuels, field.TypeInt, value)
+	}
+	if value, ok := pdu.mutation.LastUpdated(); ok {
+		_spec.SetField(psdefense.FieldLastUpdated, field.TypeTime, value)
+	}
+	if pdu.mutation.LastUpdatedCleared() {
+		_spec.ClearField(psdefense.FieldLastUpdated, field.TypeTime)
 	}
 	if pdu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -293,16 +321,16 @@ func (pduo *PSDefenseUpdateOne) AddInterceptions(i int) *PSDefenseUpdateOne {
 	return pduo
 }
 
-// SetTotalDuels sets the "TotalDuels" field.
-func (pduo *PSDefenseUpdateOne) SetTotalDuels(i int) *PSDefenseUpdateOne {
-	pduo.mutation.ResetTotalDuels()
-	pduo.mutation.SetTotalDuels(i)
+// SetDuelsTotal sets the "DuelsTotal" field.
+func (pduo *PSDefenseUpdateOne) SetDuelsTotal(i int) *PSDefenseUpdateOne {
+	pduo.mutation.ResetDuelsTotal()
+	pduo.mutation.SetDuelsTotal(i)
 	return pduo
 }
 
-// AddTotalDuels adds i to the "TotalDuels" field.
-func (pduo *PSDefenseUpdateOne) AddTotalDuels(i int) *PSDefenseUpdateOne {
-	pduo.mutation.AddTotalDuels(i)
+// AddDuelsTotal adds i to the "DuelsTotal" field.
+func (pduo *PSDefenseUpdateOne) AddDuelsTotal(i int) *PSDefenseUpdateOne {
+	pduo.mutation.AddDuelsTotal(i)
 	return pduo
 }
 
@@ -316,6 +344,18 @@ func (pduo *PSDefenseUpdateOne) SetWonDuels(i int) *PSDefenseUpdateOne {
 // AddWonDuels adds i to the "WonDuels" field.
 func (pduo *PSDefenseUpdateOne) AddWonDuels(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddWonDuels(i)
+	return pduo
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (pduo *PSDefenseUpdateOne) SetLastUpdated(t time.Time) *PSDefenseUpdateOne {
+	pduo.mutation.SetLastUpdated(t)
+	return pduo
+}
+
+// ClearLastUpdated clears the value of the "lastUpdated" field.
+func (pduo *PSDefenseUpdateOne) ClearLastUpdated() *PSDefenseUpdateOne {
+	pduo.mutation.ClearLastUpdated()
 	return pduo
 }
 
@@ -364,6 +404,7 @@ func (pduo *PSDefenseUpdateOne) Select(field string, fields ...string) *PSDefens
 
 // Save executes the query and returns the updated PSDefense entity.
 func (pduo *PSDefenseUpdateOne) Save(ctx context.Context) (*PSDefense, error) {
+	pduo.defaults()
 	return withHooks(ctx, pduo.sqlSave, pduo.mutation, pduo.hooks)
 }
 
@@ -386,6 +427,14 @@ func (pduo *PSDefenseUpdateOne) Exec(ctx context.Context) error {
 func (pduo *PSDefenseUpdateOne) ExecX(ctx context.Context) {
 	if err := pduo.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (pduo *PSDefenseUpdateOne) defaults() {
+	if _, ok := pduo.mutation.LastUpdated(); !ok && !pduo.mutation.LastUpdatedCleared() {
+		v := psdefense.UpdateDefaultLastUpdated()
+		pduo.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -433,17 +482,23 @@ func (pduo *PSDefenseUpdateOne) sqlSave(ctx context.Context) (_node *PSDefense, 
 	if value, ok := pduo.mutation.AddedInterceptions(); ok {
 		_spec.AddField(psdefense.FieldInterceptions, field.TypeInt, value)
 	}
-	if value, ok := pduo.mutation.TotalDuels(); ok {
-		_spec.SetField(psdefense.FieldTotalDuels, field.TypeInt, value)
+	if value, ok := pduo.mutation.DuelsTotal(); ok {
+		_spec.SetField(psdefense.FieldDuelsTotal, field.TypeInt, value)
 	}
-	if value, ok := pduo.mutation.AddedTotalDuels(); ok {
-		_spec.AddField(psdefense.FieldTotalDuels, field.TypeInt, value)
+	if value, ok := pduo.mutation.AddedDuelsTotal(); ok {
+		_spec.AddField(psdefense.FieldDuelsTotal, field.TypeInt, value)
 	}
 	if value, ok := pduo.mutation.WonDuels(); ok {
 		_spec.SetField(psdefense.FieldWonDuels, field.TypeInt, value)
 	}
 	if value, ok := pduo.mutation.AddedWonDuels(); ok {
 		_spec.AddField(psdefense.FieldWonDuels, field.TypeInt, value)
+	}
+	if value, ok := pduo.mutation.LastUpdated(); ok {
+		_spec.SetField(psdefense.FieldLastUpdated, field.TypeTime, value)
+	}
+	if pduo.mutation.LastUpdatedCleared() {
+		_spec.ClearField(psdefense.FieldLastUpdated, field.TypeTime)
 	}
 	if pduo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{

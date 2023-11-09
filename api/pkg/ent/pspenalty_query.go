@@ -298,12 +298,12 @@ func (ppq *PSPenaltyQuery) WithPlayerStats(opts ...func(*PlayerStatsQuery)) *PSP
 // Example:
 //
 //	var v []struct {
-//		FoulsDrawn int `json:"FoulsDrawn,omitempty"`
+//		Won int `json:"Won,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
 //	client.PSPenalty.Query().
-//		GroupBy(pspenalty.FieldFoulsDrawn).
+//		GroupBy(pspenalty.FieldWon).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 func (ppq *PSPenaltyQuery) GroupBy(field string, fields ...string) *PSPenaltyGroupBy {
@@ -321,11 +321,11 @@ func (ppq *PSPenaltyQuery) GroupBy(field string, fields ...string) *PSPenaltyGro
 // Example:
 //
 //	var v []struct {
-//		FoulsDrawn int `json:"FoulsDrawn,omitempty"`
+//		Won int `json:"Won,omitempty"`
 //	}
 //
 //	client.PSPenalty.Query().
-//		Select(pspenalty.FieldFoulsDrawn).
+//		Select(pspenalty.FieldWon).
 //		Scan(ctx, &v)
 func (ppq *PSPenaltyQuery) Select(fields ...string) *PSPenaltySelect {
 	ppq.ctx.Fields = append(ppq.ctx.Fields, fields...)
@@ -412,10 +412,10 @@ func (ppq *PSPenaltyQuery) loadPlayerStats(ctx context.Context, query *PlayerSta
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*PSPenalty)
 	for i := range nodes {
-		if nodes[i].player_stats_pspenalty == nil {
+		if nodes[i].player_stats_ps_penalty == nil {
 			continue
 		}
-		fk := *nodes[i].player_stats_pspenalty
+		fk := *nodes[i].player_stats_ps_penalty
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -432,7 +432,7 @@ func (ppq *PSPenaltyQuery) loadPlayerStats(ctx context.Context, query *PlayerSta
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_stats_pspenalty" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "player_stats_ps_penalty" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

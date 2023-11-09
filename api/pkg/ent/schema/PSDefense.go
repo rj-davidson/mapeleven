@@ -4,6 +4,7 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
 // PSDefense holds the schema definition for the PSDefense entity.
@@ -17,8 +18,12 @@ func (PSDefense) Fields() []ent.Field {
 		field.Int("TacklesTotal"),
 		field.Int("Blocks").Default(0),
 		field.Int("Interceptions"),
-		field.Int("TotalDuels"),
+		field.Int("DuelsTotal"),
 		field.Int("WonDuels"),
+		field.Time("lastUpdated").
+			Default(time.Now).
+			Optional().
+			UpdateDefault(time.Now),
 	}
 }
 
@@ -26,7 +31,7 @@ func (PSDefense) Fields() []ent.Field {
 func (PSDefense) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("playerStats", PlayerStats.Type).
-			Ref("psdefense").
+			Ref("psDefense").
 			Unique(),
 	}
 }

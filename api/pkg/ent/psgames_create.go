@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
@@ -94,6 +95,20 @@ func (pgc *PSGamesCreate) SetNillableCaptain(b *bool) *PSGamesCreate {
 	return pgc
 }
 
+// SetLastUpdated sets the "lastUpdated" field.
+func (pgc *PSGamesCreate) SetLastUpdated(t time.Time) *PSGamesCreate {
+	pgc.mutation.SetLastUpdated(t)
+	return pgc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillableLastUpdated(t *time.Time) *PSGamesCreate {
+	if t != nil {
+		pgc.SetLastUpdated(*t)
+	}
+	return pgc
+}
+
 // SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
 func (pgc *PSGamesCreate) SetPlayerStatsID(id int) *PSGamesCreate {
 	pgc.mutation.SetPlayerStatsID(id)
@@ -163,6 +178,10 @@ func (pgc *PSGamesCreate) defaults() {
 	if _, ok := pgc.mutation.Captain(); !ok {
 		v := psgames.DefaultCaptain
 		pgc.mutation.SetCaptain(v)
+	}
+	if _, ok := pgc.mutation.LastUpdated(); !ok {
+		v := psgames.DefaultLastUpdated()
+		pgc.mutation.SetLastUpdated(v)
 	}
 }
 
@@ -243,6 +262,10 @@ func (pgc *PSGamesCreate) createSpec() (*PSGames, *sqlgraph.CreateSpec) {
 		_spec.SetField(psgames.FieldCaptain, field.TypeBool, value)
 		_node.Captain = value
 	}
+	if value, ok := pgc.mutation.LastUpdated(); ok {
+		_spec.SetField(psgames.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
+	}
 	if nodes := pgc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -257,7 +280,7 @@ func (pgc *PSGamesCreate) createSpec() (*PSGames, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.player_stats_psgames = &nodes[0]
+		_node.player_stats_ps_games = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

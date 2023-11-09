@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
@@ -31,11 +32,13 @@ type PSGames struct {
 	Rating string `json:"Rating,omitempty"`
 	// Captain holds the value of the "Captain" field.
 	Captain bool `json:"Captain,omitempty"`
+	// LastUpdated holds the value of the "lastUpdated" field.
+	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSGamesQuery when eager-loading is set.
-	Edges                PSGamesEdges `json:"edges"`
-	player_stats_psgames *int
-	selectValues         sql.SelectValues
+	Edges                 PSGamesEdges `json:"edges"`
+	player_stats_ps_games *int
+	selectValues          sql.SelectValues
 }
 
 // PSGamesEdges holds the relations/edges for other nodes in the graph.
@@ -71,7 +74,9 @@ func (*PSGames) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case psgames.FieldPosition, psgames.FieldRating:
 			values[i] = new(sql.NullString)
-		case psgames.ForeignKeys[0]: // player_stats_psgames
+		case psgames.FieldLastUpdated:
+			values[i] = new(sql.NullTime)
+		case psgames.ForeignKeys[0]: // player_stats_ps_games
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -136,12 +141,18 @@ func (pg *PSGames) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pg.Captain = value.Bool
 			}
+		case psgames.FieldLastUpdated:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
+			} else if value.Valid {
+				pg.LastUpdated = value.Time
+			}
 		case psgames.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_stats_psgames", value)
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_ps_games", value)
 			} else if value.Valid {
-				pg.player_stats_psgames = new(int)
-				*pg.player_stats_psgames = int(value.Int64)
+				pg.player_stats_ps_games = new(int)
+				*pg.player_stats_ps_games = int(value.Int64)
 			}
 		default:
 			pg.selectValues.Set(columns[i], values[i])
@@ -204,6 +215,9 @@ func (pg *PSGames) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("Captain=")
 	builder.WriteString(fmt.Sprintf("%v", pg.Captain))
+	builder.WriteString(", ")
+	builder.WriteString("lastUpdated=")
+	builder.WriteString(pg.LastUpdated.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

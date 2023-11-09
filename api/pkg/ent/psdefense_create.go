@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
@@ -46,15 +47,29 @@ func (pdc *PSDefenseCreate) SetInterceptions(i int) *PSDefenseCreate {
 	return pdc
 }
 
-// SetTotalDuels sets the "TotalDuels" field.
-func (pdc *PSDefenseCreate) SetTotalDuels(i int) *PSDefenseCreate {
-	pdc.mutation.SetTotalDuels(i)
+// SetDuelsTotal sets the "DuelsTotal" field.
+func (pdc *PSDefenseCreate) SetDuelsTotal(i int) *PSDefenseCreate {
+	pdc.mutation.SetDuelsTotal(i)
 	return pdc
 }
 
 // SetWonDuels sets the "WonDuels" field.
 func (pdc *PSDefenseCreate) SetWonDuels(i int) *PSDefenseCreate {
 	pdc.mutation.SetWonDuels(i)
+	return pdc
+}
+
+// SetLastUpdated sets the "lastUpdated" field.
+func (pdc *PSDefenseCreate) SetLastUpdated(t time.Time) *PSDefenseCreate {
+	pdc.mutation.SetLastUpdated(t)
+	return pdc
+}
+
+// SetNillableLastUpdated sets the "lastUpdated" field if the given value is not nil.
+func (pdc *PSDefenseCreate) SetNillableLastUpdated(t *time.Time) *PSDefenseCreate {
+	if t != nil {
+		pdc.SetLastUpdated(*t)
+	}
 	return pdc
 }
 
@@ -116,6 +131,10 @@ func (pdc *PSDefenseCreate) defaults() {
 		v := psdefense.DefaultBlocks
 		pdc.mutation.SetBlocks(v)
 	}
+	if _, ok := pdc.mutation.LastUpdated(); !ok {
+		v := psdefense.DefaultLastUpdated()
+		pdc.mutation.SetLastUpdated(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -129,8 +148,8 @@ func (pdc *PSDefenseCreate) check() error {
 	if _, ok := pdc.mutation.Interceptions(); !ok {
 		return &ValidationError{Name: "Interceptions", err: errors.New(`ent: missing required field "PSDefense.Interceptions"`)}
 	}
-	if _, ok := pdc.mutation.TotalDuels(); !ok {
-		return &ValidationError{Name: "TotalDuels", err: errors.New(`ent: missing required field "PSDefense.TotalDuels"`)}
+	if _, ok := pdc.mutation.DuelsTotal(); !ok {
+		return &ValidationError{Name: "DuelsTotal", err: errors.New(`ent: missing required field "PSDefense.DuelsTotal"`)}
 	}
 	if _, ok := pdc.mutation.WonDuels(); !ok {
 		return &ValidationError{Name: "WonDuels", err: errors.New(`ent: missing required field "PSDefense.WonDuels"`)}
@@ -173,13 +192,17 @@ func (pdc *PSDefenseCreate) createSpec() (*PSDefense, *sqlgraph.CreateSpec) {
 		_spec.SetField(psdefense.FieldInterceptions, field.TypeInt, value)
 		_node.Interceptions = value
 	}
-	if value, ok := pdc.mutation.TotalDuels(); ok {
-		_spec.SetField(psdefense.FieldTotalDuels, field.TypeInt, value)
-		_node.TotalDuels = value
+	if value, ok := pdc.mutation.DuelsTotal(); ok {
+		_spec.SetField(psdefense.FieldDuelsTotal, field.TypeInt, value)
+		_node.DuelsTotal = value
 	}
 	if value, ok := pdc.mutation.WonDuels(); ok {
 		_spec.SetField(psdefense.FieldWonDuels, field.TypeInt, value)
 		_node.WonDuels = value
+	}
+	if value, ok := pdc.mutation.LastUpdated(); ok {
+		_spec.SetField(psdefense.FieldLastUpdated, field.TypeTime, value)
+		_node.LastUpdated = value
 	}
 	if nodes := pdc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -195,7 +218,7 @@ func (pdc *PSDefenseCreate) createSpec() (*PSDefense, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.player_stats_psdefense = &nodes[0]
+		_node.player_stats_ps_defense = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
