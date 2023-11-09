@@ -68,16 +68,16 @@ type PlayerResponse struct {
 
 // PlayerController manages HTTP requests for player data.
 type PlayerController struct {
-	client           *http.Client
-	playerModel      *player_models.PlayerModel
-	playerStatsModel *player_stats.PlayerStatsModel
+	client      *http.Client
+	playerModel *player_models.PlayerModel
+	psModel     *player_stats.PlayerStatsModel
 }
 
-func NewPlayerController(playerModel *player_models.PlayerModel, playerStatsModel *player_stats.PlayerStatsModel) *PlayerController {
+func NewPlayerController(playerModel *player_models.PlayerModel, psModel *player_stats.PlayerStatsModel) *PlayerController {
 	return &PlayerController{
-		client:           &http.Client{},
-		playerModel:      playerModel,
-		playerStatsModel: playerStatsModel,
+		client:      &http.Client{},
+		playerModel: playerModel,
+		psModel:     psModel,
 	}
 }
 
@@ -136,7 +136,6 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 	}
 
 	playerData := response.Response[0]
-
 	if err := pc.downloadPhotoIfNeeded(&playerData.Player); err != nil {
 		return err
 	}
@@ -153,28 +152,25 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 		Photo:         playerData.Player.Photo,
 	}
 
-	err := pc.upsertPlayer(ctx, input)
+	p, err := pc.upsertPlayer(ctx, input)
 	if err != nil {
 		return err
 	}
-
-	// Iterate over the slice of Statistics and update/insert each statistic in the database.
-	for _, stat := range playerData.Statistics {
-		playerStats, err := pc.playerStatsModel.UpsertPlayerStats(ctx, playerData.Player, stat)
-		
+	for _, stats := range playerData.Statistics {
+		err = pc.upsertPlayerStats(ctx, p, stats)
 		if err != nil {
-			// Handle the error, possibly logging and continuing with the next statistic
-			fmt.Printf("Error upserting stats for player ID %d: %v\n", playerData.Player.ID, err)
-			continue
+			return err
 		}
-	}
 
+	}
 	return nil
 }
 
 // upsertPlayer inserts or updates a player in the database.
-func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_models.CreatePlayerInput) error {
-	return pc.playerModel.WithTransaction(ctx, func(tx *ent.Tx) error {
+func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_models.CreatePlayerInput) (*ent.Player, error) {
+	var p *ent.Player
+	var err error
+	err = pc.playerModel.WithTransaction(ctx, func(tx *ent.Tx) error {
 		exists := tx.Player.Query().Where(player.ApiFootballIdEQ(input.ApiFootballId)).ExistX(ctx)
 		if exists {
 			updateInput := player_models.UpdatePlayerInput{
@@ -188,18 +184,29 @@ func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_model
 				Injured:       &input.Injured,
 				Photo:         &input.Photo,
 			}
-			_, err := pc.playerModel.UpdatePlayer(ctx, updateInput)
+			p, err = pc.playerModel.UpdatePlayer(ctx, updateInput)
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err := pc.playerModel.CreatePlayer(ctx, input)
+			p, err = pc.playerModel.CreatePlayer(ctx, input)
 			if err != nil {
 				return err
 			}
 		}
-		return nil
+
+		return err
+
 	})
+	if err != nil {
+		return nil, err
+	}
+	return p, err
+}
+
+func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player, stats Statistics) error {
+	return nil
+
 }
 
 func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID int) ([]int, error) {
