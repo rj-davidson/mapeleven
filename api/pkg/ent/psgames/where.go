@@ -53,356 +53,356 @@ func IDLTE(id int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLTE(FieldID, id))
 }
 
-// Appearences applies equality check predicate on the "appearences" field. It's identical to AppearencesEQ.
-func Appearences(v int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldEQ(FieldAppearences, v))
+// Appearances applies equality check predicate on the "Appearances" field. It's identical to AppearancesEQ.
+func Appearances(v int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldEQ(FieldAppearances, v))
 }
 
-// Lineups applies equality check predicate on the "lineups" field. It's identical to LineupsEQ.
+// Lineups applies equality check predicate on the "Lineups" field. It's identical to LineupsEQ.
 func Lineups(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldLineups, v))
 }
 
-// Minutes applies equality check predicate on the "minutes" field. It's identical to MinutesEQ.
+// Minutes applies equality check predicate on the "Minutes" field. It's identical to MinutesEQ.
 func Minutes(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldMinutes, v))
 }
 
-// Number applies equality check predicate on the "number" field. It's identical to NumberEQ.
+// Number applies equality check predicate on the "Number" field. It's identical to NumberEQ.
 func Number(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldNumber, v))
 }
 
-// Position applies equality check predicate on the "position" field. It's identical to PositionEQ.
+// Position applies equality check predicate on the "Position" field. It's identical to PositionEQ.
 func Position(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldPosition, v))
 }
 
-// Rating applies equality check predicate on the "rating" field. It's identical to RatingEQ.
+// Rating applies equality check predicate on the "Rating" field. It's identical to RatingEQ.
 func Rating(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldRating, v))
 }
 
-// Captain applies equality check predicate on the "captain" field. It's identical to CaptainEQ.
+// Captain applies equality check predicate on the "Captain" field. It's identical to CaptainEQ.
 func Captain(v bool) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldCaptain, v))
 }
 
-// AppearencesEQ applies the EQ predicate on the "appearences" field.
-func AppearencesEQ(v int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldEQ(FieldAppearences, v))
+// AppearancesEQ applies the EQ predicate on the "Appearances" field.
+func AppearancesEQ(v int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldEQ(FieldAppearances, v))
 }
 
-// AppearencesNEQ applies the NEQ predicate on the "appearences" field.
-func AppearencesNEQ(v int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldNEQ(FieldAppearences, v))
+// AppearancesNEQ applies the NEQ predicate on the "Appearances" field.
+func AppearancesNEQ(v int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldNEQ(FieldAppearances, v))
 }
 
-// AppearencesIn applies the In predicate on the "appearences" field.
-func AppearencesIn(vs ...int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldIn(FieldAppearences, vs...))
+// AppearancesIn applies the In predicate on the "Appearances" field.
+func AppearancesIn(vs ...int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldIn(FieldAppearances, vs...))
 }
 
-// AppearencesNotIn applies the NotIn predicate on the "appearences" field.
-func AppearencesNotIn(vs ...int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldNotIn(FieldAppearences, vs...))
+// AppearancesNotIn applies the NotIn predicate on the "Appearances" field.
+func AppearancesNotIn(vs ...int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldNotIn(FieldAppearances, vs...))
 }
 
-// AppearencesGT applies the GT predicate on the "appearences" field.
-func AppearencesGT(v int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldGT(FieldAppearences, v))
+// AppearancesGT applies the GT predicate on the "Appearances" field.
+func AppearancesGT(v int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldGT(FieldAppearances, v))
 }
 
-// AppearencesGTE applies the GTE predicate on the "appearences" field.
-func AppearencesGTE(v int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldGTE(FieldAppearences, v))
+// AppearancesGTE applies the GTE predicate on the "Appearances" field.
+func AppearancesGTE(v int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldGTE(FieldAppearances, v))
 }
 
-// AppearencesLT applies the LT predicate on the "appearences" field.
-func AppearencesLT(v int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldLT(FieldAppearences, v))
+// AppearancesLT applies the LT predicate on the "Appearances" field.
+func AppearancesLT(v int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldLT(FieldAppearances, v))
 }
 
-// AppearencesLTE applies the LTE predicate on the "appearences" field.
-func AppearencesLTE(v int) predicate.PSGames {
-	return predicate.PSGames(sql.FieldLTE(FieldAppearences, v))
+// AppearancesLTE applies the LTE predicate on the "Appearances" field.
+func AppearancesLTE(v int) predicate.PSGames {
+	return predicate.PSGames(sql.FieldLTE(FieldAppearances, v))
 }
 
-// LineupsEQ applies the EQ predicate on the "lineups" field.
+// LineupsEQ applies the EQ predicate on the "Lineups" field.
 func LineupsEQ(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldLineups, v))
 }
 
-// LineupsNEQ applies the NEQ predicate on the "lineups" field.
+// LineupsNEQ applies the NEQ predicate on the "Lineups" field.
 func LineupsNEQ(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNEQ(FieldLineups, v))
 }
 
-// LineupsIn applies the In predicate on the "lineups" field.
+// LineupsIn applies the In predicate on the "Lineups" field.
 func LineupsIn(vs ...int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldIn(FieldLineups, vs...))
 }
 
-// LineupsNotIn applies the NotIn predicate on the "lineups" field.
+// LineupsNotIn applies the NotIn predicate on the "Lineups" field.
 func LineupsNotIn(vs ...int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNotIn(FieldLineups, vs...))
 }
 
-// LineupsGT applies the GT predicate on the "lineups" field.
+// LineupsGT applies the GT predicate on the "Lineups" field.
 func LineupsGT(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGT(FieldLineups, v))
 }
 
-// LineupsGTE applies the GTE predicate on the "lineups" field.
+// LineupsGTE applies the GTE predicate on the "Lineups" field.
 func LineupsGTE(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGTE(FieldLineups, v))
 }
 
-// LineupsLT applies the LT predicate on the "lineups" field.
+// LineupsLT applies the LT predicate on the "Lineups" field.
 func LineupsLT(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLT(FieldLineups, v))
 }
 
-// LineupsLTE applies the LTE predicate on the "lineups" field.
+// LineupsLTE applies the LTE predicate on the "Lineups" field.
 func LineupsLTE(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLTE(FieldLineups, v))
 }
 
-// MinutesEQ applies the EQ predicate on the "minutes" field.
+// MinutesEQ applies the EQ predicate on the "Minutes" field.
 func MinutesEQ(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldMinutes, v))
 }
 
-// MinutesNEQ applies the NEQ predicate on the "minutes" field.
+// MinutesNEQ applies the NEQ predicate on the "Minutes" field.
 func MinutesNEQ(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNEQ(FieldMinutes, v))
 }
 
-// MinutesIn applies the In predicate on the "minutes" field.
+// MinutesIn applies the In predicate on the "Minutes" field.
 func MinutesIn(vs ...int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldIn(FieldMinutes, vs...))
 }
 
-// MinutesNotIn applies the NotIn predicate on the "minutes" field.
+// MinutesNotIn applies the NotIn predicate on the "Minutes" field.
 func MinutesNotIn(vs ...int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNotIn(FieldMinutes, vs...))
 }
 
-// MinutesGT applies the GT predicate on the "minutes" field.
+// MinutesGT applies the GT predicate on the "Minutes" field.
 func MinutesGT(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGT(FieldMinutes, v))
 }
 
-// MinutesGTE applies the GTE predicate on the "minutes" field.
+// MinutesGTE applies the GTE predicate on the "Minutes" field.
 func MinutesGTE(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGTE(FieldMinutes, v))
 }
 
-// MinutesLT applies the LT predicate on the "minutes" field.
+// MinutesLT applies the LT predicate on the "Minutes" field.
 func MinutesLT(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLT(FieldMinutes, v))
 }
 
-// MinutesLTE applies the LTE predicate on the "minutes" field.
+// MinutesLTE applies the LTE predicate on the "Minutes" field.
 func MinutesLTE(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLTE(FieldMinutes, v))
 }
 
-// NumberEQ applies the EQ predicate on the "number" field.
+// NumberEQ applies the EQ predicate on the "Number" field.
 func NumberEQ(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldNumber, v))
 }
 
-// NumberNEQ applies the NEQ predicate on the "number" field.
+// NumberNEQ applies the NEQ predicate on the "Number" field.
 func NumberNEQ(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNEQ(FieldNumber, v))
 }
 
-// NumberIn applies the In predicate on the "number" field.
+// NumberIn applies the In predicate on the "Number" field.
 func NumberIn(vs ...int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldIn(FieldNumber, vs...))
 }
 
-// NumberNotIn applies the NotIn predicate on the "number" field.
+// NumberNotIn applies the NotIn predicate on the "Number" field.
 func NumberNotIn(vs ...int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNotIn(FieldNumber, vs...))
 }
 
-// NumberGT applies the GT predicate on the "number" field.
+// NumberGT applies the GT predicate on the "Number" field.
 func NumberGT(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGT(FieldNumber, v))
 }
 
-// NumberGTE applies the GTE predicate on the "number" field.
+// NumberGTE applies the GTE predicate on the "Number" field.
 func NumberGTE(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGTE(FieldNumber, v))
 }
 
-// NumberLT applies the LT predicate on the "number" field.
+// NumberLT applies the LT predicate on the "Number" field.
 func NumberLT(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLT(FieldNumber, v))
 }
 
-// NumberLTE applies the LTE predicate on the "number" field.
+// NumberLTE applies the LTE predicate on the "Number" field.
 func NumberLTE(v int) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLTE(FieldNumber, v))
 }
 
-// PositionEQ applies the EQ predicate on the "position" field.
+// PositionEQ applies the EQ predicate on the "Position" field.
 func PositionEQ(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldPosition, v))
 }
 
-// PositionNEQ applies the NEQ predicate on the "position" field.
+// PositionNEQ applies the NEQ predicate on the "Position" field.
 func PositionNEQ(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNEQ(FieldPosition, v))
 }
 
-// PositionIn applies the In predicate on the "position" field.
+// PositionIn applies the In predicate on the "Position" field.
 func PositionIn(vs ...string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldIn(FieldPosition, vs...))
 }
 
-// PositionNotIn applies the NotIn predicate on the "position" field.
+// PositionNotIn applies the NotIn predicate on the "Position" field.
 func PositionNotIn(vs ...string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNotIn(FieldPosition, vs...))
 }
 
-// PositionGT applies the GT predicate on the "position" field.
+// PositionGT applies the GT predicate on the "Position" field.
 func PositionGT(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGT(FieldPosition, v))
 }
 
-// PositionGTE applies the GTE predicate on the "position" field.
+// PositionGTE applies the GTE predicate on the "Position" field.
 func PositionGTE(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGTE(FieldPosition, v))
 }
 
-// PositionLT applies the LT predicate on the "position" field.
+// PositionLT applies the LT predicate on the "Position" field.
 func PositionLT(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLT(FieldPosition, v))
 }
 
-// PositionLTE applies the LTE predicate on the "position" field.
+// PositionLTE applies the LTE predicate on the "Position" field.
 func PositionLTE(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLTE(FieldPosition, v))
 }
 
-// PositionContains applies the Contains predicate on the "position" field.
+// PositionContains applies the Contains predicate on the "Position" field.
 func PositionContains(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldContains(FieldPosition, v))
 }
 
-// PositionHasPrefix applies the HasPrefix predicate on the "position" field.
+// PositionHasPrefix applies the HasPrefix predicate on the "Position" field.
 func PositionHasPrefix(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldHasPrefix(FieldPosition, v))
 }
 
-// PositionHasSuffix applies the HasSuffix predicate on the "position" field.
+// PositionHasSuffix applies the HasSuffix predicate on the "Position" field.
 func PositionHasSuffix(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldHasSuffix(FieldPosition, v))
 }
 
-// PositionEqualFold applies the EqualFold predicate on the "position" field.
+// PositionEqualFold applies the EqualFold predicate on the "Position" field.
 func PositionEqualFold(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEqualFold(FieldPosition, v))
 }
 
-// PositionContainsFold applies the ContainsFold predicate on the "position" field.
+// PositionContainsFold applies the ContainsFold predicate on the "Position" field.
 func PositionContainsFold(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldContainsFold(FieldPosition, v))
 }
 
-// RatingEQ applies the EQ predicate on the "rating" field.
+// RatingEQ applies the EQ predicate on the "Rating" field.
 func RatingEQ(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldRating, v))
 }
 
-// RatingNEQ applies the NEQ predicate on the "rating" field.
+// RatingNEQ applies the NEQ predicate on the "Rating" field.
 func RatingNEQ(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNEQ(FieldRating, v))
 }
 
-// RatingIn applies the In predicate on the "rating" field.
+// RatingIn applies the In predicate on the "Rating" field.
 func RatingIn(vs ...string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldIn(FieldRating, vs...))
 }
 
-// RatingNotIn applies the NotIn predicate on the "rating" field.
+// RatingNotIn applies the NotIn predicate on the "Rating" field.
 func RatingNotIn(vs ...string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNotIn(FieldRating, vs...))
 }
 
-// RatingGT applies the GT predicate on the "rating" field.
+// RatingGT applies the GT predicate on the "Rating" field.
 func RatingGT(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGT(FieldRating, v))
 }
 
-// RatingGTE applies the GTE predicate on the "rating" field.
+// RatingGTE applies the GTE predicate on the "Rating" field.
 func RatingGTE(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldGTE(FieldRating, v))
 }
 
-// RatingLT applies the LT predicate on the "rating" field.
+// RatingLT applies the LT predicate on the "Rating" field.
 func RatingLT(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLT(FieldRating, v))
 }
 
-// RatingLTE applies the LTE predicate on the "rating" field.
+// RatingLTE applies the LTE predicate on the "Rating" field.
 func RatingLTE(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldLTE(FieldRating, v))
 }
 
-// RatingContains applies the Contains predicate on the "rating" field.
+// RatingContains applies the Contains predicate on the "Rating" field.
 func RatingContains(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldContains(FieldRating, v))
 }
 
-// RatingHasPrefix applies the HasPrefix predicate on the "rating" field.
+// RatingHasPrefix applies the HasPrefix predicate on the "Rating" field.
 func RatingHasPrefix(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldHasPrefix(FieldRating, v))
 }
 
-// RatingHasSuffix applies the HasSuffix predicate on the "rating" field.
+// RatingHasSuffix applies the HasSuffix predicate on the "Rating" field.
 func RatingHasSuffix(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldHasSuffix(FieldRating, v))
 }
 
-// RatingEqualFold applies the EqualFold predicate on the "rating" field.
+// RatingEqualFold applies the EqualFold predicate on the "Rating" field.
 func RatingEqualFold(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEqualFold(FieldRating, v))
 }
 
-// RatingContainsFold applies the ContainsFold predicate on the "rating" field.
+// RatingContainsFold applies the ContainsFold predicate on the "Rating" field.
 func RatingContainsFold(v string) predicate.PSGames {
 	return predicate.PSGames(sql.FieldContainsFold(FieldRating, v))
 }
 
-// CaptainEQ applies the EQ predicate on the "captain" field.
+// CaptainEQ applies the EQ predicate on the "Captain" field.
 func CaptainEQ(v bool) predicate.PSGames {
 	return predicate.PSGames(sql.FieldEQ(FieldCaptain, v))
 }
 
-// CaptainNEQ applies the NEQ predicate on the "captain" field.
+// CaptainNEQ applies the NEQ predicate on the "Captain" field.
 func CaptainNEQ(v bool) predicate.PSGames {
 	return predicate.PSGames(sql.FieldNEQ(FieldCaptain, v))
 }
 
-// HasPlayer applies the HasEdge predicate on the "player" edge.
-func HasPlayer() predicate.PSGames {
+// HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.
+func HasPlayerStats() predicate.PSGames {
 	return predicate.PSGames(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PlayerTable, PlayerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPlayerWith applies the HasEdge predicate on the "player" edge with a given conditions (other predicates).
-func HasPlayerWith(preds ...predicate.Player) predicate.PSGames {
+// HasPlayerStatsWith applies the HasEdge predicate on the "playerStats" edge with a given conditions (other predicates).
+func HasPlayerStatsWith(preds ...predicate.PlayerStats) predicate.PSGames {
 	return predicate.PSGames(func(s *sql.Selector) {
-		step := newPlayerStep()
+		step := newPlayerStatsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

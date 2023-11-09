@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	"entgo.io/ent/dialect/sql"
@@ -28,40 +28,40 @@ func (pou *PSOffenseUpdate) Where(ps ...predicate.PSOffense) *PSOffenseUpdate {
 	return pou
 }
 
-// SetDribbleAttempts sets the "dribbleAttempts" field.
+// SetDribbleAttempts sets the "DribbleAttempts" field.
 func (pou *PSOffenseUpdate) SetDribbleAttempts(i int) *PSOffenseUpdate {
 	pou.mutation.ResetDribbleAttempts()
 	pou.mutation.SetDribbleAttempts(i)
 	return pou
 }
 
-// AddDribbleAttempts adds i to the "dribbleAttempts" field.
+// AddDribbleAttempts adds i to the "DribbleAttempts" field.
 func (pou *PSOffenseUpdate) AddDribbleAttempts(i int) *PSOffenseUpdate {
 	pou.mutation.AddDribbleAttempts(i)
 	return pou
 }
 
-// SetDribbleSuccess sets the "dribbleSuccess" field.
+// SetDribbleSuccess sets the "DribbleSuccess" field.
 func (pou *PSOffenseUpdate) SetDribbleSuccess(i int) *PSOffenseUpdate {
 	pou.mutation.ResetDribbleSuccess()
 	pou.mutation.SetDribbleSuccess(i)
 	return pou
 }
 
-// AddDribbleSuccess adds i to the "dribbleSuccess" field.
+// AddDribbleSuccess adds i to the "DribbleSuccess" field.
 func (pou *PSOffenseUpdate) AddDribbleSuccess(i int) *PSOffenseUpdate {
 	pou.mutation.AddDribbleSuccess(i)
 	return pou
 }
 
-// SetDribblePast sets the "dribblePast" field.
+// SetDribblePast sets the "DribblePast" field.
 func (pou *PSOffenseUpdate) SetDribblePast(i int) *PSOffenseUpdate {
 	pou.mutation.ResetDribblePast()
 	pou.mutation.SetDribblePast(i)
 	return pou
 }
 
-// SetNillableDribblePast sets the "dribblePast" field if the given value is not nil.
+// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
 func (pou *PSOffenseUpdate) SetNillableDribblePast(i *int) *PSOffenseUpdate {
 	if i != nil {
 		pou.SetDribblePast(*i)
@@ -69,68 +69,68 @@ func (pou *PSOffenseUpdate) SetNillableDribblePast(i *int) *PSOffenseUpdate {
 	return pou
 }
 
-// AddDribblePast adds i to the "dribblePast" field.
+// AddDribblePast adds i to the "DribblePast" field.
 func (pou *PSOffenseUpdate) AddDribblePast(i int) *PSOffenseUpdate {
 	pou.mutation.AddDribblePast(i)
 	return pou
 }
 
-// SetPassesTotal sets the "passesTotal" field.
+// SetPassesTotal sets the "PassesTotal" field.
 func (pou *PSOffenseUpdate) SetPassesTotal(i int) *PSOffenseUpdate {
 	pou.mutation.ResetPassesTotal()
 	pou.mutation.SetPassesTotal(i)
 	return pou
 }
 
-// AddPassesTotal adds i to the "passesTotal" field.
+// AddPassesTotal adds i to the "PassesTotal" field.
 func (pou *PSOffenseUpdate) AddPassesTotal(i int) *PSOffenseUpdate {
 	pou.mutation.AddPassesTotal(i)
 	return pou
 }
 
-// SetPassesKey sets the "passesKey" field.
+// SetPassesKey sets the "PassesKey" field.
 func (pou *PSOffenseUpdate) SetPassesKey(i int) *PSOffenseUpdate {
 	pou.mutation.ResetPassesKey()
 	pou.mutation.SetPassesKey(i)
 	return pou
 }
 
-// AddPassesKey adds i to the "passesKey" field.
+// AddPassesKey adds i to the "PassesKey" field.
 func (pou *PSOffenseUpdate) AddPassesKey(i int) *PSOffenseUpdate {
 	pou.mutation.AddPassesKey(i)
 	return pou
 }
 
-// SetPassesAccuracy sets the "passesAccuracy" field.
+// SetPassesAccuracy sets the "PassesAccuracy" field.
 func (pou *PSOffenseUpdate) SetPassesAccuracy(i int) *PSOffenseUpdate {
 	pou.mutation.ResetPassesAccuracy()
 	pou.mutation.SetPassesAccuracy(i)
 	return pou
 }
 
-// AddPassesAccuracy adds i to the "passesAccuracy" field.
+// AddPassesAccuracy adds i to the "PassesAccuracy" field.
 func (pou *PSOffenseUpdate) AddPassesAccuracy(i int) *PSOffenseUpdate {
 	pou.mutation.AddPassesAccuracy(i)
 	return pou
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (pou *PSOffenseUpdate) SetPlayerID(id int) *PSOffenseUpdate {
-	pou.mutation.SetPlayerID(id)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pou *PSOffenseUpdate) SetPlayerStatsID(id int) *PSOffenseUpdate {
+	pou.mutation.SetPlayerStatsID(id)
 	return pou
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (pou *PSOffenseUpdate) SetNillablePlayerID(id *int) *PSOffenseUpdate {
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pou *PSOffenseUpdate) SetNillablePlayerStatsID(id *int) *PSOffenseUpdate {
 	if id != nil {
-		pou = pou.SetPlayerID(*id)
+		pou = pou.SetPlayerStatsID(*id)
 	}
 	return pou
 }
 
-// SetPlayer sets the "player" edge to the Player entity.
-func (pou *PSOffenseUpdate) SetPlayer(p *Player) *PSOffenseUpdate {
-	return pou.SetPlayerID(p.ID)
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pou *PSOffenseUpdate) SetPlayerStats(p *PlayerStats) *PSOffenseUpdate {
+	return pou.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSOffenseMutation object of the builder.
@@ -138,9 +138,9 @@ func (pou *PSOffenseUpdate) Mutation() *PSOffenseMutation {
 	return pou.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (pou *PSOffenseUpdate) ClearPlayer() *PSOffenseUpdate {
-	pou.mutation.ClearPlayer()
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (pou *PSOffenseUpdate) ClearPlayerStats() *PSOffenseUpdate {
+	pou.mutation.ClearPlayerStats()
 	return pou
 }
 
@@ -216,28 +216,28 @@ func (pou *PSOffenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pou.mutation.AddedPassesAccuracy(); ok {
 		_spec.AddField(psoffense.FieldPassesAccuracy, field.TypeInt, value)
 	}
-	if pou.mutation.PlayerCleared() {
+	if pou.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psoffense.PlayerTable,
-			Columns: []string{psoffense.PlayerColumn},
+			Table:   psoffense.PlayerStatsTable,
+			Columns: []string{psoffense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pou.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := pou.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psoffense.PlayerTable,
-			Columns: []string{psoffense.PlayerColumn},
+			Table:   psoffense.PlayerStatsTable,
+			Columns: []string{psoffense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -265,40 +265,40 @@ type PSOffenseUpdateOne struct {
 	mutation *PSOffenseMutation
 }
 
-// SetDribbleAttempts sets the "dribbleAttempts" field.
+// SetDribbleAttempts sets the "DribbleAttempts" field.
 func (pouo *PSOffenseUpdateOne) SetDribbleAttempts(i int) *PSOffenseUpdateOne {
 	pouo.mutation.ResetDribbleAttempts()
 	pouo.mutation.SetDribbleAttempts(i)
 	return pouo
 }
 
-// AddDribbleAttempts adds i to the "dribbleAttempts" field.
+// AddDribbleAttempts adds i to the "DribbleAttempts" field.
 func (pouo *PSOffenseUpdateOne) AddDribbleAttempts(i int) *PSOffenseUpdateOne {
 	pouo.mutation.AddDribbleAttempts(i)
 	return pouo
 }
 
-// SetDribbleSuccess sets the "dribbleSuccess" field.
+// SetDribbleSuccess sets the "DribbleSuccess" field.
 func (pouo *PSOffenseUpdateOne) SetDribbleSuccess(i int) *PSOffenseUpdateOne {
 	pouo.mutation.ResetDribbleSuccess()
 	pouo.mutation.SetDribbleSuccess(i)
 	return pouo
 }
 
-// AddDribbleSuccess adds i to the "dribbleSuccess" field.
+// AddDribbleSuccess adds i to the "DribbleSuccess" field.
 func (pouo *PSOffenseUpdateOne) AddDribbleSuccess(i int) *PSOffenseUpdateOne {
 	pouo.mutation.AddDribbleSuccess(i)
 	return pouo
 }
 
-// SetDribblePast sets the "dribblePast" field.
+// SetDribblePast sets the "DribblePast" field.
 func (pouo *PSOffenseUpdateOne) SetDribblePast(i int) *PSOffenseUpdateOne {
 	pouo.mutation.ResetDribblePast()
 	pouo.mutation.SetDribblePast(i)
 	return pouo
 }
 
-// SetNillableDribblePast sets the "dribblePast" field if the given value is not nil.
+// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
 func (pouo *PSOffenseUpdateOne) SetNillableDribblePast(i *int) *PSOffenseUpdateOne {
 	if i != nil {
 		pouo.SetDribblePast(*i)
@@ -306,68 +306,68 @@ func (pouo *PSOffenseUpdateOne) SetNillableDribblePast(i *int) *PSOffenseUpdateO
 	return pouo
 }
 
-// AddDribblePast adds i to the "dribblePast" field.
+// AddDribblePast adds i to the "DribblePast" field.
 func (pouo *PSOffenseUpdateOne) AddDribblePast(i int) *PSOffenseUpdateOne {
 	pouo.mutation.AddDribblePast(i)
 	return pouo
 }
 
-// SetPassesTotal sets the "passesTotal" field.
+// SetPassesTotal sets the "PassesTotal" field.
 func (pouo *PSOffenseUpdateOne) SetPassesTotal(i int) *PSOffenseUpdateOne {
 	pouo.mutation.ResetPassesTotal()
 	pouo.mutation.SetPassesTotal(i)
 	return pouo
 }
 
-// AddPassesTotal adds i to the "passesTotal" field.
+// AddPassesTotal adds i to the "PassesTotal" field.
 func (pouo *PSOffenseUpdateOne) AddPassesTotal(i int) *PSOffenseUpdateOne {
 	pouo.mutation.AddPassesTotal(i)
 	return pouo
 }
 
-// SetPassesKey sets the "passesKey" field.
+// SetPassesKey sets the "PassesKey" field.
 func (pouo *PSOffenseUpdateOne) SetPassesKey(i int) *PSOffenseUpdateOne {
 	pouo.mutation.ResetPassesKey()
 	pouo.mutation.SetPassesKey(i)
 	return pouo
 }
 
-// AddPassesKey adds i to the "passesKey" field.
+// AddPassesKey adds i to the "PassesKey" field.
 func (pouo *PSOffenseUpdateOne) AddPassesKey(i int) *PSOffenseUpdateOne {
 	pouo.mutation.AddPassesKey(i)
 	return pouo
 }
 
-// SetPassesAccuracy sets the "passesAccuracy" field.
+// SetPassesAccuracy sets the "PassesAccuracy" field.
 func (pouo *PSOffenseUpdateOne) SetPassesAccuracy(i int) *PSOffenseUpdateOne {
 	pouo.mutation.ResetPassesAccuracy()
 	pouo.mutation.SetPassesAccuracy(i)
 	return pouo
 }
 
-// AddPassesAccuracy adds i to the "passesAccuracy" field.
+// AddPassesAccuracy adds i to the "PassesAccuracy" field.
 func (pouo *PSOffenseUpdateOne) AddPassesAccuracy(i int) *PSOffenseUpdateOne {
 	pouo.mutation.AddPassesAccuracy(i)
 	return pouo
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (pouo *PSOffenseUpdateOne) SetPlayerID(id int) *PSOffenseUpdateOne {
-	pouo.mutation.SetPlayerID(id)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pouo *PSOffenseUpdateOne) SetPlayerStatsID(id int) *PSOffenseUpdateOne {
+	pouo.mutation.SetPlayerStatsID(id)
 	return pouo
 }
 
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (pouo *PSOffenseUpdateOne) SetNillablePlayerID(id *int) *PSOffenseUpdateOne {
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pouo *PSOffenseUpdateOne) SetNillablePlayerStatsID(id *int) *PSOffenseUpdateOne {
 	if id != nil {
-		pouo = pouo.SetPlayerID(*id)
+		pouo = pouo.SetPlayerStatsID(*id)
 	}
 	return pouo
 }
 
-// SetPlayer sets the "player" edge to the Player entity.
-func (pouo *PSOffenseUpdateOne) SetPlayer(p *Player) *PSOffenseUpdateOne {
-	return pouo.SetPlayerID(p.ID)
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pouo *PSOffenseUpdateOne) SetPlayerStats(p *PlayerStats) *PSOffenseUpdateOne {
+	return pouo.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSOffenseMutation object of the builder.
@@ -375,9 +375,9 @@ func (pouo *PSOffenseUpdateOne) Mutation() *PSOffenseMutation {
 	return pouo.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (pouo *PSOffenseUpdateOne) ClearPlayer() *PSOffenseUpdateOne {
-	pouo.mutation.ClearPlayer()
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (pouo *PSOffenseUpdateOne) ClearPlayerStats() *PSOffenseUpdateOne {
+	pouo.mutation.ClearPlayerStats()
 	return pouo
 }
 
@@ -483,28 +483,28 @@ func (pouo *PSOffenseUpdateOne) sqlSave(ctx context.Context) (_node *PSOffense, 
 	if value, ok := pouo.mutation.AddedPassesAccuracy(); ok {
 		_spec.AddField(psoffense.FieldPassesAccuracy, field.TypeInt, value)
 	}
-	if pouo.mutation.PlayerCleared() {
+	if pouo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psoffense.PlayerTable,
-			Columns: []string{psoffense.PlayerColumn},
+			Table:   psoffense.PlayerStatsTable,
+			Columns: []string{psoffense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pouo.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := pouo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psoffense.PlayerTable,
-			Columns: []string{psoffense.PlayerColumn},
+			Table:   psoffense.PlayerStatsTable,
+			Columns: []string{psoffense.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -11,6 +11,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -133,6 +134,25 @@ func (fec *FixtureEventsCreate) SetFixtureID(id int) *FixtureEventsCreate {
 // SetFixture sets the "fixture" edge to the Fixture entity.
 func (fec *FixtureEventsCreate) SetFixture(f *Fixture) *FixtureEventsCreate {
 	return fec.SetFixtureID(f.ID)
+}
+
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (fec *FixtureEventsCreate) SetPlayerStatsID(id int) *FixtureEventsCreate {
+	fec.mutation.SetPlayerStatsID(id)
+	return fec
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (fec *FixtureEventsCreate) SetNillablePlayerStatsID(id *int) *FixtureEventsCreate {
+	if id != nil {
+		fec = fec.SetPlayerStatsID(*id)
+	}
+	return fec
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (fec *FixtureEventsCreate) SetPlayerStats(p *PlayerStats) *FixtureEventsCreate {
+	return fec.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the FixtureEventsMutation object of the builder.
@@ -312,6 +332,23 @@ func (fec *FixtureEventsCreate) createSpec() (*FixtureEvents, *sqlgraph.CreateSp
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.fixture_fixture_events = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := fec.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   fixtureevents.PlayerStatsTable,
+			Columns: []string{fixtureevents.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.player_stats_player_events = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	"entgo.io/ent/dialect/sql"
@@ -28,93 +28,125 @@ func (pgu *PSGamesUpdate) Where(ps ...predicate.PSGames) *PSGamesUpdate {
 	return pgu
 }
 
-// SetAppearences sets the "appearences" field.
-func (pgu *PSGamesUpdate) SetAppearences(i int) *PSGamesUpdate {
-	pgu.mutation.ResetAppearences()
-	pgu.mutation.SetAppearences(i)
+// SetAppearances sets the "Appearances" field.
+func (pgu *PSGamesUpdate) SetAppearances(i int) *PSGamesUpdate {
+	pgu.mutation.ResetAppearances()
+	pgu.mutation.SetAppearances(i)
 	return pgu
 }
 
-// AddAppearences adds i to the "appearences" field.
-func (pgu *PSGamesUpdate) AddAppearences(i int) *PSGamesUpdate {
-	pgu.mutation.AddAppearences(i)
+// AddAppearances adds i to the "Appearances" field.
+func (pgu *PSGamesUpdate) AddAppearances(i int) *PSGamesUpdate {
+	pgu.mutation.AddAppearances(i)
 	return pgu
 }
 
-// SetLineups sets the "lineups" field.
+// SetLineups sets the "Lineups" field.
 func (pgu *PSGamesUpdate) SetLineups(i int) *PSGamesUpdate {
 	pgu.mutation.ResetLineups()
 	pgu.mutation.SetLineups(i)
 	return pgu
 }
 
-// AddLineups adds i to the "lineups" field.
+// AddLineups adds i to the "Lineups" field.
 func (pgu *PSGamesUpdate) AddLineups(i int) *PSGamesUpdate {
 	pgu.mutation.AddLineups(i)
 	return pgu
 }
 
-// SetMinutes sets the "minutes" field.
+// SetMinutes sets the "Minutes" field.
 func (pgu *PSGamesUpdate) SetMinutes(i int) *PSGamesUpdate {
 	pgu.mutation.ResetMinutes()
 	pgu.mutation.SetMinutes(i)
 	return pgu
 }
 
-// AddMinutes adds i to the "minutes" field.
+// AddMinutes adds i to the "Minutes" field.
 func (pgu *PSGamesUpdate) AddMinutes(i int) *PSGamesUpdate {
 	pgu.mutation.AddMinutes(i)
 	return pgu
 }
 
-// SetNumber sets the "number" field.
+// SetNumber sets the "Number" field.
 func (pgu *PSGamesUpdate) SetNumber(i int) *PSGamesUpdate {
 	pgu.mutation.ResetNumber()
 	pgu.mutation.SetNumber(i)
 	return pgu
 }
 
-// AddNumber adds i to the "number" field.
+// SetNillableNumber sets the "Number" field if the given value is not nil.
+func (pgu *PSGamesUpdate) SetNillableNumber(i *int) *PSGamesUpdate {
+	if i != nil {
+		pgu.SetNumber(*i)
+	}
+	return pgu
+}
+
+// AddNumber adds i to the "Number" field.
 func (pgu *PSGamesUpdate) AddNumber(i int) *PSGamesUpdate {
 	pgu.mutation.AddNumber(i)
 	return pgu
 }
 
-// SetPosition sets the "position" field.
+// SetPosition sets the "Position" field.
 func (pgu *PSGamesUpdate) SetPosition(s string) *PSGamesUpdate {
 	pgu.mutation.SetPosition(s)
 	return pgu
 }
 
-// SetRating sets the "rating" field.
+// SetNillablePosition sets the "Position" field if the given value is not nil.
+func (pgu *PSGamesUpdate) SetNillablePosition(s *string) *PSGamesUpdate {
+	if s != nil {
+		pgu.SetPosition(*s)
+	}
+	return pgu
+}
+
+// SetRating sets the "Rating" field.
 func (pgu *PSGamesUpdate) SetRating(s string) *PSGamesUpdate {
 	pgu.mutation.SetRating(s)
 	return pgu
 }
 
-// SetCaptain sets the "captain" field.
+// SetNillableRating sets the "Rating" field if the given value is not nil.
+func (pgu *PSGamesUpdate) SetNillableRating(s *string) *PSGamesUpdate {
+	if s != nil {
+		pgu.SetRating(*s)
+	}
+	return pgu
+}
+
+// SetCaptain sets the "Captain" field.
 func (pgu *PSGamesUpdate) SetCaptain(b bool) *PSGamesUpdate {
 	pgu.mutation.SetCaptain(b)
 	return pgu
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (pgu *PSGamesUpdate) SetPlayerID(id int) *PSGamesUpdate {
-	pgu.mutation.SetPlayerID(id)
-	return pgu
-}
-
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (pgu *PSGamesUpdate) SetNillablePlayerID(id *int) *PSGamesUpdate {
-	if id != nil {
-		pgu = pgu.SetPlayerID(*id)
+// SetNillableCaptain sets the "Captain" field if the given value is not nil.
+func (pgu *PSGamesUpdate) SetNillableCaptain(b *bool) *PSGamesUpdate {
+	if b != nil {
+		pgu.SetCaptain(*b)
 	}
 	return pgu
 }
 
-// SetPlayer sets the "player" edge to the Player entity.
-func (pgu *PSGamesUpdate) SetPlayer(p *Player) *PSGamesUpdate {
-	return pgu.SetPlayerID(p.ID)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pgu *PSGamesUpdate) SetPlayerStatsID(id int) *PSGamesUpdate {
+	pgu.mutation.SetPlayerStatsID(id)
+	return pgu
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pgu *PSGamesUpdate) SetNillablePlayerStatsID(id *int) *PSGamesUpdate {
+	if id != nil {
+		pgu = pgu.SetPlayerStatsID(*id)
+	}
+	return pgu
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pgu *PSGamesUpdate) SetPlayerStats(p *PlayerStats) *PSGamesUpdate {
+	return pgu.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSGamesMutation object of the builder.
@@ -122,9 +154,9 @@ func (pgu *PSGamesUpdate) Mutation() *PSGamesMutation {
 	return pgu.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (pgu *PSGamesUpdate) ClearPlayer() *PSGamesUpdate {
-	pgu.mutation.ClearPlayer()
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (pgu *PSGamesUpdate) ClearPlayerStats() *PSGamesUpdate {
+	pgu.mutation.ClearPlayerStats()
 	return pgu
 }
 
@@ -164,11 +196,11 @@ func (pgu *PSGamesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := pgu.mutation.Appearences(); ok {
-		_spec.SetField(psgames.FieldAppearences, field.TypeInt, value)
+	if value, ok := pgu.mutation.Appearances(); ok {
+		_spec.SetField(psgames.FieldAppearances, field.TypeInt, value)
 	}
-	if value, ok := pgu.mutation.AddedAppearences(); ok {
-		_spec.AddField(psgames.FieldAppearences, field.TypeInt, value)
+	if value, ok := pgu.mutation.AddedAppearances(); ok {
+		_spec.AddField(psgames.FieldAppearances, field.TypeInt, value)
 	}
 	if value, ok := pgu.mutation.Lineups(); ok {
 		_spec.SetField(psgames.FieldLineups, field.TypeInt, value)
@@ -197,28 +229,28 @@ func (pgu *PSGamesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pgu.mutation.Captain(); ok {
 		_spec.SetField(psgames.FieldCaptain, field.TypeBool, value)
 	}
-	if pgu.mutation.PlayerCleared() {
+	if pgu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: []string{psgames.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pgu.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := pgu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: []string{psgames.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
@@ -246,93 +278,125 @@ type PSGamesUpdateOne struct {
 	mutation *PSGamesMutation
 }
 
-// SetAppearences sets the "appearences" field.
-func (pguo *PSGamesUpdateOne) SetAppearences(i int) *PSGamesUpdateOne {
-	pguo.mutation.ResetAppearences()
-	pguo.mutation.SetAppearences(i)
+// SetAppearances sets the "Appearances" field.
+func (pguo *PSGamesUpdateOne) SetAppearances(i int) *PSGamesUpdateOne {
+	pguo.mutation.ResetAppearances()
+	pguo.mutation.SetAppearances(i)
 	return pguo
 }
 
-// AddAppearences adds i to the "appearences" field.
-func (pguo *PSGamesUpdateOne) AddAppearences(i int) *PSGamesUpdateOne {
-	pguo.mutation.AddAppearences(i)
+// AddAppearances adds i to the "Appearances" field.
+func (pguo *PSGamesUpdateOne) AddAppearances(i int) *PSGamesUpdateOne {
+	pguo.mutation.AddAppearances(i)
 	return pguo
 }
 
-// SetLineups sets the "lineups" field.
+// SetLineups sets the "Lineups" field.
 func (pguo *PSGamesUpdateOne) SetLineups(i int) *PSGamesUpdateOne {
 	pguo.mutation.ResetLineups()
 	pguo.mutation.SetLineups(i)
 	return pguo
 }
 
-// AddLineups adds i to the "lineups" field.
+// AddLineups adds i to the "Lineups" field.
 func (pguo *PSGamesUpdateOne) AddLineups(i int) *PSGamesUpdateOne {
 	pguo.mutation.AddLineups(i)
 	return pguo
 }
 
-// SetMinutes sets the "minutes" field.
+// SetMinutes sets the "Minutes" field.
 func (pguo *PSGamesUpdateOne) SetMinutes(i int) *PSGamesUpdateOne {
 	pguo.mutation.ResetMinutes()
 	pguo.mutation.SetMinutes(i)
 	return pguo
 }
 
-// AddMinutes adds i to the "minutes" field.
+// AddMinutes adds i to the "Minutes" field.
 func (pguo *PSGamesUpdateOne) AddMinutes(i int) *PSGamesUpdateOne {
 	pguo.mutation.AddMinutes(i)
 	return pguo
 }
 
-// SetNumber sets the "number" field.
+// SetNumber sets the "Number" field.
 func (pguo *PSGamesUpdateOne) SetNumber(i int) *PSGamesUpdateOne {
 	pguo.mutation.ResetNumber()
 	pguo.mutation.SetNumber(i)
 	return pguo
 }
 
-// AddNumber adds i to the "number" field.
+// SetNillableNumber sets the "Number" field if the given value is not nil.
+func (pguo *PSGamesUpdateOne) SetNillableNumber(i *int) *PSGamesUpdateOne {
+	if i != nil {
+		pguo.SetNumber(*i)
+	}
+	return pguo
+}
+
+// AddNumber adds i to the "Number" field.
 func (pguo *PSGamesUpdateOne) AddNumber(i int) *PSGamesUpdateOne {
 	pguo.mutation.AddNumber(i)
 	return pguo
 }
 
-// SetPosition sets the "position" field.
+// SetPosition sets the "Position" field.
 func (pguo *PSGamesUpdateOne) SetPosition(s string) *PSGamesUpdateOne {
 	pguo.mutation.SetPosition(s)
 	return pguo
 }
 
-// SetRating sets the "rating" field.
+// SetNillablePosition sets the "Position" field if the given value is not nil.
+func (pguo *PSGamesUpdateOne) SetNillablePosition(s *string) *PSGamesUpdateOne {
+	if s != nil {
+		pguo.SetPosition(*s)
+	}
+	return pguo
+}
+
+// SetRating sets the "Rating" field.
 func (pguo *PSGamesUpdateOne) SetRating(s string) *PSGamesUpdateOne {
 	pguo.mutation.SetRating(s)
 	return pguo
 }
 
-// SetCaptain sets the "captain" field.
+// SetNillableRating sets the "Rating" field if the given value is not nil.
+func (pguo *PSGamesUpdateOne) SetNillableRating(s *string) *PSGamesUpdateOne {
+	if s != nil {
+		pguo.SetRating(*s)
+	}
+	return pguo
+}
+
+// SetCaptain sets the "Captain" field.
 func (pguo *PSGamesUpdateOne) SetCaptain(b bool) *PSGamesUpdateOne {
 	pguo.mutation.SetCaptain(b)
 	return pguo
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (pguo *PSGamesUpdateOne) SetPlayerID(id int) *PSGamesUpdateOne {
-	pguo.mutation.SetPlayerID(id)
-	return pguo
-}
-
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (pguo *PSGamesUpdateOne) SetNillablePlayerID(id *int) *PSGamesUpdateOne {
-	if id != nil {
-		pguo = pguo.SetPlayerID(*id)
+// SetNillableCaptain sets the "Captain" field if the given value is not nil.
+func (pguo *PSGamesUpdateOne) SetNillableCaptain(b *bool) *PSGamesUpdateOne {
+	if b != nil {
+		pguo.SetCaptain(*b)
 	}
 	return pguo
 }
 
-// SetPlayer sets the "player" edge to the Player entity.
-func (pguo *PSGamesUpdateOne) SetPlayer(p *Player) *PSGamesUpdateOne {
-	return pguo.SetPlayerID(p.ID)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pguo *PSGamesUpdateOne) SetPlayerStatsID(id int) *PSGamesUpdateOne {
+	pguo.mutation.SetPlayerStatsID(id)
+	return pguo
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pguo *PSGamesUpdateOne) SetNillablePlayerStatsID(id *int) *PSGamesUpdateOne {
+	if id != nil {
+		pguo = pguo.SetPlayerStatsID(*id)
+	}
+	return pguo
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pguo *PSGamesUpdateOne) SetPlayerStats(p *PlayerStats) *PSGamesUpdateOne {
+	return pguo.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSGamesMutation object of the builder.
@@ -340,9 +404,9 @@ func (pguo *PSGamesUpdateOne) Mutation() *PSGamesMutation {
 	return pguo.mutation
 }
 
-// ClearPlayer clears the "player" edge to the Player entity.
-func (pguo *PSGamesUpdateOne) ClearPlayer() *PSGamesUpdateOne {
-	pguo.mutation.ClearPlayer()
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (pguo *PSGamesUpdateOne) ClearPlayerStats() *PSGamesUpdateOne {
+	pguo.mutation.ClearPlayerStats()
 	return pguo
 }
 
@@ -412,11 +476,11 @@ func (pguo *PSGamesUpdateOne) sqlSave(ctx context.Context) (_node *PSGames, err 
 			}
 		}
 	}
-	if value, ok := pguo.mutation.Appearences(); ok {
-		_spec.SetField(psgames.FieldAppearences, field.TypeInt, value)
+	if value, ok := pguo.mutation.Appearances(); ok {
+		_spec.SetField(psgames.FieldAppearances, field.TypeInt, value)
 	}
-	if value, ok := pguo.mutation.AddedAppearences(); ok {
-		_spec.AddField(psgames.FieldAppearences, field.TypeInt, value)
+	if value, ok := pguo.mutation.AddedAppearances(); ok {
+		_spec.AddField(psgames.FieldAppearances, field.TypeInt, value)
 	}
 	if value, ok := pguo.mutation.Lineups(); ok {
 		_spec.SetField(psgames.FieldLineups, field.TypeInt, value)
@@ -445,28 +509,28 @@ func (pguo *PSGamesUpdateOne) sqlSave(ctx context.Context) (_node *PSGames, err 
 	if value, ok := pguo.mutation.Captain(); ok {
 		_spec.SetField(psgames.FieldCaptain, field.TypeBool, value)
 	}
-	if pguo.mutation.PlayerCleared() {
+	if pguo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: []string{psgames.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := pguo.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := pguo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: []string{psgames.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

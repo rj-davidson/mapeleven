@@ -24,17 +24,17 @@ const (
 	FieldPassesKey = "passes_key"
 	// FieldPassesAccuracy holds the string denoting the passesaccuracy field in the database.
 	FieldPassesAccuracy = "passes_accuracy"
-	// EdgePlayer holds the string denoting the player edge name in mutations.
-	EdgePlayer = "player"
+	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
+	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the psoffense in the database.
 	Table = "ps_offenses"
-	// PlayerTable is the table that holds the player relation/edge.
-	PlayerTable = "ps_offenses"
-	// PlayerInverseTable is the table name for the Player entity.
-	// It exists in this package in order to avoid circular dependency with the "player" package.
-	PlayerInverseTable = "players"
-	// PlayerColumn is the table column denoting the player relation/edge.
-	PlayerColumn = "player_psoffense"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge.
+	PlayerStatsTable = "ps_offenses"
+	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
+	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
+	PlayerStatsInverseTable = "player_stats"
+	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
+	PlayerStatsColumn = "player_stats_psoffense"
 )
 
 // Columns holds all SQL columns for psoffense fields.
@@ -51,7 +51,7 @@ var Columns = []string{
 // ForeignKeys holds the SQL foreign-keys that are owned by the "ps_offenses"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
-	"player_psoffense",
+	"player_stats_psoffense",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -70,7 +70,7 @@ func ValidColumn(column string) bool {
 }
 
 var (
-	// DefaultDribblePast holds the default value on creation for the "dribblePast" field.
+	// DefaultDribblePast holds the default value on creation for the "DribblePast" field.
 	DefaultDribblePast int
 )
 
@@ -82,46 +82,46 @@ func ByID(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldID, opts...).ToFunc()
 }
 
-// ByDribbleAttempts orders the results by the dribbleAttempts field.
+// ByDribbleAttempts orders the results by the DribbleAttempts field.
 func ByDribbleAttempts(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDribbleAttempts, opts...).ToFunc()
 }
 
-// ByDribbleSuccess orders the results by the dribbleSuccess field.
+// ByDribbleSuccess orders the results by the DribbleSuccess field.
 func ByDribbleSuccess(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDribbleSuccess, opts...).ToFunc()
 }
 
-// ByDribblePast orders the results by the dribblePast field.
+// ByDribblePast orders the results by the DribblePast field.
 func ByDribblePast(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDribblePast, opts...).ToFunc()
 }
 
-// ByPassesTotal orders the results by the passesTotal field.
+// ByPassesTotal orders the results by the PassesTotal field.
 func ByPassesTotal(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassesTotal, opts...).ToFunc()
 }
 
-// ByPassesKey orders the results by the passesKey field.
+// ByPassesKey orders the results by the PassesKey field.
 func ByPassesKey(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassesKey, opts...).ToFunc()
 }
 
-// ByPassesAccuracy orders the results by the passesAccuracy field.
+// ByPassesAccuracy orders the results by the PassesAccuracy field.
 func ByPassesAccuracy(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassesAccuracy, opts...).ToFunc()
 }
 
-// ByPlayerField orders the results by player field.
-func ByPlayerField(field string, opts ...sql.OrderTermOption) OrderOption {
+// ByPlayerStatsField orders the results by playerStats field.
+func ByPlayerStatsField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerStep(), sql.OrderByField(field, opts...))
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), sql.OrderByField(field, opts...))
 	}
 }
-func newPlayerStep() *sqlgraph.Step {
+func newPlayerStatsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlayerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, PlayerTable, PlayerColumn),
+		sqlgraph.To(PlayerStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 	)
 }

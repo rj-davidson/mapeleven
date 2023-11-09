@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,43 +17,43 @@ type PSDefense struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// TacklesTotal holds the value of the "tacklesTotal" field.
-	TacklesTotal int `json:"tacklesTotal,omitempty"`
-	// Blocks holds the value of the "blocks" field.
-	Blocks int `json:"blocks,omitempty"`
-	// Interceptions holds the value of the "interceptions" field.
-	Interceptions int `json:"interceptions,omitempty"`
-	// TotalDuels holds the value of the "totalDuels" field.
-	TotalDuels int `json:"totalDuels,omitempty"`
-	// WonDuels holds the value of the "wonDuels" field.
-	WonDuels int `json:"wonDuels,omitempty"`
+	// TacklesTotal holds the value of the "TacklesTotal" field.
+	TacklesTotal int `json:"TacklesTotal,omitempty"`
+	// Blocks holds the value of the "Blocks" field.
+	Blocks int `json:"Blocks,omitempty"`
+	// Interceptions holds the value of the "Interceptions" field.
+	Interceptions int `json:"Interceptions,omitempty"`
+	// TotalDuels holds the value of the "TotalDuels" field.
+	TotalDuels int `json:"TotalDuels,omitempty"`
+	// WonDuels holds the value of the "WonDuels" field.
+	WonDuels int `json:"WonDuels,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSDefenseQuery when eager-loading is set.
-	Edges            PSDefenseEdges `json:"edges"`
-	player_psdefense *int
-	selectValues     sql.SelectValues
+	Edges                  PSDefenseEdges `json:"edges"`
+	player_stats_psdefense *int
+	selectValues           sql.SelectValues
 }
 
 // PSDefenseEdges holds the relations/edges for other nodes in the graph.
 type PSDefenseEdges struct {
-	// Player holds the value of the player edge.
-	Player *Player `json:"player,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats *PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PlayerOrErr returns the Player value or an error if the edge
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PSDefenseEdges) PlayerOrErr() (*Player, error) {
+func (e PSDefenseEdges) PlayerStatsOrErr() (*PlayerStats, error) {
 	if e.loadedTypes[0] {
-		if e.Player == nil {
+		if e.PlayerStats == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: player.Label}
+			return nil, &NotFoundError{label: playerstats.Label}
 		}
-		return e.Player, nil
+		return e.PlayerStats, nil
 	}
-	return nil, &NotLoadedError{edge: "player"}
+	return nil, &NotLoadedError{edge: "playerStats"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -63,7 +63,7 @@ func (*PSDefense) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case psdefense.FieldID, psdefense.FieldTacklesTotal, psdefense.FieldBlocks, psdefense.FieldInterceptions, psdefense.FieldTotalDuels, psdefense.FieldWonDuels:
 			values[i] = new(sql.NullInt64)
-		case psdefense.ForeignKeys[0]: // player_psdefense
+		case psdefense.ForeignKeys[0]: // player_stats_psdefense
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -88,40 +88,40 @@ func (pd *PSDefense) assignValues(columns []string, values []any) error {
 			pd.ID = int(value.Int64)
 		case psdefense.FieldTacklesTotal:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field tacklesTotal", values[i])
+				return fmt.Errorf("unexpected type %T for field TacklesTotal", values[i])
 			} else if value.Valid {
 				pd.TacklesTotal = int(value.Int64)
 			}
 		case psdefense.FieldBlocks:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field blocks", values[i])
+				return fmt.Errorf("unexpected type %T for field Blocks", values[i])
 			} else if value.Valid {
 				pd.Blocks = int(value.Int64)
 			}
 		case psdefense.FieldInterceptions:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field interceptions", values[i])
+				return fmt.Errorf("unexpected type %T for field Interceptions", values[i])
 			} else if value.Valid {
 				pd.Interceptions = int(value.Int64)
 			}
 		case psdefense.FieldTotalDuels:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field totalDuels", values[i])
+				return fmt.Errorf("unexpected type %T for field TotalDuels", values[i])
 			} else if value.Valid {
 				pd.TotalDuels = int(value.Int64)
 			}
 		case psdefense.FieldWonDuels:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field wonDuels", values[i])
+				return fmt.Errorf("unexpected type %T for field WonDuels", values[i])
 			} else if value.Valid {
 				pd.WonDuels = int(value.Int64)
 			}
 		case psdefense.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_psdefense", value)
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_psdefense", value)
 			} else if value.Valid {
-				pd.player_psdefense = new(int)
-				*pd.player_psdefense = int(value.Int64)
+				pd.player_stats_psdefense = new(int)
+				*pd.player_stats_psdefense = int(value.Int64)
 			}
 		default:
 			pd.selectValues.Set(columns[i], values[i])
@@ -136,9 +136,9 @@ func (pd *PSDefense) Value(name string) (ent.Value, error) {
 	return pd.selectValues.Get(name)
 }
 
-// QueryPlayer queries the "player" edge of the PSDefense entity.
-func (pd *PSDefense) QueryPlayer() *PlayerQuery {
-	return NewPSDefenseClient(pd.config).QueryPlayer(pd)
+// QueryPlayerStats queries the "playerStats" edge of the PSDefense entity.
+func (pd *PSDefense) QueryPlayerStats() *PlayerStatsQuery {
+	return NewPSDefenseClient(pd.config).QueryPlayerStats(pd)
 }
 
 // Update returns a builder for updating this PSDefense.
@@ -164,19 +164,19 @@ func (pd *PSDefense) String() string {
 	var builder strings.Builder
 	builder.WriteString("PSDefense(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pd.ID))
-	builder.WriteString("tacklesTotal=")
+	builder.WriteString("TacklesTotal=")
 	builder.WriteString(fmt.Sprintf("%v", pd.TacklesTotal))
 	builder.WriteString(", ")
-	builder.WriteString("blocks=")
+	builder.WriteString("Blocks=")
 	builder.WriteString(fmt.Sprintf("%v", pd.Blocks))
 	builder.WriteString(", ")
-	builder.WriteString("interceptions=")
+	builder.WriteString("Interceptions=")
 	builder.WriteString(fmt.Sprintf("%v", pd.Interceptions))
 	builder.WriteString(", ")
-	builder.WriteString("totalDuels=")
+	builder.WriteString("TotalDuels=")
 	builder.WriteString(fmt.Sprintf("%v", pd.TotalDuels))
 	builder.WriteString(", ")
-	builder.WriteString("wonDuels=")
+	builder.WriteString("WonDuels=")
 	builder.WriteString(fmt.Sprintf("%v", pd.WonDuels))
 	builder.WriteByte(')')
 	return builder.String()

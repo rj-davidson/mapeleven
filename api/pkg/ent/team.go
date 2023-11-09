@@ -44,6 +44,8 @@ type TeamEdges struct {
 	Season *Season `json:"season,omitempty"`
 	// Club holds the value of the club edge.
 	Club *Club `json:"club,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
 	// Standings holds the value of the standings edge.
 	Standings []*Standings `json:"standings,omitempty"`
 	// HomeFixtures holds the value of the homeFixtures edge.
@@ -54,8 +56,6 @@ type TeamEdges struct {
 	TeamFixtureEvents []*FixtureEvents `json:"teamFixtureEvents,omitempty"`
 	// FixtureLineups holds the value of the fixtureLineups edge.
 	FixtureLineups []*FixtureLineups `json:"fixtureLineups,omitempty"`
-	// Players holds the value of the players edge.
-	Players []*Player `json:"players,omitempty"`
 	// Squad holds the value of the squad edge.
 	Squad []*Squad `json:"squad,omitempty"`
 	// BiggestStats holds the value of the biggest_stats edge.
@@ -105,10 +105,19 @@ func (e TeamEdges) ClubOrErr() (*Club, error) {
 	return nil, &NotLoadedError{edge: "club"}
 }
 
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
+// was not loaded in eager-loading.
+func (e TeamEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
+	if e.loadedTypes[2] {
+		return e.PlayerStats, nil
+	}
+	return nil, &NotLoadedError{edge: "playerStats"}
+}
+
 // StandingsOrErr returns the Standings value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) StandingsOrErr() ([]*Standings, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Standings, nil
 	}
 	return nil, &NotLoadedError{edge: "standings"}
@@ -117,7 +126,7 @@ func (e TeamEdges) StandingsOrErr() ([]*Standings, error) {
 // HomeFixturesOrErr returns the HomeFixtures value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) HomeFixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.HomeFixtures, nil
 	}
 	return nil, &NotLoadedError{edge: "homeFixtures"}
@@ -126,7 +135,7 @@ func (e TeamEdges) HomeFixturesOrErr() ([]*Fixture, error) {
 // AwayFixturesOrErr returns the AwayFixtures value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) AwayFixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.AwayFixtures, nil
 	}
 	return nil, &NotLoadedError{edge: "awayFixtures"}
@@ -135,7 +144,7 @@ func (e TeamEdges) AwayFixturesOrErr() ([]*Fixture, error) {
 // TeamFixtureEventsOrErr returns the TeamFixtureEvents value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) TeamFixtureEventsOrErr() ([]*FixtureEvents, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.TeamFixtureEvents, nil
 	}
 	return nil, &NotLoadedError{edge: "teamFixtureEvents"}
@@ -144,19 +153,10 @@ func (e TeamEdges) TeamFixtureEventsOrErr() ([]*FixtureEvents, error) {
 // FixtureLineupsOrErr returns the FixtureLineups value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) FixtureLineupsOrErr() ([]*FixtureLineups, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.FixtureLineups, nil
 	}
 	return nil, &NotLoadedError{edge: "fixtureLineups"}
-}
-
-// PlayersOrErr returns the Players value or an error if the edge
-// was not loaded in eager-loading.
-func (e TeamEdges) PlayersOrErr() ([]*Player, error) {
-	if e.loadedTypes[7] {
-		return e.Players, nil
-	}
-	return nil, &NotLoadedError{edge: "players"}
 }
 
 // SquadOrErr returns the Squad value or an error if the edge
@@ -353,6 +353,11 @@ func (t *Team) QueryClub() *ClubQuery {
 	return NewTeamClient(t.config).QueryClub(t)
 }
 
+// QueryPlayerStats queries the "playerStats" edge of the Team entity.
+func (t *Team) QueryPlayerStats() *PlayerStatsQuery {
+	return NewTeamClient(t.config).QueryPlayerStats(t)
+}
+
 // QueryStandings queries the "standings" edge of the Team entity.
 func (t *Team) QueryStandings() *StandingsQuery {
 	return NewTeamClient(t.config).QueryStandings(t)
@@ -376,11 +381,6 @@ func (t *Team) QueryTeamFixtureEvents() *FixtureEventsQuery {
 // QueryFixtureLineups queries the "fixtureLineups" edge of the Team entity.
 func (t *Team) QueryFixtureLineups() *FixtureLineupsQuery {
 	return NewTeamClient(t.config).QueryFixtureLineups(t)
-}
-
-// QueryPlayers queries the "players" edge of the Team entity.
-func (t *Team) QueryPlayers() *PlayerQuery {
-	return NewTeamClient(t.config).QueryPlayers(t)
 }
 
 // QuerySquad queries the "squad" edge of the Team entity.

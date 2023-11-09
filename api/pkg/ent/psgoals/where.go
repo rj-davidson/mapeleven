@@ -53,291 +53,291 @@ func IDLTE(id int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLTE(FieldID, id))
 }
 
-// TotalGoals applies equality check predicate on the "totalGoals" field. It's identical to TotalGoalsEQ.
+// TotalGoals applies equality check predicate on the "TotalGoals" field. It's identical to TotalGoalsEQ.
 func TotalGoals(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldTotalGoals, v))
 }
 
-// ConcededGoals applies equality check predicate on the "concededGoals" field. It's identical to ConcededGoalsEQ.
+// ConcededGoals applies equality check predicate on the "ConcededGoals" field. It's identical to ConcededGoalsEQ.
 func ConcededGoals(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldConcededGoals, v))
 }
 
-// AssistGoals applies equality check predicate on the "assistGoals" field. It's identical to AssistGoalsEQ.
+// AssistGoals applies equality check predicate on the "AssistGoals" field. It's identical to AssistGoalsEQ.
 func AssistGoals(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldAssistGoals, v))
 }
 
-// SaveGoals applies equality check predicate on the "saveGoals" field. It's identical to SaveGoalsEQ.
+// SaveGoals applies equality check predicate on the "SaveGoals" field. It's identical to SaveGoalsEQ.
 func SaveGoals(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldSaveGoals, v))
 }
 
-// ShotsTotal applies equality check predicate on the "shotsTotal" field. It's identical to ShotsTotalEQ.
+// ShotsTotal applies equality check predicate on the "ShotsTotal" field. It's identical to ShotsTotalEQ.
 func ShotsTotal(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldShotsTotal, v))
 }
 
-// ShotsOn applies equality check predicate on the "shotsOn" field. It's identical to ShotsOnEQ.
+// ShotsOn applies equality check predicate on the "ShotsOn" field. It's identical to ShotsOnEQ.
 func ShotsOn(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldShotsOn, v))
 }
 
-// TotalGoalsEQ applies the EQ predicate on the "totalGoals" field.
+// TotalGoalsEQ applies the EQ predicate on the "TotalGoals" field.
 func TotalGoalsEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldTotalGoals, v))
 }
 
-// TotalGoalsNEQ applies the NEQ predicate on the "totalGoals" field.
+// TotalGoalsNEQ applies the NEQ predicate on the "TotalGoals" field.
 func TotalGoalsNEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNEQ(FieldTotalGoals, v))
 }
 
-// TotalGoalsIn applies the In predicate on the "totalGoals" field.
+// TotalGoalsIn applies the In predicate on the "TotalGoals" field.
 func TotalGoalsIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldIn(FieldTotalGoals, vs...))
 }
 
-// TotalGoalsNotIn applies the NotIn predicate on the "totalGoals" field.
+// TotalGoalsNotIn applies the NotIn predicate on the "TotalGoals" field.
 func TotalGoalsNotIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNotIn(FieldTotalGoals, vs...))
 }
 
-// TotalGoalsGT applies the GT predicate on the "totalGoals" field.
+// TotalGoalsGT applies the GT predicate on the "TotalGoals" field.
 func TotalGoalsGT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGT(FieldTotalGoals, v))
 }
 
-// TotalGoalsGTE applies the GTE predicate on the "totalGoals" field.
+// TotalGoalsGTE applies the GTE predicate on the "TotalGoals" field.
 func TotalGoalsGTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGTE(FieldTotalGoals, v))
 }
 
-// TotalGoalsLT applies the LT predicate on the "totalGoals" field.
+// TotalGoalsLT applies the LT predicate on the "TotalGoals" field.
 func TotalGoalsLT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLT(FieldTotalGoals, v))
 }
 
-// TotalGoalsLTE applies the LTE predicate on the "totalGoals" field.
+// TotalGoalsLTE applies the LTE predicate on the "TotalGoals" field.
 func TotalGoalsLTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLTE(FieldTotalGoals, v))
 }
 
-// ConcededGoalsEQ applies the EQ predicate on the "concededGoals" field.
+// ConcededGoalsEQ applies the EQ predicate on the "ConcededGoals" field.
 func ConcededGoalsEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldConcededGoals, v))
 }
 
-// ConcededGoalsNEQ applies the NEQ predicate on the "concededGoals" field.
+// ConcededGoalsNEQ applies the NEQ predicate on the "ConcededGoals" field.
 func ConcededGoalsNEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNEQ(FieldConcededGoals, v))
 }
 
-// ConcededGoalsIn applies the In predicate on the "concededGoals" field.
+// ConcededGoalsIn applies the In predicate on the "ConcededGoals" field.
 func ConcededGoalsIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldIn(FieldConcededGoals, vs...))
 }
 
-// ConcededGoalsNotIn applies the NotIn predicate on the "concededGoals" field.
+// ConcededGoalsNotIn applies the NotIn predicate on the "ConcededGoals" field.
 func ConcededGoalsNotIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNotIn(FieldConcededGoals, vs...))
 }
 
-// ConcededGoalsGT applies the GT predicate on the "concededGoals" field.
+// ConcededGoalsGT applies the GT predicate on the "ConcededGoals" field.
 func ConcededGoalsGT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGT(FieldConcededGoals, v))
 }
 
-// ConcededGoalsGTE applies the GTE predicate on the "concededGoals" field.
+// ConcededGoalsGTE applies the GTE predicate on the "ConcededGoals" field.
 func ConcededGoalsGTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGTE(FieldConcededGoals, v))
 }
 
-// ConcededGoalsLT applies the LT predicate on the "concededGoals" field.
+// ConcededGoalsLT applies the LT predicate on the "ConcededGoals" field.
 func ConcededGoalsLT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLT(FieldConcededGoals, v))
 }
 
-// ConcededGoalsLTE applies the LTE predicate on the "concededGoals" field.
+// ConcededGoalsLTE applies the LTE predicate on the "ConcededGoals" field.
 func ConcededGoalsLTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLTE(FieldConcededGoals, v))
 }
 
-// AssistGoalsEQ applies the EQ predicate on the "assistGoals" field.
+// AssistGoalsEQ applies the EQ predicate on the "AssistGoals" field.
 func AssistGoalsEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldAssistGoals, v))
 }
 
-// AssistGoalsNEQ applies the NEQ predicate on the "assistGoals" field.
+// AssistGoalsNEQ applies the NEQ predicate on the "AssistGoals" field.
 func AssistGoalsNEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNEQ(FieldAssistGoals, v))
 }
 
-// AssistGoalsIn applies the In predicate on the "assistGoals" field.
+// AssistGoalsIn applies the In predicate on the "AssistGoals" field.
 func AssistGoalsIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldIn(FieldAssistGoals, vs...))
 }
 
-// AssistGoalsNotIn applies the NotIn predicate on the "assistGoals" field.
+// AssistGoalsNotIn applies the NotIn predicate on the "AssistGoals" field.
 func AssistGoalsNotIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNotIn(FieldAssistGoals, vs...))
 }
 
-// AssistGoalsGT applies the GT predicate on the "assistGoals" field.
+// AssistGoalsGT applies the GT predicate on the "AssistGoals" field.
 func AssistGoalsGT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGT(FieldAssistGoals, v))
 }
 
-// AssistGoalsGTE applies the GTE predicate on the "assistGoals" field.
+// AssistGoalsGTE applies the GTE predicate on the "AssistGoals" field.
 func AssistGoalsGTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGTE(FieldAssistGoals, v))
 }
 
-// AssistGoalsLT applies the LT predicate on the "assistGoals" field.
+// AssistGoalsLT applies the LT predicate on the "AssistGoals" field.
 func AssistGoalsLT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLT(FieldAssistGoals, v))
 }
 
-// AssistGoalsLTE applies the LTE predicate on the "assistGoals" field.
+// AssistGoalsLTE applies the LTE predicate on the "AssistGoals" field.
 func AssistGoalsLTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLTE(FieldAssistGoals, v))
 }
 
-// SaveGoalsEQ applies the EQ predicate on the "saveGoals" field.
+// SaveGoalsEQ applies the EQ predicate on the "SaveGoals" field.
 func SaveGoalsEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldSaveGoals, v))
 }
 
-// SaveGoalsNEQ applies the NEQ predicate on the "saveGoals" field.
+// SaveGoalsNEQ applies the NEQ predicate on the "SaveGoals" field.
 func SaveGoalsNEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNEQ(FieldSaveGoals, v))
 }
 
-// SaveGoalsIn applies the In predicate on the "saveGoals" field.
+// SaveGoalsIn applies the In predicate on the "SaveGoals" field.
 func SaveGoalsIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldIn(FieldSaveGoals, vs...))
 }
 
-// SaveGoalsNotIn applies the NotIn predicate on the "saveGoals" field.
+// SaveGoalsNotIn applies the NotIn predicate on the "SaveGoals" field.
 func SaveGoalsNotIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNotIn(FieldSaveGoals, vs...))
 }
 
-// SaveGoalsGT applies the GT predicate on the "saveGoals" field.
+// SaveGoalsGT applies the GT predicate on the "SaveGoals" field.
 func SaveGoalsGT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGT(FieldSaveGoals, v))
 }
 
-// SaveGoalsGTE applies the GTE predicate on the "saveGoals" field.
+// SaveGoalsGTE applies the GTE predicate on the "SaveGoals" field.
 func SaveGoalsGTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGTE(FieldSaveGoals, v))
 }
 
-// SaveGoalsLT applies the LT predicate on the "saveGoals" field.
+// SaveGoalsLT applies the LT predicate on the "SaveGoals" field.
 func SaveGoalsLT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLT(FieldSaveGoals, v))
 }
 
-// SaveGoalsLTE applies the LTE predicate on the "saveGoals" field.
+// SaveGoalsLTE applies the LTE predicate on the "SaveGoals" field.
 func SaveGoalsLTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLTE(FieldSaveGoals, v))
 }
 
-// ShotsTotalEQ applies the EQ predicate on the "shotsTotal" field.
+// ShotsTotalEQ applies the EQ predicate on the "ShotsTotal" field.
 func ShotsTotalEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldShotsTotal, v))
 }
 
-// ShotsTotalNEQ applies the NEQ predicate on the "shotsTotal" field.
+// ShotsTotalNEQ applies the NEQ predicate on the "ShotsTotal" field.
 func ShotsTotalNEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNEQ(FieldShotsTotal, v))
 }
 
-// ShotsTotalIn applies the In predicate on the "shotsTotal" field.
+// ShotsTotalIn applies the In predicate on the "ShotsTotal" field.
 func ShotsTotalIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldIn(FieldShotsTotal, vs...))
 }
 
-// ShotsTotalNotIn applies the NotIn predicate on the "shotsTotal" field.
+// ShotsTotalNotIn applies the NotIn predicate on the "ShotsTotal" field.
 func ShotsTotalNotIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNotIn(FieldShotsTotal, vs...))
 }
 
-// ShotsTotalGT applies the GT predicate on the "shotsTotal" field.
+// ShotsTotalGT applies the GT predicate on the "ShotsTotal" field.
 func ShotsTotalGT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGT(FieldShotsTotal, v))
 }
 
-// ShotsTotalGTE applies the GTE predicate on the "shotsTotal" field.
+// ShotsTotalGTE applies the GTE predicate on the "ShotsTotal" field.
 func ShotsTotalGTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGTE(FieldShotsTotal, v))
 }
 
-// ShotsTotalLT applies the LT predicate on the "shotsTotal" field.
+// ShotsTotalLT applies the LT predicate on the "ShotsTotal" field.
 func ShotsTotalLT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLT(FieldShotsTotal, v))
 }
 
-// ShotsTotalLTE applies the LTE predicate on the "shotsTotal" field.
+// ShotsTotalLTE applies the LTE predicate on the "ShotsTotal" field.
 func ShotsTotalLTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLTE(FieldShotsTotal, v))
 }
 
-// ShotsOnEQ applies the EQ predicate on the "shotsOn" field.
+// ShotsOnEQ applies the EQ predicate on the "ShotsOn" field.
 func ShotsOnEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldEQ(FieldShotsOn, v))
 }
 
-// ShotsOnNEQ applies the NEQ predicate on the "shotsOn" field.
+// ShotsOnNEQ applies the NEQ predicate on the "ShotsOn" field.
 func ShotsOnNEQ(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNEQ(FieldShotsOn, v))
 }
 
-// ShotsOnIn applies the In predicate on the "shotsOn" field.
+// ShotsOnIn applies the In predicate on the "ShotsOn" field.
 func ShotsOnIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldIn(FieldShotsOn, vs...))
 }
 
-// ShotsOnNotIn applies the NotIn predicate on the "shotsOn" field.
+// ShotsOnNotIn applies the NotIn predicate on the "ShotsOn" field.
 func ShotsOnNotIn(vs ...int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldNotIn(FieldShotsOn, vs...))
 }
 
-// ShotsOnGT applies the GT predicate on the "shotsOn" field.
+// ShotsOnGT applies the GT predicate on the "ShotsOn" field.
 func ShotsOnGT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGT(FieldShotsOn, v))
 }
 
-// ShotsOnGTE applies the GTE predicate on the "shotsOn" field.
+// ShotsOnGTE applies the GTE predicate on the "ShotsOn" field.
 func ShotsOnGTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldGTE(FieldShotsOn, v))
 }
 
-// ShotsOnLT applies the LT predicate on the "shotsOn" field.
+// ShotsOnLT applies the LT predicate on the "ShotsOn" field.
 func ShotsOnLT(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLT(FieldShotsOn, v))
 }
 
-// ShotsOnLTE applies the LTE predicate on the "shotsOn" field.
+// ShotsOnLTE applies the LTE predicate on the "ShotsOn" field.
 func ShotsOnLTE(v int) predicate.PSGoals {
 	return predicate.PSGoals(sql.FieldLTE(FieldShotsOn, v))
 }
 
-// HasPlayer applies the HasEdge predicate on the "player" edge.
-func HasPlayer() predicate.PSGoals {
+// HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.
+func HasPlayerStats() predicate.PSGoals {
 	return predicate.PSGoals(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PlayerTable, PlayerColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasPlayerWith applies the HasEdge predicate on the "player" edge with a given conditions (other predicates).
-func HasPlayerWith(preds ...predicate.Player) predicate.PSGoals {
+// HasPlayerStatsWith applies the HasEdge predicate on the "playerStats" edge with a given conditions (other predicates).
+func HasPlayerStatsWith(preds ...predicate.PlayerStats) predicate.PSGoals {
 	return predicate.PSGoals(func(s *sql.Selector) {
-		step := newPlayerStep()
+		step := newPlayerStatsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

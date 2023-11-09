@@ -30,8 +30,6 @@ const (
 	EdgeCountry = "country"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
-	// EdgePlayer holds the string denoting the player edge name in mutations.
-	EdgePlayer = "player"
 	// Table holds the table name of the club in the database.
 	Table = "clubs"
 	// CountryTable is the table that holds the country relation/edge.
@@ -48,13 +46,6 @@ const (
 	TeamInverseTable = "teams"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "club_team"
-	// PlayerTable is the table that holds the player relation/edge.
-	PlayerTable = "players"
-	// PlayerInverseTable is the table name for the Player entity.
-	// It exists in this package in order to avoid circular dependency with the "player" package.
-	PlayerInverseTable = "players"
-	// PlayerColumn is the table column denoting the player relation/edge.
-	PlayerColumn = "club_player"
 )
 
 // Columns holds all SQL columns for club fields.
@@ -158,20 +149,6 @@ func ByTeam(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTeamStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
-
-// ByPlayerCount orders the results by player count.
-func ByPlayerCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlayerStep(), opts...)
-	}
-}
-
-// ByPlayer orders the results by player terms.
-func ByPlayer(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayerStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
 func newCountryStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -184,12 +161,5 @@ func newTeamStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TeamTable, TeamColumn),
-	)
-}
-func newPlayerStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlayerInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PlayerTable, PlayerColumn),
 	)
 }

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,47 +17,47 @@ type PSGames struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// Appearences holds the value of the "appearences" field.
-	Appearences int `json:"appearences,omitempty"`
-	// Lineups holds the value of the "lineups" field.
-	Lineups int `json:"lineups,omitempty"`
-	// Minutes holds the value of the "minutes" field.
-	Minutes int `json:"minutes,omitempty"`
-	// Number holds the value of the "number" field.
-	Number int `json:"number,omitempty"`
-	// Position holds the value of the "position" field.
-	Position string `json:"position,omitempty"`
-	// Rating holds the value of the "rating" field.
-	Rating string `json:"rating,omitempty"`
-	// Captain holds the value of the "captain" field.
-	Captain bool `json:"captain,omitempty"`
+	// Appearances holds the value of the "Appearances" field.
+	Appearances int `json:"Appearances,omitempty"`
+	// Lineups holds the value of the "Lineups" field.
+	Lineups int `json:"Lineups,omitempty"`
+	// Minutes holds the value of the "Minutes" field.
+	Minutes int `json:"Minutes,omitempty"`
+	// Number holds the value of the "Number" field.
+	Number int `json:"Number,omitempty"`
+	// Position holds the value of the "Position" field.
+	Position string `json:"Position,omitempty"`
+	// Rating holds the value of the "Rating" field.
+	Rating string `json:"Rating,omitempty"`
+	// Captain holds the value of the "Captain" field.
+	Captain bool `json:"Captain,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSGamesQuery when eager-loading is set.
-	Edges          PSGamesEdges `json:"edges"`
-	player_psgames *int
-	selectValues   sql.SelectValues
+	Edges                PSGamesEdges `json:"edges"`
+	player_stats_psgames *int
+	selectValues         sql.SelectValues
 }
 
 // PSGamesEdges holds the relations/edges for other nodes in the graph.
 type PSGamesEdges struct {
-	// Player holds the value of the player edge.
-	Player *Player `json:"player,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats *PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PlayerOrErr returns the Player value or an error if the edge
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PSGamesEdges) PlayerOrErr() (*Player, error) {
+func (e PSGamesEdges) PlayerStatsOrErr() (*PlayerStats, error) {
 	if e.loadedTypes[0] {
-		if e.Player == nil {
+		if e.PlayerStats == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: player.Label}
+			return nil, &NotFoundError{label: playerstats.Label}
 		}
-		return e.Player, nil
+		return e.PlayerStats, nil
 	}
-	return nil, &NotLoadedError{edge: "player"}
+	return nil, &NotLoadedError{edge: "playerStats"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -67,11 +67,11 @@ func (*PSGames) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case psgames.FieldCaptain:
 			values[i] = new(sql.NullBool)
-		case psgames.FieldID, psgames.FieldAppearences, psgames.FieldLineups, psgames.FieldMinutes, psgames.FieldNumber:
+		case psgames.FieldID, psgames.FieldAppearances, psgames.FieldLineups, psgames.FieldMinutes, psgames.FieldNumber:
 			values[i] = new(sql.NullInt64)
 		case psgames.FieldPosition, psgames.FieldRating:
 			values[i] = new(sql.NullString)
-		case psgames.ForeignKeys[0]: // player_psgames
+		case psgames.ForeignKeys[0]: // player_stats_psgames
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -94,54 +94,54 @@ func (pg *PSGames) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			pg.ID = int(value.Int64)
-		case psgames.FieldAppearences:
+		case psgames.FieldAppearances:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field appearences", values[i])
+				return fmt.Errorf("unexpected type %T for field Appearances", values[i])
 			} else if value.Valid {
-				pg.Appearences = int(value.Int64)
+				pg.Appearances = int(value.Int64)
 			}
 		case psgames.FieldLineups:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field lineups", values[i])
+				return fmt.Errorf("unexpected type %T for field Lineups", values[i])
 			} else if value.Valid {
 				pg.Lineups = int(value.Int64)
 			}
 		case psgames.FieldMinutes:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field minutes", values[i])
+				return fmt.Errorf("unexpected type %T for field Minutes", values[i])
 			} else if value.Valid {
 				pg.Minutes = int(value.Int64)
 			}
 		case psgames.FieldNumber:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field number", values[i])
+				return fmt.Errorf("unexpected type %T for field Number", values[i])
 			} else if value.Valid {
 				pg.Number = int(value.Int64)
 			}
 		case psgames.FieldPosition:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field position", values[i])
+				return fmt.Errorf("unexpected type %T for field Position", values[i])
 			} else if value.Valid {
 				pg.Position = value.String
 			}
 		case psgames.FieldRating:
 			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field rating", values[i])
+				return fmt.Errorf("unexpected type %T for field Rating", values[i])
 			} else if value.Valid {
 				pg.Rating = value.String
 			}
 		case psgames.FieldCaptain:
 			if value, ok := values[i].(*sql.NullBool); !ok {
-				return fmt.Errorf("unexpected type %T for field captain", values[i])
+				return fmt.Errorf("unexpected type %T for field Captain", values[i])
 			} else if value.Valid {
 				pg.Captain = value.Bool
 			}
 		case psgames.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_psgames", value)
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_psgames", value)
 			} else if value.Valid {
-				pg.player_psgames = new(int)
-				*pg.player_psgames = int(value.Int64)
+				pg.player_stats_psgames = new(int)
+				*pg.player_stats_psgames = int(value.Int64)
 			}
 		default:
 			pg.selectValues.Set(columns[i], values[i])
@@ -156,9 +156,9 @@ func (pg *PSGames) Value(name string) (ent.Value, error) {
 	return pg.selectValues.Get(name)
 }
 
-// QueryPlayer queries the "player" edge of the PSGames entity.
-func (pg *PSGames) QueryPlayer() *PlayerQuery {
-	return NewPSGamesClient(pg.config).QueryPlayer(pg)
+// QueryPlayerStats queries the "playerStats" edge of the PSGames entity.
+func (pg *PSGames) QueryPlayerStats() *PlayerStatsQuery {
+	return NewPSGamesClient(pg.config).QueryPlayerStats(pg)
 }
 
 // Update returns a builder for updating this PSGames.
@@ -184,25 +184,25 @@ func (pg *PSGames) String() string {
 	var builder strings.Builder
 	builder.WriteString("PSGames(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", pg.ID))
-	builder.WriteString("appearences=")
-	builder.WriteString(fmt.Sprintf("%v", pg.Appearences))
+	builder.WriteString("Appearances=")
+	builder.WriteString(fmt.Sprintf("%v", pg.Appearances))
 	builder.WriteString(", ")
-	builder.WriteString("lineups=")
+	builder.WriteString("Lineups=")
 	builder.WriteString(fmt.Sprintf("%v", pg.Lineups))
 	builder.WriteString(", ")
-	builder.WriteString("minutes=")
+	builder.WriteString("Minutes=")
 	builder.WriteString(fmt.Sprintf("%v", pg.Minutes))
 	builder.WriteString(", ")
-	builder.WriteString("number=")
+	builder.WriteString("Number=")
 	builder.WriteString(fmt.Sprintf("%v", pg.Number))
 	builder.WriteString(", ")
-	builder.WriteString("position=")
+	builder.WriteString("Position=")
 	builder.WriteString(pg.Position)
 	builder.WriteString(", ")
-	builder.WriteString("rating=")
+	builder.WriteString("Rating=")
 	builder.WriteString(pg.Rating)
 	builder.WriteString(", ")
-	builder.WriteString("captain=")
+	builder.WriteString("Captain=")
 	builder.WriteString(fmt.Sprintf("%v", pg.Captain))
 	builder.WriteByte(')')
 	return builder.String()

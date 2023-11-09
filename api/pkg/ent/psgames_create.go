@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -20,65 +20,97 @@ type PSGamesCreate struct {
 	hooks    []Hook
 }
 
-// SetAppearences sets the "appearences" field.
-func (pgc *PSGamesCreate) SetAppearences(i int) *PSGamesCreate {
-	pgc.mutation.SetAppearences(i)
+// SetAppearances sets the "Appearances" field.
+func (pgc *PSGamesCreate) SetAppearances(i int) *PSGamesCreate {
+	pgc.mutation.SetAppearances(i)
 	return pgc
 }
 
-// SetLineups sets the "lineups" field.
+// SetLineups sets the "Lineups" field.
 func (pgc *PSGamesCreate) SetLineups(i int) *PSGamesCreate {
 	pgc.mutation.SetLineups(i)
 	return pgc
 }
 
-// SetMinutes sets the "minutes" field.
+// SetMinutes sets the "Minutes" field.
 func (pgc *PSGamesCreate) SetMinutes(i int) *PSGamesCreate {
 	pgc.mutation.SetMinutes(i)
 	return pgc
 }
 
-// SetNumber sets the "number" field.
+// SetNumber sets the "Number" field.
 func (pgc *PSGamesCreate) SetNumber(i int) *PSGamesCreate {
 	pgc.mutation.SetNumber(i)
 	return pgc
 }
 
-// SetPosition sets the "position" field.
+// SetNillableNumber sets the "Number" field if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillableNumber(i *int) *PSGamesCreate {
+	if i != nil {
+		pgc.SetNumber(*i)
+	}
+	return pgc
+}
+
+// SetPosition sets the "Position" field.
 func (pgc *PSGamesCreate) SetPosition(s string) *PSGamesCreate {
 	pgc.mutation.SetPosition(s)
 	return pgc
 }
 
-// SetRating sets the "rating" field.
+// SetNillablePosition sets the "Position" field if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillablePosition(s *string) *PSGamesCreate {
+	if s != nil {
+		pgc.SetPosition(*s)
+	}
+	return pgc
+}
+
+// SetRating sets the "Rating" field.
 func (pgc *PSGamesCreate) SetRating(s string) *PSGamesCreate {
 	pgc.mutation.SetRating(s)
 	return pgc
 }
 
-// SetCaptain sets the "captain" field.
+// SetNillableRating sets the "Rating" field if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillableRating(s *string) *PSGamesCreate {
+	if s != nil {
+		pgc.SetRating(*s)
+	}
+	return pgc
+}
+
+// SetCaptain sets the "Captain" field.
 func (pgc *PSGamesCreate) SetCaptain(b bool) *PSGamesCreate {
 	pgc.mutation.SetCaptain(b)
 	return pgc
 }
 
-// SetPlayerID sets the "player" edge to the Player entity by ID.
-func (pgc *PSGamesCreate) SetPlayerID(id int) *PSGamesCreate {
-	pgc.mutation.SetPlayerID(id)
-	return pgc
-}
-
-// SetNillablePlayerID sets the "player" edge to the Player entity by ID if the given value is not nil.
-func (pgc *PSGamesCreate) SetNillablePlayerID(id *int) *PSGamesCreate {
-	if id != nil {
-		pgc = pgc.SetPlayerID(*id)
+// SetNillableCaptain sets the "Captain" field if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillableCaptain(b *bool) *PSGamesCreate {
+	if b != nil {
+		pgc.SetCaptain(*b)
 	}
 	return pgc
 }
 
-// SetPlayer sets the "player" edge to the Player entity.
-func (pgc *PSGamesCreate) SetPlayer(p *Player) *PSGamesCreate {
-	return pgc.SetPlayerID(p.ID)
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (pgc *PSGamesCreate) SetPlayerStatsID(id int) *PSGamesCreate {
+	pgc.mutation.SetPlayerStatsID(id)
+	return pgc
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillablePlayerStatsID(id *int) *PSGamesCreate {
+	if id != nil {
+		pgc = pgc.SetPlayerStatsID(*id)
+	}
+	return pgc
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (pgc *PSGamesCreate) SetPlayerStats(p *PlayerStats) *PSGamesCreate {
+	return pgc.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the PSGamesMutation object of the builder.
@@ -88,6 +120,7 @@ func (pgc *PSGamesCreate) Mutation() *PSGamesMutation {
 
 // Save creates the PSGames in the database.
 func (pgc *PSGamesCreate) Save(ctx context.Context) (*PSGames, error) {
+	pgc.defaults()
 	return withHooks(ctx, pgc.sqlSave, pgc.mutation, pgc.hooks)
 }
 
@@ -113,28 +146,48 @@ func (pgc *PSGamesCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
-func (pgc *PSGamesCreate) check() error {
-	if _, ok := pgc.mutation.Appearences(); !ok {
-		return &ValidationError{Name: "appearences", err: errors.New(`ent: missing required field "PSGames.appearences"`)}
-	}
-	if _, ok := pgc.mutation.Lineups(); !ok {
-		return &ValidationError{Name: "lineups", err: errors.New(`ent: missing required field "PSGames.lineups"`)}
-	}
-	if _, ok := pgc.mutation.Minutes(); !ok {
-		return &ValidationError{Name: "minutes", err: errors.New(`ent: missing required field "PSGames.minutes"`)}
-	}
+// defaults sets the default values of the builder before save.
+func (pgc *PSGamesCreate) defaults() {
 	if _, ok := pgc.mutation.Number(); !ok {
-		return &ValidationError{Name: "number", err: errors.New(`ent: missing required field "PSGames.number"`)}
+		v := psgames.DefaultNumber
+		pgc.mutation.SetNumber(v)
 	}
 	if _, ok := pgc.mutation.Position(); !ok {
-		return &ValidationError{Name: "position", err: errors.New(`ent: missing required field "PSGames.position"`)}
+		v := psgames.DefaultPosition
+		pgc.mutation.SetPosition(v)
 	}
 	if _, ok := pgc.mutation.Rating(); !ok {
-		return &ValidationError{Name: "rating", err: errors.New(`ent: missing required field "PSGames.rating"`)}
+		v := psgames.DefaultRating
+		pgc.mutation.SetRating(v)
 	}
 	if _, ok := pgc.mutation.Captain(); !ok {
-		return &ValidationError{Name: "captain", err: errors.New(`ent: missing required field "PSGames.captain"`)}
+		v := psgames.DefaultCaptain
+		pgc.mutation.SetCaptain(v)
+	}
+}
+
+// check runs all checks and user-defined validators on the builder.
+func (pgc *PSGamesCreate) check() error {
+	if _, ok := pgc.mutation.Appearances(); !ok {
+		return &ValidationError{Name: "Appearances", err: errors.New(`ent: missing required field "PSGames.Appearances"`)}
+	}
+	if _, ok := pgc.mutation.Lineups(); !ok {
+		return &ValidationError{Name: "Lineups", err: errors.New(`ent: missing required field "PSGames.Lineups"`)}
+	}
+	if _, ok := pgc.mutation.Minutes(); !ok {
+		return &ValidationError{Name: "Minutes", err: errors.New(`ent: missing required field "PSGames.Minutes"`)}
+	}
+	if _, ok := pgc.mutation.Number(); !ok {
+		return &ValidationError{Name: "Number", err: errors.New(`ent: missing required field "PSGames.Number"`)}
+	}
+	if _, ok := pgc.mutation.Position(); !ok {
+		return &ValidationError{Name: "Position", err: errors.New(`ent: missing required field "PSGames.Position"`)}
+	}
+	if _, ok := pgc.mutation.Rating(); !ok {
+		return &ValidationError{Name: "Rating", err: errors.New(`ent: missing required field "PSGames.Rating"`)}
+	}
+	if _, ok := pgc.mutation.Captain(); !ok {
+		return &ValidationError{Name: "Captain", err: errors.New(`ent: missing required field "PSGames.Captain"`)}
 	}
 	return nil
 }
@@ -162,9 +215,9 @@ func (pgc *PSGamesCreate) createSpec() (*PSGames, *sqlgraph.CreateSpec) {
 		_node = &PSGames{config: pgc.config}
 		_spec = sqlgraph.NewCreateSpec(psgames.Table, sqlgraph.NewFieldSpec(psgames.FieldID, field.TypeInt))
 	)
-	if value, ok := pgc.mutation.Appearences(); ok {
-		_spec.SetField(psgames.FieldAppearences, field.TypeInt, value)
-		_node.Appearences = value
+	if value, ok := pgc.mutation.Appearances(); ok {
+		_spec.SetField(psgames.FieldAppearances, field.TypeInt, value)
+		_node.Appearances = value
 	}
 	if value, ok := pgc.mutation.Lineups(); ok {
 		_spec.SetField(psgames.FieldLineups, field.TypeInt, value)
@@ -190,21 +243,21 @@ func (pgc *PSGamesCreate) createSpec() (*PSGames, *sqlgraph.CreateSpec) {
 		_spec.SetField(psgames.FieldCaptain, field.TypeBool, value)
 		_node.Captain = value
 	}
-	if nodes := pgc.mutation.PlayerIDs(); len(nodes) > 0 {
+	if nodes := pgc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
 			Inverse: true,
-			Table:   psgames.PlayerTable,
-			Columns: []string{psgames.PlayerColumn},
+			Table:   psgames.PlayerStatsTable,
+			Columns: []string{psgames.PlayerStatsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
-		_node.player_psgames = &nodes[0]
+		_node.player_stats_psgames = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
@@ -228,6 +281,7 @@ func (pgcb *PSGamesCreateBulk) Save(ctx context.Context) ([]*PSGames, error) {
 	for i := range pgcb.builders {
 		func(i int, root context.Context) {
 			builder := pgcb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*PSGamesMutation)
 				if !ok {

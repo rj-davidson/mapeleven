@@ -10,7 +10,6 @@ import (
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/country"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql"
@@ -27,7 +26,6 @@ type ClubQuery struct {
 	predicates  []predicate.Club
 	withCountry *CountryQuery
 	withTeam    *TeamQuery
-	withPlayer  *PlayerQuery
 	withFKs     bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -102,28 +100,6 @@ func (cq *ClubQuery) QueryTeam() *TeamQuery {
 			sqlgraph.From(club.Table, club.FieldID, selector),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, club.TeamTable, club.TeamColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPlayer chains the current query on the "player" edge.
-func (cq *ClubQuery) QueryPlayer() *PlayerQuery {
-	query := (&PlayerClient{config: cq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := cq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := cq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(club.Table, club.FieldID, selector),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, club.PlayerTable, club.PlayerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -325,7 +301,6 @@ func (cq *ClubQuery) Clone() *ClubQuery {
 		predicates:  append([]predicate.Club{}, cq.predicates...),
 		withCountry: cq.withCountry.Clone(),
 		withTeam:    cq.withTeam.Clone(),
-		withPlayer:  cq.withPlayer.Clone(),
 		// clone intermediate query.
 		sql:  cq.sql.Clone(),
 		path: cq.path,
@@ -351,17 +326,6 @@ func (cq *ClubQuery) WithTeam(opts ...func(*TeamQuery)) *ClubQuery {
 		opt(query)
 	}
 	cq.withTeam = query
-	return cq
-}
-
-// WithPlayer tells the query-builder to eager-load the nodes that are connected to
-// the "player" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *ClubQuery) WithPlayer(opts ...func(*PlayerQuery)) *ClubQuery {
-	query := (&PlayerClient{config: cq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	cq.withPlayer = query
 	return cq
 }
 
@@ -444,10 +408,9 @@ func (cq *ClubQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Club, e
 		nodes       = []*Club{}
 		withFKs     = cq.withFKs
 		_spec       = cq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [2]bool{
 			cq.withCountry != nil,
 			cq.withTeam != nil,
-			cq.withPlayer != nil,
 		}
 	)
 	if cq.withCountry != nil {
@@ -484,13 +447,6 @@ func (cq *ClubQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*Club, e
 		if err := cq.loadTeam(ctx, query, nodes,
 			func(n *Club) { n.Edges.Team = []*Team{} },
 			func(n *Club, e *Team) { n.Edges.Team = append(n.Edges.Team, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := cq.withPlayer; query != nil {
-		if err := cq.loadPlayer(ctx, query, nodes,
-			func(n *Club) { n.Edges.Player = []*Player{} },
-			func(n *Club, e *Player) { n.Edges.Player = append(n.Edges.Player, e) }); err != nil {
 			return nil, err
 		}
 	}
@@ -555,37 +511,6 @@ func (cq *ClubQuery) loadTeam(ctx context.Context, query *TeamQuery, nodes []*Cl
 		node, ok := nodeids[*fk]
 		if !ok {
 			return fmt.Errorf(`unexpected referenced foreign-key "club_team" returned %v for node %v`, *fk, n.ID)
-		}
-		assign(node, n)
-	}
-	return nil
-}
-func (cq *ClubQuery) loadPlayer(ctx context.Context, query *PlayerQuery, nodes []*Club, init func(*Club), assign func(*Club, *Player)) error {
-	fks := make([]driver.Value, 0, len(nodes))
-	nodeids := make(map[int]*Club)
-	for i := range nodes {
-		fks = append(fks, nodes[i].ID)
-		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
-	}
-	query.withFKs = true
-	query.Where(predicate.Player(func(s *sql.Selector) {
-		s.Where(sql.InValues(s.C(club.PlayerColumn), fks...))
-	}))
-	neighbors, err := query.All(ctx)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		fk := n.club_player
-		if fk == nil {
-			return fmt.Errorf(`foreign-key "club_player" is nil for node %v`, n.ID)
-		}
-		node, ok := nodeids[*fk]
-		if !ok {
-			return fmt.Errorf(`unexpected referenced foreign-key "club_player" returned %v for node %v`, *fk, n.ID)
 		}
 		assign(node, n)
 	}

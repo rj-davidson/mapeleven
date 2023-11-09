@@ -19,6 +19,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
@@ -114,6 +115,7 @@ func checkColumn(table, column string) error {
 			psoffense.Table:       psoffense.ValidColumn,
 			pspenalty.Table:       pspenalty.ValidColumn,
 			player.Table:          player.ValidColumn,
+			playerstats.Table:     playerstats.ValidColumn,
 			season.Table:          season.ValidColumn,
 			squad.Table:           squad.ValidColumn,
 			standings.Table:       standings.ValidColumn,

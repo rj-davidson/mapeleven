@@ -23,7 +23,6 @@ func (Season) Fields() []ent.Field {
 		field.Time("start_date"),
 		field.Time("end_date"),
 		field.Bool("current"),
-
 		field.Time("lastUpdated").
 			Default(time.Now).
 			Optional().
@@ -40,7 +39,8 @@ func (Season) Edges() []ent.Edge {
 		edge.To("fixtures", Fixture.Type),
 		edge.To("standings", Standings.Type),
 		edge.To("teams", Team.Type),
-		edge.To("player", Player.Type),
 		edge.To("squad", Squad.Type),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("season"),
 	}
 }

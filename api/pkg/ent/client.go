@@ -21,6 +21,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
@@ -79,6 +80,8 @@ type Client struct {
 	PSPenalty *PSPenaltyClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
+	// PlayerStats is the client for interacting with the PlayerStats builders.
+	PlayerStats *PlayerStatsClient
 	// Season is the client for interacting with the Season builders.
 	Season *SeasonClient
 	// Squad is the client for interacting with the Squad builders.
@@ -131,6 +134,7 @@ func (c *Client) init() {
 	c.PSOffense = NewPSOffenseClient(c.config)
 	c.PSPenalty = NewPSPenaltyClient(c.config)
 	c.Player = NewPlayerClient(c.config)
+	c.PlayerStats = NewPlayerStatsClient(c.config)
 	c.Season = NewSeasonClient(c.config)
 	c.Squad = NewSquadClient(c.config)
 	c.Standings = NewStandingsClient(c.config)
@@ -243,6 +247,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		PSOffense:       NewPSOffenseClient(cfg),
 		PSPenalty:       NewPSPenaltyClient(cfg),
 		Player:          NewPlayerClient(cfg),
+		PlayerStats:     NewPlayerStatsClient(cfg),
 		Season:          NewSeasonClient(cfg),
 		Squad:           NewSquadClient(cfg),
 		Standings:       NewStandingsClient(cfg),
@@ -289,6 +294,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		PSOffense:       NewPSOffenseClient(cfg),
 		PSPenalty:       NewPSPenaltyClient(cfg),
 		Player:          NewPlayerClient(cfg),
+		PlayerStats:     NewPlayerStatsClient(cfg),
 		Season:          NewSeasonClient(cfg),
 		Squad:           NewSquadClient(cfg),
 		Standings:       NewStandingsClient(cfg),
@@ -332,9 +338,9 @@ func (c *Client) Use(hooks ...Hook) {
 	for _, n := range []interface{ Use(...Hook) }{
 		c.Birth, c.Club, c.Coach, c.Country, c.Fixture, c.FixtureEvents,
 		c.FixtureLineups, c.League, c.MatchPlayer, c.PSDefense, c.PSGames, c.PSGoals,
-		c.PSOffense, c.PSPenalty, c.Player, c.Season, c.Squad, c.Standings,
-		c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore, c.TSFixtures,
-		c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
+		c.PSOffense, c.PSPenalty, c.Player, c.PlayerStats, c.Season, c.Squad,
+		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
+		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
 	} {
 		n.Use(hooks...)
 	}
@@ -346,9 +352,9 @@ func (c *Client) Intercept(interceptors ...Interceptor) {
 	for _, n := range []interface{ Intercept(...Interceptor) }{
 		c.Birth, c.Club, c.Coach, c.Country, c.Fixture, c.FixtureEvents,
 		c.FixtureLineups, c.League, c.MatchPlayer, c.PSDefense, c.PSGames, c.PSGoals,
-		c.PSOffense, c.PSPenalty, c.Player, c.Season, c.Squad, c.Standings,
-		c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore, c.TSFixtures,
-		c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
+		c.PSOffense, c.PSPenalty, c.Player, c.PlayerStats, c.Season, c.Squad,
+		c.Standings, c.TSBiggest, c.TSCards, c.TSCleanSheet, c.TSFailedToScore,
+		c.TSFixtures, c.TSGoals, c.TSLineups, c.TSPenalty, c.Team,
 	} {
 		n.Intercept(interceptors...)
 	}
@@ -387,6 +393,8 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.PSPenalty.mutate(ctx, m)
 	case *PlayerMutation:
 		return c.Player.mutate(ctx, m)
+	case *PlayerStatsMutation:
+		return c.PlayerStats.mutate(ctx, m)
 	case *SeasonMutation:
 		return c.Season.mutate(ctx, m)
 	case *SquadMutation:
@@ -698,22 +706,6 @@ func (c *ClubClient) QueryTeam(cl *Club) *TeamQuery {
 			sqlgraph.From(club.Table, club.FieldID, id),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, club.TeamTable, club.TeamColumn),
-		)
-		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPlayer queries the player edge of a Club.
-func (c *ClubClient) QueryPlayer(cl *Club) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := cl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(club.Table, club.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, club.PlayerTable, club.PlayerColumn),
 		)
 		fromV = sqlgraph.Neighbors(cl.driver.Dialect(), step)
 		return fromV, nil
@@ -1445,6 +1437,22 @@ func (c *FixtureEventsClient) QueryFixture(fe *FixtureEvents) *FixtureQuery {
 	return query
 }
 
+// QueryPlayerStats queries the playerStats edge of a FixtureEvents.
+func (c *FixtureEventsClient) QueryPlayerStats(fe *FixtureEvents) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := fe.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(fixtureevents.Table, fixtureevents.FieldID, id),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, fixtureevents.PlayerStatsTable, fixtureevents.PlayerStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(fe.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *FixtureEventsClient) Hooks() []Hook {
 	return c.hooks.FixtureEvents
@@ -1791,22 +1799,6 @@ func (c *LeagueClient) QuerySeason(l *League) *SeasonQuery {
 	return query
 }
 
-// QueryPlayer queries the player edge of a League.
-func (c *LeagueClient) QueryPlayer(l *League) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := l.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(league.Table, league.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, league.PlayerTable, league.PlayerColumn),
-		)
-		fromV = sqlgraph.Neighbors(l.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
 func (c *LeagueClient) Hooks() []Hook {
 	return c.hooks.League
@@ -1972,6 +1964,22 @@ func (c *MatchPlayerClient) QueryLineup(mp *MatchPlayer) *FixtureLineupsQuery {
 	return query
 }
 
+// QueryPlayerStats queries the playerStats edge of a MatchPlayer.
+func (c *MatchPlayerClient) QueryPlayerStats(mp *MatchPlayer) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := mp.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(matchplayer.Table, matchplayer.FieldID, id),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, matchplayer.PlayerStatsTable, matchplayer.PlayerStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(mp.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *MatchPlayerClient) Hooks() []Hook {
 	return c.hooks.MatchPlayer
@@ -2105,15 +2113,15 @@ func (c *PSDefenseClient) GetX(ctx context.Context, id int) *PSDefense {
 	return obj
 }
 
-// QueryPlayer queries the player edge of a PSDefense.
-func (c *PSDefenseClient) QueryPlayer(pd *PSDefense) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
+// QueryPlayerStats queries the playerStats edge of a PSDefense.
+func (c *PSDefenseClient) QueryPlayerStats(pd *PSDefense) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pd.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psdefense.Table, psdefense.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psdefense.PlayerTable, psdefense.PlayerColumn),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, psdefense.PlayerStatsTable, psdefense.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pd.driver.Dialect(), step)
 		return fromV, nil
@@ -2254,15 +2262,15 @@ func (c *PSGamesClient) GetX(ctx context.Context, id int) *PSGames {
 	return obj
 }
 
-// QueryPlayer queries the player edge of a PSGames.
-func (c *PSGamesClient) QueryPlayer(pg *PSGames) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
+// QueryPlayerStats queries the playerStats edge of a PSGames.
+func (c *PSGamesClient) QueryPlayerStats(pg *PSGames) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pg.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psgames.Table, psgames.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psgames.PlayerTable, psgames.PlayerColumn),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, psgames.PlayerStatsTable, psgames.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pg.driver.Dialect(), step)
 		return fromV, nil
@@ -2403,15 +2411,15 @@ func (c *PSGoalsClient) GetX(ctx context.Context, id int) *PSGoals {
 	return obj
 }
 
-// QueryPlayer queries the player edge of a PSGoals.
-func (c *PSGoalsClient) QueryPlayer(pg *PSGoals) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
+// QueryPlayerStats queries the playerStats edge of a PSGoals.
+func (c *PSGoalsClient) QueryPlayerStats(pg *PSGoals) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pg.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psgoals.Table, psgoals.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psgoals.PlayerTable, psgoals.PlayerColumn),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, psgoals.PlayerStatsTable, psgoals.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pg.driver.Dialect(), step)
 		return fromV, nil
@@ -2552,15 +2560,15 @@ func (c *PSOffenseClient) GetX(ctx context.Context, id int) *PSOffense {
 	return obj
 }
 
-// QueryPlayer queries the player edge of a PSOffense.
-func (c *PSOffenseClient) QueryPlayer(po *PSOffense) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
+// QueryPlayerStats queries the playerStats edge of a PSOffense.
+func (c *PSOffenseClient) QueryPlayerStats(po *PSOffense) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := po.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psoffense.Table, psoffense.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psoffense.PlayerTable, psoffense.PlayerColumn),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, psoffense.PlayerStatsTable, psoffense.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(po.driver.Dialect(), step)
 		return fromV, nil
@@ -2701,15 +2709,15 @@ func (c *PSPenaltyClient) GetX(ctx context.Context, id int) *PSPenalty {
 	return obj
 }
 
-// QueryPlayer queries the player edge of a PSPenalty.
-func (c *PSPenaltyClient) QueryPlayer(pp *PSPenalty) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
+// QueryPlayerStats queries the playerStats edge of a PSPenalty.
+func (c *PSPenaltyClient) QueryPlayerStats(pp *PSPenalty) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pp.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pspenalty.Table, pspenalty.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pspenalty.PlayerTable, pspenalty.PlayerColumn),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pspenalty.PlayerStatsTable, pspenalty.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pp.driver.Dialect(), step)
 		return fromV, nil
@@ -2946,143 +2954,15 @@ func (c *PlayerClient) QueryAssistEvents(pl *Player) *FixtureEventsQuery {
 	return query
 }
 
-// QueryPsgames queries the psgames edge of a Player.
-func (c *PlayerClient) QueryPsgames(pl *Player) *PSGamesQuery {
-	query := (&PSGamesClient{config: c.config}).Query()
+// QueryPlayerStats queries the playerStats edge of a Player.
+func (c *PlayerClient) QueryPlayerStats(pl *Player) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
 	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
 		id := pl.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(psgames.Table, psgames.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, player.PsgamesTable, player.PsgamesColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPsgoals queries the psgoals edge of a Player.
-func (c *PlayerClient) QueryPsgoals(pl *Player) *PSGoalsQuery {
-	query := (&PSGoalsClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(psgoals.Table, psgoals.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, player.PsgoalsTable, player.PsgoalsColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPsdefense queries the psdefense edge of a Player.
-func (c *PlayerClient) QueryPsdefense(pl *Player) *PSDefenseQuery {
-	query := (&PSDefenseClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(psdefense.Table, psdefense.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, player.PsdefenseTable, player.PsdefenseColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPsoffense queries the psoffense edge of a Player.
-func (c *PlayerClient) QueryPsoffense(pl *Player) *PSOffenseQuery {
-	query := (&PSOffenseClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(psoffense.Table, psoffense.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, player.PsoffenseTable, player.PsoffenseColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPspenalty queries the pspenalty edge of a Player.
-func (c *PlayerClient) QueryPspenalty(pl *Player) *PSPenaltyQuery {
-	query := (&PSPenaltyClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(pspenalty.Table, pspenalty.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, player.PspenaltyTable, player.PspenaltyColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QuerySeason queries the season edge of a Player.
-func (c *PlayerClient) QuerySeason(pl *Player) *SeasonQuery {
-	query := (&SeasonClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(season.Table, season.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, player.SeasonTable, player.SeasonColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryTeam queries the team edge of a Player.
-func (c *PlayerClient) QueryTeam(pl *Player) *TeamQuery {
-	query := (&TeamClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(team.Table, team.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, player.TeamTable, player.TeamColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryClub queries the club edge of a Player.
-func (c *PlayerClient) QueryClub(pl *Player) *ClubQuery {
-	query := (&ClubClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(club.Table, club.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, player.ClubTable, player.ClubColumn),
-		)
-		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryLeague queries the league edge of a Player.
-func (c *PlayerClient) QueryLeague(pl *Player) *LeagueQuery {
-	query := (&LeagueClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := pl.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(player.Table, player.FieldID, id),
-			sqlgraph.To(league.Table, league.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, player.LeagueTable, player.LeagueColumn),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, player.PlayerStatsTable, player.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pl.driver.Dialect(), step)
 		return fromV, nil
@@ -3112,6 +2992,315 @@ func (c *PlayerClient) mutate(ctx context.Context, m *PlayerMutation) (Value, er
 		return (&PlayerDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
 	default:
 		return nil, fmt.Errorf("ent: unknown Player mutation op: %q", m.Op())
+	}
+}
+
+// PlayerStatsClient is a client for the PlayerStats schema.
+type PlayerStatsClient struct {
+	config
+}
+
+// NewPlayerStatsClient returns a client for the PlayerStats from the given config.
+func NewPlayerStatsClient(c config) *PlayerStatsClient {
+	return &PlayerStatsClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `playerstats.Hooks(f(g(h())))`.
+func (c *PlayerStatsClient) Use(hooks ...Hook) {
+	c.hooks.PlayerStats = append(c.hooks.PlayerStats, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `playerstats.Intercept(f(g(h())))`.
+func (c *PlayerStatsClient) Intercept(interceptors ...Interceptor) {
+	c.inters.PlayerStats = append(c.inters.PlayerStats, interceptors...)
+}
+
+// Create returns a builder for creating a PlayerStats entity.
+func (c *PlayerStatsClient) Create() *PlayerStatsCreate {
+	mutation := newPlayerStatsMutation(c.config, OpCreate)
+	return &PlayerStatsCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of PlayerStats entities.
+func (c *PlayerStatsClient) CreateBulk(builders ...*PlayerStatsCreate) *PlayerStatsCreateBulk {
+	return &PlayerStatsCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *PlayerStatsClient) MapCreateBulk(slice any, setFunc func(*PlayerStatsCreate, int)) *PlayerStatsCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &PlayerStatsCreateBulk{err: fmt.Errorf("calling to PlayerStatsClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*PlayerStatsCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &PlayerStatsCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for PlayerStats.
+func (c *PlayerStatsClient) Update() *PlayerStatsUpdate {
+	mutation := newPlayerStatsMutation(c.config, OpUpdate)
+	return &PlayerStatsUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *PlayerStatsClient) UpdateOne(ps *PlayerStats) *PlayerStatsUpdateOne {
+	mutation := newPlayerStatsMutation(c.config, OpUpdateOne, withPlayerStats(ps))
+	return &PlayerStatsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *PlayerStatsClient) UpdateOneID(id int) *PlayerStatsUpdateOne {
+	mutation := newPlayerStatsMutation(c.config, OpUpdateOne, withPlayerStatsID(id))
+	return &PlayerStatsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for PlayerStats.
+func (c *PlayerStatsClient) Delete() *PlayerStatsDelete {
+	mutation := newPlayerStatsMutation(c.config, OpDelete)
+	return &PlayerStatsDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *PlayerStatsClient) DeleteOne(ps *PlayerStats) *PlayerStatsDeleteOne {
+	return c.DeleteOneID(ps.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *PlayerStatsClient) DeleteOneID(id int) *PlayerStatsDeleteOne {
+	builder := c.Delete().Where(playerstats.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &PlayerStatsDeleteOne{builder}
+}
+
+// Query returns a query builder for PlayerStats.
+func (c *PlayerStatsClient) Query() *PlayerStatsQuery {
+	return &PlayerStatsQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypePlayerStats},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a PlayerStats entity by its id.
+func (c *PlayerStatsClient) Get(ctx context.Context, id int) (*PlayerStats, error) {
+	return c.Query().Where(playerstats.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *PlayerStatsClient) GetX(ctx context.Context, id int) *PlayerStats {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// QueryPlayer queries the player edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPlayer(ps *PlayerStats) *PlayerQuery {
+	query := (&PlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(player.Table, player.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, playerstats.PlayerTable, playerstats.PlayerColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryTeam queries the team edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryTeam(ps *PlayerStats) *TeamQuery {
+	query := (&TeamClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(team.Table, team.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, playerstats.TeamTable, playerstats.TeamColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPlayerEvents queries the playerEvents edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPlayerEvents(ps *PlayerStats) *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PlayerEventsTable, playerstats.PlayerEventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMatchPlayer queries the matchPlayer edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryMatchPlayer(ps *PlayerStats) *MatchPlayerQuery {
+	query := (&MatchPlayerClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(matchplayer.Table, matchplayer.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.MatchPlayerTable, playerstats.MatchPlayerColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryAssistEvents queries the assistEvents edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryAssistEvents(ps *PlayerStats) *FixtureEventsQuery {
+	query := (&FixtureEventsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(fixtureevents.Table, fixtureevents.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.AssistEventsTable, playerstats.AssistEventsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPsgames queries the psgames edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsgames(ps *PlayerStats) *PSGamesQuery {
+	query := (&PSGamesClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(psgames.Table, psgames.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsgamesTable, playerstats.PsgamesColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPsgoals queries the psgoals edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsgoals(ps *PlayerStats) *PSGoalsQuery {
+	query := (&PSGoalsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(psgoals.Table, psgoals.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsgoalsTable, playerstats.PsgoalsColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPsdefense queries the psdefense edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsdefense(ps *PlayerStats) *PSDefenseQuery {
+	query := (&PSDefenseClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(psdefense.Table, psdefense.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsdefenseTable, playerstats.PsdefenseColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPsoffense queries the psoffense edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPsoffense(ps *PlayerStats) *PSOffenseQuery {
+	query := (&PSOffenseClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(psoffense.Table, psoffense.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsoffenseTable, playerstats.PsoffenseColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPspenalty queries the pspenalty edge of a PlayerStats.
+func (c *PlayerStatsClient) QueryPspenalty(ps *PlayerStats) *PSPenaltyQuery {
+	query := (&PSPenaltyClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(pspenalty.Table, pspenalty.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PspenaltyTable, playerstats.PspenaltyColumn),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QuerySeason queries the season edge of a PlayerStats.
+func (c *PlayerStatsClient) QuerySeason(ps *PlayerStats) *SeasonQuery {
+	query := (&SeasonClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(season.Table, season.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, playerstats.SeasonTable, playerstats.SeasonPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// Hooks returns the client hooks.
+func (c *PlayerStatsClient) Hooks() []Hook {
+	return c.hooks.PlayerStats
+}
+
+// Interceptors returns the client interceptors.
+func (c *PlayerStatsClient) Interceptors() []Interceptor {
+	return c.inters.PlayerStats
+}
+
+func (c *PlayerStatsClient) mutate(ctx context.Context, m *PlayerStatsMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&PlayerStatsCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&PlayerStatsUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&PlayerStatsUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&PlayerStatsDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown PlayerStats mutation op: %q", m.Op())
 	}
 }
 
@@ -3287,22 +3476,6 @@ func (c *SeasonClient) QueryTeams(s *Season) *TeamQuery {
 	return query
 }
 
-// QueryPlayer queries the player edge of a Season.
-func (c *SeasonClient) QueryPlayer(s *Season) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(season.Table, season.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, season.PlayerTable, season.PlayerColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QuerySquad queries the squad edge of a Season.
 func (c *SeasonClient) QuerySquad(s *Season) *SquadQuery {
 	query := (&SquadClient{config: c.config}).Query()
@@ -3312,6 +3485,22 @@ func (c *SeasonClient) QuerySquad(s *Season) *SquadQuery {
 			sqlgraph.From(season.Table, season.FieldID, id),
 			sqlgraph.To(squad.Table, squad.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, season.SquadTable, season.SquadColumn),
+		)
+		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryPlayerStats queries the playerStats edge of a Season.
+func (c *SeasonClient) QueryPlayerStats(s *Season) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := s.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(season.Table, season.FieldID, id),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, season.PlayerStatsTable, season.PlayerStatsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
 		return fromV, nil
@@ -5022,6 +5211,22 @@ func (c *TeamClient) QueryClub(t *Team) *ClubQuery {
 	return query
 }
 
+// QueryPlayerStats queries the playerStats edge of a Team.
+func (c *TeamClient) QueryPlayerStats(t *Team) *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := t.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(team.Table, team.FieldID, id),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, team.PlayerStatsTable, team.PlayerStatsColumn),
+		)
+		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryStandings queries the standings edge of a Team.
 func (c *TeamClient) QueryStandings(t *Team) *StandingsQuery {
 	query := (&StandingsClient{config: c.config}).Query()
@@ -5095,22 +5300,6 @@ func (c *TeamClient) QueryFixtureLineups(t *Team) *FixtureLineupsQuery {
 			sqlgraph.From(team.Table, team.FieldID, id),
 			sqlgraph.To(fixturelineups.Table, fixturelineups.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, team.FixtureLineupsTable, team.FixtureLineupsColumn),
-		)
-		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPlayers queries the players edge of a Team.
-func (c *TeamClient) QueryPlayers(t *Team) *PlayerQuery {
-	query := (&PlayerClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := t.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(team.Table, team.FieldID, id),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, team.PlayersTable, team.PlayersColumn),
 		)
 		fromV = sqlgraph.Neighbors(t.driver.Dialect(), step)
 		return fromV, nil
@@ -5291,14 +5480,15 @@ func (c *TeamClient) mutate(ctx context.Context, m *TeamMutation) (Value, error)
 type (
 	hooks struct {
 		Birth, Club, Coach, Country, Fixture, FixtureEvents, FixtureLineups, League,
-		MatchPlayer, PSDefense, PSGames, PSGoals, PSOffense, PSPenalty, Player, Season,
-		Squad, Standings, TSBiggest, TSCards, TSCleanSheet, TSFailedToScore,
-		TSFixtures, TSGoals, TSLineups, TSPenalty, Team []ent.Hook
+		MatchPlayer, PSDefense, PSGames, PSGoals, PSOffense, PSPenalty, Player,
+		PlayerStats, Season, Squad, Standings, TSBiggest, TSCards, TSCleanSheet,
+		TSFailedToScore, TSFixtures, TSGoals, TSLineups, TSPenalty, Team []ent.Hook
 	}
 	inters struct {
 		Birth, Club, Coach, Country, Fixture, FixtureEvents, FixtureLineups, League,
-		MatchPlayer, PSDefense, PSGames, PSGoals, PSOffense, PSPenalty, Player, Season,
-		Squad, Standings, TSBiggest, TSCards, TSCleanSheet, TSFailedToScore,
-		TSFixtures, TSGoals, TSLineups, TSPenalty, Team []ent.Interceptor
+		MatchPlayer, PSDefense, PSGames, PSGoals, PSOffense, PSPenalty, Player,
+		PlayerStats, Season, Squad, Standings, TSBiggest, TSCards, TSCleanSheet,
+		TSFailedToScore, TSFixtures, TSGoals, TSLineups, TSPenalty,
+		Team []ent.Interceptor
 	}
 )

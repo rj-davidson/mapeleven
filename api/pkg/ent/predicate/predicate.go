@@ -51,6 +51,9 @@ type PSPenalty func(*sql.Selector)
 // Player is the predicate function for player builders.
 type Player func(*sql.Selector)
 
+// PlayerStats is the predicate function for playerstats builders.
+type PlayerStats func(*sql.Selector)
+
 // Season is the predicate function for season builders.
 type Season func(*sql.Selector)
 

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -17,45 +17,45 @@ type PSOffense struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
-	// DribbleAttempts holds the value of the "dribbleAttempts" field.
-	DribbleAttempts int `json:"dribbleAttempts,omitempty"`
-	// DribbleSuccess holds the value of the "dribbleSuccess" field.
-	DribbleSuccess int `json:"dribbleSuccess,omitempty"`
-	// DribblePast holds the value of the "dribblePast" field.
-	DribblePast int `json:"dribblePast,omitempty"`
-	// PassesTotal holds the value of the "passesTotal" field.
-	PassesTotal int `json:"passesTotal,omitempty"`
-	// PassesKey holds the value of the "passesKey" field.
-	PassesKey int `json:"passesKey,omitempty"`
-	// PassesAccuracy holds the value of the "passesAccuracy" field.
-	PassesAccuracy int `json:"passesAccuracy,omitempty"`
+	// DribbleAttempts holds the value of the "DribbleAttempts" field.
+	DribbleAttempts int `json:"DribbleAttempts,omitempty"`
+	// DribbleSuccess holds the value of the "DribbleSuccess" field.
+	DribbleSuccess int `json:"DribbleSuccess,omitempty"`
+	// DribblePast holds the value of the "DribblePast" field.
+	DribblePast int `json:"DribblePast,omitempty"`
+	// PassesTotal holds the value of the "PassesTotal" field.
+	PassesTotal int `json:"PassesTotal,omitempty"`
+	// PassesKey holds the value of the "PassesKey" field.
+	PassesKey int `json:"PassesKey,omitempty"`
+	// PassesAccuracy holds the value of the "PassesAccuracy" field.
+	PassesAccuracy int `json:"PassesAccuracy,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PSOffenseQuery when eager-loading is set.
-	Edges            PSOffenseEdges `json:"edges"`
-	player_psoffense *int
-	selectValues     sql.SelectValues
+	Edges                  PSOffenseEdges `json:"edges"`
+	player_stats_psoffense *int
+	selectValues           sql.SelectValues
 }
 
 // PSOffenseEdges holds the relations/edges for other nodes in the graph.
 type PSOffenseEdges struct {
-	// Player holds the value of the player edge.
-	Player *Player `json:"player,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats *PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [1]bool
 }
 
-// PlayerOrErr returns the Player value or an error if the edge
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e PSOffenseEdges) PlayerOrErr() (*Player, error) {
+func (e PSOffenseEdges) PlayerStatsOrErr() (*PlayerStats, error) {
 	if e.loadedTypes[0] {
-		if e.Player == nil {
+		if e.PlayerStats == nil {
 			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: player.Label}
+			return nil, &NotFoundError{label: playerstats.Label}
 		}
-		return e.Player, nil
+		return e.PlayerStats, nil
 	}
-	return nil, &NotLoadedError{edge: "player"}
+	return nil, &NotLoadedError{edge: "playerStats"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -65,7 +65,7 @@ func (*PSOffense) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case psoffense.FieldID, psoffense.FieldDribbleAttempts, psoffense.FieldDribbleSuccess, psoffense.FieldDribblePast, psoffense.FieldPassesTotal, psoffense.FieldPassesKey, psoffense.FieldPassesAccuracy:
 			values[i] = new(sql.NullInt64)
-		case psoffense.ForeignKeys[0]: // player_psoffense
+		case psoffense.ForeignKeys[0]: // player_stats_psoffense
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -90,46 +90,46 @@ func (po *PSOffense) assignValues(columns []string, values []any) error {
 			po.ID = int(value.Int64)
 		case psoffense.FieldDribbleAttempts:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field dribbleAttempts", values[i])
+				return fmt.Errorf("unexpected type %T for field DribbleAttempts", values[i])
 			} else if value.Valid {
 				po.DribbleAttempts = int(value.Int64)
 			}
 		case psoffense.FieldDribbleSuccess:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field dribbleSuccess", values[i])
+				return fmt.Errorf("unexpected type %T for field DribbleSuccess", values[i])
 			} else if value.Valid {
 				po.DribbleSuccess = int(value.Int64)
 			}
 		case psoffense.FieldDribblePast:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field dribblePast", values[i])
+				return fmt.Errorf("unexpected type %T for field DribblePast", values[i])
 			} else if value.Valid {
 				po.DribblePast = int(value.Int64)
 			}
 		case psoffense.FieldPassesTotal:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field passesTotal", values[i])
+				return fmt.Errorf("unexpected type %T for field PassesTotal", values[i])
 			} else if value.Valid {
 				po.PassesTotal = int(value.Int64)
 			}
 		case psoffense.FieldPassesKey:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field passesKey", values[i])
+				return fmt.Errorf("unexpected type %T for field PassesKey", values[i])
 			} else if value.Valid {
 				po.PassesKey = int(value.Int64)
 			}
 		case psoffense.FieldPassesAccuracy:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field passesAccuracy", values[i])
+				return fmt.Errorf("unexpected type %T for field PassesAccuracy", values[i])
 			} else if value.Valid {
 				po.PassesAccuracy = int(value.Int64)
 			}
 		case psoffense.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field player_psoffense", value)
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_psoffense", value)
 			} else if value.Valid {
-				po.player_psoffense = new(int)
-				*po.player_psoffense = int(value.Int64)
+				po.player_stats_psoffense = new(int)
+				*po.player_stats_psoffense = int(value.Int64)
 			}
 		default:
 			po.selectValues.Set(columns[i], values[i])
@@ -144,9 +144,9 @@ func (po *PSOffense) Value(name string) (ent.Value, error) {
 	return po.selectValues.Get(name)
 }
 
-// QueryPlayer queries the "player" edge of the PSOffense entity.
-func (po *PSOffense) QueryPlayer() *PlayerQuery {
-	return NewPSOffenseClient(po.config).QueryPlayer(po)
+// QueryPlayerStats queries the "playerStats" edge of the PSOffense entity.
+func (po *PSOffense) QueryPlayerStats() *PlayerStatsQuery {
+	return NewPSOffenseClient(po.config).QueryPlayerStats(po)
 }
 
 // Update returns a builder for updating this PSOffense.
@@ -172,22 +172,22 @@ func (po *PSOffense) String() string {
 	var builder strings.Builder
 	builder.WriteString("PSOffense(")
 	builder.WriteString(fmt.Sprintf("id=%v, ", po.ID))
-	builder.WriteString("dribbleAttempts=")
+	builder.WriteString("DribbleAttempts=")
 	builder.WriteString(fmt.Sprintf("%v", po.DribbleAttempts))
 	builder.WriteString(", ")
-	builder.WriteString("dribbleSuccess=")
+	builder.WriteString("DribbleSuccess=")
 	builder.WriteString(fmt.Sprintf("%v", po.DribbleSuccess))
 	builder.WriteString(", ")
-	builder.WriteString("dribblePast=")
+	builder.WriteString("DribblePast=")
 	builder.WriteString(fmt.Sprintf("%v", po.DribblePast))
 	builder.WriteString(", ")
-	builder.WriteString("passesTotal=")
+	builder.WriteString("PassesTotal=")
 	builder.WriteString(fmt.Sprintf("%v", po.PassesTotal))
 	builder.WriteString(", ")
-	builder.WriteString("passesKey=")
+	builder.WriteString("PassesKey=")
 	builder.WriteString(fmt.Sprintf("%v", po.PassesKey))
 	builder.WriteString(", ")
-	builder.WriteString("passesAccuracy=")
+	builder.WriteString("PassesAccuracy=")
 	builder.WriteString(fmt.Sprintf("%v", po.PassesAccuracy))
 	builder.WriteByte(')')
 	return builder.String()

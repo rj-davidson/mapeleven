@@ -36,6 +36,5 @@ func (Club) Edges() []ent.Edge {
 			Ref("clubs").
 			Unique(),
 		edge.To("team", Team.Type),
-		edge.To("player", Player.Type),
 	}
 }

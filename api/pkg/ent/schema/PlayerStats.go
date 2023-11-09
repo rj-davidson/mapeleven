@@ -8,48 +8,40 @@ import (
 )
 
 // Player holds the schema definition for the Player entity.
-type Player struct {
+type PlayerStats struct {
 	ent.Schema
 }
 
 // Fields of the Player.
-func (Player) Fields() []ent.Field {
+func (PlayerStats) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("slug").
 			Unique().
 			Immutable(),
-		field.Int("ApiFootballId").
-			Unique().
-			Immutable(),
-		field.String("name"),
-		field.String("firstname"),
-		field.String("lastname"),
-		field.Int("age"),
-		field.String("height"),
-		field.String("weight"),
-		field.Bool("injured"),
-		field.String("photo"),
 		field.Time("lastUpdated").
 			Default(time.Now).
 			Optional().
 			UpdateDefault(time.Now),
-		field.String("form").Optional(),
 	}
 }
 
 // Edges of the Player.
-func (Player) Edges() []ent.Edge {
+func (PlayerStats) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("birth", Birth.Type).
-			Ref("player").
+		edge.From("player", Player.Type).
+			Ref("playerStats").
 			Unique(),
-		edge.From("nationality", Country.Type).
-			Ref("players").
+		edge.From("team", Team.Type).
+			Ref("playerStats").
 			Unique(),
-		edge.To("squad", Squad.Type),
 		edge.To("playerEvents", FixtureEvents.Type),
 		edge.To("matchPlayer", MatchPlayer.Type),
 		edge.To("assistEvents", FixtureEvents.Type),
-		edge.To("playerStats", PlayerStats.Type),
+		edge.To("psgames", PSGames.Type),
+		edge.To("psgoals", PSGoals.Type),
+		edge.To("psdefense", PSDefense.Type),
+		edge.To("psoffense", PSOffense.Type),
+		edge.To("pspenalty", PSPenalty.Type),
+		edge.To("season", Season.Type),
 	}
 }

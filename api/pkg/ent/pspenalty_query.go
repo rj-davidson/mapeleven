@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"math"
 
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	"entgo.io/ent/dialect/sql"
@@ -18,12 +18,12 @@ import (
 // PSPenaltyQuery is the builder for querying PSPenalty entities.
 type PSPenaltyQuery struct {
 	config
-	ctx        *QueryContext
-	order      []pspenalty.OrderOption
-	inters     []Interceptor
-	predicates []predicate.PSPenalty
-	withPlayer *PlayerQuery
-	withFKs    bool
+	ctx             *QueryContext
+	order           []pspenalty.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.PSPenalty
+	withPlayerStats *PlayerStatsQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -60,9 +60,9 @@ func (ppq *PSPenaltyQuery) Order(o ...pspenalty.OrderOption) *PSPenaltyQuery {
 	return ppq
 }
 
-// QueryPlayer chains the current query on the "player" edge.
-func (ppq *PSPenaltyQuery) QueryPlayer() *PlayerQuery {
-	query := (&PlayerClient{config: ppq.config}).Query()
+// QueryPlayerStats chains the current query on the "playerStats" edge.
+func (ppq *PSPenaltyQuery) QueryPlayerStats() *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: ppq.config}).Query()
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := ppq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -73,8 +73,8 @@ func (ppq *PSPenaltyQuery) QueryPlayer() *PlayerQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pspenalty.Table, pspenalty.FieldID, selector),
-			sqlgraph.To(player.Table, player.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pspenalty.PlayerTable, pspenalty.PlayerColumn),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, pspenalty.PlayerStatsTable, pspenalty.PlayerStatsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(ppq.driver.Dialect(), step)
 		return fromU, nil
@@ -269,26 +269,26 @@ func (ppq *PSPenaltyQuery) Clone() *PSPenaltyQuery {
 		return nil
 	}
 	return &PSPenaltyQuery{
-		config:     ppq.config,
-		ctx:        ppq.ctx.Clone(),
-		order:      append([]pspenalty.OrderOption{}, ppq.order...),
-		inters:     append([]Interceptor{}, ppq.inters...),
-		predicates: append([]predicate.PSPenalty{}, ppq.predicates...),
-		withPlayer: ppq.withPlayer.Clone(),
+		config:          ppq.config,
+		ctx:             ppq.ctx.Clone(),
+		order:           append([]pspenalty.OrderOption{}, ppq.order...),
+		inters:          append([]Interceptor{}, ppq.inters...),
+		predicates:      append([]predicate.PSPenalty{}, ppq.predicates...),
+		withPlayerStats: ppq.withPlayerStats.Clone(),
 		// clone intermediate query.
 		sql:  ppq.sql.Clone(),
 		path: ppq.path,
 	}
 }
 
-// WithPlayer tells the query-builder to eager-load the nodes that are connected to
-// the "player" edge. The optional arguments are used to configure the query builder of the edge.
-func (ppq *PSPenaltyQuery) WithPlayer(opts ...func(*PlayerQuery)) *PSPenaltyQuery {
-	query := (&PlayerClient{config: ppq.config}).Query()
+// WithPlayerStats tells the query-builder to eager-load the nodes that are connected to
+// the "playerStats" edge. The optional arguments are used to configure the query builder of the edge.
+func (ppq *PSPenaltyQuery) WithPlayerStats(opts ...func(*PlayerStatsQuery)) *PSPenaltyQuery {
+	query := (&PlayerStatsClient{config: ppq.config}).Query()
 	for _, opt := range opts {
 		opt(query)
 	}
-	ppq.withPlayer = query
+	ppq.withPlayerStats = query
 	return ppq
 }
 
@@ -298,7 +298,7 @@ func (ppq *PSPenaltyQuery) WithPlayer(opts ...func(*PlayerQuery)) *PSPenaltyQuer
 // Example:
 //
 //	var v []struct {
-//		FoulsDrawn int `json:"foulsDrawn,omitempty"`
+//		FoulsDrawn int `json:"FoulsDrawn,omitempty"`
 //		Count int `json:"count,omitempty"`
 //	}
 //
@@ -321,7 +321,7 @@ func (ppq *PSPenaltyQuery) GroupBy(field string, fields ...string) *PSPenaltyGro
 // Example:
 //
 //	var v []struct {
-//		FoulsDrawn int `json:"foulsDrawn,omitempty"`
+//		FoulsDrawn int `json:"FoulsDrawn,omitempty"`
 //	}
 //
 //	client.PSPenalty.Query().
@@ -372,10 +372,10 @@ func (ppq *PSPenaltyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*P
 		withFKs     = ppq.withFKs
 		_spec       = ppq.querySpec()
 		loadedTypes = [1]bool{
-			ppq.withPlayer != nil,
+			ppq.withPlayerStats != nil,
 		}
 	)
-	if ppq.withPlayer != nil {
+	if ppq.withPlayerStats != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -399,23 +399,23 @@ func (ppq *PSPenaltyQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]*P
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
-	if query := ppq.withPlayer; query != nil {
-		if err := ppq.loadPlayer(ctx, query, nodes, nil,
-			func(n *PSPenalty, e *Player) { n.Edges.Player = e }); err != nil {
+	if query := ppq.withPlayerStats; query != nil {
+		if err := ppq.loadPlayerStats(ctx, query, nodes, nil,
+			func(n *PSPenalty, e *PlayerStats) { n.Edges.PlayerStats = e }); err != nil {
 			return nil, err
 		}
 	}
 	return nodes, nil
 }
 
-func (ppq *PSPenaltyQuery) loadPlayer(ctx context.Context, query *PlayerQuery, nodes []*PSPenalty, init func(*PSPenalty), assign func(*PSPenalty, *Player)) error {
+func (ppq *PSPenaltyQuery) loadPlayerStats(ctx context.Context, query *PlayerStatsQuery, nodes []*PSPenalty, init func(*PSPenalty), assign func(*PSPenalty, *PlayerStats)) error {
 	ids := make([]int, 0, len(nodes))
 	nodeids := make(map[int][]*PSPenalty)
 	for i := range nodes {
-		if nodes[i].player_pspenalty == nil {
+		if nodes[i].player_stats_pspenalty == nil {
 			continue
 		}
-		fk := *nodes[i].player_pspenalty
+		fk := *nodes[i].player_stats_pspenalty
 		if _, ok := nodeids[fk]; !ok {
 			ids = append(ids, fk)
 		}
@@ -424,7 +424,7 @@ func (ppq *PSPenaltyQuery) loadPlayer(ctx context.Context, query *PlayerQuery, n
 	if len(ids) == 0 {
 		return nil
 	}
-	query.Where(player.IDIn(ids...))
+	query.Where(playerstats.IDIn(ids...))
 	neighbors, err := query.All(ctx)
 	if err != nil {
 		return err
@@ -432,7 +432,7 @@ func (ppq *PSPenaltyQuery) loadPlayer(ctx context.Context, query *PlayerQuery, n
 	for _, n := range neighbors {
 		nodes, ok := nodeids[n.ID]
 		if !ok {
-			return fmt.Errorf(`unexpected foreign-key "player_pspenalty" returned %v`, n.ID)
+			return fmt.Errorf(`unexpected foreign-key "player_stats_pspenalty" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

@@ -8,12 +8,8 @@ import (
 	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/birth"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/country"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 )
@@ -51,11 +47,7 @@ type Player struct {
 	// The values are being populated by the PlayerQuery when eager-loading is set.
 	Edges           PlayerEdges `json:"edges"`
 	birth_player    *int
-	club_player     *int
 	country_players *int
-	league_player   *int
-	season_player   *int
-	team_players    *int
 	selectValues    sql.SelectValues
 }
 
@@ -73,27 +65,11 @@ type PlayerEdges struct {
 	MatchPlayer []*MatchPlayer `json:"matchPlayer,omitempty"`
 	// AssistEvents holds the value of the assistEvents edge.
 	AssistEvents []*FixtureEvents `json:"assistEvents,omitempty"`
-	// Psgames holds the value of the psgames edge.
-	Psgames []*PSGames `json:"psgames,omitempty"`
-	// Psgoals holds the value of the psgoals edge.
-	Psgoals []*PSGoals `json:"psgoals,omitempty"`
-	// Psdefense holds the value of the psdefense edge.
-	Psdefense []*PSDefense `json:"psdefense,omitempty"`
-	// Psoffense holds the value of the psoffense edge.
-	Psoffense []*PSOffense `json:"psoffense,omitempty"`
-	// Pspenalty holds the value of the pspenalty edge.
-	Pspenalty []*PSPenalty `json:"pspenalty,omitempty"`
-	// Season holds the value of the season edge.
-	Season *Season `json:"season,omitempty"`
-	// Team holds the value of the team edge.
-	Team *Team `json:"team,omitempty"`
-	// Club holds the value of the club edge.
-	Club *Club `json:"club,omitempty"`
-	// League holds the value of the league edge.
-	League *League `json:"league,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [15]bool
+	loadedTypes [7]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -158,101 +134,13 @@ func (e PlayerEdges) AssistEventsOrErr() ([]*FixtureEvents, error) {
 	return nil, &NotLoadedError{edge: "assistEvents"}
 }
 
-// PsgamesOrErr returns the Psgames value or an error if the edge
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
 // was not loaded in eager-loading.
-func (e PlayerEdges) PsgamesOrErr() ([]*PSGames, error) {
+func (e PlayerEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
 	if e.loadedTypes[6] {
-		return e.Psgames, nil
+		return e.PlayerStats, nil
 	}
-	return nil, &NotLoadedError{edge: "psgames"}
-}
-
-// PsgoalsOrErr returns the Psgoals value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerEdges) PsgoalsOrErr() ([]*PSGoals, error) {
-	if e.loadedTypes[7] {
-		return e.Psgoals, nil
-	}
-	return nil, &NotLoadedError{edge: "psgoals"}
-}
-
-// PsdefenseOrErr returns the Psdefense value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerEdges) PsdefenseOrErr() ([]*PSDefense, error) {
-	if e.loadedTypes[8] {
-		return e.Psdefense, nil
-	}
-	return nil, &NotLoadedError{edge: "psdefense"}
-}
-
-// PsoffenseOrErr returns the Psoffense value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerEdges) PsoffenseOrErr() ([]*PSOffense, error) {
-	if e.loadedTypes[9] {
-		return e.Psoffense, nil
-	}
-	return nil, &NotLoadedError{edge: "psoffense"}
-}
-
-// PspenaltyOrErr returns the Pspenalty value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerEdges) PspenaltyOrErr() ([]*PSPenalty, error) {
-	if e.loadedTypes[10] {
-		return e.Pspenalty, nil
-	}
-	return nil, &NotLoadedError{edge: "pspenalty"}
-}
-
-// SeasonOrErr returns the Season value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PlayerEdges) SeasonOrErr() (*Season, error) {
-	if e.loadedTypes[11] {
-		if e.Season == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: season.Label}
-		}
-		return e.Season, nil
-	}
-	return nil, &NotLoadedError{edge: "season"}
-}
-
-// TeamOrErr returns the Team value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PlayerEdges) TeamOrErr() (*Team, error) {
-	if e.loadedTypes[12] {
-		if e.Team == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: team.Label}
-		}
-		return e.Team, nil
-	}
-	return nil, &NotLoadedError{edge: "team"}
-}
-
-// ClubOrErr returns the Club value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PlayerEdges) ClubOrErr() (*Club, error) {
-	if e.loadedTypes[13] {
-		if e.Club == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: club.Label}
-		}
-		return e.Club, nil
-	}
-	return nil, &NotLoadedError{edge: "club"}
-}
-
-// LeagueOrErr returns the League value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e PlayerEdges) LeagueOrErr() (*League, error) {
-	if e.loadedTypes[14] {
-		if e.League == nil {
-			// Edge was loaded but was not found.
-			return nil, &NotFoundError{label: league.Label}
-		}
-		return e.League, nil
-	}
-	return nil, &NotLoadedError{edge: "league"}
+	return nil, &NotLoadedError{edge: "playerStats"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -270,15 +158,7 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullTime)
 		case player.ForeignKeys[0]: // birth_player
 			values[i] = new(sql.NullInt64)
-		case player.ForeignKeys[1]: // club_player
-			values[i] = new(sql.NullInt64)
-		case player.ForeignKeys[2]: // country_players
-			values[i] = new(sql.NullInt64)
-		case player.ForeignKeys[3]: // league_player
-			values[i] = new(sql.NullInt64)
-		case player.ForeignKeys[4]: // season_player
-			values[i] = new(sql.NullInt64)
-		case player.ForeignKeys[5]: // team_players
+		case player.ForeignKeys[1]: // country_players
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -382,38 +262,10 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 			}
 		case player.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field club_player", value)
-			} else if value.Valid {
-				pl.club_player = new(int)
-				*pl.club_player = int(value.Int64)
-			}
-		case player.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field country_players", value)
 			} else if value.Valid {
 				pl.country_players = new(int)
 				*pl.country_players = int(value.Int64)
-			}
-		case player.ForeignKeys[3]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field league_player", value)
-			} else if value.Valid {
-				pl.league_player = new(int)
-				*pl.league_player = int(value.Int64)
-			}
-		case player.ForeignKeys[4]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field season_player", value)
-			} else if value.Valid {
-				pl.season_player = new(int)
-				*pl.season_player = int(value.Int64)
-			}
-		case player.ForeignKeys[5]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field team_players", value)
-			} else if value.Valid {
-				pl.team_players = new(int)
-				*pl.team_players = int(value.Int64)
 			}
 		default:
 			pl.selectValues.Set(columns[i], values[i])
@@ -458,49 +310,9 @@ func (pl *Player) QueryAssistEvents() *FixtureEventsQuery {
 	return NewPlayerClient(pl.config).QueryAssistEvents(pl)
 }
 
-// QueryPsgames queries the "psgames" edge of the Player entity.
-func (pl *Player) QueryPsgames() *PSGamesQuery {
-	return NewPlayerClient(pl.config).QueryPsgames(pl)
-}
-
-// QueryPsgoals queries the "psgoals" edge of the Player entity.
-func (pl *Player) QueryPsgoals() *PSGoalsQuery {
-	return NewPlayerClient(pl.config).QueryPsgoals(pl)
-}
-
-// QueryPsdefense queries the "psdefense" edge of the Player entity.
-func (pl *Player) QueryPsdefense() *PSDefenseQuery {
-	return NewPlayerClient(pl.config).QueryPsdefense(pl)
-}
-
-// QueryPsoffense queries the "psoffense" edge of the Player entity.
-func (pl *Player) QueryPsoffense() *PSOffenseQuery {
-	return NewPlayerClient(pl.config).QueryPsoffense(pl)
-}
-
-// QueryPspenalty queries the "pspenalty" edge of the Player entity.
-func (pl *Player) QueryPspenalty() *PSPenaltyQuery {
-	return NewPlayerClient(pl.config).QueryPspenalty(pl)
-}
-
-// QuerySeason queries the "season" edge of the Player entity.
-func (pl *Player) QuerySeason() *SeasonQuery {
-	return NewPlayerClient(pl.config).QuerySeason(pl)
-}
-
-// QueryTeam queries the "team" edge of the Player entity.
-func (pl *Player) QueryTeam() *TeamQuery {
-	return NewPlayerClient(pl.config).QueryTeam(pl)
-}
-
-// QueryClub queries the "club" edge of the Player entity.
-func (pl *Player) QueryClub() *ClubQuery {
-	return NewPlayerClient(pl.config).QueryClub(pl)
-}
-
-// QueryLeague queries the "league" edge of the Player entity.
-func (pl *Player) QueryLeague() *LeagueQuery {
-	return NewPlayerClient(pl.config).QueryLeague(pl)
+// QueryPlayerStats queries the "playerStats" edge of the Player entity.
+func (pl *Player) QueryPlayerStats() *PlayerStatsQuery {
+	return NewPlayerClient(pl.config).QueryPlayerStats(pl)
 }
 
 // Update returns a builder for updating this Player.

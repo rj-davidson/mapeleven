@@ -3,10 +3,7 @@ package schema
 import (
 	"entgo.io/ent"
 	"entgo.io/ent/schema/edge"
-	_ "entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
-	_ "entgo.io/ent/schema/field"
-	_ "time"
 )
 
 // PSGames holds the schema definition for the PSGames entity.
@@ -17,19 +14,19 @@ type PSGames struct {
 // Fields of the PSGames.
 func (PSGames) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("appearences"),
-		field.Int("lineups"),
-		field.Int("minutes"),
-		field.Int("number"),
-		field.String("position"),
-		field.String("rating"),
-		field.Bool("captain"),
+		field.Int("Appearances"),
+		field.Int("Lineups"),
+		field.Int("Minutes"),
+		field.Int("Number").Default(0),
+		field.String("Position").Default(""),
+		field.String("Rating").Default(""),
+		field.Bool("Captain").Default(false),
 	}
 }
 
 // Edges of the PSGames.
 func (PSGames) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("player", Player.Type).Ref("psgames").Unique(),
+		edge.From("playerStats", PlayerStats.Type).Ref("psgames").Unique(),
 	}
 }

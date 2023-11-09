@@ -5,7 +5,6 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/fixture_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models/player_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models/team_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
@@ -90,7 +89,7 @@ func main() {
 
 	if *devRun {
 		fmt.Println("Running in development mode...")
-		runDevelopmentMode()
+		runDevelopmentMode(client)
 	}
 
 	// Start the scheduler
@@ -111,8 +110,8 @@ func updateDatabase(client *ent.Client) {
 	cronScheduler(client, false, true, false)
 }
 
-func runDevelopmentMode() {
-	cronScheduler(nil, false, false, true)
+func runDevelopmentMode(client *ent.Client) {
+	cronScheduler(client, false, false, true)
 }
 
 func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRun bool) {
@@ -130,7 +129,7 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	fixturesModel := fixture_models.NewFixtureModel(client)
 	playerModel := player_models.NewPlayerModel(client)
 	squadModel := team_models.NewSquadModel(client)
-	playerStatsModel := player_stats.NewPlayerStatsModel(client)
+	//playerStatsModel := player_stats.NewPlayerStatsModel(client)
 
 	if initialize {
 		// Country Initialization
@@ -151,6 +150,9 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 		// Fetch Squads
 		fetchSquads(squadModel, playerModel, teamModel)
 
+		// Fetch Player Stats
+		//fetchPlayerStats(playerModel, playerStatsModel)
+
 		// Fetch Fixture Data
 		fetchFixtureData(fixturesModel)
 	}
@@ -166,7 +168,9 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 	if devRun {
 		// Add your development mode code here
-		fetchPlayerStats(playerStatsModel)
+		fetchSquads(squadModel, playerModel, teamModel)
+		//fetchPlayerStats(playerModel, teamModel)
+
 	}
 }
 
@@ -257,12 +261,13 @@ func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
 	fmt.Println("Fixture data successfully loaded.")
 }
 
-func fetchPlayerStats(playerStatsModel *player_stats.PlayerStatsModel) {
-	fmt.Println("Fetching player stats...")
-	playerStatsController := controllers.NewPlayerStatsController(playerStatsModel)
-	err := playerStatsController.FetchPlayerStatsByID()
-	if err != nil {
-		log.Printf("Error fetching player stats: %v", err)
-	}
-	fmt.Println("Player stats successfully loaded.")
-}
+// function that will fetch player stats
+//func fetchPlayerStats(playerModel *player_models.PlayerModel, teamModel *team_models.TeamModel) {
+//	fmt.Println("Fetching Player Stats...")
+//	playerStatsController := controllers.NewPlayerStatsController(teamModel)
+//	err := playerStatsController.InitializeStats(context.Background())
+//	if err != nil {
+//		log.Printf("Error fetching player stats: %v", err)
+//	}
+//	fmt.Println("Player stats successfully loaded.")
+//}

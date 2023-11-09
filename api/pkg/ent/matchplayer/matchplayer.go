@@ -28,6 +28,8 @@ const (
 	EdgePlayer = "player"
 	// EdgeLineup holds the string denoting the lineup edge name in mutations.
 	EdgeLineup = "lineup"
+	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
+	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the matchplayer in the database.
 	Table = "match_players"
 	// PlayerTable is the table that holds the player relation/edge.
@@ -44,6 +46,13 @@ const (
 	LineupInverseTable = "fixture_lineups"
 	// LineupColumn is the table column denoting the lineup relation/edge.
 	LineupColumn = "fixture_lineups_lineup_player"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge.
+	PlayerStatsTable = "match_players"
+	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
+	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
+	PlayerStatsInverseTable = "player_stats"
+	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
+	PlayerStatsColumn = "player_stats_match_player"
 )
 
 // Columns holds all SQL columns for matchplayer fields.
@@ -61,6 +70,7 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"fixture_lineups_lineup_player",
 	"player_match_player",
+	"player_stats_match_player",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -131,6 +141,13 @@ func ByLineupField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newLineupStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByPlayerStatsField orders the results by playerStats field.
+func ByPlayerStatsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newPlayerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -143,5 +160,12 @@ func newLineupStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(LineupInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, LineupTable, LineupColumn),
+	)
+}
+func newPlayerStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayerStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 	)
 }
