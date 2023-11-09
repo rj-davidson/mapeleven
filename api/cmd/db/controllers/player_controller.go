@@ -10,12 +10,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/viper"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"path/filepath"
 )
 
-// PlayerInfo holds basic information about a player.
 type PlayerInfo struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
@@ -27,43 +27,30 @@ type PlayerInfo struct {
 	Injured   bool   `json:"injured"`
 	Photo     string `json:"photo"`
 }
-
-// Statistics wraps all statistics related to a player.
-type Statistics struct {
-	Team        player_stats.PSTeam        `json:"team"`
-	League      player_stats.PSLeague      `json:"league"`
-	Games       player_stats.PSGames       `json:"games"`
-	Substitutes player_stats.PSSubstitutes `json:"substitutes"`
-	Shots       player_stats.PSShots       `json:"shots"`
-	Goals       player_stats.PSGoals       `json:"goals"`
-	Passes      player_stats.PSPasses      `json:"passes"`
-	Tackles     player_stats.PSTackles     `json:"tackles"`
-	Duels       player_stats.PSDuels       `json:"duels"`
-	Dribbles    player_stats.PSDribbles    `json:"dribbles"`
-	Fouls       player_stats.PSFouls       `json:"fouls"`
-	Cards       player_stats.PSCards       `json:"cards"`
-	Penalty     player_stats.PSPenalty     `json:"penalty"`
+type LeaguePlayerResponse struct {
+	Results  int `json:"results"`
+	Response []struct {
+		Player struct {
+			ID int `json:"id"`
+		} `json:"player"`
+		Statistics []player_stats.PlayerStats `json:"statistics"`
+	} `json:"response"`
 }
 
-// Player wraps PlayerInfo and includes a slice of Statistics.
 type Player struct {
-	Player     PlayerInfo   `json:"player"`
-	Statistics []Statistics `json:"statistics"`
+	Player PlayerInfo `json:"player"`
 }
 
-// PlayerResponse is the expected structure of the JSON response.
 type PlayerResponse struct {
 	Results  int      `json:"results"`
 	Response []Player `json:"response"`
 }
 
-// PlayerController manages HTTP requests for player data.
 type PlayerController struct {
 	client      *http.Client
 	playerModel *player_models.PlayerModel
 }
 
-// NewPlayerController creates a new PlayerController.
 func NewPlayerController(playerModel *player_models.PlayerModel) *PlayerController {
 	return &PlayerController{
 		client:      &http.Client{},
@@ -183,6 +170,63 @@ func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_model
 		}
 		return nil
 	})
+}
+
+func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID int) ([]int, error) {
+	// Create a URL for fetching players by their league ID
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?league=%d&season=2022", leagueID)
+	// Create an HTTP request
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// Add headers for the API
+	req.Header.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
+	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
+
+	resp, err := pc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	// Unmarshal data to get player IDs
+	var leaguePlayerResponse LeaguePlayerResponse
+	if err := json.Unmarshal(body, &leaguePlayerResponse); err != nil {
+		return nil, err
+	}
+
+	var playerIDs []int
+	for _, p := range leaguePlayerResponse.Response {
+		playerIDs = append(playerIDs, p.Player.ID)
+	}
+
+	return playerIDs, nil
+}
+
+func (pc *PlayerController) FetchPlayersByLeague(ctx context.Context, leagueID int) error {
+	playerIDs, err := pc.GetPlayerIDsForLeague(ctx, leagueID)
+	fmt.Println("Initializing Player... IN CONTROLLER")
+	fmt.Println(playerIDs)
+	if err != nil {
+		return err
+	}
+
+	// Ensure each player exists in the database
+	for _, playerID := range playerIDs {
+		err := pc.EnsurePlayerExists(ctx, playerID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // downloadPhotoIfNeeded downloads a player's photo if it is not already present.
