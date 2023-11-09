@@ -38,6 +38,10 @@ type UpdatePlayerInput struct {
 	Season        *int
 }
 
+type UpdatePlayerStatsInput struct {
+	ApiFootballId int
+}
+
 // DeletePlayerInput holds the required fields to delete a player.
 type DeletePlayerInput struct {
 	ID int

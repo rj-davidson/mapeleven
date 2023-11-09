@@ -1,15 +1,20 @@
 package player_stats
 
 import (
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/controllers"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgoals"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psoffense"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	"context"
 	_ "context"
+	"fmt"
 )
 
 //type PlayerStats struct {
@@ -166,47 +171,102 @@ func NewPlayerStatsModel(client *ent.Client) *PlayerStatsModel {
 	return &PlayerStatsModel{client: client}
 }
 
-type PlayerStatsPackage struct {
-	PSPenalty *ent.PSPenalty
-	PSDefense *ent.PSDefense
-	PSGoals   *ent.PSGoals
-	PSOffense *ent.PSOffense
-	PSGames   *ent.PSGames
+func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p controllers.PlayerInfo, data controllers.Statistics) (*ent.PlayerStats, error) {
+	prev, err := m.client.PlayerStats.
+		Query().
+		Where(playerstats.HasPlayerWith(player.IDEQ(p.ID))).
+		First(ctx)
+	if err != nil && !ent.IsNotFound(err) {
+		return nil, fmt.Errorf("error fetching existing PlayerStats: %v", err)
+	}
+	if prev == nil {
+		//return playerstats package
+		return m.CreatePlayerStats(ctx, m.client, data, p), nil
+	} else {
+		return UpdatePlayerStats(ctx, m.client, data, prev), nil
+	}
+
 }
 
-//
-//func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.PlayerStats, playerStats PlayerStats) (*PlayerStatsPackage, error) {
-//	//Add form to Player object
-//	_, err := m.client.PlayerStats.
-//		UpdateOne(p).
-//		Save(ctx)
-//	if err != nil {
-//		return nil, err
-//	}
-//	var playerStatsPackage PlayerStatsPackage
-//
-//	//playerStatsPackage.PSPenalty, err = m.upsertPSPenalty(ctx, p, playerStats.PSPenalty)
-//	//if err != nil {
-//	//	return nil, err
-//	//}
-//	//playerStatsPackage.PSDefense, err = m.upsertPSDefense(ctx, p, playerStats.PSDefense)
-//	//if err != nil {
-//	//	return nil, err
-//	//}
-//	//playerStatsPackage.PSGoals, err = m.upsertPSGoals(ctx, p, playerStats.PSGoals)
-//	//if err != nil {
-//	//	return nil, err
-//	//}
-//	//playerStatsPackage.PSOffense, err = m.upsertPSOffense(ctx, p, playerStats.PSOffense)
-//	//if err != nil {
-//	//	return nil, err
-//	//}
-//	//playerStatsPackage.PSGames, err = m.upsertPSGames(ctx, p, playerStats.PSGames)
-//	//if err != nil {
-//	//	return nil, err
-//	//}
-//	return &playerStatsPackage, nil
-//}
+// write the method to create the playerstats package
+func (m *PlayerStatsModel) CreatePlayerStats(ctx context.Context, client *ent.Client, data controllers.Statistics, p controllers.PlayerInfo) (*ent.PlayerStats, error) {
+	//create the playerstats
+	psp := &PlayerStats{
+		Team: PSTeam{
+			ApiFootballId: data.Team.ApiFootballId,
+			Name:          data.Team.Name,
+			Logo:          data.Team.Logo,
+		},
+		League: PSLeague{
+			ApiFootballId: data.League.ApiFootballId,
+			Name:          data.League.Name,
+			Country:       data.League.Country,
+			Logo:          data.League.Logo,
+			Flag:          data.League.Flag,
+			Season:        data.League.Season,
+		},
+		Games: PSGames{
+			Appearances: data.Games.Appearances,
+			Lineups:     data.Games.Lineups,
+			Minutes:     data.Games.Minutes,
+			Number:      data.Games.Number,
+			Position:    data.Games.Position,
+			Rating:      data.Games.Rating,
+			Captain:     data.Games.Captain,
+		},
+		Substitutes: PSSubstitutes{
+			In:    data.Substitutes.In,
+			Out:   data.Substitutes.Out,
+			Bench: data.Substitutes.Bench,
+		},
+		Shots: PSShots{
+			Total: data.Shots.Total,
+			On:    data.Shots.On,
+		},
+		Goals: PSGoals{
+			Total:    data.Goals.Total,
+			Conceded: data.Goals.Conceded,
+			Assists:  data.Goals.Assists,
+			Saves:    data.Goals.Saves,
+		},
+		Passes: PSPasses{
+			Total:    data.Passes.Total,
+			Key:      data.Passes.Key,
+			Accuracy: data.Passes.Accuracy,
+		},
+		Tackles: PSTackles{
+			Total:         data.Tackles.Total,
+			Blocks:        data.Tackles.Blocks,
+			Interceptions: data.Tackles.Interceptions,
+		},
+		Duels: PSDuels{
+			Total: data.Duels.Total,
+			Won:   data.Duels.Won,
+		},
+		Dribbles: PSDribbles{
+			Attempts: data.Dribbles.Attempts,
+			Success:  data.Dribbles.Success,
+			Past:     data.Dribbles.Past,
+		},
+		Fouls: PSFouls{
+			Drawn:     data.Fouls.Drawn,
+			Committed: data.Fouls.Committed,
+		},
+		Cards: PSCards{
+			Yellow:    data.Cards.Yellow,
+			YellowRed: data.Cards.YellowRed,
+			Red:       data.Cards.Red,
+		},
+		Penalty: PSPenalty{
+			Won:      data.Penalty.Won,
+			Commited: data.Penalty.Commited,
+			Scored:   data.Penalty.Scored,
+			Missed:   data.Penalty.Missed,
+			Saved:    data.Penalty.Saved,
+		},
+	}
+	return psp, nil
+}
 
 //func (m *PlayerStatsModel) upsertPSPenalty(ctx context.Context, p *ent.PlayerStats, data PSPenalty) (*ent.PSPenalty, error) {
 //	prev, err := m.client.PSPenalty.Query().Where(pspenalty.HasPlayerStatsWith(playerstats.IDEQ(p.ID))).First(ctx)

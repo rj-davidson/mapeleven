@@ -37,24 +37,47 @@ type LeaguePlayerResponse struct {
 	} `json:"response"`
 }
 
-type Player struct {
-	Player PlayerInfo `json:"player"`
+// Statistics wraps all statistics related to a player.
+type Statistics struct {
+	Team        player_stats.PSTeam        `json:"team"`
+	League      player_stats.PSLeague      `json:"league"`
+	Games       player_stats.PSGames       `json:"games"`
+	Substitutes player_stats.PSSubstitutes `json:"substitutes"`
+	Shots       player_stats.PSShots       `json:"shots"`
+	Goals       player_stats.PSGoals       `json:"goals"`
+	Passes      player_stats.PSPasses      `json:"passes"`
+	Tackles     player_stats.PSTackles     `json:"tackles"`
+	Duels       player_stats.PSDuels       `json:"duels"`
+	Dribbles    player_stats.PSDribbles    `json:"dribbles"`
+	Fouls       player_stats.PSFouls       `json:"fouls"`
+	Cards       player_stats.PSCards       `json:"cards"`
+	Penalty     player_stats.PSPenalty     `json:"penalty"`
 }
 
+// Player wraps PlayerInfo and includes a slice of Statistics.
+type Player struct {
+	Player     PlayerInfo   `json:"player"`
+	Statistics []Statistics `json:"statistics"`
+}
+
+// PlayerResponse is the expected structure of the JSON response.
 type PlayerResponse struct {
 	Results  int      `json:"results"`
 	Response []Player `json:"response"`
 }
 
+// PlayerController manages HTTP requests for player data.
 type PlayerController struct {
-	client      *http.Client
-	playerModel *player_models.PlayerModel
+	client           *http.Client
+	playerModel      *player_models.PlayerModel
+	playerStatsModel *player_stats.PlayerStatsModel
 }
 
-func NewPlayerController(playerModel *player_models.PlayerModel) *PlayerController {
+func NewPlayerController(playerModel *player_models.PlayerModel, playerStatsModel *player_stats.PlayerStatsModel) *PlayerController {
 	return &PlayerController{
-		client:      &http.Client{},
-		playerModel: playerModel,
+		client:           &http.Client{},
+		playerModel:      playerModel,
+		playerStatsModel: playerStatsModel,
 	}
 }
 
@@ -135,9 +158,16 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 		return err
 	}
 
-	// Here you would handle the playerData.Statistics which is a slice of Statistics.
-	// This could involve iterating over the slice and updating/inserting each statistic in your database.
-	// This part of the logic is omitted for brevity, but it would follow a similar pattern to the upsertPlayer function.
+	// Iterate over the slice of Statistics and update/insert each statistic in the database.
+	for _, stat := range playerData.Statistics {
+		playerStats, err := pc.playerStatsModel.UpsertPlayerStats(ctx, playerData.Player, stat)
+		
+		if err != nil {
+			// Handle the error, possibly logging and continuing with the next statistic
+			fmt.Printf("Error upserting stats for player ID %d: %v\n", playerData.Player.ID, err)
+			continue
+		}
+	}
 
 	return nil
 }
