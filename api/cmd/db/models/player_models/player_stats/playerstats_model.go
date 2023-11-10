@@ -16,6 +16,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"context"
 	_ "context"
+	"fmt"
 )
 
 type PSTeam struct {
@@ -129,6 +130,8 @@ func NewPlayerStatsModel(client *ent.Client) *PlayerStatsModel {
 
 func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, s PlayerStats) error {
 	// Query for the team
+	fmt.Printf("Upserting player stats for %s\n", p.Name)
+
 	t, err := m.client.Team.
 		Query().
 		WithClub(func(q *ent.ClubQuery) {
@@ -138,8 +141,10 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player,
 			q.Where(season.Year(s.League.Season))
 		}).Only(ctx)
 	if err != nil {
-		return err // Proper error handling
+		fmt.Printf("Error querying team: %v\n", err)
+		return err
 	}
+	fmt.Printf("Queried team: %v\n", t)
 
 	// Query for existing player stats
 	ps, err := m.client.PlayerStats.
@@ -152,7 +157,8 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player,
 		}).Only(ctx)
 
 	if err != nil && !ent.IsNotFound(err) {
-		return err // Proper error handling for non "not found" errors
+		fmt.Printf("Error querying player stats: %v\n", err)
+		return err
 	}
 
 	// If stats exist, update, otherwise create new stats
@@ -161,7 +167,8 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player,
 			// Set necessary fields to update here
 			Save(ctx)
 		if err != nil {
-			return err // Error handling for update operation
+			fmt.Printf("Updating existing player stats")
+			return err
 		}
 	} else {
 		ps, err = m.client.PlayerStats.
@@ -171,13 +178,16 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player,
 			// Additional fields to set can go here
 			Save(ctx)
 		if err != nil {
-			return err // Error handling for create operation
+			fmt.Printf("Creating new player stats")
+			return err
 		}
 	}
 
 	// Upsert sub-statistics
 	if err := m.upsertSubStats(ctx, ps, s); err != nil {
-		return err // Handle errors from sub-statistics upserts
+		fmt.Printf("Error upserting sub-stats: %v\n", err)
+		return err
+
 	}
 
 	return nil
@@ -214,6 +224,7 @@ func (m *PlayerStatsModel) upsertTechnicalWrapper(ctx context.Context, ps *ent.P
 
 func (m *PlayerStatsModel) upsertSubStats(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
 	// List of upsert functions
+	fmt.Printf("Upserting sub-stats for %s\n", ps.Edges.Player.Name)
 	var upsertFuncs = []func(context.Context, *ent.PlayerStats, PlayerStats) error{
 		m.upsertDefenseWrapper,
 		m.upsertGamesWrapper,
@@ -226,10 +237,11 @@ func (m *PlayerStatsModel) upsertSubStats(ctx context.Context, ps *ent.PlayerSta
 
 	for _, fn := range upsertFuncs {
 		if err := fn(ctx, ps, s); err != nil {
-			return err // Return on the first error encountered
+			fmt.Printf("Error upserting sub-stats: %v\n", err)
+			return err
 		}
 	}
-
+	fmt.Printf("Finished upserting sub-stats for %s\n", ps.Edges.Player.Name)
 	return nil
 }
 
