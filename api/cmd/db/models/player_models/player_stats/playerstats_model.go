@@ -128,81 +128,108 @@ func NewPlayerStatsModel(client *ent.Client) *PlayerStatsModel {
 }
 
 func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, s PlayerStats) error {
+	// Query for the team
 	t, err := m.client.Team.
 		Query().
-		WithClub(
-			func(q *ent.ClubQuery) {
-				q.Where(club.ApiFootballId(s.Team.ApiFootballId))
-			}).
-		WithSeason(
-			func(q *ent.SeasonQuery) {
-				q.Where(season.Year(s.League.Season))
-			}).Only(ctx)
+		WithClub(func(q *ent.ClubQuery) {
+			q.Where(club.ApiFootballId(s.Team.ApiFootballId))
+		}).
+		WithSeason(func(q *ent.SeasonQuery) {
+			q.Where(season.Year(s.League.Season))
+		}).Only(ctx)
+	if err != nil {
+		return err // Proper error handling
+	}
 
+	// Query for existing player stats
 	ps, err := m.client.PlayerStats.
 		Query().
-		WithPlayer(
-			func(q *ent.PlayerQuery) {
-				q.Where(player.IDEQ(p.ID))
-			},
-		).
-		WithTeam(
-			func(q *ent.TeamQuery) {
-				q.Where(team.IDEQ(t.ID))
-			},
-		).
-		Only(ctx)
+		WithPlayer(func(q *ent.PlayerQuery) {
+			q.Where(player.IDEQ(p.ID))
+		}).
+		WithTeam(func(q *ent.TeamQuery) {
+			q.Where(team.IDEQ(t.ID))
+		}).Only(ctx)
+
+	if err != nil && !ent.IsNotFound(err) {
+		return err // Proper error handling for non "not found" errors
+	}
+
+	// If stats exist, update, otherwise create new stats
 	if ps != nil {
-		_, err = ps.Update().
+		ps, err = ps.Update().
+			// Set necessary fields to update here
 			Save(ctx)
 		if err != nil {
-			return err
+			return err // Error handling for update operation
 		}
 	} else {
 		ps, err = m.client.PlayerStats.
 			Create().
 			SetPlayer(p).
 			SetTeam(t).
+			// Additional fields to set can go here
 			Save(ctx)
 		if err != nil {
-			return err
+			return err // Error handling for create operation
 		}
 	}
 
-	_, err = m.upsertDefense(ctx, ps, s.Duels, s.Tackles)
-	if err != nil {
-		return err
+	// Upsert sub-statistics
+	if err := m.upsertSubStats(ctx, ps, s); err != nil {
+		return err // Handle errors from sub-statistics upserts
 	}
 
-	_, err = m.upsertGames(ctx, ps, s.Games)
-	if err != nil {
-		return err
+	return nil
+}
+
+func (m *PlayerStatsModel) upsertDefenseWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
+	_, err := m.upsertDefense(ctx, ps, s.Duels, s.Tackles)
+	return err
+}
+func (m *PlayerStatsModel) upsertGamesWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
+	_, err := m.upsertGames(ctx, ps, s.Games)
+	return err
+}
+func (m *PlayerStatsModel) upsertShootingWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
+	_, err := m.upsertShooting(ctx, ps, s.Goals, s.Shots)
+	return err
+}
+func (m *PlayerStatsModel) upsertPenaltyWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
+	_, err := m.upsertPenalty(ctx, ps, s.Penalty, s.Fouls)
+	return err
+}
+func (m *PlayerStatsModel) upsertFairplayWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
+	_, err := m.upsertFairplay(ctx, ps, s.Cards, s.Fouls, s.Penalty)
+	return err
+}
+func (m *PlayerStatsModel) upsertSubstitutesWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
+	_, err := m.upsertSubstitutes(ctx, ps, s.Substitutes)
+	return err
+}
+func (m *PlayerStatsModel) upsertTechnicalWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
+	_, err := m.upsertTechnical(ctx, ps, s.Passes, s.Dribbles, s.Fouls)
+	return err
+}
+
+func (m *PlayerStatsModel) upsertSubStats(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
+	// List of upsert functions
+	var upsertFuncs = []func(context.Context, *ent.PlayerStats, PlayerStats) error{
+		m.upsertDefenseWrapper,
+		m.upsertGamesWrapper,
+		m.upsertShootingWrapper,
+		m.upsertPenaltyWrapper,
+		m.upsertFairplayWrapper,
+		m.upsertSubstitutesWrapper,
+		m.upsertTechnicalWrapper,
 	}
 
-	_, err = m.upsertShooting(ctx, ps, s.Goals, s.Shots)
-	if err != nil {
-		return err
+	for _, fn := range upsertFuncs {
+		if err := fn(ctx, ps, s); err != nil {
+			return err // Return on the first error encountered
+		}
 	}
 
-	_, err = m.upsertPenalty(ctx, ps, s.Penalty, s.Fouls)
-	if err != nil {
-		return err
-	}
-
-	_, err = m.upsertFairplay(ctx, ps, s.Cards, s.Fouls, s.Penalty)
-	if err != nil {
-		return err
-	}
-
-	_, err = m.upsertSubstitutes(ctx, ps, s.Substitutes)
-	if err != nil {
-		return err
-	}
-
-	_, err = m.upsertTechnical(ctx, ps, s.Passes, s.Dribbles, s.Fouls)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

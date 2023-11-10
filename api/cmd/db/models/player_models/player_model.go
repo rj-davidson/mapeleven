@@ -25,21 +25,23 @@ type CreatePlayerInput struct {
 
 // UpdatePlayerInput holds the fields to update an existing player.
 type UpdatePlayerInput struct {
-	ApiFootballId int
-	Name          *string
-	Firstname     *string
-	Lastname      *string
-	Age           *int
-	Height        *string
-	Weight        *string
-	Injured       *bool
-	Photo         *string
-	LeagueID      *int
-	Season        *int
+	ApiFootballId          int
+	Name                   *string
+	Firstname              *string
+	Lastname               *string
+	Age                    *int
+	Height                 *string
+	Weight                 *string
+	Injured                *bool
+	Photo                  *string
+	LeagueID               *int
+	Season                 *int
+	UpdatePlayerStatsInput *UpdatePlayerStatsInput
 }
 
 type UpdatePlayerStatsInput struct {
-	ApiFootballId int
+	LeagueID int
+	Season   int
 }
 
 // DeletePlayerInput holds the required fields to delete a player.
