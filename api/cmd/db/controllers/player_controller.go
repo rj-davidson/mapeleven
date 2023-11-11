@@ -188,8 +188,20 @@ func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_model
 }
 
 func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player, stats player_stats.PlayerStats) error {
-	return nil
+	// Log the operation
+	fmt.Printf("Upserting player stats for player ID: %d\n", p.ID)
 
+	// Call UpsertPlayerStats from PlayerStatsModel
+	err := pc.psModel.UpsertPlayerStats(ctx, p, stats)
+	if err != nil {
+		// Log and handle any errors
+		fmt.Printf("Error upserting player stats for player ID %d: %v\n", p.ID, err)
+		return err
+	}
+
+	// Log successful operation
+	fmt.Printf("Successfully upserted player stats for player ID: %d\n", p.ID)
+	return nil
 }
 
 func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID int) ([]int, error) {
