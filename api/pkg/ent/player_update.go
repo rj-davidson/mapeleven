@@ -101,23 +101,290 @@ func (pu *PlayerUpdate) ClearLastUpdated() *PlayerUpdate {
 	return pu
 }
 
-// SetForm sets the "form" field.
-func (pu *PlayerUpdate) SetForm(s string) *PlayerUpdate {
-	pu.mutation.SetForm(s)
+// SetGameAppearances sets the "GameAppearances" field.
+func (pu *PlayerUpdate) SetGameAppearances(i int) *PlayerUpdate {
+	pu.mutation.ResetGameAppearances()
+	pu.mutation.SetGameAppearances(i)
 	return pu
 }
 
-// SetNillableForm sets the "form" field if the given value is not nil.
-func (pu *PlayerUpdate) SetNillableForm(s *string) *PlayerUpdate {
-	if s != nil {
-		pu.SetForm(*s)
+// AddGameAppearances adds i to the "GameAppearances" field.
+func (pu *PlayerUpdate) AddGameAppearances(i int) *PlayerUpdate {
+	pu.mutation.AddGameAppearances(i)
+	return pu
+}
+
+// SetGameLineups sets the "GameLineups" field.
+func (pu *PlayerUpdate) SetGameLineups(i int) *PlayerUpdate {
+	pu.mutation.ResetGameLineups()
+	pu.mutation.SetGameLineups(i)
+	return pu
+}
+
+// AddGameLineups adds i to the "GameLineups" field.
+func (pu *PlayerUpdate) AddGameLineups(i int) *PlayerUpdate {
+	pu.mutation.AddGameLineups(i)
+	return pu
+}
+
+// SetGameMinutes sets the "GameMinutes" field.
+func (pu *PlayerUpdate) SetGameMinutes(i int) *PlayerUpdate {
+	pu.mutation.ResetGameMinutes()
+	pu.mutation.SetGameMinutes(i)
+	return pu
+}
+
+// AddGameMinutes adds i to the "GameMinutes" field.
+func (pu *PlayerUpdate) AddGameMinutes(i int) *PlayerUpdate {
+	pu.mutation.AddGameMinutes(i)
+	return pu
+}
+
+// SetTotalShots sets the "TotalShots" field.
+func (pu *PlayerUpdate) SetTotalShots(i int) *PlayerUpdate {
+	pu.mutation.ResetTotalShots()
+	pu.mutation.SetTotalShots(i)
+	return pu
+}
+
+// AddTotalShots adds i to the "TotalShots" field.
+func (pu *PlayerUpdate) AddTotalShots(i int) *PlayerUpdate {
+	pu.mutation.AddTotalShots(i)
+	return pu
+}
+
+// SetShotsOnTarget sets the "ShotsOnTarget" field.
+func (pu *PlayerUpdate) SetShotsOnTarget(i int) *PlayerUpdate {
+	pu.mutation.ResetShotsOnTarget()
+	pu.mutation.SetShotsOnTarget(i)
+	return pu
+}
+
+// AddShotsOnTarget adds i to the "ShotsOnTarget" field.
+func (pu *PlayerUpdate) AddShotsOnTarget(i int) *PlayerUpdate {
+	pu.mutation.AddShotsOnTarget(i)
+	return pu
+}
+
+// SetTotalGoals sets the "TotalGoals" field.
+func (pu *PlayerUpdate) SetTotalGoals(i int) *PlayerUpdate {
+	pu.mutation.ResetTotalGoals()
+	pu.mutation.SetTotalGoals(i)
+	return pu
+}
+
+// AddTotalGoals adds i to the "TotalGoals" field.
+func (pu *PlayerUpdate) AddTotalGoals(i int) *PlayerUpdate {
+	pu.mutation.AddTotalGoals(i)
+	return pu
+}
+
+// SetAssists sets the "Assists" field.
+func (pu *PlayerUpdate) SetAssists(i int) *PlayerUpdate {
+	pu.mutation.ResetAssists()
+	pu.mutation.SetAssists(i)
+	return pu
+}
+
+// AddAssists adds i to the "Assists" field.
+func (pu *PlayerUpdate) AddAssists(i int) *PlayerUpdate {
+	pu.mutation.AddAssists(i)
+	return pu
+}
+
+// SetGoalsConceded sets the "GoalsConceded" field.
+func (pu *PlayerUpdate) SetGoalsConceded(i int) *PlayerUpdate {
+	pu.mutation.ResetGoalsConceded()
+	pu.mutation.SetGoalsConceded(i)
+	return pu
+}
+
+// AddGoalsConceded adds i to the "GoalsConceded" field.
+func (pu *PlayerUpdate) AddGoalsConceded(i int) *PlayerUpdate {
+	pu.mutation.AddGoalsConceded(i)
+	return pu
+}
+
+// SetSaves sets the "Saves" field.
+func (pu *PlayerUpdate) SetSaves(i int) *PlayerUpdate {
+	pu.mutation.ResetSaves()
+	pu.mutation.SetSaves(i)
+	return pu
+}
+
+// AddSaves adds i to the "Saves" field.
+func (pu *PlayerUpdate) AddSaves(i int) *PlayerUpdate {
+	pu.mutation.AddSaves(i)
+	return pu
+}
+
+// SetPosition sets the "position" field.
+func (pu *PlayerUpdate) SetPosition(s string) *PlayerUpdate {
+	pu.mutation.SetPosition(s)
+	return pu
+}
+
+// SetRating sets the "rating" field.
+func (pu *PlayerUpdate) SetRating(s string) *PlayerUpdate {
+	pu.mutation.SetRating(s)
+	return pu
+}
+
+// SetTeamName sets the "teamName" field.
+func (pu *PlayerUpdate) SetTeamName(s string) *PlayerUpdate {
+	pu.mutation.SetTeamName(s)
+	return pu
+}
+
+// SetTeamID sets the "teamID" field.
+func (pu *PlayerUpdate) SetTeamID(i int) *PlayerUpdate {
+	pu.mutation.ResetTeamID()
+	pu.mutation.SetTeamID(i)
+	return pu
+}
+
+// AddTeamID adds i to the "teamID" field.
+func (pu *PlayerUpdate) AddTeamID(i int) *PlayerUpdate {
+	pu.mutation.AddTeamID(i)
+	return pu
+}
+
+// SetLeagueID sets the "leagueID" field.
+func (pu *PlayerUpdate) SetLeagueID(i int) *PlayerUpdate {
+	pu.mutation.ResetLeagueID()
+	pu.mutation.SetLeagueID(i)
+	return pu
+}
+
+// AddLeagueID adds i to the "leagueID" field.
+func (pu *PlayerUpdate) AddLeagueID(i int) *PlayerUpdate {
+	pu.mutation.AddLeagueID(i)
+	return pu
+}
+
+// SetLeagueName sets the "leagueName" field.
+func (pu *PlayerUpdate) SetLeagueName(s string) *PlayerUpdate {
+	pu.mutation.SetLeagueName(s)
+	return pu
+}
+
+// SetPassTotal sets the "passTotal" field.
+func (pu *PlayerUpdate) SetPassTotal(i int) *PlayerUpdate {
+	pu.mutation.ResetPassTotal()
+	pu.mutation.SetPassTotal(i)
+	return pu
+}
+
+// AddPassTotal adds i to the "passTotal" field.
+func (pu *PlayerUpdate) AddPassTotal(i int) *PlayerUpdate {
+	pu.mutation.AddPassTotal(i)
+	return pu
+}
+
+// SetPassKey sets the "passKey" field.
+func (pu *PlayerUpdate) SetPassKey(i int) *PlayerUpdate {
+	pu.mutation.ResetPassKey()
+	pu.mutation.SetPassKey(i)
+	return pu
+}
+
+// AddPassKey adds i to the "passKey" field.
+func (pu *PlayerUpdate) AddPassKey(i int) *PlayerUpdate {
+	pu.mutation.AddPassKey(i)
+	return pu
+}
+
+// SetPassAccuracy sets the "passAccuracy" field.
+func (pu *PlayerUpdate) SetPassAccuracy(i int) *PlayerUpdate {
+	pu.mutation.ResetPassAccuracy()
+	pu.mutation.SetPassAccuracy(i)
+	return pu
+}
+
+// AddPassAccuracy adds i to the "passAccuracy" field.
+func (pu *PlayerUpdate) AddPassAccuracy(i int) *PlayerUpdate {
+	pu.mutation.AddPassAccuracy(i)
+	return pu
+}
+
+// SetTotalTackle sets the "totalTackle" field.
+func (pu *PlayerUpdate) SetTotalTackle(i int) *PlayerUpdate {
+	pu.mutation.ResetTotalTackle()
+	pu.mutation.SetTotalTackle(i)
+	return pu
+}
+
+// AddTotalTackle adds i to the "totalTackle" field.
+func (pu *PlayerUpdate) AddTotalTackle(i int) *PlayerUpdate {
+	pu.mutation.AddTotalTackle(i)
+	return pu
+}
+
+// SetBlocks sets the "blocks" field.
+func (pu *PlayerUpdate) SetBlocks(i int) *PlayerUpdate {
+	pu.mutation.ResetBlocks()
+	pu.mutation.SetBlocks(i)
+	return pu
+}
+
+// SetNillableBlocks sets the "blocks" field if the given value is not nil.
+func (pu *PlayerUpdate) SetNillableBlocks(i *int) *PlayerUpdate {
+	if i != nil {
+		pu.SetBlocks(*i)
 	}
 	return pu
 }
 
-// ClearForm clears the value of the "form" field.
-func (pu *PlayerUpdate) ClearForm() *PlayerUpdate {
-	pu.mutation.ClearForm()
+// AddBlocks adds i to the "blocks" field.
+func (pu *PlayerUpdate) AddBlocks(i int) *PlayerUpdate {
+	pu.mutation.AddBlocks(i)
+	return pu
+}
+
+// SetInterceptions sets the "interceptions" field.
+func (pu *PlayerUpdate) SetInterceptions(i int) *PlayerUpdate {
+	pu.mutation.ResetInterceptions()
+	pu.mutation.SetInterceptions(i)
+	return pu
+}
+
+// SetNillableInterceptions sets the "interceptions" field if the given value is not nil.
+func (pu *PlayerUpdate) SetNillableInterceptions(i *int) *PlayerUpdate {
+	if i != nil {
+		pu.SetInterceptions(*i)
+	}
+	return pu
+}
+
+// AddInterceptions adds i to the "interceptions" field.
+func (pu *PlayerUpdate) AddInterceptions(i int) *PlayerUpdate {
+	pu.mutation.AddInterceptions(i)
+	return pu
+}
+
+// SetDuelsTotal sets the "duelsTotal" field.
+func (pu *PlayerUpdate) SetDuelsTotal(i int) *PlayerUpdate {
+	pu.mutation.ResetDuelsTotal()
+	pu.mutation.SetDuelsTotal(i)
+	return pu
+}
+
+// AddDuelsTotal adds i to the "duelsTotal" field.
+func (pu *PlayerUpdate) AddDuelsTotal(i int) *PlayerUpdate {
+	pu.mutation.AddDuelsTotal(i)
+	return pu
+}
+
+// SetDuelsWon sets the "duelsWon" field.
+func (pu *PlayerUpdate) SetDuelsWon(i int) *PlayerUpdate {
+	pu.mutation.ResetDuelsWon()
+	pu.mutation.SetDuelsWon(i)
+	return pu
+}
+
+// AddDuelsWon adds i to the "duelsWon" field.
+func (pu *PlayerUpdate) AddDuelsWon(i int) *PlayerUpdate {
+	pu.mutation.AddDuelsWon(i)
 	return pu
 }
 
@@ -434,11 +701,131 @@ func (pu *PlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if pu.mutation.LastUpdatedCleared() {
 		_spec.ClearField(player.FieldLastUpdated, field.TypeTime)
 	}
-	if value, ok := pu.mutation.Form(); ok {
-		_spec.SetField(player.FieldForm, field.TypeString, value)
+	if value, ok := pu.mutation.GameAppearances(); ok {
+		_spec.SetField(player.FieldGameAppearances, field.TypeInt, value)
 	}
-	if pu.mutation.FormCleared() {
-		_spec.ClearField(player.FieldForm, field.TypeString)
+	if value, ok := pu.mutation.AddedGameAppearances(); ok {
+		_spec.AddField(player.FieldGameAppearances, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.GameLineups(); ok {
+		_spec.SetField(player.FieldGameLineups, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedGameLineups(); ok {
+		_spec.AddField(player.FieldGameLineups, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.GameMinutes(); ok {
+		_spec.SetField(player.FieldGameMinutes, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedGameMinutes(); ok {
+		_spec.AddField(player.FieldGameMinutes, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.TotalShots(); ok {
+		_spec.SetField(player.FieldTotalShots, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedTotalShots(); ok {
+		_spec.AddField(player.FieldTotalShots, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.ShotsOnTarget(); ok {
+		_spec.SetField(player.FieldShotsOnTarget, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedShotsOnTarget(); ok {
+		_spec.AddField(player.FieldShotsOnTarget, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.TotalGoals(); ok {
+		_spec.SetField(player.FieldTotalGoals, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedTotalGoals(); ok {
+		_spec.AddField(player.FieldTotalGoals, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.Assists(); ok {
+		_spec.SetField(player.FieldAssists, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedAssists(); ok {
+		_spec.AddField(player.FieldAssists, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.GoalsConceded(); ok {
+		_spec.SetField(player.FieldGoalsConceded, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedGoalsConceded(); ok {
+		_spec.AddField(player.FieldGoalsConceded, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.Saves(); ok {
+		_spec.SetField(player.FieldSaves, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedSaves(); ok {
+		_spec.AddField(player.FieldSaves, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.Position(); ok {
+		_spec.SetField(player.FieldPosition, field.TypeString, value)
+	}
+	if value, ok := pu.mutation.Rating(); ok {
+		_spec.SetField(player.FieldRating, field.TypeString, value)
+	}
+	if value, ok := pu.mutation.TeamName(); ok {
+		_spec.SetField(player.FieldTeamName, field.TypeString, value)
+	}
+	if value, ok := pu.mutation.TeamID(); ok {
+		_spec.SetField(player.FieldTeamID, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedTeamID(); ok {
+		_spec.AddField(player.FieldTeamID, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.LeagueID(); ok {
+		_spec.SetField(player.FieldLeagueID, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedLeagueID(); ok {
+		_spec.AddField(player.FieldLeagueID, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.LeagueName(); ok {
+		_spec.SetField(player.FieldLeagueName, field.TypeString, value)
+	}
+	if value, ok := pu.mutation.PassTotal(); ok {
+		_spec.SetField(player.FieldPassTotal, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedPassTotal(); ok {
+		_spec.AddField(player.FieldPassTotal, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.PassKey(); ok {
+		_spec.SetField(player.FieldPassKey, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedPassKey(); ok {
+		_spec.AddField(player.FieldPassKey, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.PassAccuracy(); ok {
+		_spec.SetField(player.FieldPassAccuracy, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedPassAccuracy(); ok {
+		_spec.AddField(player.FieldPassAccuracy, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.TotalTackle(); ok {
+		_spec.SetField(player.FieldTotalTackle, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedTotalTackle(); ok {
+		_spec.AddField(player.FieldTotalTackle, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.Blocks(); ok {
+		_spec.SetField(player.FieldBlocks, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedBlocks(); ok {
+		_spec.AddField(player.FieldBlocks, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.Interceptions(); ok {
+		_spec.SetField(player.FieldInterceptions, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedInterceptions(); ok {
+		_spec.AddField(player.FieldInterceptions, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.DuelsTotal(); ok {
+		_spec.SetField(player.FieldDuelsTotal, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedDuelsTotal(); ok {
+		_spec.AddField(player.FieldDuelsTotal, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.DuelsWon(); ok {
+		_spec.SetField(player.FieldDuelsWon, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedDuelsWon(); ok {
+		_spec.AddField(player.FieldDuelsWon, field.TypeInt, value)
 	}
 	if pu.mutation.BirthCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -810,23 +1197,290 @@ func (puo *PlayerUpdateOne) ClearLastUpdated() *PlayerUpdateOne {
 	return puo
 }
 
-// SetForm sets the "form" field.
-func (puo *PlayerUpdateOne) SetForm(s string) *PlayerUpdateOne {
-	puo.mutation.SetForm(s)
+// SetGameAppearances sets the "GameAppearances" field.
+func (puo *PlayerUpdateOne) SetGameAppearances(i int) *PlayerUpdateOne {
+	puo.mutation.ResetGameAppearances()
+	puo.mutation.SetGameAppearances(i)
 	return puo
 }
 
-// SetNillableForm sets the "form" field if the given value is not nil.
-func (puo *PlayerUpdateOne) SetNillableForm(s *string) *PlayerUpdateOne {
-	if s != nil {
-		puo.SetForm(*s)
+// AddGameAppearances adds i to the "GameAppearances" field.
+func (puo *PlayerUpdateOne) AddGameAppearances(i int) *PlayerUpdateOne {
+	puo.mutation.AddGameAppearances(i)
+	return puo
+}
+
+// SetGameLineups sets the "GameLineups" field.
+func (puo *PlayerUpdateOne) SetGameLineups(i int) *PlayerUpdateOne {
+	puo.mutation.ResetGameLineups()
+	puo.mutation.SetGameLineups(i)
+	return puo
+}
+
+// AddGameLineups adds i to the "GameLineups" field.
+func (puo *PlayerUpdateOne) AddGameLineups(i int) *PlayerUpdateOne {
+	puo.mutation.AddGameLineups(i)
+	return puo
+}
+
+// SetGameMinutes sets the "GameMinutes" field.
+func (puo *PlayerUpdateOne) SetGameMinutes(i int) *PlayerUpdateOne {
+	puo.mutation.ResetGameMinutes()
+	puo.mutation.SetGameMinutes(i)
+	return puo
+}
+
+// AddGameMinutes adds i to the "GameMinutes" field.
+func (puo *PlayerUpdateOne) AddGameMinutes(i int) *PlayerUpdateOne {
+	puo.mutation.AddGameMinutes(i)
+	return puo
+}
+
+// SetTotalShots sets the "TotalShots" field.
+func (puo *PlayerUpdateOne) SetTotalShots(i int) *PlayerUpdateOne {
+	puo.mutation.ResetTotalShots()
+	puo.mutation.SetTotalShots(i)
+	return puo
+}
+
+// AddTotalShots adds i to the "TotalShots" field.
+func (puo *PlayerUpdateOne) AddTotalShots(i int) *PlayerUpdateOne {
+	puo.mutation.AddTotalShots(i)
+	return puo
+}
+
+// SetShotsOnTarget sets the "ShotsOnTarget" field.
+func (puo *PlayerUpdateOne) SetShotsOnTarget(i int) *PlayerUpdateOne {
+	puo.mutation.ResetShotsOnTarget()
+	puo.mutation.SetShotsOnTarget(i)
+	return puo
+}
+
+// AddShotsOnTarget adds i to the "ShotsOnTarget" field.
+func (puo *PlayerUpdateOne) AddShotsOnTarget(i int) *PlayerUpdateOne {
+	puo.mutation.AddShotsOnTarget(i)
+	return puo
+}
+
+// SetTotalGoals sets the "TotalGoals" field.
+func (puo *PlayerUpdateOne) SetTotalGoals(i int) *PlayerUpdateOne {
+	puo.mutation.ResetTotalGoals()
+	puo.mutation.SetTotalGoals(i)
+	return puo
+}
+
+// AddTotalGoals adds i to the "TotalGoals" field.
+func (puo *PlayerUpdateOne) AddTotalGoals(i int) *PlayerUpdateOne {
+	puo.mutation.AddTotalGoals(i)
+	return puo
+}
+
+// SetAssists sets the "Assists" field.
+func (puo *PlayerUpdateOne) SetAssists(i int) *PlayerUpdateOne {
+	puo.mutation.ResetAssists()
+	puo.mutation.SetAssists(i)
+	return puo
+}
+
+// AddAssists adds i to the "Assists" field.
+func (puo *PlayerUpdateOne) AddAssists(i int) *PlayerUpdateOne {
+	puo.mutation.AddAssists(i)
+	return puo
+}
+
+// SetGoalsConceded sets the "GoalsConceded" field.
+func (puo *PlayerUpdateOne) SetGoalsConceded(i int) *PlayerUpdateOne {
+	puo.mutation.ResetGoalsConceded()
+	puo.mutation.SetGoalsConceded(i)
+	return puo
+}
+
+// AddGoalsConceded adds i to the "GoalsConceded" field.
+func (puo *PlayerUpdateOne) AddGoalsConceded(i int) *PlayerUpdateOne {
+	puo.mutation.AddGoalsConceded(i)
+	return puo
+}
+
+// SetSaves sets the "Saves" field.
+func (puo *PlayerUpdateOne) SetSaves(i int) *PlayerUpdateOne {
+	puo.mutation.ResetSaves()
+	puo.mutation.SetSaves(i)
+	return puo
+}
+
+// AddSaves adds i to the "Saves" field.
+func (puo *PlayerUpdateOne) AddSaves(i int) *PlayerUpdateOne {
+	puo.mutation.AddSaves(i)
+	return puo
+}
+
+// SetPosition sets the "position" field.
+func (puo *PlayerUpdateOne) SetPosition(s string) *PlayerUpdateOne {
+	puo.mutation.SetPosition(s)
+	return puo
+}
+
+// SetRating sets the "rating" field.
+func (puo *PlayerUpdateOne) SetRating(s string) *PlayerUpdateOne {
+	puo.mutation.SetRating(s)
+	return puo
+}
+
+// SetTeamName sets the "teamName" field.
+func (puo *PlayerUpdateOne) SetTeamName(s string) *PlayerUpdateOne {
+	puo.mutation.SetTeamName(s)
+	return puo
+}
+
+// SetTeamID sets the "teamID" field.
+func (puo *PlayerUpdateOne) SetTeamID(i int) *PlayerUpdateOne {
+	puo.mutation.ResetTeamID()
+	puo.mutation.SetTeamID(i)
+	return puo
+}
+
+// AddTeamID adds i to the "teamID" field.
+func (puo *PlayerUpdateOne) AddTeamID(i int) *PlayerUpdateOne {
+	puo.mutation.AddTeamID(i)
+	return puo
+}
+
+// SetLeagueID sets the "leagueID" field.
+func (puo *PlayerUpdateOne) SetLeagueID(i int) *PlayerUpdateOne {
+	puo.mutation.ResetLeagueID()
+	puo.mutation.SetLeagueID(i)
+	return puo
+}
+
+// AddLeagueID adds i to the "leagueID" field.
+func (puo *PlayerUpdateOne) AddLeagueID(i int) *PlayerUpdateOne {
+	puo.mutation.AddLeagueID(i)
+	return puo
+}
+
+// SetLeagueName sets the "leagueName" field.
+func (puo *PlayerUpdateOne) SetLeagueName(s string) *PlayerUpdateOne {
+	puo.mutation.SetLeagueName(s)
+	return puo
+}
+
+// SetPassTotal sets the "passTotal" field.
+func (puo *PlayerUpdateOne) SetPassTotal(i int) *PlayerUpdateOne {
+	puo.mutation.ResetPassTotal()
+	puo.mutation.SetPassTotal(i)
+	return puo
+}
+
+// AddPassTotal adds i to the "passTotal" field.
+func (puo *PlayerUpdateOne) AddPassTotal(i int) *PlayerUpdateOne {
+	puo.mutation.AddPassTotal(i)
+	return puo
+}
+
+// SetPassKey sets the "passKey" field.
+func (puo *PlayerUpdateOne) SetPassKey(i int) *PlayerUpdateOne {
+	puo.mutation.ResetPassKey()
+	puo.mutation.SetPassKey(i)
+	return puo
+}
+
+// AddPassKey adds i to the "passKey" field.
+func (puo *PlayerUpdateOne) AddPassKey(i int) *PlayerUpdateOne {
+	puo.mutation.AddPassKey(i)
+	return puo
+}
+
+// SetPassAccuracy sets the "passAccuracy" field.
+func (puo *PlayerUpdateOne) SetPassAccuracy(i int) *PlayerUpdateOne {
+	puo.mutation.ResetPassAccuracy()
+	puo.mutation.SetPassAccuracy(i)
+	return puo
+}
+
+// AddPassAccuracy adds i to the "passAccuracy" field.
+func (puo *PlayerUpdateOne) AddPassAccuracy(i int) *PlayerUpdateOne {
+	puo.mutation.AddPassAccuracy(i)
+	return puo
+}
+
+// SetTotalTackle sets the "totalTackle" field.
+func (puo *PlayerUpdateOne) SetTotalTackle(i int) *PlayerUpdateOne {
+	puo.mutation.ResetTotalTackle()
+	puo.mutation.SetTotalTackle(i)
+	return puo
+}
+
+// AddTotalTackle adds i to the "totalTackle" field.
+func (puo *PlayerUpdateOne) AddTotalTackle(i int) *PlayerUpdateOne {
+	puo.mutation.AddTotalTackle(i)
+	return puo
+}
+
+// SetBlocks sets the "blocks" field.
+func (puo *PlayerUpdateOne) SetBlocks(i int) *PlayerUpdateOne {
+	puo.mutation.ResetBlocks()
+	puo.mutation.SetBlocks(i)
+	return puo
+}
+
+// SetNillableBlocks sets the "blocks" field if the given value is not nil.
+func (puo *PlayerUpdateOne) SetNillableBlocks(i *int) *PlayerUpdateOne {
+	if i != nil {
+		puo.SetBlocks(*i)
 	}
 	return puo
 }
 
-// ClearForm clears the value of the "form" field.
-func (puo *PlayerUpdateOne) ClearForm() *PlayerUpdateOne {
-	puo.mutation.ClearForm()
+// AddBlocks adds i to the "blocks" field.
+func (puo *PlayerUpdateOne) AddBlocks(i int) *PlayerUpdateOne {
+	puo.mutation.AddBlocks(i)
+	return puo
+}
+
+// SetInterceptions sets the "interceptions" field.
+func (puo *PlayerUpdateOne) SetInterceptions(i int) *PlayerUpdateOne {
+	puo.mutation.ResetInterceptions()
+	puo.mutation.SetInterceptions(i)
+	return puo
+}
+
+// SetNillableInterceptions sets the "interceptions" field if the given value is not nil.
+func (puo *PlayerUpdateOne) SetNillableInterceptions(i *int) *PlayerUpdateOne {
+	if i != nil {
+		puo.SetInterceptions(*i)
+	}
+	return puo
+}
+
+// AddInterceptions adds i to the "interceptions" field.
+func (puo *PlayerUpdateOne) AddInterceptions(i int) *PlayerUpdateOne {
+	puo.mutation.AddInterceptions(i)
+	return puo
+}
+
+// SetDuelsTotal sets the "duelsTotal" field.
+func (puo *PlayerUpdateOne) SetDuelsTotal(i int) *PlayerUpdateOne {
+	puo.mutation.ResetDuelsTotal()
+	puo.mutation.SetDuelsTotal(i)
+	return puo
+}
+
+// AddDuelsTotal adds i to the "duelsTotal" field.
+func (puo *PlayerUpdateOne) AddDuelsTotal(i int) *PlayerUpdateOne {
+	puo.mutation.AddDuelsTotal(i)
+	return puo
+}
+
+// SetDuelsWon sets the "duelsWon" field.
+func (puo *PlayerUpdateOne) SetDuelsWon(i int) *PlayerUpdateOne {
+	puo.mutation.ResetDuelsWon()
+	puo.mutation.SetDuelsWon(i)
+	return puo
+}
+
+// AddDuelsWon adds i to the "duelsWon" field.
+func (puo *PlayerUpdateOne) AddDuelsWon(i int) *PlayerUpdateOne {
+	puo.mutation.AddDuelsWon(i)
 	return puo
 }
 
@@ -1173,11 +1827,131 @@ func (puo *PlayerUpdateOne) sqlSave(ctx context.Context) (_node *Player, err err
 	if puo.mutation.LastUpdatedCleared() {
 		_spec.ClearField(player.FieldLastUpdated, field.TypeTime)
 	}
-	if value, ok := puo.mutation.Form(); ok {
-		_spec.SetField(player.FieldForm, field.TypeString, value)
+	if value, ok := puo.mutation.GameAppearances(); ok {
+		_spec.SetField(player.FieldGameAppearances, field.TypeInt, value)
 	}
-	if puo.mutation.FormCleared() {
-		_spec.ClearField(player.FieldForm, field.TypeString)
+	if value, ok := puo.mutation.AddedGameAppearances(); ok {
+		_spec.AddField(player.FieldGameAppearances, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.GameLineups(); ok {
+		_spec.SetField(player.FieldGameLineups, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedGameLineups(); ok {
+		_spec.AddField(player.FieldGameLineups, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.GameMinutes(); ok {
+		_spec.SetField(player.FieldGameMinutes, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedGameMinutes(); ok {
+		_spec.AddField(player.FieldGameMinutes, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.TotalShots(); ok {
+		_spec.SetField(player.FieldTotalShots, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedTotalShots(); ok {
+		_spec.AddField(player.FieldTotalShots, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.ShotsOnTarget(); ok {
+		_spec.SetField(player.FieldShotsOnTarget, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedShotsOnTarget(); ok {
+		_spec.AddField(player.FieldShotsOnTarget, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.TotalGoals(); ok {
+		_spec.SetField(player.FieldTotalGoals, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedTotalGoals(); ok {
+		_spec.AddField(player.FieldTotalGoals, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.Assists(); ok {
+		_spec.SetField(player.FieldAssists, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedAssists(); ok {
+		_spec.AddField(player.FieldAssists, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.GoalsConceded(); ok {
+		_spec.SetField(player.FieldGoalsConceded, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedGoalsConceded(); ok {
+		_spec.AddField(player.FieldGoalsConceded, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.Saves(); ok {
+		_spec.SetField(player.FieldSaves, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedSaves(); ok {
+		_spec.AddField(player.FieldSaves, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.Position(); ok {
+		_spec.SetField(player.FieldPosition, field.TypeString, value)
+	}
+	if value, ok := puo.mutation.Rating(); ok {
+		_spec.SetField(player.FieldRating, field.TypeString, value)
+	}
+	if value, ok := puo.mutation.TeamName(); ok {
+		_spec.SetField(player.FieldTeamName, field.TypeString, value)
+	}
+	if value, ok := puo.mutation.TeamID(); ok {
+		_spec.SetField(player.FieldTeamID, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedTeamID(); ok {
+		_spec.AddField(player.FieldTeamID, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.LeagueID(); ok {
+		_spec.SetField(player.FieldLeagueID, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedLeagueID(); ok {
+		_spec.AddField(player.FieldLeagueID, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.LeagueName(); ok {
+		_spec.SetField(player.FieldLeagueName, field.TypeString, value)
+	}
+	if value, ok := puo.mutation.PassTotal(); ok {
+		_spec.SetField(player.FieldPassTotal, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedPassTotal(); ok {
+		_spec.AddField(player.FieldPassTotal, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.PassKey(); ok {
+		_spec.SetField(player.FieldPassKey, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedPassKey(); ok {
+		_spec.AddField(player.FieldPassKey, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.PassAccuracy(); ok {
+		_spec.SetField(player.FieldPassAccuracy, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedPassAccuracy(); ok {
+		_spec.AddField(player.FieldPassAccuracy, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.TotalTackle(); ok {
+		_spec.SetField(player.FieldTotalTackle, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedTotalTackle(); ok {
+		_spec.AddField(player.FieldTotalTackle, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.Blocks(); ok {
+		_spec.SetField(player.FieldBlocks, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedBlocks(); ok {
+		_spec.AddField(player.FieldBlocks, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.Interceptions(); ok {
+		_spec.SetField(player.FieldInterceptions, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedInterceptions(); ok {
+		_spec.AddField(player.FieldInterceptions, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.DuelsTotal(); ok {
+		_spec.SetField(player.FieldDuelsTotal, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedDuelsTotal(); ok {
+		_spec.AddField(player.FieldDuelsTotal, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.DuelsWon(); ok {
+		_spec.SetField(player.FieldDuelsWon, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedDuelsWon(); ok {
+		_spec.AddField(player.FieldDuelsWon, field.TypeInt, value)
 	}
 	if puo.mutation.BirthCleared() {
 		edge := &sqlgraph.EdgeSpec{

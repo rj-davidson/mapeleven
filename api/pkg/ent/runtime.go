@@ -215,6 +215,14 @@ func init() {
 	player.DefaultLastUpdated = playerDescLastUpdated.Default.(func() time.Time)
 	// player.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	player.UpdateDefaultLastUpdated = playerDescLastUpdated.UpdateDefault.(func() time.Time)
+	// playerDescBlocks is the schema descriptor for blocks field.
+	playerDescBlocks := playerFields[30].Descriptor()
+	// player.DefaultBlocks holds the default value on creation for the blocks field.
+	player.DefaultBlocks = playerDescBlocks.Default.(int)
+	// playerDescInterceptions is the schema descriptor for interceptions field.
+	playerDescInterceptions := playerFields[31].Descriptor()
+	// player.DefaultInterceptions holds the default value on creation for the interceptions field.
+	player.DefaultInterceptions = playerDescInterceptions.Default.(int)
 	playerstatsFields := schema.PlayerStats{}.Fields()
 	_ = playerstatsFields
 	// playerstatsDescLastUpdated is the schema descriptor for lastUpdated field.

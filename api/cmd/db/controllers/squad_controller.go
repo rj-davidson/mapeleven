@@ -75,7 +75,7 @@ func (sc *SquadController) parseSquadResponse(data []byte, team *ent.Team) error
 
 	for _, teamResponse := range squadResponse.Response {
 		for _, player := range teamResponse.Players {
-			pc := NewPlayerController(sc.playerModel, sc.psModel)
+			pc := NewPlayerController(sc.playerModel)
 			err = pc.EnsurePlayerExists(context.Background(), player.ApiFootballId)
 			err = sc.upsertSquadPlayer(team, player)
 			if err != nil {

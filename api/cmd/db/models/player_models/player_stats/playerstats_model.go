@@ -128,70 +128,100 @@ func NewPlayerStatsModel(client *ent.Client) *PlayerStatsModel {
 	return &PlayerStatsModel{client: client}
 }
 
-func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, s PlayerStats) error {
-	// Query for the team
-	fmt.Printf("Upserting player stats for %s\n", p.Name)
+func (m *PlayerStatsModel) findOrCreateClub(ctx context.Context, apiFootballId int) (*ent.Club, error) {
+	c, err := m.client.Club.
+		Query().
+		Where(club.ApiFootballIdEQ(apiFootballId)).
+		First(ctx)
 
+	if ent.IsNotFound(err) {
+		c, err = m.client.Club.
+			Create().
+			SetApiFootballId(apiFootballId).
+			// Add other necessary fields here
+			Save(ctx)
+		if err != nil {
+			return nil, fmt.Errorf("error creating club: %v", err)
+		}
+	} else if err != nil {
+		return nil, fmt.Errorf("error finding club: %v", err)
+	}
+	return c, nil
+}
+
+func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, s PlayerStats) error {
+	fmt.Printf("Attempting to upsert player stats for %s with Team API ID: %d and Season: %d\n", p.Name, s.Team.ApiFootballId, s.League.Season)
+
+	// Try to find the team
 	t, err := m.client.Team.
 		Query().
-		WithClub(func(q *ent.ClubQuery) {
-			q.Where(club.ApiFootballId(s.Team.ApiFootballId))
-		}).
-		WithSeason(func(q *ent.SeasonQuery) {
-			q.Where(season.Year(s.League.Season))
-		}).Only(ctx)
-	if err != nil {
-		fmt.Printf("Error querying team: %v\n", err)
+		Where(
+			team.HasClubWith(club.ApiFootballId(s.Team.ApiFootballId)),
+			team.HasSeasonWith(season.Year(s.League.Season)),
+		).First(ctx)
+
+	if ent.IsNotFound(err) {
+		// Create the team if not found
+		t, err = m.client.Team.
+			Create().
+			SetClubID(s.Team.ApiFootballId).
+			SetSeasonID(s.League.Season).
+
+			// Additional fields to set based on your team model
+			Save(ctx)
+		if err != nil {
+			fmt.Printf("Error creating team for API ID: %d, Season: %d: %v\n", s.Team.ApiFootballId, s.League.Season, err)
+			return err
+		}
+		fmt.Printf("Created new team for API ID: %d, Season: %d\n", s.Team.ApiFootballId, s.League.Season)
+	} else if err != nil {
 		return err
 	}
-	fmt.Printf("Queried team: %v\n", t)
 
 	// Query for existing player stats
 	ps, err := m.client.PlayerStats.
 		Query().
-		WithPlayer(func(q *ent.PlayerQuery) {
-			q.Where(player.IDEQ(p.ID))
-		}).
-		WithTeam(func(q *ent.TeamQuery) {
-			q.Where(team.IDEQ(t.ID))
-		}).Only(ctx)
-
+		Where(
+			playerstats.HasPlayerWith(player.IDEQ(p.ID)),
+			playerstats.HasTeamWith(team.IDEQ(t.ID)),
+		).
+		First(ctx)
 	if err != nil && !ent.IsNotFound(err) {
-		fmt.Printf("Error querying player stats: %v\n", err)
+		fmt.Printf("Error querying player stats for %s: %v\n", p.Name, err)
 		return err
 	}
 
 	// If stats exist, update, otherwise create new stats
 	if ps != nil {
+		fmt.Printf("Updating existing player stats for %s\n", p.Name)
 		ps, err = ps.Update().
-			// Set necessary fields to update here
+			SetTeam(t).
+			SetPlayer(p).
 			Save(ctx)
-		if err != nil {
-			fmt.Printf("Updating existing player stats")
-			return err
-		}
 	} else {
+		fmt.Printf("Creating new player stats for %s\n", p.Name)
 		ps, err = m.client.PlayerStats.
 			Create().
 			SetPlayer(p).
 			SetTeam(t).
-			// Additional fields to set can go here
 			Save(ctx)
-		if err != nil {
-			fmt.Printf("Creating new player stats")
-			return err
-		}
+	}
+	if err != nil {
+		return err
 	}
 
 	// Upsert sub-statistics
+	fmt.Printf("Upserting sub-stats for %s\n", p.Name)
 	if err := m.upsertSubStats(ctx, ps, s); err != nil {
-		fmt.Printf("Error upserting sub-stats: %v\n", err)
+		fmt.Printf("Error upserting sub-stats for %s: %v\n", p.Name, err)
 		return err
-
 	}
+	fmt.Printf("Finished upserting player stats for %s\n", p.Name)
 
 	return nil
 }
+
+// Your existing methods for upserting sub-stats...
 
 func (m *PlayerStatsModel) upsertDefenseWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
 	_, err := m.upsertDefense(ctx, ps, s.Duels, s.Tackles)

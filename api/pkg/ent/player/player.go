@@ -36,8 +36,52 @@ const (
 	FieldPhoto = "photo"
 	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
 	FieldLastUpdated = "last_updated"
-	// FieldForm holds the string denoting the form field in the database.
-	FieldForm = "form"
+	// FieldGameAppearances holds the string denoting the gameappearances field in the database.
+	FieldGameAppearances = "game_appearances"
+	// FieldGameLineups holds the string denoting the gamelineups field in the database.
+	FieldGameLineups = "game_lineups"
+	// FieldGameMinutes holds the string denoting the gameminutes field in the database.
+	FieldGameMinutes = "game_minutes"
+	// FieldTotalShots holds the string denoting the totalshots field in the database.
+	FieldTotalShots = "total_shots"
+	// FieldShotsOnTarget holds the string denoting the shotsontarget field in the database.
+	FieldShotsOnTarget = "shots_on_target"
+	// FieldTotalGoals holds the string denoting the totalgoals field in the database.
+	FieldTotalGoals = "total_goals"
+	// FieldAssists holds the string denoting the assists field in the database.
+	FieldAssists = "assists"
+	// FieldGoalsConceded holds the string denoting the goalsconceded field in the database.
+	FieldGoalsConceded = "goals_conceded"
+	// FieldSaves holds the string denoting the saves field in the database.
+	FieldSaves = "saves"
+	// FieldPosition holds the string denoting the position field in the database.
+	FieldPosition = "position"
+	// FieldRating holds the string denoting the rating field in the database.
+	FieldRating = "rating"
+	// FieldTeamName holds the string denoting the teamname field in the database.
+	FieldTeamName = "team_name"
+	// FieldTeamID holds the string denoting the teamid field in the database.
+	FieldTeamID = "team_id"
+	// FieldLeagueID holds the string denoting the leagueid field in the database.
+	FieldLeagueID = "league_id"
+	// FieldLeagueName holds the string denoting the leaguename field in the database.
+	FieldLeagueName = "league_name"
+	// FieldPassTotal holds the string denoting the passtotal field in the database.
+	FieldPassTotal = "pass_total"
+	// FieldPassKey holds the string denoting the passkey field in the database.
+	FieldPassKey = "pass_key"
+	// FieldPassAccuracy holds the string denoting the passaccuracy field in the database.
+	FieldPassAccuracy = "pass_accuracy"
+	// FieldTotalTackle holds the string denoting the totaltackle field in the database.
+	FieldTotalTackle = "total_tackle"
+	// FieldBlocks holds the string denoting the blocks field in the database.
+	FieldBlocks = "blocks"
+	// FieldInterceptions holds the string denoting the interceptions field in the database.
+	FieldInterceptions = "interceptions"
+	// FieldDuelsTotal holds the string denoting the duelstotal field in the database.
+	FieldDuelsTotal = "duels_total"
+	// FieldDuelsWon holds the string denoting the duelswon field in the database.
+	FieldDuelsWon = "duels_won"
 	// EdgeBirth holds the string denoting the birth edge name in mutations.
 	EdgeBirth = "birth"
 	// EdgeNationality holds the string denoting the nationality edge name in mutations.
@@ -119,7 +163,29 @@ var Columns = []string{
 	FieldInjured,
 	FieldPhoto,
 	FieldLastUpdated,
-	FieldForm,
+	FieldGameAppearances,
+	FieldGameLineups,
+	FieldGameMinutes,
+	FieldTotalShots,
+	FieldShotsOnTarget,
+	FieldTotalGoals,
+	FieldAssists,
+	FieldGoalsConceded,
+	FieldSaves,
+	FieldPosition,
+	FieldRating,
+	FieldTeamName,
+	FieldTeamID,
+	FieldLeagueID,
+	FieldLeagueName,
+	FieldPassTotal,
+	FieldPassKey,
+	FieldPassAccuracy,
+	FieldTotalTackle,
+	FieldBlocks,
+	FieldInterceptions,
+	FieldDuelsTotal,
+	FieldDuelsWon,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "players"
@@ -149,6 +215,10 @@ var (
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
 	UpdateDefaultLastUpdated func() time.Time
+	// DefaultBlocks holds the default value on creation for the "blocks" field.
+	DefaultBlocks int
+	// DefaultInterceptions holds the default value on creation for the "interceptions" field.
+	DefaultInterceptions int
 )
 
 // OrderOption defines the ordering options for the Player queries.
@@ -214,9 +284,119 @@ func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
-// ByForm orders the results by the form field.
-func ByForm(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldForm, opts...).ToFunc()
+// ByGameAppearances orders the results by the GameAppearances field.
+func ByGameAppearances(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGameAppearances, opts...).ToFunc()
+}
+
+// ByGameLineups orders the results by the GameLineups field.
+func ByGameLineups(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGameLineups, opts...).ToFunc()
+}
+
+// ByGameMinutes orders the results by the GameMinutes field.
+func ByGameMinutes(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGameMinutes, opts...).ToFunc()
+}
+
+// ByTotalShots orders the results by the TotalShots field.
+func ByTotalShots(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTotalShots, opts...).ToFunc()
+}
+
+// ByShotsOnTarget orders the results by the ShotsOnTarget field.
+func ByShotsOnTarget(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldShotsOnTarget, opts...).ToFunc()
+}
+
+// ByTotalGoals orders the results by the TotalGoals field.
+func ByTotalGoals(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTotalGoals, opts...).ToFunc()
+}
+
+// ByAssists orders the results by the Assists field.
+func ByAssists(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldAssists, opts...).ToFunc()
+}
+
+// ByGoalsConceded orders the results by the GoalsConceded field.
+func ByGoalsConceded(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldGoalsConceded, opts...).ToFunc()
+}
+
+// BySaves orders the results by the Saves field.
+func BySaves(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldSaves, opts...).ToFunc()
+}
+
+// ByPosition orders the results by the position field.
+func ByPosition(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPosition, opts...).ToFunc()
+}
+
+// ByRating orders the results by the rating field.
+func ByRating(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRating, opts...).ToFunc()
+}
+
+// ByTeamName orders the results by the teamName field.
+func ByTeamName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTeamName, opts...).ToFunc()
+}
+
+// ByTeamID orders the results by the teamID field.
+func ByTeamID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTeamID, opts...).ToFunc()
+}
+
+// ByLeagueID orders the results by the leagueID field.
+func ByLeagueID(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLeagueID, opts...).ToFunc()
+}
+
+// ByLeagueName orders the results by the leagueName field.
+func ByLeagueName(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldLeagueName, opts...).ToFunc()
+}
+
+// ByPassTotal orders the results by the passTotal field.
+func ByPassTotal(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPassTotal, opts...).ToFunc()
+}
+
+// ByPassKey orders the results by the passKey field.
+func ByPassKey(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPassKey, opts...).ToFunc()
+}
+
+// ByPassAccuracy orders the results by the passAccuracy field.
+func ByPassAccuracy(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPassAccuracy, opts...).ToFunc()
+}
+
+// ByTotalTackle orders the results by the totalTackle field.
+func ByTotalTackle(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldTotalTackle, opts...).ToFunc()
+}
+
+// ByBlocks orders the results by the blocks field.
+func ByBlocks(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldBlocks, opts...).ToFunc()
+}
+
+// ByInterceptions orders the results by the interceptions field.
+func ByInterceptions(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldInterceptions, opts...).ToFunc()
+}
+
+// ByDuelsTotal orders the results by the duelsTotal field.
+func ByDuelsTotal(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDuelsTotal, opts...).ToFunc()
+}
+
+// ByDuelsWon orders the results by the duelsWon field.
+func ByDuelsWon(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDuelsWon, opts...).ToFunc()
 }
 
 // ByBirthField orders the results by birth field.
