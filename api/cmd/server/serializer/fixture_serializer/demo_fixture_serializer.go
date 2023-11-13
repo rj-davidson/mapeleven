@@ -3,18 +3,24 @@ package fixture_serializer
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"context"
+	"time"
 )
 
-type FixtureSerializer struct {
+type DemoFixtureSerializer struct {
 	client *ent.Client
 }
 
-func NewFixtureSerializer(client *ent.Client) *FixtureSerializer {
-	return &FixtureSerializer{client: client}
+func NewDemoFixtureSerializer(client *ent.Client) *DemoFixtureSerializer {
+	return &DemoFixtureSerializer{client: client}
 }
 
-func (dfs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string, getFixture, getEvents, getLineups bool) (*APIFixtureSet, error) {
+func (dfs *DemoFixtureSerializer) GetDemoFixtureBySlug(ctx context.Context, slug string, getFixture, getEvents, getLineups bool) (*APIFixtureSet, error) {
+	currentCycleTime := time.Now().Unix() % (5 * 60) / 60
+	maxElapsedForCycle := int(currentCycleTime * 24)
+
+	// Existing query code...
 	f, err := dfs.client.Fixture.
 		Query().
 		Where(fixture.Slug(slug)).
@@ -33,6 +39,7 @@ func (dfs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string,
 			q.WithClub()
 		}).
 		WithFixtureEvents(func(q *ent.FixtureEventsQuery) {
+			q.Where(fixtureevents.ElapsedTimeLT(maxElapsedForCycle))
 			q.WithPlayer()
 			q.WithAssist()
 			q.WithTeam(
@@ -54,7 +61,7 @@ func (dfs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string,
 	sLineups := &APIHomeAway{}
 
 	if getFixture {
-		sFixture, sTeams, err = dfs.serializeFixture(f)
+		sFixture, sTeams, err = dfs.serializeDemoFixture(f)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +96,7 @@ func (dfs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string,
 	}, nil
 }
 
-func (dfs *FixtureSerializer) serializeFixture(f *ent.Fixture) (*APIFixture, *APITeamDetails, error) {
+func (dfs *DemoFixtureSerializer) serializeDemoFixture(f *ent.Fixture) (*APIFixture, *APITeamDetails, error) {
 	var fxt APIFixture
 	var td APITeamDetails
 

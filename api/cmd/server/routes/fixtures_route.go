@@ -12,8 +12,10 @@ import (
 func SetupFixtureRoutes(app *fiber.App, client *ent.Client) {
 	ss := fixture_serializer.NewScoreboardSerializer(client)
 	fs := fixture_serializer.NewFixtureSerializer(client)
+	dfs := fixture_serializer.NewDemoFixtureSerializer(client)
 
 	app.Get(viper.GetString("ENV_PATH")+"/fixtures/:slug", getFixtureBySlug(fs))
+	app.Get(viper.GetString("ENV_PATH")+"/fixtures-demo/:slug", getDemoFixtureBySlug(dfs))
 	app.Get(viper.GetString("ENV_PATH")+"/scoreboard", getScoreboard(ss))
 }
 
@@ -28,6 +30,24 @@ func getFixtureBySlug(serializer *fixture_serializer.FixtureSerializer) fiber.Ha
 		getLineups := getParamOrDefault(c, "lineups", defaultVal)
 
 		f, err := serializer.GetFixtureBySlug(context.Background(), slug, getFixture, getEvents, getLineups)
+		if handleError(c, err) {
+			return nil
+		}
+		return c.JSON(f)
+	}
+}
+
+func getDemoFixtureBySlug(dfs *fixture_serializer.DemoFixtureSerializer) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		slug := c.Params("slug")
+		hasAnyParam := c.Query("fixture") != "" || c.Query("events") != "" || c.Query("lineups") != ""
+		defaultVal := !hasAnyParam
+
+		getFixture := getParamOrDefault(c, "fixture", defaultVal)
+		getEvents := getParamOrDefault(c, "events", defaultVal)
+		getLineups := getParamOrDefault(c, "lineups", defaultVal)
+
+		f, err := dfs.GetDemoFixtureBySlug(context.Background(), slug, getFixture, getEvents, getLineups)
 		if handleError(c, err) {
 			return nil
 		}

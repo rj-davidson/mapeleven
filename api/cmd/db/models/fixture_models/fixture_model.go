@@ -203,12 +203,12 @@ func (fm *FixtureModel) UpsertFixtureData(apiFootballId int, data FixtureDetails
 	awayTeam := f.Edges.AwayTeam
 
 	if len(data.Lineups) > 0 {
-		_, err = UpsertLineup(f, awayTeam, data.Lineups[0], fm.client, ctx)
+		_, err = UpsertLineup(f, homeTeam, data.Lineups[0], fm.client, ctx)
 		if err != nil {
 			fmt.Printf("Error upserting lineup: %v", err)
 		}
 
-		_, err = UpsertLineup(f, homeTeam, data.Lineups[1], fm.client, ctx)
+		_, err = UpsertLineup(f, awayTeam, data.Lineups[1], fm.client, ctx)
 		if err != nil {
 			fmt.Printf("Error upserting lineup: %v", err)
 		}

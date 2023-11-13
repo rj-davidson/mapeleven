@@ -95,7 +95,7 @@ func SetupRoutes(app *fiber.App, client *ent.Client) {
 	// Setup routes for stats
 	routes.SetupStatsRoutes(app)
 
-	// Setup routes for stats
+	// Setup routes for fixtures
 	routes.SetupFixtureRoutes(app, client)
 
 	// Setup routes for search
