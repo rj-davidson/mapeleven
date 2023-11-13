@@ -72,8 +72,16 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultTacklesTotal holds the default value on creation for the "TacklesTotal" field.
+	DefaultTacklesTotal int
 	// DefaultBlocks holds the default value on creation for the "Blocks" field.
 	DefaultBlocks int
+	// DefaultInterceptions holds the default value on creation for the "Interceptions" field.
+	DefaultInterceptions int
+	// DefaultDuelsTotal holds the default value on creation for the "DuelsTotal" field.
+	DefaultDuelsTotal int
+	// DefaultWonDuels holds the default value on creation for the "WonDuels" field.
+	DefaultWonDuels int
 	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.

@@ -15,9 +15,9 @@ type PSSubstitutes struct {
 // Fields of the PSSubstitutes.
 func (PSSubstitutes) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("In"),
-		field.Int("Out"),
-		field.Int("Bench"),
+		field.Int("In").Default(0),
+		field.Int("Out").Default(0),
+		field.Int("Bench").Default(0),
 		field.Time("lastUpdated").
 			Default(time.Now).
 			Optional().

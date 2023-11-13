@@ -22,6 +22,8 @@ const (
 	FieldMissed = "missed"
 	// FieldSaved holds the string denoting the saved field in the database.
 	FieldSaved = "saved"
+	// FieldCommitted holds the string denoting the committed field in the database.
+	FieldCommitted = "committed"
 	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
 	FieldLastUpdated = "last_updated"
 	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldScored,
 	FieldMissed,
 	FieldSaved,
+	FieldCommitted,
 	FieldLastUpdated,
 }
 
@@ -73,8 +76,12 @@ var (
 	DefaultWon int
 	// DefaultScored holds the default value on creation for the "Scored" field.
 	DefaultScored int
+	// DefaultMissed holds the default value on creation for the "Missed" field.
+	DefaultMissed int
 	// DefaultSaved holds the default value on creation for the "Saved" field.
 	DefaultSaved int
+	// DefaultCommitted holds the default value on creation for the "Committed" field.
+	DefaultCommitted int
 	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
@@ -107,6 +114,11 @@ func ByMissed(opts ...sql.OrderTermOption) OrderOption {
 // BySaved orders the results by the Saved field.
 func BySaved(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldSaved, opts...).ToFunc()
+}
+
+// ByCommitted orders the results by the Committed field.
+func ByCommitted(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCommitted, opts...).ToFunc()
 }
 
 // ByLastUpdated orders the results by the lastUpdated field.

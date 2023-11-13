@@ -36,6 +36,14 @@ func (pfu *PSFairplayUpdate) SetFoulsCommitted(i int) *PSFairplayUpdate {
 	return pfu
 }
 
+// SetNillableFoulsCommitted sets the "FoulsCommitted" field if the given value is not nil.
+func (pfu *PSFairplayUpdate) SetNillableFoulsCommitted(i *int) *PSFairplayUpdate {
+	if i != nil {
+		pfu.SetFoulsCommitted(*i)
+	}
+	return pfu
+}
+
 // AddFoulsCommitted adds i to the "FoulsCommitted" field.
 func (pfu *PSFairplayUpdate) AddFoulsCommitted(i int) *PSFairplayUpdate {
 	pfu.mutation.AddFoulsCommitted(i)
@@ -46,6 +54,14 @@ func (pfu *PSFairplayUpdate) AddFoulsCommitted(i int) *PSFairplayUpdate {
 func (pfu *PSFairplayUpdate) SetYellow(i int) *PSFairplayUpdate {
 	pfu.mutation.ResetYellow()
 	pfu.mutation.SetYellow(i)
+	return pfu
+}
+
+// SetNillableYellow sets the "Yellow" field if the given value is not nil.
+func (pfu *PSFairplayUpdate) SetNillableYellow(i *int) *PSFairplayUpdate {
+	if i != nil {
+		pfu.SetYellow(*i)
+	}
 	return pfu
 }
 
@@ -62,6 +78,14 @@ func (pfu *PSFairplayUpdate) SetYellowRed(i int) *PSFairplayUpdate {
 	return pfu
 }
 
+// SetNillableYellowRed sets the "YellowRed" field if the given value is not nil.
+func (pfu *PSFairplayUpdate) SetNillableYellowRed(i *int) *PSFairplayUpdate {
+	if i != nil {
+		pfu.SetYellowRed(*i)
+	}
+	return pfu
+}
+
 // AddYellowRed adds i to the "YellowRed" field.
 func (pfu *PSFairplayUpdate) AddYellowRed(i int) *PSFairplayUpdate {
 	pfu.mutation.AddYellowRed(i)
@@ -72,6 +96,14 @@ func (pfu *PSFairplayUpdate) AddYellowRed(i int) *PSFairplayUpdate {
 func (pfu *PSFairplayUpdate) SetRed(i int) *PSFairplayUpdate {
 	pfu.mutation.ResetRed()
 	pfu.mutation.SetRed(i)
+	return pfu
+}
+
+// SetNillableRed sets the "Red" field if the given value is not nil.
+func (pfu *PSFairplayUpdate) SetNillableRed(i *int) *PSFairplayUpdate {
+	if i != nil {
+		pfu.SetRed(*i)
+	}
 	return pfu
 }
 
@@ -281,6 +313,14 @@ func (pfuo *PSFairplayUpdateOne) SetFoulsCommitted(i int) *PSFairplayUpdateOne {
 	return pfuo
 }
 
+// SetNillableFoulsCommitted sets the "FoulsCommitted" field if the given value is not nil.
+func (pfuo *PSFairplayUpdateOne) SetNillableFoulsCommitted(i *int) *PSFairplayUpdateOne {
+	if i != nil {
+		pfuo.SetFoulsCommitted(*i)
+	}
+	return pfuo
+}
+
 // AddFoulsCommitted adds i to the "FoulsCommitted" field.
 func (pfuo *PSFairplayUpdateOne) AddFoulsCommitted(i int) *PSFairplayUpdateOne {
 	pfuo.mutation.AddFoulsCommitted(i)
@@ -291,6 +331,14 @@ func (pfuo *PSFairplayUpdateOne) AddFoulsCommitted(i int) *PSFairplayUpdateOne {
 func (pfuo *PSFairplayUpdateOne) SetYellow(i int) *PSFairplayUpdateOne {
 	pfuo.mutation.ResetYellow()
 	pfuo.mutation.SetYellow(i)
+	return pfuo
+}
+
+// SetNillableYellow sets the "Yellow" field if the given value is not nil.
+func (pfuo *PSFairplayUpdateOne) SetNillableYellow(i *int) *PSFairplayUpdateOne {
+	if i != nil {
+		pfuo.SetYellow(*i)
+	}
 	return pfuo
 }
 
@@ -307,6 +355,14 @@ func (pfuo *PSFairplayUpdateOne) SetYellowRed(i int) *PSFairplayUpdateOne {
 	return pfuo
 }
 
+// SetNillableYellowRed sets the "YellowRed" field if the given value is not nil.
+func (pfuo *PSFairplayUpdateOne) SetNillableYellowRed(i *int) *PSFairplayUpdateOne {
+	if i != nil {
+		pfuo.SetYellowRed(*i)
+	}
+	return pfuo
+}
+
 // AddYellowRed adds i to the "YellowRed" field.
 func (pfuo *PSFairplayUpdateOne) AddYellowRed(i int) *PSFairplayUpdateOne {
 	pfuo.mutation.AddYellowRed(i)
@@ -317,6 +373,14 @@ func (pfuo *PSFairplayUpdateOne) AddYellowRed(i int) *PSFairplayUpdateOne {
 func (pfuo *PSFairplayUpdateOne) SetRed(i int) *PSFairplayUpdateOne {
 	pfuo.mutation.ResetRed()
 	pfuo.mutation.SetRed(i)
+	return pfuo
+}
+
+// SetNillableRed sets the "Red" field if the given value is not nil.
+func (pfuo *PSFairplayUpdateOne) SetNillableRed(i *int) *PSFairplayUpdateOne {
+	if i != nil {
+		pfuo.SetRed(*i)
+	}
 	return pfuo
 }
 

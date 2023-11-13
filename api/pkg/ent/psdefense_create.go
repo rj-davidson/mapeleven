@@ -27,6 +27,14 @@ func (pdc *PSDefenseCreate) SetTacklesTotal(i int) *PSDefenseCreate {
 	return pdc
 }
 
+// SetNillableTacklesTotal sets the "TacklesTotal" field if the given value is not nil.
+func (pdc *PSDefenseCreate) SetNillableTacklesTotal(i *int) *PSDefenseCreate {
+	if i != nil {
+		pdc.SetTacklesTotal(*i)
+	}
+	return pdc
+}
+
 // SetBlocks sets the "Blocks" field.
 func (pdc *PSDefenseCreate) SetBlocks(i int) *PSDefenseCreate {
 	pdc.mutation.SetBlocks(i)
@@ -47,15 +55,39 @@ func (pdc *PSDefenseCreate) SetInterceptions(i int) *PSDefenseCreate {
 	return pdc
 }
 
+// SetNillableInterceptions sets the "Interceptions" field if the given value is not nil.
+func (pdc *PSDefenseCreate) SetNillableInterceptions(i *int) *PSDefenseCreate {
+	if i != nil {
+		pdc.SetInterceptions(*i)
+	}
+	return pdc
+}
+
 // SetDuelsTotal sets the "DuelsTotal" field.
 func (pdc *PSDefenseCreate) SetDuelsTotal(i int) *PSDefenseCreate {
 	pdc.mutation.SetDuelsTotal(i)
 	return pdc
 }
 
+// SetNillableDuelsTotal sets the "DuelsTotal" field if the given value is not nil.
+func (pdc *PSDefenseCreate) SetNillableDuelsTotal(i *int) *PSDefenseCreate {
+	if i != nil {
+		pdc.SetDuelsTotal(*i)
+	}
+	return pdc
+}
+
 // SetWonDuels sets the "WonDuels" field.
 func (pdc *PSDefenseCreate) SetWonDuels(i int) *PSDefenseCreate {
 	pdc.mutation.SetWonDuels(i)
+	return pdc
+}
+
+// SetNillableWonDuels sets the "WonDuels" field if the given value is not nil.
+func (pdc *PSDefenseCreate) SetNillableWonDuels(i *int) *PSDefenseCreate {
+	if i != nil {
+		pdc.SetWonDuels(*i)
+	}
 	return pdc
 }
 
@@ -127,9 +159,25 @@ func (pdc *PSDefenseCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pdc *PSDefenseCreate) defaults() {
+	if _, ok := pdc.mutation.TacklesTotal(); !ok {
+		v := psdefense.DefaultTacklesTotal
+		pdc.mutation.SetTacklesTotal(v)
+	}
 	if _, ok := pdc.mutation.Blocks(); !ok {
 		v := psdefense.DefaultBlocks
 		pdc.mutation.SetBlocks(v)
+	}
+	if _, ok := pdc.mutation.Interceptions(); !ok {
+		v := psdefense.DefaultInterceptions
+		pdc.mutation.SetInterceptions(v)
+	}
+	if _, ok := pdc.mutation.DuelsTotal(); !ok {
+		v := psdefense.DefaultDuelsTotal
+		pdc.mutation.SetDuelsTotal(v)
+	}
+	if _, ok := pdc.mutation.WonDuels(); !ok {
+		v := psdefense.DefaultWonDuels
+		pdc.mutation.SetWonDuels(v)
 	}
 	if _, ok := pdc.mutation.LastUpdated(); !ok {
 		v := psdefense.DefaultLastUpdated()

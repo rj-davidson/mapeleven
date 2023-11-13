@@ -36,6 +36,14 @@ func (psu *PSShootingUpdate) SetGoals(i int) *PSShootingUpdate {
 	return psu
 }
 
+// SetNillableGoals sets the "Goals" field if the given value is not nil.
+func (psu *PSShootingUpdate) SetNillableGoals(i *int) *PSShootingUpdate {
+	if i != nil {
+		psu.SetGoals(*i)
+	}
+	return psu
+}
+
 // AddGoals adds i to the "Goals" field.
 func (psu *PSShootingUpdate) AddGoals(i int) *PSShootingUpdate {
 	psu.mutation.AddGoals(i)
@@ -49,6 +57,14 @@ func (psu *PSShootingUpdate) SetConceded(i int) *PSShootingUpdate {
 	return psu
 }
 
+// SetNillableConceded sets the "Conceded" field if the given value is not nil.
+func (psu *PSShootingUpdate) SetNillableConceded(i *int) *PSShootingUpdate {
+	if i != nil {
+		psu.SetConceded(*i)
+	}
+	return psu
+}
+
 // AddConceded adds i to the "Conceded" field.
 func (psu *PSShootingUpdate) AddConceded(i int) *PSShootingUpdate {
 	psu.mutation.AddConceded(i)
@@ -59,6 +75,14 @@ func (psu *PSShootingUpdate) AddConceded(i int) *PSShootingUpdate {
 func (psu *PSShootingUpdate) SetAssists(i int) *PSShootingUpdate {
 	psu.mutation.ResetAssists()
 	psu.mutation.SetAssists(i)
+	return psu
+}
+
+// SetNillableAssists sets the "Assists" field if the given value is not nil.
+func (psu *PSShootingUpdate) SetNillableAssists(i *int) *PSShootingUpdate {
+	if i != nil {
+		psu.SetAssists(*i)
+	}
 	return psu
 }
 
@@ -96,6 +120,14 @@ func (psu *PSShootingUpdate) SetShots(i int) *PSShootingUpdate {
 	return psu
 }
 
+// SetNillableShots sets the "Shots" field if the given value is not nil.
+func (psu *PSShootingUpdate) SetNillableShots(i *int) *PSShootingUpdate {
+	if i != nil {
+		psu.SetShots(*i)
+	}
+	return psu
+}
+
 // AddShots adds i to the "Shots" field.
 func (psu *PSShootingUpdate) AddShots(i int) *PSShootingUpdate {
 	psu.mutation.AddShots(i)
@@ -106,6 +138,14 @@ func (psu *PSShootingUpdate) AddShots(i int) *PSShootingUpdate {
 func (psu *PSShootingUpdate) SetOnTarget(i int) *PSShootingUpdate {
 	psu.mutation.ResetOnTarget()
 	psu.mutation.SetOnTarget(i)
+	return psu
+}
+
+// SetNillableOnTarget sets the "OnTarget" field if the given value is not nil.
+func (psu *PSShootingUpdate) SetNillableOnTarget(i *int) *PSShootingUpdate {
+	if i != nil {
+		psu.SetOnTarget(*i)
+	}
 	return psu
 }
 
@@ -300,6 +340,14 @@ func (psuo *PSShootingUpdateOne) SetGoals(i int) *PSShootingUpdateOne {
 	return psuo
 }
 
+// SetNillableGoals sets the "Goals" field if the given value is not nil.
+func (psuo *PSShootingUpdateOne) SetNillableGoals(i *int) *PSShootingUpdateOne {
+	if i != nil {
+		psuo.SetGoals(*i)
+	}
+	return psuo
+}
+
 // AddGoals adds i to the "Goals" field.
 func (psuo *PSShootingUpdateOne) AddGoals(i int) *PSShootingUpdateOne {
 	psuo.mutation.AddGoals(i)
@@ -313,6 +361,14 @@ func (psuo *PSShootingUpdateOne) SetConceded(i int) *PSShootingUpdateOne {
 	return psuo
 }
 
+// SetNillableConceded sets the "Conceded" field if the given value is not nil.
+func (psuo *PSShootingUpdateOne) SetNillableConceded(i *int) *PSShootingUpdateOne {
+	if i != nil {
+		psuo.SetConceded(*i)
+	}
+	return psuo
+}
+
 // AddConceded adds i to the "Conceded" field.
 func (psuo *PSShootingUpdateOne) AddConceded(i int) *PSShootingUpdateOne {
 	psuo.mutation.AddConceded(i)
@@ -323,6 +379,14 @@ func (psuo *PSShootingUpdateOne) AddConceded(i int) *PSShootingUpdateOne {
 func (psuo *PSShootingUpdateOne) SetAssists(i int) *PSShootingUpdateOne {
 	psuo.mutation.ResetAssists()
 	psuo.mutation.SetAssists(i)
+	return psuo
+}
+
+// SetNillableAssists sets the "Assists" field if the given value is not nil.
+func (psuo *PSShootingUpdateOne) SetNillableAssists(i *int) *PSShootingUpdateOne {
+	if i != nil {
+		psuo.SetAssists(*i)
+	}
 	return psuo
 }
 
@@ -360,6 +424,14 @@ func (psuo *PSShootingUpdateOne) SetShots(i int) *PSShootingUpdateOne {
 	return psuo
 }
 
+// SetNillableShots sets the "Shots" field if the given value is not nil.
+func (psuo *PSShootingUpdateOne) SetNillableShots(i *int) *PSShootingUpdateOne {
+	if i != nil {
+		psuo.SetShots(*i)
+	}
+	return psuo
+}
+
 // AddShots adds i to the "Shots" field.
 func (psuo *PSShootingUpdateOne) AddShots(i int) *PSShootingUpdateOne {
 	psuo.mutation.AddShots(i)
@@ -370,6 +442,14 @@ func (psuo *PSShootingUpdateOne) AddShots(i int) *PSShootingUpdateOne {
 func (psuo *PSShootingUpdateOne) SetOnTarget(i int) *PSShootingUpdateOne {
 	psuo.mutation.ResetOnTarget()
 	psuo.mutation.SetOnTarget(i)
+	return psuo
+}
+
+// SetNillableOnTarget sets the "OnTarget" field if the given value is not nil.
+func (psuo *PSShootingUpdateOne) SetNillableOnTarget(i *int) *PSShootingUpdateOne {
+	if i != nil {
+		psuo.SetOnTarget(*i)
+	}
 	return psuo
 }
 

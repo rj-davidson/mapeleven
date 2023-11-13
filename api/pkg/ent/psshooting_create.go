@@ -27,15 +27,39 @@ func (psc *PSShootingCreate) SetGoals(i int) *PSShootingCreate {
 	return psc
 }
 
+// SetNillableGoals sets the "Goals" field if the given value is not nil.
+func (psc *PSShootingCreate) SetNillableGoals(i *int) *PSShootingCreate {
+	if i != nil {
+		psc.SetGoals(*i)
+	}
+	return psc
+}
+
 // SetConceded sets the "Conceded" field.
 func (psc *PSShootingCreate) SetConceded(i int) *PSShootingCreate {
 	psc.mutation.SetConceded(i)
 	return psc
 }
 
+// SetNillableConceded sets the "Conceded" field if the given value is not nil.
+func (psc *PSShootingCreate) SetNillableConceded(i *int) *PSShootingCreate {
+	if i != nil {
+		psc.SetConceded(*i)
+	}
+	return psc
+}
+
 // SetAssists sets the "Assists" field.
 func (psc *PSShootingCreate) SetAssists(i int) *PSShootingCreate {
 	psc.mutation.SetAssists(i)
+	return psc
+}
+
+// SetNillableAssists sets the "Assists" field if the given value is not nil.
+func (psc *PSShootingCreate) SetNillableAssists(i *int) *PSShootingCreate {
+	if i != nil {
+		psc.SetAssists(*i)
+	}
 	return psc
 }
 
@@ -59,9 +83,25 @@ func (psc *PSShootingCreate) SetShots(i int) *PSShootingCreate {
 	return psc
 }
 
+// SetNillableShots sets the "Shots" field if the given value is not nil.
+func (psc *PSShootingCreate) SetNillableShots(i *int) *PSShootingCreate {
+	if i != nil {
+		psc.SetShots(*i)
+	}
+	return psc
+}
+
 // SetOnTarget sets the "OnTarget" field.
 func (psc *PSShootingCreate) SetOnTarget(i int) *PSShootingCreate {
 	psc.mutation.SetOnTarget(i)
+	return psc
+}
+
+// SetNillableOnTarget sets the "OnTarget" field if the given value is not nil.
+func (psc *PSShootingCreate) SetNillableOnTarget(i *int) *PSShootingCreate {
+	if i != nil {
+		psc.SetOnTarget(*i)
+	}
 	return psc
 }
 
@@ -133,9 +173,29 @@ func (psc *PSShootingCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (psc *PSShootingCreate) defaults() {
+	if _, ok := psc.mutation.Goals(); !ok {
+		v := psshooting.DefaultGoals
+		psc.mutation.SetGoals(v)
+	}
+	if _, ok := psc.mutation.Conceded(); !ok {
+		v := psshooting.DefaultConceded
+		psc.mutation.SetConceded(v)
+	}
+	if _, ok := psc.mutation.Assists(); !ok {
+		v := psshooting.DefaultAssists
+		psc.mutation.SetAssists(v)
+	}
 	if _, ok := psc.mutation.Saves(); !ok {
 		v := psshooting.DefaultSaves
 		psc.mutation.SetSaves(v)
+	}
+	if _, ok := psc.mutation.Shots(); !ok {
+		v := psshooting.DefaultShots
+		psc.mutation.SetShots(v)
+	}
+	if _, ok := psc.mutation.OnTarget(); !ok {
+		v := psshooting.DefaultOnTarget
+		psc.mutation.SetOnTarget(v)
 	}
 	if _, ok := psc.mutation.LastUpdated(); !ok {
 		v := psshooting.DefaultLastUpdated()

@@ -17,8 +17,9 @@ func (PSPenalty) Fields() []ent.Field {
 	return []ent.Field{
 		field.Int("Won").Default(0),
 		field.Int("Scored").Default(0),
-		field.Int("Missed"),
+		field.Int("Missed").Default(0),
 		field.Int("Saved").Default(0),
+		field.Int("Committed").Default(0),
 		field.Time("lastUpdated").
 			Default(time.Now).
 			Optional().

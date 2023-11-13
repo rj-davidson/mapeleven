@@ -15,9 +15,9 @@ type PSGames struct {
 // Fields of the PSGames.
 func (PSGames) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("Appearances"),
-		field.Int("Lineups"),
-		field.Int("Minutes"),
+		field.Int("Appearances").Default(0),
+		field.Int("Lineups").Default(0),
+		field.Int("Minutes").Default(0),
 		field.Int("Number").Default(0),
 		field.String("Position").Default(""),
 		field.String("Rating").Default(""),

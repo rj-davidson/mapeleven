@@ -15,13 +15,13 @@ type PSTechnical struct {
 // Fields of the PSTechnical.
 func (PSTechnical) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("FoulsDrawn"),
-		field.Int("DribbleAttempts"),
-		field.Int("DribbleSuccess"),
+		field.Int("FoulsDrawn").Default(0),
+		field.Int("DribbleAttempts").Default(0),
+		field.Int("DribbleSuccess").Default(0),
 		field.Int("DribblePast").Default(0),
-		field.Int("PassesTotal"),
-		field.Int("PassesKey"),
-		field.Int("PassesAccuracy"),
+		field.Int("PassesTotal").Default(0),
+		field.Int("PassesKey").Default(0),
+		field.Int("PassesAccuracy").Default(0),
 		field.Time("lastUpdated").
 			Default(time.Now).
 			Optional().

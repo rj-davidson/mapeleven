@@ -66,6 +66,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultIn holds the default value on creation for the "In" field.
+	DefaultIn int
+	// DefaultOut holds the default value on creation for the "Out" field.
+	DefaultOut int
+	// DefaultBench holds the default value on creation for the "Bench" field.
+	DefaultBench int
 	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.

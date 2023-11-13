@@ -273,11 +273,11 @@ var (
 	// PsDefensesColumns holds the columns for the "ps_defenses" table.
 	PsDefensesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "tackles_total", Type: field.TypeInt},
+		{Name: "tackles_total", Type: field.TypeInt, Default: 0},
 		{Name: "blocks", Type: field.TypeInt, Default: 0},
-		{Name: "interceptions", Type: field.TypeInt},
-		{Name: "duels_total", Type: field.TypeInt},
-		{Name: "won_duels", Type: field.TypeInt},
+		{Name: "interceptions", Type: field.TypeInt, Default: 0},
+		{Name: "duels_total", Type: field.TypeInt, Default: 0},
+		{Name: "won_duels", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "player_stats_ps_defense", Type: field.TypeInt, Nullable: true},
 	}
@@ -298,10 +298,10 @@ var (
 	// PsFairplaysColumns holds the columns for the "ps_fairplays" table.
 	PsFairplaysColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "fouls_committed", Type: field.TypeInt},
-		{Name: "yellow", Type: field.TypeInt},
-		{Name: "yellow_red", Type: field.TypeInt},
-		{Name: "red", Type: field.TypeInt},
+		{Name: "fouls_committed", Type: field.TypeInt, Default: 0},
+		{Name: "yellow", Type: field.TypeInt, Default: 0},
+		{Name: "yellow_red", Type: field.TypeInt, Default: 0},
+		{Name: "red", Type: field.TypeInt, Default: 0},
 		{Name: "penalty_conceded", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "player_stats_ps_fairplay", Type: field.TypeInt, Nullable: true},
@@ -323,9 +323,9 @@ var (
 	// PsGamesColumns holds the columns for the "ps_games" table.
 	PsGamesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "appearances", Type: field.TypeInt},
-		{Name: "lineups", Type: field.TypeInt},
-		{Name: "minutes", Type: field.TypeInt},
+		{Name: "appearances", Type: field.TypeInt, Default: 0},
+		{Name: "lineups", Type: field.TypeInt, Default: 0},
+		{Name: "minutes", Type: field.TypeInt, Default: 0},
 		{Name: "number", Type: field.TypeInt, Default: 0},
 		{Name: "position", Type: field.TypeString, Default: ""},
 		{Name: "rating", Type: field.TypeString, Default: ""},
@@ -352,8 +352,9 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "won", Type: field.TypeInt, Default: 0},
 		{Name: "scored", Type: field.TypeInt, Default: 0},
-		{Name: "missed", Type: field.TypeInt},
+		{Name: "missed", Type: field.TypeInt, Default: 0},
 		{Name: "saved", Type: field.TypeInt, Default: 0},
+		{Name: "committed", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "player_stats_ps_penalty", Type: field.TypeInt, Nullable: true},
 	}
@@ -365,7 +366,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ps_penalties_player_stats_psPenalty",
-				Columns:    []*schema.Column{PsPenaltiesColumns[6]},
+				Columns:    []*schema.Column{PsPenaltiesColumns[7]},
 				RefColumns: []*schema.Column{PlayerStatsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -374,12 +375,12 @@ var (
 	// PsShootingsColumns holds the columns for the "ps_shootings" table.
 	PsShootingsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "goals", Type: field.TypeInt},
-		{Name: "conceded", Type: field.TypeInt},
-		{Name: "assists", Type: field.TypeInt},
+		{Name: "goals", Type: field.TypeInt, Default: 0},
+		{Name: "conceded", Type: field.TypeInt, Default: 0},
+		{Name: "assists", Type: field.TypeInt, Default: 0},
 		{Name: "saves", Type: field.TypeInt, Default: 0},
-		{Name: "shots", Type: field.TypeInt},
-		{Name: "on_target", Type: field.TypeInt},
+		{Name: "shots", Type: field.TypeInt, Default: 0},
+		{Name: "on_target", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "player_stats_ps_shooting", Type: field.TypeInt, Nullable: true},
 	}
@@ -400,9 +401,9 @@ var (
 	// PsSubstitutesColumns holds the columns for the "ps_substitutes" table.
 	PsSubstitutesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "in", Type: field.TypeInt},
-		{Name: "out", Type: field.TypeInt},
-		{Name: "bench", Type: field.TypeInt},
+		{Name: "in", Type: field.TypeInt, Default: 0},
+		{Name: "out", Type: field.TypeInt, Default: 0},
+		{Name: "bench", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "player_stats_ps_substitutes", Type: field.TypeInt, Nullable: true},
 	}
@@ -423,13 +424,13 @@ var (
 	// PsTechnicalsColumns holds the columns for the "ps_technicals" table.
 	PsTechnicalsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "fouls_drawn", Type: field.TypeInt},
-		{Name: "dribble_attempts", Type: field.TypeInt},
-		{Name: "dribble_success", Type: field.TypeInt},
+		{Name: "fouls_drawn", Type: field.TypeInt, Default: 0},
+		{Name: "dribble_attempts", Type: field.TypeInt, Default: 0},
+		{Name: "dribble_success", Type: field.TypeInt, Default: 0},
 		{Name: "dribble_past", Type: field.TypeInt, Default: 0},
-		{Name: "passes_total", Type: field.TypeInt},
-		{Name: "passes_key", Type: field.TypeInt},
-		{Name: "passes_accuracy", Type: field.TypeInt},
+		{Name: "passes_total", Type: field.TypeInt, Default: 0},
+		{Name: "passes_key", Type: field.TypeInt, Default: 0},
+		{Name: "passes_accuracy", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
 		{Name: "player_stats_ps_technical", Type: field.TypeInt, Nullable: true},
 	}

@@ -27,9 +27,25 @@ func (pfc *PSFairplayCreate) SetFoulsCommitted(i int) *PSFairplayCreate {
 	return pfc
 }
 
+// SetNillableFoulsCommitted sets the "FoulsCommitted" field if the given value is not nil.
+func (pfc *PSFairplayCreate) SetNillableFoulsCommitted(i *int) *PSFairplayCreate {
+	if i != nil {
+		pfc.SetFoulsCommitted(*i)
+	}
+	return pfc
+}
+
 // SetYellow sets the "Yellow" field.
 func (pfc *PSFairplayCreate) SetYellow(i int) *PSFairplayCreate {
 	pfc.mutation.SetYellow(i)
+	return pfc
+}
+
+// SetNillableYellow sets the "Yellow" field if the given value is not nil.
+func (pfc *PSFairplayCreate) SetNillableYellow(i *int) *PSFairplayCreate {
+	if i != nil {
+		pfc.SetYellow(*i)
+	}
 	return pfc
 }
 
@@ -39,9 +55,25 @@ func (pfc *PSFairplayCreate) SetYellowRed(i int) *PSFairplayCreate {
 	return pfc
 }
 
+// SetNillableYellowRed sets the "YellowRed" field if the given value is not nil.
+func (pfc *PSFairplayCreate) SetNillableYellowRed(i *int) *PSFairplayCreate {
+	if i != nil {
+		pfc.SetYellowRed(*i)
+	}
+	return pfc
+}
+
 // SetRed sets the "Red" field.
 func (pfc *PSFairplayCreate) SetRed(i int) *PSFairplayCreate {
 	pfc.mutation.SetRed(i)
+	return pfc
+}
+
+// SetNillableRed sets the "Red" field if the given value is not nil.
+func (pfc *PSFairplayCreate) SetNillableRed(i *int) *PSFairplayCreate {
+	if i != nil {
+		pfc.SetRed(*i)
+	}
 	return pfc
 }
 
@@ -127,6 +159,22 @@ func (pfc *PSFairplayCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pfc *PSFairplayCreate) defaults() {
+	if _, ok := pfc.mutation.FoulsCommitted(); !ok {
+		v := psfairplay.DefaultFoulsCommitted
+		pfc.mutation.SetFoulsCommitted(v)
+	}
+	if _, ok := pfc.mutation.Yellow(); !ok {
+		v := psfairplay.DefaultYellow
+		pfc.mutation.SetYellow(v)
+	}
+	if _, ok := pfc.mutation.YellowRed(); !ok {
+		v := psfairplay.DefaultYellowRed
+		pfc.mutation.SetYellowRed(v)
+	}
+	if _, ok := pfc.mutation.Red(); !ok {
+		v := psfairplay.DefaultRed
+		pfc.mutation.SetRed(v)
+	}
 	if _, ok := pfc.mutation.PenaltyConceded(); !ok {
 		v := psfairplay.DefaultPenaltyConceded
 		pfc.mutation.SetPenaltyConceded(v)

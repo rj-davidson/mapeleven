@@ -36,6 +36,14 @@ func (psu *PSSubstitutesUpdate) SetIn(i int) *PSSubstitutesUpdate {
 	return psu
 }
 
+// SetNillableIn sets the "In" field if the given value is not nil.
+func (psu *PSSubstitutesUpdate) SetNillableIn(i *int) *PSSubstitutesUpdate {
+	if i != nil {
+		psu.SetIn(*i)
+	}
+	return psu
+}
+
 // AddIn adds i to the "In" field.
 func (psu *PSSubstitutesUpdate) AddIn(i int) *PSSubstitutesUpdate {
 	psu.mutation.AddIn(i)
@@ -49,6 +57,14 @@ func (psu *PSSubstitutesUpdate) SetOut(i int) *PSSubstitutesUpdate {
 	return psu
 }
 
+// SetNillableOut sets the "Out" field if the given value is not nil.
+func (psu *PSSubstitutesUpdate) SetNillableOut(i *int) *PSSubstitutesUpdate {
+	if i != nil {
+		psu.SetOut(*i)
+	}
+	return psu
+}
+
 // AddOut adds i to the "Out" field.
 func (psu *PSSubstitutesUpdate) AddOut(i int) *PSSubstitutesUpdate {
 	psu.mutation.AddOut(i)
@@ -59,6 +75,14 @@ func (psu *PSSubstitutesUpdate) AddOut(i int) *PSSubstitutesUpdate {
 func (psu *PSSubstitutesUpdate) SetBench(i int) *PSSubstitutesUpdate {
 	psu.mutation.ResetBench()
 	psu.mutation.SetBench(i)
+	return psu
+}
+
+// SetNillableBench sets the "Bench" field if the given value is not nil.
+func (psu *PSSubstitutesUpdate) SetNillableBench(i *int) *PSSubstitutesUpdate {
+	if i != nil {
+		psu.SetBench(*i)
+	}
 	return psu
 }
 
@@ -235,6 +259,14 @@ func (psuo *PSSubstitutesUpdateOne) SetIn(i int) *PSSubstitutesUpdateOne {
 	return psuo
 }
 
+// SetNillableIn sets the "In" field if the given value is not nil.
+func (psuo *PSSubstitutesUpdateOne) SetNillableIn(i *int) *PSSubstitutesUpdateOne {
+	if i != nil {
+		psuo.SetIn(*i)
+	}
+	return psuo
+}
+
 // AddIn adds i to the "In" field.
 func (psuo *PSSubstitutesUpdateOne) AddIn(i int) *PSSubstitutesUpdateOne {
 	psuo.mutation.AddIn(i)
@@ -248,6 +280,14 @@ func (psuo *PSSubstitutesUpdateOne) SetOut(i int) *PSSubstitutesUpdateOne {
 	return psuo
 }
 
+// SetNillableOut sets the "Out" field if the given value is not nil.
+func (psuo *PSSubstitutesUpdateOne) SetNillableOut(i *int) *PSSubstitutesUpdateOne {
+	if i != nil {
+		psuo.SetOut(*i)
+	}
+	return psuo
+}
+
 // AddOut adds i to the "Out" field.
 func (psuo *PSSubstitutesUpdateOne) AddOut(i int) *PSSubstitutesUpdateOne {
 	psuo.mutation.AddOut(i)
@@ -258,6 +298,14 @@ func (psuo *PSSubstitutesUpdateOne) AddOut(i int) *PSSubstitutesUpdateOne {
 func (psuo *PSSubstitutesUpdateOne) SetBench(i int) *PSSubstitutesUpdateOne {
 	psuo.mutation.ResetBench()
 	psuo.mutation.SetBench(i)
+	return psuo
+}
+
+// SetNillableBench sets the "Bench" field if the given value is not nil.
+func (psuo *PSSubstitutesUpdateOne) SetNillableBench(i *int) *PSSubstitutesUpdateOne {
+	if i != nil {
+		psuo.SetBench(*i)
+	}
 	return psuo
 }
 

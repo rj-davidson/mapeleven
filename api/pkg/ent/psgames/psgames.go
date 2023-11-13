@@ -78,6 +78,12 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultAppearances holds the default value on creation for the "Appearances" field.
+	DefaultAppearances int
+	// DefaultLineups holds the default value on creation for the "Lineups" field.
+	DefaultLineups int
+	// DefaultMinutes holds the default value on creation for the "Minutes" field.
+	DefaultMinutes int
 	// DefaultNumber holds the default value on creation for the "Number" field.
 	DefaultNumber int
 	// DefaultPosition holds the default value on creation for the "Position" field.

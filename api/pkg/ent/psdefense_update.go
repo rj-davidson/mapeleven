@@ -36,6 +36,14 @@ func (pdu *PSDefenseUpdate) SetTacklesTotal(i int) *PSDefenseUpdate {
 	return pdu
 }
 
+// SetNillableTacklesTotal sets the "TacklesTotal" field if the given value is not nil.
+func (pdu *PSDefenseUpdate) SetNillableTacklesTotal(i *int) *PSDefenseUpdate {
+	if i != nil {
+		pdu.SetTacklesTotal(*i)
+	}
+	return pdu
+}
+
 // AddTacklesTotal adds i to the "TacklesTotal" field.
 func (pdu *PSDefenseUpdate) AddTacklesTotal(i int) *PSDefenseUpdate {
 	pdu.mutation.AddTacklesTotal(i)
@@ -70,6 +78,14 @@ func (pdu *PSDefenseUpdate) SetInterceptions(i int) *PSDefenseUpdate {
 	return pdu
 }
 
+// SetNillableInterceptions sets the "Interceptions" field if the given value is not nil.
+func (pdu *PSDefenseUpdate) SetNillableInterceptions(i *int) *PSDefenseUpdate {
+	if i != nil {
+		pdu.SetInterceptions(*i)
+	}
+	return pdu
+}
+
 // AddInterceptions adds i to the "Interceptions" field.
 func (pdu *PSDefenseUpdate) AddInterceptions(i int) *PSDefenseUpdate {
 	pdu.mutation.AddInterceptions(i)
@@ -83,6 +99,14 @@ func (pdu *PSDefenseUpdate) SetDuelsTotal(i int) *PSDefenseUpdate {
 	return pdu
 }
 
+// SetNillableDuelsTotal sets the "DuelsTotal" field if the given value is not nil.
+func (pdu *PSDefenseUpdate) SetNillableDuelsTotal(i *int) *PSDefenseUpdate {
+	if i != nil {
+		pdu.SetDuelsTotal(*i)
+	}
+	return pdu
+}
+
 // AddDuelsTotal adds i to the "DuelsTotal" field.
 func (pdu *PSDefenseUpdate) AddDuelsTotal(i int) *PSDefenseUpdate {
 	pdu.mutation.AddDuelsTotal(i)
@@ -93,6 +117,14 @@ func (pdu *PSDefenseUpdate) AddDuelsTotal(i int) *PSDefenseUpdate {
 func (pdu *PSDefenseUpdate) SetWonDuels(i int) *PSDefenseUpdate {
 	pdu.mutation.ResetWonDuels()
 	pdu.mutation.SetWonDuels(i)
+	return pdu
+}
+
+// SetNillableWonDuels sets the "WonDuels" field if the given value is not nil.
+func (pdu *PSDefenseUpdate) SetNillableWonDuels(i *int) *PSDefenseUpdate {
+	if i != nil {
+		pdu.SetWonDuels(*i)
+	}
 	return pdu
 }
 
@@ -281,6 +313,14 @@ func (pduo *PSDefenseUpdateOne) SetTacklesTotal(i int) *PSDefenseUpdateOne {
 	return pduo
 }
 
+// SetNillableTacklesTotal sets the "TacklesTotal" field if the given value is not nil.
+func (pduo *PSDefenseUpdateOne) SetNillableTacklesTotal(i *int) *PSDefenseUpdateOne {
+	if i != nil {
+		pduo.SetTacklesTotal(*i)
+	}
+	return pduo
+}
+
 // AddTacklesTotal adds i to the "TacklesTotal" field.
 func (pduo *PSDefenseUpdateOne) AddTacklesTotal(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddTacklesTotal(i)
@@ -315,6 +355,14 @@ func (pduo *PSDefenseUpdateOne) SetInterceptions(i int) *PSDefenseUpdateOne {
 	return pduo
 }
 
+// SetNillableInterceptions sets the "Interceptions" field if the given value is not nil.
+func (pduo *PSDefenseUpdateOne) SetNillableInterceptions(i *int) *PSDefenseUpdateOne {
+	if i != nil {
+		pduo.SetInterceptions(*i)
+	}
+	return pduo
+}
+
 // AddInterceptions adds i to the "Interceptions" field.
 func (pduo *PSDefenseUpdateOne) AddInterceptions(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddInterceptions(i)
@@ -328,6 +376,14 @@ func (pduo *PSDefenseUpdateOne) SetDuelsTotal(i int) *PSDefenseUpdateOne {
 	return pduo
 }
 
+// SetNillableDuelsTotal sets the "DuelsTotal" field if the given value is not nil.
+func (pduo *PSDefenseUpdateOne) SetNillableDuelsTotal(i *int) *PSDefenseUpdateOne {
+	if i != nil {
+		pduo.SetDuelsTotal(*i)
+	}
+	return pduo
+}
+
 // AddDuelsTotal adds i to the "DuelsTotal" field.
 func (pduo *PSDefenseUpdateOne) AddDuelsTotal(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddDuelsTotal(i)
@@ -338,6 +394,14 @@ func (pduo *PSDefenseUpdateOne) AddDuelsTotal(i int) *PSDefenseUpdateOne {
 func (pduo *PSDefenseUpdateOne) SetWonDuels(i int) *PSDefenseUpdateOne {
 	pduo.mutation.ResetWonDuels()
 	pduo.mutation.SetWonDuels(i)
+	return pduo
+}
+
+// SetNillableWonDuels sets the "WonDuels" field if the given value is not nil.
+func (pduo *PSDefenseUpdateOne) SetNillableWonDuels(i *int) *PSDefenseUpdateOne {
+	if i != nil {
+		pduo.SetWonDuels(*i)
+	}
 	return pduo
 }
 

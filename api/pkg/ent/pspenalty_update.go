@@ -78,6 +78,14 @@ func (ppu *PSPenaltyUpdate) SetMissed(i int) *PSPenaltyUpdate {
 	return ppu
 }
 
+// SetNillableMissed sets the "Missed" field if the given value is not nil.
+func (ppu *PSPenaltyUpdate) SetNillableMissed(i *int) *PSPenaltyUpdate {
+	if i != nil {
+		ppu.SetMissed(*i)
+	}
+	return ppu
+}
+
 // AddMissed adds i to the "Missed" field.
 func (ppu *PSPenaltyUpdate) AddMissed(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddMissed(i)
@@ -102,6 +110,27 @@ func (ppu *PSPenaltyUpdate) SetNillableSaved(i *int) *PSPenaltyUpdate {
 // AddSaved adds i to the "Saved" field.
 func (ppu *PSPenaltyUpdate) AddSaved(i int) *PSPenaltyUpdate {
 	ppu.mutation.AddSaved(i)
+	return ppu
+}
+
+// SetCommitted sets the "Committed" field.
+func (ppu *PSPenaltyUpdate) SetCommitted(i int) *PSPenaltyUpdate {
+	ppu.mutation.ResetCommitted()
+	ppu.mutation.SetCommitted(i)
+	return ppu
+}
+
+// SetNillableCommitted sets the "Committed" field if the given value is not nil.
+func (ppu *PSPenaltyUpdate) SetNillableCommitted(i *int) *PSPenaltyUpdate {
+	if i != nil {
+		ppu.SetCommitted(*i)
+	}
+	return ppu
+}
+
+// AddCommitted adds i to the "Committed" field.
+func (ppu *PSPenaltyUpdate) AddCommitted(i int) *PSPenaltyUpdate {
+	ppu.mutation.AddCommitted(i)
 	return ppu
 }
 
@@ -216,6 +245,12 @@ func (ppu *PSPenaltyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ppu.mutation.AddedSaved(); ok {
 		_spec.AddField(pspenalty.FieldSaved, field.TypeInt, value)
 	}
+	if value, ok := ppu.mutation.Committed(); ok {
+		_spec.SetField(pspenalty.FieldCommitted, field.TypeInt, value)
+	}
+	if value, ok := ppu.mutation.AddedCommitted(); ok {
+		_spec.AddField(pspenalty.FieldCommitted, field.TypeInt, value)
+	}
 	if value, ok := ppu.mutation.LastUpdated(); ok {
 		_spec.SetField(pspenalty.FieldLastUpdated, field.TypeTime, value)
 	}
@@ -320,6 +355,14 @@ func (ppuo *PSPenaltyUpdateOne) SetMissed(i int) *PSPenaltyUpdateOne {
 	return ppuo
 }
 
+// SetNillableMissed sets the "Missed" field if the given value is not nil.
+func (ppuo *PSPenaltyUpdateOne) SetNillableMissed(i *int) *PSPenaltyUpdateOne {
+	if i != nil {
+		ppuo.SetMissed(*i)
+	}
+	return ppuo
+}
+
 // AddMissed adds i to the "Missed" field.
 func (ppuo *PSPenaltyUpdateOne) AddMissed(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddMissed(i)
@@ -344,6 +387,27 @@ func (ppuo *PSPenaltyUpdateOne) SetNillableSaved(i *int) *PSPenaltyUpdateOne {
 // AddSaved adds i to the "Saved" field.
 func (ppuo *PSPenaltyUpdateOne) AddSaved(i int) *PSPenaltyUpdateOne {
 	ppuo.mutation.AddSaved(i)
+	return ppuo
+}
+
+// SetCommitted sets the "Committed" field.
+func (ppuo *PSPenaltyUpdateOne) SetCommitted(i int) *PSPenaltyUpdateOne {
+	ppuo.mutation.ResetCommitted()
+	ppuo.mutation.SetCommitted(i)
+	return ppuo
+}
+
+// SetNillableCommitted sets the "Committed" field if the given value is not nil.
+func (ppuo *PSPenaltyUpdateOne) SetNillableCommitted(i *int) *PSPenaltyUpdateOne {
+	if i != nil {
+		ppuo.SetCommitted(*i)
+	}
+	return ppuo
+}
+
+// AddCommitted adds i to the "Committed" field.
+func (ppuo *PSPenaltyUpdateOne) AddCommitted(i int) *PSPenaltyUpdateOne {
+	ppuo.mutation.AddCommitted(i)
 	return ppuo
 }
 
@@ -487,6 +551,12 @@ func (ppuo *PSPenaltyUpdateOne) sqlSave(ctx context.Context) (_node *PSPenalty, 
 	}
 	if value, ok := ppuo.mutation.AddedSaved(); ok {
 		_spec.AddField(pspenalty.FieldSaved, field.TypeInt, value)
+	}
+	if value, ok := ppuo.mutation.Committed(); ok {
+		_spec.SetField(pspenalty.FieldCommitted, field.TypeInt, value)
+	}
+	if value, ok := ppuo.mutation.AddedCommitted(); ok {
+		_spec.AddField(pspenalty.FieldCommitted, field.TypeInt, value)
 	}
 	if value, ok := ppuo.mutation.LastUpdated(); ok {
 		_spec.SetField(pspenalty.FieldLastUpdated, field.TypeTime, value)

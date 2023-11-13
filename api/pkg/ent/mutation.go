@@ -10331,6 +10331,8 @@ type PSPenaltyMutation struct {
 	add_Missed         *int
 	_Saved             *int
 	add_Saved          *int
+	_Committed         *int
+	add_Committed      *int
 	lastUpdated        *time.Time
 	clearedFields      map[string]struct{}
 	playerStats        *int
@@ -10662,6 +10664,62 @@ func (m *PSPenaltyMutation) ResetSaved() {
 	m.add_Saved = nil
 }
 
+// SetCommitted sets the "Committed" field.
+func (m *PSPenaltyMutation) SetCommitted(i int) {
+	m._Committed = &i
+	m.add_Committed = nil
+}
+
+// Committed returns the value of the "Committed" field in the mutation.
+func (m *PSPenaltyMutation) Committed() (r int, exists bool) {
+	v := m._Committed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCommitted returns the old "Committed" field's value of the PSPenalty entity.
+// If the PSPenalty object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PSPenaltyMutation) OldCommitted(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCommitted is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCommitted requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCommitted: %w", err)
+	}
+	return oldValue.Committed, nil
+}
+
+// AddCommitted adds i to the "Committed" field.
+func (m *PSPenaltyMutation) AddCommitted(i int) {
+	if m.add_Committed != nil {
+		*m.add_Committed += i
+	} else {
+		m.add_Committed = &i
+	}
+}
+
+// AddedCommitted returns the value that was added to the "Committed" field in this mutation.
+func (m *PSPenaltyMutation) AddedCommitted() (r int, exists bool) {
+	v := m.add_Committed
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetCommitted resets all changes to the "Committed" field.
+func (m *PSPenaltyMutation) ResetCommitted() {
+	m._Committed = nil
+	m.add_Committed = nil
+}
+
 // SetLastUpdated sets the "lastUpdated" field.
 func (m *PSPenaltyMutation) SetLastUpdated(t time.Time) {
 	m.lastUpdated = &t
@@ -10784,7 +10842,7 @@ func (m *PSPenaltyMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PSPenaltyMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m._Won != nil {
 		fields = append(fields, pspenalty.FieldWon)
 	}
@@ -10796,6 +10854,9 @@ func (m *PSPenaltyMutation) Fields() []string {
 	}
 	if m._Saved != nil {
 		fields = append(fields, pspenalty.FieldSaved)
+	}
+	if m._Committed != nil {
+		fields = append(fields, pspenalty.FieldCommitted)
 	}
 	if m.lastUpdated != nil {
 		fields = append(fields, pspenalty.FieldLastUpdated)
@@ -10816,6 +10877,8 @@ func (m *PSPenaltyMutation) Field(name string) (ent.Value, bool) {
 		return m.Missed()
 	case pspenalty.FieldSaved:
 		return m.Saved()
+	case pspenalty.FieldCommitted:
+		return m.Committed()
 	case pspenalty.FieldLastUpdated:
 		return m.LastUpdated()
 	}
@@ -10835,6 +10898,8 @@ func (m *PSPenaltyMutation) OldField(ctx context.Context, name string) (ent.Valu
 		return m.OldMissed(ctx)
 	case pspenalty.FieldSaved:
 		return m.OldSaved(ctx)
+	case pspenalty.FieldCommitted:
+		return m.OldCommitted(ctx)
 	case pspenalty.FieldLastUpdated:
 		return m.OldLastUpdated(ctx)
 	}
@@ -10874,6 +10939,13 @@ func (m *PSPenaltyMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetSaved(v)
 		return nil
+	case pspenalty.FieldCommitted:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCommitted(v)
+		return nil
 	case pspenalty.FieldLastUpdated:
 		v, ok := value.(time.Time)
 		if !ok {
@@ -10901,6 +10973,9 @@ func (m *PSPenaltyMutation) AddedFields() []string {
 	if m.add_Saved != nil {
 		fields = append(fields, pspenalty.FieldSaved)
 	}
+	if m.add_Committed != nil {
+		fields = append(fields, pspenalty.FieldCommitted)
+	}
 	return fields
 }
 
@@ -10917,6 +10992,8 @@ func (m *PSPenaltyMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedMissed()
 	case pspenalty.FieldSaved:
 		return m.AddedSaved()
+	case pspenalty.FieldCommitted:
+		return m.AddedCommitted()
 	}
 	return nil, false
 }
@@ -10953,6 +11030,13 @@ func (m *PSPenaltyMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddSaved(v)
+		return nil
+	case pspenalty.FieldCommitted:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddCommitted(v)
 		return nil
 	}
 	return fmt.Errorf("unknown PSPenalty numeric field %s", name)
@@ -11001,6 +11085,9 @@ func (m *PSPenaltyMutation) ResetField(name string) error {
 		return nil
 	case pspenalty.FieldSaved:
 		m.ResetSaved()
+		return nil
+	case pspenalty.FieldCommitted:
+		m.ResetCommitted()
 		return nil
 	case pspenalty.FieldLastUpdated:
 		m.ResetLastUpdated()

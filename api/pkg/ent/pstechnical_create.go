@@ -27,15 +27,39 @@ func (ptc *PSTechnicalCreate) SetFoulsDrawn(i int) *PSTechnicalCreate {
 	return ptc
 }
 
+// SetNillableFoulsDrawn sets the "FoulsDrawn" field if the given value is not nil.
+func (ptc *PSTechnicalCreate) SetNillableFoulsDrawn(i *int) *PSTechnicalCreate {
+	if i != nil {
+		ptc.SetFoulsDrawn(*i)
+	}
+	return ptc
+}
+
 // SetDribbleAttempts sets the "DribbleAttempts" field.
 func (ptc *PSTechnicalCreate) SetDribbleAttempts(i int) *PSTechnicalCreate {
 	ptc.mutation.SetDribbleAttempts(i)
 	return ptc
 }
 
+// SetNillableDribbleAttempts sets the "DribbleAttempts" field if the given value is not nil.
+func (ptc *PSTechnicalCreate) SetNillableDribbleAttempts(i *int) *PSTechnicalCreate {
+	if i != nil {
+		ptc.SetDribbleAttempts(*i)
+	}
+	return ptc
+}
+
 // SetDribbleSuccess sets the "DribbleSuccess" field.
 func (ptc *PSTechnicalCreate) SetDribbleSuccess(i int) *PSTechnicalCreate {
 	ptc.mutation.SetDribbleSuccess(i)
+	return ptc
+}
+
+// SetNillableDribbleSuccess sets the "DribbleSuccess" field if the given value is not nil.
+func (ptc *PSTechnicalCreate) SetNillableDribbleSuccess(i *int) *PSTechnicalCreate {
+	if i != nil {
+		ptc.SetDribbleSuccess(*i)
+	}
 	return ptc
 }
 
@@ -59,15 +83,39 @@ func (ptc *PSTechnicalCreate) SetPassesTotal(i int) *PSTechnicalCreate {
 	return ptc
 }
 
+// SetNillablePassesTotal sets the "PassesTotal" field if the given value is not nil.
+func (ptc *PSTechnicalCreate) SetNillablePassesTotal(i *int) *PSTechnicalCreate {
+	if i != nil {
+		ptc.SetPassesTotal(*i)
+	}
+	return ptc
+}
+
 // SetPassesKey sets the "PassesKey" field.
 func (ptc *PSTechnicalCreate) SetPassesKey(i int) *PSTechnicalCreate {
 	ptc.mutation.SetPassesKey(i)
 	return ptc
 }
 
+// SetNillablePassesKey sets the "PassesKey" field if the given value is not nil.
+func (ptc *PSTechnicalCreate) SetNillablePassesKey(i *int) *PSTechnicalCreate {
+	if i != nil {
+		ptc.SetPassesKey(*i)
+	}
+	return ptc
+}
+
 // SetPassesAccuracy sets the "PassesAccuracy" field.
 func (ptc *PSTechnicalCreate) SetPassesAccuracy(i int) *PSTechnicalCreate {
 	ptc.mutation.SetPassesAccuracy(i)
+	return ptc
+}
+
+// SetNillablePassesAccuracy sets the "PassesAccuracy" field if the given value is not nil.
+func (ptc *PSTechnicalCreate) SetNillablePassesAccuracy(i *int) *PSTechnicalCreate {
+	if i != nil {
+		ptc.SetPassesAccuracy(*i)
+	}
 	return ptc
 }
 
@@ -139,9 +187,33 @@ func (ptc *PSTechnicalCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (ptc *PSTechnicalCreate) defaults() {
+	if _, ok := ptc.mutation.FoulsDrawn(); !ok {
+		v := pstechnical.DefaultFoulsDrawn
+		ptc.mutation.SetFoulsDrawn(v)
+	}
+	if _, ok := ptc.mutation.DribbleAttempts(); !ok {
+		v := pstechnical.DefaultDribbleAttempts
+		ptc.mutation.SetDribbleAttempts(v)
+	}
+	if _, ok := ptc.mutation.DribbleSuccess(); !ok {
+		v := pstechnical.DefaultDribbleSuccess
+		ptc.mutation.SetDribbleSuccess(v)
+	}
 	if _, ok := ptc.mutation.DribblePast(); !ok {
 		v := pstechnical.DefaultDribblePast
 		ptc.mutation.SetDribblePast(v)
+	}
+	if _, ok := ptc.mutation.PassesTotal(); !ok {
+		v := pstechnical.DefaultPassesTotal
+		ptc.mutation.SetPassesTotal(v)
+	}
+	if _, ok := ptc.mutation.PassesKey(); !ok {
+		v := pstechnical.DefaultPassesKey
+		ptc.mutation.SetPassesKey(v)
+	}
+	if _, ok := ptc.mutation.PassesAccuracy(); !ok {
+		v := pstechnical.DefaultPassesAccuracy
+		ptc.mutation.SetPassesAccuracy(v)
 	}
 	if _, ok := ptc.mutation.LastUpdated(); !ok {
 		v := pstechnical.DefaultLastUpdated()

@@ -78,8 +78,20 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultFoulsDrawn holds the default value on creation for the "FoulsDrawn" field.
+	DefaultFoulsDrawn int
+	// DefaultDribbleAttempts holds the default value on creation for the "DribbleAttempts" field.
+	DefaultDribbleAttempts int
+	// DefaultDribbleSuccess holds the default value on creation for the "DribbleSuccess" field.
+	DefaultDribbleSuccess int
 	// DefaultDribblePast holds the default value on creation for the "DribblePast" field.
 	DefaultDribblePast int
+	// DefaultPassesTotal holds the default value on creation for the "PassesTotal" field.
+	DefaultPassesTotal int
+	// DefaultPassesKey holds the default value on creation for the "PassesKey" field.
+	DefaultPassesKey int
+	// DefaultPassesAccuracy holds the default value on creation for the "PassesAccuracy" field.
+	DefaultPassesAccuracy int
 	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.

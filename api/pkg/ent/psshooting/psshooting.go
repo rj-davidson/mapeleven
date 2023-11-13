@@ -75,8 +75,18 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultGoals holds the default value on creation for the "Goals" field.
+	DefaultGoals int
+	// DefaultConceded holds the default value on creation for the "Conceded" field.
+	DefaultConceded int
+	// DefaultAssists holds the default value on creation for the "Assists" field.
+	DefaultAssists int
 	// DefaultSaves holds the default value on creation for the "Saves" field.
 	DefaultSaves int
+	// DefaultShots holds the default value on creation for the "Shots" field.
+	DefaultShots int
+	// DefaultOnTarget holds the default value on creation for the "OnTarget" field.
+	DefaultOnTarget int
 	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.

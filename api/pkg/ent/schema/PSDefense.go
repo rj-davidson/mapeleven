@@ -15,11 +15,11 @@ type PSDefense struct {
 // Fields of the PSDefense.
 func (PSDefense) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("TacklesTotal"),
+		field.Int("TacklesTotal").Default(0),
 		field.Int("Blocks").Default(0),
-		field.Int("Interceptions"),
-		field.Int("DuelsTotal"),
-		field.Int("WonDuels"),
+		field.Int("Interceptions").Default(0),
+		field.Int("DuelsTotal").Default(0),
+		field.Int("WonDuels").Default(0),
 		field.Time("lastUpdated").
 			Default(time.Now).
 			Optional().

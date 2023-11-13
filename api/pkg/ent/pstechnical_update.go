@@ -36,6 +36,14 @@ func (ptu *PSTechnicalUpdate) SetFoulsDrawn(i int) *PSTechnicalUpdate {
 	return ptu
 }
 
+// SetNillableFoulsDrawn sets the "FoulsDrawn" field if the given value is not nil.
+func (ptu *PSTechnicalUpdate) SetNillableFoulsDrawn(i *int) *PSTechnicalUpdate {
+	if i != nil {
+		ptu.SetFoulsDrawn(*i)
+	}
+	return ptu
+}
+
 // AddFoulsDrawn adds i to the "FoulsDrawn" field.
 func (ptu *PSTechnicalUpdate) AddFoulsDrawn(i int) *PSTechnicalUpdate {
 	ptu.mutation.AddFoulsDrawn(i)
@@ -49,6 +57,14 @@ func (ptu *PSTechnicalUpdate) SetDribbleAttempts(i int) *PSTechnicalUpdate {
 	return ptu
 }
 
+// SetNillableDribbleAttempts sets the "DribbleAttempts" field if the given value is not nil.
+func (ptu *PSTechnicalUpdate) SetNillableDribbleAttempts(i *int) *PSTechnicalUpdate {
+	if i != nil {
+		ptu.SetDribbleAttempts(*i)
+	}
+	return ptu
+}
+
 // AddDribbleAttempts adds i to the "DribbleAttempts" field.
 func (ptu *PSTechnicalUpdate) AddDribbleAttempts(i int) *PSTechnicalUpdate {
 	ptu.mutation.AddDribbleAttempts(i)
@@ -59,6 +75,14 @@ func (ptu *PSTechnicalUpdate) AddDribbleAttempts(i int) *PSTechnicalUpdate {
 func (ptu *PSTechnicalUpdate) SetDribbleSuccess(i int) *PSTechnicalUpdate {
 	ptu.mutation.ResetDribbleSuccess()
 	ptu.mutation.SetDribbleSuccess(i)
+	return ptu
+}
+
+// SetNillableDribbleSuccess sets the "DribbleSuccess" field if the given value is not nil.
+func (ptu *PSTechnicalUpdate) SetNillableDribbleSuccess(i *int) *PSTechnicalUpdate {
+	if i != nil {
+		ptu.SetDribbleSuccess(*i)
+	}
 	return ptu
 }
 
@@ -96,6 +120,14 @@ func (ptu *PSTechnicalUpdate) SetPassesTotal(i int) *PSTechnicalUpdate {
 	return ptu
 }
 
+// SetNillablePassesTotal sets the "PassesTotal" field if the given value is not nil.
+func (ptu *PSTechnicalUpdate) SetNillablePassesTotal(i *int) *PSTechnicalUpdate {
+	if i != nil {
+		ptu.SetPassesTotal(*i)
+	}
+	return ptu
+}
+
 // AddPassesTotal adds i to the "PassesTotal" field.
 func (ptu *PSTechnicalUpdate) AddPassesTotal(i int) *PSTechnicalUpdate {
 	ptu.mutation.AddPassesTotal(i)
@@ -109,6 +141,14 @@ func (ptu *PSTechnicalUpdate) SetPassesKey(i int) *PSTechnicalUpdate {
 	return ptu
 }
 
+// SetNillablePassesKey sets the "PassesKey" field if the given value is not nil.
+func (ptu *PSTechnicalUpdate) SetNillablePassesKey(i *int) *PSTechnicalUpdate {
+	if i != nil {
+		ptu.SetPassesKey(*i)
+	}
+	return ptu
+}
+
 // AddPassesKey adds i to the "PassesKey" field.
 func (ptu *PSTechnicalUpdate) AddPassesKey(i int) *PSTechnicalUpdate {
 	ptu.mutation.AddPassesKey(i)
@@ -119,6 +159,14 @@ func (ptu *PSTechnicalUpdate) AddPassesKey(i int) *PSTechnicalUpdate {
 func (ptu *PSTechnicalUpdate) SetPassesAccuracy(i int) *PSTechnicalUpdate {
 	ptu.mutation.ResetPassesAccuracy()
 	ptu.mutation.SetPassesAccuracy(i)
+	return ptu
+}
+
+// SetNillablePassesAccuracy sets the "PassesAccuracy" field if the given value is not nil.
+func (ptu *PSTechnicalUpdate) SetNillablePassesAccuracy(i *int) *PSTechnicalUpdate {
+	if i != nil {
+		ptu.SetPassesAccuracy(*i)
+	}
 	return ptu
 }
 
@@ -319,6 +367,14 @@ func (ptuo *PSTechnicalUpdateOne) SetFoulsDrawn(i int) *PSTechnicalUpdateOne {
 	return ptuo
 }
 
+// SetNillableFoulsDrawn sets the "FoulsDrawn" field if the given value is not nil.
+func (ptuo *PSTechnicalUpdateOne) SetNillableFoulsDrawn(i *int) *PSTechnicalUpdateOne {
+	if i != nil {
+		ptuo.SetFoulsDrawn(*i)
+	}
+	return ptuo
+}
+
 // AddFoulsDrawn adds i to the "FoulsDrawn" field.
 func (ptuo *PSTechnicalUpdateOne) AddFoulsDrawn(i int) *PSTechnicalUpdateOne {
 	ptuo.mutation.AddFoulsDrawn(i)
@@ -332,6 +388,14 @@ func (ptuo *PSTechnicalUpdateOne) SetDribbleAttempts(i int) *PSTechnicalUpdateOn
 	return ptuo
 }
 
+// SetNillableDribbleAttempts sets the "DribbleAttempts" field if the given value is not nil.
+func (ptuo *PSTechnicalUpdateOne) SetNillableDribbleAttempts(i *int) *PSTechnicalUpdateOne {
+	if i != nil {
+		ptuo.SetDribbleAttempts(*i)
+	}
+	return ptuo
+}
+
 // AddDribbleAttempts adds i to the "DribbleAttempts" field.
 func (ptuo *PSTechnicalUpdateOne) AddDribbleAttempts(i int) *PSTechnicalUpdateOne {
 	ptuo.mutation.AddDribbleAttempts(i)
@@ -342,6 +406,14 @@ func (ptuo *PSTechnicalUpdateOne) AddDribbleAttempts(i int) *PSTechnicalUpdateOn
 func (ptuo *PSTechnicalUpdateOne) SetDribbleSuccess(i int) *PSTechnicalUpdateOne {
 	ptuo.mutation.ResetDribbleSuccess()
 	ptuo.mutation.SetDribbleSuccess(i)
+	return ptuo
+}
+
+// SetNillableDribbleSuccess sets the "DribbleSuccess" field if the given value is not nil.
+func (ptuo *PSTechnicalUpdateOne) SetNillableDribbleSuccess(i *int) *PSTechnicalUpdateOne {
+	if i != nil {
+		ptuo.SetDribbleSuccess(*i)
+	}
 	return ptuo
 }
 
@@ -379,6 +451,14 @@ func (ptuo *PSTechnicalUpdateOne) SetPassesTotal(i int) *PSTechnicalUpdateOne {
 	return ptuo
 }
 
+// SetNillablePassesTotal sets the "PassesTotal" field if the given value is not nil.
+func (ptuo *PSTechnicalUpdateOne) SetNillablePassesTotal(i *int) *PSTechnicalUpdateOne {
+	if i != nil {
+		ptuo.SetPassesTotal(*i)
+	}
+	return ptuo
+}
+
 // AddPassesTotal adds i to the "PassesTotal" field.
 func (ptuo *PSTechnicalUpdateOne) AddPassesTotal(i int) *PSTechnicalUpdateOne {
 	ptuo.mutation.AddPassesTotal(i)
@@ -392,6 +472,14 @@ func (ptuo *PSTechnicalUpdateOne) SetPassesKey(i int) *PSTechnicalUpdateOne {
 	return ptuo
 }
 
+// SetNillablePassesKey sets the "PassesKey" field if the given value is not nil.
+func (ptuo *PSTechnicalUpdateOne) SetNillablePassesKey(i *int) *PSTechnicalUpdateOne {
+	if i != nil {
+		ptuo.SetPassesKey(*i)
+	}
+	return ptuo
+}
+
 // AddPassesKey adds i to the "PassesKey" field.
 func (ptuo *PSTechnicalUpdateOne) AddPassesKey(i int) *PSTechnicalUpdateOne {
 	ptuo.mutation.AddPassesKey(i)
@@ -402,6 +490,14 @@ func (ptuo *PSTechnicalUpdateOne) AddPassesKey(i int) *PSTechnicalUpdateOne {
 func (ptuo *PSTechnicalUpdateOne) SetPassesAccuracy(i int) *PSTechnicalUpdateOne {
 	ptuo.mutation.ResetPassesAccuracy()
 	ptuo.mutation.SetPassesAccuracy(i)
+	return ptuo
+}
+
+// SetNillablePassesAccuracy sets the "PassesAccuracy" field if the given value is not nil.
+func (ptuo *PSTechnicalUpdateOne) SetNillablePassesAccuracy(i *int) *PSTechnicalUpdateOne {
+	if i != nil {
+		ptuo.SetPassesAccuracy(*i)
+	}
 	return ptuo
 }
 

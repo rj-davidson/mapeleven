@@ -27,15 +27,39 @@ func (psc *PSSubstitutesCreate) SetIn(i int) *PSSubstitutesCreate {
 	return psc
 }
 
+// SetNillableIn sets the "In" field if the given value is not nil.
+func (psc *PSSubstitutesCreate) SetNillableIn(i *int) *PSSubstitutesCreate {
+	if i != nil {
+		psc.SetIn(*i)
+	}
+	return psc
+}
+
 // SetOut sets the "Out" field.
 func (psc *PSSubstitutesCreate) SetOut(i int) *PSSubstitutesCreate {
 	psc.mutation.SetOut(i)
 	return psc
 }
 
+// SetNillableOut sets the "Out" field if the given value is not nil.
+func (psc *PSSubstitutesCreate) SetNillableOut(i *int) *PSSubstitutesCreate {
+	if i != nil {
+		psc.SetOut(*i)
+	}
+	return psc
+}
+
 // SetBench sets the "Bench" field.
 func (psc *PSSubstitutesCreate) SetBench(i int) *PSSubstitutesCreate {
 	psc.mutation.SetBench(i)
+	return psc
+}
+
+// SetNillableBench sets the "Bench" field if the given value is not nil.
+func (psc *PSSubstitutesCreate) SetNillableBench(i *int) *PSSubstitutesCreate {
+	if i != nil {
+		psc.SetBench(*i)
+	}
 	return psc
 }
 
@@ -107,6 +131,18 @@ func (psc *PSSubstitutesCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (psc *PSSubstitutesCreate) defaults() {
+	if _, ok := psc.mutation.In(); !ok {
+		v := pssubstitutes.DefaultIn
+		psc.mutation.SetIn(v)
+	}
+	if _, ok := psc.mutation.Out(); !ok {
+		v := pssubstitutes.DefaultOut
+		psc.mutation.SetOut(v)
+	}
+	if _, ok := psc.mutation.Bench(); !ok {
+		v := pssubstitutes.DefaultBench
+		psc.mutation.SetBench(v)
+	}
 	if _, ok := psc.mutation.LastUpdated(); !ok {
 		v := pssubstitutes.DefaultLastUpdated()
 		psc.mutation.SetLastUpdated(v)

@@ -3,6 +3,8 @@ package player_stats
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
@@ -11,6 +13,7 @@ import (
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"context"
 	_ "context"
 	"fmt"
@@ -32,72 +35,72 @@ type PSLeague struct {
 }
 
 type PSGames struct {
-	Appearances int    `json:"appearances"`
-	Lineups     int    `json:"lineups"`
-	Minutes     int    `json:"minutes"`
-	Number      int    `json:"number"`
+	Appearances *int   `json:"appearances"`
+	Lineups     *int   `json:"lineups"`
+	Minutes     *int   `json:"minutes"`
+	Number      *int   `json:"number"`
 	Position    string `json:"position"`
 	Rating      string `json:"rating"`
 	Captain     bool   `json:"captain"`
 }
 
 type PSSubstitutes struct {
-	In    int `json:"in"`
-	Out   int `json:"out"`
-	Bench int `json:"bench"`
+	In    *int `json:"in"`
+	Out   *int `json:"out"`
+	Bench *int `json:"bench"`
 }
 
 type PSShots struct {
-	Total int `json:"total"`
-	On    int `json:"on"`
+	Total *int `json:"total"`
+	On    *int `json:"on"`
 }
 
 type PSGoals struct {
-	Total    int  `json:"total"`
-	Conceded int  `json:"conceded"`
-	Assists  int  `json:"assists"`
+	Total    *int `json:"total"`
+	Conceded *int `json:"conceded"`
+	Assists  *int `json:"assists"`
 	Saves    *int `json:"saves"`
 }
 
 type PSPasses struct {
-	Total    int `json:"total"`
-	Key      int `json:"key"`
-	Accuracy int `json:"accuracy"`
+	Total    *int `json:"total"`
+	Key      *int `json:"key"`
+	Accuracy *int `json:"accuracy"`
 }
 
 type PSTackles struct {
-	Total         int  `json:"total"`
+	Total         *int `json:"total"`
 	Blocks        *int `json:"blocks"`
-	Interceptions int  `json:"interceptions"`
+	Interceptions *int `json:"interceptions"`
 }
 
 type PSDuels struct {
-	Total int `json:"total"`
-	Won   int `json:"won"`
+	Total *int `json:"total"`
+	Won   *int `json:"won"`
 }
 
 type PSDribbles struct {
-	Attempts int  `json:"attempts"`
-	Success  int  `json:"success"`
+	Attempts *int `json:"attempts"`
+	Success  *int `json:"success"`
 	Past     *int `json:"past"`
 }
 
 type PSFouls struct {
-	Drawn     int `json:"drawn"`
-	Committed int `json:"committed"`
+	Drawn     *int `json:"drawn"`
+	Committed *int `json:"committed"`
 }
 
 type PSCards struct {
-	Yellow    int `json:"yellow"`
-	YellowRed int `json:"yellowred"`
-	Red       int `json:"red"`
+	Yellow    *int `json:"yellow"`
+	YellowRed *int `json:"yellowred"`
+	Red       *int `json:"red"`
 }
 
 type PSPenalty struct {
 	Won       *int `json:"won"`
 	Committed *int `json:"commited"`
-	Scored    int  `json:"scored"`
-	Missed    int  `json:"missed"`
+	Scored    *int `json:"scored"`
+	Missed    *int `json:"missed"`
 	Saved     *int `json:"saved"`
 }
 
@@ -124,9 +127,35 @@ type PlayerStatsModel struct {
 func NewPlayerStatsModel(client *ent.Client) *PlayerStatsModel {
 	return &PlayerStatsModel{client: client}
 }
+func intValueOrDefault(val *int) int {
+	if val != nil {
+		return *val
+	}
+	return 0
+}
+
+func (m *PlayerStatsModel) StartTransaction(ctx context.Context) (*ent.Tx, error) {
+	return m.client.Tx(ctx)
+}
 
 // UpsertPlayerStats updates existing player stats or creates new ones.
 func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, tx *ent.Tx, p *ent.Player, stats PlayerStats) error {
+	t, err := m.client.Team.
+		Query().
+		WithClub(func(q *ent.ClubQuery) {
+			q.Where(club.ApiFootballIdEQ(stats.Team.ApiFootballId))
+		},
+		).
+		WithSeason(func(q *ent.SeasonQuery) {
+			q.Where(season.YearEQ(stats.League.Season))
+			q.Where(season.HasLeagueWith(league.FootballApiIdEQ(stats.League.ApiFootballId)))
+		},
+		).
+		All(ctx)
+	fmt.Printf("Team: %v\n", t)
+	if err != nil {
+		return fmt.Errorf("failed to query team: %w", err)
+	}
 	// Query for existing player stats.
 	ps, err := tx.PlayerStats.
 		Query().
@@ -135,11 +164,11 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, tx *ent.Tx, p 
 		Only(ctx)
 	fmt.Printf("Player stats: %v\n", stats)
 	// Handle not found error by creating a new player stats record.
-	if ent.IsNotFound(err) {
+	if ps == nil {
 		ps, err = tx.PlayerStats.
 			Create().
 			SetPlayer(p).
-			SetPlayerID(p.ID).
+			//SetTeam(t).
 			Save(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to create player stats: %w", err)
@@ -186,32 +215,42 @@ func (m *PlayerStatsModel) upsertTechnicalWrapper(ctx context.Context, ps *ent.P
 	return err
 }
 
-// Example check if the player stats have the necessary edges loaded
-
+// upsertSubStats upserts all of the sub-statistics for a player.
 func (m *PlayerStatsModel) upsertSubStats(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
-	if ps == nil {
-		return fmt.Errorf("player stats reference is nil")
-	}
-	if ps.Edges.Player == nil {
-		return fmt.Errorf("player edge is not loaded in player stats")
+	err := m.upsertDefenseWrapper(ctx, ps, s)
+	if err != nil {
+		return fmt.Errorf("failed to upsert defense: %w", err)
 	}
 
-	var upsertFuncs = []func(context.Context, *ent.PlayerStats, PlayerStats) error{
-		m.upsertDefenseWrapper,
-		m.upsertGamesWrapper,
-		m.upsertShootingWrapper,
-		m.upsertPenaltyWrapper,
-		m.upsertFairplayWrapper,
-		m.upsertSubstitutesWrapper,
-		m.upsertTechnicalWrapper,
+	err = m.upsertGamesWrapper(ctx, ps, s)
+	if err != nil {
+		return fmt.Errorf("failed to upsert games: %w", err)
 	}
 
-	for _, fn := range upsertFuncs {
-		if err := fn(ctx, ps, s); err != nil {
-			fmt.Printf("Error upserting sub-stats: %v\n", err)
-			return err
-		}
+	err = m.upsertShootingWrapper(ctx, ps, s)
+	if err != nil {
+		return fmt.Errorf("failed to upsert shooting: %w", err)
 	}
+
+	err = m.upsertPenaltyWrapper(ctx, ps, s)
+	if err != nil {
+		return fmt.Errorf("failed to upsert penalty: %w", err)
+	}
+
+	err = m.upsertFairplayWrapper(ctx, ps, s)
+	if err != nil {
+		return fmt.Errorf("failed to upsert fairplay: %w", err)
+	}
+
+	err = m.upsertSubstitutesWrapper(ctx, ps, s)
+	if err != nil {
+		return fmt.Errorf("failed to upsert substitutes: %w", err)
+	}
+	err = m.upsertTechnicalWrapper(ctx, ps, s)
+	if err != nil {
+		return fmt.Errorf("failed to upsert technical: %w", err)
+	}
+
 	fmt.Printf("Finished upserting sub-stats for %s\n", ps.Edges.Player.Name)
 	return nil
 }
@@ -227,13 +266,18 @@ func (m *PlayerStatsModel) upsertDefense(ctx context.Context, ps *ent.PlayerStat
 		).
 		Only(ctx)
 
+	tacklesTotal := intValueOrDefault(tackles.Total)
+	blocks := intValueOrDefault(tackles.Blocks)
+	interceptions := intValueOrDefault(tackles.Interceptions)
+	duelsTotal := intValueOrDefault(duels.Total)
+	duelsWon := intValueOrDefault(duels.Won)
 	if def != nil {
 		_, err = def.Update().
-			SetTacklesTotal(tackles.Total).
-			SetBlocks(*tackles.Blocks).
-			SetInterceptions(tackles.Interceptions).
-			SetDuelsTotal(duels.Total).
-			SetWonDuels(duels.Won).
+			SetTacklesTotal(tacklesTotal).
+			SetBlocks(blocks).
+			SetInterceptions(interceptions).
+			SetDuelsTotal(duelsTotal).
+			SetWonDuels(duelsWon).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -242,11 +286,11 @@ func (m *PlayerStatsModel) upsertDefense(ctx context.Context, ps *ent.PlayerStat
 	} else {
 		def, err := m.client.PSDefense.
 			Create().
-			SetTacklesTotal(tackles.Total).
-			SetBlocks(*tackles.Blocks).
-			SetInterceptions(tackles.Interceptions).
-			SetDuelsTotal(duels.Total).
-			SetWonDuels(duels.Won).
+			SetTacklesTotal(tacklesTotal).
+			SetBlocks(blocks).
+			SetInterceptions(interceptions).
+			SetDuelsTotal(duelsTotal).
+			SetWonDuels(duelsWon).
 			SetPlayerStats(ps).
 			Save(ctx)
 		if err != nil {
@@ -254,10 +298,6 @@ func (m *PlayerStatsModel) upsertDefense(ctx context.Context, ps *ent.PlayerStat
 		}
 		return def, nil
 	}
-}
-
-func (model *PlayerStatsModel) StartTransaction(ctx context.Context) (*ent.Tx, error) {
-	return model.client.Tx(ctx)
 }
 
 // upsertGames inserts or updates a player's games stats in the database.
@@ -270,16 +310,21 @@ func (m *PlayerStatsModel) upsertGames(ctx context.Context, ps *ent.PlayerStats,
 			},
 		).
 		Only(ctx)
+	appearances := intValueOrDefault(games.Appearances)
+	lineups := intValueOrDefault(games.Lineups)
+	minutes := intValueOrDefault(games.Minutes)
+	number := intValueOrDefault(games.Number)
 
 	if g != nil {
 		_, err = g.Update().
-			SetAppearances(games.Appearances).
-			SetLineups(games.Lineups).
-			SetMinutes(games.Minutes).
-			SetNumber(games.Number).
+			SetAppearances(appearances).
+			SetLineups(lineups).
+			SetMinutes(minutes).
+			SetNumber(number).
 			SetPosition(games.Position).
 			SetRating(games.Rating).
 			SetCaptain(games.Captain).
+			SetPlayerStats(ps).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -288,14 +333,13 @@ func (m *PlayerStatsModel) upsertGames(ctx context.Context, ps *ent.PlayerStats,
 	} else {
 		g, err := m.client.PSGames.
 			Create().
-			SetAppearances(games.Appearances).
-			SetLineups(games.Lineups).
-			SetMinutes(games.Minutes).
-			SetNumber(games.Number).
+			SetAppearances(appearances).
+			SetLineups(lineups).
+			SetMinutes(minutes).
+			SetNumber(number).
 			SetPosition(games.Position).
 			SetRating(games.Rating).
 			SetCaptain(games.Captain).
-			SetPlayerStats(ps).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -315,14 +359,21 @@ func (m *PlayerStatsModel) upsertShooting(ctx context.Context, ps *ent.PlayerSta
 		).
 		Only(ctx)
 
+	goalsTotal := intValueOrDefault(goals.Total)
+	conceded := intValueOrDefault(goals.Conceded)
+	assists := intValueOrDefault(goals.Assists)
+	saves := intValueOrDefault(goals.Saves)
+	shotsTotal := intValueOrDefault(shots.Total)
+	shotsOn := intValueOrDefault(shots.On)
+
 	if g != nil {
 		_, err = g.Update().
-			SetGoals(goals.Total).
-			SetConceded(goals.Conceded).
-			SetAssists(goals.Assists).
-			SetSaves(*goals.Saves).
-			SetShots(shots.Total).
-			SetOnTarget(shots.On).
+			SetGoals(goalsTotal).
+			SetConceded(conceded).
+			SetAssists(assists).
+			SetSaves(saves).
+			SetShots(shotsTotal).
+			SetOnTarget(shotsOn).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -331,12 +382,12 @@ func (m *PlayerStatsModel) upsertShooting(ctx context.Context, ps *ent.PlayerSta
 	} else {
 		g, err := m.client.PSShooting.
 			Create().
-			SetGoals(goals.Total).
-			SetConceded(goals.Conceded).
-			SetAssists(goals.Assists).
-			SetSaves(*goals.Saves).
-			SetShots(shots.Total).
-			SetOnTarget(shots.On).
+			SetGoals(goalsTotal).
+			SetConceded(conceded).
+			SetAssists(assists).
+			SetSaves(saves).
+			SetShots(shotsTotal).
+			SetOnTarget(shotsOn).
 			SetPlayerStats(ps).
 			Save(ctx)
 		if err != nil {
@@ -356,13 +407,19 @@ func (m *PlayerStatsModel) upsertPenalty(ctx context.Context, ps *ent.PlayerStat
 			},
 		).
 		Only(ctx)
+	won := intValueOrDefault(penalty.Won)
+	scored := intValueOrDefault(penalty.Scored)
+	missed := intValueOrDefault(penalty.Missed)
+	saved := intValueOrDefault(penalty.Saved)
+	committed := intValueOrDefault(penalty.Committed)
 
 	if p != nil {
 		_, err = p.Update().
-			SetWon(*penalty.Won).
-			SetScored(penalty.Scored).
-			SetMissed(penalty.Missed).
-			SetSaved(*penalty.Saved).
+			SetWon(won).
+			SetScored(scored).
+			SetMissed(missed).
+			SetSaved(saved).
+			SetCommitted(committed).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -371,10 +428,11 @@ func (m *PlayerStatsModel) upsertPenalty(ctx context.Context, ps *ent.PlayerStat
 	} else {
 		p, err := m.client.PSPenalty.
 			Create().
-			SetWon(*penalty.Won).
-			SetScored(penalty.Scored).
-			SetMissed(penalty.Missed).
-			SetSaved(*penalty.Saved).
+			SetWon(won).
+			SetScored(scored).
+			SetMissed(missed).
+			SetSaved(saved).
+			SetCommitted(committed).
 			SetPlayerStats(ps).
 			Save(ctx)
 		if err != nil {
@@ -394,14 +452,19 @@ func (m *PlayerStatsModel) upsertFairplay(ctx context.Context, ps *ent.PlayerSta
 			},
 		).
 		Only(ctx)
+	foulsCommitted := intValueOrDefault(fouls.Committed)
+	yellow := intValueOrDefault(cards.Yellow)
+	yellowRed := intValueOrDefault(cards.YellowRed)
+	red := intValueOrDefault(cards.Red)
+	penaltyCommitted := intValueOrDefault(penalty.Committed)
 
 	if f != nil {
 		_, err = f.Update().
-			SetFoulsCommitted(fouls.Committed).
-			SetYellow(cards.Yellow).
-			SetYellowRed(cards.YellowRed).
-			SetRed(cards.Red).
-			SetPenaltyConceded(*penalty.Committed).
+			SetFoulsCommitted(foulsCommitted).
+			SetYellow(yellow).
+			SetYellowRed(yellowRed).
+			SetRed(red).
+			SetPenaltyConceded(penaltyCommitted).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -410,11 +473,11 @@ func (m *PlayerStatsModel) upsertFairplay(ctx context.Context, ps *ent.PlayerSta
 	} else {
 		f, err := m.client.PSFairplay.
 			Create().
-			SetFoulsCommitted(fouls.Committed).
-			SetYellow(cards.Yellow).
-			SetYellowRed(cards.YellowRed).
-			SetRed(cards.Red).
-			SetPenaltyConceded(*penalty.Committed).
+			SetFoulsCommitted(foulsCommitted).
+			SetYellow(yellow).
+			SetYellowRed(yellowRed).
+			SetRed(red).
+			SetPenaltyConceded(penaltyCommitted).
 			SetPlayerStats(ps).
 			Save(ctx)
 		if err != nil {
@@ -435,11 +498,15 @@ func (m *PlayerStatsModel) upsertSubstitutes(ctx context.Context, ps *ent.Player
 		).
 		Only(ctx)
 
+	in := intValueOrDefault(subs.In)
+	out := intValueOrDefault(subs.Out)
+	bench := intValueOrDefault(subs.Bench)
+
 	if s != nil {
 		_, err = s.Update().
-			SetIn(subs.In).
-			SetOut(subs.Out).
-			SetBench(subs.Bench).
+			SetIn(in).
+			SetOut(out).
+			SetBench(bench).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -448,9 +515,9 @@ func (m *PlayerStatsModel) upsertSubstitutes(ctx context.Context, ps *ent.Player
 	} else {
 		s, err := m.client.PSSubstitutes.
 			Create().
-			SetIn(subs.In).
-			SetOut(subs.Out).
-			SetBench(subs.Bench).
+			SetIn(in).
+			SetOut(out).
+			SetBench(bench).
 			SetPlayerStats(ps).
 			Save(ctx)
 		if err != nil {
@@ -470,16 +537,23 @@ func (m *PlayerStatsModel) upsertTechnical(ctx context.Context, ps *ent.PlayerSt
 			},
 		).
 		Only(ctx)
+	foulsDrawn := intValueOrDefault(fouls.Drawn)
+	dribblesAttempts := intValueOrDefault(dribbles.Attempts)
+	dribblesSuccess := intValueOrDefault(dribbles.Success)
+	dribblesPast := intValueOrDefault(dribbles.Past)
+	passesTotal := intValueOrDefault(passes.Total)
+	passesKey := intValueOrDefault(passes.Key)
+	passesAccuracy := intValueOrDefault(passes.Accuracy)
 
 	if t != nil {
 		_, err = t.Update().
-			SetFoulsDrawn(fouls.Drawn).
-			SetDribbleAttempts(dribbles.Attempts).
-			SetDribbleSuccess(dribbles.Success).
-			SetDribblePast(*dribbles.Past).
-			SetPassesTotal(passes.Total).
-			SetPassesKey(passes.Key).
-			SetPassesAccuracy(passes.Accuracy).
+			SetFoulsDrawn(foulsDrawn).
+			SetDribbleAttempts(dribblesAttempts).
+			SetDribbleSuccess(dribblesSuccess).
+			SetDribblePast(dribblesPast).
+			SetPassesTotal(passesTotal).
+			SetPassesKey(passesKey).
+			SetPassesAccuracy(passesAccuracy).
 			Save(ctx)
 		if err != nil {
 			return nil, err
@@ -488,13 +562,13 @@ func (m *PlayerStatsModel) upsertTechnical(ctx context.Context, ps *ent.PlayerSt
 	} else {
 		t, err := m.client.PSTechnical.
 			Create().
-			SetFoulsDrawn(fouls.Drawn).
-			SetDribbleAttempts(dribbles.Attempts).
-			SetDribbleSuccess(dribbles.Success).
-			SetDribblePast(*dribbles.Past).
-			SetPassesTotal(passes.Total).
-			SetPassesKey(passes.Key).
-			SetPassesAccuracy(passes.Accuracy).
+			SetFoulsDrawn(foulsDrawn).
+			SetDribbleAttempts(dribblesAttempts).
+			SetDribbleSuccess(dribblesSuccess).
+			SetDribblePast(dribblesPast).
+			SetPassesTotal(passesTotal).
+			SetPassesKey(passesKey).
+			SetPassesAccuracy(passesAccuracy).
 			SetPlayerStats(ps).
 			Save(ctx)
 		if err != nil {

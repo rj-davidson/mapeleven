@@ -36,6 +36,14 @@ func (pgu *PSGamesUpdate) SetAppearances(i int) *PSGamesUpdate {
 	return pgu
 }
 
+// SetNillableAppearances sets the "Appearances" field if the given value is not nil.
+func (pgu *PSGamesUpdate) SetNillableAppearances(i *int) *PSGamesUpdate {
+	if i != nil {
+		pgu.SetAppearances(*i)
+	}
+	return pgu
+}
+
 // AddAppearances adds i to the "Appearances" field.
 func (pgu *PSGamesUpdate) AddAppearances(i int) *PSGamesUpdate {
 	pgu.mutation.AddAppearances(i)
@@ -49,6 +57,14 @@ func (pgu *PSGamesUpdate) SetLineups(i int) *PSGamesUpdate {
 	return pgu
 }
 
+// SetNillableLineups sets the "Lineups" field if the given value is not nil.
+func (pgu *PSGamesUpdate) SetNillableLineups(i *int) *PSGamesUpdate {
+	if i != nil {
+		pgu.SetLineups(*i)
+	}
+	return pgu
+}
+
 // AddLineups adds i to the "Lineups" field.
 func (pgu *PSGamesUpdate) AddLineups(i int) *PSGamesUpdate {
 	pgu.mutation.AddLineups(i)
@@ -59,6 +75,14 @@ func (pgu *PSGamesUpdate) AddLineups(i int) *PSGamesUpdate {
 func (pgu *PSGamesUpdate) SetMinutes(i int) *PSGamesUpdate {
 	pgu.mutation.ResetMinutes()
 	pgu.mutation.SetMinutes(i)
+	return pgu
+}
+
+// SetNillableMinutes sets the "Minutes" field if the given value is not nil.
+func (pgu *PSGamesUpdate) SetNillableMinutes(i *int) *PSGamesUpdate {
+	if i != nil {
+		pgu.SetMinutes(*i)
+	}
 	return pgu
 }
 
@@ -313,6 +337,14 @@ func (pguo *PSGamesUpdateOne) SetAppearances(i int) *PSGamesUpdateOne {
 	return pguo
 }
 
+// SetNillableAppearances sets the "Appearances" field if the given value is not nil.
+func (pguo *PSGamesUpdateOne) SetNillableAppearances(i *int) *PSGamesUpdateOne {
+	if i != nil {
+		pguo.SetAppearances(*i)
+	}
+	return pguo
+}
+
 // AddAppearances adds i to the "Appearances" field.
 func (pguo *PSGamesUpdateOne) AddAppearances(i int) *PSGamesUpdateOne {
 	pguo.mutation.AddAppearances(i)
@@ -326,6 +358,14 @@ func (pguo *PSGamesUpdateOne) SetLineups(i int) *PSGamesUpdateOne {
 	return pguo
 }
 
+// SetNillableLineups sets the "Lineups" field if the given value is not nil.
+func (pguo *PSGamesUpdateOne) SetNillableLineups(i *int) *PSGamesUpdateOne {
+	if i != nil {
+		pguo.SetLineups(*i)
+	}
+	return pguo
+}
+
 // AddLineups adds i to the "Lineups" field.
 func (pguo *PSGamesUpdateOne) AddLineups(i int) *PSGamesUpdateOne {
 	pguo.mutation.AddLineups(i)
@@ -336,6 +376,14 @@ func (pguo *PSGamesUpdateOne) AddLineups(i int) *PSGamesUpdateOne {
 func (pguo *PSGamesUpdateOne) SetMinutes(i int) *PSGamesUpdateOne {
 	pguo.mutation.ResetMinutes()
 	pguo.mutation.SetMinutes(i)
+	return pguo
+}
+
+// SetNillableMinutes sets the "Minutes" field if the given value is not nil.
+func (pguo *PSGamesUpdateOne) SetNillableMinutes(i *int) *PSGamesUpdateOne {
+	if i != nil {
+		pguo.SetMinutes(*i)
+	}
 	return pguo
 }
 

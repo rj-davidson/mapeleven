@@ -26,6 +26,8 @@ type PSPenalty struct {
 	Missed int `json:"Missed,omitempty"`
 	// Saved holds the value of the "Saved" field.
 	Saved int `json:"Saved,omitempty"`
+	// Committed holds the value of the "Committed" field.
+	Committed int `json:"Committed,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
@@ -62,7 +64,7 @@ func (*PSPenalty) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pspenalty.FieldID, pspenalty.FieldWon, pspenalty.FieldScored, pspenalty.FieldMissed, pspenalty.FieldSaved:
+		case pspenalty.FieldID, pspenalty.FieldWon, pspenalty.FieldScored, pspenalty.FieldMissed, pspenalty.FieldSaved, pspenalty.FieldCommitted:
 			values[i] = new(sql.NullInt64)
 		case pspenalty.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
@@ -112,6 +114,12 @@ func (pp *PSPenalty) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field Saved", values[i])
 			} else if value.Valid {
 				pp.Saved = int(value.Int64)
+			}
+		case pspenalty.FieldCommitted:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field Committed", values[i])
+			} else if value.Valid {
+				pp.Committed = int(value.Int64)
 			}
 		case pspenalty.FieldLastUpdated:
 			if value, ok := values[i].(*sql.NullTime); !ok {
@@ -178,6 +186,9 @@ func (pp *PSPenalty) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("Saved=")
 	builder.WriteString(fmt.Sprintf("%v", pp.Saved))
+	builder.WriteString(", ")
+	builder.WriteString("Committed=")
+	builder.WriteString(fmt.Sprintf("%v", pp.Committed))
 	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(pp.LastUpdated.Format(time.ANSIC))

@@ -55,6 +55,14 @@ func (ppc *PSPenaltyCreate) SetMissed(i int) *PSPenaltyCreate {
 	return ppc
 }
 
+// SetNillableMissed sets the "Missed" field if the given value is not nil.
+func (ppc *PSPenaltyCreate) SetNillableMissed(i *int) *PSPenaltyCreate {
+	if i != nil {
+		ppc.SetMissed(*i)
+	}
+	return ppc
+}
+
 // SetSaved sets the "Saved" field.
 func (ppc *PSPenaltyCreate) SetSaved(i int) *PSPenaltyCreate {
 	ppc.mutation.SetSaved(i)
@@ -65,6 +73,20 @@ func (ppc *PSPenaltyCreate) SetSaved(i int) *PSPenaltyCreate {
 func (ppc *PSPenaltyCreate) SetNillableSaved(i *int) *PSPenaltyCreate {
 	if i != nil {
 		ppc.SetSaved(*i)
+	}
+	return ppc
+}
+
+// SetCommitted sets the "Committed" field.
+func (ppc *PSPenaltyCreate) SetCommitted(i int) *PSPenaltyCreate {
+	ppc.mutation.SetCommitted(i)
+	return ppc
+}
+
+// SetNillableCommitted sets the "Committed" field if the given value is not nil.
+func (ppc *PSPenaltyCreate) SetNillableCommitted(i *int) *PSPenaltyCreate {
+	if i != nil {
+		ppc.SetCommitted(*i)
 	}
 	return ppc
 }
@@ -145,9 +167,17 @@ func (ppc *PSPenaltyCreate) defaults() {
 		v := pspenalty.DefaultScored
 		ppc.mutation.SetScored(v)
 	}
+	if _, ok := ppc.mutation.Missed(); !ok {
+		v := pspenalty.DefaultMissed
+		ppc.mutation.SetMissed(v)
+	}
 	if _, ok := ppc.mutation.Saved(); !ok {
 		v := pspenalty.DefaultSaved
 		ppc.mutation.SetSaved(v)
+	}
+	if _, ok := ppc.mutation.Committed(); !ok {
+		v := pspenalty.DefaultCommitted
+		ppc.mutation.SetCommitted(v)
 	}
 	if _, ok := ppc.mutation.LastUpdated(); !ok {
 		v := pspenalty.DefaultLastUpdated()
@@ -168,6 +198,9 @@ func (ppc *PSPenaltyCreate) check() error {
 	}
 	if _, ok := ppc.mutation.Saved(); !ok {
 		return &ValidationError{Name: "Saved", err: errors.New(`ent: missing required field "PSPenalty.Saved"`)}
+	}
+	if _, ok := ppc.mutation.Committed(); !ok {
+		return &ValidationError{Name: "Committed", err: errors.New(`ent: missing required field "PSPenalty.Committed"`)}
 	}
 	return nil
 }
@@ -210,6 +243,10 @@ func (ppc *PSPenaltyCreate) createSpec() (*PSPenalty, *sqlgraph.CreateSpec) {
 	if value, ok := ppc.mutation.Saved(); ok {
 		_spec.SetField(pspenalty.FieldSaved, field.TypeInt, value)
 		_node.Saved = value
+	}
+	if value, ok := ppc.mutation.Committed(); ok {
+		_spec.SetField(pspenalty.FieldCommitted, field.TypeInt, value)
+		_node.Committed = value
 	}
 	if value, ok := ppc.mutation.LastUpdated(); ok {
 		_spec.SetField(pspenalty.FieldLastUpdated, field.TypeTime, value)

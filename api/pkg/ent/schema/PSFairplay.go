@@ -15,10 +15,10 @@ type PSFairplay struct {
 // Fields of the PSFairplay.
 func (PSFairplay) Fields() []ent.Field {
 	return []ent.Field{
-		field.Int("FoulsCommitted"),
-		field.Int("Yellow"),
-		field.Int("YellowRed"),
-		field.Int("Red"),
+		field.Int("FoulsCommitted").Default(0),
+		field.Int("Yellow").Default(0),
+		field.Int("YellowRed").Default(0),
+		field.Int("Red").Default(0),
 		field.Int("PenaltyConceded").Default(0),
 		field.Time("lastUpdated").
 			Default(time.Now).

@@ -27,15 +27,39 @@ func (pgc *PSGamesCreate) SetAppearances(i int) *PSGamesCreate {
 	return pgc
 }
 
+// SetNillableAppearances sets the "Appearances" field if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillableAppearances(i *int) *PSGamesCreate {
+	if i != nil {
+		pgc.SetAppearances(*i)
+	}
+	return pgc
+}
+
 // SetLineups sets the "Lineups" field.
 func (pgc *PSGamesCreate) SetLineups(i int) *PSGamesCreate {
 	pgc.mutation.SetLineups(i)
 	return pgc
 }
 
+// SetNillableLineups sets the "Lineups" field if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillableLineups(i *int) *PSGamesCreate {
+	if i != nil {
+		pgc.SetLineups(*i)
+	}
+	return pgc
+}
+
 // SetMinutes sets the "Minutes" field.
 func (pgc *PSGamesCreate) SetMinutes(i int) *PSGamesCreate {
 	pgc.mutation.SetMinutes(i)
+	return pgc
+}
+
+// SetNillableMinutes sets the "Minutes" field if the given value is not nil.
+func (pgc *PSGamesCreate) SetNillableMinutes(i *int) *PSGamesCreate {
+	if i != nil {
+		pgc.SetMinutes(*i)
+	}
 	return pgc
 }
 
@@ -163,6 +187,18 @@ func (pgc *PSGamesCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (pgc *PSGamesCreate) defaults() {
+	if _, ok := pgc.mutation.Appearances(); !ok {
+		v := psgames.DefaultAppearances
+		pgc.mutation.SetAppearances(v)
+	}
+	if _, ok := pgc.mutation.Lineups(); !ok {
+		v := psgames.DefaultLineups
+		pgc.mutation.SetLineups(v)
+	}
+	if _, ok := pgc.mutation.Minutes(); !ok {
+		v := psgames.DefaultMinutes
+		pgc.mutation.SetMinutes(v)
+	}
 	if _, ok := pgc.mutation.Number(); !ok {
 		v := psgames.DefaultNumber
 		pgc.mutation.SetNumber(v)

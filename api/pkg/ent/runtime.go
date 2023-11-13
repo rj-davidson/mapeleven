@@ -109,10 +109,26 @@ func init() {
 	matchplayer.UpdateDefaultLastUpdated = matchplayerDescLastUpdated.UpdateDefault.(func() time.Time)
 	psdefenseFields := schema.PSDefense{}.Fields()
 	_ = psdefenseFields
+	// psdefenseDescTacklesTotal is the schema descriptor for TacklesTotal field.
+	psdefenseDescTacklesTotal := psdefenseFields[0].Descriptor()
+	// psdefense.DefaultTacklesTotal holds the default value on creation for the TacklesTotal field.
+	psdefense.DefaultTacklesTotal = psdefenseDescTacklesTotal.Default.(int)
 	// psdefenseDescBlocks is the schema descriptor for Blocks field.
 	psdefenseDescBlocks := psdefenseFields[1].Descriptor()
 	// psdefense.DefaultBlocks holds the default value on creation for the Blocks field.
 	psdefense.DefaultBlocks = psdefenseDescBlocks.Default.(int)
+	// psdefenseDescInterceptions is the schema descriptor for Interceptions field.
+	psdefenseDescInterceptions := psdefenseFields[2].Descriptor()
+	// psdefense.DefaultInterceptions holds the default value on creation for the Interceptions field.
+	psdefense.DefaultInterceptions = psdefenseDescInterceptions.Default.(int)
+	// psdefenseDescDuelsTotal is the schema descriptor for DuelsTotal field.
+	psdefenseDescDuelsTotal := psdefenseFields[3].Descriptor()
+	// psdefense.DefaultDuelsTotal holds the default value on creation for the DuelsTotal field.
+	psdefense.DefaultDuelsTotal = psdefenseDescDuelsTotal.Default.(int)
+	// psdefenseDescWonDuels is the schema descriptor for WonDuels field.
+	psdefenseDescWonDuels := psdefenseFields[4].Descriptor()
+	// psdefense.DefaultWonDuels holds the default value on creation for the WonDuels field.
+	psdefense.DefaultWonDuels = psdefenseDescWonDuels.Default.(int)
 	// psdefenseDescLastUpdated is the schema descriptor for lastUpdated field.
 	psdefenseDescLastUpdated := psdefenseFields[5].Descriptor()
 	// psdefense.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
@@ -121,6 +137,22 @@ func init() {
 	psdefense.UpdateDefaultLastUpdated = psdefenseDescLastUpdated.UpdateDefault.(func() time.Time)
 	psfairplayFields := schema.PSFairplay{}.Fields()
 	_ = psfairplayFields
+	// psfairplayDescFoulsCommitted is the schema descriptor for FoulsCommitted field.
+	psfairplayDescFoulsCommitted := psfairplayFields[0].Descriptor()
+	// psfairplay.DefaultFoulsCommitted holds the default value on creation for the FoulsCommitted field.
+	psfairplay.DefaultFoulsCommitted = psfairplayDescFoulsCommitted.Default.(int)
+	// psfairplayDescYellow is the schema descriptor for Yellow field.
+	psfairplayDescYellow := psfairplayFields[1].Descriptor()
+	// psfairplay.DefaultYellow holds the default value on creation for the Yellow field.
+	psfairplay.DefaultYellow = psfairplayDescYellow.Default.(int)
+	// psfairplayDescYellowRed is the schema descriptor for YellowRed field.
+	psfairplayDescYellowRed := psfairplayFields[2].Descriptor()
+	// psfairplay.DefaultYellowRed holds the default value on creation for the YellowRed field.
+	psfairplay.DefaultYellowRed = psfairplayDescYellowRed.Default.(int)
+	// psfairplayDescRed is the schema descriptor for Red field.
+	psfairplayDescRed := psfairplayFields[3].Descriptor()
+	// psfairplay.DefaultRed holds the default value on creation for the Red field.
+	psfairplay.DefaultRed = psfairplayDescRed.Default.(int)
 	// psfairplayDescPenaltyConceded is the schema descriptor for PenaltyConceded field.
 	psfairplayDescPenaltyConceded := psfairplayFields[4].Descriptor()
 	// psfairplay.DefaultPenaltyConceded holds the default value on creation for the PenaltyConceded field.
@@ -133,6 +165,18 @@ func init() {
 	psfairplay.UpdateDefaultLastUpdated = psfairplayDescLastUpdated.UpdateDefault.(func() time.Time)
 	psgamesFields := schema.PSGames{}.Fields()
 	_ = psgamesFields
+	// psgamesDescAppearances is the schema descriptor for Appearances field.
+	psgamesDescAppearances := psgamesFields[0].Descriptor()
+	// psgames.DefaultAppearances holds the default value on creation for the Appearances field.
+	psgames.DefaultAppearances = psgamesDescAppearances.Default.(int)
+	// psgamesDescLineups is the schema descriptor for Lineups field.
+	psgamesDescLineups := psgamesFields[1].Descriptor()
+	// psgames.DefaultLineups holds the default value on creation for the Lineups field.
+	psgames.DefaultLineups = psgamesDescLineups.Default.(int)
+	// psgamesDescMinutes is the schema descriptor for Minutes field.
+	psgamesDescMinutes := psgamesFields[2].Descriptor()
+	// psgames.DefaultMinutes holds the default value on creation for the Minutes field.
+	psgames.DefaultMinutes = psgamesDescMinutes.Default.(int)
 	// psgamesDescNumber is the schema descriptor for Number field.
 	psgamesDescNumber := psgamesFields[3].Descriptor()
 	// psgames.DefaultNumber holds the default value on creation for the Number field.
@@ -165,22 +209,50 @@ func init() {
 	pspenaltyDescScored := pspenaltyFields[1].Descriptor()
 	// pspenalty.DefaultScored holds the default value on creation for the Scored field.
 	pspenalty.DefaultScored = pspenaltyDescScored.Default.(int)
+	// pspenaltyDescMissed is the schema descriptor for Missed field.
+	pspenaltyDescMissed := pspenaltyFields[2].Descriptor()
+	// pspenalty.DefaultMissed holds the default value on creation for the Missed field.
+	pspenalty.DefaultMissed = pspenaltyDescMissed.Default.(int)
 	// pspenaltyDescSaved is the schema descriptor for Saved field.
 	pspenaltyDescSaved := pspenaltyFields[3].Descriptor()
 	// pspenalty.DefaultSaved holds the default value on creation for the Saved field.
 	pspenalty.DefaultSaved = pspenaltyDescSaved.Default.(int)
+	// pspenaltyDescCommitted is the schema descriptor for Committed field.
+	pspenaltyDescCommitted := pspenaltyFields[4].Descriptor()
+	// pspenalty.DefaultCommitted holds the default value on creation for the Committed field.
+	pspenalty.DefaultCommitted = pspenaltyDescCommitted.Default.(int)
 	// pspenaltyDescLastUpdated is the schema descriptor for lastUpdated field.
-	pspenaltyDescLastUpdated := pspenaltyFields[4].Descriptor()
+	pspenaltyDescLastUpdated := pspenaltyFields[5].Descriptor()
 	// pspenalty.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
 	pspenalty.DefaultLastUpdated = pspenaltyDescLastUpdated.Default.(func() time.Time)
 	// pspenalty.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	pspenalty.UpdateDefaultLastUpdated = pspenaltyDescLastUpdated.UpdateDefault.(func() time.Time)
 	psshootingFields := schema.PSShooting{}.Fields()
 	_ = psshootingFields
+	// psshootingDescGoals is the schema descriptor for Goals field.
+	psshootingDescGoals := psshootingFields[0].Descriptor()
+	// psshooting.DefaultGoals holds the default value on creation for the Goals field.
+	psshooting.DefaultGoals = psshootingDescGoals.Default.(int)
+	// psshootingDescConceded is the schema descriptor for Conceded field.
+	psshootingDescConceded := psshootingFields[1].Descriptor()
+	// psshooting.DefaultConceded holds the default value on creation for the Conceded field.
+	psshooting.DefaultConceded = psshootingDescConceded.Default.(int)
+	// psshootingDescAssists is the schema descriptor for Assists field.
+	psshootingDescAssists := psshootingFields[2].Descriptor()
+	// psshooting.DefaultAssists holds the default value on creation for the Assists field.
+	psshooting.DefaultAssists = psshootingDescAssists.Default.(int)
 	// psshootingDescSaves is the schema descriptor for Saves field.
 	psshootingDescSaves := psshootingFields[3].Descriptor()
 	// psshooting.DefaultSaves holds the default value on creation for the Saves field.
 	psshooting.DefaultSaves = psshootingDescSaves.Default.(int)
+	// psshootingDescShots is the schema descriptor for Shots field.
+	psshootingDescShots := psshootingFields[4].Descriptor()
+	// psshooting.DefaultShots holds the default value on creation for the Shots field.
+	psshooting.DefaultShots = psshootingDescShots.Default.(int)
+	// psshootingDescOnTarget is the schema descriptor for OnTarget field.
+	psshootingDescOnTarget := psshootingFields[5].Descriptor()
+	// psshooting.DefaultOnTarget holds the default value on creation for the OnTarget field.
+	psshooting.DefaultOnTarget = psshootingDescOnTarget.Default.(int)
 	// psshootingDescLastUpdated is the schema descriptor for lastUpdated field.
 	psshootingDescLastUpdated := psshootingFields[6].Descriptor()
 	// psshooting.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
@@ -189,6 +261,18 @@ func init() {
 	psshooting.UpdateDefaultLastUpdated = psshootingDescLastUpdated.UpdateDefault.(func() time.Time)
 	pssubstitutesFields := schema.PSSubstitutes{}.Fields()
 	_ = pssubstitutesFields
+	// pssubstitutesDescIn is the schema descriptor for In field.
+	pssubstitutesDescIn := pssubstitutesFields[0].Descriptor()
+	// pssubstitutes.DefaultIn holds the default value on creation for the In field.
+	pssubstitutes.DefaultIn = pssubstitutesDescIn.Default.(int)
+	// pssubstitutesDescOut is the schema descriptor for Out field.
+	pssubstitutesDescOut := pssubstitutesFields[1].Descriptor()
+	// pssubstitutes.DefaultOut holds the default value on creation for the Out field.
+	pssubstitutes.DefaultOut = pssubstitutesDescOut.Default.(int)
+	// pssubstitutesDescBench is the schema descriptor for Bench field.
+	pssubstitutesDescBench := pssubstitutesFields[2].Descriptor()
+	// pssubstitutes.DefaultBench holds the default value on creation for the Bench field.
+	pssubstitutes.DefaultBench = pssubstitutesDescBench.Default.(int)
 	// pssubstitutesDescLastUpdated is the schema descriptor for lastUpdated field.
 	pssubstitutesDescLastUpdated := pssubstitutesFields[3].Descriptor()
 	// pssubstitutes.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
@@ -197,10 +281,34 @@ func init() {
 	pssubstitutes.UpdateDefaultLastUpdated = pssubstitutesDescLastUpdated.UpdateDefault.(func() time.Time)
 	pstechnicalFields := schema.PSTechnical{}.Fields()
 	_ = pstechnicalFields
+	// pstechnicalDescFoulsDrawn is the schema descriptor for FoulsDrawn field.
+	pstechnicalDescFoulsDrawn := pstechnicalFields[0].Descriptor()
+	// pstechnical.DefaultFoulsDrawn holds the default value on creation for the FoulsDrawn field.
+	pstechnical.DefaultFoulsDrawn = pstechnicalDescFoulsDrawn.Default.(int)
+	// pstechnicalDescDribbleAttempts is the schema descriptor for DribbleAttempts field.
+	pstechnicalDescDribbleAttempts := pstechnicalFields[1].Descriptor()
+	// pstechnical.DefaultDribbleAttempts holds the default value on creation for the DribbleAttempts field.
+	pstechnical.DefaultDribbleAttempts = pstechnicalDescDribbleAttempts.Default.(int)
+	// pstechnicalDescDribbleSuccess is the schema descriptor for DribbleSuccess field.
+	pstechnicalDescDribbleSuccess := pstechnicalFields[2].Descriptor()
+	// pstechnical.DefaultDribbleSuccess holds the default value on creation for the DribbleSuccess field.
+	pstechnical.DefaultDribbleSuccess = pstechnicalDescDribbleSuccess.Default.(int)
 	// pstechnicalDescDribblePast is the schema descriptor for DribblePast field.
 	pstechnicalDescDribblePast := pstechnicalFields[3].Descriptor()
 	// pstechnical.DefaultDribblePast holds the default value on creation for the DribblePast field.
 	pstechnical.DefaultDribblePast = pstechnicalDescDribblePast.Default.(int)
+	// pstechnicalDescPassesTotal is the schema descriptor for PassesTotal field.
+	pstechnicalDescPassesTotal := pstechnicalFields[4].Descriptor()
+	// pstechnical.DefaultPassesTotal holds the default value on creation for the PassesTotal field.
+	pstechnical.DefaultPassesTotal = pstechnicalDescPassesTotal.Default.(int)
+	// pstechnicalDescPassesKey is the schema descriptor for PassesKey field.
+	pstechnicalDescPassesKey := pstechnicalFields[5].Descriptor()
+	// pstechnical.DefaultPassesKey holds the default value on creation for the PassesKey field.
+	pstechnical.DefaultPassesKey = pstechnicalDescPassesKey.Default.(int)
+	// pstechnicalDescPassesAccuracy is the schema descriptor for PassesAccuracy field.
+	pstechnicalDescPassesAccuracy := pstechnicalFields[6].Descriptor()
+	// pstechnical.DefaultPassesAccuracy holds the default value on creation for the PassesAccuracy field.
+	pstechnical.DefaultPassesAccuracy = pstechnicalDescPassesAccuracy.Default.(int)
 	// pstechnicalDescLastUpdated is the schema descriptor for lastUpdated field.
 	pstechnicalDescLastUpdated := pstechnicalFields[7].Descriptor()
 	// pstechnical.DefaultLastUpdated holds the default value on creation for the lastUpdated field.

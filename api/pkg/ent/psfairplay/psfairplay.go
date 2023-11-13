@@ -72,6 +72,14 @@ func ValidColumn(column string) bool {
 }
 
 var (
+	// DefaultFoulsCommitted holds the default value on creation for the "FoulsCommitted" field.
+	DefaultFoulsCommitted int
+	// DefaultYellow holds the default value on creation for the "Yellow" field.
+	DefaultYellow int
+	// DefaultYellowRed holds the default value on creation for the "YellowRed" field.
+	DefaultYellowRed int
+	// DefaultRed holds the default value on creation for the "Red" field.
+	DefaultRed int
 	// DefaultPenaltyConceded holds the default value on creation for the "PenaltyConceded" field.
 	DefaultPenaltyConceded int
 	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.

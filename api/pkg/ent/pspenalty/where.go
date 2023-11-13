@@ -75,6 +75,11 @@ func Saved(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldSaved, v))
 }
 
+// Committed applies equality check predicate on the "Committed" field. It's identical to CommittedEQ.
+func Committed(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldEQ(FieldCommitted, v))
+}
+
 // LastUpdated applies equality check predicate on the "lastUpdated" field. It's identical to LastUpdatedEQ.
 func LastUpdated(v time.Time) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldEQ(FieldLastUpdated, v))
@@ -238,6 +243,46 @@ func SavedLT(v int) predicate.PSPenalty {
 // SavedLTE applies the LTE predicate on the "Saved" field.
 func SavedLTE(v int) predicate.PSPenalty {
 	return predicate.PSPenalty(sql.FieldLTE(FieldSaved, v))
+}
+
+// CommittedEQ applies the EQ predicate on the "Committed" field.
+func CommittedEQ(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldEQ(FieldCommitted, v))
+}
+
+// CommittedNEQ applies the NEQ predicate on the "Committed" field.
+func CommittedNEQ(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldNEQ(FieldCommitted, v))
+}
+
+// CommittedIn applies the In predicate on the "Committed" field.
+func CommittedIn(vs ...int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldIn(FieldCommitted, vs...))
+}
+
+// CommittedNotIn applies the NotIn predicate on the "Committed" field.
+func CommittedNotIn(vs ...int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldNotIn(FieldCommitted, vs...))
+}
+
+// CommittedGT applies the GT predicate on the "Committed" field.
+func CommittedGT(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldGT(FieldCommitted, v))
+}
+
+// CommittedGTE applies the GTE predicate on the "Committed" field.
+func CommittedGTE(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldGTE(FieldCommitted, v))
+}
+
+// CommittedLT applies the LT predicate on the "Committed" field.
+func CommittedLT(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldLT(FieldCommitted, v))
+}
+
+// CommittedLTE applies the LTE predicate on the "Committed" field.
+func CommittedLTE(v int) predicate.PSPenalty {
+	return predicate.PSPenalty(sql.FieldLTE(FieldCommitted, v))
 }
 
 // LastUpdatedEQ applies the EQ predicate on the "lastUpdated" field.
