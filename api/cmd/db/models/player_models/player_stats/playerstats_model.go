@@ -3,8 +3,6 @@ package player_stats
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
@@ -13,7 +11,6 @@ import (
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"context"
 	_ "context"
 	"fmt"
@@ -140,35 +137,17 @@ func (m *PlayerStatsModel) StartTransaction(ctx context.Context) (*ent.Tx, error
 
 // UpsertPlayerStats updates existing player stats or creates new ones.
 func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, tx *ent.Tx, p *ent.Player, stats PlayerStats) error {
-	t, err := m.client.Team.
-		Query().
-		WithClub(func(q *ent.ClubQuery) {
-			q.Where(club.ApiFootballIdEQ(stats.Team.ApiFootballId))
-		},
-		).
-		WithSeason(func(q *ent.SeasonQuery) {
-			q.Where(season.YearEQ(stats.League.Season))
-			q.Where(season.HasLeagueWith(league.FootballApiIdEQ(stats.League.ApiFootballId)))
-		},
-		).
-		All(ctx)
-	fmt.Printf("Team: %v\n", t)
-	if err != nil {
-		return fmt.Errorf("failed to query team: %w", err)
-	}
-	// Query for existing player stats.
+	// Query for existing player stats or create new ones.
 	ps, err := tx.PlayerStats.
 		Query().
 		Where(playerstats.HasPlayerWith(player.IDEQ(p.ID))).
 		WithPlayer().
 		Only(ctx)
-	fmt.Printf("Player stats: %v\n", stats)
-	// Handle not found error by creating a new player stats record.
-	if ps == nil {
+
+	if ent.IsNotFound(err) {
 		ps, err = tx.PlayerStats.
 			Create().
 			SetPlayer(p).
-			//SetTeam(t).
 			Save(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to create player stats: %w", err)
@@ -177,15 +156,18 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, tx *ent.Tx, p 
 		return fmt.Errorf("failed to query player stats: %w", err)
 	}
 
+	// Ensure `ps` is not nil to avoid nil pointer dereference
+	if ps == nil {
+		return fmt.Errorf("player stats is nil after creation/query")
+	}
+
 	// Upsert sub-statistics using the individual wrapper functions.
-	err = m.upsertSubStats(ctx, ps, stats)
-	if err != nil {
+	if err = m.upsertSubStats(ctx, ps, stats); err != nil {
 		return fmt.Errorf("failed to upsert sub-stats: %w", err)
 	}
 
 	return nil
 }
-
 func (m *PlayerStatsModel) upsertDefenseWrapper(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
 	_, err := m.upsertDefense(ctx, ps, s.Duels, s.Tackles)
 	return err
@@ -257,15 +239,31 @@ func (m *PlayerStatsModel) upsertSubStats(ctx context.Context, ps *ent.PlayerSta
 
 // upsertDefense inserts or updates a player's defense stats in the database.
 func (m *PlayerStatsModel) upsertDefense(ctx context.Context, ps *ent.PlayerStats, duels PSDuels, tackles PSTackles) (*ent.PSDefense, error) {
-	def, err := m.client.PSDefense.
-		Query().
-		WithPlayerStats(
-			func(q *ent.PlayerStatsQuery) {
-				q.Where(playerstats.IDEQ(ps.ID))
-			},
-		).
-		Only(ctx)
-
+	def, err := ps.QueryPsDefense().Only(ctx)
+	if ent.IsNotFound(err) {
+		// Create new PSDefense record
+		m.client.PSDefense.
+			Create().
+			SetTacklesTotal(intValueOrDefault(tackles.Total)).
+			SetBlocks(intValueOrDefault(tackles.Blocks)).
+			SetInterceptions(intValueOrDefault(tackles.Interceptions)).
+			SetDuelsTotal(intValueOrDefault(duels.Total)).
+			SetWonDuels(intValueOrDefault(duels.Won)).
+			SetPlayerStats(ps).
+			Save(ctx)
+	} else if err != nil {
+		return nil, fmt.Errorf("error querying PSDefense: %w", err)
+	} else {
+		// Update existing PSDefense record
+		def.Update().
+			SetTacklesTotal(intValueOrDefault(tackles.Total)).
+			SetBlocks(intValueOrDefault(tackles.Blocks)).
+			SetInterceptions(intValueOrDefault(tackles.Interceptions)).
+			SetDuelsTotal(intValueOrDefault(duels.Total)).
+			SetWonDuels(intValueOrDefault(duels.Won)).
+			Save(ctx)
+	}
+	fmt.Printf("For Some reason the ent.IsnotFound is working")
 	tacklesTotal := intValueOrDefault(tackles.Total)
 	blocks := intValueOrDefault(tackles.Blocks)
 	interceptions := intValueOrDefault(tackles.Interceptions)

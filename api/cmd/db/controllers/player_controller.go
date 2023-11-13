@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"path/filepath"
 )
@@ -140,13 +139,7 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 	if err != nil {
 		return err
 	}
-	for _, stats := range playerData.Statistics {
-		err = pc.upsertPlayerStats(ctx, p, stats)
-		if err != nil {
-			return err
-		}
-
-	}
+	fmt.Printf("Created player: %s\n", p.Name)
 	return nil
 }
 
@@ -186,37 +179,6 @@ func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_model
 		return nil, err
 	}
 	return p, err
-}
-
-func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player, stats player_stats.PlayerStats) error {
-	log.Printf("[upsertPlayerStats] Starting upsert for player ID: %d", p.ID)
-
-	// Start a transaction
-	tx, err := pc.psModel.StartTransaction(ctx)
-	if err != nil {
-		log.Printf("[upsertPlayerStats] Error starting transaction for player ID %d: %v", p.ID, err)
-		return fmt.Errorf("starting transaction for player stats upsert: %w", err)
-	}
-
-	// Assuming UpsertPlayerStats accepts *ent.Tx and player_stats.PlayerStats
-	err = pc.psModel.UpsertPlayerStats(ctx, tx, p, stats)
-	if err != nil {
-		log.Printf("[upsertPlayerStats] Error upserting player stats for player ID %d: %v", p.ID, err)
-		err := tx.Rollback()
-		if err != nil {
-			return err
-		}
-		return fmt.Errorf("upserting player stats for player ID %d: %w", p.ID, err)
-	}
-
-	// Commit the transaction
-	if err := tx.Commit(); err != nil {
-		log.Printf("[upsertPlayerStats] Error committing transaction for player ID %d: %v", p.ID, err)
-		return fmt.Errorf("committing transaction for player stats upsert: %w", err)
-	}
-
-	log.Printf("[upsertPlayerStats] Successfully upserted player stats for player ID: %d", p.ID)
-	return nil
 }
 
 func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID int) ([]int, error) {
