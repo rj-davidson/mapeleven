@@ -139,7 +139,15 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 	if err != nil {
 		return err
 	}
-	fmt.Printf("Created player: %s\n", p.Name)
+	fmt.Printf("Created or updated player: %s\n", p.Name)
+
+	// Handle player statistics
+	for _, stat := range playerData.Statistics {
+		if err := pc.upsertPlayerStats(ctx, p.ID, stat); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -179,6 +187,29 @@ func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_model
 		return nil, err
 	}
 	return p, err
+}
+
+func (pc *PlayerController) upsertPlayerStats(ctx context.Context, playerID int, stat player_stats.PlayerStats) error {
+	// Check if the statistic already exists for the player and season
+	exists, err := pc.psModel.Exists(ctx, playerID, stat.League.Season)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		// If statistics exist, update them
+		_, err = pc.psModel.UpdatePlayerStats(ctx, playerID, stat)
+		if err != nil {
+			return err
+		}
+	} else {
+		// If statistics do not exist, create them
+		_, err = pc.psModel.CreatePlayerStats(ctx, playerID, stat)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID int) ([]int, error) {

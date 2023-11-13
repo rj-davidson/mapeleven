@@ -7,12 +7,12 @@ import (
 	"time"
 )
 
-// PlayerStats Player holds the schema definition for the Player entity.
+// PlayerStats holds the schema definition for the PlayerStats entity.
 type PlayerStats struct {
 	ent.Schema
 }
 
-// Fields of the Player.
+// Fields of the PlayerStats.
 func (PlayerStats) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("lastUpdated").
@@ -22,7 +22,7 @@ func (PlayerStats) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Player.
+// Edges of the PlayerStats.
 func (PlayerStats) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("player", Player.Type).
