@@ -41,52 +41,6 @@ type Player struct {
 	Photo string `json:"photo,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
-	// GameAppearances holds the value of the "GameAppearances" field.
-	GameAppearances int `json:"GameAppearances,omitempty"`
-	// GameLineups holds the value of the "GameLineups" field.
-	GameLineups int `json:"GameLineups,omitempty"`
-	// GameMinutes holds the value of the "GameMinutes" field.
-	GameMinutes int `json:"GameMinutes,omitempty"`
-	// TotalShots holds the value of the "TotalShots" field.
-	TotalShots int `json:"TotalShots,omitempty"`
-	// ShotsOnTarget holds the value of the "ShotsOnTarget" field.
-	ShotsOnTarget int `json:"ShotsOnTarget,omitempty"`
-	// TotalGoals holds the value of the "TotalGoals" field.
-	TotalGoals int `json:"TotalGoals,omitempty"`
-	// Assists holds the value of the "Assists" field.
-	Assists int `json:"Assists,omitempty"`
-	// GoalsConceded holds the value of the "GoalsConceded" field.
-	GoalsConceded int `json:"GoalsConceded,omitempty"`
-	// Saves holds the value of the "Saves" field.
-	Saves int `json:"Saves,omitempty"`
-	// Position holds the value of the "position" field.
-	Position string `json:"position,omitempty"`
-	// Rating holds the value of the "rating" field.
-	Rating string `json:"rating,omitempty"`
-	// TeamName holds the value of the "teamName" field.
-	TeamName string `json:"teamName,omitempty"`
-	// TeamID holds the value of the "teamID" field.
-	TeamID int `json:"teamID,omitempty"`
-	// LeagueID holds the value of the "leagueID" field.
-	LeagueID int `json:"leagueID,omitempty"`
-	// LeagueName holds the value of the "leagueName" field.
-	LeagueName string `json:"leagueName,omitempty"`
-	// PassTotal holds the value of the "passTotal" field.
-	PassTotal int `json:"passTotal,omitempty"`
-	// PassKey holds the value of the "passKey" field.
-	PassKey int `json:"passKey,omitempty"`
-	// PassAccuracy holds the value of the "passAccuracy" field.
-	PassAccuracy int `json:"passAccuracy,omitempty"`
-	// TotalTackle holds the value of the "totalTackle" field.
-	TotalTackle int `json:"totalTackle,omitempty"`
-	// Blocks holds the value of the "blocks" field.
-	Blocks int `json:"blocks,omitempty"`
-	// Interceptions holds the value of the "interceptions" field.
-	Interceptions int `json:"interceptions,omitempty"`
-	// DuelsTotal holds the value of the "duelsTotal" field.
-	DuelsTotal int `json:"duelsTotal,omitempty"`
-	// DuelsWon holds the value of the "duelsWon" field.
-	DuelsWon int `json:"duelsWon,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlayerQuery when eager-loading is set.
 	Edges           PlayerEdges `json:"edges"`
@@ -194,9 +148,9 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case player.FieldInjured:
 			values[i] = new(sql.NullBool)
-		case player.FieldID, player.FieldApiFootballId, player.FieldAge, player.FieldGameAppearances, player.FieldGameLineups, player.FieldGameMinutes, player.FieldTotalShots, player.FieldShotsOnTarget, player.FieldTotalGoals, player.FieldAssists, player.FieldGoalsConceded, player.FieldSaves, player.FieldTeamID, player.FieldLeagueID, player.FieldPassTotal, player.FieldPassKey, player.FieldPassAccuracy, player.FieldTotalTackle, player.FieldBlocks, player.FieldInterceptions, player.FieldDuelsTotal, player.FieldDuelsWon:
+		case player.FieldID, player.FieldApiFootballId, player.FieldAge:
 			values[i] = new(sql.NullInt64)
-		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto, player.FieldPosition, player.FieldRating, player.FieldTeamName, player.FieldLeagueName:
+		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto:
 			values[i] = new(sql.NullString)
 		case player.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
@@ -290,144 +244,6 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
 			} else if value.Valid {
 				pl.LastUpdated = value.Time
-			}
-		case player.FieldGameAppearances:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field GameAppearances", values[i])
-			} else if value.Valid {
-				pl.GameAppearances = int(value.Int64)
-			}
-		case player.FieldGameLineups:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field GameLineups", values[i])
-			} else if value.Valid {
-				pl.GameLineups = int(value.Int64)
-			}
-		case player.FieldGameMinutes:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field GameMinutes", values[i])
-			} else if value.Valid {
-				pl.GameMinutes = int(value.Int64)
-			}
-		case player.FieldTotalShots:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field TotalShots", values[i])
-			} else if value.Valid {
-				pl.TotalShots = int(value.Int64)
-			}
-		case player.FieldShotsOnTarget:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field ShotsOnTarget", values[i])
-			} else if value.Valid {
-				pl.ShotsOnTarget = int(value.Int64)
-			}
-		case player.FieldTotalGoals:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field TotalGoals", values[i])
-			} else if value.Valid {
-				pl.TotalGoals = int(value.Int64)
-			}
-		case player.FieldAssists:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field Assists", values[i])
-			} else if value.Valid {
-				pl.Assists = int(value.Int64)
-			}
-		case player.FieldGoalsConceded:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field GoalsConceded", values[i])
-			} else if value.Valid {
-				pl.GoalsConceded = int(value.Int64)
-			}
-		case player.FieldSaves:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field Saves", values[i])
-			} else if value.Valid {
-				pl.Saves = int(value.Int64)
-			}
-		case player.FieldPosition:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field position", values[i])
-			} else if value.Valid {
-				pl.Position = value.String
-			}
-		case player.FieldRating:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field rating", values[i])
-			} else if value.Valid {
-				pl.Rating = value.String
-			}
-		case player.FieldTeamName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field teamName", values[i])
-			} else if value.Valid {
-				pl.TeamName = value.String
-			}
-		case player.FieldTeamID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field teamID", values[i])
-			} else if value.Valid {
-				pl.TeamID = int(value.Int64)
-			}
-		case player.FieldLeagueID:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field leagueID", values[i])
-			} else if value.Valid {
-				pl.LeagueID = int(value.Int64)
-			}
-		case player.FieldLeagueName:
-			if value, ok := values[i].(*sql.NullString); !ok {
-				return fmt.Errorf("unexpected type %T for field leagueName", values[i])
-			} else if value.Valid {
-				pl.LeagueName = value.String
-			}
-		case player.FieldPassTotal:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field passTotal", values[i])
-			} else if value.Valid {
-				pl.PassTotal = int(value.Int64)
-			}
-		case player.FieldPassKey:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field passKey", values[i])
-			} else if value.Valid {
-				pl.PassKey = int(value.Int64)
-			}
-		case player.FieldPassAccuracy:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field passAccuracy", values[i])
-			} else if value.Valid {
-				pl.PassAccuracy = int(value.Int64)
-			}
-		case player.FieldTotalTackle:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field totalTackle", values[i])
-			} else if value.Valid {
-				pl.TotalTackle = int(value.Int64)
-			}
-		case player.FieldBlocks:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field blocks", values[i])
-			} else if value.Valid {
-				pl.Blocks = int(value.Int64)
-			}
-		case player.FieldInterceptions:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field interceptions", values[i])
-			} else if value.Valid {
-				pl.Interceptions = int(value.Int64)
-			}
-		case player.FieldDuelsTotal:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field duelsTotal", values[i])
-			} else if value.Valid {
-				pl.DuelsTotal = int(value.Int64)
-			}
-		case player.FieldDuelsWon:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field duelsWon", values[i])
-			} else if value.Valid {
-				pl.DuelsWon = int(value.Int64)
 			}
 		case player.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -546,75 +362,6 @@ func (pl *Player) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(pl.LastUpdated.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("GameAppearances=")
-	builder.WriteString(fmt.Sprintf("%v", pl.GameAppearances))
-	builder.WriteString(", ")
-	builder.WriteString("GameLineups=")
-	builder.WriteString(fmt.Sprintf("%v", pl.GameLineups))
-	builder.WriteString(", ")
-	builder.WriteString("GameMinutes=")
-	builder.WriteString(fmt.Sprintf("%v", pl.GameMinutes))
-	builder.WriteString(", ")
-	builder.WriteString("TotalShots=")
-	builder.WriteString(fmt.Sprintf("%v", pl.TotalShots))
-	builder.WriteString(", ")
-	builder.WriteString("ShotsOnTarget=")
-	builder.WriteString(fmt.Sprintf("%v", pl.ShotsOnTarget))
-	builder.WriteString(", ")
-	builder.WriteString("TotalGoals=")
-	builder.WriteString(fmt.Sprintf("%v", pl.TotalGoals))
-	builder.WriteString(", ")
-	builder.WriteString("Assists=")
-	builder.WriteString(fmt.Sprintf("%v", pl.Assists))
-	builder.WriteString(", ")
-	builder.WriteString("GoalsConceded=")
-	builder.WriteString(fmt.Sprintf("%v", pl.GoalsConceded))
-	builder.WriteString(", ")
-	builder.WriteString("Saves=")
-	builder.WriteString(fmt.Sprintf("%v", pl.Saves))
-	builder.WriteString(", ")
-	builder.WriteString("position=")
-	builder.WriteString(pl.Position)
-	builder.WriteString(", ")
-	builder.WriteString("rating=")
-	builder.WriteString(pl.Rating)
-	builder.WriteString(", ")
-	builder.WriteString("teamName=")
-	builder.WriteString(pl.TeamName)
-	builder.WriteString(", ")
-	builder.WriteString("teamID=")
-	builder.WriteString(fmt.Sprintf("%v", pl.TeamID))
-	builder.WriteString(", ")
-	builder.WriteString("leagueID=")
-	builder.WriteString(fmt.Sprintf("%v", pl.LeagueID))
-	builder.WriteString(", ")
-	builder.WriteString("leagueName=")
-	builder.WriteString(pl.LeagueName)
-	builder.WriteString(", ")
-	builder.WriteString("passTotal=")
-	builder.WriteString(fmt.Sprintf("%v", pl.PassTotal))
-	builder.WriteString(", ")
-	builder.WriteString("passKey=")
-	builder.WriteString(fmt.Sprintf("%v", pl.PassKey))
-	builder.WriteString(", ")
-	builder.WriteString("passAccuracy=")
-	builder.WriteString(fmt.Sprintf("%v", pl.PassAccuracy))
-	builder.WriteString(", ")
-	builder.WriteString("totalTackle=")
-	builder.WriteString(fmt.Sprintf("%v", pl.TotalTackle))
-	builder.WriteString(", ")
-	builder.WriteString("blocks=")
-	builder.WriteString(fmt.Sprintf("%v", pl.Blocks))
-	builder.WriteString(", ")
-	builder.WriteString("interceptions=")
-	builder.WriteString(fmt.Sprintf("%v", pl.Interceptions))
-	builder.WriteString(", ")
-	builder.WriteString("duelsTotal=")
-	builder.WriteString(fmt.Sprintf("%v", pl.DuelsTotal))
-	builder.WriteString(", ")
-	builder.WriteString("duelsWon=")
-	builder.WriteString(fmt.Sprintf("%v", pl.DuelsWon))
 	builder.WriteByte(')')
 	return builder.String()
 }

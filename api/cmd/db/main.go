@@ -261,14 +261,3 @@ func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
 	}
 	fmt.Println("Fixture data successfully loaded.")
 }
-
-// function that will fetch player stats
-//func fetchPlayerStats(playerModel *player_models.PlayerModel, teamModel *team_models.TeamModel) {
-//	fmt.Println("Fetching Player Stats...")
-//	playerStatsController := controllers.NewPlayerStatsController(teamModel)
-//	err := playerStatsController.InitializeStats(context.Background())
-//	if err != nil {
-//		log.Printf("Error fetching player stats: %v", err)
-//	}
-//	fmt.Println("Player stats successfully loaded.")
-//}

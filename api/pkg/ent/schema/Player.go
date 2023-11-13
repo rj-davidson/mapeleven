@@ -33,30 +33,6 @@ func (Player) Fields() []ent.Field {
 			Default(time.Now).
 			Optional().
 			UpdateDefault(time.Now),
-		field.Int("GameAppearances"),
-		field.Int("GameLineups"),
-		field.Int("GameMinutes"),
-		field.Int("TotalShots"),
-		field.Int("ShotsOnTarget"),
-		field.Int("TotalGoals"),
-		field.Int("Assists"),
-		field.Int("GoalsConceded"),
-		field.Int("Saves"),
-
-		field.String("position"),
-		field.String("rating"),
-		field.String("teamName"),
-		field.Int("teamID"),
-		field.Int("leagueID"),
-		field.String("leagueName"),
-		field.Int("passTotal"),
-		field.Int("passKey"),
-		field.Int("passAccuracy"),
-		field.Int("totalTackle"),
-		field.Int("blocks").Default(0),
-		field.Int("interceptions").Default(0),
-		field.Int("duelsTotal"),
-		field.Int("duelsWon"),
 	}
 }
 
