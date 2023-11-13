@@ -131,9 +131,8 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, tx *ent.Tx, pl
 	ps, err := tx.PlayerStats.
 		Query().
 		Where(playerstats.HasPlayerWith(player.IDEQ(playerID))).
-		WithPlayer(). // Eagerly load the Player edge
+		WithPlayer().
 		Only(ctx)
-
 	// Handle not found error by creating a new player stats record.
 	if ent.IsNotFound(err) {
 		ps, err = tx.PlayerStats.
