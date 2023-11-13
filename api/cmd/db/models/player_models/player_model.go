@@ -10,17 +10,18 @@ import (
 
 // CreatePlayerInput holds the required fields to create a new player.
 type CreatePlayerInput struct {
-	ApiFootballId int
-	Name          string
-	Firstname     string
-	Lastname      string
-	Age           int
-	Height        string
-	Weight        string
-	Injured       bool
-	Photo         string
-	LeagueID      int
-	Season        int
+	ApiFootballId          int
+	Name                   string
+	Firstname              string
+	Lastname               string
+	Age                    int
+	Height                 string
+	Weight                 string
+	Injured                bool
+	Photo                  string
+	LeagueID               int
+	Season                 int
+	CreatePlayerStatsInput *CreatePlayerStatsInput
 }
 
 // UpdatePlayerInput holds the fields to update an existing player.
@@ -39,9 +40,126 @@ type UpdatePlayerInput struct {
 	UpdatePlayerStatsInput *UpdatePlayerStatsInput
 }
 
+type PSTeam struct {
+	ApiFootballId *int
+	Name          *string
+	Logo          *string
+}
+type PSLeague struct {
+	ApiFootballId *int
+	Name          *string
+	Country       *string
+	Logo          *string
+	Flag          *string
+	Season        *int
+	Round         *string
+}
+
+type PSGames struct {
+	Appearances *int
+	Lineups     *int
+	Minutes     *int
+	Number      *int
+	Position    *string
+	Rating      *string
+	Captain     *bool
+}
+
+type PSSubstitutes struct {
+	In    *int
+	Out   *int
+	Bench *int
+}
+
+type PSShooting struct {
+	Total *int
+	On    *int
+}
+
+type PSGoals struct {
+	Total    *int
+	Conceded *int
+	Assists  *int
+	Saves    *int
+}
+
+type PSShot struct {
+	Total *int
+	On    *int
+}
+
+type PSPasses struct {
+	Total    *int
+	Key      *int
+	Accuracy *int
+}
+
+type PSTackles struct {
+	Total         *int
+	Blocks        *int
+	Interceptions *int
+}
+
+type PSDuels struct {
+	Total *int
+	Won   *int
+}
+
+type PSDribbles struct {
+	Attempts *int
+	Success  *int
+	Past     *int
+}
+
+type PSFouls struct {
+	Drawn     *int
+	Committed *int
+}
+
+type PSCards struct {
+	Yellow    *int
+	Yellowred *int
+	Red       *int
+}
+
+type PSPenalty struct {
+	Won      *int
+	Commited *int
+	Saved    *int
+	Missed   *int
+}
+
+type CreatePlayerStatsInput struct {
+	Team        PSTeam
+	League      PSLeague
+	Games       PSGames
+	Substitutes PSSubstitutes
+	Shooting    PSShooting
+	Goals       PSGoals
+	Shot        PSShot
+	Passes      PSPasses
+	Tackles     PSTackles
+	Duels       PSDuels
+	Dribbles    PSDribbles
+	Fouls       PSFouls
+	Cards       PSCards
+	Penalty     PSPenalty
+}
 type UpdatePlayerStatsInput struct {
-	LeagueID int
-	Season   int
+	Team        PSTeam
+	League      PSLeague
+	Games       PSGames
+	Substitutes PSSubstitutes
+	Shooting    PSShooting
+	Goals       PSGoals
+	Shot        PSShot
+	Passes      PSPasses
+	Tackles     PSTackles
+	Duels       PSDuels
+	Dribbles    PSDribbles
+	Fouls       PSFouls
+	Cards       PSCards
+	Penalty     PSPenalty
 }
 
 // DeletePlayerInput holds the required fields to delete a player.

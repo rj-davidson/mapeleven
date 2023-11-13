@@ -199,7 +199,7 @@ func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player
 	}
 
 	// Assuming UpsertPlayerStats accepts *ent.Tx and player_stats.PlayerStats
-	err = pc.psModel.UpsertPlayerStats(ctx, tx, p.ID, stats)
+	err = pc.psModel.UpsertPlayerStats(ctx, tx, p, stats)
 	if err != nil {
 		tx.Rollback()
 		log.Printf("[upsertPlayerStats] Error upserting player stats for player ID %d: %v", p.ID, err)

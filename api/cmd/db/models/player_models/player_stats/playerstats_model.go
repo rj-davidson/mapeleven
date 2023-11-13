@@ -35,7 +35,7 @@ type PSGames struct {
 	Appearances int    `json:"appearances"`
 	Lineups     int    `json:"lineups"`
 	Minutes     int    `json:"minutes"`
-	Number      *int   `json:"number"`
+	Number      int    `json:"number"`
 	Position    string `json:"position"`
 	Rating      string `json:"rating"`
 	Captain     bool   `json:"captain"`
@@ -126,18 +126,20 @@ func NewPlayerStatsModel(client *ent.Client) *PlayerStatsModel {
 }
 
 // UpsertPlayerStats updates existing player stats or creates new ones.
-func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, tx *ent.Tx, playerID int, stats PlayerStats) error {
+func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, tx *ent.Tx, p *ent.Player, stats PlayerStats) error {
 	// Query for existing player stats.
 	ps, err := tx.PlayerStats.
 		Query().
-		Where(playerstats.HasPlayerWith(player.IDEQ(playerID))).
+		Where(playerstats.HasPlayerWith(player.IDEQ(p.ID))).
 		WithPlayer().
 		Only(ctx)
+	fmt.Printf("Player stats: %v\n", stats)
 	// Handle not found error by creating a new player stats record.
 	if ent.IsNotFound(err) {
 		ps, err = tx.PlayerStats.
 			Create().
-			SetPlayerID(playerID).
+			SetPlayer(p).
+			SetPlayerID(p.ID).
 			Save(ctx)
 		if err != nil {
 			return fmt.Errorf("failed to create player stats: %w", err)
@@ -184,15 +186,16 @@ func (m *PlayerStatsModel) upsertTechnicalWrapper(ctx context.Context, ps *ent.P
 	return err
 }
 
+// Example check if the player stats have the necessary edges loaded
+
 func (m *PlayerStatsModel) upsertSubStats(ctx context.Context, ps *ent.PlayerStats, s PlayerStats) error {
 	if ps == nil {
 		return fmt.Errorf("player stats reference is nil")
 	}
-
-	// Example check if the player stats have the necessary edges loaded
 	if ps.Edges.Player == nil {
 		return fmt.Errorf("player edge is not loaded in player stats")
 	}
+
 	var upsertFuncs = []func(context.Context, *ent.PlayerStats, PlayerStats) error{
 		m.upsertDefenseWrapper,
 		m.upsertGamesWrapper,
@@ -273,7 +276,7 @@ func (m *PlayerStatsModel) upsertGames(ctx context.Context, ps *ent.PlayerStats,
 			SetAppearances(games.Appearances).
 			SetLineups(games.Lineups).
 			SetMinutes(games.Minutes).
-			SetNumber(*games.Number).
+			SetNumber(games.Number).
 			SetPosition(games.Position).
 			SetRating(games.Rating).
 			SetCaptain(games.Captain).
@@ -288,7 +291,7 @@ func (m *PlayerStatsModel) upsertGames(ctx context.Context, ps *ent.PlayerStats,
 			SetAppearances(games.Appearances).
 			SetLineups(games.Lineups).
 			SetMinutes(games.Minutes).
-			SetNumber(*games.Number).
+			SetNumber(games.Number).
 			SetPosition(games.Position).
 			SetRating(games.Rating).
 			SetCaptain(games.Captain).
