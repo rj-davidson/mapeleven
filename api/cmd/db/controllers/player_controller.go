@@ -78,7 +78,7 @@ func (pc *PlayerController) EnsurePlayerExists(ctx context.Context, apiFootballI
 
 // fetchPlayerByID makes an HTTP request to fetch player data by ID.
 func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) error {
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?id=%d&season=2022", playerID)
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?id=%d&season=2023", playerID)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -143,7 +143,7 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 
 	// Handle player statistics
 	for _, stat := range playerData.Statistics {
-		if err := pc.upsertPlayerStats(ctx, p.ID, stat); err != nil {
+		if err := pc.upsertPlayerStats(ctx, p, stat); err != nil {
 			return err
 		}
 	}
@@ -189,25 +189,10 @@ func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_model
 	return p, err
 }
 
-func (pc *PlayerController) upsertPlayerStats(ctx context.Context, playerID int, stat player_stats.PlayerStats) error {
-	// Check if the statistic already exists for the player and season
-	exists, err := pc.psModel.Exists(ctx, playerID, stat.League.Season)
+func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player, stat player_stats.PlayerStats) error {
+	_, err := pc.psModel.UpsertPlayerStats(ctx, p, stat)
 	if err != nil {
 		return err
-	}
-
-	if exists {
-		// If statistics exist, update them
-		_, err = pc.psModel.UpdatePlayerStats(ctx, playerID, stat)
-		if err != nil {
-			return err
-		}
-	} else {
-		// If statistics do not exist, create them
-		_, err = pc.psModel.CreatePlayerStats(ctx, playerID, stat)
-		if err != nil {
-			return err
-		}
 	}
 	return nil
 }

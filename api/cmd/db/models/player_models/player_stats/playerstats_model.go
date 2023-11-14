@@ -3,15 +3,24 @@ package player_stats
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psfairplay"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pssubstitutes"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
 	_ "capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"context"
 	_ "context"
 	"fmt"
@@ -138,183 +147,344 @@ func (m *PlayerStatsModel) StartTransaction(ctx context.Context) (*ent.Tx, error
 }
 
 // Exists checks if the player statistics already exist for a given player and season.
-func (m *PlayerStatsModel) Exists(ctx context.Context, playerID int, szn int) (bool, error) {
-	return m.client.PlayerStats.Query().
-		Where(playerstats.IDEQ(playerID), playerstats.HasSeasonWith(season.Year(szn))).
-		Exist(ctx)
-}
-
-// CreatePlayerStats creates a new player statistics record along with related entities like PSDefense and PSFairplay.
-func (m *PlayerStatsModel) CreatePlayerStats(ctx context.Context, playerID int, stats PlayerStats) (*ent.PlayerStats, error) {
-	// Start transaction
-	tx, err := m.StartTransaction(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("error starting transaction: %w", err)
-	}
-
-	ps, err := tx.PlayerStats.
-		Create().
-		SetLastUpdated(time.Now()).
-		SetPlayerID(playerID).
-		Save(ctx)
-	if err != nil {
-		tx.Rollback()
-		return nil, fmt.Errorf("error creating PlayerStats: %w", err)
-	}
+func (m *PlayerStatsModel) Exists(ctx context.Context, p *ent.Player, szn int) (bool, *ent.PlayerStats) {
+	ps, _ := m.client.PlayerStats.Query().
+		Where(playerstats.IDEQ(p.ID), playerstats.HasSeasonWith(season.Year(szn))).
+		Only(ctx)
 	if ps == nil {
-		fmt.Printf("ps is nil: %v\n", ps)
+		return false, nil
+	}
+	return true, ps
+}
+
+// UpsertPlayerStats CreatePlayerStats creates a new player statistics record along with related entities like PSDefense and PSFairplay.
+func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, stats PlayerStats) (*ent.PlayerStats, error) {
+	// Check if league exists
+	l, err := m.client.League.
+		Query().
+		Where(league.FootballApiIdEQ(stats.League.ApiFootballId)).
+		Only(ctx)
+	if l == nil {
+		fmt.Printf("Skipping unsupported league [%v, %s] for [%s]\n", stats.League.ApiFootballId, stats.League.Name, p.Name)
+		return nil, nil
 	}
 
-	// Example of creating a related entity, adjust as needed for other entities
-	_, err = tx.PSDefense.
-		Create().
-		SetBlocks(intValueOrDefault(stats.Tackles.Blocks)).
-		SetInterceptions(intValueOrDefault(stats.Tackles.Interceptions)).
-		SetTacklesTotal(intValueOrDefault(stats.Tackles.Total)).
-		SetDuelsTotal(intValueOrDefault(stats.Duels.Total)).
-		SetWonDuels(intValueOrDefault(stats.Duels.Won)).
-		SetPlayerStats(ps).
-		Save(ctx)
+	// Start transaction
+	t, err := m.client.Team.
+		Query().
+		Where(
+			team.HasClubWith(
+				club.ApiFootballIdEQ(stats.Team.ApiFootballId),
+			),
+			team.HasSeasonWith(
+				season.YearEQ(stats.League.Season),
+				season.HasLeagueWith(league.FootballApiIdEQ(stats.League.ApiFootballId)),
+			),
+		).
+		Only(ctx)
 	if err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-	_, err = tx.PSFairplay.
-		Create().
-		SetYellow(intValueOrDefault(stats.Cards.Yellow)).
-		SetYellowRed(intValueOrDefault(stats.Cards.YellowRed)).
-		SetRed(intValueOrDefault(stats.Cards.Red)).
-		SetFoulsCommitted(intValueOrDefault(stats.Fouls.Committed)).
-		SetPenaltyConceded(intValueOrDefault(stats.Penalty.Committed)).
-		SetLastUpdated(time.Now()).
-		SetPlayerStats(ps).
-		Save(ctx)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
+		fmt.Printf("Error fetching team for playerStats: %v\n", err)
+		return nil, nil
 	}
 
-	_, err = tx.PSGames.
-		Create().
-		SetAppearances(intValueOrDefault(stats.Games.Appearances)).
-		SetLineups(intValueOrDefault(stats.Games.Lineups)).
-		SetMinutes(intValueOrDefault(stats.Games.Minutes)).
-		SetNumber(intValueOrDefault(stats.Games.Number)).
-		SetPosition(stats.Games.Position).
-		SetRating(stats.Games.Rating).
-		SetCaptain(stats.Games.Captain).
-		SetLastUpdated(time.Now()).
-		SetPlayerStats(ps).
-		Save(ctx)
+	// Check if player stats already exist
+	exists, ps := m.Exists(ctx, p, stats.League.Season)
+	if !exists {
+		ps, err = m.client.PlayerStats.
+			Create().
+			SetPlayer(p).
+			SetTeam(t).
+			Save(ctx)
+		if err != nil {
+			fmt.Printf("Error creating playerStats: %v\n", err)
+			return nil, err
+		}
+	}
+	err = m.upsertDefense(ctx, ps, stats)
 	if err != nil {
-		tx.Rollback()
-		return nil, err
+		fmt.Printf("Error upserting defense: %v\n", err)
 	}
-	_, err = tx.PSSubstitutes.
-		Create().
-		SetIn(intValueOrDefault(stats.Substitutes.In)).
-		SetOut(intValueOrDefault(stats.Substitutes.Out)).
-		SetBench(intValueOrDefault(stats.Substitutes.Bench)).
-		SetLastUpdated(time.Now()).
-		SetPlayerStats(ps).
-		Save(ctx)
+	err = m.upsertFairplay(ctx, ps, stats)
 	if err != nil {
-		tx.Rollback()
-		return nil, err
+		fmt.Printf("Error upserting fairplay: %v\n", err)
 	}
-	_, err = tx.PSShooting.
-		Create().
-		SetShots(intValueOrDefault(stats.Shots.Total)).
-		SetOnTarget(intValueOrDefault(stats.Shots.On)).
-		SetAssists(intValueOrDefault(stats.Goals.Assists)).
-		SetGoals(intValueOrDefault(stats.Goals.Total)).
-		SetSaves(intValueOrDefault(stats.Goals.Saves)).
-		SetLastUpdated(time.Now()).
-		SetPlayerStats(ps).
-		Save(ctx)
+	err = m.upsertGames(ctx, ps, stats)
 	if err != nil {
-		tx.Rollback()
-		return nil, err
+		fmt.Printf("Error upserting games: %v\n", err)
 	}
-	_, err = tx.PSTechnical.
-		Create().
-		SetPassesTotal(intValueOrDefault(stats.Passes.Total)).
-		SetPassesKey(intValueOrDefault(stats.Passes.Key)).
-		SetPassesAccuracy(intValueOrDefault(stats.Passes.Accuracy)).
-		SetDribbleAttempts(intValueOrDefault(stats.Dribbles.Attempts)).
-		SetDribbleSuccess(intValueOrDefault(stats.Dribbles.Success)).
-		SetDribblePast(intValueOrDefault(stats.Dribbles.Past)).
-		SetLastUpdated(time.Now()).
-		SetPlayerStats(ps).
-		Save(ctx)
-
+	err = m.upsertPenalty(ctx, ps, stats)
 	if err != nil {
-		tx.Rollback()
-		return nil, err
+		fmt.Printf("Error upserting penalty: %v\n", err)
 	}
-
-	_, err = tx.PSPenalty.
-		Create().
-		SetWon(intValueOrDefault(stats.Penalty.Won)).
-		SetCommitted(intValueOrDefault(stats.Penalty.Committed)).
-		SetScored(intValueOrDefault(stats.Penalty.Scored)).
-		SetMissed(intValueOrDefault(stats.Penalty.Missed)).
-		SetSaved(intValueOrDefault(stats.Penalty.Saved)).
-		SetLastUpdated(time.Now()).
-		SetPlayerStats(ps).
-		Save(ctx)
+	err = m.upsertShooting(ctx, ps, stats)
 	if err != nil {
-		tx.Rollback()
-		return nil, err
+		fmt.Printf("Error upserting shooting: %v\n", err)
 	}
-
-	// Commit transaction
-	if err := tx.Commit(); err != nil {
-		return nil, fmt.Errorf("error committing transaction: %w", err)
+	err = m.upsertSubstitutes(ctx, ps, stats)
+	if err != nil {
+		fmt.Printf("Error upserting substitutes: %v\n", err)
 	}
-
+	err = m.upsertTechnical(ctx, ps, stats)
+	if err != nil {
+		fmt.Printf("Error upserting technical: %v\n", err)
+	}
 	return ps, nil
 }
 
-// UpdatePlayerStats updates an existing player statistics record along with related entities like PSDefense and PSFairplay.
-func (m *PlayerStatsModel) UpdatePlayerStats(ctx context.Context, playerStatsID int, stats PlayerStats) (*ent.PlayerStats, error) {
-	// Start transaction
-	tx, err := m.StartTransaction(ctx)
-	if err != nil {
-		return nil, err
+func (m *PlayerStatsModel) upsertDefense(ctx context.Context, ps *ent.PlayerStats, stats PlayerStats) error {
+	defense, _ := m.client.PSDefense.
+		Query().
+		Where(psdefense.HasPlayerStatsWith(playerstats.IDEQ(ps.ID))).
+		Only(ctx)
+	if defense == nil {
+		_, err := m.client.PSDefense.
+			Create().
+			SetBlocks(intValueOrDefault(stats.Tackles.Blocks)).
+			SetInterceptions(intValueOrDefault(stats.Tackles.Interceptions)).
+			SetTacklesTotal(intValueOrDefault(stats.Tackles.Total)).
+			SetDuelsTotal(intValueOrDefault(stats.Duels.Total)).
+			SetWonDuels(intValueOrDefault(stats.Duels.Won)).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := m.client.PSDefense.
+			UpdateOne(defense).
+			SetBlocks(intValueOrDefault(stats.Tackles.Blocks)).
+			SetInterceptions(intValueOrDefault(stats.Tackles.Interceptions)).
+			SetTacklesTotal(intValueOrDefault(stats.Tackles.Total)).
+			SetDuelsTotal(intValueOrDefault(stats.Duels.Total)).
+			SetWonDuels(intValueOrDefault(stats.Duels.Won)).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
-	ps, err := tx.PlayerStats.
-		UpdateOneID(playerStatsID).
-		SetLastUpdated(time.Now()).
-		SetPlayerID(playerStatsID).
-		SetTeamID(stats.Team.ApiFootballId).
-		Save(ctx)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
+func (m *PlayerStatsModel) upsertFairplay(ctx context.Context, ps *ent.PlayerStats, stats PlayerStats) error {
+	fairplay, _ := m.client.PSFairplay.
+		Query().
+		Where(psfairplay.HasPlayerStatsWith(playerstats.IDEQ(ps.ID))).
+		Only(ctx)
+	if fairplay == nil {
+		_, err := m.client.PSFairplay.
+			Create().
+			SetYellow(intValueOrDefault(stats.Cards.Yellow)).
+			SetYellowRed(intValueOrDefault(stats.Cards.YellowRed)).
+			SetRed(intValueOrDefault(stats.Cards.Red)).
+			SetFoulsCommitted(intValueOrDefault(stats.Fouls.Committed)).
+			SetPenaltyConceded(intValueOrDefault(stats.Penalty.Committed)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := m.client.PSFairplay.
+			UpdateOne(fairplay).
+			SetYellow(intValueOrDefault(stats.Cards.Yellow)).
+			SetYellowRed(intValueOrDefault(stats.Cards.YellowRed)).
+			SetRed(intValueOrDefault(stats.Cards.Red)).
+			SetFoulsCommitted(intValueOrDefault(stats.Fouls.Committed)).
+			SetPenaltyConceded(intValueOrDefault(stats.Penalty.Committed)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
-	// Example of updating a related entity, adjust as needed for other entities
-	_, err = tx.PSDefense.
-		Update().
-		Where(psdefense.HasPlayerStatsWith(playerstats.IDEQ(playerStatsID))).
-		SetBlocks(intValueOrDefault(stats.Tackles.Blocks)).
-		SetInterceptions(intValueOrDefault(stats.Tackles.Interceptions)).
-		SetTacklesTotal(intValueOrDefault(stats.Tackles.Total)).
-		SetDuelsTotal(intValueOrDefault(stats.Duels.Total)).
-		SetWonDuels(intValueOrDefault(stats.Duels.Won)).
-		Save(ctx)
-	if err != nil {
-		tx.Rollback()
-		return nil, err
+func (m *PlayerStatsModel) upsertGames(ctx context.Context, ps *ent.PlayerStats, stats PlayerStats) error {
+	games, _ := m.client.PSGames.
+		Query().
+		Where(psgames.HasPlayerStatsWith(playerstats.IDEQ(ps.ID))).
+		Only(ctx)
+	if games == nil {
+		_, err := m.client.PSGames.
+			Create().
+			SetAppearances(intValueOrDefault(stats.Games.Appearances)).
+			SetLineups(intValueOrDefault(stats.Games.Lineups)).
+			SetMinutes(intValueOrDefault(stats.Games.Minutes)).
+			SetNumber(intValueOrDefault(stats.Games.Number)).
+			SetPosition(stats.Games.Position).
+			SetRating(stats.Games.Rating).
+			SetCaptain(stats.Games.Captain).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := m.client.PSGames.
+			UpdateOne(games).
+			SetAppearances(intValueOrDefault(stats.Games.Appearances)).
+			SetLineups(intValueOrDefault(stats.Games.Lineups)).
+			SetMinutes(intValueOrDefault(stats.Games.Minutes)).
+			SetNumber(intValueOrDefault(stats.Games.Number)).
+			SetPosition(stats.Games.Position).
+			SetRating(stats.Games.Rating).
+			SetCaptain(stats.Games.Captain).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
-	// Commit transaction
-	err = tx.Commit()
-	if err != nil {
-		return nil, err
+func (m *PlayerStatsModel) upsertPenalty(ctx context.Context, ps *ent.PlayerStats, stats PlayerStats) error {
+	penalty, _ := m.client.PSPenalty.
+		Query().
+		Where(pspenalty.HasPlayerStatsWith(playerstats.IDEQ(ps.ID))).
+		Only(ctx)
+	if penalty == nil {
+		_, err := m.client.PSPenalty.
+			Create().
+			SetWon(intValueOrDefault(stats.Penalty.Won)).
+			SetCommitted(intValueOrDefault(stats.Penalty.Committed)).
+			SetScored(intValueOrDefault(stats.Penalty.Scored)).
+			SetMissed(intValueOrDefault(stats.Penalty.Missed)).
+			SetSaved(intValueOrDefault(stats.Penalty.Saved)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := m.client.PSPenalty.
+			UpdateOne(penalty).
+			SetWon(intValueOrDefault(stats.Penalty.Won)).
+			SetCommitted(intValueOrDefault(stats.Penalty.Committed)).
+			SetScored(intValueOrDefault(stats.Penalty.Scored)).
+			SetMissed(intValueOrDefault(stats.Penalty.Missed)).
+			SetSaved(intValueOrDefault(stats.Penalty.Saved)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
 	}
+	return nil
+}
 
-	return ps, nil
+func (m *PlayerStatsModel) upsertShooting(ctx context.Context, ps *ent.PlayerStats, stats PlayerStats) error {
+	shooting, _ := m.client.PSShooting.
+		Query().
+		Where(psshooting.HasPlayerStatsWith(playerstats.IDEQ(ps.ID))).
+		Only(ctx)
+	if shooting == nil {
+		_, err := m.client.PSShooting.
+			Create().
+			SetShots(intValueOrDefault(stats.Shots.Total)).
+			SetOnTarget(intValueOrDefault(stats.Shots.On)).
+			SetAssists(intValueOrDefault(stats.Goals.Assists)).
+			SetGoals(intValueOrDefault(stats.Goals.Total)).
+			SetSaves(intValueOrDefault(stats.Goals.Saves)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := m.client.PSShooting.
+			UpdateOne(shooting).
+			SetShots(intValueOrDefault(stats.Shots.Total)).
+			SetOnTarget(intValueOrDefault(stats.Shots.On)).
+			SetAssists(intValueOrDefault(stats.Goals.Assists)).
+			SetGoals(intValueOrDefault(stats.Goals.Total)).
+			SetSaves(intValueOrDefault(stats.Goals.Saves)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *PlayerStatsModel) upsertSubstitutes(ctx context.Context, ps *ent.PlayerStats, stats PlayerStats) error {
+	substitutes, _ := m.client.PSSubstitutes.
+		Query().
+		Where(pssubstitutes.HasPlayerStatsWith(playerstats.IDEQ(ps.ID))).
+		Only(ctx)
+	if substitutes == nil {
+		_, err := m.client.PSSubstitutes.
+			Create().
+			SetIn(intValueOrDefault(stats.Substitutes.In)).
+			SetOut(intValueOrDefault(stats.Substitutes.Out)).
+			SetBench(intValueOrDefault(stats.Substitutes.Bench)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := m.client.PSSubstitutes.
+			UpdateOne(substitutes).
+			SetIn(intValueOrDefault(stats.Substitutes.In)).
+			SetOut(intValueOrDefault(stats.Substitutes.Out)).
+			SetBench(intValueOrDefault(stats.Substitutes.Bench)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (m *PlayerStatsModel) upsertTechnical(ctx context.Context, ps *ent.PlayerStats, stats PlayerStats) error {
+	technical, _ := m.client.PSTechnical.
+		Query().
+		Where(pstechnical.HasPlayerStatsWith(playerstats.IDEQ(ps.ID))).
+		Only(ctx)
+	if technical == nil {
+		_, err := m.client.PSTechnical.
+			Create().
+			SetPassesTotal(intValueOrDefault(stats.Passes.Total)).
+			SetPassesKey(intValueOrDefault(stats.Passes.Key)).
+			SetPassesAccuracy(intValueOrDefault(stats.Passes.Accuracy)).
+			SetDribbleAttempts(intValueOrDefault(stats.Dribbles.Attempts)).
+			SetDribbleSuccess(intValueOrDefault(stats.Dribbles.Success)).
+			SetDribblePast(intValueOrDefault(stats.Dribbles.Past)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err := m.client.PSTechnical.
+			UpdateOne(technical).
+			SetPassesTotal(intValueOrDefault(stats.Passes.Total)).
+			SetPassesKey(intValueOrDefault(stats.Passes.Key)).
+			SetPassesAccuracy(intValueOrDefault(stats.Passes.Accuracy)).
+			SetDribbleAttempts(intValueOrDefault(stats.Dribbles.Attempts)).
+			SetDribbleSuccess(intValueOrDefault(stats.Dribbles.Success)).
+			SetDribblePast(intValueOrDefault(stats.Dribbles.Past)).
+			SetLastUpdated(time.Now()).
+			SetPlayerStats(ps).
+			Save(ctx)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }
