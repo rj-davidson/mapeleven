@@ -20,6 +20,8 @@ const (
 	EdgePlayer = "player"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
 	EdgeTeam = "team"
+	// EdgeSeason holds the string denoting the season edge name in mutations.
+	EdgeSeason = "season"
 	// EdgePlayerEvents holds the string denoting the playerevents edge name in mutations.
 	EdgePlayerEvents = "playerEvents"
 	// EdgeMatchPlayer holds the string denoting the matchplayer edge name in mutations.
@@ -38,8 +40,6 @@ const (
 	EdgePsPenalty = "psPenalty"
 	// EdgePsSubstitutes holds the string denoting the pssubstitutes edge name in mutations.
 	EdgePsSubstitutes = "psSubstitutes"
-	// EdgeSeason holds the string denoting the season edge name in mutations.
-	EdgeSeason = "season"
 	// EdgePsFairplay holds the string denoting the psfairplay edge name in mutations.
 	EdgePsFairplay = "psFairplay"
 	// Table holds the table name of the playerstats in the database.
@@ -58,6 +58,11 @@ const (
 	TeamInverseTable = "teams"
 	// TeamColumn is the table column denoting the team relation/edge.
 	TeamColumn = "team_player_stats"
+	// SeasonTable is the table that holds the season relation/edge. The primary key declared below.
+	SeasonTable = "player_stats_season"
+	// SeasonInverseTable is the table name for the Season entity.
+	// It exists in this package in order to avoid circular dependency with the "season" package.
+	SeasonInverseTable = "seasons"
 	// PlayerEventsTable is the table that holds the playerEvents relation/edge.
 	PlayerEventsTable = "fixture_events"
 	// PlayerEventsInverseTable is the table name for the FixtureEvents entity.
@@ -121,11 +126,6 @@ const (
 	PsSubstitutesInverseTable = "ps_substitutes"
 	// PsSubstitutesColumn is the table column denoting the psSubstitutes relation/edge.
 	PsSubstitutesColumn = "player_stats_ps_substitutes"
-	// SeasonTable is the table that holds the season relation/edge. The primary key declared below.
-	SeasonTable = "player_stats_season"
-	// SeasonInverseTable is the table name for the Season entity.
-	// It exists in this package in order to avoid circular dependency with the "season" package.
-	SeasonInverseTable = "seasons"
 	// PsFairplayTable is the table that holds the psFairplay relation/edge.
 	PsFairplayTable = "ps_fairplays"
 	// PsFairplayInverseTable is the table name for the PSFairplay entity.
@@ -203,6 +203,20 @@ func ByTeamField(field string, opts ...sql.OrderTermOption) OrderOption {
 	}
 }
 
+// BySeasonCount orders the results by season count.
+func BySeasonCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSeasonStep(), opts...)
+	}
+}
+
+// BySeason orders the results by season terms.
+func BySeason(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSeasonStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
 // ByPlayerEventsCount orders the results by playerEvents count.
 func ByPlayerEventsCount(opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -245,115 +259,52 @@ func ByAssistEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	}
 }
 
-// ByPsGamesCount orders the results by psGames count.
-func ByPsGamesCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsGamesField orders the results by psGames field.
+func ByPsGamesField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsGamesStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newPsGamesStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByPsGames orders the results by psGames terms.
-func ByPsGames(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPsShootingField orders the results by psShooting field.
+func ByPsShootingField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsGamesStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsShootingStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByPsShootingCount orders the results by psShooting count.
-func ByPsShootingCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsDefenseField orders the results by psDefense field.
+func ByPsDefenseField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsShootingStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newPsDefenseStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByPsShooting orders the results by psShooting terms.
-func ByPsShooting(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPsTechnicalField orders the results by psTechnical field.
+func ByPsTechnicalField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsShootingStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsTechnicalStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByPsDefenseCount orders the results by psDefense count.
-func ByPsDefenseCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsPenaltyField orders the results by psPenalty field.
+func ByPsPenaltyField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsDefenseStep(), opts...)
+		sqlgraph.OrderByNeighborTerms(s, newPsPenaltyStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByPsDefense orders the results by psDefense terms.
-func ByPsDefense(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+// ByPsSubstitutesField orders the results by psSubstitutes field.
+func ByPsSubstitutesField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsDefenseStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsSubstitutesStep(), sql.OrderByField(field, opts...))
 	}
 }
 
-// ByPsTechnicalCount orders the results by psTechnical count.
-func ByPsTechnicalCount(opts ...sql.OrderTermOption) OrderOption {
+// ByPsFairplayField orders the results by psFairplay field.
+func ByPsFairplayField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsTechnicalStep(), opts...)
-	}
-}
-
-// ByPsTechnical orders the results by psTechnical terms.
-func ByPsTechnical(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsTechnicalStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByPsPenaltyCount orders the results by psPenalty count.
-func ByPsPenaltyCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsPenaltyStep(), opts...)
-	}
-}
-
-// ByPsPenalty orders the results by psPenalty terms.
-func ByPsPenalty(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsPenaltyStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByPsSubstitutesCount orders the results by psSubstitutes count.
-func ByPsSubstitutesCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsSubstitutesStep(), opts...)
-	}
-}
-
-// ByPsSubstitutes orders the results by psSubstitutes terms.
-func ByPsSubstitutes(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsSubstitutesStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// BySeasonCount orders the results by season count.
-func BySeasonCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newSeasonStep(), opts...)
-	}
-}
-
-// BySeason orders the results by season terms.
-func BySeason(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newSeasonStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByPsFairplayCount orders the results by psFairplay count.
-func ByPsFairplayCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPsFairplayStep(), opts...)
-	}
-}
-
-// ByPsFairplay orders the results by psFairplay terms.
-func ByPsFairplay(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPsFairplayStep(), append([]sql.OrderTerm{term}, terms...)...)
+		sqlgraph.OrderByNeighborTerms(s, newPsFairplayStep(), sql.OrderByField(field, opts...))
 	}
 }
 func newPlayerStep() *sqlgraph.Step {
@@ -368,6 +319,13 @@ func newTeamStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, TeamTable, TeamColumn),
+	)
+}
+func newSeasonStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SeasonInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, false, SeasonTable, SeasonPrimaryKey...),
 	)
 }
 func newPlayerEventsStep() *sqlgraph.Step {
@@ -395,55 +353,48 @@ func newPsGamesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsGamesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsGamesTable, PsGamesColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, PsGamesTable, PsGamesColumn),
 	)
 }
 func newPsShootingStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsShootingInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsShootingTable, PsShootingColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, PsShootingTable, PsShootingColumn),
 	)
 }
 func newPsDefenseStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsDefenseInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsDefenseTable, PsDefenseColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, PsDefenseTable, PsDefenseColumn),
 	)
 }
 func newPsTechnicalStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsTechnicalInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsTechnicalTable, PsTechnicalColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, PsTechnicalTable, PsTechnicalColumn),
 	)
 }
 func newPsPenaltyStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsPenaltyInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsPenaltyTable, PsPenaltyColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, PsPenaltyTable, PsPenaltyColumn),
 	)
 }
 func newPsSubstitutesStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsSubstitutesInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsSubstitutesTable, PsSubstitutesColumn),
-	)
-}
-func newSeasonStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(SeasonInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2M, false, SeasonTable, SeasonPrimaryKey...),
+		sqlgraph.Edge(sqlgraph.O2O, false, PsSubstitutesTable, PsSubstitutesColumn),
 	)
 }
 func newPsFairplayStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PsFairplayInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PsFairplayTable, PsFairplayColumn),
+		sqlgraph.Edge(sqlgraph.O2O, false, PsFairplayTable, PsFairplayColumn),
 	)
 }

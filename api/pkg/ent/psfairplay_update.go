@@ -259,7 +259,7 @@ func (pfu *PSFairplayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pfu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psfairplay.PlayerStatsTable,
 			Columns: []string{psfairplay.PlayerStatsColumn},
@@ -272,7 +272,7 @@ func (pfu *PSFairplayUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := pfu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psfairplay.PlayerStatsTable,
 			Columns: []string{psfairplay.PlayerStatsColumn},
@@ -566,7 +566,7 @@ func (pfuo *PSFairplayUpdateOne) sqlSave(ctx context.Context) (_node *PSFairplay
 	}
 	if pfuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psfairplay.PlayerStatsTable,
 			Columns: []string{psfairplay.PlayerStatsColumn},
@@ -579,7 +579,7 @@ func (pfuo *PSFairplayUpdateOne) sqlSave(ctx context.Context) (_node *PSFairplay
 	}
 	if nodes := pfuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psfairplay.PlayerStatsTable,
 			Columns: []string{psfairplay.PlayerStatsColumn},

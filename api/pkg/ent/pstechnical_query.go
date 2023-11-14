@@ -74,7 +74,7 @@ func (ptq *PSTechnicalQuery) QueryPlayerStats() *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pstechnical.Table, pstechnical.FieldID, selector),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pstechnical.PlayerStatsTable, pstechnical.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, pstechnical.PlayerStatsTable, pstechnical.PlayerStatsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(ptq.driver.Dialect(), step)
 		return fromU, nil

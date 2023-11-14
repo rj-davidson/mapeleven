@@ -286,7 +286,7 @@ func (psu *PSShootingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if psu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psshooting.PlayerStatsTable,
 			Columns: []string{psshooting.PlayerStatsColumn},
@@ -299,7 +299,7 @@ func (psu *PSShootingUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := psu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psshooting.PlayerStatsTable,
 			Columns: []string{psshooting.PlayerStatsColumn},
@@ -620,7 +620,7 @@ func (psuo *PSShootingUpdateOne) sqlSave(ctx context.Context) (_node *PSShooting
 	}
 	if psuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psshooting.PlayerStatsTable,
 			Columns: []string{psshooting.PlayerStatsColumn},
@@ -633,7 +633,7 @@ func (psuo *PSShootingUpdateOne) sqlSave(ctx context.Context) (_node *PSShooting
 	}
 	if nodes := psuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psshooting.PlayerStatsTable,
 			Columns: []string{psshooting.PlayerStatsColumn},

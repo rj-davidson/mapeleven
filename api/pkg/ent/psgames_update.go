@@ -283,7 +283,7 @@ func (pgu *PSGamesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pgu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psgames.PlayerStatsTable,
 			Columns: []string{psgames.PlayerStatsColumn},
@@ -296,7 +296,7 @@ func (pgu *PSGamesUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := pgu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psgames.PlayerStatsTable,
 			Columns: []string{psgames.PlayerStatsColumn},
@@ -614,7 +614,7 @@ func (pguo *PSGamesUpdateOne) sqlSave(ctx context.Context) (_node *PSGames, err 
 	}
 	if pguo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psgames.PlayerStatsTable,
 			Columns: []string{psgames.PlayerStatsColumn},
@@ -627,7 +627,7 @@ func (pguo *PSGamesUpdateOne) sqlSave(ctx context.Context) (_node *PSGames, err 
 	}
 	if nodes := pguo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psgames.PlayerStatsTable,
 			Columns: []string{psgames.PlayerStatsColumn},

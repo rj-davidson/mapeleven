@@ -31,16 +31,17 @@ func (PlayerStats) Edges() []ent.Edge {
 		edge.From("team", Team.Type).
 			Ref("playerStats").
 			Unique(),
+		edge.To("season", Season.Type),
 		edge.To("playerEvents", FixtureEvents.Type),
 		edge.To("matchPlayer", MatchPlayer.Type),
 		edge.To("assistEvents", FixtureEvents.Type),
-		edge.To("psGames", PSGames.Type),
-		edge.To("psShooting", PSShooting.Type),
-		edge.To("psDefense", PSDefense.Type),
-		edge.To("psTechnical", PSTechnical.Type),
-		edge.To("psPenalty", PSPenalty.Type),
-		edge.To("psSubstitutes", PSSubstitutes.Type),
-		edge.To("season", Season.Type),
-		edge.To("psFairplay", PSFairplay.Type),
+
+		edge.To("psGames", PSGames.Type).Unique(),
+		edge.To("psShooting", PSShooting.Type).Unique(),
+		edge.To("psDefense", PSDefense.Type).Unique(),
+		edge.To("psTechnical", PSTechnical.Type).Unique(),
+		edge.To("psPenalty", PSPenalty.Type).Unique(),
+		edge.To("psSubstitutes", PSSubstitutes.Type).Unique(),
+		edge.To("psFairplay", PSFairplay.Type).Unique(),
 	}
 }

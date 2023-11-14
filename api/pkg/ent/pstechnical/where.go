@@ -70,11 +70,6 @@ func DribbleSuccess(v int) predicate.PSTechnical {
 	return predicate.PSTechnical(sql.FieldEQ(FieldDribbleSuccess, v))
 }
 
-// DribblePast applies equality check predicate on the "DribblePast" field. It's identical to DribblePastEQ.
-func DribblePast(v int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldEQ(FieldDribblePast, v))
-}
-
 // PassesTotal applies equality check predicate on the "PassesTotal" field. It's identical to PassesTotalEQ.
 func PassesTotal(v int) predicate.PSTechnical {
 	return predicate.PSTechnical(sql.FieldEQ(FieldPassesTotal, v))
@@ -213,46 +208,6 @@ func DribbleSuccessLT(v int) predicate.PSTechnical {
 // DribbleSuccessLTE applies the LTE predicate on the "DribbleSuccess" field.
 func DribbleSuccessLTE(v int) predicate.PSTechnical {
 	return predicate.PSTechnical(sql.FieldLTE(FieldDribbleSuccess, v))
-}
-
-// DribblePastEQ applies the EQ predicate on the "DribblePast" field.
-func DribblePastEQ(v int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldEQ(FieldDribblePast, v))
-}
-
-// DribblePastNEQ applies the NEQ predicate on the "DribblePast" field.
-func DribblePastNEQ(v int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldNEQ(FieldDribblePast, v))
-}
-
-// DribblePastIn applies the In predicate on the "DribblePast" field.
-func DribblePastIn(vs ...int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldIn(FieldDribblePast, vs...))
-}
-
-// DribblePastNotIn applies the NotIn predicate on the "DribblePast" field.
-func DribblePastNotIn(vs ...int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldNotIn(FieldDribblePast, vs...))
-}
-
-// DribblePastGT applies the GT predicate on the "DribblePast" field.
-func DribblePastGT(v int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldGT(FieldDribblePast, v))
-}
-
-// DribblePastGTE applies the GTE predicate on the "DribblePast" field.
-func DribblePastGTE(v int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldGTE(FieldDribblePast, v))
-}
-
-// DribblePastLT applies the LT predicate on the "DribblePast" field.
-func DribblePastLT(v int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldLT(FieldDribblePast, v))
-}
-
-// DribblePastLTE applies the LTE predicate on the "DribblePast" field.
-func DribblePastLTE(v int) predicate.PSTechnical {
-	return predicate.PSTechnical(sql.FieldLTE(FieldDribblePast, v))
 }
 
 // PassesTotalEQ applies the EQ predicate on the "PassesTotal" field.
@@ -430,7 +385,7 @@ func HasPlayerStats() predicate.PSTechnical {
 	return predicate.PSTechnical(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, PlayerStatsTable, PlayerStatsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

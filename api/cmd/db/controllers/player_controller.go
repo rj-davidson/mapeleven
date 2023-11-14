@@ -199,7 +199,7 @@ func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player
 
 func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID int) ([]int, error) {
 	// Create a URL for fetching players by their league ID
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?league=%d&season=2022", leagueID)
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?league=%d&season=2023", leagueID)
 	// Create an HTTP request
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {

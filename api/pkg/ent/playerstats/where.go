@@ -156,6 +156,29 @@ func HasTeamWith(preds ...predicate.Team) predicate.PlayerStats {
 	})
 }
 
+// HasSeason applies the HasEdge predicate on the "season" edge.
+func HasSeason() predicate.PlayerStats {
+	return predicate.PlayerStats(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, SeasonTable, SeasonPrimaryKey...),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
+func HasSeasonWith(preds ...predicate.Season) predicate.PlayerStats {
+	return predicate.PlayerStats(func(s *sql.Selector) {
+		step := newSeasonStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasPlayerEvents applies the HasEdge predicate on the "playerEvents" edge.
 func HasPlayerEvents() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
@@ -230,7 +253,7 @@ func HasPsGames() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PsGamesTable, PsGamesColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, PsGamesTable, PsGamesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -253,7 +276,7 @@ func HasPsShooting() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PsShootingTable, PsShootingColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, PsShootingTable, PsShootingColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -276,7 +299,7 @@ func HasPsDefense() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PsDefenseTable, PsDefenseColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, PsDefenseTable, PsDefenseColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -299,7 +322,7 @@ func HasPsTechnical() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PsTechnicalTable, PsTechnicalColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, PsTechnicalTable, PsTechnicalColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -322,7 +345,7 @@ func HasPsPenalty() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PsPenaltyTable, PsPenaltyColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, PsPenaltyTable, PsPenaltyColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -345,7 +368,7 @@ func HasPsSubstitutes() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PsSubstitutesTable, PsSubstitutesColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, PsSubstitutesTable, PsSubstitutesColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -363,35 +386,12 @@ func HasPsSubstitutesWith(preds ...predicate.PSSubstitutes) predicate.PlayerStat
 	})
 }
 
-// HasSeason applies the HasEdge predicate on the "season" edge.
-func HasSeason() predicate.PlayerStats {
-	return predicate.PlayerStats(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, SeasonTable, SeasonPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasSeasonWith applies the HasEdge predicate on the "season" edge with a given conditions (other predicates).
-func HasSeasonWith(preds ...predicate.Season) predicate.PlayerStats {
-	return predicate.PlayerStats(func(s *sql.Selector) {
-		step := newSeasonStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasPsFairplay applies the HasEdge predicate on the "psFairplay" edge.
 func HasPsFairplay() predicate.PlayerStats {
 	return predicate.PlayerStats(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PsFairplayTable, PsFairplayColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, PsFairplayTable, PsFairplayColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

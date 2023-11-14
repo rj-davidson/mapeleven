@@ -92,27 +92,6 @@ func (ptu *PSTechnicalUpdate) AddDribbleSuccess(i int) *PSTechnicalUpdate {
 	return ptu
 }
 
-// SetDribblePast sets the "DribblePast" field.
-func (ptu *PSTechnicalUpdate) SetDribblePast(i int) *PSTechnicalUpdate {
-	ptu.mutation.ResetDribblePast()
-	ptu.mutation.SetDribblePast(i)
-	return ptu
-}
-
-// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
-func (ptu *PSTechnicalUpdate) SetNillableDribblePast(i *int) *PSTechnicalUpdate {
-	if i != nil {
-		ptu.SetDribblePast(*i)
-	}
-	return ptu
-}
-
-// AddDribblePast adds i to the "DribblePast" field.
-func (ptu *PSTechnicalUpdate) AddDribblePast(i int) *PSTechnicalUpdate {
-	ptu.mutation.AddDribblePast(i)
-	return ptu
-}
-
 // SetPassesTotal sets the "PassesTotal" field.
 func (ptu *PSTechnicalUpdate) SetPassesTotal(i int) *PSTechnicalUpdate {
 	ptu.mutation.ResetPassesTotal()
@@ -281,12 +260,6 @@ func (ptu *PSTechnicalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := ptu.mutation.AddedDribbleSuccess(); ok {
 		_spec.AddField(pstechnical.FieldDribbleSuccess, field.TypeInt, value)
 	}
-	if value, ok := ptu.mutation.DribblePast(); ok {
-		_spec.SetField(pstechnical.FieldDribblePast, field.TypeInt, value)
-	}
-	if value, ok := ptu.mutation.AddedDribblePast(); ok {
-		_spec.AddField(pstechnical.FieldDribblePast, field.TypeInt, value)
-	}
 	if value, ok := ptu.mutation.PassesTotal(); ok {
 		_spec.SetField(pstechnical.FieldPassesTotal, field.TypeInt, value)
 	}
@@ -313,7 +286,7 @@ func (ptu *PSTechnicalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ptu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pstechnical.PlayerStatsTable,
 			Columns: []string{pstechnical.PlayerStatsColumn},
@@ -326,7 +299,7 @@ func (ptu *PSTechnicalUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := ptu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pstechnical.PlayerStatsTable,
 			Columns: []string{pstechnical.PlayerStatsColumn},
@@ -420,27 +393,6 @@ func (ptuo *PSTechnicalUpdateOne) SetNillableDribbleSuccess(i *int) *PSTechnical
 // AddDribbleSuccess adds i to the "DribbleSuccess" field.
 func (ptuo *PSTechnicalUpdateOne) AddDribbleSuccess(i int) *PSTechnicalUpdateOne {
 	ptuo.mutation.AddDribbleSuccess(i)
-	return ptuo
-}
-
-// SetDribblePast sets the "DribblePast" field.
-func (ptuo *PSTechnicalUpdateOne) SetDribblePast(i int) *PSTechnicalUpdateOne {
-	ptuo.mutation.ResetDribblePast()
-	ptuo.mutation.SetDribblePast(i)
-	return ptuo
-}
-
-// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
-func (ptuo *PSTechnicalUpdateOne) SetNillableDribblePast(i *int) *PSTechnicalUpdateOne {
-	if i != nil {
-		ptuo.SetDribblePast(*i)
-	}
-	return ptuo
-}
-
-// AddDribblePast adds i to the "DribblePast" field.
-func (ptuo *PSTechnicalUpdateOne) AddDribblePast(i int) *PSTechnicalUpdateOne {
-	ptuo.mutation.AddDribblePast(i)
 	return ptuo
 }
 
@@ -642,12 +594,6 @@ func (ptuo *PSTechnicalUpdateOne) sqlSave(ctx context.Context) (_node *PSTechnic
 	if value, ok := ptuo.mutation.AddedDribbleSuccess(); ok {
 		_spec.AddField(pstechnical.FieldDribbleSuccess, field.TypeInt, value)
 	}
-	if value, ok := ptuo.mutation.DribblePast(); ok {
-		_spec.SetField(pstechnical.FieldDribblePast, field.TypeInt, value)
-	}
-	if value, ok := ptuo.mutation.AddedDribblePast(); ok {
-		_spec.AddField(pstechnical.FieldDribblePast, field.TypeInt, value)
-	}
 	if value, ok := ptuo.mutation.PassesTotal(); ok {
 		_spec.SetField(pstechnical.FieldPassesTotal, field.TypeInt, value)
 	}
@@ -674,7 +620,7 @@ func (ptuo *PSTechnicalUpdateOne) sqlSave(ctx context.Context) (_node *PSTechnic
 	}
 	if ptuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pstechnical.PlayerStatsTable,
 			Columns: []string{pstechnical.PlayerStatsColumn},
@@ -687,7 +633,7 @@ func (ptuo *PSTechnicalUpdateOne) sqlSave(ctx context.Context) (_node *PSTechnic
 	}
 	if nodes := ptuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pstechnical.PlayerStatsTable,
 			Columns: []string{pstechnical.PlayerStatsColumn},

@@ -2139,7 +2139,7 @@ func (c *PSDefenseClient) QueryPlayerStats(pd *PSDefense) *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psdefense.Table, psdefense.FieldID, id),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psdefense.PlayerStatsTable, psdefense.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, psdefense.PlayerStatsTable, psdefense.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pd.driver.Dialect(), step)
 		return fromV, nil
@@ -2288,7 +2288,7 @@ func (c *PSFairplayClient) QueryPlayerStats(pf *PSFairplay) *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psfairplay.Table, psfairplay.FieldID, id),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psfairplay.PlayerStatsTable, psfairplay.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, psfairplay.PlayerStatsTable, psfairplay.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pf.driver.Dialect(), step)
 		return fromV, nil
@@ -2437,7 +2437,7 @@ func (c *PSGamesClient) QueryPlayerStats(pg *PSGames) *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psgames.Table, psgames.FieldID, id),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psgames.PlayerStatsTable, psgames.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, psgames.PlayerStatsTable, psgames.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pg.driver.Dialect(), step)
 		return fromV, nil
@@ -2586,7 +2586,7 @@ func (c *PSPenaltyClient) QueryPlayerStats(pp *PSPenalty) *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pspenalty.Table, pspenalty.FieldID, id),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pspenalty.PlayerStatsTable, pspenalty.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, pspenalty.PlayerStatsTable, pspenalty.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pp.driver.Dialect(), step)
 		return fromV, nil
@@ -2735,7 +2735,7 @@ func (c *PSShootingClient) QueryPlayerStats(ps *PSShooting) *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psshooting.Table, psshooting.FieldID, id),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psshooting.PlayerStatsTable, psshooting.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, psshooting.PlayerStatsTable, psshooting.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -2884,7 +2884,7 @@ func (c *PSSubstitutesClient) QueryPlayerStats(ps *PSSubstitutes) *PlayerStatsQu
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pssubstitutes.Table, pssubstitutes.FieldID, id),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pssubstitutes.PlayerStatsTable, pssubstitutes.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, pssubstitutes.PlayerStatsTable, pssubstitutes.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3033,7 +3033,7 @@ func (c *PSTechnicalClient) QueryPlayerStats(pt *PSTechnical) *PlayerStatsQuery 
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pstechnical.Table, pstechnical.FieldID, id),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pstechnical.PlayerStatsTable, pstechnical.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, pstechnical.PlayerStatsTable, pstechnical.PlayerStatsColumn),
 		)
 		fromV = sqlgraph.Neighbors(pt.driver.Dialect(), step)
 		return fromV, nil
@@ -3451,6 +3451,22 @@ func (c *PlayerStatsClient) QueryTeam(ps *PlayerStats) *TeamQuery {
 	return query
 }
 
+// QuerySeason queries the season edge of a PlayerStats.
+func (c *PlayerStatsClient) QuerySeason(ps *PlayerStats) *SeasonQuery {
+	query := (&SeasonClient{config: c.config}).Query()
+	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
+		id := ps.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
+			sqlgraph.To(season.Table, season.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, playerstats.SeasonTable, playerstats.SeasonPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // QueryPlayerEvents queries the playerEvents edge of a PlayerStats.
 func (c *PlayerStatsClient) QueryPlayerEvents(ps *PlayerStats) *FixtureEventsQuery {
 	query := (&FixtureEventsClient{config: c.config}).Query()
@@ -3507,7 +3523,7 @@ func (c *PlayerStatsClient) QueryPsGames(ps *PlayerStats) *PSGamesQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(psgames.Table, psgames.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsGamesTable, playerstats.PsGamesColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsGamesTable, playerstats.PsGamesColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3523,7 +3539,7 @@ func (c *PlayerStatsClient) QueryPsShooting(ps *PlayerStats) *PSShootingQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(psshooting.Table, psshooting.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsShootingTable, playerstats.PsShootingColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsShootingTable, playerstats.PsShootingColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3539,7 +3555,7 @@ func (c *PlayerStatsClient) QueryPsDefense(ps *PlayerStats) *PSDefenseQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(psdefense.Table, psdefense.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsDefenseTable, playerstats.PsDefenseColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsDefenseTable, playerstats.PsDefenseColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3555,7 +3571,7 @@ func (c *PlayerStatsClient) QueryPsTechnical(ps *PlayerStats) *PSTechnicalQuery 
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(pstechnical.Table, pstechnical.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsTechnicalTable, playerstats.PsTechnicalColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsTechnicalTable, playerstats.PsTechnicalColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3571,7 +3587,7 @@ func (c *PlayerStatsClient) QueryPsPenalty(ps *PlayerStats) *PSPenaltyQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(pspenalty.Table, pspenalty.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsPenaltyTable, playerstats.PsPenaltyColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsPenaltyTable, playerstats.PsPenaltyColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3587,23 +3603,7 @@ func (c *PlayerStatsClient) QueryPsSubstitutes(ps *PlayerStats) *PSSubstitutesQu
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(pssubstitutes.Table, pssubstitutes.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsSubstitutesTable, playerstats.PsSubstitutesColumn),
-		)
-		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QuerySeason queries the season edge of a PlayerStats.
-func (c *PlayerStatsClient) QuerySeason(ps *PlayerStats) *SeasonQuery {
-	query := (&SeasonClient{config: c.config}).Query()
-	query.path = func(context.Context) (fromV *sql.Selector, _ error) {
-		id := ps.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
-			sqlgraph.To(season.Table, season.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, playerstats.SeasonTable, playerstats.SeasonPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsSubstitutesTable, playerstats.PsSubstitutesColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil
@@ -3619,7 +3619,7 @@ func (c *PlayerStatsClient) QueryPsFairplay(ps *PlayerStats) *PSFairplayQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, id),
 			sqlgraph.To(psfairplay.Table, psfairplay.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsFairplayTable, playerstats.PsFairplayColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsFairplayTable, playerstats.PsFairplayColumn),
 		)
 		fromV = sqlgraph.Neighbors(ps.driver.Dialect(), step)
 		return fromV, nil

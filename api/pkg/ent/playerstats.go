@@ -9,6 +9,13 @@ import (
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psfairplay"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pssubstitutes"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -35,6 +42,8 @@ type PlayerStatsEdges struct {
 	Player *Player `json:"player,omitempty"`
 	// Team holds the value of the team edge.
 	Team *Team `json:"team,omitempty"`
+	// Season holds the value of the season edge.
+	Season []*Season `json:"season,omitempty"`
 	// PlayerEvents holds the value of the playerEvents edge.
 	PlayerEvents []*FixtureEvents `json:"playerEvents,omitempty"`
 	// MatchPlayer holds the value of the matchPlayer edge.
@@ -42,21 +51,19 @@ type PlayerStatsEdges struct {
 	// AssistEvents holds the value of the assistEvents edge.
 	AssistEvents []*FixtureEvents `json:"assistEvents,omitempty"`
 	// PsGames holds the value of the psGames edge.
-	PsGames []*PSGames `json:"psGames,omitempty"`
+	PsGames *PSGames `json:"psGames,omitempty"`
 	// PsShooting holds the value of the psShooting edge.
-	PsShooting []*PSShooting `json:"psShooting,omitempty"`
+	PsShooting *PSShooting `json:"psShooting,omitempty"`
 	// PsDefense holds the value of the psDefense edge.
-	PsDefense []*PSDefense `json:"psDefense,omitempty"`
+	PsDefense *PSDefense `json:"psDefense,omitempty"`
 	// PsTechnical holds the value of the psTechnical edge.
-	PsTechnical []*PSTechnical `json:"psTechnical,omitempty"`
+	PsTechnical *PSTechnical `json:"psTechnical,omitempty"`
 	// PsPenalty holds the value of the psPenalty edge.
-	PsPenalty []*PSPenalty `json:"psPenalty,omitempty"`
+	PsPenalty *PSPenalty `json:"psPenalty,omitempty"`
 	// PsSubstitutes holds the value of the psSubstitutes edge.
-	PsSubstitutes []*PSSubstitutes `json:"psSubstitutes,omitempty"`
-	// Season holds the value of the season edge.
-	Season []*Season `json:"season,omitempty"`
+	PsSubstitutes *PSSubstitutes `json:"psSubstitutes,omitempty"`
 	// PsFairplay holds the value of the psFairplay edge.
-	PsFairplay []*PSFairplay `json:"psFairplay,omitempty"`
+	PsFairplay *PSFairplay `json:"psFairplay,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [13]bool
@@ -88,10 +95,19 @@ func (e PlayerStatsEdges) TeamOrErr() (*Team, error) {
 	return nil, &NotLoadedError{edge: "team"}
 }
 
+// SeasonOrErr returns the Season value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerStatsEdges) SeasonOrErr() ([]*Season, error) {
+	if e.loadedTypes[2] {
+		return e.Season, nil
+	}
+	return nil, &NotLoadedError{edge: "season"}
+}
+
 // PlayerEventsOrErr returns the PlayerEvents value or an error if the edge
 // was not loaded in eager-loading.
 func (e PlayerStatsEdges) PlayerEventsOrErr() ([]*FixtureEvents, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.PlayerEvents, nil
 	}
 	return nil, &NotLoadedError{edge: "playerEvents"}
@@ -100,7 +116,7 @@ func (e PlayerStatsEdges) PlayerEventsOrErr() ([]*FixtureEvents, error) {
 // MatchPlayerOrErr returns the MatchPlayer value or an error if the edge
 // was not loaded in eager-loading.
 func (e PlayerStatsEdges) MatchPlayerOrErr() ([]*MatchPlayer, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.MatchPlayer, nil
 	}
 	return nil, &NotLoadedError{edge: "matchPlayer"}
@@ -109,79 +125,98 @@ func (e PlayerStatsEdges) MatchPlayerOrErr() ([]*MatchPlayer, error) {
 // AssistEventsOrErr returns the AssistEvents value or an error if the edge
 // was not loaded in eager-loading.
 func (e PlayerStatsEdges) AssistEventsOrErr() ([]*FixtureEvents, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.AssistEvents, nil
 	}
 	return nil, &NotLoadedError{edge: "assistEvents"}
 }
 
 // PsGamesOrErr returns the PsGames value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsGamesOrErr() ([]*PSGames, error) {
-	if e.loadedTypes[5] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerStatsEdges) PsGamesOrErr() (*PSGames, error) {
+	if e.loadedTypes[6] {
+		if e.PsGames == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: psgames.Label}
+		}
 		return e.PsGames, nil
 	}
 	return nil, &NotLoadedError{edge: "psGames"}
 }
 
 // PsShootingOrErr returns the PsShooting value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsShootingOrErr() ([]*PSShooting, error) {
-	if e.loadedTypes[6] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerStatsEdges) PsShootingOrErr() (*PSShooting, error) {
+	if e.loadedTypes[7] {
+		if e.PsShooting == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: psshooting.Label}
+		}
 		return e.PsShooting, nil
 	}
 	return nil, &NotLoadedError{edge: "psShooting"}
 }
 
 // PsDefenseOrErr returns the PsDefense value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsDefenseOrErr() ([]*PSDefense, error) {
-	if e.loadedTypes[7] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerStatsEdges) PsDefenseOrErr() (*PSDefense, error) {
+	if e.loadedTypes[8] {
+		if e.PsDefense == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: psdefense.Label}
+		}
 		return e.PsDefense, nil
 	}
 	return nil, &NotLoadedError{edge: "psDefense"}
 }
 
 // PsTechnicalOrErr returns the PsTechnical value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsTechnicalOrErr() ([]*PSTechnical, error) {
-	if e.loadedTypes[8] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerStatsEdges) PsTechnicalOrErr() (*PSTechnical, error) {
+	if e.loadedTypes[9] {
+		if e.PsTechnical == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: pstechnical.Label}
+		}
 		return e.PsTechnical, nil
 	}
 	return nil, &NotLoadedError{edge: "psTechnical"}
 }
 
 // PsPenaltyOrErr returns the PsPenalty value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsPenaltyOrErr() ([]*PSPenalty, error) {
-	if e.loadedTypes[9] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerStatsEdges) PsPenaltyOrErr() (*PSPenalty, error) {
+	if e.loadedTypes[10] {
+		if e.PsPenalty == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: pspenalty.Label}
+		}
 		return e.PsPenalty, nil
 	}
 	return nil, &NotLoadedError{edge: "psPenalty"}
 }
 
 // PsSubstitutesOrErr returns the PsSubstitutes value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsSubstitutesOrErr() ([]*PSSubstitutes, error) {
-	if e.loadedTypes[10] {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerStatsEdges) PsSubstitutesOrErr() (*PSSubstitutes, error) {
+	if e.loadedTypes[11] {
+		if e.PsSubstitutes == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: pssubstitutes.Label}
+		}
 		return e.PsSubstitutes, nil
 	}
 	return nil, &NotLoadedError{edge: "psSubstitutes"}
 }
 
-// SeasonOrErr returns the Season value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) SeasonOrErr() ([]*Season, error) {
-	if e.loadedTypes[11] {
-		return e.Season, nil
-	}
-	return nil, &NotLoadedError{edge: "season"}
-}
-
 // PsFairplayOrErr returns the PsFairplay value or an error if the edge
-// was not loaded in eager-loading.
-func (e PlayerStatsEdges) PsFairplayOrErr() ([]*PSFairplay, error) {
+// was not loaded in eager-loading, or loaded but was not found.
+func (e PlayerStatsEdges) PsFairplayOrErr() (*PSFairplay, error) {
 	if e.loadedTypes[12] {
+		if e.PsFairplay == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: psfairplay.Label}
+		}
 		return e.PsFairplay, nil
 	}
 	return nil, &NotLoadedError{edge: "psFairplay"}
@@ -264,6 +299,11 @@ func (ps *PlayerStats) QueryTeam() *TeamQuery {
 	return NewPlayerStatsClient(ps.config).QueryTeam(ps)
 }
 
+// QuerySeason queries the "season" edge of the PlayerStats entity.
+func (ps *PlayerStats) QuerySeason() *SeasonQuery {
+	return NewPlayerStatsClient(ps.config).QuerySeason(ps)
+}
+
 // QueryPlayerEvents queries the "playerEvents" edge of the PlayerStats entity.
 func (ps *PlayerStats) QueryPlayerEvents() *FixtureEventsQuery {
 	return NewPlayerStatsClient(ps.config).QueryPlayerEvents(ps)
@@ -307,11 +347,6 @@ func (ps *PlayerStats) QueryPsPenalty() *PSPenaltyQuery {
 // QueryPsSubstitutes queries the "psSubstitutes" edge of the PlayerStats entity.
 func (ps *PlayerStats) QueryPsSubstitutes() *PSSubstitutesQuery {
 	return NewPlayerStatsClient(ps.config).QueryPsSubstitutes(ps)
-}
-
-// QuerySeason queries the "season" edge of the PlayerStats entity.
-func (ps *PlayerStats) QuerySeason() *SeasonQuery {
-	return NewPlayerStatsClient(ps.config).QuerySeason(ps)
 }
 
 // QueryPsFairplay queries the "psFairplay" edge of the PlayerStats entity.

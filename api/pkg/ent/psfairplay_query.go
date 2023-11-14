@@ -74,7 +74,7 @@ func (pfq *PSFairplayQuery) QueryPlayerStats() *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(psfairplay.Table, psfairplay.FieldID, selector),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, psfairplay.PlayerStatsTable, psfairplay.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, psfairplay.PlayerStatsTable, psfairplay.PlayerStatsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(pfq.driver.Dialect(), step)
 		return fromU, nil

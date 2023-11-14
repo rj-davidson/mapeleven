@@ -142,10 +142,6 @@ func intValueOrDefault(val *int) int {
 	return 0
 }
 
-func (m *PlayerStatsModel) StartTransaction(ctx context.Context) (*ent.Tx, error) {
-	return m.client.Tx(ctx)
-}
-
 // Exists checks if the player statistics already exist for a given player and season.
 func (m *PlayerStatsModel) Exists(ctx context.Context, p *ent.Player, szn int) (bool, *ent.PlayerStats) {
 	ps, _ := m.client.PlayerStats.Query().
@@ -157,7 +153,7 @@ func (m *PlayerStatsModel) Exists(ctx context.Context, p *ent.Player, szn int) (
 	return true, ps
 }
 
-// UpsertPlayerStats CreatePlayerStats creates a new player statistics record along with related entities like PSDefense and PSFairplay.
+// UpsertPlayerStats creates a new player statistics record along with related entities like PSDefense and PSFairplay.
 func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, stats PlayerStats) (*ent.PlayerStats, error) {
 	// Check if league exists
 	l, err := m.client.League.
@@ -169,7 +165,6 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player,
 		return nil, nil
 	}
 
-	// Start transaction
 	t, err := m.client.Team.
 		Query().
 		Where(
@@ -242,6 +237,7 @@ func (m *PlayerStatsModel) upsertDefense(ctx context.Context, ps *ent.PlayerStat
 			SetBlocks(intValueOrDefault(stats.Tackles.Blocks)).
 			SetInterceptions(intValueOrDefault(stats.Tackles.Interceptions)).
 			SetTacklesTotal(intValueOrDefault(stats.Tackles.Total)).
+			SetDribblePast(intValueOrDefault(stats.Dribbles.Past)).
 			SetDuelsTotal(intValueOrDefault(stats.Duels.Total)).
 			SetWonDuels(intValueOrDefault(stats.Duels.Won)).
 			SetPlayerStats(ps).
@@ -255,6 +251,7 @@ func (m *PlayerStatsModel) upsertDefense(ctx context.Context, ps *ent.PlayerStat
 			SetBlocks(intValueOrDefault(stats.Tackles.Blocks)).
 			SetInterceptions(intValueOrDefault(stats.Tackles.Interceptions)).
 			SetTacklesTotal(intValueOrDefault(stats.Tackles.Total)).
+			SetDribblePast(intValueOrDefault(stats.Dribbles.Past)).
 			SetDuelsTotal(intValueOrDefault(stats.Duels.Total)).
 			SetWonDuels(intValueOrDefault(stats.Duels.Won)).
 			Save(ctx)
@@ -463,7 +460,6 @@ func (m *PlayerStatsModel) upsertTechnical(ctx context.Context, ps *ent.PlayerSt
 			SetPassesAccuracy(intValueOrDefault(stats.Passes.Accuracy)).
 			SetDribbleAttempts(intValueOrDefault(stats.Dribbles.Attempts)).
 			SetDribbleSuccess(intValueOrDefault(stats.Dribbles.Success)).
-			SetDribblePast(intValueOrDefault(stats.Dribbles.Past)).
 			SetLastUpdated(time.Now()).
 			SetPlayerStats(ps).
 			Save(ctx)
@@ -478,7 +474,6 @@ func (m *PlayerStatsModel) upsertTechnical(ctx context.Context, ps *ent.PlayerSt
 			SetPassesAccuracy(intValueOrDefault(stats.Passes.Accuracy)).
 			SetDribbleAttempts(intValueOrDefault(stats.Dribbles.Attempts)).
 			SetDribbleSuccess(intValueOrDefault(stats.Dribbles.Success)).
-			SetDribblePast(intValueOrDefault(stats.Dribbles.Past)).
 			SetLastUpdated(time.Now()).
 			SetPlayerStats(ps).
 			Save(ctx)

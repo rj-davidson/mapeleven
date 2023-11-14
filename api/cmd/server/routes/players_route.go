@@ -1,7 +1,7 @@
 package routes
 
 import (
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/server/serializer"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/server/serializer/player_serializer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"context"
 	"fmt"
@@ -10,13 +10,13 @@ import (
 )
 
 func SetupPlayersRoutes(app *fiber.App, client *ent.Client) {
-	playerSerializer := serializer.NewPlayerSerializer(client)
+	playerSerializer := player_serializer.NewPlayerSerializer(client)
 
 	app.Get(viper.GetString("ENV_PATH")+"/players", getAllPlayers(playerSerializer))
 	app.Get(viper.GetString("ENV_PATH")+"/players/:slug", getPlayerBySlug(playerSerializer))
 }
 
-func getAllPlayers(serializer *serializer.PlayerSerializer) fiber.Handler {
+func getAllPlayers(serializer *player_serializer.PlayerSerializer) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		players, err := serializer.GetPlayers(context.Background())
 		if err != nil {
@@ -28,7 +28,7 @@ func getAllPlayers(serializer *serializer.PlayerSerializer) fiber.Handler {
 	}
 }
 
-func getPlayerBySlug(serializer *serializer.PlayerSerializer) fiber.Handler {
+func getPlayerBySlug(serializer *player_serializer.PlayerSerializer) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		slug := c.Params("slug")
 

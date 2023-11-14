@@ -113,6 +113,27 @@ func (pdu *PSDefenseUpdate) AddDuelsTotal(i int) *PSDefenseUpdate {
 	return pdu
 }
 
+// SetDribblePast sets the "DribblePast" field.
+func (pdu *PSDefenseUpdate) SetDribblePast(i int) *PSDefenseUpdate {
+	pdu.mutation.ResetDribblePast()
+	pdu.mutation.SetDribblePast(i)
+	return pdu
+}
+
+// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
+func (pdu *PSDefenseUpdate) SetNillableDribblePast(i *int) *PSDefenseUpdate {
+	if i != nil {
+		pdu.SetDribblePast(*i)
+	}
+	return pdu
+}
+
+// AddDribblePast adds i to the "DribblePast" field.
+func (pdu *PSDefenseUpdate) AddDribblePast(i int) *PSDefenseUpdate {
+	pdu.mutation.AddDribblePast(i)
+	return pdu
+}
+
 // SetWonDuels sets the "WonDuels" field.
 func (pdu *PSDefenseUpdate) SetWonDuels(i int) *PSDefenseUpdate {
 	pdu.mutation.ResetWonDuels()
@@ -245,6 +266,12 @@ func (pdu *PSDefenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := pdu.mutation.AddedDuelsTotal(); ok {
 		_spec.AddField(psdefense.FieldDuelsTotal, field.TypeInt, value)
 	}
+	if value, ok := pdu.mutation.DribblePast(); ok {
+		_spec.SetField(psdefense.FieldDribblePast, field.TypeInt, value)
+	}
+	if value, ok := pdu.mutation.AddedDribblePast(); ok {
+		_spec.AddField(psdefense.FieldDribblePast, field.TypeInt, value)
+	}
 	if value, ok := pdu.mutation.WonDuels(); ok {
 		_spec.SetField(psdefense.FieldWonDuels, field.TypeInt, value)
 	}
@@ -259,7 +286,7 @@ func (pdu *PSDefenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pdu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
 			Columns: []string{psdefense.PlayerStatsColumn},
@@ -272,7 +299,7 @@ func (pdu *PSDefenseUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := pdu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
 			Columns: []string{psdefense.PlayerStatsColumn},
@@ -387,6 +414,27 @@ func (pduo *PSDefenseUpdateOne) SetNillableDuelsTotal(i *int) *PSDefenseUpdateOn
 // AddDuelsTotal adds i to the "DuelsTotal" field.
 func (pduo *PSDefenseUpdateOne) AddDuelsTotal(i int) *PSDefenseUpdateOne {
 	pduo.mutation.AddDuelsTotal(i)
+	return pduo
+}
+
+// SetDribblePast sets the "DribblePast" field.
+func (pduo *PSDefenseUpdateOne) SetDribblePast(i int) *PSDefenseUpdateOne {
+	pduo.mutation.ResetDribblePast()
+	pduo.mutation.SetDribblePast(i)
+	return pduo
+}
+
+// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
+func (pduo *PSDefenseUpdateOne) SetNillableDribblePast(i *int) *PSDefenseUpdateOne {
+	if i != nil {
+		pduo.SetDribblePast(*i)
+	}
+	return pduo
+}
+
+// AddDribblePast adds i to the "DribblePast" field.
+func (pduo *PSDefenseUpdateOne) AddDribblePast(i int) *PSDefenseUpdateOne {
+	pduo.mutation.AddDribblePast(i)
 	return pduo
 }
 
@@ -552,6 +600,12 @@ func (pduo *PSDefenseUpdateOne) sqlSave(ctx context.Context) (_node *PSDefense, 
 	if value, ok := pduo.mutation.AddedDuelsTotal(); ok {
 		_spec.AddField(psdefense.FieldDuelsTotal, field.TypeInt, value)
 	}
+	if value, ok := pduo.mutation.DribblePast(); ok {
+		_spec.SetField(psdefense.FieldDribblePast, field.TypeInt, value)
+	}
+	if value, ok := pduo.mutation.AddedDribblePast(); ok {
+		_spec.AddField(psdefense.FieldDribblePast, field.TypeInt, value)
+	}
 	if value, ok := pduo.mutation.WonDuels(); ok {
 		_spec.SetField(psdefense.FieldWonDuels, field.TypeInt, value)
 	}
@@ -566,7 +620,7 @@ func (pduo *PSDefenseUpdateOne) sqlSave(ctx context.Context) (_node *PSDefense, 
 	}
 	if pduo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
 			Columns: []string{psdefense.PlayerStatsColumn},
@@ -579,7 +633,7 @@ func (pduo *PSDefenseUpdateOne) sqlSave(ctx context.Context) (_node *PSDefense, 
 	}
 	if nodes := pduo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
 			Columns: []string{psdefense.PlayerStatsColumn},

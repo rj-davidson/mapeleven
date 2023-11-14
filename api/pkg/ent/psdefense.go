@@ -26,6 +26,8 @@ type PSDefense struct {
 	Interceptions int `json:"Interceptions,omitempty"`
 	// DuelsTotal holds the value of the "DuelsTotal" field.
 	DuelsTotal int `json:"DuelsTotal,omitempty"`
+	// DribblePast holds the value of the "DribblePast" field.
+	DribblePast int `json:"DribblePast,omitempty"`
 	// WonDuels holds the value of the "WonDuels" field.
 	WonDuels int `json:"WonDuels,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
@@ -64,7 +66,7 @@ func (*PSDefense) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case psdefense.FieldID, psdefense.FieldTacklesTotal, psdefense.FieldBlocks, psdefense.FieldInterceptions, psdefense.FieldDuelsTotal, psdefense.FieldWonDuels:
+		case psdefense.FieldID, psdefense.FieldTacklesTotal, psdefense.FieldBlocks, psdefense.FieldInterceptions, psdefense.FieldDuelsTotal, psdefense.FieldDribblePast, psdefense.FieldWonDuels:
 			values[i] = new(sql.NullInt64)
 		case psdefense.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
@@ -114,6 +116,12 @@ func (pd *PSDefense) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field DuelsTotal", values[i])
 			} else if value.Valid {
 				pd.DuelsTotal = int(value.Int64)
+			}
+		case psdefense.FieldDribblePast:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field DribblePast", values[i])
+			} else if value.Valid {
+				pd.DribblePast = int(value.Int64)
 			}
 		case psdefense.FieldWonDuels:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -186,6 +194,9 @@ func (pd *PSDefense) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("DuelsTotal=")
 	builder.WriteString(fmt.Sprintf("%v", pd.DuelsTotal))
+	builder.WriteString(", ")
+	builder.WriteString("DribblePast=")
+	builder.WriteString(fmt.Sprintf("%v", pd.DribblePast))
 	builder.WriteString(", ")
 	builder.WriteString("WonDuels=")
 	builder.WriteString(fmt.Sprintf("%v", pd.WonDuels))

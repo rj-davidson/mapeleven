@@ -20,8 +20,6 @@ const (
 	FieldDribbleAttempts = "dribble_attempts"
 	// FieldDribbleSuccess holds the string denoting the dribblesuccess field in the database.
 	FieldDribbleSuccess = "dribble_success"
-	// FieldDribblePast holds the string denoting the dribblepast field in the database.
-	FieldDribblePast = "dribble_past"
 	// FieldPassesTotal holds the string denoting the passestotal field in the database.
 	FieldPassesTotal = "passes_total"
 	// FieldPassesKey holds the string denoting the passeskey field in the database.
@@ -49,7 +47,6 @@ var Columns = []string{
 	FieldFoulsDrawn,
 	FieldDribbleAttempts,
 	FieldDribbleSuccess,
-	FieldDribblePast,
 	FieldPassesTotal,
 	FieldPassesKey,
 	FieldPassesAccuracy,
@@ -84,8 +81,6 @@ var (
 	DefaultDribbleAttempts int
 	// DefaultDribbleSuccess holds the default value on creation for the "DribbleSuccess" field.
 	DefaultDribbleSuccess int
-	// DefaultDribblePast holds the default value on creation for the "DribblePast" field.
-	DefaultDribblePast int
 	// DefaultPassesTotal holds the default value on creation for the "PassesTotal" field.
 	DefaultPassesTotal int
 	// DefaultPassesKey holds the default value on creation for the "PassesKey" field.
@@ -121,11 +116,6 @@ func ByDribbleSuccess(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDribbleSuccess, opts...).ToFunc()
 }
 
-// ByDribblePast orders the results by the DribblePast field.
-func ByDribblePast(opts ...sql.OrderTermOption) OrderOption {
-	return sql.OrderByField(FieldDribblePast, opts...).ToFunc()
-}
-
 // ByPassesTotal orders the results by the PassesTotal field.
 func ByPassesTotal(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldPassesTotal, opts...).ToFunc()
@@ -156,6 +146,6 @@ func newPlayerStatsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayerStatsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
+		sqlgraph.Edge(sqlgraph.O2O, true, PlayerStatsTable, PlayerStatsColumn),
 	)
 }

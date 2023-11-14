@@ -75,6 +75,11 @@ func DuelsTotal(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldDuelsTotal, v))
 }
 
+// DribblePast applies equality check predicate on the "DribblePast" field. It's identical to DribblePastEQ.
+func DribblePast(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldEQ(FieldDribblePast, v))
+}
+
 // WonDuels applies equality check predicate on the "WonDuels" field. It's identical to WonDuelsEQ.
 func WonDuels(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldWonDuels, v))
@@ -245,6 +250,46 @@ func DuelsTotalLTE(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldLTE(FieldDuelsTotal, v))
 }
 
+// DribblePastEQ applies the EQ predicate on the "DribblePast" field.
+func DribblePastEQ(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldEQ(FieldDribblePast, v))
+}
+
+// DribblePastNEQ applies the NEQ predicate on the "DribblePast" field.
+func DribblePastNEQ(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldNEQ(FieldDribblePast, v))
+}
+
+// DribblePastIn applies the In predicate on the "DribblePast" field.
+func DribblePastIn(vs ...int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldIn(FieldDribblePast, vs...))
+}
+
+// DribblePastNotIn applies the NotIn predicate on the "DribblePast" field.
+func DribblePastNotIn(vs ...int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldNotIn(FieldDribblePast, vs...))
+}
+
+// DribblePastGT applies the GT predicate on the "DribblePast" field.
+func DribblePastGT(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldGT(FieldDribblePast, v))
+}
+
+// DribblePastGTE applies the GTE predicate on the "DribblePast" field.
+func DribblePastGTE(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldGTE(FieldDribblePast, v))
+}
+
+// DribblePastLT applies the LT predicate on the "DribblePast" field.
+func DribblePastLT(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldLT(FieldDribblePast, v))
+}
+
+// DribblePastLTE applies the LTE predicate on the "DribblePast" field.
+func DribblePastLTE(v int) predicate.PSDefense {
+	return predicate.PSDefense(sql.FieldLTE(FieldDribblePast, v))
+}
+
 // WonDuelsEQ applies the EQ predicate on the "WonDuels" field.
 func WonDuelsEQ(v int) predicate.PSDefense {
 	return predicate.PSDefense(sql.FieldEQ(FieldWonDuels, v))
@@ -340,7 +385,7 @@ func HasPlayerStats() predicate.PSDefense {
 	return predicate.PSDefense(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, PlayerStatsTable, PlayerStatsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})

@@ -254,7 +254,7 @@ func (ppc *PSPenaltyCreate) createSpec() (*PSPenalty, *sqlgraph.CreateSpec) {
 	}
 	if nodes := ppc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
 			Columns: []string{pspenalty.PlayerStatsColumn},

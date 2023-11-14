@@ -304,7 +304,7 @@ func (pgc *PSGamesCreate) createSpec() (*PSGames, *sqlgraph.CreateSpec) {
 	}
 	if nodes := pgc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psgames.PlayerStatsTable,
 			Columns: []string{psgames.PlayerStatsColumn},

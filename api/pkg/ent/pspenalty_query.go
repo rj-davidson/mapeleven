@@ -74,7 +74,7 @@ func (ppq *PSPenaltyQuery) QueryPlayerStats() *PlayerStatsQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(pspenalty.Table, pspenalty.FieldID, selector),
 			sqlgraph.To(playerstats.Table, playerstats.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pspenalty.PlayerStatsTable, pspenalty.PlayerStatsColumn),
+			sqlgraph.Edge(sqlgraph.O2O, true, pspenalty.PlayerStatsTable, pspenalty.PlayerStatsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(ppq.driver.Dialect(), step)
 		return fromU, nil

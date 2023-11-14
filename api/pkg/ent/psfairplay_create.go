@@ -254,7 +254,7 @@ func (pfc *PSFairplayCreate) createSpec() (*PSFairplay, *sqlgraph.CreateSpec) {
 	}
 	if nodes := pfc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psfairplay.PlayerStatsTable,
 			Columns: []string{psfairplay.PlayerStatsColumn},

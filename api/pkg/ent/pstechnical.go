@@ -24,8 +24,6 @@ type PSTechnical struct {
 	DribbleAttempts int `json:"DribbleAttempts,omitempty"`
 	// DribbleSuccess holds the value of the "DribbleSuccess" field.
 	DribbleSuccess int `json:"DribbleSuccess,omitempty"`
-	// DribblePast holds the value of the "DribblePast" field.
-	DribblePast int `json:"DribblePast,omitempty"`
 	// PassesTotal holds the value of the "PassesTotal" field.
 	PassesTotal int `json:"PassesTotal,omitempty"`
 	// PassesKey holds the value of the "PassesKey" field.
@@ -68,7 +66,7 @@ func (*PSTechnical) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case pstechnical.FieldID, pstechnical.FieldFoulsDrawn, pstechnical.FieldDribbleAttempts, pstechnical.FieldDribbleSuccess, pstechnical.FieldDribblePast, pstechnical.FieldPassesTotal, pstechnical.FieldPassesKey, pstechnical.FieldPassesAccuracy:
+		case pstechnical.FieldID, pstechnical.FieldFoulsDrawn, pstechnical.FieldDribbleAttempts, pstechnical.FieldDribbleSuccess, pstechnical.FieldPassesTotal, pstechnical.FieldPassesKey, pstechnical.FieldPassesAccuracy:
 			values[i] = new(sql.NullInt64)
 		case pstechnical.FieldLastUpdated:
 			values[i] = new(sql.NullTime)
@@ -112,12 +110,6 @@ func (pt *PSTechnical) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field DribbleSuccess", values[i])
 			} else if value.Valid {
 				pt.DribbleSuccess = int(value.Int64)
-			}
-		case pstechnical.FieldDribblePast:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field DribblePast", values[i])
-			} else if value.Valid {
-				pt.DribblePast = int(value.Int64)
 			}
 		case pstechnical.FieldPassesTotal:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -199,9 +191,6 @@ func (pt *PSTechnical) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("DribbleSuccess=")
 	builder.WriteString(fmt.Sprintf("%v", pt.DribbleSuccess))
-	builder.WriteString(", ")
-	builder.WriteString("DribblePast=")
-	builder.WriteString(fmt.Sprintf("%v", pt.DribblePast))
 	builder.WriteString(", ")
 	builder.WriteString("PassesTotal=")
 	builder.WriteString(fmt.Sprintf("%v", pt.PassesTotal))

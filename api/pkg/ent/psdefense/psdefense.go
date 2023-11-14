@@ -22,6 +22,8 @@ const (
 	FieldInterceptions = "interceptions"
 	// FieldDuelsTotal holds the string denoting the duelstotal field in the database.
 	FieldDuelsTotal = "duels_total"
+	// FieldDribblePast holds the string denoting the dribblepast field in the database.
+	FieldDribblePast = "dribble_past"
 	// FieldWonDuels holds the string denoting the wonduels field in the database.
 	FieldWonDuels = "won_duels"
 	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
@@ -46,6 +48,7 @@ var Columns = []string{
 	FieldBlocks,
 	FieldInterceptions,
 	FieldDuelsTotal,
+	FieldDribblePast,
 	FieldWonDuels,
 	FieldLastUpdated,
 }
@@ -80,6 +83,8 @@ var (
 	DefaultInterceptions int
 	// DefaultDuelsTotal holds the default value on creation for the "DuelsTotal" field.
 	DefaultDuelsTotal int
+	// DefaultDribblePast holds the default value on creation for the "DribblePast" field.
+	DefaultDribblePast int
 	// DefaultWonDuels holds the default value on creation for the "WonDuels" field.
 	DefaultWonDuels int
 	// DefaultLastUpdated holds the default value on creation for the "lastUpdated" field.
@@ -116,6 +121,11 @@ func ByDuelsTotal(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldDuelsTotal, opts...).ToFunc()
 }
 
+// ByDribblePast orders the results by the DribblePast field.
+func ByDribblePast(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldDribblePast, opts...).ToFunc()
+}
+
 // ByWonDuels orders the results by the WonDuels field.
 func ByWonDuels(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldWonDuels, opts...).ToFunc()
@@ -136,6 +146,6 @@ func newPlayerStatsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(PlayerStatsInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
+		sqlgraph.Edge(sqlgraph.O2O, true, PlayerStatsTable, PlayerStatsColumn),
 	)
 }

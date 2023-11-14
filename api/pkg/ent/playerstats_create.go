@@ -83,6 +83,21 @@ func (psc *PlayerStatsCreate) SetTeam(t *Team) *PlayerStatsCreate {
 	return psc.SetTeamID(t.ID)
 }
 
+// AddSeasonIDs adds the "season" edge to the Season entity by IDs.
+func (psc *PlayerStatsCreate) AddSeasonIDs(ids ...int) *PlayerStatsCreate {
+	psc.mutation.AddSeasonIDs(ids...)
+	return psc
+}
+
+// AddSeason adds the "season" edges to the Season entity.
+func (psc *PlayerStatsCreate) AddSeason(s ...*Season) *PlayerStatsCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return psc.AddSeasonIDs(ids...)
+}
+
 // AddPlayerEventIDs adds the "playerEvents" edge to the FixtureEvents entity by IDs.
 func (psc *PlayerStatsCreate) AddPlayerEventIDs(ids ...int) *PlayerStatsCreate {
 	psc.mutation.AddPlayerEventIDs(ids...)
@@ -128,124 +143,137 @@ func (psc *PlayerStatsCreate) AddAssistEvents(f ...*FixtureEvents) *PlayerStatsC
 	return psc.AddAssistEventIDs(ids...)
 }
 
-// AddPsGameIDs adds the "psGames" edge to the PSGames entity by IDs.
-func (psc *PlayerStatsCreate) AddPsGameIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddPsGameIDs(ids...)
+// SetPsGamesID sets the "psGames" edge to the PSGames entity by ID.
+func (psc *PlayerStatsCreate) SetPsGamesID(id int) *PlayerStatsCreate {
+	psc.mutation.SetPsGamesID(id)
 	return psc
 }
 
-// AddPsGames adds the "psGames" edges to the PSGames entity.
-func (psc *PlayerStatsCreate) AddPsGames(p ...*PSGames) *PlayerStatsCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePsGamesID sets the "psGames" edge to the PSGames entity by ID if the given value is not nil.
+func (psc *PlayerStatsCreate) SetNillablePsGamesID(id *int) *PlayerStatsCreate {
+	if id != nil {
+		psc = psc.SetPsGamesID(*id)
 	}
-	return psc.AddPsGameIDs(ids...)
-}
-
-// AddPsShootingIDs adds the "psShooting" edge to the PSShooting entity by IDs.
-func (psc *PlayerStatsCreate) AddPsShootingIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddPsShootingIDs(ids...)
 	return psc
 }
 
-// AddPsShooting adds the "psShooting" edges to the PSShooting entity.
-func (psc *PlayerStatsCreate) AddPsShooting(p ...*PSShooting) *PlayerStatsCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return psc.AddPsShootingIDs(ids...)
+// SetPsGames sets the "psGames" edge to the PSGames entity.
+func (psc *PlayerStatsCreate) SetPsGames(p *PSGames) *PlayerStatsCreate {
+	return psc.SetPsGamesID(p.ID)
 }
 
-// AddPsDefenseIDs adds the "psDefense" edge to the PSDefense entity by IDs.
-func (psc *PlayerStatsCreate) AddPsDefenseIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddPsDefenseIDs(ids...)
+// SetPsShootingID sets the "psShooting" edge to the PSShooting entity by ID.
+func (psc *PlayerStatsCreate) SetPsShootingID(id int) *PlayerStatsCreate {
+	psc.mutation.SetPsShootingID(id)
 	return psc
 }
 
-// AddPsDefense adds the "psDefense" edges to the PSDefense entity.
-func (psc *PlayerStatsCreate) AddPsDefense(p ...*PSDefense) *PlayerStatsCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePsShootingID sets the "psShooting" edge to the PSShooting entity by ID if the given value is not nil.
+func (psc *PlayerStatsCreate) SetNillablePsShootingID(id *int) *PlayerStatsCreate {
+	if id != nil {
+		psc = psc.SetPsShootingID(*id)
 	}
-	return psc.AddPsDefenseIDs(ids...)
-}
-
-// AddPsTechnicalIDs adds the "psTechnical" edge to the PSTechnical entity by IDs.
-func (psc *PlayerStatsCreate) AddPsTechnicalIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddPsTechnicalIDs(ids...)
 	return psc
 }
 
-// AddPsTechnical adds the "psTechnical" edges to the PSTechnical entity.
-func (psc *PlayerStatsCreate) AddPsTechnical(p ...*PSTechnical) *PlayerStatsCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return psc.AddPsTechnicalIDs(ids...)
+// SetPsShooting sets the "psShooting" edge to the PSShooting entity.
+func (psc *PlayerStatsCreate) SetPsShooting(p *PSShooting) *PlayerStatsCreate {
+	return psc.SetPsShootingID(p.ID)
 }
 
-// AddPsPenaltyIDs adds the "psPenalty" edge to the PSPenalty entity by IDs.
-func (psc *PlayerStatsCreate) AddPsPenaltyIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddPsPenaltyIDs(ids...)
+// SetPsDefenseID sets the "psDefense" edge to the PSDefense entity by ID.
+func (psc *PlayerStatsCreate) SetPsDefenseID(id int) *PlayerStatsCreate {
+	psc.mutation.SetPsDefenseID(id)
 	return psc
 }
 
-// AddPsPenalty adds the "psPenalty" edges to the PSPenalty entity.
-func (psc *PlayerStatsCreate) AddPsPenalty(p ...*PSPenalty) *PlayerStatsCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetNillablePsDefenseID sets the "psDefense" edge to the PSDefense entity by ID if the given value is not nil.
+func (psc *PlayerStatsCreate) SetNillablePsDefenseID(id *int) *PlayerStatsCreate {
+	if id != nil {
+		psc = psc.SetPsDefenseID(*id)
 	}
-	return psc.AddPsPenaltyIDs(ids...)
-}
-
-// AddPsSubstituteIDs adds the "psSubstitutes" edge to the PSSubstitutes entity by IDs.
-func (psc *PlayerStatsCreate) AddPsSubstituteIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddPsSubstituteIDs(ids...)
 	return psc
 }
 
-// AddPsSubstitutes adds the "psSubstitutes" edges to the PSSubstitutes entity.
-func (psc *PlayerStatsCreate) AddPsSubstitutes(p ...*PSSubstitutes) *PlayerStatsCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return psc.AddPsSubstituteIDs(ids...)
+// SetPsDefense sets the "psDefense" edge to the PSDefense entity.
+func (psc *PlayerStatsCreate) SetPsDefense(p *PSDefense) *PlayerStatsCreate {
+	return psc.SetPsDefenseID(p.ID)
 }
 
-// AddSeasonIDs adds the "season" edge to the Season entity by IDs.
-func (psc *PlayerStatsCreate) AddSeasonIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddSeasonIDs(ids...)
+// SetPsTechnicalID sets the "psTechnical" edge to the PSTechnical entity by ID.
+func (psc *PlayerStatsCreate) SetPsTechnicalID(id int) *PlayerStatsCreate {
+	psc.mutation.SetPsTechnicalID(id)
 	return psc
 }
 
-// AddSeason adds the "season" edges to the Season entity.
-func (psc *PlayerStatsCreate) AddSeason(s ...*Season) *PlayerStatsCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
+// SetNillablePsTechnicalID sets the "psTechnical" edge to the PSTechnical entity by ID if the given value is not nil.
+func (psc *PlayerStatsCreate) SetNillablePsTechnicalID(id *int) *PlayerStatsCreate {
+	if id != nil {
+		psc = psc.SetPsTechnicalID(*id)
 	}
-	return psc.AddSeasonIDs(ids...)
-}
-
-// AddPsFairplayIDs adds the "psFairplay" edge to the PSFairplay entity by IDs.
-func (psc *PlayerStatsCreate) AddPsFairplayIDs(ids ...int) *PlayerStatsCreate {
-	psc.mutation.AddPsFairplayIDs(ids...)
 	return psc
 }
 
-// AddPsFairplay adds the "psFairplay" edges to the PSFairplay entity.
-func (psc *PlayerStatsCreate) AddPsFairplay(p ...*PSFairplay) *PlayerStatsCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
+// SetPsTechnical sets the "psTechnical" edge to the PSTechnical entity.
+func (psc *PlayerStatsCreate) SetPsTechnical(p *PSTechnical) *PlayerStatsCreate {
+	return psc.SetPsTechnicalID(p.ID)
+}
+
+// SetPsPenaltyID sets the "psPenalty" edge to the PSPenalty entity by ID.
+func (psc *PlayerStatsCreate) SetPsPenaltyID(id int) *PlayerStatsCreate {
+	psc.mutation.SetPsPenaltyID(id)
+	return psc
+}
+
+// SetNillablePsPenaltyID sets the "psPenalty" edge to the PSPenalty entity by ID if the given value is not nil.
+func (psc *PlayerStatsCreate) SetNillablePsPenaltyID(id *int) *PlayerStatsCreate {
+	if id != nil {
+		psc = psc.SetPsPenaltyID(*id)
 	}
-	return psc.AddPsFairplayIDs(ids...)
+	return psc
+}
+
+// SetPsPenalty sets the "psPenalty" edge to the PSPenalty entity.
+func (psc *PlayerStatsCreate) SetPsPenalty(p *PSPenalty) *PlayerStatsCreate {
+	return psc.SetPsPenaltyID(p.ID)
+}
+
+// SetPsSubstitutesID sets the "psSubstitutes" edge to the PSSubstitutes entity by ID.
+func (psc *PlayerStatsCreate) SetPsSubstitutesID(id int) *PlayerStatsCreate {
+	psc.mutation.SetPsSubstitutesID(id)
+	return psc
+}
+
+// SetNillablePsSubstitutesID sets the "psSubstitutes" edge to the PSSubstitutes entity by ID if the given value is not nil.
+func (psc *PlayerStatsCreate) SetNillablePsSubstitutesID(id *int) *PlayerStatsCreate {
+	if id != nil {
+		psc = psc.SetPsSubstitutesID(*id)
+	}
+	return psc
+}
+
+// SetPsSubstitutes sets the "psSubstitutes" edge to the PSSubstitutes entity.
+func (psc *PlayerStatsCreate) SetPsSubstitutes(p *PSSubstitutes) *PlayerStatsCreate {
+	return psc.SetPsSubstitutesID(p.ID)
+}
+
+// SetPsFairplayID sets the "psFairplay" edge to the PSFairplay entity by ID.
+func (psc *PlayerStatsCreate) SetPsFairplayID(id int) *PlayerStatsCreate {
+	psc.mutation.SetPsFairplayID(id)
+	return psc
+}
+
+// SetNillablePsFairplayID sets the "psFairplay" edge to the PSFairplay entity by ID if the given value is not nil.
+func (psc *PlayerStatsCreate) SetNillablePsFairplayID(id *int) *PlayerStatsCreate {
+	if id != nil {
+		psc = psc.SetPsFairplayID(*id)
+	}
+	return psc
+}
+
+// SetPsFairplay sets the "psFairplay" edge to the PSFairplay entity.
+func (psc *PlayerStatsCreate) SetPsFairplay(p *PSFairplay) *PlayerStatsCreate {
+	return psc.SetPsFairplayID(p.ID)
 }
 
 // Mutation returns the PlayerStatsMutation object of the builder.
@@ -355,6 +383,22 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 		_node.team_player_stats = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
+	if nodes := psc.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   playerstats.SeasonTable,
+			Columns: playerstats.SeasonPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
 	if nodes := psc.mutation.PlayerEventsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
@@ -405,7 +449,7 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsGamesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   playerstats.PsGamesTable,
 			Columns: []string{playerstats.PsGamesColumn},
@@ -421,7 +465,7 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsShootingIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   playerstats.PsShootingTable,
 			Columns: []string{playerstats.PsShootingColumn},
@@ -437,7 +481,7 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsDefenseIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   playerstats.PsDefenseTable,
 			Columns: []string{playerstats.PsDefenseColumn},
@@ -453,7 +497,7 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsTechnicalIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   playerstats.PsTechnicalTable,
 			Columns: []string{playerstats.PsTechnicalColumn},
@@ -469,7 +513,7 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsPenaltyIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   playerstats.PsPenaltyTable,
 			Columns: []string{playerstats.PsPenaltyColumn},
@@ -485,7 +529,7 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 	}
 	if nodes := psc.mutation.PsSubstitutesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   playerstats.PsSubstitutesTable,
 			Columns: []string{playerstats.PsSubstitutesColumn},
@@ -499,25 +543,9 @@ func (psc *PlayerStatsCreate) createSpec() (*PlayerStats, *sqlgraph.CreateSpec) 
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := psc.mutation.SeasonIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   playerstats.SeasonTable,
-			Columns: playerstats.SeasonPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := psc.mutation.PsFairplayIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.O2O,
 			Inverse: false,
 			Table:   playerstats.PsFairplayTable,
 			Columns: []string{playerstats.PsFairplayColumn},

@@ -205,7 +205,7 @@ func (psu *PSSubstitutesUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	}
 	if psu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pssubstitutes.PlayerStatsTable,
 			Columns: []string{pssubstitutes.PlayerStatsColumn},
@@ -218,7 +218,7 @@ func (psu *PSSubstitutesUpdate) sqlSave(ctx context.Context) (n int, err error) 
 	}
 	if nodes := psu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pssubstitutes.PlayerStatsTable,
 			Columns: []string{pssubstitutes.PlayerStatsColumn},
@@ -458,7 +458,7 @@ func (psuo *PSSubstitutesUpdateOne) sqlSave(ctx context.Context) (_node *PSSubst
 	}
 	if psuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pssubstitutes.PlayerStatsTable,
 			Columns: []string{pssubstitutes.PlayerStatsColumn},
@@ -471,7 +471,7 @@ func (psuo *PSSubstitutesUpdateOne) sqlSave(ctx context.Context) (_node *PSSubst
 	}
 	if nodes := psuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pssubstitutes.PlayerStatsTable,
 			Columns: []string{pssubstitutes.PlayerStatsColumn},

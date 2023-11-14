@@ -259,7 +259,7 @@ func (ppu *PSPenaltyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if ppu.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
 			Columns: []string{pspenalty.PlayerStatsColumn},
@@ -272,7 +272,7 @@ func (ppu *PSPenaltyUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := ppu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
 			Columns: []string{pspenalty.PlayerStatsColumn},
@@ -566,7 +566,7 @@ func (ppuo *PSPenaltyUpdateOne) sqlSave(ctx context.Context) (_node *PSPenalty, 
 	}
 	if ppuo.mutation.PlayerStatsCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
 			Columns: []string{pspenalty.PlayerStatsColumn},
@@ -579,7 +579,7 @@ func (ppuo *PSPenaltyUpdateOne) sqlSave(ctx context.Context) (_node *PSPenalty, 
 	}
 	if nodes := ppuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pspenalty.PlayerStatsTable,
 			Columns: []string{pspenalty.PlayerStatsColumn},

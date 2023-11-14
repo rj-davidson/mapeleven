@@ -63,20 +63,6 @@ func (ptc *PSTechnicalCreate) SetNillableDribbleSuccess(i *int) *PSTechnicalCrea
 	return ptc
 }
 
-// SetDribblePast sets the "DribblePast" field.
-func (ptc *PSTechnicalCreate) SetDribblePast(i int) *PSTechnicalCreate {
-	ptc.mutation.SetDribblePast(i)
-	return ptc
-}
-
-// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
-func (ptc *PSTechnicalCreate) SetNillableDribblePast(i *int) *PSTechnicalCreate {
-	if i != nil {
-		ptc.SetDribblePast(*i)
-	}
-	return ptc
-}
-
 // SetPassesTotal sets the "PassesTotal" field.
 func (ptc *PSTechnicalCreate) SetPassesTotal(i int) *PSTechnicalCreate {
 	ptc.mutation.SetPassesTotal(i)
@@ -199,10 +185,6 @@ func (ptc *PSTechnicalCreate) defaults() {
 		v := pstechnical.DefaultDribbleSuccess
 		ptc.mutation.SetDribbleSuccess(v)
 	}
-	if _, ok := ptc.mutation.DribblePast(); !ok {
-		v := pstechnical.DefaultDribblePast
-		ptc.mutation.SetDribblePast(v)
-	}
 	if _, ok := ptc.mutation.PassesTotal(); !ok {
 		v := pstechnical.DefaultPassesTotal
 		ptc.mutation.SetPassesTotal(v)
@@ -231,9 +213,6 @@ func (ptc *PSTechnicalCreate) check() error {
 	}
 	if _, ok := ptc.mutation.DribbleSuccess(); !ok {
 		return &ValidationError{Name: "DribbleSuccess", err: errors.New(`ent: missing required field "PSTechnical.DribbleSuccess"`)}
-	}
-	if _, ok := ptc.mutation.DribblePast(); !ok {
-		return &ValidationError{Name: "DribblePast", err: errors.New(`ent: missing required field "PSTechnical.DribblePast"`)}
 	}
 	if _, ok := ptc.mutation.PassesTotal(); !ok {
 		return &ValidationError{Name: "PassesTotal", err: errors.New(`ent: missing required field "PSTechnical.PassesTotal"`)}
@@ -282,10 +261,6 @@ func (ptc *PSTechnicalCreate) createSpec() (*PSTechnical, *sqlgraph.CreateSpec) 
 		_spec.SetField(pstechnical.FieldDribbleSuccess, field.TypeInt, value)
 		_node.DribbleSuccess = value
 	}
-	if value, ok := ptc.mutation.DribblePast(); ok {
-		_spec.SetField(pstechnical.FieldDribblePast, field.TypeInt, value)
-		_node.DribblePast = value
-	}
 	if value, ok := ptc.mutation.PassesTotal(); ok {
 		_spec.SetField(pstechnical.FieldPassesTotal, field.TypeInt, value)
 		_node.PassesTotal = value
@@ -304,7 +279,7 @@ func (ptc *PSTechnicalCreate) createSpec() (*PSTechnical, *sqlgraph.CreateSpec) 
 	}
 	if nodes := ptc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   pstechnical.PlayerStatsTable,
 			Columns: []string{pstechnical.PlayerStatsColumn},

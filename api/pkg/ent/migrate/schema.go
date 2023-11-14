@@ -277,9 +277,10 @@ var (
 		{Name: "blocks", Type: field.TypeInt, Default: 0},
 		{Name: "interceptions", Type: field.TypeInt, Default: 0},
 		{Name: "duels_total", Type: field.TypeInt, Default: 0},
+		{Name: "dribble_past", Type: field.TypeInt, Default: 0},
 		{Name: "won_duels", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
-		{Name: "player_stats_ps_defense", Type: field.TypeInt, Nullable: true},
+		{Name: "player_stats_ps_defense", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PsDefensesTable holds the schema information for the "ps_defenses" table.
 	PsDefensesTable = &schema.Table{
@@ -289,7 +290,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ps_defenses_player_stats_psDefense",
-				Columns:    []*schema.Column{PsDefensesColumns[7]},
+				Columns:    []*schema.Column{PsDefensesColumns[8]},
 				RefColumns: []*schema.Column{PlayerStatsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -304,7 +305,7 @@ var (
 		{Name: "red", Type: field.TypeInt, Default: 0},
 		{Name: "penalty_conceded", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
-		{Name: "player_stats_ps_fairplay", Type: field.TypeInt, Nullable: true},
+		{Name: "player_stats_ps_fairplay", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PsFairplaysTable holds the schema information for the "ps_fairplays" table.
 	PsFairplaysTable = &schema.Table{
@@ -331,7 +332,7 @@ var (
 		{Name: "rating", Type: field.TypeString, Default: ""},
 		{Name: "captain", Type: field.TypeBool, Default: false},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
-		{Name: "player_stats_ps_games", Type: field.TypeInt, Nullable: true},
+		{Name: "player_stats_ps_games", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PsGamesTable holds the schema information for the "ps_games" table.
 	PsGamesTable = &schema.Table{
@@ -356,7 +357,7 @@ var (
 		{Name: "saved", Type: field.TypeInt, Default: 0},
 		{Name: "committed", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
-		{Name: "player_stats_ps_penalty", Type: field.TypeInt, Nullable: true},
+		{Name: "player_stats_ps_penalty", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PsPenaltiesTable holds the schema information for the "ps_penalties" table.
 	PsPenaltiesTable = &schema.Table{
@@ -382,7 +383,7 @@ var (
 		{Name: "shots", Type: field.TypeInt, Default: 0},
 		{Name: "on_target", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
-		{Name: "player_stats_ps_shooting", Type: field.TypeInt, Nullable: true},
+		{Name: "player_stats_ps_shooting", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PsShootingsTable holds the schema information for the "ps_shootings" table.
 	PsShootingsTable = &schema.Table{
@@ -405,7 +406,7 @@ var (
 		{Name: "out", Type: field.TypeInt, Default: 0},
 		{Name: "bench", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
-		{Name: "player_stats_ps_substitutes", Type: field.TypeInt, Nullable: true},
+		{Name: "player_stats_ps_substitutes", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PsSubstitutesTable holds the schema information for the "ps_substitutes" table.
 	PsSubstitutesTable = &schema.Table{
@@ -427,12 +428,11 @@ var (
 		{Name: "fouls_drawn", Type: field.TypeInt, Default: 0},
 		{Name: "dribble_attempts", Type: field.TypeInt, Default: 0},
 		{Name: "dribble_success", Type: field.TypeInt, Default: 0},
-		{Name: "dribble_past", Type: field.TypeInt, Default: 0},
 		{Name: "passes_total", Type: field.TypeInt, Default: 0},
 		{Name: "passes_key", Type: field.TypeInt, Default: 0},
 		{Name: "passes_accuracy", Type: field.TypeInt, Default: 0},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
-		{Name: "player_stats_ps_technical", Type: field.TypeInt, Nullable: true},
+		{Name: "player_stats_ps_technical", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// PsTechnicalsTable holds the schema information for the "ps_technicals" table.
 	PsTechnicalsTable = &schema.Table{
@@ -442,7 +442,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "ps_technicals_player_stats_psTechnical",
-				Columns:    []*schema.Column{PsTechnicalsColumns[9]},
+				Columns:    []*schema.Column{PsTechnicalsColumns[8]},
 				RefColumns: []*schema.Column{PlayerStatsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

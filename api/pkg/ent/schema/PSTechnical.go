@@ -18,7 +18,6 @@ func (PSTechnical) Fields() []ent.Field {
 		field.Int("FoulsDrawn").Default(0),
 		field.Int("DribbleAttempts").Default(0),
 		field.Int("DribbleSuccess").Default(0),
-		field.Int("DribblePast").Default(0),
 		field.Int("PassesTotal").Default(0),
 		field.Int("PassesKey").Default(0),
 		field.Int("PassesAccuracy").Default(0),

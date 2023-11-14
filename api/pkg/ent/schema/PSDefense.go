@@ -19,6 +19,7 @@ func (PSDefense) Fields() []ent.Field {
 		field.Int("Blocks").Default(0),
 		field.Int("Interceptions").Default(0),
 		field.Int("DuelsTotal").Default(0),
+		field.Int("DribblePast").Default(0),
 		field.Int("WonDuels").Default(0),
 		field.Time("lastUpdated").
 			Default(time.Now).

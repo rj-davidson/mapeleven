@@ -77,6 +77,20 @@ func (pdc *PSDefenseCreate) SetNillableDuelsTotal(i *int) *PSDefenseCreate {
 	return pdc
 }
 
+// SetDribblePast sets the "DribblePast" field.
+func (pdc *PSDefenseCreate) SetDribblePast(i int) *PSDefenseCreate {
+	pdc.mutation.SetDribblePast(i)
+	return pdc
+}
+
+// SetNillableDribblePast sets the "DribblePast" field if the given value is not nil.
+func (pdc *PSDefenseCreate) SetNillableDribblePast(i *int) *PSDefenseCreate {
+	if i != nil {
+		pdc.SetDribblePast(*i)
+	}
+	return pdc
+}
+
 // SetWonDuels sets the "WonDuels" field.
 func (pdc *PSDefenseCreate) SetWonDuels(i int) *PSDefenseCreate {
 	pdc.mutation.SetWonDuels(i)
@@ -175,6 +189,10 @@ func (pdc *PSDefenseCreate) defaults() {
 		v := psdefense.DefaultDuelsTotal
 		pdc.mutation.SetDuelsTotal(v)
 	}
+	if _, ok := pdc.mutation.DribblePast(); !ok {
+		v := psdefense.DefaultDribblePast
+		pdc.mutation.SetDribblePast(v)
+	}
 	if _, ok := pdc.mutation.WonDuels(); !ok {
 		v := psdefense.DefaultWonDuels
 		pdc.mutation.SetWonDuels(v)
@@ -198,6 +216,9 @@ func (pdc *PSDefenseCreate) check() error {
 	}
 	if _, ok := pdc.mutation.DuelsTotal(); !ok {
 		return &ValidationError{Name: "DuelsTotal", err: errors.New(`ent: missing required field "PSDefense.DuelsTotal"`)}
+	}
+	if _, ok := pdc.mutation.DribblePast(); !ok {
+		return &ValidationError{Name: "DribblePast", err: errors.New(`ent: missing required field "PSDefense.DribblePast"`)}
 	}
 	if _, ok := pdc.mutation.WonDuels(); !ok {
 		return &ValidationError{Name: "WonDuels", err: errors.New(`ent: missing required field "PSDefense.WonDuels"`)}
@@ -244,6 +265,10 @@ func (pdc *PSDefenseCreate) createSpec() (*PSDefense, *sqlgraph.CreateSpec) {
 		_spec.SetField(psdefense.FieldDuelsTotal, field.TypeInt, value)
 		_node.DuelsTotal = value
 	}
+	if value, ok := pdc.mutation.DribblePast(); ok {
+		_spec.SetField(psdefense.FieldDribblePast, field.TypeInt, value)
+		_node.DribblePast = value
+	}
 	if value, ok := pdc.mutation.WonDuels(); ok {
 		_spec.SetField(psdefense.FieldWonDuels, field.TypeInt, value)
 		_node.WonDuels = value
@@ -254,7 +279,7 @@ func (pdc *PSDefenseCreate) createSpec() (*PSDefense, *sqlgraph.CreateSpec) {
 	}
 	if nodes := pdc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
+			Rel:     sqlgraph.O2O,
 			Inverse: true,
 			Table:   psdefense.PlayerStatsTable,
 			Columns: []string{psdefense.PlayerStatsColumn},

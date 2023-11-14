@@ -36,6 +36,7 @@ type PlayerStatsQuery struct {
 	predicates        []predicate.PlayerStats
 	withPlayer        *PlayerQuery
 	withTeam          *TeamQuery
+	withSeason        *SeasonQuery
 	withPlayerEvents  *FixtureEventsQuery
 	withMatchPlayer   *MatchPlayerQuery
 	withAssistEvents  *FixtureEventsQuery
@@ -45,7 +46,6 @@ type PlayerStatsQuery struct {
 	withPsTechnical   *PSTechnicalQuery
 	withPsPenalty     *PSPenaltyQuery
 	withPsSubstitutes *PSSubstitutesQuery
-	withSeason        *SeasonQuery
 	withPsFairplay    *PSFairplayQuery
 	withFKs           bool
 	// intermediate query (i.e. traversal path).
@@ -121,6 +121,28 @@ func (psq *PlayerStatsQuery) QueryTeam() *TeamQuery {
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
 			sqlgraph.To(team.Table, team.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, playerstats.TeamTable, playerstats.TeamColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QuerySeason chains the current query on the "season" edge.
+func (psq *PlayerStatsQuery) QuerySeason() *SeasonQuery {
+	query := (&SeasonClient{config: psq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := psq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := psq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
+			sqlgraph.To(season.Table, season.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, playerstats.SeasonTable, playerstats.SeasonPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
 		return fromU, nil
@@ -208,7 +230,7 @@ func (psq *PlayerStatsQuery) QueryPsGames() *PSGamesQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
 			sqlgraph.To(psgames.Table, psgames.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsGamesTable, playerstats.PsGamesColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsGamesTable, playerstats.PsGamesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
 		return fromU, nil
@@ -230,7 +252,7 @@ func (psq *PlayerStatsQuery) QueryPsShooting() *PSShootingQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
 			sqlgraph.To(psshooting.Table, psshooting.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsShootingTable, playerstats.PsShootingColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsShootingTable, playerstats.PsShootingColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
 		return fromU, nil
@@ -252,7 +274,7 @@ func (psq *PlayerStatsQuery) QueryPsDefense() *PSDefenseQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
 			sqlgraph.To(psdefense.Table, psdefense.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsDefenseTable, playerstats.PsDefenseColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsDefenseTable, playerstats.PsDefenseColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
 		return fromU, nil
@@ -274,7 +296,7 @@ func (psq *PlayerStatsQuery) QueryPsTechnical() *PSTechnicalQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
 			sqlgraph.To(pstechnical.Table, pstechnical.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsTechnicalTable, playerstats.PsTechnicalColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsTechnicalTable, playerstats.PsTechnicalColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
 		return fromU, nil
@@ -296,7 +318,7 @@ func (psq *PlayerStatsQuery) QueryPsPenalty() *PSPenaltyQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
 			sqlgraph.To(pspenalty.Table, pspenalty.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsPenaltyTable, playerstats.PsPenaltyColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsPenaltyTable, playerstats.PsPenaltyColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,29 +340,7 @@ func (psq *PlayerStatsQuery) QueryPsSubstitutes() *PSSubstitutesQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
 			sqlgraph.To(pssubstitutes.Table, pssubstitutes.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsSubstitutesTable, playerstats.PsSubstitutesColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QuerySeason chains the current query on the "season" edge.
-func (psq *PlayerStatsQuery) QuerySeason() *SeasonQuery {
-	query := (&SeasonClient{config: psq.config}).Query()
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := psq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := psq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
-			sqlgraph.To(season.Table, season.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, playerstats.SeasonTable, playerstats.SeasonPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsSubstitutesTable, playerstats.PsSubstitutesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
 		return fromU, nil
@@ -362,7 +362,7 @@ func (psq *PlayerStatsQuery) QueryPsFairplay() *PSFairplayQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(playerstats.Table, playerstats.FieldID, selector),
 			sqlgraph.To(psfairplay.Table, psfairplay.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, playerstats.PsFairplayTable, playerstats.PsFairplayColumn),
+			sqlgraph.Edge(sqlgraph.O2O, false, playerstats.PsFairplayTable, playerstats.PsFairplayColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(psq.driver.Dialect(), step)
 		return fromU, nil
@@ -564,6 +564,7 @@ func (psq *PlayerStatsQuery) Clone() *PlayerStatsQuery {
 		predicates:        append([]predicate.PlayerStats{}, psq.predicates...),
 		withPlayer:        psq.withPlayer.Clone(),
 		withTeam:          psq.withTeam.Clone(),
+		withSeason:        psq.withSeason.Clone(),
 		withPlayerEvents:  psq.withPlayerEvents.Clone(),
 		withMatchPlayer:   psq.withMatchPlayer.Clone(),
 		withAssistEvents:  psq.withAssistEvents.Clone(),
@@ -573,7 +574,6 @@ func (psq *PlayerStatsQuery) Clone() *PlayerStatsQuery {
 		withPsTechnical:   psq.withPsTechnical.Clone(),
 		withPsPenalty:     psq.withPsPenalty.Clone(),
 		withPsSubstitutes: psq.withPsSubstitutes.Clone(),
-		withSeason:        psq.withSeason.Clone(),
 		withPsFairplay:    psq.withPsFairplay.Clone(),
 		// clone intermediate query.
 		sql:  psq.sql.Clone(),
@@ -600,6 +600,17 @@ func (psq *PlayerStatsQuery) WithTeam(opts ...func(*TeamQuery)) *PlayerStatsQuer
 		opt(query)
 	}
 	psq.withTeam = query
+	return psq
+}
+
+// WithSeason tells the query-builder to eager-load the nodes that are connected to
+// the "season" edge. The optional arguments are used to configure the query builder of the edge.
+func (psq *PlayerStatsQuery) WithSeason(opts ...func(*SeasonQuery)) *PlayerStatsQuery {
+	query := (&SeasonClient{config: psq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	psq.withSeason = query
 	return psq
 }
 
@@ -702,17 +713,6 @@ func (psq *PlayerStatsQuery) WithPsSubstitutes(opts ...func(*PSSubstitutesQuery)
 	return psq
 }
 
-// WithSeason tells the query-builder to eager-load the nodes that are connected to
-// the "season" edge. The optional arguments are used to configure the query builder of the edge.
-func (psq *PlayerStatsQuery) WithSeason(opts ...func(*SeasonQuery)) *PlayerStatsQuery {
-	query := (&SeasonClient{config: psq.config}).Query()
-	for _, opt := range opts {
-		opt(query)
-	}
-	psq.withSeason = query
-	return psq
-}
-
 // WithPsFairplay tells the query-builder to eager-load the nodes that are connected to
 // the "psFairplay" edge. The optional arguments are used to configure the query builder of the edge.
 func (psq *PlayerStatsQuery) WithPsFairplay(opts ...func(*PSFairplayQuery)) *PlayerStatsQuery {
@@ -806,6 +806,7 @@ func (psq *PlayerStatsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		loadedTypes = [13]bool{
 			psq.withPlayer != nil,
 			psq.withTeam != nil,
+			psq.withSeason != nil,
 			psq.withPlayerEvents != nil,
 			psq.withMatchPlayer != nil,
 			psq.withAssistEvents != nil,
@@ -815,7 +816,6 @@ func (psq *PlayerStatsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 			psq.withPsTechnical != nil,
 			psq.withPsPenalty != nil,
 			psq.withPsSubstitutes != nil,
-			psq.withSeason != nil,
 			psq.withPsFairplay != nil,
 		}
 	)
@@ -855,6 +855,13 @@ func (psq *PlayerStatsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 			return nil, err
 		}
 	}
+	if query := psq.withSeason; query != nil {
+		if err := psq.loadSeason(ctx, query, nodes,
+			func(n *PlayerStats) { n.Edges.Season = []*Season{} },
+			func(n *PlayerStats, e *Season) { n.Edges.Season = append(n.Edges.Season, e) }); err != nil {
+			return nil, err
+		}
+	}
 	if query := psq.withPlayerEvents; query != nil {
 		if err := psq.loadPlayerEvents(ctx, query, nodes,
 			func(n *PlayerStats) { n.Edges.PlayerEvents = []*FixtureEvents{} },
@@ -877,58 +884,44 @@ func (psq *PlayerStatsQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		}
 	}
 	if query := psq.withPsGames; query != nil {
-		if err := psq.loadPsGames(ctx, query, nodes,
-			func(n *PlayerStats) { n.Edges.PsGames = []*PSGames{} },
-			func(n *PlayerStats, e *PSGames) { n.Edges.PsGames = append(n.Edges.PsGames, e) }); err != nil {
+		if err := psq.loadPsGames(ctx, query, nodes, nil,
+			func(n *PlayerStats, e *PSGames) { n.Edges.PsGames = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := psq.withPsShooting; query != nil {
-		if err := psq.loadPsShooting(ctx, query, nodes,
-			func(n *PlayerStats) { n.Edges.PsShooting = []*PSShooting{} },
-			func(n *PlayerStats, e *PSShooting) { n.Edges.PsShooting = append(n.Edges.PsShooting, e) }); err != nil {
+		if err := psq.loadPsShooting(ctx, query, nodes, nil,
+			func(n *PlayerStats, e *PSShooting) { n.Edges.PsShooting = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := psq.withPsDefense; query != nil {
-		if err := psq.loadPsDefense(ctx, query, nodes,
-			func(n *PlayerStats) { n.Edges.PsDefense = []*PSDefense{} },
-			func(n *PlayerStats, e *PSDefense) { n.Edges.PsDefense = append(n.Edges.PsDefense, e) }); err != nil {
+		if err := psq.loadPsDefense(ctx, query, nodes, nil,
+			func(n *PlayerStats, e *PSDefense) { n.Edges.PsDefense = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := psq.withPsTechnical; query != nil {
-		if err := psq.loadPsTechnical(ctx, query, nodes,
-			func(n *PlayerStats) { n.Edges.PsTechnical = []*PSTechnical{} },
-			func(n *PlayerStats, e *PSTechnical) { n.Edges.PsTechnical = append(n.Edges.PsTechnical, e) }); err != nil {
+		if err := psq.loadPsTechnical(ctx, query, nodes, nil,
+			func(n *PlayerStats, e *PSTechnical) { n.Edges.PsTechnical = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := psq.withPsPenalty; query != nil {
-		if err := psq.loadPsPenalty(ctx, query, nodes,
-			func(n *PlayerStats) { n.Edges.PsPenalty = []*PSPenalty{} },
-			func(n *PlayerStats, e *PSPenalty) { n.Edges.PsPenalty = append(n.Edges.PsPenalty, e) }); err != nil {
+		if err := psq.loadPsPenalty(ctx, query, nodes, nil,
+			func(n *PlayerStats, e *PSPenalty) { n.Edges.PsPenalty = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := psq.withPsSubstitutes; query != nil {
-		if err := psq.loadPsSubstitutes(ctx, query, nodes,
-			func(n *PlayerStats) { n.Edges.PsSubstitutes = []*PSSubstitutes{} },
-			func(n *PlayerStats, e *PSSubstitutes) { n.Edges.PsSubstitutes = append(n.Edges.PsSubstitutes, e) }); err != nil {
-			return nil, err
-		}
-	}
-	if query := psq.withSeason; query != nil {
-		if err := psq.loadSeason(ctx, query, nodes,
-			func(n *PlayerStats) { n.Edges.Season = []*Season{} },
-			func(n *PlayerStats, e *Season) { n.Edges.Season = append(n.Edges.Season, e) }); err != nil {
+		if err := psq.loadPsSubstitutes(ctx, query, nodes, nil,
+			func(n *PlayerStats, e *PSSubstitutes) { n.Edges.PsSubstitutes = e }); err != nil {
 			return nil, err
 		}
 	}
 	if query := psq.withPsFairplay; query != nil {
-		if err := psq.loadPsFairplay(ctx, query, nodes,
-			func(n *PlayerStats) { n.Edges.PsFairplay = []*PSFairplay{} },
-			func(n *PlayerStats, e *PSFairplay) { n.Edges.PsFairplay = append(n.Edges.PsFairplay, e) }); err != nil {
+		if err := psq.loadPsFairplay(ctx, query, nodes, nil,
+			func(n *PlayerStats, e *PSFairplay) { n.Edges.PsFairplay = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -995,6 +988,67 @@ func (psq *PlayerStatsQuery) loadTeam(ctx context.Context, query *TeamQuery, nod
 		}
 		for i := range nodes {
 			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (psq *PlayerStatsQuery) loadSeason(ctx context.Context, query *SeasonQuery, nodes []*PlayerStats, init func(*PlayerStats), assign func(*PlayerStats, *Season)) error {
+	edgeIDs := make([]driver.Value, len(nodes))
+	byID := make(map[int]*PlayerStats)
+	nids := make(map[int]map[*PlayerStats]struct{})
+	for i, node := range nodes {
+		edgeIDs[i] = node.ID
+		byID[node.ID] = node
+		if init != nil {
+			init(node)
+		}
+	}
+	query.Where(func(s *sql.Selector) {
+		joinT := sql.Table(playerstats.SeasonTable)
+		s.Join(joinT).On(s.C(season.FieldID), joinT.C(playerstats.SeasonPrimaryKey[1]))
+		s.Where(sql.InValues(joinT.C(playerstats.SeasonPrimaryKey[0]), edgeIDs...))
+		columns := s.SelectedColumns()
+		s.Select(joinT.C(playerstats.SeasonPrimaryKey[0]))
+		s.AppendSelect(columns...)
+		s.SetDistinct(false)
+	})
+	if err := query.prepareQuery(ctx); err != nil {
+		return err
+	}
+	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
+		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
+			assign := spec.Assign
+			values := spec.ScanValues
+			spec.ScanValues = func(columns []string) ([]any, error) {
+				values, err := values(columns[1:])
+				if err != nil {
+					return nil, err
+				}
+				return append([]any{new(sql.NullInt64)}, values...), nil
+			}
+			spec.Assign = func(columns []string, values []any) error {
+				outValue := int(values[0].(*sql.NullInt64).Int64)
+				inValue := int(values[1].(*sql.NullInt64).Int64)
+				if nids[inValue] == nil {
+					nids[inValue] = map[*PlayerStats]struct{}{byID[outValue]: {}}
+					return assign(columns[1:], values[1:])
+				}
+				nids[inValue][byID[outValue]] = struct{}{}
+				return nil
+			}
+		})
+	})
+	neighbors, err := withInterceptors[[]*Season](ctx, query, qr, query.inters)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected "season" node returned %v`, n.ID)
+		}
+		for kn := range nodes {
+			assign(kn, n)
 		}
 	}
 	return nil
@@ -1098,9 +1152,6 @@ func (psq *PlayerStatsQuery) loadPsGames(ctx context.Context, query *PSGamesQuer
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.PSGames(func(s *sql.Selector) {
@@ -1129,9 +1180,6 @@ func (psq *PlayerStatsQuery) loadPsShooting(ctx context.Context, query *PSShooti
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.PSShooting(func(s *sql.Selector) {
@@ -1160,9 +1208,6 @@ func (psq *PlayerStatsQuery) loadPsDefense(ctx context.Context, query *PSDefense
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.PSDefense(func(s *sql.Selector) {
@@ -1191,9 +1236,6 @@ func (psq *PlayerStatsQuery) loadPsTechnical(ctx context.Context, query *PSTechn
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.PSTechnical(func(s *sql.Selector) {
@@ -1222,9 +1264,6 @@ func (psq *PlayerStatsQuery) loadPsPenalty(ctx context.Context, query *PSPenalty
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.PSPenalty(func(s *sql.Selector) {
@@ -1253,9 +1292,6 @@ func (psq *PlayerStatsQuery) loadPsSubstitutes(ctx context.Context, query *PSSub
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.PSSubstitutes(func(s *sql.Selector) {
@@ -1278,76 +1314,12 @@ func (psq *PlayerStatsQuery) loadPsSubstitutes(ctx context.Context, query *PSSub
 	}
 	return nil
 }
-func (psq *PlayerStatsQuery) loadSeason(ctx context.Context, query *SeasonQuery, nodes []*PlayerStats, init func(*PlayerStats), assign func(*PlayerStats, *Season)) error {
-	edgeIDs := make([]driver.Value, len(nodes))
-	byID := make(map[int]*PlayerStats)
-	nids := make(map[int]map[*PlayerStats]struct{})
-	for i, node := range nodes {
-		edgeIDs[i] = node.ID
-		byID[node.ID] = node
-		if init != nil {
-			init(node)
-		}
-	}
-	query.Where(func(s *sql.Selector) {
-		joinT := sql.Table(playerstats.SeasonTable)
-		s.Join(joinT).On(s.C(season.FieldID), joinT.C(playerstats.SeasonPrimaryKey[1]))
-		s.Where(sql.InValues(joinT.C(playerstats.SeasonPrimaryKey[0]), edgeIDs...))
-		columns := s.SelectedColumns()
-		s.Select(joinT.C(playerstats.SeasonPrimaryKey[0]))
-		s.AppendSelect(columns...)
-		s.SetDistinct(false)
-	})
-	if err := query.prepareQuery(ctx); err != nil {
-		return err
-	}
-	qr := QuerierFunc(func(ctx context.Context, q Query) (Value, error) {
-		return query.sqlAll(ctx, func(_ context.Context, spec *sqlgraph.QuerySpec) {
-			assign := spec.Assign
-			values := spec.ScanValues
-			spec.ScanValues = func(columns []string) ([]any, error) {
-				values, err := values(columns[1:])
-				if err != nil {
-					return nil, err
-				}
-				return append([]any{new(sql.NullInt64)}, values...), nil
-			}
-			spec.Assign = func(columns []string, values []any) error {
-				outValue := int(values[0].(*sql.NullInt64).Int64)
-				inValue := int(values[1].(*sql.NullInt64).Int64)
-				if nids[inValue] == nil {
-					nids[inValue] = map[*PlayerStats]struct{}{byID[outValue]: {}}
-					return assign(columns[1:], values[1:])
-				}
-				nids[inValue][byID[outValue]] = struct{}{}
-				return nil
-			}
-		})
-	})
-	neighbors, err := withInterceptors[[]*Season](ctx, query, qr, query.inters)
-	if err != nil {
-		return err
-	}
-	for _, n := range neighbors {
-		nodes, ok := nids[n.ID]
-		if !ok {
-			return fmt.Errorf(`unexpected "season" node returned %v`, n.ID)
-		}
-		for kn := range nodes {
-			assign(kn, n)
-		}
-	}
-	return nil
-}
 func (psq *PlayerStatsQuery) loadPsFairplay(ctx context.Context, query *PSFairplayQuery, nodes []*PlayerStats, init func(*PlayerStats), assign func(*PlayerStats, *PSFairplay)) error {
 	fks := make([]driver.Value, 0, len(nodes))
 	nodeids := make(map[int]*PlayerStats)
 	for i := range nodes {
 		fks = append(fks, nodes[i].ID)
 		nodeids[nodes[i].ID] = nodes[i]
-		if init != nil {
-			init(nodes[i])
-		}
 	}
 	query.withFKs = true
 	query.Where(predicate.PSFairplay(func(s *sql.Selector) {

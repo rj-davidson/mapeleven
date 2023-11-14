@@ -125,12 +125,16 @@ func init() {
 	psdefenseDescDuelsTotal := psdefenseFields[3].Descriptor()
 	// psdefense.DefaultDuelsTotal holds the default value on creation for the DuelsTotal field.
 	psdefense.DefaultDuelsTotal = psdefenseDescDuelsTotal.Default.(int)
+	// psdefenseDescDribblePast is the schema descriptor for DribblePast field.
+	psdefenseDescDribblePast := psdefenseFields[4].Descriptor()
+	// psdefense.DefaultDribblePast holds the default value on creation for the DribblePast field.
+	psdefense.DefaultDribblePast = psdefenseDescDribblePast.Default.(int)
 	// psdefenseDescWonDuels is the schema descriptor for WonDuels field.
-	psdefenseDescWonDuels := psdefenseFields[4].Descriptor()
+	psdefenseDescWonDuels := psdefenseFields[5].Descriptor()
 	// psdefense.DefaultWonDuels holds the default value on creation for the WonDuels field.
 	psdefense.DefaultWonDuels = psdefenseDescWonDuels.Default.(int)
 	// psdefenseDescLastUpdated is the schema descriptor for lastUpdated field.
-	psdefenseDescLastUpdated := psdefenseFields[5].Descriptor()
+	psdefenseDescLastUpdated := psdefenseFields[6].Descriptor()
 	// psdefense.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
 	psdefense.DefaultLastUpdated = psdefenseDescLastUpdated.Default.(func() time.Time)
 	// psdefense.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
@@ -293,24 +297,20 @@ func init() {
 	pstechnicalDescDribbleSuccess := pstechnicalFields[2].Descriptor()
 	// pstechnical.DefaultDribbleSuccess holds the default value on creation for the DribbleSuccess field.
 	pstechnical.DefaultDribbleSuccess = pstechnicalDescDribbleSuccess.Default.(int)
-	// pstechnicalDescDribblePast is the schema descriptor for DribblePast field.
-	pstechnicalDescDribblePast := pstechnicalFields[3].Descriptor()
-	// pstechnical.DefaultDribblePast holds the default value on creation for the DribblePast field.
-	pstechnical.DefaultDribblePast = pstechnicalDescDribblePast.Default.(int)
 	// pstechnicalDescPassesTotal is the schema descriptor for PassesTotal field.
-	pstechnicalDescPassesTotal := pstechnicalFields[4].Descriptor()
+	pstechnicalDescPassesTotal := pstechnicalFields[3].Descriptor()
 	// pstechnical.DefaultPassesTotal holds the default value on creation for the PassesTotal field.
 	pstechnical.DefaultPassesTotal = pstechnicalDescPassesTotal.Default.(int)
 	// pstechnicalDescPassesKey is the schema descriptor for PassesKey field.
-	pstechnicalDescPassesKey := pstechnicalFields[5].Descriptor()
+	pstechnicalDescPassesKey := pstechnicalFields[4].Descriptor()
 	// pstechnical.DefaultPassesKey holds the default value on creation for the PassesKey field.
 	pstechnical.DefaultPassesKey = pstechnicalDescPassesKey.Default.(int)
 	// pstechnicalDescPassesAccuracy is the schema descriptor for PassesAccuracy field.
-	pstechnicalDescPassesAccuracy := pstechnicalFields[6].Descriptor()
+	pstechnicalDescPassesAccuracy := pstechnicalFields[5].Descriptor()
 	// pstechnical.DefaultPassesAccuracy holds the default value on creation for the PassesAccuracy field.
 	pstechnical.DefaultPassesAccuracy = pstechnicalDescPassesAccuracy.Default.(int)
 	// pstechnicalDescLastUpdated is the schema descriptor for lastUpdated field.
-	pstechnicalDescLastUpdated := pstechnicalFields[7].Descriptor()
+	pstechnicalDescLastUpdated := pstechnicalFields[6].Descriptor()
 	// pstechnical.DefaultLastUpdated holds the default value on creation for the lastUpdated field.
 	pstechnical.DefaultLastUpdated = pstechnicalDescLastUpdated.Default.(func() time.Time)
 	// pstechnical.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
