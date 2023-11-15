@@ -21,17 +21,39 @@ func NewPlayerSerializer(client *ent.Client, playerPopularityTracker map[string]
 }
 
 // GetPlayerBySlug returns a player by slug.
-func (ps *PlayerSerializer) GetPlayerBySlug(slug string, ctx context.Context) (*APIPlayer, error) {
+func (ps *PlayerSerializer) GetPlayerBySlug(ctx context.Context, slug string) (*APIPlayer, error) {
 	p, err := ps.client.Player.
 		Query().
 		Where(player.SlugEQ(slug)).
+		WithPlayerStats(func(q *ent.PlayerStatsQuery) {
+			// Include necessary sub-queries to load related data for player stats
+			q.WithPsShooting().
+				WithPsDefense().
+				WithPsTechnical().
+				WithPsFairplay().
+				WithPsGames().
+				WithPsPenalty().
+				WithPsSubstitutes().
+				WithTeam(func(tq *ent.TeamQuery) {
+					tq.WithClub().
+						WithSeason(func(sq *ent.SeasonQuery) {
+							sq.WithLeague()
+						})
+				})
+		}).
 		Only(ctx)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return ps.SerializePlayer(p, p.Popularity), nil
+	// Check if the playerPopularityTracker has an entry for this player
+	popularity := 0
+	if val, ok := ps.playerPopularityTracker[p.Slug]; ok {
+		popularity = val
+	}
+
+	return ps.SerializePlayer(p, popularity), nil
 }
 
 // GetPlayers returns all players.
@@ -79,9 +101,12 @@ func (ps *PlayerSerializer) GetPlayers(ctx context.Context) ([]*APIPlayer, error
 // SerializePlayer serializes a player entity into an APIPlayer.
 func (ps *PlayerSerializer) SerializePlayer(p *ent.Player, popularity int) *APIPlayer {
 	var playerStats []APIPlayerStats
-	for _, stat := range p.Edges.PlayerStats {
-		playerStats = append(playerStats, ps.serializePlayerStats(stat))
+	if p.Edges.PlayerStats != nil {
+		for _, stat := range p.Edges.PlayerStats {
+			playerStats = append(playerStats, ps.serializePlayerStats(stat))
+		}
 	}
+
 	return &APIPlayer{
 		Slug:       p.Slug,
 		Name:       p.Name,
@@ -98,29 +123,22 @@ func (ps *PlayerSerializer) SerializePlayer(p *ent.Player, popularity int) *APIP
 }
 
 func (ps *PlayerSerializer) serializePlayerStats(s *ent.PlayerStats) APIPlayerStats {
-	return APIPlayerStats{
-		Team: APIPSTeam{
-			Slug: s.Edges.Team.Edges.Club.Slug,
-			Name: s.Edges.Team.Edges.Club.Name,
-			Logo: s.Edges.Team.Edges.Club.Logo,
-		},
-		League: APIPSLeague{
-			Slug:    s.Edges.Team.Edges.Season.Edges.League.Slug,
-			Name:    s.Edges.Team.Edges.Season.Edges.League.Name,
-			Country: s.Edges.Team.Edges.Season.Edges.League.Edges.Country.Name,
-			Logo:    s.Edges.Team.Edges.Season.Edges.League.Logo,
-			Flag:    s.Edges.Team.Edges.Season.Edges.League.Edges.Country.Flag,
-			Season:  s.Edges.Team.Edges.Season.Year,
-		},
-		Defense: APIPSDefense{
+
+	var defense APIPSDefense
+	if s.Edges.PsDefense != nil {
+		defense = APIPSDefense{
 			TacklesTotal:  s.Edges.PsDefense.TacklesTotal,
 			Blocks:        s.Edges.PsDefense.Blocks,
 			Interceptions: s.Edges.PsDefense.Interceptions,
 			DuelsTotal:    s.Edges.PsDefense.DuelsTotal,
 			DuelsWon:      s.Edges.PsDefense.WonDuels,
 			DribblePast:   s.Edges.PsDefense.DribblePast,
-		},
-		Games: APIPSGames{
+		}
+	}
+
+	var games APIPSGames
+	if s.Edges.PsGames != nil {
+		games = APIPSGames{
 			Appearances: s.Edges.PsGames.Appearances,
 			Lineups:     s.Edges.PsGames.Lineups,
 			Minutes:     s.Edges.PsGames.Minutes,
@@ -128,41 +146,71 @@ func (ps *PlayerSerializer) serializePlayerStats(s *ent.PlayerStats) APIPlayerSt
 			Position:    s.Edges.PsGames.Position,
 			Rating:      s.Edges.PsGames.Rating,
 			Captain:     s.Edges.PsGames.Captain,
-		},
-		Shooting: APIPSShooting{
+		}
+	}
+
+	var shooting APIPSShooting
+	if s.Edges.PsShooting != nil {
+		shooting = APIPSShooting{
 			Goals:    s.Edges.PsShooting.Goals,
 			Conceded: s.Edges.PsShooting.Conceded,
 			Assists:  s.Edges.PsShooting.Assists,
 			Saves:    s.Edges.PsShooting.Saves,
 			Shots:    s.Edges.PsShooting.Shots,
 			OnTarget: s.Edges.PsShooting.OnTarget,
-		},
-		Substitutes: APIPSSubstitutes{
+		}
+	}
+
+	var substitutes APIPSSubstitutes
+	if s.Edges.PsSubstitutes != nil {
+		substitutes = APIPSSubstitutes{
 			In:    s.Edges.PsSubstitutes.In,
 			Out:   s.Edges.PsSubstitutes.Out,
 			Bench: s.Edges.PsSubstitutes.Bench,
-		},
-		Technical: APIPSTechnical{
+		}
+	}
+
+	var technical APIPSTechnical
+	if s.Edges.PsTechnical != nil {
+		technical = APIPSTechnical{
 			FoulsDrawn:      s.Edges.PsTechnical.FoulsDrawn,
 			DribbleAttempts: s.Edges.PsTechnical.DribbleAttempts,
 			DribblesSuccess: s.Edges.PsTechnical.DribbleSuccess,
 			Passes:          s.Edges.PsTechnical.PassesTotal,
 			KeyPasses:       s.Edges.PsTechnical.PassesKey,
 			PassAccuracy:    s.Edges.PsTechnical.PassesAccuracy,
-		},
-		Penalty: APIPSPenalty{
+		}
+	}
+
+	var penalty APIPSPenalty
+	if s.Edges.PsPenalty != nil {
+		penalty = APIPSPenalty{
 			Won:       s.Edges.PsPenalty.Won,
 			Committed: s.Edges.PsPenalty.Committed,
 			Scored:    s.Edges.PsPenalty.Scored,
 			Saved:     s.Edges.PsPenalty.Saved,
 			Missed:    s.Edges.PsPenalty.Missed,
-		},
-		Fairplay: APIPSFairplay{
+		}
+	}
+
+	var fairplay APIPSFairplay
+	if s.Edges.PsFairplay != nil {
+		fairplay = APIPSFairplay{
 			Yellow:            s.Edges.PsFairplay.Yellow,
 			YellowRed:         s.Edges.PsFairplay.YellowRed,
 			Red:               s.Edges.PsFairplay.Red,
 			FoulsCommitted:    s.Edges.PsFairplay.FoulsCommitted,
 			PenaltiesConceded: s.Edges.PsFairplay.PenaltyConceded,
-		},
+		}
+	}
+
+	return APIPlayerStats{
+		Defense:     defense,
+		Games:       games,
+		Shooting:    shooting,
+		Substitutes: substitutes,
+		Technical:   technical,
+		Penalty:     penalty,
+		Fairplay:    fairplay,
 	}
 }

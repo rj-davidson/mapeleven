@@ -13,7 +13,7 @@ build: db server client
 
 db:
 	@echo "+ $@"
-	cd api/cmd/db && go build -o ../../bin/db ./main.go
+	cd api/cmd/db && go build -o ../../bin/db ./fetcher.go
 
 server:
 	@echo "+ $@"

@@ -38,7 +38,7 @@ func getPlayerBySlug(serializer *player_serializer.PlayerSerializer) fiber.Handl
 	return func(c *fiber.Ctx) error {
 		slug := c.Params("slug")
 
-		player, err := serializer.GetPlayerBySlug(slug, context.Background())
+		player, err := serializer.GetPlayerBySlug(context.Background(), slug)
 		if err != nil {
 			if ent.IsNotFound(err) {
 				return c.Status(fiber.StatusNotFound).JSON(&fiber.Map{
