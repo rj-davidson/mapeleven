@@ -36,6 +36,8 @@ const (
 	FieldPhoto = "photo"
 	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
 	FieldLastUpdated = "last_updated"
+	// FieldPopularity holds the string denoting the popularity field in the database.
+	FieldPopularity = "popularity"
 	// EdgeBirth holds the string denoting the birth edge name in mutations.
 	EdgeBirth = "birth"
 	// EdgeNationality holds the string denoting the nationality edge name in mutations.
@@ -117,6 +119,7 @@ var Columns = []string{
 	FieldInjured,
 	FieldPhoto,
 	FieldLastUpdated,
+	FieldPopularity,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "players"
@@ -146,6 +149,8 @@ var (
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
 	UpdateDefaultLastUpdated func() time.Time
+	// DefaultPopularity holds the default value on creation for the "Popularity" field.
+	DefaultPopularity int
 )
 
 // OrderOption defines the ordering options for the Player queries.
@@ -209,6 +214,11 @@ func ByPhoto(opts ...sql.OrderTermOption) OrderOption {
 // ByLastUpdated orders the results by the lastUpdated field.
 func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
+}
+
+// ByPopularity orders the results by the Popularity field.
+func ByPopularity(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPopularity, opts...).ToFunc()
 }
 
 // ByBirthField orders the results by birth field.

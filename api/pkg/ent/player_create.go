@@ -100,6 +100,20 @@ func (pc *PlayerCreate) SetNillableLastUpdated(t *time.Time) *PlayerCreate {
 	return pc
 }
 
+// SetPopularity sets the "Popularity" field.
+func (pc *PlayerCreate) SetPopularity(i int) *PlayerCreate {
+	pc.mutation.SetPopularity(i)
+	return pc
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (pc *PlayerCreate) SetNillablePopularity(i *int) *PlayerCreate {
+	if i != nil {
+		pc.SetPopularity(*i)
+	}
+	return pc
+}
+
 // SetBirthID sets the "birth" edge to the Birth entity by ID.
 func (pc *PlayerCreate) SetBirthID(id int) *PlayerCreate {
 	pc.mutation.SetBirthID(id)
@@ -252,6 +266,10 @@ func (pc *PlayerCreate) defaults() {
 		v := player.DefaultLastUpdated()
 		pc.mutation.SetLastUpdated(v)
 	}
+	if _, ok := pc.mutation.Popularity(); !ok {
+		v := player.DefaultPopularity
+		pc.mutation.SetPopularity(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -285,6 +303,9 @@ func (pc *PlayerCreate) check() error {
 	}
 	if _, ok := pc.mutation.Photo(); !ok {
 		return &ValidationError{Name: "photo", err: errors.New(`ent: missing required field "Player.photo"`)}
+	}
+	if _, ok := pc.mutation.Popularity(); !ok {
+		return &ValidationError{Name: "Popularity", err: errors.New(`ent: missing required field "Player.Popularity"`)}
 	}
 	return nil
 }
@@ -355,6 +376,10 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 	if value, ok := pc.mutation.LastUpdated(); ok {
 		_spec.SetField(player.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
+	}
+	if value, ok := pc.mutation.Popularity(); ok {
+		_spec.SetField(player.FieldPopularity, field.TypeInt, value)
+		_node.Popularity = value
 	}
 	if nodes := pc.mutation.BirthIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

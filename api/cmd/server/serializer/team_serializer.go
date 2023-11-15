@@ -6,6 +6,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"context"
+	"sort"
 	"time"
 )
 
@@ -40,14 +41,17 @@ type APITeam struct {
 	NationalTeam bool              `json:"nationalTeam,omitempty"`
 	Country      APICountry        `json:"country,omitempty"`
 	Competitions []APICompetitions `json:"competitions,omitempty"`
+	Popularity   int               `json:"popularity,omitempty"`
 }
 
 type TeamSerializer struct {
-	client *ent.Client
+	client                *ent.Client
+	teamPopularityTracker map[string]int
 }
 
-func NewTeamSerializer(client *ent.Client) *TeamSerializer {
-	return &TeamSerializer{client: client}
+func NewTeamSerializer(client *ent.Client, teamPopularityTracker map[string]int) *TeamSerializer {
+	return &TeamSerializer{client: client,
+		teamPopularityTracker: teamPopularityTracker}
 }
 
 func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
@@ -88,6 +92,7 @@ func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
 			Flag: club.Edges.Country.Flag,
 		},
 		Competitions: compList,
+		Popularity:   ts.teamPopularityTracker[club.Slug],
 	}
 }
 
@@ -169,8 +174,15 @@ func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*AP
 
 	var teamItems []*APITeam
 	for _, t := range teams {
-		teamItems = append(teamItems, ts.SerializeTeam(t))
+		serializedTeam := ts.SerializeTeam(t)
+		serializedTeam.Popularity = ts.teamPopularityTracker[t.Slug]
+		teamItems = append(teamItems, serializedTeam)
 	}
+
+	// Sort teamItems based on Popularity
+	sort.Slice(teamItems, func(i, j int) bool {
+		return teamItems[i].Popularity > teamItems[j].Popularity
+	})
 
 	return teamItems, nil
 }

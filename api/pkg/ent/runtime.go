@@ -323,6 +323,10 @@ func init() {
 	player.DefaultLastUpdated = playerDescLastUpdated.Default.(func() time.Time)
 	// player.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	player.UpdateDefaultLastUpdated = playerDescLastUpdated.UpdateDefault.(func() time.Time)
+	// playerDescPopularity is the schema descriptor for Popularity field.
+	playerDescPopularity := playerFields[11].Descriptor()
+	// player.DefaultPopularity holds the default value on creation for the Popularity field.
+	player.DefaultPopularity = playerDescPopularity.Default.(int)
 	playerstatsFields := schema.PlayerStats{}.Fields()
 	_ = playerstatsFields
 	// playerstatsDescLastUpdated is the schema descriptor for lastUpdated field.
@@ -839,4 +843,8 @@ func init() {
 	team.DefaultLastUpdated = teamDescLastUpdated.Default.(func() time.Time)
 	// team.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	team.UpdateDefaultLastUpdated = teamDescLastUpdated.UpdateDefault.(func() time.Time)
+	// teamDescPopularity is the schema descriptor for Popularity field.
+	teamDescPopularity := teamFields[2].Descriptor()
+	// team.DefaultPopularity holds the default value on creation for the Popularity field.
+	team.DefaultPopularity = teamDescPopularity.Default.(int)
 }

@@ -101,6 +101,27 @@ func (pu *PlayerUpdate) ClearLastUpdated() *PlayerUpdate {
 	return pu
 }
 
+// SetPopularity sets the "Popularity" field.
+func (pu *PlayerUpdate) SetPopularity(i int) *PlayerUpdate {
+	pu.mutation.ResetPopularity()
+	pu.mutation.SetPopularity(i)
+	return pu
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (pu *PlayerUpdate) SetNillablePopularity(i *int) *PlayerUpdate {
+	if i != nil {
+		pu.SetPopularity(*i)
+	}
+	return pu
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (pu *PlayerUpdate) AddPopularity(i int) *PlayerUpdate {
+	pu.mutation.AddPopularity(i)
+	return pu
+}
+
 // SetBirthID sets the "birth" edge to the Birth entity by ID.
 func (pu *PlayerUpdate) SetBirthID(id int) *PlayerUpdate {
 	pu.mutation.SetBirthID(id)
@@ -413,6 +434,12 @@ func (pu *PlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pu.mutation.LastUpdatedCleared() {
 		_spec.ClearField(player.FieldLastUpdated, field.TypeTime)
+	}
+	if value, ok := pu.mutation.Popularity(); ok {
+		_spec.SetField(player.FieldPopularity, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedPopularity(); ok {
+		_spec.AddField(player.FieldPopularity, field.TypeInt, value)
 	}
 	if pu.mutation.BirthCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -784,6 +811,27 @@ func (puo *PlayerUpdateOne) ClearLastUpdated() *PlayerUpdateOne {
 	return puo
 }
 
+// SetPopularity sets the "Popularity" field.
+func (puo *PlayerUpdateOne) SetPopularity(i int) *PlayerUpdateOne {
+	puo.mutation.ResetPopularity()
+	puo.mutation.SetPopularity(i)
+	return puo
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (puo *PlayerUpdateOne) SetNillablePopularity(i *int) *PlayerUpdateOne {
+	if i != nil {
+		puo.SetPopularity(*i)
+	}
+	return puo
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (puo *PlayerUpdateOne) AddPopularity(i int) *PlayerUpdateOne {
+	puo.mutation.AddPopularity(i)
+	return puo
+}
+
 // SetBirthID sets the "birth" edge to the Birth entity by ID.
 func (puo *PlayerUpdateOne) SetBirthID(id int) *PlayerUpdateOne {
 	puo.mutation.SetBirthID(id)
@@ -1126,6 +1174,12 @@ func (puo *PlayerUpdateOne) sqlSave(ctx context.Context) (_node *Player, err err
 	}
 	if puo.mutation.LastUpdatedCleared() {
 		_spec.ClearField(player.FieldLastUpdated, field.TypeTime)
+	}
+	if value, ok := puo.mutation.Popularity(); ok {
+		_spec.SetField(player.FieldPopularity, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedPopularity(); ok {
+		_spec.AddField(player.FieldPopularity, field.TypeInt, value)
 	}
 	if puo.mutation.BirthCleared() {
 		edge := &sqlgraph.EdgeSpec{

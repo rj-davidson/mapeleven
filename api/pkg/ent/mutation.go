@@ -13835,6 +13835,8 @@ type PlayerMutation struct {
 	injured             *bool
 	photo               *string
 	lastUpdated         *time.Time
+	_Popularity         *int
+	add_Popularity      *int
 	clearedFields       map[string]struct{}
 	birth               *int
 	clearedbirth        bool
@@ -14407,6 +14409,62 @@ func (m *PlayerMutation) ResetLastUpdated() {
 	delete(m.clearedFields, player.FieldLastUpdated)
 }
 
+// SetPopularity sets the "Popularity" field.
+func (m *PlayerMutation) SetPopularity(i int) {
+	m._Popularity = &i
+	m.add_Popularity = nil
+}
+
+// Popularity returns the value of the "Popularity" field in the mutation.
+func (m *PlayerMutation) Popularity() (r int, exists bool) {
+	v := m._Popularity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPopularity returns the old "Popularity" field's value of the Player entity.
+// If the Player object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *PlayerMutation) OldPopularity(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPopularity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPopularity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPopularity: %w", err)
+	}
+	return oldValue.Popularity, nil
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (m *PlayerMutation) AddPopularity(i int) {
+	if m.add_Popularity != nil {
+		*m.add_Popularity += i
+	} else {
+		m.add_Popularity = &i
+	}
+}
+
+// AddedPopularity returns the value that was added to the "Popularity" field in this mutation.
+func (m *PlayerMutation) AddedPopularity() (r int, exists bool) {
+	v := m.add_Popularity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPopularity resets all changes to the "Popularity" field.
+func (m *PlayerMutation) ResetPopularity() {
+	m._Popularity = nil
+	m.add_Popularity = nil
+}
+
 // SetBirthID sets the "birth" edge to the Birth entity by id.
 func (m *PlayerMutation) SetBirthID(id int) {
 	m.birth = &id
@@ -14789,7 +14847,7 @@ func (m *PlayerMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *PlayerMutation) Fields() []string {
-	fields := make([]string, 0, 11)
+	fields := make([]string, 0, 12)
 	if m.slug != nil {
 		fields = append(fields, player.FieldSlug)
 	}
@@ -14823,6 +14881,9 @@ func (m *PlayerMutation) Fields() []string {
 	if m.lastUpdated != nil {
 		fields = append(fields, player.FieldLastUpdated)
 	}
+	if m._Popularity != nil {
+		fields = append(fields, player.FieldPopularity)
+	}
 	return fields
 }
 
@@ -14853,6 +14914,8 @@ func (m *PlayerMutation) Field(name string) (ent.Value, bool) {
 		return m.Photo()
 	case player.FieldLastUpdated:
 		return m.LastUpdated()
+	case player.FieldPopularity:
+		return m.Popularity()
 	}
 	return nil, false
 }
@@ -14884,6 +14947,8 @@ func (m *PlayerMutation) OldField(ctx context.Context, name string) (ent.Value, 
 		return m.OldPhoto(ctx)
 	case player.FieldLastUpdated:
 		return m.OldLastUpdated(ctx)
+	case player.FieldPopularity:
+		return m.OldPopularity(ctx)
 	}
 	return nil, fmt.Errorf("unknown Player field %s", name)
 }
@@ -14970,6 +15035,13 @@ func (m *PlayerMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLastUpdated(v)
 		return nil
+	case player.FieldPopularity:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPopularity(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Player field %s", name)
 }
@@ -14984,6 +15056,9 @@ func (m *PlayerMutation) AddedFields() []string {
 	if m.addage != nil {
 		fields = append(fields, player.FieldAge)
 	}
+	if m.add_Popularity != nil {
+		fields = append(fields, player.FieldPopularity)
+	}
 	return fields
 }
 
@@ -14996,6 +15071,8 @@ func (m *PlayerMutation) AddedField(name string) (ent.Value, bool) {
 		return m.AddedApiFootballId()
 	case player.FieldAge:
 		return m.AddedAge()
+	case player.FieldPopularity:
+		return m.AddedPopularity()
 	}
 	return nil, false
 }
@@ -15018,6 +15095,13 @@ func (m *PlayerMutation) AddField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.AddAge(v)
+		return nil
+	case player.FieldPopularity:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPopularity(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Player numeric field %s", name)
@@ -15087,6 +15171,9 @@ func (m *PlayerMutation) ResetField(name string) error {
 		return nil
 	case player.FieldLastUpdated:
 		m.ResetLastUpdated()
+		return nil
+	case player.FieldPopularity:
+		m.ResetPopularity()
 		return nil
 	}
 	return fmt.Errorf("unknown Player field %s", name)
@@ -34699,6 +34786,8 @@ type TeamMutation struct {
 	id                           *int
 	form                         *string
 	lastUpdated                  *time.Time
+	_Popularity                  *int
+	add_Popularity               *int
 	clearedFields                map[string]struct{}
 	season                       *int
 	clearedseason                bool
@@ -34941,6 +35030,62 @@ func (m *TeamMutation) LastUpdatedCleared() bool {
 func (m *TeamMutation) ResetLastUpdated() {
 	m.lastUpdated = nil
 	delete(m.clearedFields, team.FieldLastUpdated)
+}
+
+// SetPopularity sets the "Popularity" field.
+func (m *TeamMutation) SetPopularity(i int) {
+	m._Popularity = &i
+	m.add_Popularity = nil
+}
+
+// Popularity returns the value of the "Popularity" field in the mutation.
+func (m *TeamMutation) Popularity() (r int, exists bool) {
+	v := m._Popularity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPopularity returns the old "Popularity" field's value of the Team entity.
+// If the Team object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *TeamMutation) OldPopularity(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPopularity is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPopularity requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPopularity: %w", err)
+	}
+	return oldValue.Popularity, nil
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (m *TeamMutation) AddPopularity(i int) {
+	if m.add_Popularity != nil {
+		*m.add_Popularity += i
+	} else {
+		m.add_Popularity = &i
+	}
+}
+
+// AddedPopularity returns the value that was added to the "Popularity" field in this mutation.
+func (m *TeamMutation) AddedPopularity() (r int, exists bool) {
+	v := m.add_Popularity
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetPopularity resets all changes to the "Popularity" field.
+func (m *TeamMutation) ResetPopularity() {
+	m._Popularity = nil
+	m.add_Popularity = nil
 }
 
 // SetSeasonID sets the "season" edge to the Season entity by id.
@@ -35760,12 +35905,15 @@ func (m *TeamMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *TeamMutation) Fields() []string {
-	fields := make([]string, 0, 2)
+	fields := make([]string, 0, 3)
 	if m.form != nil {
 		fields = append(fields, team.FieldForm)
 	}
 	if m.lastUpdated != nil {
 		fields = append(fields, team.FieldLastUpdated)
+	}
+	if m._Popularity != nil {
+		fields = append(fields, team.FieldPopularity)
 	}
 	return fields
 }
@@ -35779,6 +35927,8 @@ func (m *TeamMutation) Field(name string) (ent.Value, bool) {
 		return m.Form()
 	case team.FieldLastUpdated:
 		return m.LastUpdated()
+	case team.FieldPopularity:
+		return m.Popularity()
 	}
 	return nil, false
 }
@@ -35792,6 +35942,8 @@ func (m *TeamMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldForm(ctx)
 	case team.FieldLastUpdated:
 		return m.OldLastUpdated(ctx)
+	case team.FieldPopularity:
+		return m.OldPopularity(ctx)
 	}
 	return nil, fmt.Errorf("unknown Team field %s", name)
 }
@@ -35815,6 +35967,13 @@ func (m *TeamMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetLastUpdated(v)
 		return nil
+	case team.FieldPopularity:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPopularity(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Team field %s", name)
 }
@@ -35822,13 +35981,21 @@ func (m *TeamMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
 func (m *TeamMutation) AddedFields() []string {
-	return nil
+	var fields []string
+	if m.add_Popularity != nil {
+		fields = append(fields, team.FieldPopularity)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
 func (m *TeamMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case team.FieldPopularity:
+		return m.AddedPopularity()
+	}
 	return nil, false
 }
 
@@ -35837,6 +36004,13 @@ func (m *TeamMutation) AddedField(name string) (ent.Value, bool) {
 // type.
 func (m *TeamMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case team.FieldPopularity:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddPopularity(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Team numeric field %s", name)
 }
@@ -35884,6 +36058,9 @@ func (m *TeamMutation) ResetField(name string) error {
 		return nil
 	case team.FieldLastUpdated:
 		m.ResetLastUpdated()
+		return nil
+	case team.FieldPopularity:
+		m.ResetPopularity()
 		return nil
 	}
 	return fmt.Errorf("unknown Team field %s", name)

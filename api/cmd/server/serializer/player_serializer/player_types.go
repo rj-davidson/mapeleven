@@ -11,6 +11,7 @@ type APIPlayer struct {
 	Injured    bool             `json:"injured"`
 	Photo      string           `json:"photo"`
 	Statistics []APIPlayerStats `json:"statistics,omitempty"`
+	Popularity int              `json:"popularity,omitempty"`
 }
 
 type APIPlayerStats struct {

@@ -76,6 +76,27 @@ func (tu *TeamUpdate) ClearLastUpdated() *TeamUpdate {
 	return tu
 }
 
+// SetPopularity sets the "Popularity" field.
+func (tu *TeamUpdate) SetPopularity(i int) *TeamUpdate {
+	tu.mutation.ResetPopularity()
+	tu.mutation.SetPopularity(i)
+	return tu
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (tu *TeamUpdate) SetNillablePopularity(i *int) *TeamUpdate {
+	if i != nil {
+		tu.SetPopularity(*i)
+	}
+	return tu
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (tu *TeamUpdate) AddPopularity(i int) *TeamUpdate {
+	tu.mutation.AddPopularity(i)
+	return tu
+}
+
 // SetSeasonID sets the "season" edge to the Season entity by ID.
 func (tu *TeamUpdate) SetSeasonID(id int) *TeamUpdate {
 	tu.mutation.SetSeasonID(id)
@@ -653,6 +674,12 @@ func (tu *TeamUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if tu.mutation.LastUpdatedCleared() {
 		_spec.ClearField(team.FieldLastUpdated, field.TypeTime)
+	}
+	if value, ok := tu.mutation.Popularity(); ok {
+		_spec.SetField(team.FieldPopularity, field.TypeInt, value)
+	}
+	if value, ok := tu.mutation.AddedPopularity(); ok {
+		_spec.AddField(team.FieldPopularity, field.TypeInt, value)
 	}
 	if tu.mutation.SeasonCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1327,6 +1354,27 @@ func (tuo *TeamUpdateOne) ClearLastUpdated() *TeamUpdateOne {
 	return tuo
 }
 
+// SetPopularity sets the "Popularity" field.
+func (tuo *TeamUpdateOne) SetPopularity(i int) *TeamUpdateOne {
+	tuo.mutation.ResetPopularity()
+	tuo.mutation.SetPopularity(i)
+	return tuo
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (tuo *TeamUpdateOne) SetNillablePopularity(i *int) *TeamUpdateOne {
+	if i != nil {
+		tuo.SetPopularity(*i)
+	}
+	return tuo
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (tuo *TeamUpdateOne) AddPopularity(i int) *TeamUpdateOne {
+	tuo.mutation.AddPopularity(i)
+	return tuo
+}
+
 // SetSeasonID sets the "season" edge to the Season entity by ID.
 func (tuo *TeamUpdateOne) SetSeasonID(id int) *TeamUpdateOne {
 	tuo.mutation.SetSeasonID(id)
@@ -1934,6 +1982,12 @@ func (tuo *TeamUpdateOne) sqlSave(ctx context.Context) (_node *Team, err error) 
 	}
 	if tuo.mutation.LastUpdatedCleared() {
 		_spec.ClearField(team.FieldLastUpdated, field.TypeTime)
+	}
+	if value, ok := tuo.mutation.Popularity(); ok {
+		_spec.SetField(team.FieldPopularity, field.TypeInt, value)
+	}
+	if value, ok := tuo.mutation.AddedPopularity(); ok {
+		_spec.AddField(team.FieldPopularity, field.TypeInt, value)
 	}
 	if tuo.mutation.SeasonCleared() {
 		edge := &sqlgraph.EdgeSpec{

@@ -64,6 +64,20 @@ func (tc *TeamCreate) SetNillableLastUpdated(t *time.Time) *TeamCreate {
 	return tc
 }
 
+// SetPopularity sets the "Popularity" field.
+func (tc *TeamCreate) SetPopularity(i int) *TeamCreate {
+	tc.mutation.SetPopularity(i)
+	return tc
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (tc *TeamCreate) SetNillablePopularity(i *int) *TeamCreate {
+	if i != nil {
+		tc.SetPopularity(*i)
+	}
+	return tc
+}
+
 // SetSeasonID sets the "season" edge to the Season entity by ID.
 func (tc *TeamCreate) SetSeasonID(id int) *TeamCreate {
 	tc.mutation.SetSeasonID(id)
@@ -386,10 +400,17 @@ func (tc *TeamCreate) defaults() {
 		v := team.DefaultLastUpdated()
 		tc.mutation.SetLastUpdated(v)
 	}
+	if _, ok := tc.mutation.Popularity(); !ok {
+		v := team.DefaultPopularity
+		tc.mutation.SetPopularity(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TeamCreate) check() error {
+	if _, ok := tc.mutation.Popularity(); !ok {
+		return &ValidationError{Name: "Popularity", err: errors.New(`ent: missing required field "Team.Popularity"`)}
+	}
 	if _, ok := tc.mutation.ClubID(); !ok {
 		return &ValidationError{Name: "club", err: errors.New(`ent: missing required edge "Team.club"`)}
 	}
@@ -426,6 +447,10 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 	if value, ok := tc.mutation.LastUpdated(); ok {
 		_spec.SetField(team.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
+	}
+	if value, ok := tc.mutation.Popularity(); ok {
+		_spec.SetField(team.FieldPopularity, field.TypeInt, value)
+		_node.Popularity = value
 	}
 	if nodes := tc.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

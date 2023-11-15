@@ -462,6 +462,7 @@ var (
 		{Name: "injured", Type: field.TypeBool},
 		{Name: "photo", Type: field.TypeString},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "popularity", Type: field.TypeInt, Default: 0},
 		{Name: "birth_player", Type: field.TypeInt, Nullable: true},
 		{Name: "country_players", Type: field.TypeInt, Nullable: true},
 	}
@@ -473,13 +474,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "players_births_player",
-				Columns:    []*schema.Column{PlayersColumns[12]},
+				Columns:    []*schema.Column{PlayersColumns[13]},
 				RefColumns: []*schema.Column{BirthsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "players_countries_players",
-				Columns:    []*schema.Column{PlayersColumns[13]},
+				Columns:    []*schema.Column{PlayersColumns[14]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -902,6 +903,7 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "form", Type: field.TypeString, Nullable: true},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
+		{Name: "popularity", Type: field.TypeInt, Default: 0},
 		{Name: "club_team", Type: field.TypeInt},
 		{Name: "season_teams", Type: field.TypeInt, Nullable: true},
 	}
@@ -913,13 +915,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "teams_clubs_team",
-				Columns:    []*schema.Column{TeamsColumns[3]},
+				Columns:    []*schema.Column{TeamsColumns[4]},
 				RefColumns: []*schema.Column{ClubsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "teams_seasons_teams",
-				Columns:    []*schema.Column{TeamsColumns[4]},
+				Columns:    []*schema.Column{TeamsColumns[5]},
 				RefColumns: []*schema.Column{SeasonsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

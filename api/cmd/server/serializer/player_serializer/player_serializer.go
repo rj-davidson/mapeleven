@@ -4,14 +4,20 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"context"
+	"sort"
 )
 
 type PlayerSerializer struct {
-	client *ent.Client
+	client                  *ent.Client
+	playerPopularityTracker map[string]int
 }
 
-func NewPlayerSerializer(client *ent.Client) *PlayerSerializer {
-	return &PlayerSerializer{client: client}
+func NewPlayerSerializer(client *ent.Client, playerPopularityTracker map[string]int) *PlayerSerializer {
+	return &PlayerSerializer{
+		client:                  client,
+		playerPopularityTracker: playerPopularityTracker,
+	}
+
 }
 
 // GetPlayerBySlug returns a player by slug.
@@ -25,7 +31,7 @@ func (ps *PlayerSerializer) GetPlayerBySlug(slug string, ctx context.Context) (*
 		return nil, err
 	}
 
-	return ps.SerializePlayer(p), nil
+	return ps.SerializePlayer(p, p.Popularity), nil
 }
 
 // GetPlayers returns all players.
@@ -58,14 +64,20 @@ func (ps *PlayerSerializer) GetPlayers(ctx context.Context) ([]*APIPlayer, error
 
 	var playerItems []*APIPlayer
 	for _, p := range players {
-		playerItems = append(playerItems, ps.SerializePlayer(p))
+		popularity := ps.playerPopularityTracker[p.Slug]
+		playerItems = append(playerItems, ps.SerializePlayer(p, popularity))
 	}
+
+	// Sort playerItems based on Popularity
+	sort.Slice(playerItems, func(i, j int) bool {
+		return playerItems[i].Popularity > playerItems[j].Popularity
+	})
 
 	return playerItems, nil
 }
 
 // SerializePlayer serializes a player entity into an APIPlayer.
-func (ps *PlayerSerializer) SerializePlayer(p *ent.Player) *APIPlayer {
+func (ps *PlayerSerializer) SerializePlayer(p *ent.Player, popularity int) *APIPlayer {
 	var playerStats []APIPlayerStats
 	for _, stat := range p.Edges.PlayerStats {
 		playerStats = append(playerStats, ps.serializePlayerStats(stat))
@@ -81,6 +93,7 @@ func (ps *PlayerSerializer) SerializePlayer(p *ent.Player) *APIPlayer {
 		Injured:    p.Injured,
 		Photo:      p.Photo,
 		Statistics: playerStats,
+		Popularity: popularity,
 	}
 }
 

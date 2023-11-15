@@ -41,6 +41,8 @@ type Player struct {
 	Photo string `json:"photo,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
+	// Popularity holds the value of the "Popularity" field.
+	Popularity int `json:"Popularity,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlayerQuery when eager-loading is set.
 	Edges           PlayerEdges `json:"edges"`
@@ -148,7 +150,7 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case player.FieldInjured:
 			values[i] = new(sql.NullBool)
-		case player.FieldID, player.FieldApiFootballId, player.FieldAge:
+		case player.FieldID, player.FieldApiFootballId, player.FieldAge, player.FieldPopularity:
 			values[i] = new(sql.NullInt64)
 		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto:
 			values[i] = new(sql.NullString)
@@ -244,6 +246,12 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
 			} else if value.Valid {
 				pl.LastUpdated = value.Time
+			}
+		case player.FieldPopularity:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field Popularity", values[i])
+			} else if value.Valid {
+				pl.Popularity = int(value.Int64)
 			}
 		case player.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -362,6 +370,9 @@ func (pl *Player) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(pl.LastUpdated.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("Popularity=")
+	builder.WriteString(fmt.Sprintf("%v", pl.Popularity))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -110,6 +110,11 @@ func LastUpdated(v time.Time) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldLastUpdated, v))
 }
 
+// Popularity applies equality check predicate on the "Popularity" field. It's identical to PopularityEQ.
+func Popularity(v int) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldPopularity, v))
+}
+
 // SlugEQ applies the EQ predicate on the "slug" field.
 func SlugEQ(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldSlug, v))
@@ -703,6 +708,46 @@ func LastUpdatedIsNil() predicate.Player {
 // LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
 func LastUpdatedNotNil() predicate.Player {
 	return predicate.Player(sql.FieldNotNull(FieldLastUpdated))
+}
+
+// PopularityEQ applies the EQ predicate on the "Popularity" field.
+func PopularityEQ(v int) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldPopularity, v))
+}
+
+// PopularityNEQ applies the NEQ predicate on the "Popularity" field.
+func PopularityNEQ(v int) predicate.Player {
+	return predicate.Player(sql.FieldNEQ(FieldPopularity, v))
+}
+
+// PopularityIn applies the In predicate on the "Popularity" field.
+func PopularityIn(vs ...int) predicate.Player {
+	return predicate.Player(sql.FieldIn(FieldPopularity, vs...))
+}
+
+// PopularityNotIn applies the NotIn predicate on the "Popularity" field.
+func PopularityNotIn(vs ...int) predicate.Player {
+	return predicate.Player(sql.FieldNotIn(FieldPopularity, vs...))
+}
+
+// PopularityGT applies the GT predicate on the "Popularity" field.
+func PopularityGT(v int) predicate.Player {
+	return predicate.Player(sql.FieldGT(FieldPopularity, v))
+}
+
+// PopularityGTE applies the GTE predicate on the "Popularity" field.
+func PopularityGTE(v int) predicate.Player {
+	return predicate.Player(sql.FieldGTE(FieldPopularity, v))
+}
+
+// PopularityLT applies the LT predicate on the "Popularity" field.
+func PopularityLT(v int) predicate.Player {
+	return predicate.Player(sql.FieldLT(FieldPopularity, v))
+}
+
+// PopularityLTE applies the LTE predicate on the "Popularity" field.
+func PopularityLTE(v int) predicate.Player {
+	return predicate.Player(sql.FieldLTE(FieldPopularity, v))
 }
 
 // HasBirth applies the HasEdge predicate on the "birth" edge.

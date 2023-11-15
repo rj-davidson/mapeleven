@@ -65,6 +65,11 @@ func LastUpdated(v time.Time) predicate.Team {
 	return predicate.Team(sql.FieldEQ(FieldLastUpdated, v))
 }
 
+// Popularity applies equality check predicate on the "Popularity" field. It's identical to PopularityEQ.
+func Popularity(v int) predicate.Team {
+	return predicate.Team(sql.FieldEQ(FieldPopularity, v))
+}
+
 // FormEQ applies the EQ predicate on the "form" field.
 func FormEQ(v string) predicate.Team {
 	return predicate.Team(sql.FieldEQ(FieldForm, v))
@@ -188,6 +193,46 @@ func LastUpdatedIsNil() predicate.Team {
 // LastUpdatedNotNil applies the NotNil predicate on the "lastUpdated" field.
 func LastUpdatedNotNil() predicate.Team {
 	return predicate.Team(sql.FieldNotNull(FieldLastUpdated))
+}
+
+// PopularityEQ applies the EQ predicate on the "Popularity" field.
+func PopularityEQ(v int) predicate.Team {
+	return predicate.Team(sql.FieldEQ(FieldPopularity, v))
+}
+
+// PopularityNEQ applies the NEQ predicate on the "Popularity" field.
+func PopularityNEQ(v int) predicate.Team {
+	return predicate.Team(sql.FieldNEQ(FieldPopularity, v))
+}
+
+// PopularityIn applies the In predicate on the "Popularity" field.
+func PopularityIn(vs ...int) predicate.Team {
+	return predicate.Team(sql.FieldIn(FieldPopularity, vs...))
+}
+
+// PopularityNotIn applies the NotIn predicate on the "Popularity" field.
+func PopularityNotIn(vs ...int) predicate.Team {
+	return predicate.Team(sql.FieldNotIn(FieldPopularity, vs...))
+}
+
+// PopularityGT applies the GT predicate on the "Popularity" field.
+func PopularityGT(v int) predicate.Team {
+	return predicate.Team(sql.FieldGT(FieldPopularity, v))
+}
+
+// PopularityGTE applies the GTE predicate on the "Popularity" field.
+func PopularityGTE(v int) predicate.Team {
+	return predicate.Team(sql.FieldGTE(FieldPopularity, v))
+}
+
+// PopularityLT applies the LT predicate on the "Popularity" field.
+func PopularityLT(v int) predicate.Team {
+	return predicate.Team(sql.FieldLT(FieldPopularity, v))
+}
+
+// PopularityLTE applies the LTE predicate on the "Popularity" field.
+func PopularityLTE(v int) predicate.Team {
+	return predicate.Team(sql.FieldLTE(FieldPopularity, v))
 }
 
 // HasSeason applies the HasEdge predicate on the "season" edge.
