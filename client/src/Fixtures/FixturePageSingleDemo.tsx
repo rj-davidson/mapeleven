@@ -31,7 +31,7 @@ function FixturePageSingle() {
 
     useEffect(() => {
         const fetchData = () => {
-            fetch(`${url}/fixtures/${slug}`)
+            fetch(`${url}/fixtures-demo/${slug}`)
                 .then(response => response.json())
                 .then(jsonData => {
                     setHomeTeamSlug(jsonData.teams.home.slug);
@@ -42,6 +42,8 @@ function FixturePageSingle() {
                     setAwayLogo(jsonData.teams.away.logo);
                     setReferee(jsonData.fixture.referee);
                     setMinute(jsonData.fixture.elapsed);
+                    setHomeTeamScore(jsonData.fixture.homeTeamScore);
+                    setAwayTeamScore(jsonData.fixture.awayTeamScore);
                     setLoading(false);
                     setEvents(jsonData.events);
                     setDate(jsonData.fixture.date);
@@ -87,8 +89,8 @@ function FixturePageSingle() {
                     homeLogo={homeLogo}
                     awayLogo={awayLogo}
                     referee={referee}
-                    homeTeamScore={0}
-                    awayTeamScore={0}
+                    homeTeamScore={homeTeamScore}
+                    awayTeamScore={awayTeamScore}
                     minute={minute}
                     events={events}
                     date={date}

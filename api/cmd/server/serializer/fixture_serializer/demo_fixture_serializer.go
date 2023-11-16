@@ -61,7 +61,7 @@ func (dfs *DemoFixtureSerializer) GetDemoFixtureBySlug(ctx context.Context, slug
 	sLineups := &APIHomeAway{}
 
 	if getFixture {
-		sFixture, sTeams, err = dfs.serializeDemoFixture(f)
+		sFixture, sTeams, err = dfs.serializeDemoFixture(f, maxElapsedForCycle)
 		if err != nil {
 			return nil, err
 		}
@@ -96,9 +96,21 @@ func (dfs *DemoFixtureSerializer) GetDemoFixtureBySlug(ctx context.Context, slug
 	}, nil
 }
 
-func (dfs *DemoFixtureSerializer) serializeDemoFixture(f *ent.Fixture) (*APIFixture, *APITeamDetails, error) {
+func (dfs *DemoFixtureSerializer) serializeDemoFixture(f *ent.Fixture, maxElapsedForCycle int) (*APIFixture, *APITeamDetails, error) {
 	var fxt APIFixture
 	var td APITeamDetails
+	homeTeamScore := 0
+	awayTeamScore := 0
+
+	for _, e := range f.Edges.FixtureEvents {
+		if e.Type == "Goal" && e.ElapsedTime <= maxElapsedForCycle {
+			if e.Edges.Team.Edges.Club.Slug == f.Edges.HomeTeam.Edges.Club.Slug {
+				homeTeamScore++
+			} else if e.Edges.Team.Edges.Club.Slug == f.Edges.AwayTeam.Edges.Club.Slug {
+				awayTeamScore++
+			}
+		}
+	}
 
 	fxt = APIFixture{
 		Slug:          f.Slug,
@@ -108,8 +120,8 @@ func (dfs *DemoFixtureSerializer) serializeDemoFixture(f *ent.Fixture) (*APIFixt
 		Elapsed:       f.Elapsed,
 		Round:         f.Round,
 		Status:        f.Status,
-		HomeTeamScore: f.HomeTeamScore,
-		AwayTeamScore: f.AwayTeamScore,
+		HomeTeamScore: homeTeamScore,
+		AwayTeamScore: awayTeamScore,
 		Season: APISeason{
 			Year:    f.Edges.Season.Year,
 			Start:   f.Edges.Season.StartDate,

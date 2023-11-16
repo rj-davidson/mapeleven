@@ -1,8 +1,7 @@
 import * as React from 'react';
-import { Box, Card, CardContent, Grid, Typography } from '@mui/material';
+import { Grid, Typography } from '@mui/material';
 import { APIFixtureEvent } from '../Models/api_types';
 import DisplayImage from '../Util/DisplayImage';
-import FixtureMatchEvents from './FixtureMatchEvents';
 import { Tile } from '../Util/TileTS';
 
 interface FixturePageSingleMainProps {

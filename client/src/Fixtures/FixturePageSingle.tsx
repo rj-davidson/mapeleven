@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Card, CardContent, CardMedia, Grid, Paper, Skeleton, Typography } from '@mui/material';
+import { Box, Card, CardContent, CardMedia, Grid, Skeleton, Typography } from '@mui/material';
 import Field from '../Teams/FieldSVG';
 import DisplayImage from '../Util/DisplayImage';
 import { APIFixture, APIFixtureEvent, APIFixtureTeam } from '../Models/api_types';
