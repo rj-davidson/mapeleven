@@ -1,20 +1,20 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { Box, Card, CardContent, CardMedia, Grid, Skeleton, Typography } from '@mui/material';
-import Field from '../Teams/FieldSVG';
-import DisplayImage from '../Util/DisplayImage';
-import { APIFixture, APIFixtureEvent, APIFixtureTeam } from '../Models/api_types';
+import { Grid, Skeleton, Typography, useMediaQuery } from '@mui/material';
+import { APIFixtureEvent, APIFixtureTeam } from '../Models/api_types';
 import FixtureMatchEvents from './FixtureMatchEvents';
 import FixturePageSingleMain from './FixturePageSingleMain';
-import TeamIDCard from '../Teams/TeamIDCard';
 import TeamIDCardFixturePage from '../Teams/TeamIDCardFixturePage';
 import { Tile } from '../Util/Tile';
+import FixtureLineup from './FixtureLineup';
+import FixtureLineupMobile from './FixtureLineupMobile';
 
 const url = import.meta.env.VITE_API_URL;
 
 function FixturePageSingle() {
     const { slug } = useParams();
+    const isSmallerThanLG = useMediaQuery('(max-width: 1260px)');
 
     const [homeTeamSlug, setHomeTeamSlug] = useState<string>('');
     const [awayTeamSlug, setAwayTeamSlug] = useState<string>('');
@@ -31,6 +31,8 @@ function FixturePageSingle() {
     const [loading, setLoading] = useState<boolean>(true);
     const [events, setEvents] = useState<APIFixtureEvent[]>([]);
     const [teams, setTeams] = useState<APIFixtureTeam>();
+    const [homeLineup, setHomeLineup] = useState([]);
+    const [awayLineup, setAwayLineup] = useState([]);
 
     useEffect(() => {
         fetch(`${url}/fixtures/${slug}`)
@@ -51,10 +53,11 @@ function FixturePageSingle() {
                 setDate(jsonData.fixture.date);
                 setTimeZone(jsonData.fixture.timezone);
                 setTeams(jsonData.teams);
+                setHomeLineup(jsonData.lineups.home.matchPlayers);
+                setAwayLineup(jsonData.lineups.away.matchPlayers);
             })
             .catch(error => console.error(error));
     }, [slug]);
-
     return loading ? (
         <Grid container spacing={2} direction='column'>
             <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
@@ -91,6 +94,15 @@ function FixturePageSingle() {
                     timeZone={timeZone}
                 />
             </Grid>
+            {homeLineup.length > 0 && awayLineup.length > 0 && (
+                <Grid item xs={12} sm={12}>
+                    {isSmallerThanLG ? (
+                        <FixtureLineupMobile homePlayers={awayLineup} awayPlayers={homeLineup} />
+                    ) : (
+                        <FixtureLineup homePlayers={awayLineup} awayPlayers={homeLineup} />
+                    )}
+                </Grid>
+            )}
             <Grid item xs={12} sm={12}>
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={3}>
