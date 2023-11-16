@@ -99,8 +99,14 @@ func (dfs *DemoFixtureSerializer) GetDemoFixtureBySlug(ctx context.Context, slug
 func (dfs *DemoFixtureSerializer) serializeDemoFixture(f *ent.Fixture, maxElapsedForCycle int) (*APIFixture, *APITeamDetails, error) {
 	var fxt APIFixture
 	var td APITeamDetails
+	var elapsed int
 	homeTeamScore := 0
 	awayTeamScore := 0
+	if maxElapsedForCycle < 91 {
+		elapsed = maxElapsedForCycle
+	} else {
+		elapsed = 90
+	}
 
 	for _, e := range f.Edges.FixtureEvents {
 		if e.Type == "Goal" && e.ElapsedTime <= maxElapsedForCycle {
@@ -117,9 +123,9 @@ func (dfs *DemoFixtureSerializer) serializeDemoFixture(f *ent.Fixture, maxElapse
 		Referee:       f.Referee,
 		Timezone:      f.Timezone,
 		Date:          f.Date,
-		Elapsed:       f.Elapsed,
+		Elapsed:       elapsed,
 		Round:         f.Round,
-		Status:        f.Status,
+		Status:        "In Progress",
 		HomeTeamScore: homeTeamScore,
 		AwayTeamScore: awayTeamScore,
 		Season: APISeason{

@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Grid, Skeleton, Typography, useMediaQuery } from '@mui/material';
 import { APIFixtureEvent, APIFixtureTeam } from '../Models/api_types';
-import FixtureMatchEvents from './FixtureMatchEvents';
+import FixtureMatchEvents from './Events/FixtureMatchEvents';
 import FixturePageSingleMain from './FixturePageSingleMain';
 import TeamIDCardFixturePage from '../Teams/TeamIDCardFixturePage';
 import { Tile } from '../Util/Tile';
