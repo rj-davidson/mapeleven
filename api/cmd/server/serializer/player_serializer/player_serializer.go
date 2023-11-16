@@ -4,7 +4,6 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"context"
-	"fmt"
 	"sort"
 )
 
@@ -27,7 +26,6 @@ func (ps *PlayerSerializer) GetPlayerBySlug(ctx context.Context, slug string) (*
 		Query().
 		Where(player.SlugEQ(slug)).
 		WithPlayerStats(func(q *ent.PlayerStatsQuery) {
-			// Include necessary sub-queries to load related data for player stats
 			q.WithPsShooting().
 				WithPsDefense().
 				WithPsTechnical().
@@ -38,17 +36,19 @@ func (ps *PlayerSerializer) GetPlayerBySlug(ctx context.Context, slug string) (*
 				WithTeam(func(tq *ent.TeamQuery) {
 					tq.WithClub().
 						WithSeason(func(sq *ent.SeasonQuery) {
-							sq.WithLeague()
+							sq.WithLeague(func(lq *ent.LeagueQuery) {
+								lq.WithCountry() // Ensure the country is loaded for the league
+							})
 						})
 				})
 		}).
 		Only(ctx)
 
 	if err != nil {
+		// Handle the error appropriately. For example:
 		return nil, err
 	}
 
-	// Check if the playerPopularityTracker has an entry for this player
 	popularity := 0
 	if val, ok := ps.playerPopularityTracker[p.Slug]; ok {
 		popularity = val
@@ -124,26 +124,26 @@ func (ps *PlayerSerializer) SerializePlayer(p *ent.Player, popularity int) *APIP
 }
 
 func (ps *PlayerSerializer) serializePlayerStats(s *ent.PlayerStats) APIPlayerStats {
-
-	fmt.Printf("Player teams: %v\n", s.Edges.Team.Edges.Club.Name)
 	var team APIPSTeam
-	if s.Edges.Team != nil && s.Edges.Team.Edges.Club != nil {
-		team = APIPSTeam{
-			Name: s.Edges.Team.Edges.Club.Name,
-			Slug: s.Edges.Team.Edges.Club.Slug,
-			Logo: s.Edges.Team.Edges.Club.Logo,
-		}
-	}
-
 	var league APIPSLeague
-	if s.Edges.Team != nil && s.Edges.Team.Edges.Season != nil && s.Edges.Team.Edges.Season.Edges.League != nil {
-		league = APIPSLeague{
-			Slug:    s.Edges.Team.Edges.Season.Edges.League.Slug,
-			Name:    s.Edges.Team.Edges.Season.Edges.League.Name,
-			Country: s.Edges.Team.Edges.Season.Edges.League.Edges.Country.Name,
-			Logo:    s.Edges.Team.Edges.Season.Edges.League.Logo,
-			Flag:    s.Edges.Team.Edges.Season.Edges.League.Edges.Country.Flag,
-			Season:  s.Edges.Team.Edges.Season.Year,
+
+	if s.Edges.Team != nil {
+		if s.Edges.Team.Edges.Club != nil {
+			team = APIPSTeam{
+				Name: s.Edges.Team.Edges.Club.Name,
+				Slug: s.Edges.Team.Edges.Club.Slug,
+				Logo: s.Edges.Team.Edges.Club.Logo,
+			}
+		}
+		if s.Edges.Team.Edges.Season != nil && s.Edges.Team.Edges.Season.Edges.League != nil {
+			league = APIPSLeague{
+				Slug:    s.Edges.Team.Edges.Season.Edges.League.Slug,
+				Name:    s.Edges.Team.Edges.Season.Edges.League.Name,
+				Country: s.Edges.Team.Edges.Season.Edges.League.Edges.Country.Name,
+				Logo:    s.Edges.Team.Edges.Season.Edges.League.Logo,
+				Flag:    s.Edges.Team.Edges.Season.Edges.League.Edges.Country.Flag,
+				Season:  s.Edges.Team.Edges.Season.Year,
+			}
 		}
 	}
 
