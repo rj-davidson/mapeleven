@@ -20,6 +20,15 @@ func NewPlayerSerializer(client *ent.Client) *PlayerSerializer {
 
 // GetPlayerBySlug returns a player by slug.
 func (ps *PlayerSerializer) GetPlayerBySlug(ctx context.Context, slug string) (*APIPlayer, error) {
+	_, err := ps.client.Player.Update().
+		Where(player.SlugEQ(slug)).
+		AddPopularity(1).
+		Save(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
 	p, err := ps.client.Player.
 		Query().
 		Where(player.SlugEQ(slug)).
@@ -43,11 +52,8 @@ func (ps *PlayerSerializer) GetPlayerBySlug(ctx context.Context, slug string) (*
 		Only(ctx)
 
 	if err != nil {
-		// Handle the error appropriately. For example:
 		return nil, err
 	}
-
-	p, err = p.Update().SetPopularity(p.Popularity + 1).Save(ctx)
 
 	return ps.SerializePlayer(p), nil
 }

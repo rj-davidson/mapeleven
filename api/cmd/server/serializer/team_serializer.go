@@ -54,6 +54,7 @@ func NewTeamSerializer(client *ent.Client) *TeamSerializer {
 
 func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
 	ls := NewLeagueSerializer(ts.client)
+
 	var compList = make([]APICompetitions, 0)
 	for _, t := range club.Edges.Team {
 		tsList := APITeamStats{
@@ -99,6 +100,13 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 	if err != nil {
 		year = time.Now()
 	}
+	_, err = ts.client.Club.Update().
+		Where(club.SlugEQ(slug)).
+		AddPopularity(1).
+		Save(ctx)
+	if err != nil {
+		return nil, err
+	}
 
 	t, err := ts.client.Club.Query().
 		Where(club.Slug(slug)).
@@ -126,11 +134,9 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 			},
 		).
 		First(ctx)
-
 	if err != nil {
 		return nil, err
 	}
-	t, err = t.Update().SetPopularity(t.Popularity + 1).Save(ctx)
 
 	return ts.SerializeTeam(t), nil
 }

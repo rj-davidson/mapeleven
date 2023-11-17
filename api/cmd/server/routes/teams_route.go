@@ -17,7 +17,7 @@ var (
 
 // SetupTeamsRoutes sets up the routes for managing teams.
 func SetupTeamsRoutes(app *fiber.App, client *ent.Client) {
-	teamSerializer := serializer.NewTeamSerializer(client, TeamPopularityTracker)
+	teamSerializer := serializer.NewTeamSerializer(client)
 
 	app.Get(viper.GetString("ENV_PATH")+"/teams", getAllTeams(teamSerializer))
 	app.Get(viper.GetString("ENV_PATH")+"/teams/:slug", getTeamBySlug(teamSerializer))
