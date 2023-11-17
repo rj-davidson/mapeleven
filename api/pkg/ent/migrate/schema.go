@@ -31,6 +31,7 @@ var (
 		{Name: "founded", Type: field.TypeInt},
 		{Name: "national", Type: field.TypeBool},
 		{Name: "logo", Type: field.TypeString},
+		{Name: "popularity", Type: field.TypeInt, Default: 0},
 		{Name: "country_clubs", Type: field.TypeInt, Nullable: true},
 	}
 	// ClubsTable holds the schema information for the "clubs" table.
@@ -41,7 +42,7 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "clubs_countries_clubs",
-				Columns:    []*schema.Column{ClubsColumns[8]},
+				Columns:    []*schema.Column{ClubsColumns[9]},
 				RefColumns: []*schema.Column{CountriesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -903,7 +904,6 @@ var (
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "form", Type: field.TypeString, Nullable: true},
 		{Name: "last_updated", Type: field.TypeTime, Nullable: true},
-		{Name: "popularity", Type: field.TypeInt, Default: 0},
 		{Name: "club_team", Type: field.TypeInt},
 		{Name: "season_teams", Type: field.TypeInt, Nullable: true},
 	}
@@ -915,13 +915,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "teams_clubs_team",
-				Columns:    []*schema.Column{TeamsColumns[4]},
+				Columns:    []*schema.Column{TeamsColumns[3]},
 				RefColumns: []*schema.Column{ClubsColumns[0]},
 				OnDelete:   schema.NoAction,
 			},
 			{
 				Symbol:     "teams_seasons_teams",
-				Columns:    []*schema.Column{TeamsColumns[5]},
+				Columns:    []*schema.Column{TeamsColumns[4]},
 				RefColumns: []*schema.Column{SeasonsColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

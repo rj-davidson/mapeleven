@@ -30,8 +30,6 @@ type Team struct {
 	Form string `json:"form,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
-	// Popularity holds the value of the "Popularity" field.
-	Popularity int `json:"Popularity,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TeamQuery when eager-loading is set.
 	Edges        TeamEdges `json:"edges"`
@@ -275,7 +273,7 @@ func (*Team) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case team.FieldID, team.FieldPopularity:
+		case team.FieldID:
 			values[i] = new(sql.NullInt64)
 		case team.FieldForm:
 			values[i] = new(sql.NullString)
@@ -317,12 +315,6 @@ func (t *Team) assignValues(columns []string, values []any) error {
 				return fmt.Errorf("unexpected type %T for field lastUpdated", values[i])
 			} else if value.Valid {
 				t.LastUpdated = value.Time
-			}
-		case team.FieldPopularity:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for field Popularity", values[i])
-			} else if value.Valid {
-				t.Popularity = int(value.Int64)
 			}
 		case team.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -464,9 +456,6 @@ func (t *Team) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(t.LastUpdated.Format(time.ANSIC))
-	builder.WriteString(", ")
-	builder.WriteString("Popularity=")
-	builder.WriteString(fmt.Sprintf("%v", t.Popularity))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -26,6 +26,7 @@ func (Club) Fields() []ent.Field {
 		field.Int("founded"),
 		field.Bool("national"),
 		field.String("logo"),
+		field.Int("Popularity").Default(0),
 	}
 }
 

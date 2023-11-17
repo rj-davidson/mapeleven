@@ -21,7 +21,6 @@ func (Team) Fields() []ent.Field {
 			Default(time.Now).
 			Optional().
 			UpdateDefault(time.Now),
-		field.Int("Popularity").Default(0),
 	}
 }
 

@@ -7,16 +7,10 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
-	"sync"
-)
-
-var (
-	PlayerPopularityTracker = make(map[string]int)
-	playerPopularityMutex   sync.Mutex
 )
 
 func SetupPlayersRoutes(app *fiber.App, client *ent.Client) {
-	playerSerializer := player_serializer.NewPlayerSerializer(client, PlayerPopularityTracker)
+	playerSerializer := player_serializer.NewPlayerSerializer(client)
 
 	app.Get(viper.GetString("ENV_PATH")+"/players", getAllPlayers(playerSerializer))
 	app.Get(viper.GetString("ENV_PATH")+"/players/:slug", getPlayerBySlug(playerSerializer))
@@ -49,9 +43,6 @@ func getPlayerBySlug(serializer *player_serializer.PlayerSerializer) fiber.Handl
 				"error": fmt.Sprintf("Failed to get player: %v", err),
 			})
 		}
-		playerPopularityMutex.Lock()
-		PlayerPopularityTracker[slug]++
-		playerPopularityMutex.Unlock()
 		return c.JSON(player)
 	}
 }

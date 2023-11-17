@@ -47,6 +47,10 @@ func init() {
 	clubDescCode := clubFields[3].Descriptor()
 	// club.CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	club.CodeValidator = clubDescCode.Validators[0].(func(string) error)
+	// clubDescPopularity is the schema descriptor for Popularity field.
+	clubDescPopularity := clubFields[7].Descriptor()
+	// club.DefaultPopularity holds the default value on creation for the Popularity field.
+	club.DefaultPopularity = clubDescPopularity.Default.(int)
 	coachFields := schema.Coach{}.Fields()
 	_ = coachFields
 	// coachDescLastUpdated is the schema descriptor for lastUpdated field.
@@ -843,8 +847,4 @@ func init() {
 	team.DefaultLastUpdated = teamDescLastUpdated.Default.(func() time.Time)
 	// team.UpdateDefaultLastUpdated holds the default value on update for the lastUpdated field.
 	team.UpdateDefaultLastUpdated = teamDescLastUpdated.UpdateDefault.(func() time.Time)
-	// teamDescPopularity is the schema descriptor for Popularity field.
-	teamDescPopularity := teamFields[2].Descriptor()
-	// team.DefaultPopularity holds the default value on creation for the Popularity field.
-	team.DefaultPopularity = teamDescPopularity.Default.(int)
 }

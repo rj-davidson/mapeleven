@@ -8,14 +8,12 @@ import (
 )
 
 type PlayerSerializer struct {
-	client                  *ent.Client
-	playerPopularityTracker map[string]int
+	client *ent.Client
 }
 
-func NewPlayerSerializer(client *ent.Client, playerPopularityTracker map[string]int) *PlayerSerializer {
+func NewPlayerSerializer(client *ent.Client) *PlayerSerializer {
 	return &PlayerSerializer{
-		client:                  client,
-		playerPopularityTracker: playerPopularityTracker,
+		client: client,
 	}
 
 }
@@ -49,12 +47,9 @@ func (ps *PlayerSerializer) GetPlayerBySlug(ctx context.Context, slug string) (*
 		return nil, err
 	}
 
-	popularity := 0
-	if val, ok := ps.playerPopularityTracker[p.Slug]; ok {
-		popularity = val
-	}
+	p, err = p.Update().SetPopularity(p.Popularity + 1).Save(ctx)
 
-	return ps.SerializePlayer(p, popularity), nil
+	return ps.SerializePlayer(p), nil
 }
 
 // GetPlayers returns all players.
@@ -87,8 +82,7 @@ func (ps *PlayerSerializer) GetPlayers(ctx context.Context) ([]*APIPlayer, error
 
 	var playerItems []*APIPlayer
 	for _, p := range players {
-		popularity := ps.playerPopularityTracker[p.Slug]
-		playerItems = append(playerItems, ps.SerializePlayer(p, popularity))
+		playerItems = append(playerItems, ps.SerializePlayer(p))
 	}
 
 	// Sort playerItems based on Popularity
@@ -100,7 +94,7 @@ func (ps *PlayerSerializer) GetPlayers(ctx context.Context) ([]*APIPlayer, error
 }
 
 // SerializePlayer serializes a player entity into an APIPlayer.
-func (ps *PlayerSerializer) SerializePlayer(p *ent.Player, popularity int) *APIPlayer {
+func (ps *PlayerSerializer) SerializePlayer(p *ent.Player) *APIPlayer {
 	var playerStats []APIPlayerStats
 	if p.Edges.PlayerStats != nil {
 		for _, stat := range p.Edges.PlayerStats {
@@ -119,7 +113,7 @@ func (ps *PlayerSerializer) SerializePlayer(p *ent.Player, popularity int) *APIP
 		Injured:    p.Injured,
 		Photo:      p.Photo,
 		Statistics: playerStats,
-		Popularity: popularity,
+		Popularity: p.Popularity,
 	}
 }
 

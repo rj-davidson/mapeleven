@@ -26,6 +26,8 @@ const (
 	FieldNational = "national"
 	// FieldLogo holds the string denoting the logo field in the database.
 	FieldLogo = "logo"
+	// FieldPopularity holds the string denoting the popularity field in the database.
+	FieldPopularity = "popularity"
 	// EdgeCountry holds the string denoting the country edge name in mutations.
 	EdgeCountry = "country"
 	// EdgeTeam holds the string denoting the team edge name in mutations.
@@ -58,6 +60,7 @@ var Columns = []string{
 	FieldFounded,
 	FieldNational,
 	FieldLogo,
+	FieldPopularity,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "clubs"
@@ -84,6 +87,8 @@ func ValidColumn(column string) bool {
 var (
 	// CodeValidator is a validator for the "code" field. It is called by the builders before save.
 	CodeValidator func(string) error
+	// DefaultPopularity holds the default value on creation for the "Popularity" field.
+	DefaultPopularity int
 )
 
 // OrderOption defines the ordering options for the Club queries.
@@ -127,6 +132,11 @@ func ByNational(opts ...sql.OrderTermOption) OrderOption {
 // ByLogo orders the results by the logo field.
 func ByLogo(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLogo, opts...).ToFunc()
+}
+
+// ByPopularity orders the results by the Popularity field.
+func ByPopularity(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPopularity, opts...).ToFunc()
 }
 
 // ByCountryField orders the results by country field.

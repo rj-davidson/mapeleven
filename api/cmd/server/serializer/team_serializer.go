@@ -45,13 +45,11 @@ type APITeam struct {
 }
 
 type TeamSerializer struct {
-	client                *ent.Client
-	teamPopularityTracker map[string]int
+	client *ent.Client
 }
 
-func NewTeamSerializer(client *ent.Client, teamPopularityTracker map[string]int) *TeamSerializer {
-	return &TeamSerializer{client: client,
-		teamPopularityTracker: teamPopularityTracker}
+func NewTeamSerializer(client *ent.Client) *TeamSerializer {
+	return &TeamSerializer{client: client}
 }
 
 func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
@@ -92,7 +90,7 @@ func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
 			Flag: club.Edges.Country.Flag,
 		},
 		Competitions: compList,
-		Popularity:   ts.teamPopularityTracker[club.Slug],
+		Popularity:   club.Popularity,
 	}
 }
 
@@ -125,7 +123,6 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 				q.WithGoalsStats()
 				q.WithLineups()
 				q.WithPenaltyStats()
-
 			},
 		).
 		First(ctx)
@@ -133,6 +130,7 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 	if err != nil {
 		return nil, err
 	}
+	t, err = t.Update().SetPopularity(t.Popularity + 1).Save(ctx)
 
 	return ts.SerializeTeam(t), nil
 }
@@ -175,7 +173,6 @@ func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*AP
 	var teamItems []*APITeam
 	for _, t := range teams {
 		serializedTeam := ts.SerializeTeam(t)
-		serializedTeam.Popularity = ts.teamPopularityTracker[t.Slug]
 		teamItems = append(teamItems, serializedTeam)
 	}
 
