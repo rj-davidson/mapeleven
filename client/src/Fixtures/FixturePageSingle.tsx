@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Skeleton from "@mui/material/Skeleton";
-import Typography from "@mui/material/Typography";
 import { useMediaQuery } from "@mui/material";
 import { APIFixtureEvent, APIFixtureTeam } from "../Models/api_types";
 import FixtureMatchEvents from "./Events/FixtureMatchEvents";
@@ -120,20 +119,14 @@ function FixturePageSingle() {
           </Grid>
           <Grid item xs={12} sm={6}>
             <Tile style={{ flexDirection: "column" }}>
-              {events.length > 0 ? (
-                events.map((event, index) => (
-                  <Grid item xs={12} key={index}>
-                    <FixtureMatchEvents
-                      event={event}
-                      awayTeamSlug={awayTeamSlug}
-                    />
-                  </Grid>
-                ))
-              ) : (
-                <Grid item xs={12}>
-                  <Typography variant="body2">No events yet.</Typography>
+              {events.map((event, index) => (
+                <Grid item xs={12} key={index}>
+                  <FixtureMatchEvents
+                    event={event}
+                    awayTeamSlug={awayTeamSlug}
+                  />
                 </Grid>
-              )}
+              ))}
             </Tile>
           </Grid>
           <Grid item xs={12} sm={3}>
