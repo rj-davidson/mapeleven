@@ -391,6 +391,29 @@ func HasLineupWith(preds ...predicate.FixtureLineups) predicate.MatchPlayer {
 	})
 }
 
+// HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.
+func HasPlayerStats() predicate.MatchPlayer {
+	return predicate.MatchPlayer(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPlayerStatsWith applies the HasEdge predicate on the "playerStats" edge with a given conditions (other predicates).
+func HasPlayerStatsWith(preds ...predicate.PlayerStats) predicate.MatchPlayer {
+	return predicate.MatchPlayer(func(s *sql.Selector) {
+		step := newPlayerStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.MatchPlayer) predicate.MatchPlayer {
 	return predicate.MatchPlayer(sql.AndPredicates(predicates...))

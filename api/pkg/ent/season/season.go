@@ -34,6 +34,10 @@ const (
 	EdgeStandings = "standings"
 	// EdgeTeams holds the string denoting the teams edge name in mutations.
 	EdgeTeams = "teams"
+	// EdgeSquad holds the string denoting the squad edge name in mutations.
+	EdgeSquad = "squad"
+	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
+	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the season in the database.
 	Table = "seasons"
 	// LeagueTable is the table that holds the league relation/edge.
@@ -64,6 +68,18 @@ const (
 	TeamsInverseTable = "teams"
 	// TeamsColumn is the table column denoting the teams relation/edge.
 	TeamsColumn = "season_teams"
+	// SquadTable is the table that holds the squad relation/edge.
+	SquadTable = "squads"
+	// SquadInverseTable is the table name for the Squad entity.
+	// It exists in this package in order to avoid circular dependency with the "squad" package.
+	SquadInverseTable = "squads"
+	// SquadColumn is the table column denoting the squad relation/edge.
+	SquadColumn = "season_squad"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge. The primary key declared below.
+	PlayerStatsTable = "player_stats_season"
+	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
+	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
+	PlayerStatsInverseTable = "player_stats"
 )
 
 // Columns holds all SQL columns for season fields.
@@ -82,6 +98,12 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"league_season",
 }
+
+var (
+	// PlayerStatsPrimaryKey and PlayerStatsColumn2 are the table columns denoting the
+	// primary key for the playerStats relation (M2M).
+	PlayerStatsPrimaryKey = []string{"player_stats_id", "season_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -191,6 +213,34 @@ func ByTeams(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newTeamsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// BySquadCount orders the results by squad count.
+func BySquadCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newSquadStep(), opts...)
+	}
+}
+
+// BySquad orders the results by squad terms.
+func BySquad(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newSquadStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
+
+// ByPlayerStatsCount orders the results by playerStats count.
+func ByPlayerStatsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPlayerStatsStep(), opts...)
+	}
+}
+
+// ByPlayerStats orders the results by playerStats terms.
+func ByPlayerStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newLeagueStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -217,5 +267,19 @@ func newTeamsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(TeamsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, TeamsTable, TeamsColumn),
+	)
+}
+func newSquadStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(SquadInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, SquadTable, SquadColumn),
+	)
+}
+func newPlayerStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayerStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2M, true, PlayerStatsTable, PlayerStatsPrimaryKey...),
 	)
 }

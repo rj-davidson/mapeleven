@@ -18,10 +18,14 @@ const (
 	FieldForm = "form"
 	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
 	FieldLastUpdated = "last_updated"
+	// FieldPopularity holds the string denoting the popularity field in the database.
+	FieldPopularity = "popularity"
 	// EdgeSeason holds the string denoting the season edge name in mutations.
 	EdgeSeason = "season"
 	// EdgeClub holds the string denoting the club edge name in mutations.
 	EdgeClub = "club"
+	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
+	EdgePlayerStats = "playerStats"
 	// EdgeStandings holds the string denoting the standings edge name in mutations.
 	EdgeStandings = "standings"
 	// EdgeHomeFixtures holds the string denoting the homefixtures edge name in mutations.
@@ -32,8 +36,6 @@ const (
 	EdgeTeamFixtureEvents = "teamFixtureEvents"
 	// EdgeFixtureLineups holds the string denoting the fixturelineups edge name in mutations.
 	EdgeFixtureLineups = "fixtureLineups"
-	// EdgePlayers holds the string denoting the players edge name in mutations.
-	EdgePlayers = "players"
 	// EdgeSquad holds the string denoting the squad edge name in mutations.
 	EdgeSquad = "squad"
 	// EdgeBiggestStats holds the string denoting the biggest_stats edge name in mutations.
@@ -68,6 +70,13 @@ const (
 	ClubInverseTable = "clubs"
 	// ClubColumn is the table column denoting the club relation/edge.
 	ClubColumn = "club_team"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge.
+	PlayerStatsTable = "player_stats"
+	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
+	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
+	PlayerStatsInverseTable = "player_stats"
+	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
+	PlayerStatsColumn = "team_player_stats"
 	// StandingsTable is the table that holds the standings relation/edge.
 	StandingsTable = "standings"
 	// StandingsInverseTable is the table name for the Standings entity.
@@ -103,13 +112,6 @@ const (
 	FixtureLineupsInverseTable = "fixture_lineups"
 	// FixtureLineupsColumn is the table column denoting the fixtureLineups relation/edge.
 	FixtureLineupsColumn = "team_fixture_lineups"
-	// PlayersTable is the table that holds the players relation/edge.
-	PlayersTable = "players"
-	// PlayersInverseTable is the table name for the Player entity.
-	// It exists in this package in order to avoid circular dependency with the "player" package.
-	PlayersInverseTable = "players"
-	// PlayersColumn is the table column denoting the players relation/edge.
-	PlayersColumn = "team_players"
 	// SquadTable is the table that holds the squad relation/edge.
 	SquadTable = "squads"
 	// SquadInverseTable is the table name for the Squad entity.
@@ -180,6 +182,7 @@ var Columns = []string{
 	FieldID,
 	FieldForm,
 	FieldLastUpdated,
+	FieldPopularity,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "teams"
@@ -209,6 +212,8 @@ var (
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
 	UpdateDefaultLastUpdated func() time.Time
+	// DefaultPopularity holds the default value on creation for the "Popularity" field.
+	DefaultPopularity int
 )
 
 // OrderOption defines the ordering options for the Team queries.
@@ -229,6 +234,11 @@ func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
 }
 
+// ByPopularity orders the results by the Popularity field.
+func ByPopularity(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPopularity, opts...).ToFunc()
+}
+
 // BySeasonField orders the results by season field.
 func BySeasonField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
@@ -240,6 +250,20 @@ func BySeasonField(field string, opts ...sql.OrderTermOption) OrderOption {
 func ByClubField(field string, opts ...sql.OrderTermOption) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newClubStep(), sql.OrderByField(field, opts...))
+	}
+}
+
+// ByPlayerStatsCount orders the results by playerStats count.
+func ByPlayerStatsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPlayerStatsStep(), opts...)
+	}
+}
+
+// ByPlayerStats orders the results by playerStats terms.
+func ByPlayerStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -310,20 +334,6 @@ func ByFixtureLineupsCount(opts ...sql.OrderTermOption) OrderOption {
 func ByFixtureLineups(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 	return func(s *sql.Selector) {
 		sqlgraph.OrderByNeighborTerms(s, newFixtureLineupsStep(), append([]sql.OrderTerm{term}, terms...)...)
-	}
-}
-
-// ByPlayersCount orders the results by players count.
-func ByPlayersCount(opts ...sql.OrderTermOption) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborsCount(s, newPlayersStep(), opts...)
-	}
-}
-
-// ByPlayers orders the results by players terms.
-func ByPlayers(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
-	return func(s *sql.Selector) {
-		sqlgraph.OrderByNeighborTerms(s, newPlayersStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
 
@@ -417,6 +427,13 @@ func newClubStep() *sqlgraph.Step {
 		sqlgraph.Edge(sqlgraph.M2O, true, ClubTable, ClubColumn),
 	)
 }
+func newPlayerStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayerStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PlayerStatsTable, PlayerStatsColumn),
+	)
+}
 func newStandingsStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -450,13 +467,6 @@ func newFixtureLineupsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FixtureLineupsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, FixtureLineupsTable, FixtureLineupsColumn),
-	)
-}
-func newPlayersStep() *sqlgraph.Step {
-	return sqlgraph.NewStep(
-		sqlgraph.From(Table, FieldID),
-		sqlgraph.To(PlayersInverseTable, FieldID),
-		sqlgraph.Edge(sqlgraph.O2M, false, PlayersTable, PlayersColumn),
 	)
 }
 func newSquadStep() *sqlgraph.Step {

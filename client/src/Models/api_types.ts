@@ -215,6 +215,8 @@ interface APIPlayer {
     weight: string;
     injured: boolean;
     photo: string;
+    statistics?: APIPlayerStats;
+    popularity?: number;
 }
 
 interface APIFixture {
@@ -312,8 +314,76 @@ interface APIFixturePlayerDetailInfo {
     y: number;
 }
 
+interface APIPlayerStats {
+    PSDefense: APIPlayerStatsDefense;
+    PSGames: APIPlayerStatsGames;
+    PSShooting: APIPlayerStatsShooting;
+    PSSubstitutes: APIPlayerStatsSubstitutes;
+    PSTechnical: APIPlayerStatsTechnical;
+    PSPenalty: APIPlayerStatsPenalty;
+    PSFairPlay: APIPlayerStatsFairPlay;
+}
+
+interface APIPlayerStatsDefense {
+    tackles: number;
+    blocks: number;
+    interceptions: number;
+    duels: number;
+    dribbledPast: number;
+}
+
+interface APIPlayerStatsGames {
+    appearances: number;
+    lineups: number;
+    minutes: number;
+    number: number;
+    position: string;
+    rating: string;
+    captain: boolean;
+}
+
+interface APIPlayerStatsShooting {
+    goals: number;
+    conceded: number;
+    assists: number;
+    saves: number;
+    shots: number;
+    ontarget: number;
+}
+
+interface APIPlayerStatsSubstitutes {
+    in: number;
+    out: number;
+    bench: number;
+}
+
+interface APIPlayerStatsTechnical {
+    foulsDrawn: number;
+    dribbleaAttempts: number;
+    dribbleSuccess: number;
+    passes: number;
+    keyPasses: number;
+    passAccuracy: number;
+}
+
+interface APIPlayerStatsPenalty {
+    won: number;
+    commited: number;
+    scored: number;
+    missed: number;
+    saved: number;
+}
+
+interface APIPlayerStatsFairPlay {
+    yellow: number;
+    yellowRed: number;
+    red: number;
+    foulsCommitted: number;
+    penaltiesConceded: number;
+}
 
 export {
+
     APIFixture,
     APIFixtureSet,
     APIFixtureEvent,
@@ -332,4 +402,6 @@ export {
     APIRecord,
     APIStanding,
     APIPlayer,
+    APIPlayerStats,
 };
+

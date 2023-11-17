@@ -110,6 +110,11 @@ func LastUpdated(v time.Time) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldLastUpdated, v))
 }
 
+// Popularity applies equality check predicate on the "Popularity" field. It's identical to PopularityEQ.
+func Popularity(v int) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldPopularity, v))
+}
+
 // SlugEQ applies the EQ predicate on the "slug" field.
 func SlugEQ(v string) predicate.Player {
 	return predicate.Player(sql.FieldEQ(FieldSlug, v))
@@ -705,6 +710,46 @@ func LastUpdatedNotNil() predicate.Player {
 	return predicate.Player(sql.FieldNotNull(FieldLastUpdated))
 }
 
+// PopularityEQ applies the EQ predicate on the "Popularity" field.
+func PopularityEQ(v int) predicate.Player {
+	return predicate.Player(sql.FieldEQ(FieldPopularity, v))
+}
+
+// PopularityNEQ applies the NEQ predicate on the "Popularity" field.
+func PopularityNEQ(v int) predicate.Player {
+	return predicate.Player(sql.FieldNEQ(FieldPopularity, v))
+}
+
+// PopularityIn applies the In predicate on the "Popularity" field.
+func PopularityIn(vs ...int) predicate.Player {
+	return predicate.Player(sql.FieldIn(FieldPopularity, vs...))
+}
+
+// PopularityNotIn applies the NotIn predicate on the "Popularity" field.
+func PopularityNotIn(vs ...int) predicate.Player {
+	return predicate.Player(sql.FieldNotIn(FieldPopularity, vs...))
+}
+
+// PopularityGT applies the GT predicate on the "Popularity" field.
+func PopularityGT(v int) predicate.Player {
+	return predicate.Player(sql.FieldGT(FieldPopularity, v))
+}
+
+// PopularityGTE applies the GTE predicate on the "Popularity" field.
+func PopularityGTE(v int) predicate.Player {
+	return predicate.Player(sql.FieldGTE(FieldPopularity, v))
+}
+
+// PopularityLT applies the LT predicate on the "Popularity" field.
+func PopularityLT(v int) predicate.Player {
+	return predicate.Player(sql.FieldLT(FieldPopularity, v))
+}
+
+// PopularityLTE applies the LTE predicate on the "Popularity" field.
+func PopularityLTE(v int) predicate.Player {
+	return predicate.Player(sql.FieldLTE(FieldPopularity, v))
+}
+
 // HasBirth applies the HasEdge predicate on the "birth" edge.
 func HasBirth() predicate.Player {
 	return predicate.Player(func(s *sql.Selector) {
@@ -835,6 +880,29 @@ func HasAssistEvents() predicate.Player {
 func HasAssistEventsWith(preds ...predicate.FixtureEvents) predicate.Player {
 	return predicate.Player(func(s *sql.Selector) {
 		step := newAssistEventsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.
+func HasPlayerStats() predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PlayerStatsTable, PlayerStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPlayerStatsWith applies the HasEdge predicate on the "playerStats" edge with a given conditions (other predicates).
+func HasPlayerStatsWith(preds ...predicate.PlayerStats) predicate.Player {
+	return predicate.Player(func(s *sql.Selector) {
+		step := newPlayerStatsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

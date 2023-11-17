@@ -30,6 +30,8 @@ type Team struct {
 	Form string `json:"form,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
+	// Popularity holds the value of the "Popularity" field.
+	Popularity int `json:"Popularity,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the TeamQuery when eager-loading is set.
 	Edges        TeamEdges `json:"edges"`
@@ -44,6 +46,8 @@ type TeamEdges struct {
 	Season *Season `json:"season,omitempty"`
 	// Club holds the value of the club edge.
 	Club *Club `json:"club,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
 	// Standings holds the value of the standings edge.
 	Standings []*Standings `json:"standings,omitempty"`
 	// HomeFixtures holds the value of the homeFixtures edge.
@@ -54,8 +58,6 @@ type TeamEdges struct {
 	TeamFixtureEvents []*FixtureEvents `json:"teamFixtureEvents,omitempty"`
 	// FixtureLineups holds the value of the fixtureLineups edge.
 	FixtureLineups []*FixtureLineups `json:"fixtureLineups,omitempty"`
-	// Players holds the value of the players edge.
-	Players []*Player `json:"players,omitempty"`
 	// Squad holds the value of the squad edge.
 	Squad []*Squad `json:"squad,omitempty"`
 	// BiggestStats holds the value of the biggest_stats edge.
@@ -105,10 +107,19 @@ func (e TeamEdges) ClubOrErr() (*Club, error) {
 	return nil, &NotLoadedError{edge: "club"}
 }
 
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
+// was not loaded in eager-loading.
+func (e TeamEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
+	if e.loadedTypes[2] {
+		return e.PlayerStats, nil
+	}
+	return nil, &NotLoadedError{edge: "playerStats"}
+}
+
 // StandingsOrErr returns the Standings value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) StandingsOrErr() ([]*Standings, error) {
-	if e.loadedTypes[2] {
+	if e.loadedTypes[3] {
 		return e.Standings, nil
 	}
 	return nil, &NotLoadedError{edge: "standings"}
@@ -117,7 +128,7 @@ func (e TeamEdges) StandingsOrErr() ([]*Standings, error) {
 // HomeFixturesOrErr returns the HomeFixtures value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) HomeFixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[3] {
+	if e.loadedTypes[4] {
 		return e.HomeFixtures, nil
 	}
 	return nil, &NotLoadedError{edge: "homeFixtures"}
@@ -126,7 +137,7 @@ func (e TeamEdges) HomeFixturesOrErr() ([]*Fixture, error) {
 // AwayFixturesOrErr returns the AwayFixtures value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) AwayFixturesOrErr() ([]*Fixture, error) {
-	if e.loadedTypes[4] {
+	if e.loadedTypes[5] {
 		return e.AwayFixtures, nil
 	}
 	return nil, &NotLoadedError{edge: "awayFixtures"}
@@ -135,7 +146,7 @@ func (e TeamEdges) AwayFixturesOrErr() ([]*Fixture, error) {
 // TeamFixtureEventsOrErr returns the TeamFixtureEvents value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) TeamFixtureEventsOrErr() ([]*FixtureEvents, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[6] {
 		return e.TeamFixtureEvents, nil
 	}
 	return nil, &NotLoadedError{edge: "teamFixtureEvents"}
@@ -144,19 +155,10 @@ func (e TeamEdges) TeamFixtureEventsOrErr() ([]*FixtureEvents, error) {
 // FixtureLineupsOrErr returns the FixtureLineups value or an error if the edge
 // was not loaded in eager-loading.
 func (e TeamEdges) FixtureLineupsOrErr() ([]*FixtureLineups, error) {
-	if e.loadedTypes[6] {
+	if e.loadedTypes[7] {
 		return e.FixtureLineups, nil
 	}
 	return nil, &NotLoadedError{edge: "fixtureLineups"}
-}
-
-// PlayersOrErr returns the Players value or an error if the edge
-// was not loaded in eager-loading.
-func (e TeamEdges) PlayersOrErr() ([]*Player, error) {
-	if e.loadedTypes[7] {
-		return e.Players, nil
-	}
-	return nil, &NotLoadedError{edge: "players"}
 }
 
 // SquadOrErr returns the Squad value or an error if the edge
@@ -273,7 +275,7 @@ func (*Team) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case team.FieldID:
+		case team.FieldID, team.FieldPopularity:
 			values[i] = new(sql.NullInt64)
 		case team.FieldForm:
 			values[i] = new(sql.NullString)
@@ -316,6 +318,12 @@ func (t *Team) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				t.LastUpdated = value.Time
 			}
+		case team.FieldPopularity:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field Popularity", values[i])
+			} else if value.Valid {
+				t.Popularity = int(value.Int64)
+			}
 		case team.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field club_team", value)
@@ -353,6 +361,11 @@ func (t *Team) QueryClub() *ClubQuery {
 	return NewTeamClient(t.config).QueryClub(t)
 }
 
+// QueryPlayerStats queries the "playerStats" edge of the Team entity.
+func (t *Team) QueryPlayerStats() *PlayerStatsQuery {
+	return NewTeamClient(t.config).QueryPlayerStats(t)
+}
+
 // QueryStandings queries the "standings" edge of the Team entity.
 func (t *Team) QueryStandings() *StandingsQuery {
 	return NewTeamClient(t.config).QueryStandings(t)
@@ -376,11 +389,6 @@ func (t *Team) QueryTeamFixtureEvents() *FixtureEventsQuery {
 // QueryFixtureLineups queries the "fixtureLineups" edge of the Team entity.
 func (t *Team) QueryFixtureLineups() *FixtureLineupsQuery {
 	return NewTeamClient(t.config).QueryFixtureLineups(t)
-}
-
-// QueryPlayers queries the "players" edge of the Team entity.
-func (t *Team) QueryPlayers() *PlayerQuery {
-	return NewTeamClient(t.config).QueryPlayers(t)
 }
 
 // QuerySquad queries the "squad" edge of the Team entity.
@@ -456,6 +464,9 @@ func (t *Team) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(t.LastUpdated.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("Popularity=")
+	builder.WriteString(fmt.Sprintf("%v", t.Popularity))
 	builder.WriteByte(')')
 	return builder.String()
 }

@@ -30,8 +30,24 @@ type Tx struct {
 	League *LeagueClient
 	// MatchPlayer is the client for interacting with the MatchPlayer builders.
 	MatchPlayer *MatchPlayerClient
+	// PSDefense is the client for interacting with the PSDefense builders.
+	PSDefense *PSDefenseClient
+	// PSFairplay is the client for interacting with the PSFairplay builders.
+	PSFairplay *PSFairplayClient
+	// PSGames is the client for interacting with the PSGames builders.
+	PSGames *PSGamesClient
+	// PSPenalty is the client for interacting with the PSPenalty builders.
+	PSPenalty *PSPenaltyClient
+	// PSShooting is the client for interacting with the PSShooting builders.
+	PSShooting *PSShootingClient
+	// PSSubstitutes is the client for interacting with the PSSubstitutes builders.
+	PSSubstitutes *PSSubstitutesClient
+	// PSTechnical is the client for interacting with the PSTechnical builders.
+	PSTechnical *PSTechnicalClient
 	// Player is the client for interacting with the Player builders.
 	Player *PlayerClient
+	// PlayerStats is the client for interacting with the PlayerStats builders.
+	PlayerStats *PlayerStatsClient
 	// Season is the client for interacting with the Season builders.
 	Season *SeasonClient
 	// Squad is the client for interacting with the Squad builders.
@@ -196,7 +212,15 @@ func (tx *Tx) init() {
 	tx.FixtureLineups = NewFixtureLineupsClient(tx.config)
 	tx.League = NewLeagueClient(tx.config)
 	tx.MatchPlayer = NewMatchPlayerClient(tx.config)
+	tx.PSDefense = NewPSDefenseClient(tx.config)
+	tx.PSFairplay = NewPSFairplayClient(tx.config)
+	tx.PSGames = NewPSGamesClient(tx.config)
+	tx.PSPenalty = NewPSPenaltyClient(tx.config)
+	tx.PSShooting = NewPSShootingClient(tx.config)
+	tx.PSSubstitutes = NewPSSubstitutesClient(tx.config)
+	tx.PSTechnical = NewPSTechnicalClient(tx.config)
 	tx.Player = NewPlayerClient(tx.config)
+	tx.PlayerStats = NewPlayerStatsClient(tx.config)
 	tx.Season = NewSeasonClient(tx.config)
 	tx.Squad = NewSquadClient(tx.config)
 	tx.Standings = NewStandingsClient(tx.config)

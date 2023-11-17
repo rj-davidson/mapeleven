@@ -36,6 +36,8 @@ const (
 	FieldPhoto = "photo"
 	// FieldLastUpdated holds the string denoting the lastupdated field in the database.
 	FieldLastUpdated = "last_updated"
+	// FieldPopularity holds the string denoting the popularity field in the database.
+	FieldPopularity = "popularity"
 	// EdgeBirth holds the string denoting the birth edge name in mutations.
 	EdgeBirth = "birth"
 	// EdgeNationality holds the string denoting the nationality edge name in mutations.
@@ -48,6 +50,8 @@ const (
 	EdgeMatchPlayer = "matchPlayer"
 	// EdgeAssistEvents holds the string denoting the assistevents edge name in mutations.
 	EdgeAssistEvents = "assistEvents"
+	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
+	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the player in the database.
 	Table = "players"
 	// BirthTable is the table that holds the birth relation/edge.
@@ -92,6 +96,13 @@ const (
 	AssistEventsInverseTable = "fixture_events"
 	// AssistEventsColumn is the table column denoting the assistEvents relation/edge.
 	AssistEventsColumn = "player_assist_events"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge.
+	PlayerStatsTable = "player_stats"
+	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
+	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
+	PlayerStatsInverseTable = "player_stats"
+	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
+	PlayerStatsColumn = "player_player_stats"
 )
 
 // Columns holds all SQL columns for player fields.
@@ -108,6 +119,7 @@ var Columns = []string{
 	FieldInjured,
 	FieldPhoto,
 	FieldLastUpdated,
+	FieldPopularity,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "players"
@@ -115,7 +127,6 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"birth_player",
 	"country_players",
-	"team_players",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -138,6 +149,8 @@ var (
 	DefaultLastUpdated func() time.Time
 	// UpdateDefaultLastUpdated holds the default value on update for the "lastUpdated" field.
 	UpdateDefaultLastUpdated func() time.Time
+	// DefaultPopularity holds the default value on creation for the "Popularity" field.
+	DefaultPopularity int
 )
 
 // OrderOption defines the ordering options for the Player queries.
@@ -201,6 +214,11 @@ func ByPhoto(opts ...sql.OrderTermOption) OrderOption {
 // ByLastUpdated orders the results by the lastUpdated field.
 func ByLastUpdated(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldLastUpdated, opts...).ToFunc()
+}
+
+// ByPopularity orders the results by the Popularity field.
+func ByPopularity(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldPopularity, opts...).ToFunc()
 }
 
 // ByBirthField orders the results by birth field.
@@ -272,6 +290,20 @@ func ByAssistEvents(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newAssistEventsStep(), append([]sql.OrderTerm{term}, terms...)...)
 	}
 }
+
+// ByPlayerStatsCount orders the results by playerStats count.
+func ByPlayerStatsCount(opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborsCount(s, newPlayerStatsStep(), opts...)
+	}
+}
+
+// ByPlayerStats orders the results by playerStats terms.
+func ByPlayerStats(term sql.OrderTerm, terms ...sql.OrderTerm) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), append([]sql.OrderTerm{term}, terms...)...)
+	}
+}
 func newBirthStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -312,5 +344,12 @@ func newAssistEventsStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(AssistEventsInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.O2M, false, AssistEventsTable, AssistEventsColumn),
+	)
+}
+func newPlayerStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayerStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.O2M, false, PlayerStatsTable, PlayerStatsColumn),
 	)
 }

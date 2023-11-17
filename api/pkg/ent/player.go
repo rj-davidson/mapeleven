@@ -41,12 +41,13 @@ type Player struct {
 	Photo string `json:"photo,omitempty"`
 	// LastUpdated holds the value of the "lastUpdated" field.
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
+	// Popularity holds the value of the "Popularity" field.
+	Popularity int `json:"Popularity,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the PlayerQuery when eager-loading is set.
 	Edges           PlayerEdges `json:"edges"`
 	birth_player    *int
 	country_players *int
-	team_players    *int
 	selectValues    sql.SelectValues
 }
 
@@ -64,9 +65,11 @@ type PlayerEdges struct {
 	MatchPlayer []*MatchPlayer `json:"matchPlayer,omitempty"`
 	// AssistEvents holds the value of the assistEvents edge.
 	AssistEvents []*FixtureEvents `json:"assistEvents,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats []*PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
+	loadedTypes [7]bool
 }
 
 // BirthOrErr returns the Birth value or an error if the edge
@@ -131,6 +134,15 @@ func (e PlayerEdges) AssistEventsOrErr() ([]*FixtureEvents, error) {
 	return nil, &NotLoadedError{edge: "assistEvents"}
 }
 
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
+// was not loaded in eager-loading.
+func (e PlayerEdges) PlayerStatsOrErr() ([]*PlayerStats, error) {
+	if e.loadedTypes[6] {
+		return e.PlayerStats, nil
+	}
+	return nil, &NotLoadedError{edge: "playerStats"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Player) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -138,7 +150,7 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case player.FieldInjured:
 			values[i] = new(sql.NullBool)
-		case player.FieldID, player.FieldApiFootballId, player.FieldAge:
+		case player.FieldID, player.FieldApiFootballId, player.FieldAge, player.FieldPopularity:
 			values[i] = new(sql.NullInt64)
 		case player.FieldSlug, player.FieldName, player.FieldFirstname, player.FieldLastname, player.FieldHeight, player.FieldWeight, player.FieldPhoto:
 			values[i] = new(sql.NullString)
@@ -147,8 +159,6 @@ func (*Player) scanValues(columns []string) ([]any, error) {
 		case player.ForeignKeys[0]: // birth_player
 			values[i] = new(sql.NullInt64)
 		case player.ForeignKeys[1]: // country_players
-			values[i] = new(sql.NullInt64)
-		case player.ForeignKeys[2]: // team_players
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -237,6 +247,12 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pl.LastUpdated = value.Time
 			}
+		case player.FieldPopularity:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for field Popularity", values[i])
+			} else if value.Valid {
+				pl.Popularity = int(value.Int64)
+			}
 		case player.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field birth_player", value)
@@ -250,13 +266,6 @@ func (pl *Player) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				pl.country_players = new(int)
 				*pl.country_players = int(value.Int64)
-			}
-		case player.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field team_players", value)
-			} else if value.Valid {
-				pl.team_players = new(int)
-				*pl.team_players = int(value.Int64)
 			}
 		default:
 			pl.selectValues.Set(columns[i], values[i])
@@ -299,6 +308,11 @@ func (pl *Player) QueryMatchPlayer() *MatchPlayerQuery {
 // QueryAssistEvents queries the "assistEvents" edge of the Player entity.
 func (pl *Player) QueryAssistEvents() *FixtureEventsQuery {
 	return NewPlayerClient(pl.config).QueryAssistEvents(pl)
+}
+
+// QueryPlayerStats queries the "playerStats" edge of the Player entity.
+func (pl *Player) QueryPlayerStats() *PlayerStatsQuery {
+	return NewPlayerClient(pl.config).QueryPlayerStats(pl)
 }
 
 // Update returns a builder for updating this Player.
@@ -356,6 +370,9 @@ func (pl *Player) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("lastUpdated=")
 	builder.WriteString(pl.LastUpdated.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("Popularity=")
+	builder.WriteString(fmt.Sprintf("%v", pl.Popularity))
 	builder.WriteByte(')')
 	return builder.String()
 }

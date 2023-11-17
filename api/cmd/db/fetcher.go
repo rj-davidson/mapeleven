@@ -5,6 +5,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/fixture_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models/player_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models/team_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
@@ -89,7 +90,7 @@ func main() {
 
 	if *devRun {
 		fmt.Println("Running in development mode...")
-		runDevelopmentMode()
+		runDevelopmentMode(client)
 	}
 
 	// Start the scheduler
@@ -110,8 +111,8 @@ func updateDatabase(client *ent.Client) {
 	cronScheduler(client, false, true, false)
 }
 
-func runDevelopmentMode() {
-	cronScheduler(nil, false, false, true)
+func runDevelopmentMode(client *ent.Client) {
+	cronScheduler(client, false, false, true)
 }
 
 func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRun bool) {
@@ -129,6 +130,7 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	fixturesModel := fixture_models.NewFixtureModel(client)
 	playerModel := player_models.NewPlayerModel(client)
 	squadModel := team_models.NewSquadModel(client)
+	playerStatsModel := player_stats.NewPlayerStatsModel(client)
 
 	if initialize {
 		// Country Initialization
@@ -147,7 +149,10 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 		fetchTeamStats(teamModel, teamStatsModel)
 
 		// Fetch Squads
-		fetchSquads(squadModel, playerModel, teamModel)
+		fetchSquads(squadModel, playerModel, teamModel, playerStatsModel)
+
+		// Fetch Player Stats
+		//fetchPlayerStats(playerModel, playerStatsModel)
 
 		// Fetch Fixture Data
 		fetchFixtureData(fixturesModel)
@@ -164,6 +169,9 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 	if devRun {
 		// Add your development mode code here
+		fetchSquads(squadModel, playerModel, teamModel, playerStatsModel)
+		//fetchPlayerStats(playerModel, teamModel)
+
 	}
 }
 
@@ -227,7 +235,7 @@ func fetchTeamStats(teamModel *team_models.TeamModel, teamStatsModel *team_stats
 	}
 }
 
-func fetchSquads(squadModel *team_models.SquadModel, playerModel *player_models.PlayerModel, teamModel *team_models.TeamModel) {
+func fetchSquads(squadModel *team_models.SquadModel, playerModel *player_models.PlayerModel, teamModel *team_models.TeamModel, playerstatsModel *player_stats.PlayerStatsModel) {
 	fmt.Println("Fetching Squads...")
 
 	teams, err := teamModel.ListAll(context.Background())
@@ -236,7 +244,7 @@ func fetchSquads(squadModel *team_models.SquadModel, playerModel *player_models.
 		return
 	}
 
-	squadController := controllers.NewSquadController(squadModel, playerModel)
+	squadController := controllers.NewSquadController(squadModel, playerModel, playerstatsModel)
 	err = squadController.InitializeSquads(teams, context.Background())
 	if err != nil {
 		log.Printf("Error initializing squads: %v", err)

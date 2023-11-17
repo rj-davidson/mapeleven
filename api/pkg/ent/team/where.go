@@ -65,6 +65,11 @@ func LastUpdated(v time.Time) predicate.Team {
 	return predicate.Team(sql.FieldEQ(FieldLastUpdated, v))
 }
 
+// Popularity applies equality check predicate on the "Popularity" field. It's identical to PopularityEQ.
+func Popularity(v int) predicate.Team {
+	return predicate.Team(sql.FieldEQ(FieldPopularity, v))
+}
+
 // FormEQ applies the EQ predicate on the "form" field.
 func FormEQ(v string) predicate.Team {
 	return predicate.Team(sql.FieldEQ(FieldForm, v))
@@ -190,6 +195,46 @@ func LastUpdatedNotNil() predicate.Team {
 	return predicate.Team(sql.FieldNotNull(FieldLastUpdated))
 }
 
+// PopularityEQ applies the EQ predicate on the "Popularity" field.
+func PopularityEQ(v int) predicate.Team {
+	return predicate.Team(sql.FieldEQ(FieldPopularity, v))
+}
+
+// PopularityNEQ applies the NEQ predicate on the "Popularity" field.
+func PopularityNEQ(v int) predicate.Team {
+	return predicate.Team(sql.FieldNEQ(FieldPopularity, v))
+}
+
+// PopularityIn applies the In predicate on the "Popularity" field.
+func PopularityIn(vs ...int) predicate.Team {
+	return predicate.Team(sql.FieldIn(FieldPopularity, vs...))
+}
+
+// PopularityNotIn applies the NotIn predicate on the "Popularity" field.
+func PopularityNotIn(vs ...int) predicate.Team {
+	return predicate.Team(sql.FieldNotIn(FieldPopularity, vs...))
+}
+
+// PopularityGT applies the GT predicate on the "Popularity" field.
+func PopularityGT(v int) predicate.Team {
+	return predicate.Team(sql.FieldGT(FieldPopularity, v))
+}
+
+// PopularityGTE applies the GTE predicate on the "Popularity" field.
+func PopularityGTE(v int) predicate.Team {
+	return predicate.Team(sql.FieldGTE(FieldPopularity, v))
+}
+
+// PopularityLT applies the LT predicate on the "Popularity" field.
+func PopularityLT(v int) predicate.Team {
+	return predicate.Team(sql.FieldLT(FieldPopularity, v))
+}
+
+// PopularityLTE applies the LTE predicate on the "Popularity" field.
+func PopularityLTE(v int) predicate.Team {
+	return predicate.Team(sql.FieldLTE(FieldPopularity, v))
+}
+
 // HasSeason applies the HasEdge predicate on the "season" edge.
 func HasSeason() predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
@@ -228,6 +273,29 @@ func HasClub() predicate.Team {
 func HasClubWith(preds ...predicate.Club) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		step := newClubStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.
+func HasPlayerStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PlayerStatsTable, PlayerStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPlayerStatsWith applies the HasEdge predicate on the "playerStats" edge with a given conditions (other predicates).
+func HasPlayerStatsWith(preds ...predicate.PlayerStats) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newPlayerStatsStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)
@@ -343,29 +411,6 @@ func HasFixtureLineups() predicate.Team {
 func HasFixtureLineupsWith(preds ...predicate.FixtureLineups) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		step := newFixtureLineupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPlayers applies the HasEdge predicate on the "players" edge.
-func HasPlayers() predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PlayersTable, PlayersColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPlayersWith applies the HasEdge predicate on the "players" edge with a given conditions (other predicates).
-func HasPlayersWith(preds ...predicate.Player) predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := newPlayersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

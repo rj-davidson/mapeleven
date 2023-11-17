@@ -7,11 +7,17 @@ import (
 	"fmt"
 	"github.com/gofiber/fiber/v2"
 	"github.com/spf13/viper"
+	"sync"
+)
+
+var (
+	TeamPopularityTracker = make(map[string]int)
+	teamPopularityMutex   sync.Mutex
 )
 
 // SetupTeamsRoutes sets up the routes for managing teams.
 func SetupTeamsRoutes(app *fiber.App, client *ent.Client) {
-	teamSerializer := serializer.NewTeamSerializer(client)
+	teamSerializer := serializer.NewTeamSerializer(client, TeamPopularityTracker)
 
 	app.Get(viper.GetString("ENV_PATH")+"/teams", getAllTeams(teamSerializer))
 	app.Get(viper.GetString("ENV_PATH")+"/teams/:slug", getTeamBySlug(teamSerializer))
@@ -35,6 +41,10 @@ func getTeamBySlug(serializer *serializer.TeamSerializer) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		slug := c.Params("slug")
 		season := c.Query("season", "")
+
+		teamPopularityMutex.Lock()
+		TeamPopularityTracker[slug]++
+		teamPopularityMutex.Unlock()
 
 		team, err := serializer.GetTeamBySlug(context.Background(), slug, season)
 		if err != nil {

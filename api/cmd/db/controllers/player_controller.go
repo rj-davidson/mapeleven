@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models/player_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/utils"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
@@ -15,23 +16,6 @@ import (
 	"path/filepath"
 )
 
-type PlayerStatistics struct {
-	Team struct {
-		League struct {
-			ID int `json:"id"`
-		} `json:"league"`
-	} `json:"team"`
-	Season int `json:"season"`
-}
-
-type LeaguePlayerInfo struct {
-	ID int `json:"id"`
-}
-
-type LeaguePlayer struct {
-	Player LeaguePlayerInfo `json:"player"`
-}
-
 type PlayerInfo struct {
 	ID        int    `json:"id"`
 	Name      string `json:"name"`
@@ -42,7 +26,6 @@ type PlayerInfo struct {
 	Weight    string `json:"weight"`
 	Injured   bool   `json:"injured"`
 	Photo     string `json:"photo"`
-	//Statistics []PlayerStatistics `json:"statistics"`
 }
 type LeaguePlayerResponse struct {
 	Results  int `json:"results"`
@@ -50,30 +33,38 @@ type LeaguePlayerResponse struct {
 		Player struct {
 			ID int `json:"id"`
 		} `json:"player"`
+		Statistics []player_stats.PlayerStats `json:"statistics"`
 	} `json:"response"`
 }
 
+// Player wraps PlayerInfo and includes a slice of Statistics.
 type Player struct {
-	Player PlayerInfo `json:"player"`
+	Player     PlayerInfo                 `json:"player"`
+	Statistics []player_stats.PlayerStats `json:"statistics"`
 }
 
+// PlayerResponse is the expected structure of the JSON response.
 type PlayerResponse struct {
 	Results  int      `json:"results"`
 	Response []Player `json:"response"`
 }
 
+// PlayerController manages HTTP requests for player data.
 type PlayerController struct {
 	client      *http.Client
 	playerModel *player_models.PlayerModel
+	psModel     *player_stats.PlayerStatsModel
 }
 
-func NewPlayerController(playerModel *player_models.PlayerModel) *PlayerController {
+func NewPlayerController(playerModel *player_models.PlayerModel, psModel *player_stats.PlayerStatsModel) *PlayerController {
 	return &PlayerController{
 		client:      &http.Client{},
 		playerModel: playerModel,
+		psModel:     psModel,
 	}
 }
 
+// EnsurePlayerExists checks if a player exists and fetches their data if not.
 func (pc *PlayerController) EnsurePlayerExists(ctx context.Context, apiFootballId int) error {
 	exists := pc.playerModel.Exists(ctx, apiFootballId)
 	if !exists {
@@ -85,8 +76,9 @@ func (pc *PlayerController) EnsurePlayerExists(ctx context.Context, apiFootballI
 	return nil
 }
 
+// fetchPlayerByID makes an HTTP request to fetch player data by ID.
 func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) error {
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?id=%d&season=2022", playerID)
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?id=%d&season=2023", playerID)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -96,7 +88,6 @@ func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) e
 	req.Header.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
 
-	fmt.Printf("Fetching player by ID: %d\n", playerID)
 	resp, err := pc.client.Do(req)
 	if err != nil {
 		return err
@@ -104,57 +95,67 @@ func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) e
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("Received non-OK HTTP status %d", resp.StatusCode)
+		return fmt.Errorf("received non-OK HTTP status %d", resp.StatusCode)
 	}
 
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
+
 	return pc.parsePlayerResponse(ctx, data, playerID)
 }
 
+// parsePlayerResponse parses the JSON response into the PlayerResponse struct.
 func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte, playerID int) error {
 	var response PlayerResponse
 	if err := json.Unmarshal(data, &response); err != nil {
 		return err
 	}
 
-	// Check if the response is empty
 	if response.Results == 0 {
-		// Log the scenario and return without an error
 		fmt.Printf("No data available for playerID: %d for season 2022.\n", playerID)
 		return nil
 	}
 
-	p := response.Response[0].Player
-
-	if err := pc.downloadPhotoIfNeeded(&p); err != nil {
+	playerData := response.Response[0]
+	if err := pc.downloadPhotoIfNeeded(&playerData.Player); err != nil {
 		return err
 	}
 
 	input := player_models.CreatePlayerInput{
-		ApiFootballId: p.ID,
-		Name:          p.Name,
-		Firstname:     p.Firstname,
-		Lastname:      p.Lastname,
-		Age:           p.Age,
-		Height:        p.Height,
-		Weight:        p.Weight,
-		Injured:       p.Injured,
-		Photo:         p.Photo,
+		ApiFootballId: playerData.Player.ID,
+		Name:          playerData.Player.Name,
+		Firstname:     playerData.Player.Firstname,
+		Lastname:      playerData.Player.Lastname,
+		Age:           playerData.Player.Age,
+		Height:        playerData.Player.Height,
+		Weight:        playerData.Player.Weight,
+		Injured:       playerData.Player.Injured,
+		Photo:         playerData.Player.Photo,
 	}
 
-	err := pc.upsertPlayer(ctx, input)
+	p, err := pc.upsertPlayer(ctx, input)
 	if err != nil {
 		return err
+	}
+	fmt.Printf("Created or updated player: %s\n", p.Name)
+
+	// Handle player statistics
+	for _, stat := range playerData.Statistics {
+		if err := pc.upsertPlayerStats(ctx, p, stat); err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_models.CreatePlayerInput) error {
-	return pc.playerModel.WithTransaction(ctx, func(tx *ent.Tx) error {
+// upsertPlayer inserts or updates a player in the database.
+func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_models.CreatePlayerInput) (*ent.Player, error) {
+	var p *ent.Player
+	var err error
+	err = pc.playerModel.WithTransaction(ctx, func(tx *ent.Tx) error {
 		exists := tx.Player.Query().Where(player.ApiFootballIdEQ(input.ApiFootballId)).ExistX(ctx)
 		if exists {
 			updateInput := player_models.UpdatePlayerInput{
@@ -168,23 +169,37 @@ func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_model
 				Injured:       &input.Injured,
 				Photo:         &input.Photo,
 			}
-			_, err := pc.playerModel.UpdatePlayer(ctx, updateInput)
+			p, err = pc.playerModel.UpdatePlayer(ctx, updateInput)
 			if err != nil {
 				return err
 			}
 		} else {
-			_, err := pc.playerModel.CreatePlayer(ctx, input)
+			p, err = pc.playerModel.CreatePlayer(ctx, input)
 			if err != nil {
 				return err
 			}
 		}
-		return nil
+
+		return err
+
 	})
+	if err != nil {
+		return nil, err
+	}
+	return p, err
+}
+
+func (pc *PlayerController) upsertPlayerStats(ctx context.Context, p *ent.Player, stat player_stats.PlayerStats) error {
+	_, err := pc.psModel.UpsertPlayerStats(ctx, p, stat)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID int) ([]int, error) {
 	// Create a URL for fetching players by their league ID
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?league=%d&season=2022", leagueID)
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?league=%d&season=2023", leagueID)
 	// Create an HTTP request
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -239,6 +254,7 @@ func (pc *PlayerController) FetchPlayersByLeague(ctx context.Context, leagueID i
 	return nil
 }
 
+// downloadPhotoIfNeeded downloads a player's photo if it is not already present.
 func (pc *PlayerController) downloadPhotoIfNeeded(p *PlayerInfo) error {
 	if p.Photo != "" {
 		photoLocation, err := utils.DownloadImageIfNeeded(

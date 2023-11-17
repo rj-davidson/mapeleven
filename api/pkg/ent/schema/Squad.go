@@ -33,5 +33,8 @@ func (Squad) Edges() []ent.Edge {
 		edge.From("team", Team.Type).
 			Ref("squad").
 			Unique(),
+		edge.From("season", Season.Type).
+			Ref("squad").
+			Unique(),
 	}
 }

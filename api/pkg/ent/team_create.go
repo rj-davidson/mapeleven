@@ -12,7 +12,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixturelineups"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
@@ -64,6 +64,20 @@ func (tc *TeamCreate) SetNillableLastUpdated(t *time.Time) *TeamCreate {
 	return tc
 }
 
+// SetPopularity sets the "Popularity" field.
+func (tc *TeamCreate) SetPopularity(i int) *TeamCreate {
+	tc.mutation.SetPopularity(i)
+	return tc
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (tc *TeamCreate) SetNillablePopularity(i *int) *TeamCreate {
+	if i != nil {
+		tc.SetPopularity(*i)
+	}
+	return tc
+}
+
 // SetSeasonID sets the "season" edge to the Season entity by ID.
 func (tc *TeamCreate) SetSeasonID(id int) *TeamCreate {
 	tc.mutation.SetSeasonID(id)
@@ -92,6 +106,21 @@ func (tc *TeamCreate) SetClubID(id int) *TeamCreate {
 // SetClub sets the "club" edge to the Club entity.
 func (tc *TeamCreate) SetClub(c *Club) *TeamCreate {
 	return tc.SetClubID(c.ID)
+}
+
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (tc *TeamCreate) AddPlayerStatIDs(ids ...int) *TeamCreate {
+	tc.mutation.AddPlayerStatIDs(ids...)
+	return tc
+}
+
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (tc *TeamCreate) AddPlayerStats(p ...*PlayerStats) *TeamCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return tc.AddPlayerStatIDs(ids...)
 }
 
 // AddStandingIDs adds the "standings" edge to the Standings entity by IDs.
@@ -167,21 +196,6 @@ func (tc *TeamCreate) AddFixtureLineups(f ...*FixtureLineups) *TeamCreate {
 		ids[i] = f[i].ID
 	}
 	return tc.AddFixtureLineupIDs(ids...)
-}
-
-// AddPlayerIDs adds the "players" edge to the Player entity by IDs.
-func (tc *TeamCreate) AddPlayerIDs(ids ...int) *TeamCreate {
-	tc.mutation.AddPlayerIDs(ids...)
-	return tc
-}
-
-// AddPlayers adds the "players" edges to the Player entity.
-func (tc *TeamCreate) AddPlayers(p ...*Player) *TeamCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return tc.AddPlayerIDs(ids...)
 }
 
 // AddSquadIDs adds the "squad" edge to the Squad entity by IDs.
@@ -386,10 +400,17 @@ func (tc *TeamCreate) defaults() {
 		v := team.DefaultLastUpdated()
 		tc.mutation.SetLastUpdated(v)
 	}
+	if _, ok := tc.mutation.Popularity(); !ok {
+		v := team.DefaultPopularity
+		tc.mutation.SetPopularity(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
 func (tc *TeamCreate) check() error {
+	if _, ok := tc.mutation.Popularity(); !ok {
+		return &ValidationError{Name: "Popularity", err: errors.New(`ent: missing required field "Team.Popularity"`)}
+	}
 	if _, ok := tc.mutation.ClubID(); !ok {
 		return &ValidationError{Name: "club", err: errors.New(`ent: missing required edge "Team.club"`)}
 	}
@@ -427,6 +448,10 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 		_spec.SetField(team.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
 	}
+	if value, ok := tc.mutation.Popularity(); ok {
+		_spec.SetField(team.FieldPopularity, field.TypeInt, value)
+		_node.Popularity = value
+	}
 	if nodes := tc.mutation.SeasonIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -459,6 +484,22 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.club_team = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := tc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   team.PlayerStatsTable,
+			Columns: []string{team.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := tc.mutation.StandingsIDs(); len(nodes) > 0 {
@@ -534,22 +575,6 @@ func (tc *TeamCreate) createSpec() (*Team, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := tc.mutation.PlayersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   team.PlayersTable,
-			Columns: []string{team.PlayersColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: sqlgraph.NewFieldSpec(player.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -82,6 +82,7 @@ func (m *TeamModel) ListAll(ctx context.Context) ([]*ent.Team, error) {
 			func(s *ent.SeasonQuery) {
 				s.WithLeague()
 			}).
+		WithSquad().
 		WithClub().
 		All(ctx)
 }

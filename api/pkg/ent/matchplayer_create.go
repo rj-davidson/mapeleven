@@ -11,6 +11,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixturelineups"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
 )
@@ -104,6 +105,25 @@ func (mpc *MatchPlayerCreate) SetLineupID(id int) *MatchPlayerCreate {
 // SetLineup sets the "lineup" edge to the FixtureLineups entity.
 func (mpc *MatchPlayerCreate) SetLineup(f *FixtureLineups) *MatchPlayerCreate {
 	return mpc.SetLineupID(f.ID)
+}
+
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (mpc *MatchPlayerCreate) SetPlayerStatsID(id int) *MatchPlayerCreate {
+	mpc.mutation.SetPlayerStatsID(id)
+	return mpc
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (mpc *MatchPlayerCreate) SetNillablePlayerStatsID(id *int) *MatchPlayerCreate {
+	if id != nil {
+		mpc = mpc.SetPlayerStatsID(*id)
+	}
+	return mpc
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (mpc *MatchPlayerCreate) SetPlayerStats(p *PlayerStats) *MatchPlayerCreate {
+	return mpc.SetPlayerStatsID(p.ID)
 }
 
 // Mutation returns the MatchPlayerMutation object of the builder.
@@ -236,6 +256,23 @@ func (mpc *MatchPlayerCreate) createSpec() (*MatchPlayer, *sqlgraph.CreateSpec) 
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.fixture_lineups_lineup_player = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mpc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   matchplayer.PlayerStatsTable,
+			Columns: []string{matchplayer.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.player_stats_match_player = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
