@@ -19,6 +19,14 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psdefense"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psfairplay"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psgames"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pspenalty"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/psshooting"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pssubstitutes"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/pstechnical"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
@@ -103,7 +111,15 @@ func checkColumn(table, column string) error {
 			fixturelineups.Table:  fixturelineups.ValidColumn,
 			league.Table:          league.ValidColumn,
 			matchplayer.Table:     matchplayer.ValidColumn,
+			psdefense.Table:       psdefense.ValidColumn,
+			psfairplay.Table:      psfairplay.ValidColumn,
+			psgames.Table:         psgames.ValidColumn,
+			pspenalty.Table:       pspenalty.ValidColumn,
+			psshooting.Table:      psshooting.ValidColumn,
+			pssubstitutes.Table:   pssubstitutes.ValidColumn,
+			pstechnical.Table:     pstechnical.ValidColumn,
 			player.Table:          player.ValidColumn,
+			playerstats.Table:     playerstats.ValidColumn,
 			season.Table:          season.ValidColumn,
 			squad.Table:           squad.ValidColumn,
 			standings.Table:       standings.ValidColumn,

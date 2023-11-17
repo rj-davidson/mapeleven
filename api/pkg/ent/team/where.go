@@ -236,6 +236,29 @@ func HasClubWith(preds ...predicate.Club) predicate.Team {
 	})
 }
 
+// HasPlayerStats applies the HasEdge predicate on the "playerStats" edge.
+func HasPlayerStats() predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, PlayerStatsTable, PlayerStatsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasPlayerStatsWith applies the HasEdge predicate on the "playerStats" edge with a given conditions (other predicates).
+func HasPlayerStatsWith(preds ...predicate.PlayerStats) predicate.Team {
+	return predicate.Team(func(s *sql.Selector) {
+		step := newPlayerStatsStep()
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // HasStandings applies the HasEdge predicate on the "standings" edge.
 func HasStandings() predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
@@ -343,29 +366,6 @@ func HasFixtureLineups() predicate.Team {
 func HasFixtureLineupsWith(preds ...predicate.FixtureLineups) predicate.Team {
 	return predicate.Team(func(s *sql.Selector) {
 		step := newFixtureLineupsStep()
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPlayers applies the HasEdge predicate on the "players" edge.
-func HasPlayers() predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, PlayersTable, PlayersColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasPlayersWith applies the HasEdge predicate on the "players" edge with a given conditions (other predicates).
-func HasPlayersWith(preds ...predicate.Player) predicate.Team {
-	return predicate.Team(func(s *sql.Selector) {
-		step := newPlayersStep()
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
 				p(s)

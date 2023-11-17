@@ -46,5 +46,8 @@ func (FixtureEvents) Edges() []ent.Edge {
 			Ref("fixtureEvents").
 			Unique().
 			Required(),
+		edge.From("playerStats", PlayerStats.Type).
+			Ref("playerEvents").
+			Unique(),
 	}
 }

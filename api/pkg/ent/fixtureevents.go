@@ -10,6 +10,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -34,12 +35,14 @@ type FixtureEvents struct {
 	LastUpdated time.Time `json:"lastUpdated,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the FixtureEventsQuery when eager-loading is set.
-	Edges                    FixtureEventsEdges `json:"edges"`
-	fixture_fixture_events   *int
-	player_player_events     *int
-	player_assist_events     *int
-	team_team_fixture_events *int
-	selectValues             sql.SelectValues
+	Edges                      FixtureEventsEdges `json:"edges"`
+	fixture_fixture_events     *int
+	player_player_events       *int
+	player_assist_events       *int
+	player_stats_player_events *int
+	player_stats_assist_events *int
+	team_team_fixture_events   *int
+	selectValues               sql.SelectValues
 }
 
 // FixtureEventsEdges holds the relations/edges for other nodes in the graph.
@@ -52,9 +55,11 @@ type FixtureEventsEdges struct {
 	Team *Team `json:"team,omitempty"`
 	// Fixture holds the value of the fixture edge.
 	Fixture *Fixture `json:"fixture,omitempty"`
+	// PlayerStats holds the value of the playerStats edge.
+	PlayerStats *PlayerStats `json:"playerStats,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [4]bool
+	loadedTypes [5]bool
 }
 
 // PlayerOrErr returns the Player value or an error if the edge
@@ -109,6 +114,19 @@ func (e FixtureEventsEdges) FixtureOrErr() (*Fixture, error) {
 	return nil, &NotLoadedError{edge: "fixture"}
 }
 
+// PlayerStatsOrErr returns the PlayerStats value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e FixtureEventsEdges) PlayerStatsOrErr() (*PlayerStats, error) {
+	if e.loadedTypes[4] {
+		if e.PlayerStats == nil {
+			// Edge was loaded but was not found.
+			return nil, &NotFoundError{label: playerstats.Label}
+		}
+		return e.PlayerStats, nil
+	}
+	return nil, &NotLoadedError{edge: "playerStats"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*FixtureEvents) scanValues(columns []string) ([]any, error) {
 	values := make([]any, len(columns))
@@ -126,7 +144,11 @@ func (*FixtureEvents) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullInt64)
 		case fixtureevents.ForeignKeys[2]: // player_assist_events
 			values[i] = new(sql.NullInt64)
-		case fixtureevents.ForeignKeys[3]: // team_team_fixture_events
+		case fixtureevents.ForeignKeys[3]: // player_stats_player_events
+			values[i] = new(sql.NullInt64)
+		case fixtureevents.ForeignKeys[4]: // player_stats_assist_events
+			values[i] = new(sql.NullInt64)
+		case fixtureevents.ForeignKeys[5]: // team_team_fixture_events
 			values[i] = new(sql.NullInt64)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -208,6 +230,20 @@ func (fe *FixtureEvents) assignValues(columns []string, values []any) error {
 			}
 		case fixtureevents.ForeignKeys[3]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_player_events", value)
+			} else if value.Valid {
+				fe.player_stats_player_events = new(int)
+				*fe.player_stats_player_events = int(value.Int64)
+			}
+		case fixtureevents.ForeignKeys[4]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field player_stats_assist_events", value)
+			} else if value.Valid {
+				fe.player_stats_assist_events = new(int)
+				*fe.player_stats_assist_events = int(value.Int64)
+			}
+		case fixtureevents.ForeignKeys[5]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field team_team_fixture_events", value)
 			} else if value.Valid {
 				fe.team_team_fixture_events = new(int)
@@ -244,6 +280,11 @@ func (fe *FixtureEvents) QueryTeam() *TeamQuery {
 // QueryFixture queries the "fixture" edge of the FixtureEvents entity.
 func (fe *FixtureEvents) QueryFixture() *FixtureQuery {
 	return NewFixtureEventsClient(fe.config).QueryFixture(fe)
+}
+
+// QueryPlayerStats queries the "playerStats" edge of the FixtureEvents entity.
+func (fe *FixtureEvents) QueryPlayerStats() *PlayerStatsQuery {
+	return NewFixtureEventsClient(fe.config).QueryPlayerStats(fe)
 }
 
 // Update returns a builder for updating this FixtureEvents.

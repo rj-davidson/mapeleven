@@ -14,8 +14,8 @@ func NewFixtureSerializer(client *ent.Client) *FixtureSerializer {
 	return &FixtureSerializer{client: client}
 }
 
-func (fs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string, getFixture, getEvents, getLineups bool) (*APIFixtureSet, error) {
-	f, err := fs.client.Fixture.
+func (dfs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string, getFixture, getEvents, getLineups bool) (*APIFixtureSet, error) {
+	f, err := dfs.client.Fixture.
 		Query().
 		Where(fixture.Slug(slug)).
 		WithSeason().
@@ -54,7 +54,7 @@ func (fs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string, 
 	sLineups := &APIHomeAway{}
 
 	if getFixture {
-		sFixture, sTeams, err = fs.serializeFixture(f)
+		sFixture, sTeams, err = dfs.serializeFixture(f)
 		if err != nil {
 			return nil, err
 		}
@@ -89,7 +89,7 @@ func (fs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string, 
 	}, nil
 }
 
-func (fs *FixtureSerializer) serializeFixture(f *ent.Fixture) (*APIFixture, *APITeamDetails, error) {
+func (dfs *FixtureSerializer) serializeFixture(f *ent.Fixture) (*APIFixture, *APITeamDetails, error) {
 	var fxt APIFixture
 	var td APITeamDetails
 

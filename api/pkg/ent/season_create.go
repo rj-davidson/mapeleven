@@ -10,7 +10,9 @@ import (
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/league"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -130,6 +132,36 @@ func (sc *SeasonCreate) AddTeams(t ...*Team) *SeasonCreate {
 		ids[i] = t[i].ID
 	}
 	return sc.AddTeamIDs(ids...)
+}
+
+// AddSquadIDs adds the "squad" edge to the Squad entity by IDs.
+func (sc *SeasonCreate) AddSquadIDs(ids ...int) *SeasonCreate {
+	sc.mutation.AddSquadIDs(ids...)
+	return sc
+}
+
+// AddSquad adds the "squad" edges to the Squad entity.
+func (sc *SeasonCreate) AddSquad(s ...*Squad) *SeasonCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return sc.AddSquadIDs(ids...)
+}
+
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (sc *SeasonCreate) AddPlayerStatIDs(ids ...int) *SeasonCreate {
+	sc.mutation.AddPlayerStatIDs(ids...)
+	return sc
+}
+
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (sc *SeasonCreate) AddPlayerStats(p ...*PlayerStats) *SeasonCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return sc.AddPlayerStatIDs(ids...)
 }
 
 // Mutation returns the SeasonMutation object of the builder.
@@ -298,6 +330,38 @@ func (sc *SeasonCreate) createSpec() (*Season, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sc.mutation.SquadIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   season.SquadTable,
+			Columns: []string{season.SquadColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(squad.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   season.PlayerStatsTable,
+			Columns: season.PlayerStatsPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -84,6 +85,25 @@ func (sc *SquadCreate) SetNillableTeamID(id *int) *SquadCreate {
 // SetTeam sets the "team" edge to the Team entity.
 func (sc *SquadCreate) SetTeam(t *Team) *SquadCreate {
 	return sc.SetTeamID(t.ID)
+}
+
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (sc *SquadCreate) SetSeasonID(id int) *SquadCreate {
+	sc.mutation.SetSeasonID(id)
+	return sc
+}
+
+// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
+func (sc *SquadCreate) SetNillableSeasonID(id *int) *SquadCreate {
+	if id != nil {
+		sc = sc.SetSeasonID(*id)
+	}
+	return sc
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (sc *SquadCreate) SetSeason(s *Season) *SquadCreate {
+	return sc.SetSeasonID(s.ID)
 }
 
 // Mutation returns the SquadMutation object of the builder.
@@ -205,6 +225,23 @@ func (sc *SquadCreate) createSpec() (*Squad, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.team_squad = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := sc.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   squad.SeasonTable,
+			Columns: []string{squad.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.season_squad = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

@@ -13,6 +13,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"entgo.io/ent/dialect/sql"
@@ -97,6 +98,27 @@ func (pu *PlayerUpdate) SetLastUpdated(t time.Time) *PlayerUpdate {
 // ClearLastUpdated clears the value of the "lastUpdated" field.
 func (pu *PlayerUpdate) ClearLastUpdated() *PlayerUpdate {
 	pu.mutation.ClearLastUpdated()
+	return pu
+}
+
+// SetPopularity sets the "Popularity" field.
+func (pu *PlayerUpdate) SetPopularity(i int) *PlayerUpdate {
+	pu.mutation.ResetPopularity()
+	pu.mutation.SetPopularity(i)
+	return pu
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (pu *PlayerUpdate) SetNillablePopularity(i *int) *PlayerUpdate {
+	if i != nil {
+		pu.SetPopularity(*i)
+	}
+	return pu
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (pu *PlayerUpdate) AddPopularity(i int) *PlayerUpdate {
+	pu.mutation.AddPopularity(i)
 	return pu
 }
 
@@ -196,6 +218,21 @@ func (pu *PlayerUpdate) AddAssistEvents(f ...*FixtureEvents) *PlayerUpdate {
 		ids[i] = f[i].ID
 	}
 	return pu.AddAssistEventIDs(ids...)
+}
+
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (pu *PlayerUpdate) AddPlayerStatIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.AddPlayerStatIDs(ids...)
+	return pu
+}
+
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (pu *PlayerUpdate) AddPlayerStats(p ...*PlayerStats) *PlayerUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pu.AddPlayerStatIDs(ids...)
 }
 
 // Mutation returns the PlayerMutation object of the builder.
@@ -299,6 +336,27 @@ func (pu *PlayerUpdate) RemoveAssistEvents(f ...*FixtureEvents) *PlayerUpdate {
 	return pu.RemoveAssistEventIDs(ids...)
 }
 
+// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+func (pu *PlayerUpdate) ClearPlayerStats() *PlayerUpdate {
+	pu.mutation.ClearPlayerStats()
+	return pu
+}
+
+// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
+func (pu *PlayerUpdate) RemovePlayerStatIDs(ids ...int) *PlayerUpdate {
+	pu.mutation.RemovePlayerStatIDs(ids...)
+	return pu
+}
+
+// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
+func (pu *PlayerUpdate) RemovePlayerStats(p ...*PlayerStats) *PlayerUpdate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pu.RemovePlayerStatIDs(ids...)
+}
+
 // Save executes the query and returns the number of nodes affected by the update operation.
 func (pu *PlayerUpdate) Save(ctx context.Context) (int, error) {
 	pu.defaults()
@@ -376,6 +434,12 @@ func (pu *PlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if pu.mutation.LastUpdatedCleared() {
 		_spec.ClearField(player.FieldLastUpdated, field.TypeTime)
+	}
+	if value, ok := pu.mutation.Popularity(); ok {
+		_spec.SetField(player.FieldPopularity, field.TypeInt, value)
+	}
+	if value, ok := pu.mutation.AddedPopularity(); ok {
+		_spec.AddField(player.FieldPopularity, field.TypeInt, value)
 	}
 	if pu.mutation.BirthCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -615,6 +679,51 @@ func (pu *PlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if pu.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerStatsTable,
+			Columns: []string{player.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !pu.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerStatsTable,
+			Columns: []string{player.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := pu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerStatsTable,
+			Columns: []string{player.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, pu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{player.Label}
@@ -699,6 +808,27 @@ func (puo *PlayerUpdateOne) SetLastUpdated(t time.Time) *PlayerUpdateOne {
 // ClearLastUpdated clears the value of the "lastUpdated" field.
 func (puo *PlayerUpdateOne) ClearLastUpdated() *PlayerUpdateOne {
 	puo.mutation.ClearLastUpdated()
+	return puo
+}
+
+// SetPopularity sets the "Popularity" field.
+func (puo *PlayerUpdateOne) SetPopularity(i int) *PlayerUpdateOne {
+	puo.mutation.ResetPopularity()
+	puo.mutation.SetPopularity(i)
+	return puo
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (puo *PlayerUpdateOne) SetNillablePopularity(i *int) *PlayerUpdateOne {
+	if i != nil {
+		puo.SetPopularity(*i)
+	}
+	return puo
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (puo *PlayerUpdateOne) AddPopularity(i int) *PlayerUpdateOne {
+	puo.mutation.AddPopularity(i)
 	return puo
 }
 
@@ -800,6 +930,21 @@ func (puo *PlayerUpdateOne) AddAssistEvents(f ...*FixtureEvents) *PlayerUpdateOn
 	return puo.AddAssistEventIDs(ids...)
 }
 
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (puo *PlayerUpdateOne) AddPlayerStatIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.AddPlayerStatIDs(ids...)
+	return puo
+}
+
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (puo *PlayerUpdateOne) AddPlayerStats(p ...*PlayerStats) *PlayerUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puo.AddPlayerStatIDs(ids...)
+}
+
 // Mutation returns the PlayerMutation object of the builder.
 func (puo *PlayerUpdateOne) Mutation() *PlayerMutation {
 	return puo.mutation
@@ -899,6 +1044,27 @@ func (puo *PlayerUpdateOne) RemoveAssistEvents(f ...*FixtureEvents) *PlayerUpdat
 		ids[i] = f[i].ID
 	}
 	return puo.RemoveAssistEventIDs(ids...)
+}
+
+// ClearPlayerStats clears all "playerStats" edges to the PlayerStats entity.
+func (puo *PlayerUpdateOne) ClearPlayerStats() *PlayerUpdateOne {
+	puo.mutation.ClearPlayerStats()
+	return puo
+}
+
+// RemovePlayerStatIDs removes the "playerStats" edge to PlayerStats entities by IDs.
+func (puo *PlayerUpdateOne) RemovePlayerStatIDs(ids ...int) *PlayerUpdateOne {
+	puo.mutation.RemovePlayerStatIDs(ids...)
+	return puo
+}
+
+// RemovePlayerStats removes "playerStats" edges to PlayerStats entities.
+func (puo *PlayerUpdateOne) RemovePlayerStats(p ...*PlayerStats) *PlayerUpdateOne {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return puo.RemovePlayerStatIDs(ids...)
 }
 
 // Where appends a list predicates to the PlayerUpdate builder.
@@ -1008,6 +1174,12 @@ func (puo *PlayerUpdateOne) sqlSave(ctx context.Context) (_node *Player, err err
 	}
 	if puo.mutation.LastUpdatedCleared() {
 		_spec.ClearField(player.FieldLastUpdated, field.TypeTime)
+	}
+	if value, ok := puo.mutation.Popularity(); ok {
+		_spec.SetField(player.FieldPopularity, field.TypeInt, value)
+	}
+	if value, ok := puo.mutation.AddedPopularity(); ok {
+		_spec.AddField(player.FieldPopularity, field.TypeInt, value)
 	}
 	if puo.mutation.BirthCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -1240,6 +1412,51 @@ func (puo *PlayerUpdateOne) sqlSave(ctx context.Context) (_node *Player, err err
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if puo.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerStatsTable,
+			Columns: []string{player.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.RemovedPlayerStatsIDs(); len(nodes) > 0 && !puo.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerStatsTable,
+			Columns: []string{player.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := puo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerStatsTable,
+			Columns: []string{player.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

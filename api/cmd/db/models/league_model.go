@@ -62,17 +62,8 @@ func (lm *LeagueModel) CreateLeague(ctx context.Context, input CreateLeagueInput
 
 // UpdateLeague updates an existing league record.
 func (lm *LeagueModel) UpdateLeague(ctx context.Context, input UpdateLeagueInput) (*ent.League, error) {
-	// Find the country by its code
-	c, err := lm.client.Country.
-		Query().
-		Where(country.NameEQ(*input.Country)).
-		Only(context.Background())
-
-	if err != nil {
-		return nil, err
-	}
-
 	updater := lm.client.League.UpdateOneID(input.ID)
+
 	if input.Name != nil {
 		updater.SetName(*input.Name)
 	}
@@ -82,7 +73,19 @@ func (lm *LeagueModel) UpdateLeague(ctx context.Context, input UpdateLeagueInput
 	if input.Logo != nil {
 		updater.SetLogo(*input.Logo)
 	}
+
 	if input.Country != nil {
+		// Find the country by its name
+		c, err := lm.client.Country.
+			Query().
+			Where(country.NameEQ(*input.Country)).
+			Only(ctx)
+
+		if err != nil {
+			// Handle error properly, maybe country not found or other issue
+			return nil, err
+		}
+
 		updater.SetCountryID(c.ID)
 	}
 

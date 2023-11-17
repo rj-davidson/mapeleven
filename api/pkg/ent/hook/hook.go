@@ -117,6 +117,90 @@ func (f MatchPlayerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value,
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.MatchPlayerMutation", m)
 }
 
+// The PSDefenseFunc type is an adapter to allow the use of ordinary
+// function as PSDefense mutator.
+type PSDefenseFunc func(context.Context, *ent.PSDefenseMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PSDefenseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PSDefenseMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PSDefenseMutation", m)
+}
+
+// The PSFairplayFunc type is an adapter to allow the use of ordinary
+// function as PSFairplay mutator.
+type PSFairplayFunc func(context.Context, *ent.PSFairplayMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PSFairplayFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PSFairplayMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PSFairplayMutation", m)
+}
+
+// The PSGamesFunc type is an adapter to allow the use of ordinary
+// function as PSGames mutator.
+type PSGamesFunc func(context.Context, *ent.PSGamesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PSGamesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PSGamesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PSGamesMutation", m)
+}
+
+// The PSPenaltyFunc type is an adapter to allow the use of ordinary
+// function as PSPenalty mutator.
+type PSPenaltyFunc func(context.Context, *ent.PSPenaltyMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PSPenaltyFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PSPenaltyMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PSPenaltyMutation", m)
+}
+
+// The PSShootingFunc type is an adapter to allow the use of ordinary
+// function as PSShooting mutator.
+type PSShootingFunc func(context.Context, *ent.PSShootingMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PSShootingFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PSShootingMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PSShootingMutation", m)
+}
+
+// The PSSubstitutesFunc type is an adapter to allow the use of ordinary
+// function as PSSubstitutes mutator.
+type PSSubstitutesFunc func(context.Context, *ent.PSSubstitutesMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PSSubstitutesFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PSSubstitutesMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PSSubstitutesMutation", m)
+}
+
+// The PSTechnicalFunc type is an adapter to allow the use of ordinary
+// function as PSTechnical mutator.
+type PSTechnicalFunc func(context.Context, *ent.PSTechnicalMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PSTechnicalFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PSTechnicalMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PSTechnicalMutation", m)
+}
+
 // The PlayerFunc type is an adapter to allow the use of ordinary
 // function as Player mutator.
 type PlayerFunc func(context.Context, *ent.PlayerMutation) (ent.Value, error)
@@ -127,6 +211,18 @@ func (f PlayerFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, erro
 		return f(ctx, mv)
 	}
 	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlayerMutation", m)
+}
+
+// The PlayerStatsFunc type is an adapter to allow the use of ordinary
+// function as PlayerStats mutator.
+type PlayerStatsFunc func(context.Context, *ent.PlayerStatsMutation) (ent.Value, error)
+
+// Mutate calls f(ctx, m).
+func (f PlayerStatsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	if mv, ok := m.(*ent.PlayerStatsMutation); ok {
+		return f(ctx, mv)
+	}
+	return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.PlayerStatsMutation", m)
 }
 
 // The SeasonFunc type is an adapter to allow the use of ordinary

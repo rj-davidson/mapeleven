@@ -6,6 +6,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"context"
+	"sort"
 	"time"
 )
 
@@ -40,6 +41,7 @@ type APITeam struct {
 	NationalTeam bool              `json:"nationalTeam,omitempty"`
 	Country      APICountry        `json:"country,omitempty"`
 	Competitions []APICompetitions `json:"competitions,omitempty"`
+	Popularity   int               `json:"popularity,omitempty"`
 }
 
 type TeamSerializer struct {
@@ -52,6 +54,7 @@ func NewTeamSerializer(client *ent.Client) *TeamSerializer {
 
 func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
 	ls := NewLeagueSerializer(ts.client)
+
 	var compList = make([]APICompetitions, 0)
 	for _, t := range club.Edges.Team {
 		tsList := APITeamStats{
@@ -88,6 +91,7 @@ func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
 			Flag: club.Edges.Country.Flag,
 		},
 		Competitions: compList,
+		Popularity:   club.Popularity,
 	}
 }
 
@@ -95,6 +99,13 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 	year, err := time.Parse("2006", seasonStr)
 	if err != nil {
 		year = time.Now()
+	}
+	_, err = ts.client.Club.Update().
+		Where(club.SlugEQ(slug)).
+		AddPopularity(1).
+		Save(ctx)
+	if err != nil {
+		return nil, err
 	}
 
 	t, err := ts.client.Club.Query().
@@ -120,11 +131,9 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 				q.WithGoalsStats()
 				q.WithLineups()
 				q.WithPenaltyStats()
-
 			},
 		).
 		First(ctx)
-
 	if err != nil {
 		return nil, err
 	}
@@ -169,8 +178,14 @@ func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*AP
 
 	var teamItems []*APITeam
 	for _, t := range teams {
-		teamItems = append(teamItems, ts.SerializeTeam(t))
+		serializedTeam := ts.SerializeTeam(t)
+		teamItems = append(teamItems, serializedTeam)
 	}
+
+	// Sort teamItems based on Popularity
+	sort.Slice(teamItems, func(i, j int) bool {
+		return teamItems[i].Popularity > teamItems[j].Popularity
+	})
 
 	return teamItems, nil
 }

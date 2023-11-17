@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models/player_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"context"
@@ -16,13 +17,15 @@ type SquadController struct {
 	client      *http.Client
 	squadModel  *team_models.SquadModel
 	playerModel *player_models.PlayerModel
+	psModel     *player_stats.PlayerStatsModel
 }
 
-func NewSquadController(squadModel *team_models.SquadModel, playerModel *player_models.PlayerModel) *SquadController {
+func NewSquadController(squadModel *team_models.SquadModel, playerModel *player_models.PlayerModel, psModel *player_stats.PlayerStatsModel) *SquadController {
 	return &SquadController{
 		client:      &http.Client{},
 		squadModel:  squadModel,
 		playerModel: playerModel,
+		psModel:     psModel,
 	}
 }
 
@@ -72,7 +75,7 @@ func (sc *SquadController) parseSquadResponse(data []byte, team *ent.Team) error
 
 	for _, teamResponse := range squadResponse.Response {
 		for _, player := range teamResponse.Players {
-			pc := NewPlayerController(sc.playerModel)
+			pc := NewPlayerController(sc.playerModel, sc.psModel)
 			err = pc.EnsurePlayerExists(context.Background(), player.ApiFootballId)
 			err = sc.upsertSquadPlayer(team, player)
 			if err != nil {

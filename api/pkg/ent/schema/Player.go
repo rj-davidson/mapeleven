@@ -33,6 +33,7 @@ func (Player) Fields() []ent.Field {
 			Default(time.Now).
 			Optional().
 			UpdateDefault(time.Now),
+		field.Int("Popularity").Default(0),
 	}
 }
 
@@ -49,5 +50,6 @@ func (Player) Edges() []ent.Edge {
 		edge.To("playerEvents", FixtureEvents.Type),
 		edge.To("matchPlayer", MatchPlayer.Type),
 		edge.To("assistEvents", FixtureEvents.Type),
+		edge.To("playerStats", PlayerStats.Type),
 	}
 }

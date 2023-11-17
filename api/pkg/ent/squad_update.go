@@ -10,6 +10,7 @@ import (
 
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"entgo.io/ent/dialect/sql"
@@ -99,6 +100,25 @@ func (su *SquadUpdate) SetTeam(t *Team) *SquadUpdate {
 	return su.SetTeamID(t.ID)
 }
 
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (su *SquadUpdate) SetSeasonID(id int) *SquadUpdate {
+	su.mutation.SetSeasonID(id)
+	return su
+}
+
+// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
+func (su *SquadUpdate) SetNillableSeasonID(id *int) *SquadUpdate {
+	if id != nil {
+		su = su.SetSeasonID(*id)
+	}
+	return su
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (su *SquadUpdate) SetSeason(s *Season) *SquadUpdate {
+	return su.SetSeasonID(s.ID)
+}
+
 // Mutation returns the SquadMutation object of the builder.
 func (su *SquadUpdate) Mutation() *SquadMutation {
 	return su.mutation
@@ -113,6 +133,12 @@ func (su *SquadUpdate) ClearPlayer() *SquadUpdate {
 // ClearTeam clears the "team" edge to the Team entity.
 func (su *SquadUpdate) ClearTeam() *SquadUpdate {
 	su.mutation.ClearTeam()
+	return su
+}
+
+// ClearSeason clears the "season" edge to the Season entity.
+func (su *SquadUpdate) ClearSeason() *SquadUpdate {
+	su.mutation.ClearSeason()
 	return su
 }
 
@@ -234,6 +260,35 @@ func (su *SquadUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if su.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   squad.SeasonTable,
+			Columns: []string{squad.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := su.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   squad.SeasonTable,
+			Columns: []string{squad.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, su.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{squad.Label}
@@ -323,6 +378,25 @@ func (suo *SquadUpdateOne) SetTeam(t *Team) *SquadUpdateOne {
 	return suo.SetTeamID(t.ID)
 }
 
+// SetSeasonID sets the "season" edge to the Season entity by ID.
+func (suo *SquadUpdateOne) SetSeasonID(id int) *SquadUpdateOne {
+	suo.mutation.SetSeasonID(id)
+	return suo
+}
+
+// SetNillableSeasonID sets the "season" edge to the Season entity by ID if the given value is not nil.
+func (suo *SquadUpdateOne) SetNillableSeasonID(id *int) *SquadUpdateOne {
+	if id != nil {
+		suo = suo.SetSeasonID(*id)
+	}
+	return suo
+}
+
+// SetSeason sets the "season" edge to the Season entity.
+func (suo *SquadUpdateOne) SetSeason(s *Season) *SquadUpdateOne {
+	return suo.SetSeasonID(s.ID)
+}
+
 // Mutation returns the SquadMutation object of the builder.
 func (suo *SquadUpdateOne) Mutation() *SquadMutation {
 	return suo.mutation
@@ -337,6 +411,12 @@ func (suo *SquadUpdateOne) ClearPlayer() *SquadUpdateOne {
 // ClearTeam clears the "team" edge to the Team entity.
 func (suo *SquadUpdateOne) ClearTeam() *SquadUpdateOne {
 	suo.mutation.ClearTeam()
+	return suo
+}
+
+// ClearSeason clears the "season" edge to the Season entity.
+func (suo *SquadUpdateOne) ClearSeason() *SquadUpdateOne {
+	suo.mutation.ClearSeason()
 	return suo
 }
 
@@ -481,6 +561,35 @@ func (suo *SquadUpdateOne) sqlSave(ctx context.Context) (_node *Squad, err error
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(team.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if suo.mutation.SeasonCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   squad.SeasonTable,
+			Columns: []string{squad.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := suo.mutation.SeasonIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   squad.SeasonTable,
+			Columns: []string{squad.SeasonColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(season.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

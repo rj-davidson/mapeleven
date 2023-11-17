@@ -88,6 +88,11 @@ func Logo(v string) predicate.Club {
 	return predicate.Club(sql.FieldEQ(FieldLogo, v))
 }
 
+// Popularity applies equality check predicate on the "Popularity" field. It's identical to PopularityEQ.
+func Popularity(v int) predicate.Club {
+	return predicate.Club(sql.FieldEQ(FieldPopularity, v))
+}
+
 // ApiFootballIdEQ applies the EQ predicate on the "apiFootballId" field.
 func ApiFootballIdEQ(v int) predicate.Club {
 	return predicate.Club(sql.FieldEQ(FieldApiFootballId, v))
@@ -436,6 +441,46 @@ func LogoEqualFold(v string) predicate.Club {
 // LogoContainsFold applies the ContainsFold predicate on the "logo" field.
 func LogoContainsFold(v string) predicate.Club {
 	return predicate.Club(sql.FieldContainsFold(FieldLogo, v))
+}
+
+// PopularityEQ applies the EQ predicate on the "Popularity" field.
+func PopularityEQ(v int) predicate.Club {
+	return predicate.Club(sql.FieldEQ(FieldPopularity, v))
+}
+
+// PopularityNEQ applies the NEQ predicate on the "Popularity" field.
+func PopularityNEQ(v int) predicate.Club {
+	return predicate.Club(sql.FieldNEQ(FieldPopularity, v))
+}
+
+// PopularityIn applies the In predicate on the "Popularity" field.
+func PopularityIn(vs ...int) predicate.Club {
+	return predicate.Club(sql.FieldIn(FieldPopularity, vs...))
+}
+
+// PopularityNotIn applies the NotIn predicate on the "Popularity" field.
+func PopularityNotIn(vs ...int) predicate.Club {
+	return predicate.Club(sql.FieldNotIn(FieldPopularity, vs...))
+}
+
+// PopularityGT applies the GT predicate on the "Popularity" field.
+func PopularityGT(v int) predicate.Club {
+	return predicate.Club(sql.FieldGT(FieldPopularity, v))
+}
+
+// PopularityGTE applies the GTE predicate on the "Popularity" field.
+func PopularityGTE(v int) predicate.Club {
+	return predicate.Club(sql.FieldGTE(FieldPopularity, v))
+}
+
+// PopularityLT applies the LT predicate on the "Popularity" field.
+func PopularityLT(v int) predicate.Club {
+	return predicate.Club(sql.FieldLT(FieldPopularity, v))
+}
+
+// PopularityLTE applies the LTE predicate on the "Popularity" field.
+func PopularityLTE(v int) predicate.Club {
+	return predicate.Club(sql.FieldLTE(FieldPopularity, v))
 }
 
 // HasCountry applies the HasEdge predicate on the "country" edge.

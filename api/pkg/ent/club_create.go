@@ -63,6 +63,20 @@ func (cc *ClubCreate) SetLogo(s string) *ClubCreate {
 	return cc
 }
 
+// SetPopularity sets the "Popularity" field.
+func (cc *ClubCreate) SetPopularity(i int) *ClubCreate {
+	cc.mutation.SetPopularity(i)
+	return cc
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (cc *ClubCreate) SetNillablePopularity(i *int) *ClubCreate {
+	if i != nil {
+		cc.SetPopularity(*i)
+	}
+	return cc
+}
+
 // SetCountryID sets the "country" edge to the Country entity by ID.
 func (cc *ClubCreate) SetCountryID(id int) *ClubCreate {
 	cc.mutation.SetCountryID(id)
@@ -104,6 +118,7 @@ func (cc *ClubCreate) Mutation() *ClubMutation {
 
 // Save creates the Club in the database.
 func (cc *ClubCreate) Save(ctx context.Context) (*Club, error) {
+	cc.defaults()
 	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
 }
 
@@ -126,6 +141,14 @@ func (cc *ClubCreate) Exec(ctx context.Context) error {
 func (cc *ClubCreate) ExecX(ctx context.Context) {
 	if err := cc.Exec(ctx); err != nil {
 		panic(err)
+	}
+}
+
+// defaults sets the default values of the builder before save.
+func (cc *ClubCreate) defaults() {
+	if _, ok := cc.mutation.Popularity(); !ok {
+		v := club.DefaultPopularity
+		cc.mutation.SetPopularity(v)
 	}
 }
 
@@ -156,6 +179,9 @@ func (cc *ClubCreate) check() error {
 	}
 	if _, ok := cc.mutation.Logo(); !ok {
 		return &ValidationError{Name: "logo", err: errors.New(`ent: missing required field "Club.logo"`)}
+	}
+	if _, ok := cc.mutation.Popularity(); !ok {
+		return &ValidationError{Name: "Popularity", err: errors.New(`ent: missing required field "Club.Popularity"`)}
 	}
 	return nil
 }
@@ -211,6 +237,10 @@ func (cc *ClubCreate) createSpec() (*Club, *sqlgraph.CreateSpec) {
 		_spec.SetField(club.FieldLogo, field.TypeString, value)
 		_node.Logo = value
 	}
+	if value, ok := cc.mutation.Popularity(); ok {
+		_spec.SetField(club.FieldPopularity, field.TypeInt, value)
+		_node.Popularity = value
+	}
 	if nodes := cc.mutation.CountryIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -265,6 +295,7 @@ func (ccb *ClubCreateBulk) Save(ctx context.Context) ([]*Club, error) {
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*ClubMutation)
 				if !ok {

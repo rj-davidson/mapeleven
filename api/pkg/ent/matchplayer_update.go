@@ -11,6 +11,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixturelineups"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -151,6 +152,25 @@ func (mpu *MatchPlayerUpdate) SetLineup(f *FixtureLineups) *MatchPlayerUpdate {
 	return mpu.SetLineupID(f.ID)
 }
 
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (mpu *MatchPlayerUpdate) SetPlayerStatsID(id int) *MatchPlayerUpdate {
+	mpu.mutation.SetPlayerStatsID(id)
+	return mpu
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (mpu *MatchPlayerUpdate) SetNillablePlayerStatsID(id *int) *MatchPlayerUpdate {
+	if id != nil {
+		mpu = mpu.SetPlayerStatsID(*id)
+	}
+	return mpu
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (mpu *MatchPlayerUpdate) SetPlayerStats(p *PlayerStats) *MatchPlayerUpdate {
+	return mpu.SetPlayerStatsID(p.ID)
+}
+
 // Mutation returns the MatchPlayerMutation object of the builder.
 func (mpu *MatchPlayerUpdate) Mutation() *MatchPlayerMutation {
 	return mpu.mutation
@@ -165,6 +185,12 @@ func (mpu *MatchPlayerUpdate) ClearPlayer() *MatchPlayerUpdate {
 // ClearLineup clears the "lineup" edge to the FixtureLineups entity.
 func (mpu *MatchPlayerUpdate) ClearLineup() *MatchPlayerUpdate {
 	mpu.mutation.ClearLineup()
+	return mpu
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (mpu *MatchPlayerUpdate) ClearPlayerStats() *MatchPlayerUpdate {
+	mpu.mutation.ClearPlayerStats()
 	return mpu
 }
 
@@ -321,6 +347,35 @@ func (mpu *MatchPlayerUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if mpu.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   matchplayer.PlayerStatsTable,
+			Columns: []string{matchplayer.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mpu.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   matchplayer.PlayerStatsTable,
+			Columns: []string{matchplayer.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, mpu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{matchplayer.Label}
@@ -462,6 +517,25 @@ func (mpuo *MatchPlayerUpdateOne) SetLineup(f *FixtureLineups) *MatchPlayerUpdat
 	return mpuo.SetLineupID(f.ID)
 }
 
+// SetPlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID.
+func (mpuo *MatchPlayerUpdateOne) SetPlayerStatsID(id int) *MatchPlayerUpdateOne {
+	mpuo.mutation.SetPlayerStatsID(id)
+	return mpuo
+}
+
+// SetNillablePlayerStatsID sets the "playerStats" edge to the PlayerStats entity by ID if the given value is not nil.
+func (mpuo *MatchPlayerUpdateOne) SetNillablePlayerStatsID(id *int) *MatchPlayerUpdateOne {
+	if id != nil {
+		mpuo = mpuo.SetPlayerStatsID(*id)
+	}
+	return mpuo
+}
+
+// SetPlayerStats sets the "playerStats" edge to the PlayerStats entity.
+func (mpuo *MatchPlayerUpdateOne) SetPlayerStats(p *PlayerStats) *MatchPlayerUpdateOne {
+	return mpuo.SetPlayerStatsID(p.ID)
+}
+
 // Mutation returns the MatchPlayerMutation object of the builder.
 func (mpuo *MatchPlayerUpdateOne) Mutation() *MatchPlayerMutation {
 	return mpuo.mutation
@@ -476,6 +550,12 @@ func (mpuo *MatchPlayerUpdateOne) ClearPlayer() *MatchPlayerUpdateOne {
 // ClearLineup clears the "lineup" edge to the FixtureLineups entity.
 func (mpuo *MatchPlayerUpdateOne) ClearLineup() *MatchPlayerUpdateOne {
 	mpuo.mutation.ClearLineup()
+	return mpuo
+}
+
+// ClearPlayerStats clears the "playerStats" edge to the PlayerStats entity.
+func (mpuo *MatchPlayerUpdateOne) ClearPlayerStats() *MatchPlayerUpdateOne {
+	mpuo.mutation.ClearPlayerStats()
 	return mpuo
 }
 
@@ -655,6 +735,35 @@ func (mpuo *MatchPlayerUpdateOne) sqlSave(ctx context.Context) (_node *MatchPlay
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixturelineups.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if mpuo.mutation.PlayerStatsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   matchplayer.PlayerStatsTable,
+			Columns: []string{matchplayer.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := mpuo.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   matchplayer.PlayerStatsTable,
+			Columns: []string{matchplayer.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {

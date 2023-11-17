@@ -10,6 +10,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixturelineups"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/predicate"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -19,13 +20,14 @@ import (
 // MatchPlayerQuery is the builder for querying MatchPlayer entities.
 type MatchPlayerQuery struct {
 	config
-	ctx        *QueryContext
-	order      []matchplayer.OrderOption
-	inters     []Interceptor
-	predicates []predicate.MatchPlayer
-	withPlayer *PlayerQuery
-	withLineup *FixtureLineupsQuery
-	withFKs    bool
+	ctx             *QueryContext
+	order           []matchplayer.OrderOption
+	inters          []Interceptor
+	predicates      []predicate.MatchPlayer
+	withPlayer      *PlayerQuery
+	withLineup      *FixtureLineupsQuery
+	withPlayerStats *PlayerStatsQuery
+	withFKs         bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -99,6 +101,28 @@ func (mpq *MatchPlayerQuery) QueryLineup() *FixtureLineupsQuery {
 			sqlgraph.From(matchplayer.Table, matchplayer.FieldID, selector),
 			sqlgraph.To(fixturelineups.Table, fixturelineups.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, matchplayer.LineupTable, matchplayer.LineupColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(mpq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryPlayerStats chains the current query on the "playerStats" edge.
+func (mpq *MatchPlayerQuery) QueryPlayerStats() *PlayerStatsQuery {
+	query := (&PlayerStatsClient{config: mpq.config}).Query()
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := mpq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := mpq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(matchplayer.Table, matchplayer.FieldID, selector),
+			sqlgraph.To(playerstats.Table, playerstats.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, matchplayer.PlayerStatsTable, matchplayer.PlayerStatsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mpq.driver.Dialect(), step)
 		return fromU, nil
@@ -293,13 +317,14 @@ func (mpq *MatchPlayerQuery) Clone() *MatchPlayerQuery {
 		return nil
 	}
 	return &MatchPlayerQuery{
-		config:     mpq.config,
-		ctx:        mpq.ctx.Clone(),
-		order:      append([]matchplayer.OrderOption{}, mpq.order...),
-		inters:     append([]Interceptor{}, mpq.inters...),
-		predicates: append([]predicate.MatchPlayer{}, mpq.predicates...),
-		withPlayer: mpq.withPlayer.Clone(),
-		withLineup: mpq.withLineup.Clone(),
+		config:          mpq.config,
+		ctx:             mpq.ctx.Clone(),
+		order:           append([]matchplayer.OrderOption{}, mpq.order...),
+		inters:          append([]Interceptor{}, mpq.inters...),
+		predicates:      append([]predicate.MatchPlayer{}, mpq.predicates...),
+		withPlayer:      mpq.withPlayer.Clone(),
+		withLineup:      mpq.withLineup.Clone(),
+		withPlayerStats: mpq.withPlayerStats.Clone(),
 		// clone intermediate query.
 		sql:  mpq.sql.Clone(),
 		path: mpq.path,
@@ -325,6 +350,17 @@ func (mpq *MatchPlayerQuery) WithLineup(opts ...func(*FixtureLineupsQuery)) *Mat
 		opt(query)
 	}
 	mpq.withLineup = query
+	return mpq
+}
+
+// WithPlayerStats tells the query-builder to eager-load the nodes that are connected to
+// the "playerStats" edge. The optional arguments are used to configure the query builder of the edge.
+func (mpq *MatchPlayerQuery) WithPlayerStats(opts ...func(*PlayerStatsQuery)) *MatchPlayerQuery {
+	query := (&PlayerStatsClient{config: mpq.config}).Query()
+	for _, opt := range opts {
+		opt(query)
+	}
+	mpq.withPlayerStats = query
 	return mpq
 }
 
@@ -407,12 +443,13 @@ func (mpq *MatchPlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 		nodes       = []*MatchPlayer{}
 		withFKs     = mpq.withFKs
 		_spec       = mpq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			mpq.withPlayer != nil,
 			mpq.withLineup != nil,
+			mpq.withPlayerStats != nil,
 		}
 	)
-	if mpq.withPlayer != nil || mpq.withLineup != nil {
+	if mpq.withPlayer != nil || mpq.withLineup != nil || mpq.withPlayerStats != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -445,6 +482,12 @@ func (mpq *MatchPlayerQuery) sqlAll(ctx context.Context, hooks ...queryHook) ([]
 	if query := mpq.withLineup; query != nil {
 		if err := mpq.loadLineup(ctx, query, nodes, nil,
 			func(n *MatchPlayer, e *FixtureLineups) { n.Edges.Lineup = e }); err != nil {
+			return nil, err
+		}
+	}
+	if query := mpq.withPlayerStats; query != nil {
+		if err := mpq.loadPlayerStats(ctx, query, nodes, nil,
+			func(n *MatchPlayer, e *PlayerStats) { n.Edges.PlayerStats = e }); err != nil {
 			return nil, err
 		}
 	}
@@ -508,6 +551,38 @@ func (mpq *MatchPlayerQuery) loadLineup(ctx context.Context, query *FixtureLineu
 		nodes, ok := nodeids[n.ID]
 		if !ok {
 			return fmt.Errorf(`unexpected foreign-key "fixture_lineups_lineup_player" returned %v`, n.ID)
+		}
+		for i := range nodes {
+			assign(nodes[i], n)
+		}
+	}
+	return nil
+}
+func (mpq *MatchPlayerQuery) loadPlayerStats(ctx context.Context, query *PlayerStatsQuery, nodes []*MatchPlayer, init func(*MatchPlayer), assign func(*MatchPlayer, *PlayerStats)) error {
+	ids := make([]int, 0, len(nodes))
+	nodeids := make(map[int][]*MatchPlayer)
+	for i := range nodes {
+		if nodes[i].player_stats_match_player == nil {
+			continue
+		}
+		fk := *nodes[i].player_stats_match_player
+		if _, ok := nodeids[fk]; !ok {
+			ids = append(ids, fk)
+		}
+		nodeids[fk] = append(nodeids[fk], nodes[i])
+	}
+	if len(ids) == 0 {
+		return nil
+	}
+	query.Where(playerstats.IDIn(ids...))
+	neighbors, err := query.All(ctx)
+	if err != nil {
+		return err
+	}
+	for _, n := range neighbors {
+		nodes, ok := nodeids[n.ID]
+		if !ok {
+			return fmt.Errorf(`unexpected foreign-key "player_stats_match_player" returned %v`, n.ID)
 		}
 		for i := range nodes {
 			assign(nodes[i], n)

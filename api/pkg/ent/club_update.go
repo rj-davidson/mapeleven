@@ -66,6 +66,27 @@ func (cu *ClubUpdate) SetLogo(s string) *ClubUpdate {
 	return cu
 }
 
+// SetPopularity sets the "Popularity" field.
+func (cu *ClubUpdate) SetPopularity(i int) *ClubUpdate {
+	cu.mutation.ResetPopularity()
+	cu.mutation.SetPopularity(i)
+	return cu
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (cu *ClubUpdate) SetNillablePopularity(i *int) *ClubUpdate {
+	if i != nil {
+		cu.SetPopularity(*i)
+	}
+	return cu
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (cu *ClubUpdate) AddPopularity(i int) *ClubUpdate {
+	cu.mutation.AddPopularity(i)
+	return cu
+}
+
 // SetCountryID sets the "country" edge to the Country entity by ID.
 func (cu *ClubUpdate) SetCountryID(id int) *ClubUpdate {
 	cu.mutation.SetCountryID(id)
@@ -199,6 +220,12 @@ func (cu *ClubUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	if value, ok := cu.mutation.Logo(); ok {
 		_spec.SetField(club.FieldLogo, field.TypeString, value)
 	}
+	if value, ok := cu.mutation.Popularity(); ok {
+		_spec.SetField(club.FieldPopularity, field.TypeInt, value)
+	}
+	if value, ok := cu.mutation.AddedPopularity(); ok {
+		_spec.AddField(club.FieldPopularity, field.TypeInt, value)
+	}
 	if cu.mutation.CountryCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -327,6 +354,27 @@ func (cuo *ClubUpdateOne) SetNational(b bool) *ClubUpdateOne {
 // SetLogo sets the "logo" field.
 func (cuo *ClubUpdateOne) SetLogo(s string) *ClubUpdateOne {
 	cuo.mutation.SetLogo(s)
+	return cuo
+}
+
+// SetPopularity sets the "Popularity" field.
+func (cuo *ClubUpdateOne) SetPopularity(i int) *ClubUpdateOne {
+	cuo.mutation.ResetPopularity()
+	cuo.mutation.SetPopularity(i)
+	return cuo
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (cuo *ClubUpdateOne) SetNillablePopularity(i *int) *ClubUpdateOne {
+	if i != nil {
+		cuo.SetPopularity(*i)
+	}
+	return cuo
+}
+
+// AddPopularity adds i to the "Popularity" field.
+func (cuo *ClubUpdateOne) AddPopularity(i int) *ClubUpdateOne {
+	cuo.mutation.AddPopularity(i)
 	return cuo
 }
 
@@ -492,6 +540,12 @@ func (cuo *ClubUpdateOne) sqlSave(ctx context.Context) (_node *Club, err error) 
 	}
 	if value, ok := cuo.mutation.Logo(); ok {
 		_spec.SetField(club.FieldLogo, field.TypeString, value)
+	}
+	if value, ok := cuo.mutation.Popularity(); ok {
+		_spec.SetField(club.FieldPopularity, field.TypeInt, value)
+	}
+	if value, ok := cuo.mutation.AddedPopularity(); ok {
+		_spec.AddField(club.FieldPopularity, field.TypeInt, value)
 	}
 	if cuo.mutation.CountryCleared() {
 		edge := &sqlgraph.EdgeSpec{

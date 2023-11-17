@@ -34,6 +34,8 @@ const (
 	EdgeTeam = "team"
 	// EdgeFixture holds the string denoting the fixture edge name in mutations.
 	EdgeFixture = "fixture"
+	// EdgePlayerStats holds the string denoting the playerstats edge name in mutations.
+	EdgePlayerStats = "playerStats"
 	// Table holds the table name of the fixtureevents in the database.
 	Table = "fixture_events"
 	// PlayerTable is the table that holds the player relation/edge.
@@ -64,6 +66,13 @@ const (
 	FixtureInverseTable = "fixtures"
 	// FixtureColumn is the table column denoting the fixture relation/edge.
 	FixtureColumn = "fixture_fixture_events"
+	// PlayerStatsTable is the table that holds the playerStats relation/edge.
+	PlayerStatsTable = "fixture_events"
+	// PlayerStatsInverseTable is the table name for the PlayerStats entity.
+	// It exists in this package in order to avoid circular dependency with the "playerstats" package.
+	PlayerStatsInverseTable = "player_stats"
+	// PlayerStatsColumn is the table column denoting the playerStats relation/edge.
+	PlayerStatsColumn = "player_stats_player_events"
 )
 
 // Columns holds all SQL columns for fixtureevents fields.
@@ -83,6 +92,8 @@ var ForeignKeys = []string{
 	"fixture_fixture_events",
 	"player_player_events",
 	"player_assist_events",
+	"player_stats_player_events",
+	"player_stats_assist_events",
 	"team_team_fixture_events",
 }
 
@@ -173,6 +184,13 @@ func ByFixtureField(field string, opts ...sql.OrderTermOption) OrderOption {
 		sqlgraph.OrderByNeighborTerms(s, newFixtureStep(), sql.OrderByField(field, opts...))
 	}
 }
+
+// ByPlayerStatsField orders the results by playerStats field.
+func ByPlayerStatsField(field string, opts ...sql.OrderTermOption) OrderOption {
+	return func(s *sql.Selector) {
+		sqlgraph.OrderByNeighborTerms(s, newPlayerStatsStep(), sql.OrderByField(field, opts...))
+	}
+}
 func newPlayerStep() *sqlgraph.Step {
 	return sqlgraph.NewStep(
 		sqlgraph.From(Table, FieldID),
@@ -199,5 +217,12 @@ func newFixtureStep() *sqlgraph.Step {
 		sqlgraph.From(Table, FieldID),
 		sqlgraph.To(FixtureInverseTable, FieldID),
 		sqlgraph.Edge(sqlgraph.M2O, true, FixtureTable, FixtureColumn),
+	)
+}
+func newPlayerStatsStep() *sqlgraph.Step {
+	return sqlgraph.NewStep(
+		sqlgraph.From(Table, FieldID),
+		sqlgraph.To(PlayerStatsInverseTable, FieldID),
+		sqlgraph.Edge(sqlgraph.M2O, true, PlayerStatsTable, PlayerStatsColumn),
 	)
 }

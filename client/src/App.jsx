@@ -12,8 +12,9 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { ThemeProvider } from '@mui/material';
 import HomePage from './Home/HomePage';
 import PlayerPageSingle from './Players/PlayerPageSingle';
-import FixturePageSingle from './Fixtures/FixturePageSingle'
-import FixturePageDummy from "./Fixtures/FixturePageDummy";
+import FixturePageSingle from './Fixtures/FixturePageSingle';
+import FixturePageDummy from './Fixtures/FixturePageDummy';
+import FixturePageSingleDemo from './Fixtures/FixturePageSingleDemo';
 
 function App() {
     return (
@@ -22,7 +23,8 @@ function App() {
                 <Router>
                     <Layout>
                         <Routes>
-                            <Route path='/fixtures/:slug' element={<FixturePageSingle/>} />
+                            <Route path='/fixtures/:slug' element={<FixturePageSingle />} />
+                            <Route path='/fixtures-demo/:slug' element={<FixturePageSingleDemo />} />
                             <Route path='/players/:slug' element={<PlayerPageSingle />} />
                             <Route path='/players' element={<Players />} />
                             <Route path='/teams/:slug' element={<TeamPageSingle />} />

@@ -13,7 +13,7 @@ build: db server client
 
 db:
 	@echo "+ $@"
-	cd api/cmd/db && go build -o ../../bin/db
+	cd api/cmd/db && go build -o ../../bin/db ./main.go
 
 server:
 	@echo "+ $@"
@@ -30,6 +30,10 @@ docker-build-api: db docker-build-api-db docker-build-api-server
 docker-up-api: docker-build-api
 	@echo "+ $@"
 	docker-compose --env-file $(ENV_FILE) up db api-db api-server
+
+docker-up-client-detached: docker-build-client
+	@echo "+ $@"
+	docker-compose up -d client
 
 docker-up-api-detached: docker-build-api
 	@echo "+ $@"
@@ -62,6 +66,10 @@ docker-down:
 docker-down-db:
 	@echo "+ $@"
 	docker-compose down db
+
+docker-down-client:
+	@echo "+ $@"
+	docker-compose down client
 
 docker-up-detached: docker-build
 	@echo "+ $@"

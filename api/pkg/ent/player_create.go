@@ -13,6 +13,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixtureevents"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/matchplayer"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/playerstats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/squad"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -95,6 +96,20 @@ func (pc *PlayerCreate) SetLastUpdated(t time.Time) *PlayerCreate {
 func (pc *PlayerCreate) SetNillableLastUpdated(t *time.Time) *PlayerCreate {
 	if t != nil {
 		pc.SetLastUpdated(*t)
+	}
+	return pc
+}
+
+// SetPopularity sets the "Popularity" field.
+func (pc *PlayerCreate) SetPopularity(i int) *PlayerCreate {
+	pc.mutation.SetPopularity(i)
+	return pc
+}
+
+// SetNillablePopularity sets the "Popularity" field if the given value is not nil.
+func (pc *PlayerCreate) SetNillablePopularity(i *int) *PlayerCreate {
+	if i != nil {
+		pc.SetPopularity(*i)
 	}
 	return pc
 }
@@ -197,6 +212,21 @@ func (pc *PlayerCreate) AddAssistEvents(f ...*FixtureEvents) *PlayerCreate {
 	return pc.AddAssistEventIDs(ids...)
 }
 
+// AddPlayerStatIDs adds the "playerStats" edge to the PlayerStats entity by IDs.
+func (pc *PlayerCreate) AddPlayerStatIDs(ids ...int) *PlayerCreate {
+	pc.mutation.AddPlayerStatIDs(ids...)
+	return pc
+}
+
+// AddPlayerStats adds the "playerStats" edges to the PlayerStats entity.
+func (pc *PlayerCreate) AddPlayerStats(p ...*PlayerStats) *PlayerCreate {
+	ids := make([]int, len(p))
+	for i := range p {
+		ids[i] = p[i].ID
+	}
+	return pc.AddPlayerStatIDs(ids...)
+}
+
 // Mutation returns the PlayerMutation object of the builder.
 func (pc *PlayerCreate) Mutation() *PlayerMutation {
 	return pc.mutation
@@ -236,6 +266,10 @@ func (pc *PlayerCreate) defaults() {
 		v := player.DefaultLastUpdated()
 		pc.mutation.SetLastUpdated(v)
 	}
+	if _, ok := pc.mutation.Popularity(); !ok {
+		v := player.DefaultPopularity
+		pc.mutation.SetPopularity(v)
+	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -269,6 +303,9 @@ func (pc *PlayerCreate) check() error {
 	}
 	if _, ok := pc.mutation.Photo(); !ok {
 		return &ValidationError{Name: "photo", err: errors.New(`ent: missing required field "Player.photo"`)}
+	}
+	if _, ok := pc.mutation.Popularity(); !ok {
+		return &ValidationError{Name: "Popularity", err: errors.New(`ent: missing required field "Player.Popularity"`)}
 	}
 	return nil
 }
@@ -339,6 +376,10 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 	if value, ok := pc.mutation.LastUpdated(); ok {
 		_spec.SetField(player.FieldLastUpdated, field.TypeTime, value)
 		_node.LastUpdated = value
+	}
+	if value, ok := pc.mutation.Popularity(); ok {
+		_spec.SetField(player.FieldPopularity, field.TypeInt, value)
+		_node.Popularity = value
 	}
 	if nodes := pc.mutation.BirthIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -431,6 +472,22 @@ func (pc *PlayerCreate) createSpec() (*Player, *sqlgraph.CreateSpec) {
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: sqlgraph.NewFieldSpec(fixtureevents.FieldID, field.TypeInt),
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := pc.mutation.PlayerStatsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   player.PlayerStatsTable,
+			Columns: []string{player.PlayerStatsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: sqlgraph.NewFieldSpec(playerstats.FieldID, field.TypeInt),
 			},
 		}
 		for _, k := range nodes {
