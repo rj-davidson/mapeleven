@@ -18,13 +18,12 @@ plugins:
   - mui-path-imports
 rules:
   no-unused-vars: 'off'
-  'prettier/prettier': 'warn'
   no-console: 'warn'
   prefer-template: 'warn'
   no-undef: 'off'
   'react-hooks/exhaustive-deps': 'off'
   '@typescript-eslint/no-unused-vars':
-    - 'warn'
+    - 'error'
     - argsIgnorePattern: '^_'
       varsIgnorePattern: '^_'
       caughtErrorsIgnorePattern: '^_'
