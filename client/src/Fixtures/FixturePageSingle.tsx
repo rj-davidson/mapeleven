@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 import Skeleton from "@mui/material/Skeleton";
 import { useMediaQuery } from "@mui/material";
-import { APIFixtureEvent, APIFixtureTeam } from "../Models/api_types";
+import { APIFixtureSet } from "../Models/api_types";
 import FixtureMatchEvents from "./Events/FixtureMatchEvents";
 import FixturePageSingleMain from "./FixturePageSingleMain";
 import TeamIDCardFixturePage from "../Teams/TeamIDCardFixturePage";
@@ -17,48 +17,17 @@ const url = import.meta.env.VITE_API_URL;
 function FixturePageSingle() {
   const { slug } = useParams();
   const isSmallerThanLG = useMediaQuery("(max-width: 1260px)");
-
-  const [homeTeamSlug, setHomeTeamSlug] = useState<string>("");
-  const [awayTeamSlug, setAwayTeamSlug] = useState<string>("");
-  const [homeTeam, setHomeTeam] = useState<string>("");
-  const [awayTeam, setAwayTeam] = useState<string>("");
-  const [homeLogo, setHomeLogo] = useState<string>("");
-  const [awayLogo, setAwayLogo] = useState<string>("");
-  const [referee, setReferee] = useState<string>("");
-  const [homeTeamScore, setHomeTeamScore] = useState<number>(0);
-  const [awayTeamScore, setAwayTeamScore] = useState<number>(0);
-  const [minute, setMinute] = useState<number>(0);
-  const [date, setDate] = useState<Date>(new Date());
-  const [timeZone, setTimeZone] = useState<string>("");
+  const [fixtureData, setFixtureData] = useState<APIFixtureSet>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [events, setEvents] = useState<APIFixtureEvent[]>([]);
-  const [_, setTeams] = useState<APIFixtureTeam>();
-  const [homeLineup, setHomeLineup] = useState([]);
-  const [awayLineup, setAwayLineup] = useState([]);
 
   useEffect(() => {
     fetch(`${url}/fixtures/${slug}`)
       .then((response) => response.json())
       .then((jsonData) => {
-        setHomeTeamSlug(jsonData.teams.home.slug);
-        setAwayTeamSlug(jsonData.teams.away.slug);
-        setHomeTeam(jsonData.teams.home.name);
-        setAwayTeam(jsonData.teams.away.name);
-        setHomeLogo(jsonData.teams.home.logo);
-        setAwayLogo(jsonData.teams.away.logo);
-        setReferee(jsonData.fixture.referee);
-        setHomeTeamScore(jsonData.fixture.homeTeamScore);
-        setAwayTeamScore(jsonData.fixture.awayTeamScore);
-        setMinute(jsonData.fixture.elapsed);
+        setFixtureData(jsonData as APIFixtureSet);
         setLoading(false);
-        setEvents(jsonData.events);
-        setDate(jsonData.fixture.date);
-        setTimeZone(jsonData.fixture.timezone);
-        setTeams(jsonData.teams);
-        setHomeLineup(jsonData.lineups.home.matchPlayers);
-        setAwayLineup(jsonData.lineups.away.matchPlayers);
       })
-      .catch((error) => console.error(error));
+      .catch();
   }, [slug]);
   return loading ? (
     <Grid container spacing={2} direction="column">
@@ -82,59 +51,61 @@ function FixturePageSingle() {
   ) : (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={12}>
-        <FixturePageSingleMain
-          homeTeam={homeTeam}
-          awayTeam={awayTeam}
-          homeLogo={homeLogo}
-          awayLogo={awayLogo}
-          referee={referee}
-          homeTeamScore={homeTeamScore}
-          awayTeamScore={awayTeamScore}
-          minute={minute}
-          events={events}
-          date={date}
-          timeZone={timeZone}
-        />
+        <FixturePageSingleMain data={fixtureData} />
       </Grid>
-      {homeLineup.length > 0 && awayLineup.length > 0 && (
-        <Grid item xs={12} sm={12}>
-          {isSmallerThanLG ? (
-            <FixtureLineupMobile
-              homePlayers={awayLineup}
-              awayPlayers={homeLineup}
-            />
-          ) : (
-            <FixtureLineup homePlayers={awayLineup} awayPlayers={homeLineup} />
-          )}
-        </Grid>
-      )}
+      {fixtureData?.lineups &&
+        fixtureData.lineups.home &&
+        fixtureData.lineups.home.matchPlayers.length > 0 &&
+        fixtureData.lineups.away &&
+        fixtureData.lineups.away.matchPlayers.length > 0 && (
+          <Grid item xs={12} sm={12}>
+            {isSmallerThanLG ? (
+              <FixtureLineupMobile
+                homePlayers={fixtureData.lineups.home.matchPlayers}
+                awayPlayers={fixtureData.lineups.away.matchPlayers}
+              />
+            ) : (
+              <FixtureLineup
+                homePlayers={fixtureData.lineups.home.matchPlayers}
+                awayPlayers={fixtureData.lineups.away.matchPlayers}
+              />
+            )}
+          </Grid>
+        )}
       <Grid item xs={12} sm={12}>
         <Grid container spacing={2}>
           <Grid item xs={12} sm={3}>
-            <TeamIDCardFixturePage
-              slug={homeTeamSlug}
-              name={homeTeam}
-              badge={homeLogo}
-            />
+            {fixtureData && fixtureData.teams && (
+              <TeamIDCardFixturePage
+                slug={fixtureData.teams.home.slug}
+                name={fixtureData.teams.home.name}
+                badge={fixtureData.teams.home.logo}
+              />
+            )}
           </Grid>
           <Grid item xs={12} sm={6}>
             <Tile style={{ flexDirection: "column" }}>
-              {events.map((event, index) => (
-                <Grid item xs={12} key={index}>
-                  <FixtureMatchEvents
-                    event={event}
-                    awayTeamSlug={awayTeamSlug}
-                  />
-                </Grid>
-              ))}
+              {fixtureData?.events &&
+                fixtureData.events.map((event, index) => (
+                  <Grid item xs={12} key={index}>
+                    {fixtureData.teams && (
+                      <FixtureMatchEvents
+                        event={event}
+                        awayTeamSlug={fixtureData.teams.away.slug}
+                      />
+                    )}
+                  </Grid>
+                ))}
             </Tile>
           </Grid>
           <Grid item xs={12} sm={3}>
-            <TeamIDCardFixturePage
-              slug={awayTeamSlug}
-              name={awayTeam}
-              badge={awayLogo}
-            />
+            {fixtureData && fixtureData.teams && (
+              <TeamIDCardFixturePage
+                slug={fixtureData.teams.away.slug}
+                name={fixtureData.teams.away.name}
+                badge={fixtureData.teams.away.logo}
+              />
+            )}
           </Grid>
         </Grid>
       </Grid>
