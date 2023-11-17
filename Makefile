@@ -31,6 +31,10 @@ docker-up-api: docker-build-api
 	@echo "+ $@"
 	docker-compose --env-file $(ENV_FILE) up db api-db api-server
 
+docker-up-client-detached: docker-build-client
+	@echo "+ $@"
+	docker-compose up -d client
+
 docker-up-api-detached: docker-build-api
 	@echo "+ $@"
 	docker-compose --env-file $(ENV_FILE) up -d db api-db api-server
@@ -62,6 +66,10 @@ docker-down:
 docker-down-db:
 	@echo "+ $@"
 	docker-compose down db
+
+docker-down-client:
+	@echo "+ $@"
+	docker-compose down client
 
 docker-up-detached: docker-build
 	@echo "+ $@"
