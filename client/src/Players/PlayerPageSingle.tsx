@@ -1,40 +1,24 @@
 import * as React from "react";
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import Skeleton from "@mui/material/Skeleton";
 import PlayerPageSingleColumn from "./PlayerPageSingleColumn";
-import { Tile } from "../Util/Tile";
 import PlayerPageSingleMain from "./PlayerPageSingleMain";
+import { APIPlayer } from "../Models/api_types";
 
 const url = import.meta.env.VITE_API_URL;
 
 function PlayerPageSingle() {
   const { slug } = useParams();
-
-  const [name, setName] = useState<string>("");
-  const [firstName, setFirstName] = useState<string>("");
-  const [lastName, setLastName] = useState<string>("");
-  const [photo, setPhoto] = useState<string>("");
-  const [age, setAge] = useState<number>(0);
-  const [height, setHeight] = useState<string>("");
-  const [weight, setWeight] = useState<string>("");
-  const [injured, setInjured] = useState<boolean>(false);
+  const [playerData, setPlayerData] = useState<APIPlayer>();
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     fetch(`${url}/players/${slug}`)
       .then((response) => response.json())
       .then((jsonData) => {
-        setName(jsonData.name);
-        setFirstName(jsonData.firstname);
-        setLastName(jsonData.lastname);
-        setPhoto(jsonData.photo);
-        setAge(jsonData.age);
-        setHeight(jsonData.height);
-        setWeight(jsonData.weight);
-        setInjured(jsonData.injured);
+        setPlayerData(jsonData as APIPlayer);
         setLoading(false);
       })
       .catch((error) => console.error(error));
@@ -64,18 +48,11 @@ function PlayerPageSingle() {
       <Grid item xs={12} sm={12} md={12} lg={3} width="100%">
         <PlayerPageSingleColumn
           slug={slug && slug !== "" ? slug : ""}
-          name={name}
-          firstName={firstName}
-          lastName={lastName}
-          photo={photo}
-          age={age}
-          height={height}
-          weight={weight}
-          injured={injured}
+          playerData={playerData}
         />
       </Grid>
       <Grid item xs={12} sm={12} md={12} lg={9} width="100%">
-        <PlayerPageSingleMain name={name} />
+        <PlayerPageSingleMain playerData={playerData} />
       </Grid>
     </Grid>
   );
