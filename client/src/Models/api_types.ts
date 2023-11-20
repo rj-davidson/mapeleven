@@ -315,6 +315,7 @@ interface APIFixturePlayerDetailInfo {
 }
 
 interface APIPlayerStats {
+  team: APIPlayerStatsTeam;
   defense: APIPlayerStatsDefense;
   games: APIPlayerStatsGames;
   shooting: APIPlayerStatsShooting;
@@ -322,6 +323,12 @@ interface APIPlayerStats {
   technical: APIPlayerStatsTechnical;
   penalty: APIPlayerStatsPenalty;
   fairplay: APIPlayerStatsFairPlay;
+}
+
+interface APIPlayerStatsTeam {
+  slug: string;
+  name: string;
+  logo: string;
 }
 
 interface APIPlayerStatsDefense {
