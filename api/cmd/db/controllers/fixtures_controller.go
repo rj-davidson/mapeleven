@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/spf13/viper"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -86,6 +87,19 @@ func (fc *FixtureController) InitializeFixtures(lm *models.LeagueModel, ctx cont
 	return nil
 }
 
+// UpdateFixtures updates fixtures given a list of *ent.Fixture
+func (fc *FixtureController) UpdateFixtures(fixtures []*ent.Fixture) error {
+	ctx := context.Background()
+	for _, f := range fixtures {
+		_, err := fc.fetchFixtureById(ctx, f.ApiFootballId, f.Edges.Season)
+		if err != nil {
+			fmt.Printf("Error fetching fixture by id %d: %v", f.ApiFootballId, err)
+		}
+	}
+
+	return nil
+}
+
 func (fc *FixtureController) fetchFixturesByLeague(ctx context.Context, leagueID int, season *ent.Season) ([]*ent.Fixture, error) {
 	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/fixtures?league=%d&season=%d", leagueID, season.Year)
 
@@ -141,6 +155,35 @@ func (fc *FixtureController) fetchFixturesByIds(ctx context.Context, fixtureIDs 
 	}
 
 	return fixtures, nil
+}
+
+func (fc *FixtureController) fetchFixtureById(ctx context.Context, fixtureID int, season *ent.Season) ([]*ent.Fixture, error) {
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/fixtures?id=%d", fixtureID)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
+	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
+
+	resp, err := fc.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer func(Body io.ReadCloser) {
+		err := Body.Close()
+		if err != nil {
+
+		}
+	}(resp.Body)
+
+	data, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
+
+	return fc.parseFixturesResponse(data, season)
 }
 
 func (fc *FixtureController) parseFixturesResponse(data []byte, season *ent.Season) ([]*ent.Fixture, error) {

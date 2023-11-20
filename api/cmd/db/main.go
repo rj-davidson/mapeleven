@@ -151,27 +151,52 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 		// Fetch Squads
 		fetchSquads(squadModel, playerModel, teamModel, playerStatsModel)
 
-		// Fetch Player Stats
-		//fetchPlayerStats(playerModel, playerStatsModel)
-
 		// Fetch Fixture Data
 		fetchFixtureData(fixturesModel)
 	}
 
 	if runScheduler {
 		// Schedule cron jobs
-		s.Every(14).Days().At("00:00").Do(fetchCountries, countryModel)
-		s.Every(14).Days().At("00:00").Do(fetchLeagues, leagueModel)
-		s.Every(14).Days().At("00:00").Do(fetchStandings, standingsModel, clubModel)
-		s.Every(14).Days().At("00:00").Do(fetchFixtures, fixturesModel)
-		s.Every(14).Days().At("00:00").Do(fetchTeamStats, teamModel, teamStatsModel)
+		_, err := s.Every(12).Hours().At("00:00").Do(fetchCountries, countryModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
+		_, err = s.Every(12).Hours().At("00:00").Do(fetchLeagues, leagueModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
+		_, err = s.Every(12).Hours().At("00:00").Do(fetchStandings, standingsModel, clubModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
+		_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtures, fixturesModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
+		_, err = s.Every(12).Hours().At("00:00").Do(fetchTeamStats, teamModel, teamStatsModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
+		_, err = s.Every(12).Hours().At("00:00").Do(fetchSquads, squadModel, playerModel, teamModel, playerStatsModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
+		_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtureData, fixturesModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
+		_, err = s.Every(150).Seconds().At("00:00").Do(fetchTodaysFixtures, fixturesModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
+		_, err = s.Every(45).Seconds().At("00:00").Do(fetchLiveFixtures, fixturesModel)
+		if err != nil {
+			fmt.Printf("error scheduling job: %v", err)
+		}
 	}
 
 	if devRun {
-		// Add your development mode code here
-		fetchSquads(squadModel, playerModel, teamModel, playerStatsModel)
-		//fetchPlayerStats(playerModel, teamModel)
-
+		/* EMPTY */
 	}
 }
 
@@ -260,4 +285,44 @@ func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
 		log.Printf("Error fetching fixture data: %v", err)
 	}
 	fmt.Println("Fixture data successfully loaded.")
+}
+
+func fetchTodaysFixtures(fixtureModel *fixture_models.FixtureModel) error {
+	fmt.Println("Fetching today's fixtures...")
+	fc := controllers.NewFixtureController(fixtureModel)
+	fdc := controllers.NewFixtureDataController(fixtureModel)
+	todaysFixtures, err := fixtureModel.ListTodaysFixtures(context.Background())
+	if err != nil {
+		fmt.Printf("Error fetching today's fixtures: %v", err)
+	}
+	err = fc.UpdateFixtures(todaysFixtures)
+	if err != nil {
+		fmt.Printf("Error updating today's fixtures: %v", err)
+	}
+	err = fdc.UpdateFixtures(context.Background(), todaysFixtures)
+	if err != nil {
+		fmt.Printf("Error updating today's fixtures: %v", err)
+	}
+	fmt.Println("Today's fixtures successfully loaded.")
+	return nil
+}
+
+func fetchLiveFixtures(fixtureModel *fixture_models.FixtureModel) error {
+	fmt.Println("Fetching live fixtures...")
+	fc := controllers.NewFixtureController(fixtureModel)
+	fdc := controllers.NewFixtureDataController(fixtureModel)
+	liveFixtures, err := fixtureModel.ListLiveFixtures(context.Background())
+	if err != nil {
+		fmt.Printf("Error fetching live fixtures: %v", err)
+	}
+	err = fc.UpdateFixtures(liveFixtures)
+	if err != nil {
+		fmt.Printf("Error updating live fixtures: %v", err)
+	}
+	err = fdc.UpdateFixtures(context.Background(), liveFixtures)
+	if err != nil {
+		fmt.Printf("Error updating live fixtures: %v", err)
+	}
+	fmt.Println("Live fixtures successfully loaded.")
+	return nil
 }

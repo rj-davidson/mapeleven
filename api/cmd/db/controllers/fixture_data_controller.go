@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/fixture_models"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -33,6 +34,20 @@ func (fdc *FixtureDataController) FetchFixtures(ctx context.Context) error {
 		return err
 	}
 	for _, f := range fs {
+		fixtureDetails, err := fdc.fetchFixtureByID(ctx, f.ApiFootballId)
+		if err != nil {
+			fmt.Printf("Error fetching fixture: %v", err)
+		}
+		err = fdc.writeFixtureData(f.ApiFootballId, *fixtureDetails, ctx)
+		if err != nil {
+			fmt.Printf("Error writing fixture data: %v", err)
+		}
+	}
+	return nil
+}
+
+func (fdc *FixtureDataController) UpdateFixtures(ctx context.Context, fixtures []*ent.Fixture) error {
+	for _, f := range fixtures {
 		fixtureDetails, err := fdc.fetchFixtureByID(ctx, f.ApiFootballId)
 		if err != nil {
 			fmt.Printf("Error fetching fixture: %v", err)
