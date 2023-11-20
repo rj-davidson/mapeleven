@@ -1,39 +1,29 @@
 import * as React from "react";
-import { Tile } from "../Util/Tile.jsx";
+import { Tile } from "../Util/TileTS";
 import { Flex } from "../Util/Flex.jsx";
 import DisplayImage from "../Util/DisplayImage";
 import PlayerIDTitle from "./PlayerIDTitle";
+import { APIPlayer } from "../Models/api_types";
 
 interface TeamOppIDCardProps {
   slug: string | undefined;
-  name: string;
-  photo: string;
-  injured: boolean;
+  playerData: APIPlayer | undefined;
 }
 
 const TeamOppIDCard: React.FC<TeamOppIDCardProps> = ({
   slug = "",
-  name = "Team Name",
-  injured,
-  photo,
+  playerData,
 }) => {
   return (
     <Tile
-      style={{
+      sx={{
         flexDirection: "column",
         justifyContent: "space-between",
         height: "100%",
         background: "var(--dark1)",
-        border: "5px solid var(--blue)",
       }}
     >
-      <PlayerIDTitle
-        slug={slug}
-        name={name}
-        country={"Country"}
-        flag={""}
-        injured={injured}
-      />
+      <PlayerIDTitle slug={slug} playerData={playerData} />
 
       <Flex
         style={{
@@ -43,10 +33,10 @@ const TeamOppIDCard: React.FC<TeamOppIDCardProps> = ({
         }}
       >
         <DisplayImage
-          src={photo}
-          alt={name}
+          src={playerData?.photo}
+          alt={playerData?.name}
           width={"108px"}
-          height={"108"}
+          height={"108px"}
           sx={{
             borderRadius: "10px",
             boxShadow: "rgba(0,0,0,0.2) 0 0 10px",

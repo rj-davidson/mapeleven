@@ -516,12 +516,7 @@ const PlayerRadarChart: React.FC<PlayerRadarChartProps> = ({ playerData }) => {
             <PlayerRadarSearch handleSearch={handleSearch} />
 
             {oppData?.photo ? (
-              <PlayerOppIDCard
-                slug={oppSlug}
-                name={oppData.name}
-                photo={oppData.photo}
-                injured={oppData.injured}
-              />
+              <PlayerOppIDCard slug={oppSlug} playerData={oppData} />
             ) : (
               <Tile
                 sx={{

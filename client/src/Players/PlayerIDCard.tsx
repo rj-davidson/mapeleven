@@ -3,7 +3,7 @@ import { useState } from "react";
 import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import { useMediaQuery } from "@mui/material";
-import { Tile } from "../Util/Tile.jsx";
+import { Tile } from "../Util/TileTS";
 import { Flex } from "../Util/Flex.jsx";
 import Tilt from "react-parallax-tilt";
 import DisplayImage from "../Util/DisplayImage";
@@ -48,40 +48,38 @@ const PlayerIDCard: React.FC<PlayerIDCardProps> = ({ slug, playerData }) => {
             }}
           >
             <Tile
-              style={{
+              sx={{
                 flexDirection: "column",
-                gap: "48px",
-                border: "5px solid var(--red)",
+                gap: "32px",
               }}
             >
-              <PlayerIDTitle
-                slug={slug}
-                name={playerData?.name}
-                country={"Country"}
-                flag={""}
-                injured={playerData?.injured}
-              />
+              <PlayerIDTitle slug={slug} playerData={playerData} />
 
               <Flex
                 style={{
                   justifyContent: "center",
                   alignItems: "center",
-                  marginTop: "-12px",
+                  marginTop: "-20px",
                 }}
               >
                 <DisplayImage
                   src={playerData?.photo}
                   alt={playerData?.name}
                   width={"108px"}
-                  height={"108"}
+                  height={"108px"}
                   sx={{
                     borderRadius: "10px",
-                    boxShadow: "rgba(0,0,0,0.2) 0 0 10px",
+                    border: "5px solid var(--light0)",
                   }}
                 />
               </Flex>
-
               <Grid container spacing={1}>
+                <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
+                  <PlayerIDStatBox
+                    stat="Position"
+                    value={playerData?.statistics?.[0].games.position}
+                  />
+                </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
                   <PlayerIDStatBox stat="Age" value={playerData?.age} />
                 </Grid>
@@ -97,40 +95,38 @@ const PlayerIDCard: React.FC<PlayerIDCardProps> = ({ slug, playerData }) => {
         </Box>
       ) : (
         <Tile
-          style={{
+          sx={{
             flexDirection: "column",
-            gap: "48px",
-            border: "5px solid var(--red)",
+            gap: "32px",
           }}
         >
-          <PlayerIDTitle
-            slug={slug}
-            name={playerData?.name}
-            country={"Country"}
-            flag={""}
-            injured={playerData?.injured}
-          />
+          <PlayerIDTitle slug={slug} playerData={playerData} />
 
           <Flex
             style={{
               justifyContent: "center",
               alignItems: "center",
-              marginTop: "-12px",
+              marginTop: "-20px",
             }}
           >
             <DisplayImage
               src={playerData?.photo}
               alt={playerData?.name}
               width={"108px"}
-              height={"108"}
+              height={"108px"}
               sx={{
                 borderRadius: "10px",
-                boxShadow: "rgba(0,0,0,0.2) 0 0 10px",
+                border: "5px solid var(--light0)",
               }}
             />
           </Flex>
-
           <Grid container spacing={1}>
+            <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
+              <PlayerIDStatBox
+                stat="Position"
+                value={playerData?.statistics?.[0].games.position}
+              />
+            </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
               <PlayerIDStatBox stat="Age" value={playerData?.age} />
             </Grid>

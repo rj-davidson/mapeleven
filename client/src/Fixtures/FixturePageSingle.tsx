@@ -8,7 +8,7 @@ import { APIFixtureSet } from "../Models/api_types";
 import FixtureMatchEvents from "./Events/FixtureMatchEvents";
 import FixturePageSingleMain from "./FixturePageSingleMain";
 import TeamIDCardFixturePage from "../Teams/TeamIDCardFixturePage";
-import { Tile } from "../Util/Tile";
+import { Tile } from "../Util/TileTS";
 import FixtureLineup from "./FixtureLineup";
 import FixtureLineupMobile from "./FixtureLineupMobile";
 
@@ -84,7 +84,7 @@ function FixturePageSingle() {
             )}
           </Grid>
           <Grid item xs={12} sm={6}>
-            <Tile style={{ flexDirection: "column" }}>
+            <Tile sx={{ flexDirection: "column" }}>
               {fixtureData?.events &&
                 fixtureData.events.map((event, index) => (
                   <Grid item xs={12} key={index}>
