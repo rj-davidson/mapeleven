@@ -10,44 +10,15 @@ import DisplayImage from "../Util/DisplayImage";
 import TeamIDTitle from "./TeamIDTitle";
 import TeamIDStatBox from "./TeamIDStatBox";
 import { useMediaQuery } from "@mui/material";
+import { APITeam } from "../Models/api_types";
 
 interface TeamIDCardProps {
-  slug: string;
-  name: string;
-  badge: string;
-  country: string;
-  flag: string;
-  founded: string;
-  goals: number;
-  clean: number;
-  gamesPlayed: number;
-  wins: number;
-  draws: number;
-  loses: number;
-  leagueSlug: string;
-  leagueName: string;
-  leagueLogo: string;
+  slug: string | undefined;
+  teamData: APITeam | undefined;
   rank: string;
 }
 
-const TeamIDCard: React.FC<TeamIDCardProps> = ({
-  slug,
-  name,
-  badge,
-  country,
-  flag,
-  founded,
-  goals,
-  clean,
-  gamesPlayed,
-  wins,
-  draws,
-  loses,
-  leagueSlug,
-  leagueName,
-  leagueLogo,
-  rank,
-}) => {
+const TeamIDCard: React.FC<TeamIDCardProps> = ({ slug, teamData, rank }) => {
   const [isHovered, setIsHovered] = useState<boolean>(false);
   const [inspect, setInspect] = useState<boolean>(false);
 
@@ -86,12 +57,12 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
             >
               <TeamIDTitle
                 slug={slug}
-                name={name}
-                country={country}
-                flag={flag}
-                leagueSlug={leagueSlug}
-                leagueName={leagueName}
-                leagueLogo={leagueLogo}
+                name={teamData?.name.long}
+                country={teamData?.country?.name}
+                flag={teamData?.country?.flag}
+                leagueSlug={teamData?.competitions?.[0].league.slug}
+                leagueName={teamData?.competitions?.[0].league.name}
+                leagueLogo={teamData?.competitions?.[0].league.logo}
               />
 
               <Flex
@@ -102,10 +73,10 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
                 }}
               >
                 <DisplayImage
-                  src={badge}
-                  alt={name}
+                  src={teamData?.badge}
+                  alt={teamData?.name.long}
                   width={"108px"}
-                  height={"108"}
+                  height={"108px"}
                 />
               </Flex>
 
@@ -114,10 +85,31 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
                   <TeamIDStatBox stat="Position" value={rank} />
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
-                  <TeamIDStatBox stat="Points" value={3 * wins + draws} />
+                  <TeamIDStatBox
+                    stat="Points"
+                    value={
+                      3 *
+                        ((teamData?.competitions?.[0].stats?.fixtures.wins
+                          .home || 0) +
+                          (teamData?.competitions?.[0].stats?.fixtures.wins
+                            .away || 0)) +
+                      (teamData?.competitions?.[0].stats?.fixtures.draws.home ||
+                        0) +
+                      (teamData?.competitions?.[0].stats?.fixtures.draws.away ||
+                        0)
+                    }
+                  />
                 </Grid>
                 <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
-                  <TeamIDStatBox stat="Games Played" value={gamesPlayed} />
+                  <TeamIDStatBox
+                    stat="Games Played"
+                    value={
+                      (teamData?.competitions?.[0].stats?.fixtures.played
+                        .home || 0) +
+                      (teamData?.competitions?.[0].stats?.fixtures.played
+                        .away || 0)
+                    }
+                  />
                 </Grid>
               </Grid>
 
@@ -128,7 +120,7 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
                   fontStyle: "italic",
                 }}
               >
-                Founded {founded}
+                Founded {teamData?.founded}
               </Typography>
             </Tile>
           </Tilt>
@@ -142,12 +134,12 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
         >
           <TeamIDTitle
             slug={slug}
-            name={name}
-            country={country}
-            flag={flag}
-            leagueSlug={leagueSlug}
-            leagueName={leagueName}
-            leagueLogo={leagueLogo}
+            name={teamData?.name.long}
+            country={teamData?.country?.name}
+            flag={teamData?.country?.flag}
+            leagueSlug={teamData?.competitions?.[0].league.slug}
+            leagueName={teamData?.competitions?.[0].league.name}
+            leagueLogo={teamData?.competitions?.[0].league.logo}
           />
 
           <Flex
@@ -158,10 +150,10 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
             }}
           >
             <DisplayImage
-              src={badge}
-              alt={name}
+              src={teamData?.badge}
+              alt={teamData?.name.long}
               width={"108px"}
-              height={"108"}
+              height={"108px"}
             />
           </Flex>
 
@@ -170,17 +162,40 @@ const TeamIDCard: React.FC<TeamIDCardProps> = ({
               <TeamIDStatBox stat="Position" value={rank} />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
-              <TeamIDStatBox stat="Points" value={3 * wins + draws} />
+              <TeamIDStatBox
+                stat="Points"
+                value={
+                  3 *
+                    ((teamData?.competitions?.[0].stats?.fixtures.wins.home ||
+                      0) +
+                      (teamData?.competitions?.[0].stats?.fixtures.wins.away ||
+                        0)) +
+                  (teamData?.competitions?.[0].stats?.fixtures.draws.home ||
+                    0) +
+                  (teamData?.competitions?.[0].stats?.fixtures.draws.away || 0)
+                }
+              />
             </Grid>
             <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
-              <TeamIDStatBox stat="Games Played" value={gamesPlayed} />
+              <TeamIDStatBox
+                stat="Games Played"
+                value={
+                  (teamData?.competitions?.[0].stats?.fixtures.played.home ||
+                    0) +
+                  (teamData?.competitions?.[0].stats?.fixtures.played.away || 0)
+                }
+              />
             </Grid>
           </Grid>
 
           <Typography
-            sx={{ fontSize: "16px", textAlign: "right", fontStyle: "italic" }}
+            sx={{
+              fontSize: "16px",
+              textAlign: "right",
+              fontStyle: "italic",
+            }}
           >
-            Founded {founded}
+            Founded {teamData?.founded}
           </Typography>
         </Tile>
       )}

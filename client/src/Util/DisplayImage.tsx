@@ -4,7 +4,7 @@ import { CSSProperties } from "react";
 const url = import.meta.env.VITE_API_URL;
 
 interface DisplayImageProps {
-  src: string | undefined;
+  src: string | undefined | null;
   alt: string | undefined;
   location?: string;
   width?: string;

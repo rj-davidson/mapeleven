@@ -6,13 +6,13 @@ import { Link } from "react-router-dom";
 import Box from "@mui/material/Box";
 
 interface TeamIDTitleProps {
-  slug: string;
-  name: string;
-  country: string;
-  flag: string;
-  leagueSlug?: string;
-  leagueName?: string;
-  leagueLogo?: string;
+  slug: string | undefined;
+  name: string | undefined;
+  country: string | undefined;
+  flag: string | undefined | null;
+  leagueSlug?: string | undefined;
+  leagueName?: string | undefined;
+  leagueLogo?: string | undefined;
 }
 
 const TeamIDTitle: React.FC<TeamIDTitleProps> = ({
