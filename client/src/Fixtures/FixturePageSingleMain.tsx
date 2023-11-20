@@ -123,26 +123,19 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                       event.team.name === data.teams.away.name
                   )
                   .map((event, index) => (
-                    <Typography
-                      variant="body2"
-                      align="center"
-                      key={index}
-                      sx={{
-                        fontSize: "20px",
-                      }}
-                    >
-                      <Box
-                        display={"flex-center"}
-                        justifyContent={"center"}
-                        alignItems={"center"}
-                      >
-                        {`${event.player.name} `}{" "}
-                        <Box ml={1}>
-                          {" "}
-                          <EventTime event={event} />
+                      <Typography variant="subtitle1" align="center" key={index}>
+                        <Box
+                            display={"flex-center"}
+                            justifyContent={"center"}
+                            alignItems={"center"}
+                        >
+                          {`${event.player.name} `}{" "}
+                          <Box ml={1}>
+                            {" "}
+                            <EventTime event={event} />
+                          </Box>
                         </Box>
-                      </Box>
-                    </Typography>
+                      </Typography>
                   ))
               ) : (
                 <Typography variant="body2">No events available.</Typography>
