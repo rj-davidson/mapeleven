@@ -5,7 +5,7 @@ import DisplayImage from "../Util/DisplayImage";
 import TeamIDTitle from "./TeamIDTitle";
 
 interface TeamOppIDCardProps {
-  slug: string;
+  slug: string | undefined;
   name: string;
   badge: string;
   country: string;

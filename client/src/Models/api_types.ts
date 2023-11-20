@@ -123,8 +123,21 @@ export interface APITSGoals {
 }
 
 export interface APITSGoalDetail {
+  total: APITSGoalSubDetail;
+  average: APITSGoalAvgSubDetail;
+  minute: APITSGoalMinuteSplit;
+}
+
+export interface APITSGoalSubDetail {
   home: number;
   away: number;
+  total: number;
+}
+
+export interface APITSGoalAvgSubDetail {
+  home: string;
+  away: string;
+  total: string;
 }
 
 export interface APITSCards {
@@ -173,9 +186,9 @@ export interface APITSPenalty {
 }
 
 interface APICompetitions {
-  League: APILeague;
+  league: APILeague;
   Current: boolean;
-  Stats?: APITeamStats;
+  stats?: APITeamStats;
 }
 
 interface APIStandings {
@@ -335,6 +348,7 @@ interface APIPlayerStatsDefense {
   tackles: number;
   blocks: number;
   interceptions: number;
+  duels_total: number;
   duels_won: number;
   dribbledPast: number;
 }
