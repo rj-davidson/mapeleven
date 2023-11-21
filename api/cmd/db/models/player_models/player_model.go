@@ -1,6 +1,7 @@
 package player_models
 
 import (
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/utils"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"context"
@@ -180,32 +181,13 @@ func NewPlayerModel(client *ent.Client) *PlayerModel {
 
 // CreatePlayer creates a new player.
 func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput) (*ent.Player, error) {
-	fmt.Printf("CreatePlayerMethod")
-	if input.Firstname == "" || input.Lastname == "" {
-		names := strings.Split(input.Name, " ")
-		if len(names) > 1 {
-			if input.Firstname == "" {
-				input.Firstname = strings.Replace(names[0], ".", "", -1)
-			}
-			if input.Lastname == "" {
-				input.Lastname = strings.Join(names[1:], " ")
-			}
-		} else {
-			if input.Firstname == "" {
-				input.Firstname = input.Name
-			} else if input.Lastname == "" {
-				input.Lastname = input.Name
-			}
-		}
-	}
 	p, err := m.client.Player.
 		Create().
 		SetApiFootballId(input.ApiFootballId).
 		SetName(input.Name).
-		//set firstname to the part before the space in the name
 		SetFirstname(input.Firstname).
-		//set lastname to the part after the space in the name
 		SetLastname(input.Lastname).
+		SetSlug(utils.Slugify(input.Name)).
 		SetAge(input.Age).
 		SetHeight(input.Height).
 		SetWeight(input.Weight).
