@@ -8,6 +8,12 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Calendar from 'react-calendar';
 import './Calendar.css';
 
+import Dialog from "@mui/material/Dialog";
+import DialogTitle from "@mui/material/DialogTitle";
+import DialogContent from "@mui/material/DialogContent";
+import DialogActions from "@mui/material/DialogActions";
+
+
 type DaySwitcherProps = {
     onDateChange: (newDate: Date) => void;
 };
@@ -42,6 +48,7 @@ const styles = {
 const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
     const [currentDate, setCurrentDate] = useState(new Date());
     const [isCalendarOpen, setCalendarOpen] = useState(false);
+    const [isDatePickerOpen, setDatePickerOpen] = useState(false);
     const isSmallerThanLG = useMediaQuery("(max-width: 1260px)");
 
     const handleBackwardClick = () => {
@@ -57,7 +64,11 @@ const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
     };
 
     const handleDateTextClick = () => {
-        setCalendarOpen(!isCalendarOpen);
+        setDatePickerOpen(!isDatePickerOpen);
+    };
+
+    const handleCalendarClick = () => {
+        setDatePickerOpen(false);
     };
 
     const options: Intl.DateTimeFormatOptions = {
@@ -103,19 +114,30 @@ const DaySwitcher: React.FC<DaySwitcherProps> = ({ onDateChange }) => {
             <Button sx={styles.arrowButton} onClick={handleForwardClick}>
                 <ChevronRightIcon />
             </Button>
-            {isCalendarOpen && (
-                <Calendar
-                    onChange={(date) => {
-                        setCurrentDate(date as Date);
-                        onDateChange(date as Date);
-                        setCalendarOpen(false);
-                    }}
-                    value={currentDate}
-                    minDate={minDate}
-                    maxDate={maxDate}
-                    tileClassName={tileClassName}
-                />
-            )}
+            <Dialog
+                open={isDatePickerOpen}
+                onClose={() => setDatePickerOpen(false)}
+                maxWidth="sm"
+                fullWidth>
+                <DialogTitle>Select a Date</DialogTitle>
+                <DialogContent>
+                    <Calendar
+                        onChange={(date) => {
+                            setCurrentDate(date as Date);
+                            onDateChange(date as Date);
+                            setCalendarOpen(false);
+                        }}
+                        value={currentDate}
+                        minDate={minDate}
+                        maxDate={maxDate}
+                        tileClassName={tileClassName}
+                        onClickDay={handleCalendarClick}
+                    />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setDatePickerOpen(false)}>Cancel</Button>
+                </DialogActions>
+            </Dialog>
         </Box>
     );
 };
