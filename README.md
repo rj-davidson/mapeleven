@@ -15,12 +15,19 @@ The backend is crafted in [Go](https://golang.org/), using [Fiber](https://gofib
 
 ## Build Instructions
 
-The project is containerized using Docker, so ensure that [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are installed.
+The project is containerized using Docker, so ensure that [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are installed. Also make sure that make has been installed as well. This will be utilized in the command to deploy the project.
 
 The primary command to deploy the project:
 
 ```bash
 make docker-up
+```
+
+To run the client individually ensure that yarn is installed.
+
+The primary command to deploy the client:
+```bash
+yarn run start
 ```
 
 This command builds and starts the Docker containers defined in the Docker Compose files of the project.
