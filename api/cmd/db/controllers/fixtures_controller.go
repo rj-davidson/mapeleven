@@ -3,6 +3,7 @@ package controllers
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/fixture_models"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/utils"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"context"
@@ -55,15 +56,21 @@ type FixtureController struct {
 	httpClient   *http.Client
 	fixtureModel *fixture_models.FixtureModel
 	leagueModel  *models.LeagueModel
+	teamModel    *team_models.TeamModel
+	teamCtrl     *TeamController
 }
 
 func NewFixtureController(entClient *ent.Client) *FixtureController {
 	fm := fixture_models.NewFixtureModel(entClient)
 	lm := models.NewLeagueModel(entClient)
+	tm := team_models.NewTeamModel(entClient)
+	tc := NewTeamController(entClient)
 	return &FixtureController{
 		httpClient:   http.DefaultClient,
 		fixtureModel: fm,
 		leagueModel:  lm,
+		teamModel:    tm,
+		teamCtrl:     tc,
 	}
 }
 
@@ -237,7 +244,7 @@ func (fc *FixtureController) upsertFixture(ctx context.Context, fixtureInput *fi
 	if !existingFixture {
 		return fc.fixtureModel.CreateBaseFixture(ctx, *fixtureInput)
 	} else {
-		// If the fixture exists, we update it
+		fc.handleFixtureTeams(ctx, fixtureInput)
 		updatedFixtureInput := fixture_models.UpdateFixtureInput{
 			Referee:       fixtureInput.Referee,
 			Timezone:      fixtureInput.Timezone,
@@ -250,7 +257,20 @@ func (fc *FixtureController) upsertFixture(ctx context.Context, fixtureInput *fi
 			HomeTeamID:    &fixtureInput.HomeTeamID,
 			AwayTeamID:    &fixtureInput.AwayTeamID,
 		}
-
 		return fc.fixtureModel.UpdateBaseFixture(ctx, updatedFixtureInput)
+	}
+}
+
+func (fc *FixtureController) handleFixtureTeams(ctx context.Context, input *fixture_models.CreateFixtureInput) {
+	// Ensure the home team exists
+	err := fc.teamCtrl.EnsureTeamExists(ctx, input.Season.Year, input.Season.Edges.League.FootballApiId, input.HomeTeamID)
+	if err != nil {
+		fmt.Printf("[Fixture Controller] Error ensuring team exists: %v\n", err)
+	}
+
+	// Ensure the away team exists
+	err = fc.teamCtrl.EnsureTeamExists(ctx, input.Season.Year, input.Season.Edges.League.FootballApiId, input.AwayTeamID)
+	if err != nil {
+		fmt.Printf("[Fixture Controller] Error ensuring team exists: %v\n", err)
 	}
 }

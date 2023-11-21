@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/fixture_models"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"context"
 	"encoding/json"
@@ -19,13 +20,19 @@ type FixtureResponse struct {
 type FixtureDataController struct {
 	httpClient   *http.Client
 	fixtureModel *fixture_models.FixtureModel
+	playerModel  *player_models.PlayerModel
+	playerCtrl   *PlayerController
 }
 
 func NewFixtureDataController(entClient *ent.Client) *FixtureDataController {
 	fm := fixture_models.NewFixtureModel(entClient)
+	pm := player_models.NewPlayerModel(entClient)
+	pc := NewPlayerController(entClient)
 	return &FixtureDataController{
 		httpClient:   http.DefaultClient,
 		fixtureModel: fm,
+		playerModel:  pm,
+		playerCtrl:   pc,
 	}
 }
 
@@ -96,9 +103,28 @@ func (fdc *FixtureDataController) fetchFixtureByID(ctx context.Context, fixtureI
 }
 
 func (fdc *FixtureDataController) writeFixtureData(apiFootballId int, data fixture_models.FixtureDetails, ctx context.Context) error {
+	for _, lineup := range data.Lineups {
+		fdc.handleLineupPlayers(ctx, &lineup)
+	}
+
 	err := fdc.fixtureModel.UpsertFixtureData(apiFootballId, data, ctx)
 	if err != nil {
 		fmt.Printf("Error upserting fixture data: %v", err)
 	}
 	return nil
+}
+
+func (fdc *FixtureDataController) handleLineupPlayers(ctx context.Context, lineup *fixture_models.LineupInfo) {
+	for _, player := range lineup.StartXI {
+		err := fdc.playerCtrl.EnsurePlayerExists(ctx, player.Player.ID)
+		if err != nil {
+			fmt.Printf("[FixtureDataController] Error ensuring player exists: %v", err)
+		}
+	}
+	for _, player := range lineup.Substitutes {
+		err := fdc.playerCtrl.EnsurePlayerExists(ctx, player.Player.ID)
+		if err != nil {
+			fmt.Printf("[FixtureDataController] Error ensuring player exists: %v", err)
+		}
+	}
 }
