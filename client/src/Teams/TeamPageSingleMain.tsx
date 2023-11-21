@@ -6,6 +6,9 @@ import TeamRadarChart from "./TeamRadarChart";
 import TeamStatsWinsPieChart from "./TeamStatsWinsPieChart";
 import TeamStatsGoalsPieChart from "./TeamStatsGoalsPieChart";
 import TeamStatsScoredPieChart from "./TeamStatsScoredPieChart";
+import TeamListPlayers from "./TeamListPlayers";
+import { Tile } from "../Util/TileTS";
+import TeamStatsPenaltyPieChart from "./TeamStatsPenaltyPieChart";
 
 interface TeamPageSingleMainProps {
   goalMinuteSplit: APITSGoalMinuteSplit | undefined;
@@ -39,6 +42,16 @@ const TeamPageSingleMain: React.FC<TeamPageSingleMainProps> = ({
       </Grid>
       <Grid item xs={12} sm={12} md={12} lg={6} width="100%">
         <TeamStatsScoredPieChart teamData={teamData} />
+      </Grid>
+      <Grid item xs={12} sm={12} md={12} lg={6} width="100%">
+        <TeamStatsPenaltyPieChart teamData={teamData} />
+      </Grid>
+      <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
+        <Tile>
+          <TeamListPlayers
+            playerList={teamData?.competitions?.[0].squad.players}
+          />
+        </Tile>
       </Grid>
     </Grid>
   );
