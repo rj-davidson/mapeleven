@@ -78,13 +78,25 @@ interface APITeam {
   logo: string;
   slug: string;
   name: APITeamName;
-  leagueName: string;
+  leagueName?: string;
   badge: string;
   founded?: number;
   nationalTeam?: boolean;
   country?: APICountry;
   competitions?: APICompetitions[];
   players?: APIPlayer[];
+}
+
+interface APISquad {
+  Players: APISquadPlayer[];
+}
+
+interface APISquadPlayer {
+  name: string;
+  slug: string;
+  photo: string;
+  position: string;
+  squadNumber: number;
 }
 
 export interface APITeamStats {
@@ -437,4 +449,7 @@ export {
   APIStanding,
   APIPlayer,
   APIPlayerStats,
+  APISquad,
+  APISquadPlayer,
+  APIFixtureSeason,
 };

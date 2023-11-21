@@ -44,7 +44,7 @@ func (ps *PlayerSerializer) GetPlayerBySlug(ctx context.Context, slug string) (*
 					tq.WithClub().
 						WithSeason(func(sq *ent.SeasonQuery) {
 							sq.WithLeague(func(lq *ent.LeagueQuery) {
-								lq.WithCountry() // Ensure the country is loaded for the league
+								lq.WithCountry()
 							})
 						})
 				})

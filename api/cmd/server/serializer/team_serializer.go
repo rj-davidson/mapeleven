@@ -19,6 +19,8 @@ type APICompetitions struct {
 	LeagueItem APILeague    `json:"league"`
 	Current    bool         `json:"current"`
 	Stats      APITeamStats `json:"stats,omitempty"`
+	Squad      APISquad     `json:"squad,omitempty"`
+	Fixtures   []APIFixture `json:"fixtures,omitempty"`
 }
 
 type APITeamStats struct {
@@ -42,6 +44,29 @@ type APITeam struct {
 	Country      APICountry        `json:"country,omitempty"`
 	Competitions []APICompetitions `json:"competitions,omitempty"`
 	Popularity   int               `json:"popularity,omitempty"`
+}
+
+type APISquad struct {
+	Players []APIPlayer `json:"players"`
+}
+
+type APIPlayer struct {
+	Slug        string `json:"slug"`
+	Name        string `json:"name,omitempty"`
+	Photo       string `json:"photo,omitempty"`
+	Position    string `json:"position,omitempty"`
+	SquadNumber int    `json:"number,omitempty"`
+}
+
+type APIFixture struct {
+	Slug      string    `json:"slug"`
+	HomeTeam  APITeam   `json:"homeTeam"`
+	AwayTeam  APITeam   `json:"awayTeam"`
+	HomeScore int       `json:"homeScore,omitempty"`
+	AwayScore int       `json:"awayScore,omitempty"`
+	League    APILeague `json:"league"`
+	Date      time.Time `json:"date"`
+	Status    string    `json:"status"`
 }
 
 type TeamSerializer struct {
@@ -76,6 +101,8 @@ func (ts *TeamSerializer) SerializeTeam(club *ent.Club) *APITeam {
 			LeagueItem: *li,
 			Current:    t.Edges.Season.Current,
 			Stats:      tsList,
+			Squad:      ts.serializeCompetitionSquad(t.Edges.Squad),
+			Fixtures:   ts.serializeFixtures(t.Edges.AwayFixtures, t.Edges.HomeFixtures),
 		})
 	}
 
@@ -113,6 +140,9 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 		WithCountry().
 		WithTeam(
 			func(q *ent.TeamQuery) {
+				q.WithSquad(func(q *ent.SquadQuery) {
+					q.WithPlayer()
+				})
 				q.WithSeason(
 					func(q *ent.SeasonQuery) {
 						q.Where(season.YearEQ(year.Year())).
@@ -131,6 +161,30 @@ func (ts *TeamSerializer) GetTeamBySlug(ctx context.Context, slug string, season
 				q.WithGoalsStats()
 				q.WithLineups()
 				q.WithPenaltyStats()
+				q.WithAwayFixtures(
+					func(q *ent.FixtureQuery) {
+						q.WithAwayTeam(func(tq *ent.TeamQuery) {
+							tq.WithClub()
+						})
+						q.WithHomeTeam(func(tq *ent.TeamQuery) {
+							tq.WithClub()
+						})
+						q.WithSeason(func(sq *ent.SeasonQuery) {
+							sq.WithLeague()
+						})
+					})
+				q.WithHomeFixtures(
+					func(q *ent.FixtureQuery) {
+						q.WithAwayTeam(func(tq *ent.TeamQuery) {
+							tq.WithClub()
+						})
+						q.WithHomeTeam(func(tq *ent.TeamQuery) {
+							tq.WithClub()
+						})
+						q.WithSeason(func(sq *ent.SeasonQuery) {
+							sq.WithLeague()
+						})
+					})
 			},
 		).
 		First(ctx)
@@ -151,6 +205,9 @@ func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*AP
 		WithCountry().
 		WithTeam(
 			func(q *ent.TeamQuery) {
+				q.WithSquad(func(q *ent.SquadQuery) {
+					q.WithPlayer()
+				})
 				q.WithSeason(
 					func(q *ent.SeasonQuery) {
 						q.Where(season.YearEQ(year.Year())).
@@ -169,6 +226,30 @@ func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*AP
 				q.WithGoalsStats()
 				q.WithLineups()
 				q.WithPenaltyStats()
+				q.WithAwayFixtures(
+					func(q *ent.FixtureQuery) {
+						q.WithAwayTeam(func(tq *ent.TeamQuery) {
+							tq.WithClub()
+						})
+						q.WithHomeTeam(func(tq *ent.TeamQuery) {
+							tq.WithClub()
+						})
+						q.WithSeason(func(sq *ent.SeasonQuery) {
+							sq.WithLeague()
+						})
+					})
+				q.WithHomeFixtures(
+					func(q *ent.FixtureQuery) {
+						q.WithAwayTeam(func(tq *ent.TeamQuery) {
+							tq.WithClub()
+						})
+						q.WithHomeTeam(func(tq *ent.TeamQuery) {
+							tq.WithClub()
+						})
+						q.WithSeason(func(sq *ent.SeasonQuery) {
+							sq.WithLeague()
+						})
+					})
 			}).
 		All(ctx)
 
@@ -188,4 +269,68 @@ func (ts *TeamSerializer) GetTeams(ctx context.Context, seasonStr string) ([]*AP
 	})
 
 	return teamItems, nil
+}
+
+func (ts *TeamSerializer) serializeCompetitionSquad(squads []*ent.Squad) APISquad {
+	var players []APIPlayer
+	for _, s := range squads {
+		players = append(players, ts.serializeSquadPlayer(s))
+	}
+
+	return APISquad{Players: players}
+}
+
+func (ts *TeamSerializer) serializeSquadPlayer(s *ent.Squad) APIPlayer {
+	return APIPlayer{
+		Name:        s.Edges.Player.Name,
+		Slug:        s.Edges.Player.Slug,
+		Photo:       s.Edges.Player.Photo,
+		Position:    s.Position,
+		SquadNumber: s.Number,
+	}
+}
+
+func (ts *TeamSerializer) serializeFixtures(home []*ent.Fixture, away []*ent.Fixture) []APIFixture {
+	var fixtures []APIFixture
+	for _, f := range home {
+		fixtures = append(fixtures, ts.serializeFixture(f))
+	}
+	for _, f := range away {
+		fixtures = append(fixtures, ts.serializeFixture(f))
+	}
+
+	return fixtures
+}
+
+func (ts *TeamSerializer) serializeFixture(f *ent.Fixture) APIFixture {
+	// If the fixture status is not FT AET or PEN, then no need to get the score
+	var homeScore int
+	var awayScore int
+	if f.Status == "FT" || f.Status == "AET" || f.Status == "PEN" {
+		homeScore = f.HomeTeamScore
+		awayScore = f.AwayTeamScore
+	}
+	return APIFixture{
+		Slug: f.Slug,
+		HomeTeam: APITeam{
+			Slug:  f.Edges.HomeTeam.Edges.Club.Slug,
+			Name:  APITeamName{Long: f.Edges.HomeTeam.Edges.Club.Name, Short: f.Edges.HomeTeam.Edges.Club.Code},
+			Badge: f.Edges.HomeTeam.Edges.Club.Logo,
+		},
+		AwayTeam: APITeam{
+			Slug:  f.Edges.HomeTeam.Edges.Club.Slug,
+			Name:  APITeamName{Long: f.Edges.HomeTeam.Edges.Club.Name, Short: f.Edges.HomeTeam.Edges.Club.Code},
+			Badge: f.Edges.HomeTeam.Edges.Club.Logo,
+		},
+		HomeScore: homeScore,
+		AwayScore: awayScore,
+		League: APILeague{
+			Slug: f.Edges.Season.Edges.League.Slug,
+			Name: f.Edges.Season.Edges.League.Name,
+			Type: string(f.Edges.Season.Edges.League.Type),
+			Logo: f.Edges.Season.Edges.League.Logo,
+		},
+		Date:   f.Date,
+		Status: f.Status,
+	}
 }
