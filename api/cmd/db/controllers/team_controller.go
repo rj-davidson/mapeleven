@@ -14,14 +14,15 @@ type TeamIdPackage struct {
 }
 
 type TeamController struct {
-	client    *http.Client
-	teamModel *team_models.TeamModel
+	httpClient *http.Client
+	teamModel  *team_models.TeamModel
 }
 
-func NewTeamController(teamModel *team_models.TeamModel) *TeamController {
+func NewTeamController(entClient *ent.Client) *TeamController {
+	tm := team_models.NewTeamModel(entClient)
 	return &TeamController{
-		client:    &http.Client{},
-		teamModel: teamModel,
+		httpClient: http.DefaultClient,
+		teamModel:  tm,
 	}
 }
 
@@ -45,12 +46,10 @@ func (tc *TeamController) GetTeam(ctx context.Context, year, apiFootballLeagueId
 }
 
 func (tc *TeamController) fetchTeamByID(ctx context.Context, seasonIdentifiers TeamIdPackage) error {
-	// TODO: Fetch Statistics
 	return tc.parseTeamResponse(ctx, seasonIdentifiers)
 }
 
 func (tc *TeamController) parseTeamResponse(ctx context.Context, seasonIdentifiers TeamIdPackage) error {
-	// TODO: Parse Statistics (header should be of type data []byte
 	return tc.upsertTeam(ctx, seasonIdentifiers)
 }
 

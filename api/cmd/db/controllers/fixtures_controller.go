@@ -16,11 +16,6 @@ import (
 	"time"
 )
 
-type FixtureController struct {
-	client       *http.Client
-	fixtureModel *fixture_models.FixtureModel
-}
-
 type APIFixtureResponse struct {
 	Response []struct {
 		Fixture struct {
@@ -56,17 +51,26 @@ type APIFixtureResponse struct {
 	} `json:"response"`
 }
 
-func NewFixtureController(fixtureModel *fixture_models.FixtureModel) *FixtureController {
+type FixtureController struct {
+	httpClient   *http.Client
+	fixtureModel *fixture_models.FixtureModel
+	leagueModel  *models.LeagueModel
+}
+
+func NewFixtureController(entClient *ent.Client) *FixtureController {
+	fm := fixture_models.NewFixtureModel(entClient)
+	lm := models.NewLeagueModel(entClient)
 	return &FixtureController{
-		client:       &http.Client{},
-		fixtureModel: fixtureModel,
+		httpClient:   http.DefaultClient,
+		fixtureModel: fm,
+		leagueModel:  lm,
 	}
 }
 
-func (fc *FixtureController) InitializeFixtures(lm *models.LeagueModel, ctx context.Context) error {
+func (fc *FixtureController) InitializeFixtures(ctx context.Context) error {
 	fmt.Println("Initializing fixtures...")
 	// Get all leagues from the database
-	leagues, err := lm.ListLeagues(ctx)
+	leagues, err := fc.leagueModel.ListLeagues(ctx)
 	if err != nil {
 		return err
 	}
@@ -74,7 +78,7 @@ func (fc *FixtureController) InitializeFixtures(lm *models.LeagueModel, ctx cont
 	// Fetch and process fixtures for each league
 	for _, league := range leagues {
 		// Get the current season for the league
-		season, err := lm.GetCurrentSeasonForLeague(ctx, league)
+		season, err := fc.leagueModel.GetCurrentSeasonForLeague(ctx, league)
 		fmt.Println("Fetching fixtures for league: ", league.Name)
 		_, err = fc.fetchFixturesByLeague(ctx, league.FootballApiId, season)
 		if err != nil {
@@ -110,7 +114,7 @@ func (fc *FixtureController) fetchFixturesByLeague(ctx context.Context, leagueID
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
-	resp, err := fc.client.Do(req)
+	resp, err := fc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +140,7 @@ func (fc *FixtureController) fetchFixturesByIds(ctx context.Context, fixtureIDs 
 		req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 		req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
-		resp, err := fc.client.Do(req)
+		resp, err := fc.httpClient.Do(req)
 		if err != nil {
 			return nil, err
 		}
@@ -167,7 +171,7 @@ func (fc *FixtureController) fetchFixtureById(ctx context.Context, fixtureID int
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
-	resp, err := fc.client.Do(req)
+	resp, err := fc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

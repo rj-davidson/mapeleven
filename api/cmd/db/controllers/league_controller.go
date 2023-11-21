@@ -16,7 +16,7 @@ import (
 )
 
 type LeagueController struct {
-	client      *http.Client
+	httpClient  *http.Client
 	leagueModel *models.LeagueModel
 	seasonModel *models.SeasonModel
 }
@@ -36,11 +36,13 @@ type APILeague struct {
 	Logo string      `json:"logo"`
 }
 
-func NewLeagueController(leagueModel *models.LeagueModel, seasonModel *models.SeasonModel) *LeagueController {
+func NewLeagueController(entClient *ent.Client) *LeagueController {
+	lm := models.NewLeagueModel(entClient)
+	sm := models.NewSeasonModel(entClient)
 	return &LeagueController{
-		client:      &http.Client{},
-		leagueModel: leagueModel,
-		seasonModel: seasonModel,
+		httpClient:  http.DefaultClient,
+		leagueModel: lm,
+		seasonModel: sm,
 	}
 }
 
@@ -50,7 +52,7 @@ func (lc *LeagueController) InitializeLeagues(leagueIDs []int, ctx context.Conte
 		fmt.Println("Initializing league with FootballApiId: ", leagueID)
 		err := lc.fetchLeagueByID(ctx, leagueID)
 		if err != nil {
-			fmt.Errorf("fetch league with FootballApiId %d: %w", leagueID, err)
+			fmt.Printf("fetch league with FootballApiId %d: %w", leagueID, err)
 		}
 	}
 	fmt.Println("[ Finished initializing leagues ]")
@@ -67,7 +69,7 @@ func (lc *LeagueController) fetchLeagueByID(ctx context.Context, leagueID int) e
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
-	resp, err := lc.client.Do(req)
+	resp, err := lc.httpClient.Do(req)
 	if err != nil {
 		return err
 	}

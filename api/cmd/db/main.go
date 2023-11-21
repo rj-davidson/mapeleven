@@ -2,12 +2,8 @@ package main
 
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/controllers"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/fixture_models"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/player_models/player_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models"
-	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models/team_models/team_stats"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/migrate"
 	"context"
@@ -119,76 +115,63 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	// Initialize scheduler
 	s := gocron.NewScheduler(time.UTC)
 
-	// Model Declaration
-	seasonModel := models.NewSeasonModel(client)
-	countryModel := models.NewCountryModel(client)
-	leagueModel := models.NewLeagueModel(client)
-	clubModel := models.NewClubModel(client)
-	teamModel := team_models.NewTeamModel(client)
-	teamStatsModel := team_stats.NewTeamStatsModel(client)
-	standingsModel := models.NewStandingsModel(client)
-	fixturesModel := fixture_models.NewFixtureModel(client)
-	playerModel := player_models.NewPlayerModel(client)
-	squadModel := team_models.NewSquadModel(client)
-	playerStatsModel := player_stats.NewPlayerStatsModel(client)
-
 	if initialize {
 		// Country Initialization
-		fetchCountries(countryModel)
+		fetchCountries(client)
 
 		// SeasonID Initialization
-		fetchLeagues(leagueModel, seasonModel)
+		fetchLeagues(client)
 
 		// Standings Initialization
-		fetchStandings(standingsModel, clubModel, leagueModel, teamModel)
+		fetchStandings(client)
 
 		// Fixtures Initialization
-		fetchFixtures(fixturesModel, leagueModel)
+		fetchFixtures(client)
 
 		// Team Stats Initialization
-		fetchTeamStats(teamModel, teamStatsModel)
+		fetchTeamStats(client)
 
 		// Fetch Squads
-		fetchSquads(squadModel, playerModel, teamModel, playerStatsModel)
+		fetchSquads(client)
 
 		// Fetch Fixture Data
-		fetchFixtureData(fixturesModel)
+		fetchFixtureData(client)
 
 		if runScheduler {
 			// Schedule cron jobs
-			_, err := s.Every(12).Hours().At("00:00").Do(fetchCountries, countryModel)
+			_, err := s.Every(12).Hours().At("00:00").Do(fetchCountries, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
-			_, err = s.Every(12).Hours().At("00:00").Do(fetchLeagues, leagueModel)
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchLeagues, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
-			_, err = s.Every(12).Hours().At("00:00").Do(fetchStandings, standingsModel, clubModel)
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchStandings, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
-			_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtures, fixturesModel)
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtures, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
-			_, err = s.Every(12).Hours().At("00:00").Do(fetchTeamStats, teamModel, teamStatsModel)
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchTeamStats, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
-			_, err = s.Every(12).Hours().At("00:00").Do(fetchSquads, squadModel, playerModel, teamModel, playerStatsModel)
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchSquads, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
-			_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtureData, fixturesModel)
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtureData, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
-			_, err = s.Every(150).Seconds().At("00:00").Do(fetchTodaysFixtures, fixturesModel)
+			_, err = s.Every(150).Seconds().At("00:00").Do(fetchTodaysFixtures, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
-			_, err = s.Every(45).Seconds().At("00:00").Do(fetchLiveFixtures, fixturesModel)
+			_, err = s.Every(45).Seconds().At("00:00").Do(fetchLiveFixtures, client)
 			if err != nil {
 				fmt.Printf("error scheduling job: %v", err)
 			}
@@ -196,19 +179,19 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 	}
 
 	if devRun {
-		fetchSquads(squadModel, playerModel, teamModel, playerStatsModel)
+		fetchSquads(client)
 	}
 }
 
-func fetchCountries(countryModel *models.CountryModel) {
-	countryController := controllers.NewCountryController(countryModel)
+func fetchCountries(client *ent.Client) {
+	countryController := controllers.NewCountryController(client)
 	err := countryController.InitializeCountries()
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func fetchLeagues(leagueModel *models.LeagueModel, seasonModel *models.SeasonModel) {
+func fetchLeagues(client *ent.Client) {
 	championsLeagueID := 2
 	premierLeagueID := 39
 	ligue1ID := 71
@@ -217,7 +200,7 @@ func fetchLeagues(leagueModel *models.LeagueModel, seasonModel *models.SeasonMod
 	mlsID := 253
 	leagueIDs := []int{premierLeagueID, mlsID, championsLeagueID, ligue1ID, bundesligaID, laLigaID}
 
-	leagueController := controllers.NewLeagueController(leagueModel, seasonModel)
+	leagueController := controllers.NewLeagueController(client)
 	err := leagueController.InitializeLeagues(leagueIDs, context.Background())
 	if err != nil {
 		log.Fatal(err)
@@ -225,28 +208,27 @@ func fetchLeagues(leagueModel *models.LeagueModel, seasonModel *models.SeasonMod
 }
 
 // Fetches standings from API and saves them to the database
-func fetchStandings(standingsModel *models.StandingsModel, clubModel *models.ClubModel, leagueModel *models.LeagueModel, teamModel *team_models.TeamModel) {
-	clubController := controllers.NewClubController(clubModel)
-	teamController := controllers.NewTeamController(teamModel)
-	standingsController := controllers.NewStandingsController(standingsModel, clubController, teamController)
-	err := standingsController.InitializeStandings(leagueModel, context.Background())
+func fetchStandings(client *ent.Client) {
+	standingsController := controllers.NewStandingsController(client)
+	err := standingsController.InitializeStandings(context.Background())
 	if err != nil {
 		log.Printf("error initializing standings: %v", err)
 	}
 }
 
 // Fetches Fixtures by league from API and saves them to the database
-func fetchFixtures(fixturesModel *fixture_models.FixtureModel, leagueModel *models.LeagueModel) {
-	fixtureController := controllers.NewFixtureController(fixturesModel)
-	err := fixtureController.InitializeFixtures(leagueModel, context.Background())
+func fetchFixtures(client *ent.Client) {
+	fixtureController := controllers.NewFixtureController(client)
+	err := fixtureController.InitializeFixtures(context.Background())
 	if err != nil {
 		log.Printf("error initializing fixtures: %v", err)
 	}
 }
 
-func fetchTeamStats(teamModel *team_models.TeamModel, teamStatsModel *team_stats.TeamStatsModel) {
-	teamStatsController := controllers.NewTeamStatsController(teamStatsModel)
-	teams, err := teamModel.ListAll(context.Background())
+func fetchTeamStats(client *ent.Client) {
+	teamStatsController := controllers.NewTeamStatsController(client)
+	tm := team_models.NewTeamModel(client)
+	teams, err := tm.ListAll(context.Background())
 	if err != nil {
 		log.Printf("error fetching teams: %v", err)
 		return
@@ -257,16 +239,17 @@ func fetchTeamStats(teamModel *team_models.TeamModel, teamStatsModel *team_stats
 	}
 }
 
-func fetchSquads(squadModel *team_models.SquadModel, playerModel *player_models.PlayerModel, teamModel *team_models.TeamModel, playerstatsModel *player_stats.PlayerStatsModel) {
+func fetchSquads(client *ent.Client) {
 	fmt.Println("Fetching Squads...")
 
-	teams, err := teamModel.ListAll(context.Background())
+	tm := team_models.NewTeamModel(client)
+	teams, err := tm.ListAll(context.Background())
 	if err != nil {
 		log.Printf("Error fetching teams: %v", err)
 		return
 	}
 
-	squadController := controllers.NewSquadController(squadModel, playerModel, playerstatsModel)
+	squadController := controllers.NewSquadController(client)
 	err = squadController.InitializeSquads(teams, context.Background())
 	if err != nil {
 		log.Printf("Error initializing squads: %v", err)
@@ -274,9 +257,9 @@ func fetchSquads(squadModel *team_models.SquadModel, playerModel *player_models.
 	fmt.Println("Squads successfully loaded.")
 }
 
-func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
+func fetchFixtureData(client *ent.Client) {
 	fmt.Println("Fetching fixture data...")
-	fixtureDataController := controllers.NewFixtureDataController(fixtureModel)
+	fixtureDataController := controllers.NewFixtureDataController(client)
 	err := fixtureDataController.FetchFixtures(context.Background())
 	if err != nil {
 		log.Printf("Error fetching fixture data: %v", err)
@@ -284,11 +267,12 @@ func fetchFixtureData(fixtureModel *fixture_models.FixtureModel) {
 	fmt.Println("Fixture data successfully loaded.")
 }
 
-func fetchTodaysFixtures(fixtureModel *fixture_models.FixtureModel) error {
+func fetchTodaysFixtures(client *ent.Client) error {
 	fmt.Println("Fetching today's fixtures...")
-	fc := controllers.NewFixtureController(fixtureModel)
-	fdc := controllers.NewFixtureDataController(fixtureModel)
-	todaysFixtures, err := fixtureModel.ListTodaysFixtures(context.Background())
+	fc := controllers.NewFixtureController(client)
+	fdc := controllers.NewFixtureDataController(client)
+	fm := fixture_models.NewFixtureModel(client)
+	todaysFixtures, err := fm.ListTodaysFixtures(context.Background())
 	if err != nil {
 		fmt.Printf("Error fetching today's fixtures: %v", err)
 	}
@@ -304,11 +288,12 @@ func fetchTodaysFixtures(fixtureModel *fixture_models.FixtureModel) error {
 	return nil
 }
 
-func fetchLiveFixtures(fixtureModel *fixture_models.FixtureModel) error {
+func fetchLiveFixtures(client *ent.Client) error {
 	fmt.Println("Fetching live fixtures...")
-	fc := controllers.NewFixtureController(fixtureModel)
-	fdc := controllers.NewFixtureDataController(fixtureModel)
-	liveFixtures, err := fixtureModel.ListLiveFixtures(context.Background())
+	fc := controllers.NewFixtureController(client)
+	fdc := controllers.NewFixtureDataController(client)
+	fm := fixture_models.NewFixtureModel(client)
+	liveFixtures, err := fm.ListLiveFixtures(context.Background())
 	if err != nil {
 		fmt.Printf("Error fetching live fixtures: %v", err)
 	}

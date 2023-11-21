@@ -28,14 +28,15 @@ type TeamStatsResponse struct {
 }
 
 type TeamStatsController struct {
-	client         *http.Client
+	httpClient     *http.Client
 	teamStatsModel *team_stats.TeamStatsModel
 }
 
-func NewTeamStatsController(teamStatsModel *team_stats.TeamStatsModel) *TeamStatsController {
+func NewTeamStatsController(entClient *ent.Client) *TeamStatsController {
+	tsm := team_stats.NewTeamStatsModel(entClient)
 	return &TeamStatsController{
-		client:         &http.Client{},
-		teamStatsModel: teamStatsModel,
+		httpClient:     http.DefaultClient,
+		teamStatsModel: tsm,
 	}
 }
 
@@ -65,7 +66,7 @@ func (tsc *TeamStatsController) FetchTeamStatsByID(ctx context.Context, team *en
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
-	resp, err := tsc.client.Do(req)
+	resp, err := tsc.httpClient.Do(req)
 	if err != nil {
 		return err
 	}

@@ -14,18 +14,24 @@ import (
 )
 
 type SquadController struct {
-	client      *http.Client
+	httpClient  *http.Client
 	squadModel  *team_models.SquadModel
 	playerModel *player_models.PlayerModel
 	psModel     *player_stats.PlayerStatsModel
+	playerCtrl  *PlayerController
 }
 
-func NewSquadController(squadModel *team_models.SquadModel, playerModel *player_models.PlayerModel, psModel *player_stats.PlayerStatsModel) *SquadController {
+func NewSquadController(entClient *ent.Client) *SquadController {
+	sm := team_models.NewSquadModel(entClient)
+	pm := player_models.NewPlayerModel(entClient)
+	psm := player_stats.NewPlayerStatsModel(entClient)
+	pc := NewPlayerController(entClient)
 	return &SquadController{
-		client:      &http.Client{},
-		squadModel:  squadModel,
-		playerModel: playerModel,
-		psModel:     psModel,
+		httpClient:  http.DefaultClient,
+		squadModel:  sm,
+		playerModel: pm,
+		psModel:     psm,
+		playerCtrl:  pc,
 	}
 }
 
@@ -52,7 +58,7 @@ func (sc *SquadController) FetchSquadByTeam(ctx context.Context, team *ent.Team)
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
-	resp, err := sc.client.Do(req)
+	resp, err := sc.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -75,8 +81,7 @@ func (sc *SquadController) parseSquadResponse(data []byte, team *ent.Team) error
 
 	for _, teamResponse := range squadResponse.Response {
 		for _, player := range teamResponse.Players {
-			pc := NewPlayerController(sc.playerModel, sc.psModel)
-			err = pc.EnsurePlayerExists(context.Background(), player.ApiFootballId)
+			err = sc.playerCtrl.EnsurePlayerExists(context.Background(), player.ApiFootballId)
 			err = sc.upsertSquadPlayer(team, player)
 			if err != nil {
 				return err

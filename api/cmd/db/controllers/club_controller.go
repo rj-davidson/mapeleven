@@ -3,6 +3,7 @@ package controllers
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/models"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/cmd/db/utils"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -13,8 +14,8 @@ import (
 )
 
 type ClubController struct {
-	client    *http.Client
-	clubModel *models.ClubModel
+	httpClient *http.Client
+	clubModel  *models.ClubModel
 }
 
 type APIClub struct {
@@ -23,10 +24,11 @@ type APIClub struct {
 	} `json:"response"`
 }
 
-func NewClubController(clubModel *models.ClubModel) *ClubController {
+func NewClubController(entClient *ent.Client) *ClubController {
+	cm := models.NewClubModel(entClient)
 	return &ClubController{
-		client:    &http.Client{},
-		clubModel: clubModel,
+		httpClient: http.DefaultClient,
+		clubModel:  cm,
 	}
 }
 
@@ -52,7 +54,7 @@ func (cc *ClubController) fetchClubByID(ctx context.Context, clubID int) error {
 	req.Header.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
 
-	resp, err := cc.client.Do(req)
+	resp, err := cc.httpClient.Do(req)
 	if err != nil {
 		return err
 	}

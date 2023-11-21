@@ -17,14 +17,15 @@ type FixtureResponse struct {
 }
 
 type FixtureDataController struct {
-	client       *http.Client
+	httpClient   *http.Client
 	fixtureModel *fixture_models.FixtureModel
 }
 
-func NewFixtureDataController(fixtureModel *fixture_models.FixtureModel) *FixtureDataController {
+func NewFixtureDataController(entClient *ent.Client) *FixtureDataController {
+	fm := fixture_models.NewFixtureModel(entClient)
 	return &FixtureDataController{
-		client:       &http.Client{},
-		fixtureModel: fixtureModel,
+		httpClient:   http.DefaultClient,
+		fixtureModel: fm,
 	}
 }
 
@@ -71,7 +72,7 @@ func (fdc *FixtureDataController) fetchFixtureByID(ctx context.Context, fixtureI
 	req.Header.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
 
-	resp, err := fdc.client.Do(req)
+	resp, err := fdc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

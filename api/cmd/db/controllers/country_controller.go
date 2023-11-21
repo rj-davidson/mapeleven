@@ -15,37 +15,30 @@ import (
 )
 
 type CountryController struct {
-	client       *http.Client
+	httpClient   *http.Client
 	countryModel *models.CountryModel
 }
 
-func NewCountryController(countryModel *models.CountryModel) *CountryController {
+func NewCountryController(entClient *ent.Client) *CountryController {
+	cm := models.NewCountryModel(entClient)
 	return &CountryController{
-		client:       http.DefaultClient,
-		countryModel: countryModel,
+		httpClient:   http.DefaultClient,
+		countryModel: cm,
 	}
 }
 
 func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (ent.Country, error) {
-	// Convert the code to uppercase if it is not empty
 	c.Code = strings.ToUpper(c.Code)
-
-	// If the code is empty, use the first 3 letters of the name
 	if c.Code == "" {
 		c.Code = strings.ToUpper(c.Name[:3])
 	}
-
-	// Download the flag and set the local path to the flag
 	if c.Flag != "" {
 		c.Flag, _ = utils.DownloadImageIfNeeded(c.Flag,
 			fmt.Sprintf("images/flags/%s%s", c.Code, filepath.Ext(c.Flag)))
 	}
-
-	// Search for country by code in Ent DB
 	country, err := cc.countryModel.GetCountryByName(c.Name)
 	if country == nil {
 		fmt.Printf("DB[countries] -> Adding <   %s   > \n", c.Name)
-		// Country does not exist, create it
 		createInput := &models.CreateCountryInput{
 			Name: c.Name,
 			Code: c.Code,
@@ -56,7 +49,6 @@ func (cc *CountryController) UpsertCountry(c models.CreateCountryInput) (ent.Cou
 			return ent.Country{}, err
 		}
 	} else {
-		// Country exists, update it
 		updateInput := &models.UpdateCountryInput{
 			Code: c.Code,
 			Name: c.Name,
@@ -127,7 +119,7 @@ func (cc *CountryController) GetAllCountryData(ctx context.Context) ([]byte, err
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
-	resp, err := cc.client.Do(req)
+	resp, err := cc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}

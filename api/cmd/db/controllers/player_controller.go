@@ -36,35 +36,30 @@ type LeaguePlayerResponse struct {
 		Statistics []player_stats.PlayerStats `json:"statistics"`
 	} `json:"response"`
 }
-
-// Player wraps PlayerInfo and includes a slice of Statistics.
 type Player struct {
 	Player     PlayerInfo                 `json:"player"`
 	Statistics []player_stats.PlayerStats `json:"statistics"`
 }
-
-// PlayerResponse is the expected structure of the JSON response.
 type PlayerResponse struct {
 	Results  int      `json:"results"`
 	Response []Player `json:"response"`
 }
-
-// PlayerController manages HTTP requests for player data.
 type PlayerController struct {
-	client      *http.Client
+	httpClient  *http.Client
 	playerModel *player_models.PlayerModel
 	psModel     *player_stats.PlayerStatsModel
 }
 
-func NewPlayerController(playerModel *player_models.PlayerModel, psModel *player_stats.PlayerStatsModel) *PlayerController {
+func NewPlayerController(entClient *ent.Client) *PlayerController {
+	pm := player_models.NewPlayerModel(entClient)
+	psm := player_stats.NewPlayerStatsModel(entClient)
 	return &PlayerController{
-		client:      &http.Client{},
-		playerModel: playerModel,
-		psModel:     psModel,
+		httpClient:  http.DefaultClient,
+		playerModel: pm,
+		psModel:     psm,
 	}
 }
 
-// EnsurePlayerExists checks if a player exists and fetches their data if not.
 func (pc *PlayerController) EnsurePlayerExists(ctx context.Context, apiFootballId int) error {
 	exists := pc.playerModel.Exists(ctx, apiFootballId)
 	if !exists {
@@ -76,7 +71,6 @@ func (pc *PlayerController) EnsurePlayerExists(ctx context.Context, apiFootballI
 	return nil
 }
 
-// fetchPlayerByID makes an HTTP request to fetch player data by ID.
 func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) error {
 	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?id=%d&season=2023", playerID)
 
@@ -88,7 +82,7 @@ func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) e
 	req.Header.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
 
-	resp, err := pc.client.Do(req)
+	resp, err := pc.httpClient.Do(req)
 	if err != nil {
 		return err
 	}
@@ -106,7 +100,6 @@ func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) e
 	return pc.parsePlayerResponse(ctx, data, playerID)
 }
 
-// parsePlayerResponse parses the JSON response into the PlayerResponse struct.
 func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte, playerID int) error {
 	var response PlayerResponse
 	if err := json.Unmarshal(data, &response); err != nil {
@@ -141,7 +134,6 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 	}
 	fmt.Printf("Created or updated player: %s\n", p.Name)
 
-	// Handle player statistics
 	for _, stat := range playerData.Statistics {
 		if err := pc.upsertPlayerStats(ctx, p, stat); err != nil {
 			return err
@@ -151,7 +143,6 @@ func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte
 	return nil
 }
 
-// upsertPlayer inserts or updates a player in the database.
 func (pc *PlayerController) upsertPlayer(ctx context.Context, input player_models.CreatePlayerInput) (*ent.Player, error) {
 	var p *ent.Player
 	var err error
@@ -210,7 +201,7 @@ func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID 
 	req.Header.Add("X-RapidAPI-Host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("X-RapidAPI-Key", viper.GetString("API_KEY"))
 
-	resp, err := pc.client.Do(req)
+	resp, err := pc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -221,7 +212,6 @@ func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID 
 		return nil, err
 	}
 
-	// Unmarshal data to get player IDs
 	var leaguePlayerResponse LeaguePlayerResponse
 	if err := json.Unmarshal(body, &leaguePlayerResponse); err != nil {
 		return nil, err
@@ -243,7 +233,6 @@ func (pc *PlayerController) FetchPlayersByLeague(ctx context.Context, leagueID i
 		return err
 	}
 
-	// Ensure each player exists in the database
 	for _, playerID := range playerIDs {
 		err := pc.EnsurePlayerExists(ctx, playerID)
 		if err != nil {
@@ -254,7 +243,6 @@ func (pc *PlayerController) FetchPlayersByLeague(ctx context.Context, leagueID i
 	return nil
 }
 
-// downloadPhotoIfNeeded downloads a player's photo if it is not already present.
 func (pc *PlayerController) downloadPhotoIfNeeded(p *PlayerInfo) error {
 	if p.Photo != "" {
 		photoLocation, err := utils.DownloadImageIfNeeded(

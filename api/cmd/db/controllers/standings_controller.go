@@ -71,36 +71,42 @@ type APIStandingsResponse struct {
 }
 
 type StandingsController struct {
-	client         *http.Client
+	httpClient     *http.Client
 	standingsModel *models.StandingsModel
+	leagueModel    *models.LeagueModel
 	clubController *ClubController
 	teamController *TeamController
 }
 
-func NewStandingsController(standingsModel *models.StandingsModel, clubController *ClubController, teamController *TeamController) *StandingsController {
+func NewStandingsController(entClient *ent.Client) *StandingsController {
+	sm := models.NewStandingsModel(entClient)
+	cc := NewClubController(models.NewClubModel(entClient))
+	lm := models.NewLeagueModel(entClient)
+	tc := NewTeamController(entClient)
 	return &StandingsController{
-		client:         &http.Client{},
-		standingsModel: standingsModel,
-		clubController: clubController,
-		teamController: teamController,
+		httpClient:     http.DefaultClient,
+		leagueModel:    lm,
+		standingsModel: sm,
+		clubController: cc,
+		teamController: tc,
 	}
 }
 
-func (sc *StandingsController) InitializeStandings(lm *models.LeagueModel, ctx context.Context) error {
+func (sc *StandingsController) InitializeStandings(ctx context.Context) error {
 	fmt.Println("Initializing standings...")
 
-	leagues, err := lm.ListLeagues(ctx)
+	leagues, err := sc.leagueModel.ListLeagues(ctx)
 	if err != nil {
 		return err
 	}
 
 	// Fetch and process standings for each league
 	for _, l := range leagues {
-		s, err := lm.GetCurrentSeasonForLeague(ctx, l)
+		s, err := sc.leagueModel.GetCurrentSeasonForLeague(ctx, l)
 		fmt.Println("Fetching standings for league: ", l.Name)
 		_, err = sc.FetchStandingsByLeague(ctx, l, s)
 		if err != nil {
-			fmt.Errorf("fetch standings for league %s: %w", league.Name, err)
+			fmt.Printf("fetch standings for league %s: %w", league.Name, err)
 		}
 	}
 
@@ -118,7 +124,7 @@ func (sc *StandingsController) FetchStandingsByLeague(ctx context.Context, l *en
 	req.Header.Add("x-rapidapi-host", "api-football-v1.p.rapidapi.com")
 	req.Header.Add("x-rapidapi-key", viper.GetString("API_KEY"))
 
-	resp, err := sc.client.Do(req)
+	resp, err := sc.httpClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
