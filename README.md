@@ -69,13 +69,20 @@ Nginx configuration is beyond the scope of this README. Please consult the offic
 Our project makes use of the following key external libraries:
 
 #### Frontend
+* [D3](https://d3js.org/)
+* [ESLint](https://eslint.org/)
 * [React](https://reactjs.org/)
 * [MUI](https://mui.com/)
+* [Prettier](https://prettier.io/)
+* [TypeScript](https://www.typescriptlang.org/)
 * [Vite](https://vitejs.dev/)
+* [Yarn](https://yarnpkg.com)
 
 #### Backend
-* [Ent](https://entgo.io/)
-* [Fiber](https://gofiber.io/)
+* [Ent](https://entgo.io/ent)
+* [GoCron](https://github.com/go-co-op/gocron)
+* [Fiber](https://github.com/gofiber/fiber/v2)
+* [Viper](https://github.com/spf13/viper)
 
 ## User Usage
 
