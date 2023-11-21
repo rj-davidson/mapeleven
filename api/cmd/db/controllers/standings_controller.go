@@ -80,7 +80,7 @@ type StandingsController struct {
 
 func NewStandingsController(entClient *ent.Client) *StandingsController {
 	sm := models.NewStandingsModel(entClient)
-	cc := NewClubController(models.NewClubModel(entClient))
+	cc := NewClubController(entClient)
 	lm := models.NewLeagueModel(entClient)
 	tc := NewTeamController(entClient)
 	return &StandingsController{
