@@ -189,6 +189,11 @@ interface APICompetitions {
   league: APILeague;
   Current: boolean;
   stats?: APITeamStats;
+  squad: APITeamSquad;
+}
+
+interface APITeamSquad {
+  players?: APIPlayer[];
 }
 
 interface APIStandings {
