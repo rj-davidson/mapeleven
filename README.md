@@ -1,92 +1,86 @@
-# MapEleven
+# mapeleven
 
+## Project Description
+mapeleven is a comprehensive, soccer-focused web application that provides users with access to live scores, club, league, player and fixture info. The data is presented through a variety of visual techniques, enhancing the overall user experience. The user-friendly interface, complete with a search bar and a date selection feature, allows users to effortlessly search for players, teams, and leagues, or check out upcoming and past fixtures.
 
+## Technical Details
 
-## Getting started
+### Frontend
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+The frontend is built with [ReactJS](https://reactjs.org/), complemented by [TypeScript](https://www.typescriptlang.org/) and Javascript, along with [Vite](https://vitejs.dev/) as a build tool, and [Yarn](https://yarnpkg.com) as a package manager. For the interface, the [MUI](https://mui.com/) library is used for creating a robust and responsive UI.
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+### Backend
 
-## Add your files
+The backend is crafted in [Go](https://golang.org/), using [Fiber](https://gofiber.io/) as a web framework, and [Ent](https://entgo.io/) as an ORM. Data is stored in a PostgreSQL database.
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+## Build Instructions
 
+The project is containerized using Docker, so ensure that [Docker](https://www.docker.com/) and [Docker Compose](https://docs.docker.com/compose/) are installed.
+
+The primary command to deploy the project:
+
+```bash
+make docker-up
 ```
-cd existing_repo
-git remote add origin https://capstone-cs.eng.utah.edu/mapeleven/mapeleven.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+This command builds and starts the Docker containers defined in the Docker Compose files of the project.
 
-- [ ] [Set up project integrations](https://capstone-cs.eng.utah.edu/mapeleven/mapeleven/-/settings/integrations)
+## External API Usage
 
-## Collaborate with your team
+This project relies on [API-FOOTBALL](https://www.api-football.com/) as its primary data source. To run Mapeleven, you must have an API key from API-FOOTBALL. Head over to their website, register, and obtain your API key.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+## Environment Configuration
 
-## Test and Deploy
+To configure the application, you need to set up environment files for both the frontend and backend components of the project.:
+-  For the backend, edit the `api/.env` file with your corresponding database details, host details, and API-FOOTBALL key like so:
+    ```
+    DB_HOST=localhost
+    DB_PORT=5432
+    DB_USER=<name>
+    DB_PASS=<pass>
+    DB_NAME=<db name>
 
-Use the built-in continuous integration in GitLab.
+    ENV_PATH=
+    IP_HOST=localhost
+    DOMAIN=<when necessary>
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+    API_KEY=<API-FOOTBALL API Key>
+    API_HOST=api-football-v1.p.rapidapi.com
+    ```
 
-***
+-  For the frontend, modify the `client/.env.local` file to set the URL of the API server:
+    ```
+    VITE_API_URL=http://localhost:8080 //this will change if the user deploys to a server
+    ```
 
-# Editing this README
+## Server Deployment
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+To deploy this project to a Debian server with Nginx, follow these steps:
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+1. Clone the project onto your server.
+2. Install Docker and Docker Compose if not already installed.
+3. Configure your environment files (`api/.env` and `client/.env.local`) as described above.
+4. Once Docker and Docker Compose are installed and your environment files are configured, you can use the `make docker-up` command to build and start the Docker containers.
 
-## Name
-Choose a self-explaining name for your project.
+Nginx configuration is beyond the scope of this README. Please consult the official [Nginx documentation](https://nginx.org/en/docs/) for instructions on setting up Nginx as a reverse proxy and for serving static files.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## External Libraries
+Our project makes use of the following key external libraries:
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+#### Frontend
+* [React](https://reactjs.org/)
+* [MUI](https://mui.com/)
+* [Vite](https://vitejs.dev/)
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+#### Backend
+* [Ent](https://entgo.io/)
+* [Fiber](https://gofiber.io/)
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+## User Usage
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+The mapeleven web application is designed to offer a seamless user experience on a variety of devices, from desktops to tablets and smartphones. Simply navigate to the site in your web browser of choice, and use the search bar to find players, teams, or leagues, or use the date selector on the homepage to view upcoming and past fixtures.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+### Technical Requirements
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+The mapeleven web app is built to run efficiently on any device with a modern web browser, such as Chrome, Firefox, Safari, or Edge. It is mobile-friendly and responsive, ensuring a smooth experience on smartphones and tablets.
