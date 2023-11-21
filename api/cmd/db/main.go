@@ -153,50 +153,50 @@ func cronScheduler(client *ent.Client, initialize bool, runScheduler bool, devRu
 
 		// Fetch Fixture Data
 		fetchFixtureData(fixturesModel)
-	}
 
-	if runScheduler {
-		// Schedule cron jobs
-		_, err := s.Every(12).Hours().At("00:00").Do(fetchCountries, countryModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
-		}
-		_, err = s.Every(12).Hours().At("00:00").Do(fetchLeagues, leagueModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
-		}
-		_, err = s.Every(12).Hours().At("00:00").Do(fetchStandings, standingsModel, clubModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
-		}
-		_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtures, fixturesModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
-		}
-		_, err = s.Every(12).Hours().At("00:00").Do(fetchTeamStats, teamModel, teamStatsModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
-		}
-		_, err = s.Every(12).Hours().At("00:00").Do(fetchSquads, squadModel, playerModel, teamModel, playerStatsModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
-		}
-		_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtureData, fixturesModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
-		}
-		_, err = s.Every(150).Seconds().At("00:00").Do(fetchTodaysFixtures, fixturesModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
-		}
-		_, err = s.Every(45).Seconds().At("00:00").Do(fetchLiveFixtures, fixturesModel)
-		if err != nil {
-			fmt.Printf("error scheduling job: %v", err)
+		if runScheduler {
+			// Schedule cron jobs
+			_, err := s.Every(12).Hours().At("00:00").Do(fetchCountries, countryModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchLeagues, leagueModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchStandings, standingsModel, clubModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtures, fixturesModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchTeamStats, teamModel, teamStatsModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchSquads, squadModel, playerModel, teamModel, playerStatsModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
+			_, err = s.Every(12).Hours().At("00:00").Do(fetchFixtureData, fixturesModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
+			_, err = s.Every(150).Seconds().At("00:00").Do(fetchTodaysFixtures, fixturesModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
+			_, err = s.Every(45).Seconds().At("00:00").Do(fetchLiveFixtures, fixturesModel)
+			if err != nil {
+				fmt.Printf("error scheduling job: %v", err)
+			}
 		}
 	}
 
 	if devRun {
-		/* EMPTY */
+		fetchSquads(squadModel, playerModel, teamModel, playerStatsModel)
 	}
 }
 
@@ -210,15 +210,12 @@ func fetchCountries(countryModel *models.CountryModel) {
 
 func fetchLeagues(leagueModel *models.LeagueModel, seasonModel *models.SeasonModel) {
 	championsLeagueID := 2
-	//europaLeagueID := 3
 	premierLeagueID := 39
-	//serieAID := 61
-	//ligue1ID := 71
-	//bundesligaID := 78
-	//laLigaID := 140
-	majorleaguesoccerID := 253
-	leagueIDs := []int{premierLeagueID, majorleaguesoccerID, championsLeagueID}
-	//leagueIDs := []int{majorleaguesoccerID, championsLeagueID, europaLeagueID}
+	ligue1ID := 71
+	bundesligaID := 78
+	laLigaID := 140
+	mlsID := 253
+	leagueIDs := []int{premierLeagueID, mlsID, championsLeagueID, ligue1ID, bundesligaID, laLigaID}
 
 	leagueController := controllers.NewLeagueController(leagueModel, seasonModel)
 	err := leagueController.InitializeLeagues(leagueIDs, context.Background())

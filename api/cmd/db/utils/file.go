@@ -54,3 +54,10 @@ func DownloadImageIfNeeded(url string, filename string) (string, error) {
 
 	return filename, nil
 }
+
+func SetIfEmpty(s string, defaultValue string) string {
+	if s == "" {
+		return defaultValue
+	}
+	return s
+}
