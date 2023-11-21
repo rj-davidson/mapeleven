@@ -21,7 +21,7 @@ import PlayerOppIDCard from "./PlayerOppIDCard";
 import { APIPlayer } from "../Models/api_types";
 
 interface PlayerRadarChartProps {
-  playerData: APIPlayer | undefined;
+  playerData: APIPlayer;
 }
 
 interface ChartDatum {
@@ -107,34 +107,34 @@ const PlayerRadarChart: React.FC<PlayerRadarChartProps> = ({ playerData }) => {
     }
 
     if (stat === "Goals") {
-      return (playerData?.statistics?.[0].shooting.goals ?? 0) * 2;
+      return (playerData.statistics?.[0].shooting.goals ?? 0) * 2;
     }
     if (stat === "Assists") {
-      return (playerData?.statistics?.[0].shooting.assists ?? 0) * 2;
+      return (playerData.statistics?.[0].shooting.assists ?? 0) * 2;
     }
     if (stat === "Shots") {
-      return (playerData?.statistics?.[0].shooting.shots ?? 0) * 2;
+      return (playerData.statistics?.[0].shooting.shots ?? 0) * 2;
     }
     if (stat === "Shots on Target") {
-      return (playerData?.statistics?.[0].shooting.shots_on_target ?? 0) * 2;
+      return (playerData.statistics?.[0].shooting.shots_on_target ?? 0) * 2;
     }
     if (stat === "Passes") {
-      return (playerData?.statistics?.[0].technical.passes ?? 0) * 0.1;
+      return (playerData.statistics?.[0].technical.passes ?? 0) * 0.1;
     }
     if (stat === "Dribble Success") {
-      return (playerData?.statistics?.[0].technical.dribbles_success ?? 0) * 2;
+      return (playerData.statistics?.[0].technical.dribbles_success ?? 0) * 2;
     }
     if (stat === "Duels Won") {
-      return (playerData?.statistics?.[0].defense.duels_won ?? 0) * 2;
+      return (playerData.statistics?.[0].defense.duels_won ?? 0) * 2;
     }
     if (stat === "Key Passes") {
-      return (playerData?.statistics?.[0].technical.key_passes ?? 0) * 2;
+      return (playerData.statistics?.[0].technical.key_passes ?? 0) * 2;
     }
     if (stat === "Pass Accuracy") {
-      return (playerData?.statistics?.[0].technical.pass_accuracy ?? 0) * 2;
+      return (playerData.statistics?.[0].technical.pass_accuracy ?? 0) * 2;
     }
     if (stat === "Saves") {
-      return (playerData?.statistics?.[0].shooting.saves ?? 0) * 2;
+      return (playerData.statistics?.[0].shooting.saves ?? 0) * 2;
     }
 
     return 0;
@@ -263,41 +263,37 @@ const PlayerRadarChart: React.FC<PlayerRadarChartProps> = ({ playerData }) => {
     let orgStat: string = "";
     switch (label) {
       case "Goals":
-        orgStat = `${playerData?.statistics?.[0].shooting.goals ?? 0}`;
+        orgStat = `${playerData.statistics?.[0].shooting.goals ?? 0}`;
 
         break;
       case "Shots on Target":
-        orgStat = `${
-          playerData?.statistics?.[0].shooting.shots_on_target ?? 0
-        }`;
+        orgStat = `${playerData.statistics?.[0].shooting.shots_on_target ?? 0}`;
         break;
       case "Passes":
-        orgStat = `${playerData?.statistics?.[0].technical.passes ?? 0}`;
+        orgStat = `${playerData.statistics?.[0].technical.passes ?? 0}`;
         break;
       case "Assists":
-        orgStat = `${playerData?.statistics?.[0].shooting.assists ?? 0}`;
+        orgStat = `${playerData.statistics?.[0].shooting.assists ?? 0}`;
         break;
       case "Shots":
-        orgStat = `${playerData?.statistics?.[0].shooting.shots ?? 0}`;
+        orgStat = `${playerData.statistics?.[0].shooting.shots ?? 0}`;
         break;
       case "Dribble Success":
         orgStat = `${
-          playerData?.statistics?.[0].technical.dribbles_success ?? 0
+          playerData.statistics?.[0].technical.dribbles_success ?? 0
         }`;
         break;
       case "Duels Won":
-        orgStat = `${playerData?.statistics?.[0].defense.duels_won ?? 0}`;
+        orgStat = `${playerData.statistics?.[0].defense.duels_won ?? 0}`;
         break;
       case "Key Passes":
-        orgStat = `${playerData?.statistics?.[0].technical.key_passes ?? 0}`;
+        orgStat = `${playerData.statistics?.[0].technical.key_passes ?? 0}`;
         break;
       case "Pass Accuracy":
-        orgStat = `${
-          playerData?.statistics?.[0].technical.pass_accuracy ?? 0
-        }%`;
+        orgStat = `${playerData.statistics?.[0].technical.pass_accuracy ?? 0}%`;
         break;
       case "Saves":
-        orgStat = `${playerData?.statistics?.[0].shooting.saves ?? 0}`;
+        orgStat = `${playerData.statistics?.[0].shooting.saves ?? 0}`;
         break;
       default:
         return orgStat;
@@ -346,40 +342,40 @@ const PlayerRadarChart: React.FC<PlayerRadarChartProps> = ({ playerData }) => {
   };
 
   /* eslint-disable react/prop-types */
-  const CustomTooltip = ({ payload, label }) => {
-    if (!payload || payload.length === 0) {
-      return null;
-    }
+  const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload) {
+      const colorA = payload[0].color;
+      const colorB = payload[1] ? payload[1].color : null;
 
-    const colorA = payload[0].color;
-    const colorB = payload[1] ? payload[1].color : null;
-
-    return (
-      <Box
-        sx={{
-          background: "var(--dark0)",
-          borderRadius: "10px",
-          padding: "10px",
-          color: "white",
-        }}
-      >
-        <Typography>{label}</Typography>
-        <Flex style={{ gap: "6px", color: colorA }}>
-          {payload[0].name}:
-          <Typography sx={{ fontWeight: 800, wrap: "inline" }}>
-            {getOriginalValue(label)}
-          </Typography>
-        </Flex>
-        {payload[1] && (
-          <Flex style={{ gap: "6px", color: colorB }}>
-            {payload[1].name}:
+      return (
+        <Box
+          sx={{
+            background: "var(--dark0)",
+            borderRadius: "10px",
+            padding: "10px",
+            color: "white",
+          }}
+        >
+          <Typography>{label}</Typography>
+          <Flex style={{ gap: "6px", color: colorA }}>
+            {payload[0].name}:
             <Typography sx={{ fontWeight: 800, wrap: "inline" }}>
-              {getOppOriginalValue(label)}
+              {getOriginalValue(label)}
             </Typography>
           </Flex>
-        )}
-      </Box>
-    );
+          {payload[1] && (
+            <Flex style={{ gap: "6px", color: colorB }}>
+              {payload[1].name}:
+              <Typography sx={{ fontWeight: 800, wrap: "inline" }}>
+                {getOppOriginalValue(label)}
+              </Typography>
+            </Flex>
+          )}
+        </Box>
+      );
+    }
+
+    return null;
   };
 
   return (
@@ -474,7 +470,7 @@ const PlayerRadarChart: React.FC<PlayerRadarChartProps> = ({ playerData }) => {
                   tickLine={false}
                 />
                 <Radar
-                  name={playerData?.name}
+                  name={playerData.name}
                   dataKey="A"
                   stroke="var(--red)"
                   fill="var(--red)"
@@ -497,7 +493,9 @@ const PlayerRadarChart: React.FC<PlayerRadarChartProps> = ({ playerData }) => {
                     border: "none",
                     borderRadius: "10px",
                   }}
-                  content={<CustomTooltip payload={null} label={null} />}
+                  content={
+                    <CustomTooltip active={null} payload={null} label={null} />
+                  }
                 />
                 <Legend />
               </RadarChart>
