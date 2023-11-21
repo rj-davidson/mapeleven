@@ -5,6 +5,7 @@ import FormCard from "./FormCard.jsx";
 import TeamIDCard from "./TeamIDCard";
 import TeamStats from "./TeamStats";
 import { APITeam } from "../Models/api_types";
+import TeamNextFixture from "./TeamNextFixture";
 
 interface TeamPageSingleColumnProps {
   slug: string | undefined;
@@ -32,6 +33,9 @@ const TeamPageSingleColumn: React.FC<TeamPageSingleColumnProps> = ({
         >
           <FormCard />
         </Flex>
+      </Grid>
+      <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
+        <TeamNextFixture teamData={teamData} />
       </Grid>
       <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
         <Flex

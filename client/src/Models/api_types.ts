@@ -190,10 +190,19 @@ interface APICompetitions {
   Current: boolean;
   stats?: APITeamStats;
   squad: APITeamSquad;
+  fixtures: APITeamFixtures[];
 }
 
 interface APITeamSquad {
   players?: APIPlayer[];
+}
+
+interface APITeamFixtures {
+  slug: string;
+  homeTeam: APITeam;
+  awayTeam: APITeam;
+  date: Date;
+  status: string;
 }
 
 interface APIStandings {
