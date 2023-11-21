@@ -1,9 +1,8 @@
-import {useParams} from "react-router-dom";
 import {useEffect, useState} from "react";
 import {Grid, Skeleton} from "@mui/material";
-import PlayerPageSingleColumn from "../Players/PlayerPageSingleColumn";
 import * as React from "react";
 import PlayerIDCard from "../Players/PlayerIDCard";
+import {APIPlayer} from "../Models/api_types";
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -22,19 +21,13 @@ const FixturePlayerCard: React.FC<FixturePlayerCardProps> = ({ slug }) => {
     const [weight, setWeight] = useState<string>('');
     const [injured, setInjured] = useState<boolean>(false);
     const [loading, setLoading] = useState<boolean>(true);
+    const [playerData, setPlayerData] = useState<APIPlayer>();
 
     useEffect(() => {
         fetch(`${url}/players/${slug}`)
             .then(response => response.json())
             .then(jsonData => {
-                setName(jsonData.name);
-                setFirstName(jsonData.firstname);
-                setLastName(jsonData.lastname);
-                setPhoto(jsonData.photo);
-                setAge(jsonData.age);
-                setHeight(jsonData.height);
-                setWeight(jsonData.weight);
-                setInjured(jsonData.injured);
+                setPlayerData(jsonData as APIPlayer);
                 setLoading(false);
             })
             .catch(error => console.error(error));
@@ -65,15 +58,7 @@ const FixturePlayerCard: React.FC<FixturePlayerCardProps> = ({ slug }) => {
                 <Grid container spacing={2}>
                     <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                         <PlayerIDCard
-                            slug={slug}
-                            name={name}
-                            firstName={firstName}
-                            lastName={lastName}
-                            photo={photo}
-                            age={age}
-                            height={height}
-                            weight={weight}
-                            injured={injured}
+                            slug={slug} playerData={playerData}
                         />
                     </Grid>
                 </Grid>

@@ -2,6 +2,9 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import {APIFixtureEvent} from "../Models/api_types";
 import FixturePlayerCard from "./FixturePlayerCard";
+import Typography from "@mui/material/Typography";
+import { Grid } from '@mui/material';
+import {Tile} from "../Util/TileTS";
 
 interface FixturePlayerStepperProps {
     events: APIFixtureEvent[];
@@ -14,7 +17,7 @@ const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events }) =
     const goalEvents = events.filter((events) => events.type === 'Goal');
 
 
-
+    const timeScored = goalEvents.map((event) => event.time);
     const scoringPlayers = goalEvents.map((event) => event.player);
 
 
@@ -37,11 +40,15 @@ const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events }) =
     };
 
     return (
-        <div>
-            <h2>Scoring Player Stepper:</h2>
-            <p>Current Player: {scoringPlayers[currentPlayerIndex]?.name}</p>
-            <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
-        </div>
+            <Grid >
+                <Tile>
+                    <Typography>
+                        Goal Scored in {timeScored[currentPlayerIndex].elapsed}th minute:
+                    </Typography>
+                    <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
+                </Tile>
+
+            </Grid>
     );
 };
 
