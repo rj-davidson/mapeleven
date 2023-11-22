@@ -122,6 +122,7 @@ func (lm *LeagueModel) GetCurrentSeasonForLeague(ctx context.Context, l *ent.Lea
 			season.HasLeagueWith(league.IDEQ(l.ID)),
 			season.CurrentEQ(true),
 		).
+		WithLeague().
 		Only(ctx)
 }
 

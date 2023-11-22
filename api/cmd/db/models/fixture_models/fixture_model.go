@@ -158,7 +158,10 @@ func (fm *FixtureModel) CreateBaseFixture(ctx context.Context, input CreateFixtu
 }
 
 func (fm *FixtureModel) UpdateBaseFixture(ctx context.Context, input UpdateFixtureInput) (*ent.Fixture, error) {
-	updater := fm.client.Fixture.UpdateOneID(input.ApiFootballId)
+	f, _ := fm.client.Fixture.Query().
+		Where(fixture.ApiFootballIdEQ(input.ApiFootballId)).
+		Only(ctx)
+	updater := fm.client.Fixture.UpdateOne(f)
 	if input.Round != nil {
 		updater.SetRound(*input.Round)
 	}
