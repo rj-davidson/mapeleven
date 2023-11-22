@@ -8,13 +8,14 @@ import {Tile} from "../Util/TileTS";
 
 interface FixturePlayerStepperProps {
     events: APIFixtureEvent[];
+    homeTeamName: string;
 }
 
-const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events,}) => {
+const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events, homeTeamName}) => {
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
 
     // Filter events to get only those with type 'Goal'
-    const goalEvents = events.filter((events) => events.type === 'Goal' );
+    const goalEvents = events.filter((events) => events.type === 'Goal' && events.team.name === homeTeamName);
 
 
     const timeScored = goalEvents.map((event) => event.time);
@@ -40,15 +41,15 @@ const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events,}) =
     };
 
     return (
-            <Grid >
-                <Tile>
-                    <Typography>
-                        Goal Scored in {timeScored[currentPlayerIndex].elapsed}th minute:
-                    </Typography>
-                    <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
-                </Tile>
+        <Grid >
+            <Tile>
+                <Typography>
+                    Goal Scored in {timeScored[currentPlayerIndex].elapsed}th minute:
+                </Typography>
+                <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
+            </Tile>
 
-            </Grid>
+        </Grid>
     );
 };
 

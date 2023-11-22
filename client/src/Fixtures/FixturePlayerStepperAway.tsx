@@ -6,15 +6,16 @@ import Typography from "@mui/material/Typography";
 import { Grid } from '@mui/material';
 import {Tile} from "../Util/TileTS";
 
-interface FixturePlayerStepperProps {
+interface FixturePlayerStepperAwayProps {
     events: APIFixtureEvent[];
+    awayTeamName: string;
 }
 
-const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events,}) => {
+const FixturePlayerStepperAway: React.FC<FixturePlayerStepperAwayProps> = ({ events,awayTeamName }) => {
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
 
     // Filter events to get only those with type 'Goal'
-    const goalEvents = events.filter((events) => events.type === 'Goal' );
+    const goalEvents = events.filter((events) => events.type === 'Goal' && events.team.name === awayTeamName);
 
 
     const timeScored = goalEvents.map((event) => event.time);
@@ -40,16 +41,16 @@ const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events,}) =
     };
 
     return (
-            <Grid >
-                <Tile>
-                    <Typography>
-                        Goal Scored in {timeScored[currentPlayerIndex].elapsed}th minute:
-                    </Typography>
-                    <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
-                </Tile>
+        <Grid >
+            <Tile>
+                <Typography>
+                    Goal Scored in {timeScored[currentPlayerIndex].elapsed}th minute:
+                </Typography>
+                <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
+            </Tile>
 
-            </Grid>
+        </Grid>
     );
 };
 
-export default FixturePlayerStepper;
+export default FixturePlayerStepperAway;
