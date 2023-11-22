@@ -60,10 +60,10 @@ func NewPlayerController(entClient *ent.Client) *PlayerController {
 	}
 }
 
-func (pc *PlayerController) EnsurePlayerExists(ctx context.Context, apiFootballId int) error {
-	exists := pc.playerModel.Exists(ctx, apiFootballId)
+func (pc *PlayerController) EnsurePlayerExists(ctx context.Context, playerApiFootballId, leagueApiFootballId int) error {
+	exists := pc.playerModel.Exists(ctx, playerApiFootballId)
 	if !exists {
-		err := pc.fetchPlayerByID(ctx, apiFootballId)
+		err := pc.fetchPlayerByID(ctx, playerApiFootballId, leagueApiFootballId)
 		if err != nil {
 			return err
 		}
@@ -71,8 +71,8 @@ func (pc *PlayerController) EnsurePlayerExists(ctx context.Context, apiFootballI
 	return nil
 }
 
-func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) error {
-	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?id=%d&season=2023", playerID)
+func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerApiFootballId, leagueApiFootballId int) error {
+	url := fmt.Sprintf("https://api-football-v1.p.rapidapi.com/v3/players?id=%d&league=%d&season=2023", playerApiFootballId, leagueApiFootballId)
 
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
@@ -97,7 +97,7 @@ func (pc *PlayerController) fetchPlayerByID(ctx context.Context, playerID int) e
 		return err
 	}
 
-	return pc.parsePlayerResponse(ctx, data, playerID)
+	return pc.parsePlayerResponse(ctx, data, playerApiFootballId)
 }
 
 func (pc *PlayerController) parsePlayerResponse(ctx context.Context, data []byte, playerID int) error {
@@ -227,14 +227,12 @@ func (pc *PlayerController) GetPlayerIDsForLeague(ctx context.Context, leagueID 
 
 func (pc *PlayerController) FetchPlayersByLeague(ctx context.Context, leagueID int) error {
 	playerIDs, err := pc.GetPlayerIDsForLeague(ctx, leagueID)
-	fmt.Println("Initializing Player... IN CONTROLLER")
-	fmt.Println(playerIDs)
 	if err != nil {
 		return err
 	}
 
 	for _, playerID := range playerIDs {
-		err := pc.EnsurePlayerExists(ctx, playerID)
+		err := pc.EnsurePlayerExists(ctx, playerID, leagueID)
 		if err != nil {
 			return err
 		}

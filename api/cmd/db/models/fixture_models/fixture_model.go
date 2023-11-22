@@ -197,6 +197,9 @@ func (fm *FixtureModel) FixtureExistsByApiFootballId(ctx context.Context, apiFoo
 func (fm *FixtureModel) ListFixtures(ctx context.Context) ([]*ent.Fixture, error) {
 	return fm.client.Fixture.
 		Query().
+		WithSeason(func(sq *ent.SeasonQuery) {
+			sq.WithLeague()
+		}).
 		All(ctx)
 }
 
@@ -239,7 +242,9 @@ func (fm *FixtureModel) ListTodaysFixtures(ctx context.Context) ([]*ent.Fixture,
 			fixture.StatusNEQ("PEN"),
 			fixture.StatusNEQ("CANC"),
 		).
-		WithSeason().
+		WithSeason(func(sq *ent.SeasonQuery) {
+			sq.WithLeague()
+		}).
 		All(ctx)
 }
 
@@ -259,6 +264,8 @@ func (fm *FixtureModel) ListLiveFixtures(ctx context.Context) ([]*ent.Fixture, e
 			fixture.StatusEQ("BT"),
 			fixture.StatusEQ("P"),
 		).
-		WithSeason().
+		WithSeason(func(sq *ent.SeasonQuery) {
+			sq.WithLeague()
+		}).
 		All(ctx)
 }

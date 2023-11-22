@@ -246,6 +246,7 @@ func (fc *FixtureController) upsertFixture(ctx context.Context, fixtureInput *fi
 	} else {
 		fc.handleFixtureTeams(ctx, fixtureInput)
 		updatedFixtureInput := fixture_models.UpdateFixtureInput{
+			ApiFootballId: fixtureInput.ApiFootballId,
 			Referee:       fixtureInput.Referee,
 			Timezone:      fixtureInput.Timezone,
 			Date:          fixtureInput.Date,

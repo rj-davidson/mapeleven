@@ -34,12 +34,12 @@ type PSTeam struct {
 }
 
 type PSLeague struct {
-	ApiFootballId int    `json:"id"`
-	Name          string `json:"name"`
-	Country       string `json:"country"`
-	Logo          string `json:"logo"`
-	Flag          string `json:"flag"`
-	Season        int    `json:"season"`
+	ApiFootballId *int    `json:"id"`
+	Name          *string `json:"name"`
+	Country       *string `json:"country"`
+	Logo          *string `json:"logo"`
+	Flag          *string `json:"flag"`
+	Season        *int    `json:"season"`
 }
 
 type PSGames struct {
@@ -156,9 +156,12 @@ func (m *PlayerStatsModel) Exists(ctx context.Context, p *ent.Player, szn int) (
 // UpsertPlayerStats creates a new player statistics record along with related entities like PSDefense and PSFairplay.
 func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player, stats PlayerStats) (*ent.PlayerStats, error) {
 	// Check if league exists
+	if stats.League.ApiFootballId == nil {
+		return nil, nil
+	}
 	l, err := m.client.League.
 		Query().
-		Where(league.FootballApiIdEQ(stats.League.ApiFootballId)).
+		Where(league.FootballApiIdEQ(*stats.League.ApiFootballId)).
 		Only(ctx)
 	if l == nil { // Skipping leagues that don't exist in our database
 		return nil, nil
@@ -171,8 +174,8 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player,
 				club.ApiFootballIdEQ(stats.Team.ApiFootballId),
 			),
 			team.HasSeasonWith(
-				season.YearEQ(stats.League.Season),
-				season.HasLeagueWith(league.FootballApiIdEQ(stats.League.ApiFootballId)),
+				season.YearEQ(*stats.League.Season),
+				season.HasLeagueWith(league.FootballApiIdEQ(*stats.League.ApiFootballId)),
 			),
 		).
 		Only(ctx)
@@ -182,7 +185,7 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player,
 	}
 
 	// Check if player stats already exist
-	exists, ps := m.Exists(ctx, p, stats.League.Season)
+	exists, ps := m.Exists(ctx, p, *stats.League.Season)
 	if !exists {
 		ps, err = m.client.PlayerStats.
 			Create().

@@ -6,8 +6,6 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"context"
 	"errors"
-	"fmt"
-	"strings"
 )
 
 // CreatePlayerInput holds the required fields to create a new player.
@@ -203,25 +201,6 @@ func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput)
 
 // UpdatePlayer updates an existing player.
 func (m *PlayerModel) UpdatePlayer(ctx context.Context, input UpdatePlayerInput) (*ent.Player, error) {
-	fmt.Printf("UpdatePlayer Method")
-	if *input.Firstname == "" || *input.Lastname == "" {
-		names := strings.Split(*input.Name, " ")
-		if len(names) > 1 {
-			if *input.Firstname == "" {
-				//get rid of period in the name
-				*input.Firstname = strings.Replace(names[0], ".", "", -1)
-			}
-			if *input.Lastname == "" {
-				*input.Lastname = strings.Join(names[1:], " ")
-			}
-		} else {
-			if *input.Firstname == "" {
-				input.Firstname = input.Name
-			} else if *input.Lastname == "" {
-				input.Lastname = input.Name
-			}
-		}
-	}
 	pl, err := m.client.Player.Query().Where(player.ApiFootballIdEQ(input.ApiFootballId)).Only(ctx)
 	if err != nil {
 		return nil, err
@@ -324,7 +303,7 @@ func (m *PlayerModel) GetPlayerBirth(ctx context.Context, playerID int) (*ent.Bi
 func (m *PlayerModel) Exists(ctx context.Context, id int) bool {
 	count, _ := m.client.Player.
 		Query().
-		Where(player.IDEQ(id)).
+		Where(player.ApiFootballIdEQ(id)).
 		Count(ctx)
 
 	return count > 0

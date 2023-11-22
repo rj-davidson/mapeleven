@@ -46,7 +46,7 @@ func (fdc *FixtureDataController) FetchFixtures(ctx context.Context) error {
 		if err != nil {
 			fmt.Printf("Error fetching fixture: %v", err)
 		}
-		err = fdc.writeFixtureData(f.ApiFootballId, *fixtureDetails, ctx)
+		err = fdc.writeFixtureData(f.ApiFootballId, *fixtureDetails, f.Edges.Season.Edges.League.FootballApiId, ctx)
 		if err != nil {
 			fmt.Printf("Error writing fixture data: %v", err)
 		}
@@ -60,7 +60,7 @@ func (fdc *FixtureDataController) UpdateFixtures(ctx context.Context, fixtures [
 		if err != nil {
 			fmt.Printf("Error fetching fixture: %v", err)
 		}
-		err = fdc.writeFixtureData(f.ApiFootballId, *fixtureDetails, ctx)
+		err = fdc.writeFixtureData(f.ApiFootballId, *fixtureDetails, f.Edges.Season.Edges.League.FootballApiId, ctx)
 		if err != nil {
 			fmt.Printf("Error writing fixture data: %v", err)
 		}
@@ -102,9 +102,9 @@ func (fdc *FixtureDataController) fetchFixtureByID(ctx context.Context, fixtureI
 	return &fixtureResponse.Response[0], nil
 }
 
-func (fdc *FixtureDataController) writeFixtureData(apiFootballId int, data fixture_models.FixtureDetails, ctx context.Context) error {
+func (fdc *FixtureDataController) writeFixtureData(apiFootballId int, data fixture_models.FixtureDetails, leagueApiFootballId int, ctx context.Context) error {
 	for _, lineup := range data.Lineups {
-		fdc.handleLineupPlayers(ctx, &lineup)
+		fdc.handleLineupPlayers(ctx, &lineup, leagueApiFootballId)
 	}
 
 	err := fdc.fixtureModel.UpsertFixtureData(apiFootballId, data, ctx)
@@ -114,15 +114,15 @@ func (fdc *FixtureDataController) writeFixtureData(apiFootballId int, data fixtu
 	return nil
 }
 
-func (fdc *FixtureDataController) handleLineupPlayers(ctx context.Context, lineup *fixture_models.LineupInfo) {
+func (fdc *FixtureDataController) handleLineupPlayers(ctx context.Context, lineup *fixture_models.LineupInfo, leagueApiFootballId int) {
 	for _, player := range lineup.StartXI {
-		err := fdc.playerCtrl.EnsurePlayerExists(ctx, player.Player.ID)
+		err := fdc.playerCtrl.EnsurePlayerExists(ctx, player.Player.ID, leagueApiFootballId)
 		if err != nil {
 			fmt.Printf("[FixtureDataController] Error ensuring player exists: %v", err)
 		}
 	}
 	for _, player := range lineup.Substitutes {
-		err := fdc.playerCtrl.EnsurePlayerExists(ctx, player.Player.ID)
+		err := fdc.playerCtrl.EnsurePlayerExists(ctx, player.Player.ID, leagueApiFootballId)
 		if err != nil {
 			fmt.Printf("[FixtureDataController] Error ensuring player exists: %v", err)
 		}

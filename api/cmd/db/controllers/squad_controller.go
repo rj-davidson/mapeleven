@@ -81,7 +81,7 @@ func (sc *SquadController) parseSquadResponse(data []byte, team *ent.Team) error
 
 	for _, teamResponse := range squadResponse.Response {
 		for _, player := range teamResponse.Players {
-			err = sc.playerCtrl.EnsurePlayerExists(context.Background(), player.ApiFootballId)
+			err = sc.playerCtrl.EnsurePlayerExists(context.Background(), player.ApiFootballId, team.Edges.Season.Edges.League.FootballApiId)
 			err = sc.upsertSquadPlayer(team, player)
 			if err != nil {
 				return err
@@ -97,6 +97,5 @@ func (sc *SquadController) upsertSquadPlayer(team *ent.Team, s team_models.Playe
 		fmt.Printf("Error upserting squad for %s: %v\n", team.Edges.Club.Name, err)
 		return err
 	}
-	fmt.Printf("Successfully upserted %s (Squad: %s)\n", s.Name, team.Edges.Club.Name)
 	return nil
 }
