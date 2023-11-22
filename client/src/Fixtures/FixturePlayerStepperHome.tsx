@@ -42,13 +42,14 @@ const FixturePlayerStepperHome: React.FC<FixturePlayerStepperHomeProps> = ({ eve
 
     return (
         <Grid >
+            {timeScored[currentPlayerIndex] && scoringPlayers[currentPlayerIndex] &&
             <Tile>
                 <Typography>
                     Goal Scored in {timeScored[currentPlayerIndex].elapsed}th minute:
                 </Typography>
                 <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
             </Tile>
-
+            }
         </Grid>
     );
 };
