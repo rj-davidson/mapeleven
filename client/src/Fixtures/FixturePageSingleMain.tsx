@@ -7,6 +7,7 @@ import { Tile } from "../Util/TileTS";
 import { EventTime } from "./Events/EventTime";
 import Box from "@mui/material/Box";
 import Sports from "@mui/icons-material/Sports";
+import { Link } from "react-router-dom";
 
 interface FixturePageSingleMainProps {
   data: APIFixtureSet | undefined;
@@ -36,13 +37,20 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                   width={"100px"}
                   height={"100px"}
                 />
-                <Typography
-                  variant="h6"
-                  align="center"
-                  sx={{ fontSize: "42px" }}
-                >
-                  {data.teams.home.name}
-                </Typography>
+                <Link to={`/teams/${data.teams.home.slug}`}>
+                  <Typography
+                    variant="h6"
+                    align="center"
+                    sx={{
+                      fontSize: "42px",
+                      "&:hover": {
+                        textDecoration: "underline", // Add underline on hover
+                      },
+                    }}
+                  >
+                    {data.teams.home.name}
+                  </Typography>
+                </Link>
               </Box>
 
               {data.events ? (
@@ -107,13 +115,20 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                   width={"100px"}
                   height={"100px"}
                 ></DisplayImage>
-                <Typography
-                  variant="h6"
-                  align="center"
-                  sx={{ fontSize: "42px" }}
-                >
-                  {data.teams.away.name}
-                </Typography>
+                <Link to={`/teams/${data.teams.away.slug}`}>
+                  <Typography
+                    variant="h6"
+                    align="center"
+                    sx={{
+                      fontSize: "42px",
+                      "&:hover": {
+                        textDecoration: "underline", // Add underline on hover
+                      },
+                    }}
+                  >
+                    {data.teams.away.name}
+                  </Typography>
+                </Link>
               </Box>
               {data.events ? (
                 data.events
