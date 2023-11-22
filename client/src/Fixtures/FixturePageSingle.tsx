@@ -24,7 +24,7 @@ function FixturePageSingle() {
     const [loading, setLoading] = useState<boolean>(true);
 
     useEffect(() => {
-        fetch(`${url}/fixtures/${slug}`)
+        slug && fetch(`${url}/fixtures/${slug}`)
             .then((response) => response.json())
             .then((jsonData) => {
                 setFixtureData(jsonData as APIFixtureSet);

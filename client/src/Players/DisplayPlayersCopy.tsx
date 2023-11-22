@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import { Flex } from "../Util/Flex.jsx";
 import Person from "@mui/icons-material/Person";
 import PlayerCard from "./PlayerCardCopy";
+import { APIPlayer } from "../Models/api_types";
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -16,25 +17,25 @@ interface DisplayPlayersProps {
 }
 
 const DisplayPlayers: React.FC<DisplayPlayersProps> = ({ limit, skeleton }) => {
-  const [playerData, setPlayerData] = useState([]);
+  const [playerData, setPlayerData] = useState<APIPlayer[]>();
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    // Send a GET request to the API.
     fetch(`${url}/players`)
       .then((response) => response.json())
       .then((jsonData) => {
-        const response = jsonData;
-        const newPlayerData = [];
-        for (let i = 0; i < response.length; i++) {
-          const player = response[i];
-          newPlayerData.push(player);
-        }
+        const sortedData = jsonData.sort((a: APIPlayer, b: APIPlayer) => {
+          const aPopularity = a.popularity !== undefined ? a.popularity : 0;
+          const bPopularity = b.popularity !== undefined ? b.popularity : 0;
+          return bPopularity - aPopularity;
+        });
+
         if (limit) {
-          setPlayerData(newPlayerData.slice(0, limit));
+          setPlayerData(sortedData.slice(0, limit) as APIPlayer[]);
         } else {
-          setPlayerData(newPlayerData);
+          setPlayerData(sortedData as APIPlayer[]);
         }
+
         setLoading(false);
       })
       .catch((error) => console.error(error));
@@ -76,15 +77,16 @@ const DisplayPlayers: React.FC<DisplayPlayersProps> = ({ limit, skeleton }) => {
         </Grid>
       ) : (
         <Grid container spacing={1}>
-          {playerData.map((player, playerIndex) => (
-            <Grid item xs={12} sm={12} md={12} lg={12} key={playerIndex}>
-              <PlayerCard
-                slug={player.slug}
-                name={player.name}
-                photo={player.photo}
-              />
-            </Grid>
-          ))}
+          {playerData &&
+            playerData.map((player, playerIndex) => (
+              <Grid item xs={12} sm={12} md={12} lg={12} key={playerIndex}>
+                <PlayerCard
+                  slug={player.slug}
+                  name={player.name}
+                  photo={player.photo}
+                />
+              </Grid>
+            ))}
         </Grid>
       )}
     </Box>

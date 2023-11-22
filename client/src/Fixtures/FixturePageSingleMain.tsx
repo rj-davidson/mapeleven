@@ -6,6 +6,7 @@ import DisplayImage from "../Util/DisplayImage";
 import { Tile } from "../Util/TileTS";
 import { EventTime } from "./Events/EventTime";
 import Box from "@mui/material/Box";
+import Sports from "@mui/icons-material/Sports";
 
 interface FixturePageSingleMainProps {
   data: APIFixtureSet | undefined;
@@ -123,19 +124,19 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                       event.team.name === data.teams.away.name
                   )
                   .map((event, index) => (
-                      <Typography variant="subtitle1" align="center" key={index}>
-                        <Box
-                            display={"flex-center"}
-                            justifyContent={"center"}
-                            alignItems={"center"}
-                        >
-                          {`${event.player.name} `}{" "}
-                          <Box ml={1}>
-                            {" "}
-                            <EventTime event={event} />
-                          </Box>
+                    <Typography variant="subtitle1" align="center" key={index}>
+                      <Box
+                        display={"flex-center"}
+                        justifyContent={"center"}
+                        alignItems={"center"}
+                      >
+                        {`${event.player.name} `}{" "}
+                        <Box ml={1}>
+                          {" "}
+                          <EventTime event={event} />
                         </Box>
-                      </Typography>
+                      </Box>
+                    </Typography>
                   ))
               ) : (
                 <Typography variant="body2">No events available.</Typography>
@@ -156,13 +157,15 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
             </Grid>
             <Grid item xs={12} sm={12}>
               <Typography
-                variant="body1"
+                variant="subtitle1"
                 align="center"
                 sx={{
-                  fontSize: "20px",
+                  fontSize: "16px",
                 }}
               >
-                Referee: {data.fixture?.referee}
+                <Box gap={1} display="inline-flex" alignItems="center">
+                  <Sports sx={{ fontSize: "24px" }} /> {data.fixture?.referee}
+                </Box>
               </Typography>
             </Grid>
           </Grid>
