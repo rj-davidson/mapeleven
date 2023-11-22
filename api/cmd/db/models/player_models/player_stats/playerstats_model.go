@@ -160,8 +160,7 @@ func (m *PlayerStatsModel) UpsertPlayerStats(ctx context.Context, p *ent.Player,
 		Query().
 		Where(league.FootballApiIdEQ(stats.League.ApiFootballId)).
 		Only(ctx)
-	if l == nil {
-		fmt.Printf("Skipping unsupported league [%v, %s] for [%s]\n", stats.League.ApiFootballId, stats.League.Name, p.Name)
+	if l == nil { // Skipping leagues that don't exist in our database
 		return nil, nil
 	}
 

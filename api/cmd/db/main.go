@@ -136,6 +136,7 @@ func updaterTicker(client *ent.Client) {
 }
 
 func fetchCountries(client *ent.Client) {
+	log.Printf("Fetching Countries [%s]", time.Now().Format("2006-01-02 15:04:05"))
 	countryController := controllers.NewCountryController(client)
 	err := countryController.InitializeCountries()
 	if err != nil {
@@ -144,6 +145,7 @@ func fetchCountries(client *ent.Client) {
 }
 
 func fetchLeagues(client *ent.Client) {
+	log.Printf("Fetching Leagues [%s]", time.Now().Format("2006-01-02 15:04:05"))
 	championsLeagueID := 2
 	premierLeagueID := 39
 	ligue1ID := 61
@@ -161,6 +163,7 @@ func fetchLeagues(client *ent.Client) {
 
 // Fetches standings from API and saves them to the database
 func fetchStandings(client *ent.Client) {
+	log.Printf("Fetching Standings [%s]", time.Now().Format("2006-01-02 15:04:05"))
 	standingsController := controllers.NewStandingsController(client)
 	err := standingsController.InitializeStandings(context.Background())
 	if err != nil {
@@ -170,6 +173,7 @@ func fetchStandings(client *ent.Client) {
 
 // Fetches Fixtures by league from API and saves them to the database
 func fetchFixtures(client *ent.Client) {
+	log.Printf("Fetching Fixtures [%s]", time.Now().Format("2006-01-02 15:04:05"))
 	fixtureController := controllers.NewFixtureController(client)
 	err := fixtureController.InitializeFixtures(context.Background())
 	if err != nil {
@@ -178,6 +182,7 @@ func fetchFixtures(client *ent.Client) {
 }
 
 func fetchTeamStats(client *ent.Client) {
+	log.Printf("Fetching Team Stats [%s]", time.Now().Format("2006-01-02 15:04:05"))
 	teamStatsController := controllers.NewTeamStatsController(client)
 	tm := team_models.NewTeamModel(client)
 	teams, err := tm.ListAll(context.Background())
@@ -192,7 +197,7 @@ func fetchTeamStats(client *ent.Client) {
 }
 
 func fetchSquads(client *ent.Client) {
-	fmt.Println("Fetching Squads...")
+	log.Printf("Fetching Squads [%s]", time.Now().Format("2006-01-02 15:04:05"))
 
 	tm := team_models.NewTeamModel(client)
 	teams, err := tm.ListAll(context.Background())
@@ -210,7 +215,7 @@ func fetchSquads(client *ent.Client) {
 }
 
 func fetchFixtureData(client *ent.Client) {
-	fmt.Println("Fetching fixture data...")
+	log.Printf("Fetching Fixture Data [%s]", time.Now().Format("2006-01-02 15:04:05"))
 	fixtureDataController := controllers.NewFixtureDataController(client)
 	err := fixtureDataController.FetchFixtures(context.Background())
 	if err != nil {
@@ -227,7 +232,7 @@ func fetchTodaysFixtures(client *ent.Client) {
 	if len(todaysFixtures) == 0 {
 		return
 	}
-	fmt.Println("Fetching today's fixtures...")
+	log.Printf("Fetching Today's Fixtures [%s]", time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		fmt.Printf("Error fetching today's fixtures: %v", err)
 	}
@@ -250,7 +255,7 @@ func fetchLiveFixtures(client *ent.Client) {
 	if len(liveFixtures) == 0 {
 		return
 	}
-	fmt.Println("Fetching live fixtures...")
+	log.Printf("Fetching Live Fixtures [%s]", time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		fmt.Printf("Error fetching live fixtures: %v", err)
 	}
