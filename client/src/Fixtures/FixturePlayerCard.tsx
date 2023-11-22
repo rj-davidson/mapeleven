@@ -54,14 +54,10 @@ const FixturePlayerCard: React.FC<FixturePlayerCardProps> = ({ slug }) => {
         </Grid>
     ) : (
         <Grid container spacing={2}>
-            <Grid item xs={12} sm={12} md={12} lg={3} width='100%'>
-                <Grid container spacing={2}>
-                    <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
+            <Grid item xs={12} sm={12} md={12} lg={12} width='100%'>
                         <PlayerIDCard
                             slug={slug} playerData={playerData}
                         />
-                    </Grid>
-                </Grid>
             </Grid>
         </Grid>
     );

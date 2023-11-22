@@ -85,9 +85,11 @@ function FixturePageSingle() {
                                 badge={fixtureData.teams.home.logo}
                             />
                         )}
-                        {fixtureData && fixtureData.teams && fixtureData.events && (
-                            <FixturePlayerStepperHome events={fixtureData.events} homeTeamName={fixtureData.teams.home.name}/>
-                        )}
+                        <div style={{ marginTop: '16px' }}>
+                            {fixtureData && fixtureData.teams && fixtureData.events && (
+                                <FixturePlayerStepperHome events={fixtureData.events} homeTeamName={fixtureData.teams.home.name}/>
+                            )}
+                        </div>
                     </Grid>
                     <Grid item xs={12} sm={6}>
                         <Tile sx={{ flexDirection: "column" }}>
@@ -112,16 +114,13 @@ function FixturePageSingle() {
                                 badge={fixtureData.teams.away.logo}
                             />
                         )}
-                        {fixtureData && fixtureData.teams && fixtureData.events && (
-                            <FixturePlayerStepperAway events={fixtureData.events} awayTeamName={fixtureData.teams.away.name}/>
-                        )}
+                        <div style={{ marginTop: '16px' }}>
+                            {fixtureData && fixtureData.teams && fixtureData.events && (
+                                <FixturePlayerStepperAway events={fixtureData.events} awayTeamName={fixtureData.teams.away.name}/>
+                            )}
+                        </div>
                     </Grid>
                 </Grid>
-            </Grid>
-            <Grid>
-                {fixtureData && fixtureData.teams && fixtureData.events && (
-                    <FixturePlayerStepper events={fixtureData?.events} />
-                )}
             </Grid>
         </Grid>
     );

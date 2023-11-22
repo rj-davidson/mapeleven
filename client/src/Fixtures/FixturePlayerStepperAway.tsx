@@ -5,6 +5,7 @@ import FixturePlayerCard from "./FixturePlayerCard";
 import Typography from "@mui/material/Typography";
 import { Grid } from '@mui/material';
 import {Tile} from "../Util/TileTS";
+import {Flex} from "../Util/Flex";
 
 interface FixturePlayerStepperAwayProps {
     events: APIFixtureEvent[];
@@ -26,7 +27,7 @@ const FixturePlayerStepperAway: React.FC<FixturePlayerStepperAwayProps> = ({ eve
         const interval = setInterval(() => {
             // Increment the player index, and loop back to 0 if it exceeds the array length
             setCurrentPlayerIndex((prevIndex) => (prevIndex + 1) % scoringPlayers.length);
-        }, 3000); // Change the interval time (in milliseconds) as needed
+        }, 6000); // Change the interval time (in milliseconds) as needed
 
         // Clear the interval when the component is unmounted
         return () => clearInterval(interval);
@@ -41,16 +42,18 @@ const FixturePlayerStepperAway: React.FC<FixturePlayerStepperAwayProps> = ({ eve
     };
 
     return (
-        <Grid >
+        <Flex style={{flexDirection:'column', gap:'8px'}}>
             {timeScored[currentPlayerIndex] && scoringPlayers[currentPlayerIndex] &&
-            <Tile>
-                <Typography>
-                    Goal Scored in {timeScored[currentPlayerIndex].elapsed}th minute:
-                </Typography>
-                <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
-            </Tile>
+                <Flex style={{flexDirection:'column', gap:'8px'}}>
+                    <Tile >
+                        <Typography align="center" sx={{fontSize: '20px'}}>
+                            Goal Scored in {timeScored[currentPlayerIndex].elapsed}th minute:
+                        </Typography>
+                    </Tile>
+                    <FixturePlayerCard slug={scoringPlayers[currentPlayerIndex]?.slug} />
+                </Flex>
             }
-        </Grid>
+        </Flex>
     );
 };
 
