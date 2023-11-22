@@ -6,12 +6,12 @@ import Typography from "@mui/material/Typography";
 import { Grid } from '@mui/material';
 import {Tile} from "../Util/TileTS";
 
-interface FixturePlayerStepperProps {
+interface FixturePlayerStepperHomeProps {
     events: APIFixtureEvent[];
     homeTeamName: string;
 }
 
-const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events, homeTeamName}) => {
+const FixturePlayerStepperHome: React.FC<FixturePlayerStepperHomeProps> = ({ events, homeTeamName}) => {
     const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
 
     // Filter events to get only those with type 'Goal'
@@ -53,4 +53,4 @@ const FixturePlayerStepper: React.FC<FixturePlayerStepperProps> = ({ events, hom
     );
 };
 
-export default FixturePlayerStepper;
+export default FixturePlayerStepperHome;
