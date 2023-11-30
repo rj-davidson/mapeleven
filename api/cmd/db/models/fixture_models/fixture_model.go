@@ -7,7 +7,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
 	"context"
-	"fmt"
+	"log"
 	"time"
 )
 
@@ -211,18 +211,18 @@ func (fm *FixtureModel) UpsertFixtureData(apiFootballId int, data FixtureDetails
 	if len(data.Lineups) > 0 {
 		_, err = UpsertLineup(f, homeTeam, data.Lineups[0], fm.client, ctx)
 		if err != nil {
-			fmt.Printf("Error upserting lineup: %v", err)
+			log.Printf("Error upserting lineup: %v", err)
 		}
 
 		_, err = UpsertLineup(f, awayTeam, data.Lineups[1], fm.client, ctx)
 		if err != nil {
-			fmt.Printf("Error upserting lineup: %v", err)
+			log.Printf("Error upserting lineup: %v", err)
 		}
 	}
 
 	err = RepopulateEvents(f, fm.client, data.Events, ctx)
 	if err != nil {
-		fmt.Printf("Error repopulating events: %v", err)
+		log.Printf("Error repopulating events: %v", err)
 	}
 
 	return nil

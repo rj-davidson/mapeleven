@@ -22,7 +22,7 @@ func RepopulateEvents(f *ent.Fixture, client *ent.Client, events []Event, ctx co
 
 	for _, event := range events {
 		if err := createFixtureEvent(f, client, event, ctx, teamCache, playerCache); err != nil {
-			return err
+			fmt.Printf("Error creating fixture event: %v", err)
 		}
 	}
 

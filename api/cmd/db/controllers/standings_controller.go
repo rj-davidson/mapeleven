@@ -158,7 +158,7 @@ func (sc *StandingsController) parseStandingsResponse(data []byte, s *ent.Season
 				if err != nil {
 					fmt.Println("Error ensuring team exists: ", err)
 				}
-				standingsInput := models.CreateStandingsInput{
+				standingsInput := models.StandingsForm{
 					Rank:             standing.Rank,
 					Description:      standing.Description,
 					SeasonID:         s.ID,
@@ -199,20 +199,17 @@ func (sc *StandingsController) parseStandingsResponse(data []byte, s *ent.Season
 	return leagueStandings, nil
 }
 
-func (sc *StandingsController) upsertStandings(ctx context.Context, standingsInput *models.CreateStandingsInput, year, apiFootballLeagueId, apiFootballClubId int) (*ent.Standings, error) {
-	existingStanding := sc.standingsModel.CheckIfStandingsExist(ctx, standingsInput.Team, standingsInput.SeasonID)
+func (sc *StandingsController) upsertStandings(ctx context.Context, standingsInput *models.StandingsForm, year, apiFootballLeagueId, apiFootballClubId int) (*ent.Standings, error) {
+	standingExists, standing := sc.standingsModel.Exists(ctx, standingsInput.Team, standingsInput.SeasonID)
+	t, err := sc.teamController.GetTeam(ctx, year, apiFootballLeagueId, apiFootballClubId)
 
-	if !existingStanding {
-		t, err := sc.teamController.GetTeam(ctx, year, apiFootballLeagueId, apiFootballClubId)
+	if !standingExists {
 		if err != nil {
 			return nil, err
 		}
 		return sc.standingsModel.CreateStandings(ctx, *standingsInput, t)
 	} else {
-		// TODO Implement update
-
-		// Return  nil and an error statying that update standings has not been implemented yet
-		return nil, fmt.Errorf("update standings has not been implemented yet")
+		return sc.standingsModel.UpdateStandings(ctx, *standingsInput, standing.ID)
 
 	}
 }

@@ -9,7 +9,6 @@ import (
 	"context"
 	"entgo.io/ent/dialect"
 	"flag"
-	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"log"
@@ -52,7 +51,7 @@ func main() {
 	defer func(client *ent.Client) {
 		err := client.Close()
 		if err != nil {
-			fmt.Printf("Error closing client: %v", err)
+			log.Printf("Error closing client: %v", err)
 		}
 	}(client)
 	ctx := context.Background()
@@ -142,24 +141,24 @@ func fetchCountries(client *ent.Client) {
 	countryController := controllers.NewCountryController(client)
 	err := countryController.InitializeCountries()
 	if err != nil {
-		fmt.Printf("error initializing countries: %v", err)
+		log.Printf("error initializing countries: %v", err)
 	}
 }
 
 func fetchLeagues(client *ent.Client) {
 	log.Printf("Fetching Leagues")
-	championsLeagueID := 2
 	premierLeagueID := 39
 	ligue1ID := 61
 	bundesligaID := 78
 	laLigaID := 140
-	mlsID := 253
-	leagueIDs := []int{championsLeagueID, premierLeagueID, ligue1ID, bundesligaID, laLigaID, mlsID}
+	serieAID := 135
+	eredivisieID := 88
+	leagueIDs := []int{eredivisieID, premierLeagueID, ligue1ID, serieAID, bundesligaID, laLigaID}
 
 	leagueController := controllers.NewLeagueController(client)
 	err := leagueController.InitializeLeagues(leagueIDs, context.Background())
 	if err != nil {
-		fmt.Printf("error initializing leagues: %v", err)
+		log.Printf("error initializing leagues: %v", err)
 	}
 }
 
@@ -169,7 +168,7 @@ func fetchStandings(client *ent.Client) {
 	standingsController := controllers.NewStandingsController(client)
 	err := standingsController.InitializeStandings(context.Background())
 	if err != nil {
-		fmt.Printf("error initializing standings: %v", err)
+		log.Printf("error initializing standings: %v", err)
 	}
 }
 
@@ -179,7 +178,7 @@ func fetchFixtures(client *ent.Client) {
 	fixtureController := controllers.NewFixtureController(client)
 	err := fixtureController.InitializeFixtures(context.Background())
 	if err != nil {
-		fmt.Printf("error initializing fixtures: %v", err)
+		log.Printf("error initializing fixtures: %v", err)
 	}
 }
 
@@ -189,12 +188,12 @@ func fetchTeamStats(client *ent.Client) {
 	tm := team_models.NewTeamModel(client)
 	teams, err := tm.ListAll(context.Background())
 	if err != nil {
-		fmt.Printf("error fetching teams: %v", err)
+		log.Printf("error fetching teams: %v", err)
 		return
 	}
 	err = teamStatsController.InitializeFixtures(teams, context.Background())
 	if err != nil {
-		fmt.Printf("error initializing team stats: %v", err)
+		log.Printf("error initializing team stats: %v", err)
 	}
 }
 
@@ -204,16 +203,16 @@ func fetchSquads(client *ent.Client) {
 	tm := team_models.NewTeamModel(client)
 	teams, err := tm.ListAll(context.Background())
 	if err != nil {
-		fmt.Printf("error fetching teams: %v", err)
+		log.Printf("error fetching teams: %v", err)
 		return
 	}
 
 	squadController := controllers.NewSquadController(client)
 	err = squadController.InitializeSquads(teams, context.Background())
 	if err != nil {
-		fmt.Printf("error initializing squads: %v", err)
+		log.Printf("error initializing squads: %v", err)
 	}
-	fmt.Println("Squads successfully loaded.")
+	log.Println("Squads successfully loaded.")
 }
 
 func fetchFixtureData(client *ent.Client) {
@@ -221,9 +220,9 @@ func fetchFixtureData(client *ent.Client) {
 	fixtureDataController := controllers.NewFixtureDataController(client)
 	err := fixtureDataController.FetchFixtures(context.Background())
 	if err != nil {
-		fmt.Printf("error fetching fixture data: %v", err)
+		log.Printf("error fetching fixture data: %v", err)
 	}
-	fmt.Println("Fixture data successfully loaded.")
+	log.Println("Fixture data successfully loaded.")
 }
 
 func fetchTodaysFixtures(client *ent.Client) {
@@ -236,17 +235,17 @@ func fetchTodaysFixtures(client *ent.Client) {
 	}
 	log.Printf("Fetching Today's Fixtures")
 	if err != nil {
-		fmt.Printf("Error fetching today's fixtures: %v", err)
+		log.Printf("Error fetching today's fixtures: %v", err)
 	}
 	err = fc.UpdateFixtures(todaysFixtures)
 	if err != nil {
-		fmt.Printf("Error updating today's fixtures: %v", err)
+		log.Printf("Error updating today's fixtures: %v", err)
 	}
 	err = fdc.UpdateFixtures(context.Background(), todaysFixtures)
 	if err != nil {
-		fmt.Printf("Error updating today's fixtures: %v", err)
+		log.Printf("Error updating today's fixtures: %v", err)
 	}
-	fmt.Println("Today's fixtures successfully loaded.")
+	log.Println("Today's fixtures successfully loaded.")
 }
 
 func fetchLiveFixtures(client *ent.Client) {
@@ -259,15 +258,15 @@ func fetchLiveFixtures(client *ent.Client) {
 	}
 	log.Printf("Fetching Live Fixtures")
 	if err != nil {
-		fmt.Printf("Error fetching live fixtures: %v", err)
+		log.Printf("Error fetching live fixtures: %v", err)
 	}
 	err = fc.UpdateFixtures(liveFixtures)
 	if err != nil {
-		fmt.Printf("Error updating live fixtures: %v", err)
+		log.Printf("Error updating live fixtures: %v", err)
 	}
 	err = fdc.UpdateFixtures(context.Background(), liveFixtures)
 	if err != nil {
-		fmt.Printf("Error updating live fixtures: %v", err)
+		log.Printf("Error updating live fixtures: %v", err)
 	}
-	fmt.Println("Live fixtures successfully loaded.")
+	log.Println("Live fixtures successfully loaded.")
 }
