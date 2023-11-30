@@ -97,7 +97,11 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                   fontSize: "20px",
                 }}
               >
-                {data.fixture?.status === "Match Finished" ? "Full Time" : `${data.fixture?.elapsed}'`}
+                {
+                  ["In Progress", "First Half", "Second Half", "Extra Time"].indexOf(data.fixture?.status ?? "") !== -1
+                    ? `${data.fixture?.elapsed}'`
+                    : data.fixture?.status ?? `${data.fixture?.elapsed}'`
+                }
               </Typography>
             </Grid>
             <Grid item xs={12} sm={4}>
@@ -122,7 +126,7 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                     sx={{
                       fontSize: "42px",
                       "&:hover": {
-                        textDecoration: "underline", // Add underline on hover
+                        textDecoration: "underline",
                       },
                     }}
                   >
