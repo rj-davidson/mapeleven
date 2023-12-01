@@ -14,6 +14,8 @@ import HomePage from "./Home/HomePage";
 import PlayerPageSingle from "./Players/PlayerPageSingle";
 import FixturePageSingle from "./Fixtures/FixturePageSingle";
 import FixturePageSingleDemo from "./Fixtures/FixturePageSingleDemo";
+import MemberPage from "./About/MemberPage";
+import TutorialPage from "./About/TutorialPage";
 
 function App() {
   return (
@@ -33,6 +35,8 @@ function App() {
               <Route path="/teams" element={<TeamPageAll />} />
               <Route path="/leagues/:slug" element={<LeaguePage />} />
               <Route path="/leagues" element={<LeaguesPageAll />} />
+              <Route path="/tutorial" element={<TutorialPage />} />
+              <Route path="/members" element={<MemberPage />} />
               <Route path="/about" element={<About />} />
               <Route path="/" element={<HomePage />} />
             </Routes>
