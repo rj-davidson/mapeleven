@@ -100,15 +100,15 @@ func dataManager(client *ent.Client, initialize bool, runScheduler bool, devRun 
 }
 
 func updaterTicker(client *ent.Client) {
-	counTicker := time.NewTicker(12 * time.Hour)
-	leagTicker := time.NewTicker(12 * time.Hour)
-	standTicker := time.NewTicker(12 * time.Hour)
-	fixtTicker := time.NewTicker(12 * time.Hour)
-	teamTicker := time.NewTicker(12 * time.Hour)
-	squaTicker := time.NewTicker(12 * time.Hour)
-	fixDTicker := time.NewTicker(12 * time.Hour)
-	fetchTodayTicker := time.NewTicker(150 * time.Second)
-	fetchLiveTicker := time.NewTicker(45 * time.Second)
+	counTicker := time.NewTicker(24 * time.Hour)
+	leagTicker := time.NewTicker(24 * time.Hour)
+	standTicker := time.NewTicker(24 * time.Hour)
+	fixtTicker := time.NewTicker(24 * time.Hour)
+	teamTicker := time.NewTicker(24 * time.Hour)
+	squaTicker := time.NewTicker(24 * time.Hour)
+	fixDTicker := time.NewTicker(24 * time.Hour)
+	fetchTodayTicker := time.NewTicker(600 * time.Second)
+	fetchLiveTicker := time.NewTicker(120 * time.Second)
 
 	go func() {
 		for {

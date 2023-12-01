@@ -2,6 +2,7 @@ package models
 
 import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
+	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/club"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/season"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/standings"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/team"
@@ -178,7 +179,7 @@ func (m *StandingsModel) Exists(ctx context.Context, teamID, seasonID int) (bool
 		Query().
 		Where(
 			standings.HasTeamWith(
-				team.ID(teamID),
+				team.HasClubWith(club.ApiFootballIdEQ(teamID)),
 			),
 			standings.HasSeasonWith(
 				season.ID(seasonID),
