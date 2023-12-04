@@ -107,7 +107,7 @@ func updaterTicker(client *ent.Client) {
 	teamTicker := time.NewTicker(24 * time.Hour)
 	squaTicker := time.NewTicker(24 * time.Hour)
 	fixDTicker := time.NewTicker(24 * time.Hour)
-	fetchTodayTicker := time.NewTicker(600 * time.Second)
+	refreshFxtr := time.NewTicker(120 * time.Second)
 	fetchLiveTicker := time.NewTicker(120 * time.Second)
 
 	go func() {
@@ -127,8 +127,8 @@ func updaterTicker(client *ent.Client) {
 				go fetchSquads(client)
 			case <-fixDTicker.C:
 				go fetchFixtureData(client)
-			case <-fetchTodayTicker.C:
-				go fetchTodaysFixtures(client)
+			case <-refreshFxtr.C:
+				go refreshFixtures(client)
 			case <-fetchLiveTicker.C:
 				go fetchLiveFixtures(client)
 			}
@@ -225,26 +225,10 @@ func fetchFixtureData(client *ent.Client) {
 	log.Println("Fixture data successfully loaded.")
 }
 
-func fetchTodaysFixtures(client *ent.Client) {
-	fc := controllers.NewFixtureController(client)
-	fdc := controllers.NewFixtureDataController(client)
-	fm := fixture_models.NewFixtureModel(client)
-	todaysFixtures, err := fm.ListTodaysFixtures(context.Background())
-	if len(todaysFixtures) == 0 {
-		return
-	}
+func refreshFixtures(client *ent.Client) {
+	fm := controllers.NewFixtureController(client)
 	log.Printf("Fetching Today's Fixtures")
-	if err != nil {
-		log.Printf("Error fetching today's fixtures: %v", err)
-	}
-	err = fc.UpdateFixtures(todaysFixtures)
-	if err != nil {
-		log.Printf("Error updating today's fixtures: %v", err)
-	}
-	err = fdc.UpdateFixtures(context.Background(), todaysFixtures)
-	if err != nil {
-		log.Printf("Error updating today's fixtures: %v", err)
-	}
+	fm.RefreshFixtures(context.Background())
 	log.Println("Today's fixtures successfully loaded.")
 }
 

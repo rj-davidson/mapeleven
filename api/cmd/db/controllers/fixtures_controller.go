@@ -98,6 +98,19 @@ func (fc *FixtureController) InitializeFixtures(ctx context.Context) error {
 	return nil
 }
 
+// RefreshFixtures fetches fixtures for all leagues in the database
+func (fc *FixtureController) RefreshFixtures(ctx context.Context) {
+	log.Println("Refreshing fixtures...")
+
+	// Get all leagues from the database
+	err := fc.InitializeFixtures(ctx)
+	if err != nil {
+		log.Printf("Error refreshing fixtures: %v", err)
+	}
+
+	log.Println("[ Finished refreshing fixtures ]")
+}
+
 // UpdateFixtures updates fixtures given a list of *ent.Fixture
 func (fc *FixtureController) UpdateFixtures(fixtures []*ent.Fixture) error {
 	ctx := context.Background()

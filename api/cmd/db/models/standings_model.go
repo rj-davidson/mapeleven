@@ -10,7 +10,7 @@ import (
 	"errors"
 )
 
-// StandingsForm holds the required fields to create a new standings entry.
+// StandingsForm holds the required fields to create a new standings' entry.
 type StandingsForm struct {
 	Rank         int
 	Description  string

@@ -228,27 +228,7 @@ func (fm *FixtureModel) UpsertFixtureData(apiFootballId int, data FixtureDetails
 	return nil
 }
 
-// ListTodaysFixtures List fixtures that will be played today or tomorrow and do not have the status of FT, AET, PEN, or CANC
-func (fm *FixtureModel) ListTodaysFixtures(ctx context.Context) ([]*ent.Fixture, error) {
-	today := time.Now().UTC()
-	tomorrow := today.AddDate(0, 0, 1)
-	return fm.client.Fixture.
-		Query().
-		Where(
-			fixture.DateGTE(today),
-			fixture.DateLT(tomorrow),
-			fixture.StatusNEQ("FT"),
-			fixture.StatusNEQ("AET"),
-			fixture.StatusNEQ("PEN"),
-			fixture.StatusNEQ("CANC"),
-		).
-		WithSeason(func(sq *ent.SeasonQuery) {
-			sq.WithLeague()
-		}).
-		All(ctx)
-}
-
-// ListLiveFixtures lists fixtures that are scheduled for today or tomorrow and have the status of 1H, HT, 2H, ET, BT, or P
+// ListLiveFixtures lists fixtures that are scheduled for today or tomorrow and have an ongoing match status
 func (fm *FixtureModel) ListLiveFixtures(ctx context.Context) ([]*ent.Fixture, error) {
 	today := time.Now().UTC()
 	tomorrow := today.AddDate(0, 0, 1)
@@ -257,12 +237,15 @@ func (fm *FixtureModel) ListLiveFixtures(ctx context.Context) ([]*ent.Fixture, e
 		Where(
 			fixture.DateGTE(today),
 			fixture.DateLT(tomorrow),
-			fixture.StatusEQ("1H"),
-			fixture.StatusEQ("HT"),
-			fixture.StatusEQ("2H"),
-			fixture.StatusEQ("ET"),
-			fixture.StatusEQ("BT"),
-			fixture.StatusEQ("P"),
+			fixture.StatusIn(
+				"First Half",
+				"Half Time",
+				"Second Half",
+				"Extra Time",
+				"Break Time",
+				"Penalty In Progress",
+				"Penalty",
+				"Penalties"),
 		).
 		WithSeason(func(sq *ent.SeasonQuery) {
 			sq.WithLeague()
