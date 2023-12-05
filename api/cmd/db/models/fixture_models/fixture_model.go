@@ -162,6 +162,10 @@ func (fm *FixtureModel) UpdateBaseFixture(ctx context.Context, input UpdateFixtu
 		Where(fixture.ApiFootballIdEQ(input.ApiFootballId)).
 		Only(ctx)
 	updater := fm.client.Fixture.UpdateOne(f)
+	if input.Elapsed != nil {
+		updater.SetElapsed(*input.Elapsed)
+	}
+
 	if input.Round != nil {
 		updater.SetRound(*input.Round)
 	}
