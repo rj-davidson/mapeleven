@@ -236,19 +236,26 @@ func (fm *FixtureModel) ListLiveFixtures(ctx context.Context) ([]*ent.Fixture, e
 		Query().
 		Where(
 			fixture.DateGTE(today),
-			fixture.DateLT(tomorrow),
+			fixture.DateLTE(tomorrow),
 			fixture.StatusIn(
 				"First Half",
-				"Half Time",
+				"Kick Off",
+				"Halftime",
 				"Second Half",
+				"2nd Half Started",
 				"Extra Time",
 				"Break Time",
-				"Penalty In Progress",
-				"Penalty",
-				"Penalties"),
+				"Penalty In Progress"),
 		).
 		WithSeason(func(sq *ent.SeasonQuery) {
 			sq.WithLeague()
+		}).
+		WithHomeTeam(func(tq *ent.TeamQuery) {
+			tq.WithClub()
+
+		}).
+		WithAwayTeam(func(tq *ent.TeamQuery) {
+			tq.WithClub()
 		}).
 		All(ctx)
 }

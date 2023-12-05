@@ -90,7 +90,7 @@ func dataManager(client *ent.Client, initialize bool, runScheduler bool, devRun 
 	}
 
 	if runScheduler {
-		log.Printf("Running Scheduler")
+		log.Printf("------ Updating Database ------")
 		updaterTicker(client)
 	}
 
@@ -227,9 +227,9 @@ func fetchFixtureData(client *ent.Client) {
 
 func refreshFixtures(client *ent.Client) {
 	fm := controllers.NewFixtureController(client)
-	log.Printf("Fetching Today's Fixtures")
+	log.Printf("Refreshing Fixtures")
 	fm.RefreshFixtures(context.Background())
-	log.Println("Today's fixtures successfully loaded.")
+	log.Println("Fixtures successfully refreshed.")
 }
 
 func fetchLiveFixtures(client *ent.Client) {
@@ -241,6 +241,12 @@ func fetchLiveFixtures(client *ent.Client) {
 		return
 	}
 	log.Printf("Fetching Live Fixtures")
+	for _, fixture := range liveFixtures {
+		log.Printf("Fixture: %d [%s v. %s]",
+			fixture.ApiFootballId,
+			fixture.Edges.HomeTeam.Edges.Club.Name,
+			fixture.Edges.AwayTeam.Edges.Club.Name)
+	}
 	if err != nil {
 		log.Printf("Error fetching live fixtures: %v", err)
 	}
