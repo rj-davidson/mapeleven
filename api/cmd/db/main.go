@@ -78,7 +78,7 @@ func main() {
 }
 
 func dataManager(client *ent.Client, initialize bool, runScheduler bool, devRun bool) {
-	if initialize { //|| runScheduler {
+	if initialize || runScheduler {
 		fetchCountries(client)
 		fetchLeagues(client)
 		fetchStandings(client)
@@ -147,16 +147,16 @@ func fetchCountries(client *ent.Client) {
 
 func fetchLeagues(client *ent.Client) {
 	log.Printf("Fetching Leagues")
-	//premierLeagueID := 39
-	//ligue1ID := 61
-	//bundesligaID := 78
-	//laLigaID := 140
-	//serieAID := 135
-	//eredivisieID := 88
-	//leagueIDs := []int{eredivisieID, premierLeagueID, ligue1ID, serieAID, bundesligaID, laLigaID}
+	premierLeagueID := 39
+	ligue1ID := 61
+	bundesligaID := 78
+	laLigaID := 140
+	serieAID := 135
+	eredivisieID := 88
+	leagueIDs := []int{eredivisieID, premierLeagueID, ligue1ID, serieAID, bundesligaID, laLigaID}
 
 	leagueController := controllers.NewLeagueController(client)
-	err := leagueController.InitializeLeagues([]int{39}, context.Background())
+	err := leagueController.InitializeLeagues(leagueIDs, context.Background())
 	if err != nil {
 		log.Printf("error initializing leagues: %v", err)
 	}
