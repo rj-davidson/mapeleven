@@ -230,12 +230,13 @@ func (fm *FixtureModel) UpsertFixtureData(apiFootballId int, data FixtureDetails
 
 // ListLiveFixtures lists fixtures that are scheduled for today or tomorrow and have an ongoing match status
 func (fm *FixtureModel) ListLiveFixtures(ctx context.Context) ([]*ent.Fixture, error) {
-	today := time.Now().UTC()
+	today := time.Now().UTC().Truncate(24 * time.Hour)
+	yesterday := today.AddDate(0, 0, -1)
 	tomorrow := today.AddDate(0, 0, 1)
 	return fm.client.Fixture.
 		Query().
 		Where(
-			fixture.DateGTE(today),
+			fixture.DateGTE(yesterday),
 			fixture.DateLTE(tomorrow),
 			fixture.StatusIn(
 				"First Half",

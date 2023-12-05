@@ -67,6 +67,10 @@ docker-down-db:
 	@echo "+ $@"
 	docker-compose down db
 
+docker-down-controller:
+	@echo "+ $@"
+	docker-compose down api-db
+
 docker-down-client:
 	@echo "+ $@"
 	docker-compose down client
