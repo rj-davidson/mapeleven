@@ -48,6 +48,18 @@ type APIFixtureResponse struct {
 				Home int `json:"home"`
 				Away int `json:"away"`
 			} `json:"fulltime"`
+			Halftime struct {
+				Home int `json:"home"`
+				Away int `json:"away"`
+			} `json:"halftime"`
+			Extratime struct {
+				Home int `json:"home"`
+				Away int `json:"away"`
+			} `json:"extratime"`
+			Penalty struct {
+				Home int `json:"home"`
+				Away int `json:"away"`
+			} `json:"penalty"`
 		} `json:"score"`
 	} `json:"response"`
 }
@@ -223,6 +235,17 @@ func (fc *FixtureController) parseFixturesResponse(data []byte, season *ent.Seas
 			return nil, err
 		}
 
+		var homeScore *int
+		var awayScore *int
+
+		if res.Fixture.Status.Long == "Match Finished" || res.Fixture.Status.Long == "Full Time" {
+			homeScore = &res.Score.Fulltime.Home
+			awayScore = &res.Score.Fulltime.Away
+		} else {
+			homeScore = nil
+			awayScore = nil
+		}
+
 		fixtureInput := fixture_models.CreateFixtureInput{
 			ApiFootballId: res.Fixture.ID,
 			Referee:       &res.Fixture.Referee,
@@ -230,8 +253,8 @@ func (fc *FixtureController) parseFixturesResponse(data []byte, season *ent.Seas
 			Date:          parsedDate,
 			Elapsed:       &res.Fixture.Status.Elapsed,
 			Status:        res.Fixture.Status.Long,
-			HomeTeamScore: &res.Score.Fulltime.Home,
-			AwayTeamScore: &res.Score.Fulltime.Away,
+			HomeTeamScore: homeScore,
+			AwayTeamScore: awayScore,
 			Season:        season,
 			HomeTeamID:    res.Teams.Home.ID,
 			AwayTeamID:    res.Teams.Away.ID,

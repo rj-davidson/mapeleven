@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"io"
+	"log"
 	"net/http"
 )
 
@@ -111,6 +112,8 @@ func (fdc *FixtureDataController) writeFixtureData(apiFootballId int, data fixtu
 	if err != nil {
 		fmt.Printf("Error upserting fixture data: %v", err)
 	}
+
+	fdc.calculateScores(data, apiFootballId)
 	return nil
 }
 
@@ -126,5 +129,29 @@ func (fdc *FixtureDataController) handleLineupPlayers(ctx context.Context, lineu
 		if err != nil {
 			fmt.Printf("[FixtureDataController] Error ensuring player exists: %v", err)
 		}
+	}
+}
+
+// Calculate scores by totaling fixture goal events
+func (fdc *FixtureDataController) calculateScores(data fixture_models.FixtureDetails, apiFootballId int) {
+	homeTeamScore := 0
+	awayTeamScore := 0
+	for _, event := range data.Events {
+		if event.Type == "Goal" {
+			if event.Team.ID == data.Teams.Home.ID {
+				homeTeamScore += 1
+			} else {
+				awayTeamScore += 1
+			}
+		}
+	}
+
+	f, err := fdc.fixtureModel.GetFixtureByApiFootballId(context.Background(), apiFootballId)
+	if err != nil {
+		log.Printf("calculateScores: Error getting fixture: %v", err)
+	}
+	_, err = f.Update().SetHomeTeamScore(homeTeamScore).SetAwayTeamScore(awayTeamScore).Save(context.Background())
+	if err != nil {
+		log.Printf("calculateScores: Error updating fixture: %v", err)
 	}
 }
