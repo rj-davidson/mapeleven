@@ -10,9 +10,10 @@ interface LineupPlayerProps {
     photo: string;
     home: boolean;
     mobile: boolean;
+    number: number;
 }
 
-const LineupPlayer: React.FC<LineupPlayerProps> = ({ player, index, photo, home, mobile }) => {
+const LineupPlayer: React.FC<LineupPlayerProps> = ({ player, index, photo, home, mobile, number }) => {
     const [isHovered, setIsHovered] = useState<boolean>(false);
 
     return (
@@ -31,7 +32,7 @@ const LineupPlayer: React.FC<LineupPlayerProps> = ({ player, index, photo, home,
                     width={'50px'}
                     height={'50px'}
                     sx={{
-                        borderRadius: '10px',
+                        borderRadius: '50%',
                         border: isHovered
                             ? 'thick solid var(--light0)'
                             : home
@@ -39,7 +40,17 @@ const LineupPlayer: React.FC<LineupPlayerProps> = ({ player, index, photo, home,
                             : 'thick solid var(--blue)',
                     }}
                 />
-                {!mobile && <Typography>{player.name}</Typography>}
+              <Box display="flex" justifyContent="center" alignItems="center" paddingTop={1}>
+                <Typography
+                  variant="subtitle2"
+                  style={{
+                    whiteSpace: 'nowrap',
+                    fontSize: mobile ? 10 : 'initial'
+                  }}
+                >
+                  {'[' + number + '] ' + player.name}
+                </Typography>
+              </Box>
             </Flex>
         </Box>
     );

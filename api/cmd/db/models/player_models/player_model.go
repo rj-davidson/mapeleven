@@ -6,6 +6,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/player"
 	"context"
 	"errors"
+	"strings"
 )
 
 // CreatePlayerInput holds the required fields to create a new player.
@@ -182,9 +183,9 @@ func (m *PlayerModel) CreatePlayer(ctx context.Context, input CreatePlayerInput)
 	p, err := m.client.Player.
 		Create().
 		SetApiFootballId(input.ApiFootballId).
-		SetName(input.Name).
-		SetFirstname(input.Firstname).
-		SetLastname(input.Lastname).
+		SetName(playerName(input.Name)).
+		SetFirstname(playerName(input.Firstname)).
+		SetLastname(playerName(input.Lastname)).
 		SetSlug(utils.Slugify(input.Name)).
 		SetAge(input.Age).
 		SetHeight(input.Height).
@@ -208,13 +209,13 @@ func (m *PlayerModel) UpdatePlayer(ctx context.Context, input UpdatePlayerInput)
 	update := m.client.Player.UpdateOne(pl)
 
 	if input.Name != nil {
-		update.SetName(*input.Name)
+		update.SetName(playerName(*input.Name))
 	}
 	if input.Firstname != nil {
-		update.SetFirstname(*input.Firstname)
+		update.SetFirstname(playerName(*input.Firstname))
 	}
 	if input.Lastname != nil {
-		update.SetLastname(*input.Lastname)
+		update.SetLastname(playerName(*input.Lastname))
 	}
 	if input.Age != nil {
 		update.SetAge(*input.Age)
@@ -322,4 +323,8 @@ func (m *PlayerModel) WithTransaction(ctx context.Context, fn func(tx *ent.Tx) e
 		return err
 	}
 	return tx.Commit()
+}
+
+func playerName(name string) string {
+	return strings.ReplaceAll(name, "&apos;", "'")
 }

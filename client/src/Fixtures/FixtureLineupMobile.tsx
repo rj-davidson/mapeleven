@@ -122,6 +122,7 @@ const FixtureLineup: React.FC<FixtureLineupProps> = ({
                   photo={homePhotos[player.slug]}
                   home={true}
                   mobile={true}
+                  number={player.number}
                 />
               </Link>
             ))}
@@ -156,6 +157,7 @@ const FixtureLineup: React.FC<FixtureLineupProps> = ({
                   photo={awayPhotos[player.slug]}
                   home={false}
                   mobile={true}
+                  number={player.number}
                 />
               </Link>
             ))}
