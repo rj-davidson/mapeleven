@@ -99,7 +99,7 @@ export default function ListFixtures(): JSX.Element {
               sx={{ fontSize: "16px", textAlign: "center" }}
               paddingY={4}
             >
-              No Fixtures
+              No fixtures on this day
             </Typography>
           )}
         </Box>

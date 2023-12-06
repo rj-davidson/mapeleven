@@ -214,7 +214,7 @@ interface APITeamFixtures {
   slug: string;
   homeTeam: APITeam;
   awayTeam: APITeam;
-  date: Date;
+  date: string;
   status: string;
 }
 
