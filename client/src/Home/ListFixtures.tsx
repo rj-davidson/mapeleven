@@ -35,7 +35,13 @@ export default function ListFixtures(): JSX.Element {
         });
 
         setFixtures(newFixtures);
-        setSelectedDate(new Date().toISOString().slice(0, 10));
+        const date = new Date();
+        const localDate = new Date(
+          date.getTime() - date.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .slice(0, 10);
+        setSelectedDate(localDate);
         setLoading(false);
       })
       .catch();
