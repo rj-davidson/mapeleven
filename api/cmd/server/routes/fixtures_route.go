@@ -63,14 +63,10 @@ func getParamOrDefault(c *fiber.Ctx, param string, defaultVal bool) bool {
 	return value == "true"
 }
 
-// TODO: Implement
-func getFixturesByLeague() fiber.Handler {
-	return nil
-}
-
 func getScoreboard(serializer *fixture_serializer.ScoreboardSerializer) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		scoreboard := serializer.SerializeScoreboard()
+		timezone := c.Query("timezone", "Europe/London")
+		scoreboard := serializer.SerializeScoreboard(timezone)
 		return c.JSON(scoreboard)
 	}
 }
