@@ -28,20 +28,14 @@ export default function ListFixtures(): JSX.Element {
         const newFixtures: Fixtures = {};
 
         jsonData.date.forEach((dateObj: APIScoreboardDate) => {
-          const convertedDate = new Date(dateObj.date);
+          const dateParts = dateObj.date.split("-");
+          const isoDateString = `${dateParts[2]}-${dateParts[0]}-${dateParts[1]}`;
+          const convertedDate = new Date(isoDateString);
           newFixtures[convertedDate.toISOString().slice(0, 10)] = dateObj;
         });
 
         setFixtures(newFixtures);
-        const date = new Date();
-        const localDate = new Date(
-          date.getTime() - date.getTimezoneOffset() * 60000
-        )
-          .toISOString()
-          .slice(0, 10);
-
-        setSelectedDate(localDate);
-
+        setSelectedDate(new Date().toISOString().slice(0, 10));
         setLoading(false);
       })
       .catch();
