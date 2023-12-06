@@ -115,7 +115,7 @@ const FixtureLineup: React.FC<FixtureLineupProps> = ({
             }}
           >
             {homeColumns[x].map((player, index) => (
-              <Link to={`/players/${player.slug}`}>
+              <Link to={`/players/${player.slug}`} key={player.slug}>
                 <LineupPlayer
                   player={player}
                   index={index}

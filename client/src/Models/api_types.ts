@@ -31,6 +31,7 @@ interface APIScoreboardDate {
       round?: number;
       status?: string;
       timezone?: string;
+      time?: string;
       homeTeam: {
         slug: string;
         name: string;
@@ -213,7 +214,7 @@ interface APITeamFixtures {
   slug: string;
   homeTeam: APITeam;
   awayTeam: APITeam;
-  date: Date;
+  date: string;
   status: string;
 }
 

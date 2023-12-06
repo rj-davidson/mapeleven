@@ -53,56 +53,67 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                 </Link>
               </Box>
 
-              {data.events ? (
-                data.events
-                  .filter(
-                    (event) =>
-                      data.teams !== undefined &&
-                      event.team.name === data.teams.home.name &&
-                      event.type === "Goal"
-                  )
-                  .map((event, index) => (
-                    <Typography variant="subtitle1" align="center" key={index}>
-                      <Box
-                        display={"flex-center"}
-                        justifyContent={"center"}
-                        alignItems={"center"}
+              {data.events
+                ? data.events
+                    .filter(
+                      (event) =>
+                        data.teams !== undefined &&
+                        event.team.name === data.teams.home.name &&
+                        event.type === "Goal"
+                    )
+                    .map((event, index) => (
+                      <Typography
+                        variant="subtitle1"
+                        align="center"
+                        key={index}
                       >
-                        {`${event.player.name} `}{" "}
-                        <Box ml={1}>
-                          {" "}
-                          <EventTime event={event} />
+                        <Box
+                          display={"flex-center"}
+                          justifyContent={"center"}
+                          alignItems={"center"}
+                        >
+                          {`${event.player.name} `}{" "}
+                          <Box ml={1}>
+                            {" "}
+                            <EventTime event={event} />
+                          </Box>
                         </Box>
-                      </Box>
-                    </Typography>
-                  ))
-              ) : (
-                <Typography variant="body2">No events available.</Typography>
-              )}
+                      </Typography>
+                    ))
+                : undefined}
             </Grid>
             <Grid item xs={12} sm={4}>
-              <Typography
-                variant="h4"
-                align="center"
-                sx={{
-                  fontSize: "42px",
-                }}
-              >
-                {data.fixture?.homeTeamScore} - {data.fixture?.awayTeamScore}
-              </Typography>
-              <Typography
-                variant="h6"
-                align="center"
-                sx={{
-                  fontSize: "20px",
-                }}
-              >
-                {
-                  ["In Progress", "First Half", "Second Half", "Extra Time"].indexOf(data.fixture?.status ?? "") !== -1
-                    ? `${data.fixture?.elapsed}'`
-                    : data.fixture?.status ?? `${data.fixture?.elapsed}'`
-                }
-              </Typography>
+              {data.fixture?.status !== "Not Started" && (
+                <>
+                  <Typography
+                    variant="h4"
+                    align="center"
+                    sx={{
+                      fontSize: "42px",
+                    }}
+                  >
+                    {data.fixture?.homeTeamScore} -{" "}
+                    {data.fixture?.awayTeamScore}
+                  </Typography>
+
+                  <Typography
+                    variant="h6"
+                    align="center"
+                    sx={{
+                      fontSize: "20px",
+                    }}
+                  >
+                    {[
+                      "In Progress",
+                      "First Half",
+                      "Second Half",
+                      "Extra Time",
+                    ].indexOf(data.fixture?.status ?? "") !== -1
+                      ? `${data.fixture?.elapsed}'`
+                      : data.fixture?.status ?? `${data.fixture?.elapsed}'`}
+                  </Typography>
+                </>
+              )}
             </Grid>
             <Grid item xs={12} sm={4}>
               <Box
@@ -134,44 +145,47 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                   </Typography>
                 </Link>
               </Box>
-              {data.events ? (
-                data.events
-                  .filter(
-                    (event) =>
-                      event.type === "Goal" &&
-                      data.teams !== undefined &&
-                      event.team.name === data.teams.away.name
-                  )
-                  .map((event, index) => (
-                    <Typography variant="subtitle1" align="center" key={index}>
-                      <Box
-                        display={"flex-center"}
-                        justifyContent={"center"}
-                        alignItems={"center"}
+              {data.events
+                ? data.events
+                    .filter(
+                      (event) =>
+                        event.type === "Goal" &&
+                        data.teams !== undefined &&
+                        event.team.name === data.teams.away.name
+                    )
+                    .map((event, index) => (
+                      <Typography
+                        variant="subtitle1"
+                        align="center"
+                        key={index}
                       >
-                        {`${event.player.name} `}{" "}
-                        <Box ml={1}>
-                          {" "}
-                          <EventTime event={event} />
+                        <Box
+                          display={"flex-center"}
+                          justifyContent={"center"}
+                          alignItems={"center"}
+                        >
+                          {`${event.player.name} `}{" "}
+                          <Box ml={1}>
+                            {" "}
+                            <EventTime event={event} />
+                          </Box>
                         </Box>
-                      </Box>
-                    </Typography>
-                  ))
-              ) : (
-                <Typography variant="body2">No events available.</Typography>
-              )}
+                      </Typography>
+                    ))
+                : undefined}
             </Grid>
             <Grid item xs={12} sm={12} sx={{ textAlign: "center" }}>
-              <Typography
-                variant="body1"
-                align="center"
-                sx={{
-                  fontSize: "20px",
-                }}
-              >
+              <Typography variant="h6" align="center">
                 {data.fixture &&
-                  new Date(data.fixture.date.toString()).toDateString()}{" "}
-                {data.fixture?.timezone}
+                  new Date(data.fixture.date.toString()).toDateString()}
+                {data.fixture &&
+                  data.fixture.status === "Not Started" &&
+                  ` - ${new Date(
+                    data.fixture.date.toString()
+                  ).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}`}
               </Typography>
             </Grid>
             <Grid item xs={12} sm={12}>
