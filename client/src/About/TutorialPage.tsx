@@ -4,8 +4,11 @@ import "../App.css";
 import Grid from "@mui/material/Grid";
 import { Tile } from "../Util/TileTS";
 import { Flex } from "../Util/Flex.jsx";
+import ReactPlayer from "react-player";
+import { useMediaQuery } from "@mui/material";
 
 function TutorialPage() {
+  const isMobile = useMediaQuery("(max-width: 1260px)");
   return (
     <Grid container spacing={2}>
       <Grid item xs={12} sm={12} md={12} lg={12} width="100%">
@@ -43,11 +46,26 @@ function TutorialPage() {
               Use the hamburger menu in the top left to find access to other
               pages on the site. Use the search bar in the top right to find
               players, teams, or leagues. The homepage contains popular players,
-              teams, and a list of matches/fixtures. Click on a player, team, or
-              match to go to its individual page. These matches are sorted by
-              the data. Use the arrows to step forward or back one day. Click on
-              the date to open a calendar.
+              teams, and a list of games/fixtures. Click on a player, team, or
+              game to go to its individual page. These games are sorted by the
+              data. Use the arrows to step forward or back one day. Click on the
+              date to open a calendar.
             </Typography>
+            <Flex
+              style={{
+                marginTop: "2%",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <ReactPlayer
+                url={"https://youtu.be/5d5f0_JjYCg"}
+                controls={true}
+                width={isMobile ? "100%" : "50%"}
+                style={{ border: "solid var(--dark0) 6px" }}
+              />
+            </Flex>
           </Flex>
         </Tile>
       </Grid>
@@ -63,16 +81,31 @@ function TutorialPage() {
                 fontWeight: "bold",
               }}
             >
-              Matches/Fixtures Page
+              Games/Fixtures Page
             </Typography>
             <Typography
               sx={{ fontSize: { xs: "20px", sm: "20px" }, marginLeft: "10px" }}
             >
               This page will show you the score, team lineups, goal scorers, and
-              more for a specific match. Click on a player's image or name to go
+              more for a specific game. Click on a player's image or name to go
               that player's page. Click on a team's name to go to that teams
-              page. Scroll down to see the full list of match events.
+              page. Scroll down to see the full list of game events.
             </Typography>
+            <Flex
+              style={{
+                marginTop: "2%",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <ReactPlayer
+                url={"https://youtu.be/78FVoqKwLvI"}
+                controls={true}
+                width={isMobile ? "100%" : "50%"}
+                style={{ border: "solid var(--dark0) 6px" }}
+              />
+            </Flex>
           </Flex>
         </Tile>
       </Grid>
@@ -103,6 +136,21 @@ function TutorialPage() {
               can select up to 6, with a minimum of 3 data points. Scroll down
               and you will find more stats and visualizations.
             </Typography>
+            <Flex
+              style={{
+                marginTop: "2%",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <ReactPlayer
+                url={"https://youtu.be/1YbPjjMm-jg"}
+                controls={true}
+                width={isMobile ? "100%" : "50%"}
+                style={{ border: "solid var(--dark0) 6px" }}
+              />
+            </Flex>
           </Flex>
         </Tile>
       </Grid>
@@ -133,6 +181,21 @@ function TutorialPage() {
               with a minimum of 3 data points. Scroll down and you will find
               more stats and visualizations plus a list players on the team.
             </Typography>
+            <Flex
+              style={{
+                marginTop: "2%",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <ReactPlayer
+                url={"https://youtu.be/h99wi_uaOHs"}
+                controls={true}
+                width={isMobile ? "100%" : "50%"}
+                style={{ border: "solid var(--dark0) 6px" }}
+              />
+            </Flex>
           </Flex>
         </Tile>
       </Grid>
@@ -158,6 +221,21 @@ function TutorialPage() {
               games won, games lost, and more. Select a team's name to go to
               that team's page.
             </Typography>
+            <Flex
+              style={{
+                marginTop: "2%",
+                justifyContent: "center",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <ReactPlayer
+                url={"https://youtu.be/xd8RLMMmsiQ"}
+                controls={true}
+                width={isMobile ? "100%" : "50%"}
+                style={{ border: "solid var(--dark0) 6px" }}
+              />
+            </Flex>
           </Flex>
         </Tile>
       </Grid>
