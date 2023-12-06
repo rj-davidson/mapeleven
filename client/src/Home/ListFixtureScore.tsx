@@ -1,6 +1,7 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import LinearProgress from "@mui/material/LinearProgress";
 import { useMediaQuery } from "@mui/material";
 
 interface ListFixtureScoreProps {
@@ -26,6 +27,8 @@ const ListFixtureScore: React.FC<ListFixtureScoreProps> = ({
   const displayScore =
     status === "Not Started" ? timeString : `${homeScore} - ${awayScore}`;
 
+  const liveGame = status === "First Half" || status === "Second Half";
+
   return (
     <Box
       sx={{
@@ -46,6 +49,11 @@ const ListFixtureScore: React.FC<ListFixtureScoreProps> = ({
         }}
       >
         {displayScore}
+        {liveGame && (
+          <Box sx={{ width: "100%", color: "var(--green)" }}>
+            <LinearProgress color={"inherit"} />
+          </Box>
+        )}
       </Typography>
     </Box>
   );
