@@ -30,6 +30,7 @@ const ListFixtureScore: React.FC<ListFixtureScoreProps> = ({
     <Box
       sx={{
         paddingX: isMobile ? 1 : 2,
+        width: isMobile ? "20%" : "25%",
         display: "flex",
         flexDirection: "column",
         justifyContent: "center",

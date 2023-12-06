@@ -31,7 +31,7 @@ const ListFixtureTeam: React.FC<ListFixtureTeamProps> = ({
     >
       <Link to={`/teams/${slug}`}>
         <Typography
-          variant="h6"
+          variant={isSmallerThanLG ? "caption" : "h6"}
           component="h2"
           sx={{
             fontSize: !isSmallerThanLG ? "16px" : "12px",
@@ -58,7 +58,7 @@ const ListFixtureTeam: React.FC<ListFixtureTeamProps> = ({
       <DisplayImage src={logo} alt={name} />
       <Link to={`/teams/${slug}`}>
         <Typography
-          variant="h6"
+          variant={isSmallerThanLG ? "caption" : "h6"}
           component="h2"
           sx={{
             fontSize: !isSmallerThanLG ? "16px" : "12px",
