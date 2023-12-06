@@ -5,6 +5,7 @@ import (
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent"
 	"capstone-cs.eng.utah.edu/mapeleven/mapeleven/pkg/ent/fixture"
 	"context"
+	"log"
 	"time"
 )
 
@@ -20,15 +21,16 @@ type score struct {
 }
 
 type fixtureSimple struct {
-	Slug     string `json:"slug"`
-	Referee  string `json:"referee,omitempty"`
-	Elapsed  int    `json:"elapsed,omitempty"`
-	Round    int    `json:"round,omitempty"`
-	Status   string `json:"status,omitempty"`
-	Timezone string `json:"timezone,omitempty"`
-	HomeTeam team   `json:"homeTeam"`
-	AwayTeam team   `json:"awayTeam"`
-	Score    score  `json:"score,omitempty"`
+	Slug     string    `json:"slug"`
+	Referee  string    `json:"referee,omitempty"`
+	Elapsed  int       `json:"elapsed,omitempty"`
+	Round    int       `json:"round,omitempty"`
+	Status   string    `json:"status,omitempty"`
+	Timezone string    `json:"timezone,omitempty"`
+	Time     time.Time `json:"time,omitempty"`
+	HomeTeam team      `json:"homeTeam"`
+	AwayTeam team      `json:"awayTeam"`
+	Score    score     `json:"score,omitempty"`
 }
 
 type lg struct {
@@ -65,6 +67,7 @@ func mapEntFixtureToAPIFixture(fixture *ent.Fixture) fixtureSimple {
 		Round:    fixture.Round,
 		Status:   fixture.Status,
 		Timezone: fixture.Timezone,
+		Time:     fixture.Date,
 		HomeTeam: mapEntTeamToTeam(fixture.Edges.HomeTeam),
 		AwayTeam: mapEntTeamToTeam(fixture.Edges.AwayTeam),
 		Score: score{
@@ -113,12 +116,12 @@ func (ss *ScoreboardSerializer) getScoreboardFixtures() ([]*ent.Fixture, error) 
 	return fixtures, nil
 }
 
-func (ss *ScoreboardSerializer) SerializeScoreboard() *APIFixturesByDate {
+func (ss *ScoreboardSerializer) SerializeScoreboard(timezone string) *APIFixturesByDate {
 	fixtures, err := ss.getScoreboardFixtures()
 	if err != nil {
 		return nil
 	}
-	fixturesByDate := groupFixturesByDateAndLeague(fixtures)
+	fixturesByDate := groupFixturesByDateAndLeague(fixtures, timezone)
 
 	apiFixturesByDate := &APIFixturesByDate{}
 
@@ -134,11 +137,17 @@ func (ss *ScoreboardSerializer) SerializeScoreboard() *APIFixturesByDate {
 	return apiFixturesByDate
 }
 
-func groupFixturesByDateAndLeague(fixtures []*ent.Fixture) map[string]map[*ent.League][]*ent.Fixture {
+func groupFixturesByDateAndLeague(fixtures []*ent.Fixture, clientTimezone string) map[string]map[*ent.League][]*ent.Fixture {
 	m := make(map[string]map[*ent.League][]*ent.Fixture)
 
+	loc, err := time.LoadLocation(clientTimezone)
+	if err != nil {
+		log.Printf("Error loading timezone: %v", err)
+	}
+
 	for _, f := range fixtures {
-		dateStr := f.Date.Format("01-02-2006")
+		dateWithTimezone := f.Date.In(loc)
+		dateStr := dateWithTimezone.Format("01-02-2006")
 		if _, exists := m[dateStr]; !exists {
 			m[dateStr] = make(map[*ent.League][]*ent.Fixture)
 		}

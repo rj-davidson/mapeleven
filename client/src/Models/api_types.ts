@@ -31,6 +31,7 @@ interface APIScoreboardDate {
       round?: number;
       status?: string;
       timezone?: string;
+      time?: string;
       homeTeam: {
         slug: string;
         name: string;

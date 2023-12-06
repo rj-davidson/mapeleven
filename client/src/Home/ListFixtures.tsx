@@ -18,36 +18,33 @@ interface Fixtures {
 export default function ListFixtures(): JSX.Element {
   const [fixtures, setFixtures] = useState<Fixtures>();
   const [loading, setLoading] = useState<boolean>(true);
-  const [selectedDate, setSelectedDate] = useState(
-    new Date().toISOString().slice(0, 10)
-  );
-
-  function convertDate(dateString) {
-    // Split the input string by "-"
-    const dateParts = dateString.split("-");
-
-    const day = parseInt(dateParts[1]);
-    const month = parseInt(dateParts[0]) - 1; // Subtract 1 from the month (JavaScript months are 0-indexed)
-    const year = parseInt(dateParts[2]);
-
-    return new Date(year, month, day);
-  }
+  const [selectedDate, setSelectedDate] = useState<string>();
 
   useEffect(() => {
-    fetch(`${url}/scoreboard`)
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    fetch(`${url}/scoreboard?timezone=${encodeURIComponent(timeZone)}`)
       .then((response) => response.json())
       .then((jsonData) => {
         const newFixtures: Fixtures = {};
 
         jsonData.date.forEach((dateObj: APIScoreboardDate) => {
-          const convertedDate = convertDate(dateObj.date);
+          const convertedDate = new Date(dateObj.date);
           newFixtures[convertedDate.toISOString().slice(0, 10)] = dateObj;
         });
 
         setFixtures(newFixtures);
+        const date = new Date();
+        const localDate = new Date(
+          date.getTime() - date.getTimezoneOffset() * 60000
+        )
+          .toISOString()
+          .slice(0, 10);
+
+        setSelectedDate(localDate);
+
         setLoading(false);
       })
-      .catch((error) => console.error(error));
+      .catch();
   }, []);
 
   const skeletonCards: JSX.Element[] = [];
@@ -67,16 +64,21 @@ export default function ListFixtures(): JSX.Element {
 
   // Function to retrieve the selected fixture
   const getSelectedFixture = () => {
-    if (fixtures && fixtures[selectedDate]) {
+    if (fixtures && selectedDate && fixtures[selectedDate]) {
       return fixtures[selectedDate];
     }
-    return null; // Return null if no fixture is found for the selected date
+    return null;
   };
 
   const selectedFixture = getSelectedFixture();
 
   const handleDateChange = (newDate: Date) => {
-    setSelectedDate(newDate.toISOString().slice(0, 10));
+    const localDate = new Date(
+      newDate.getTime() - newDate.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .slice(0, 10);
+    setSelectedDate(localDate);
   };
 
   return (
@@ -95,8 +97,9 @@ export default function ListFixtures(): JSX.Element {
               variant="h6"
               component="h2"
               sx={{ fontSize: "16px", textAlign: "center" }}
+              paddingY={4}
             >
-              No fixtures
+              No Fixtures
             </Typography>
           )}
         </Box>
