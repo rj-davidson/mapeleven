@@ -59,7 +59,8 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                       (event) =>
                         data.teams !== undefined &&
                         event.team.name === data.teams.home.name &&
-                        event.type === "Goal"
+                        event.type === "Goal" &&
+                          event.detail !== "Missed Penalty"
                     )
                     .map((event, index) => (
                       <Typography
@@ -151,7 +152,8 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                       (event) =>
                         event.type === "Goal" &&
                         data.teams !== undefined &&
-                        event.team.name === data.teams.away.name
+                          event.team.name === data.teams.away.name &&
+                          event.detail !== "Missed Penalty"
                     )
                     .map((event, index) => (
                       <Typography

@@ -5,6 +5,7 @@ import React from "react";
 import { GoalEvent } from "./GoalEvent";
 import { CardEvent } from "./CardEvent";
 import { SubstEvent } from "./SubstEvent";
+import {MissedPenaltyEvent} from "./MissedPenaltyEvent";
 
 type MatchEventProps = {
   event: APIFixtureEvent;
@@ -21,9 +22,12 @@ const FixtureMatchEvent: React.FC<MatchEventProps> = ({
         {event.type === "subst" && (
           <SubstEvent event={event} away={awayTeamSlug === event.team.slug} />
         )}
-        {event.type === "Goal" && (
+        {event.type === "Goal" && event.detail !== "Missed Penalty" && (
           <GoalEvent event={event} away={event.team.slug === awayTeamSlug} />
         )}
+          {event.type === "Goal" && event.detail === "Missed Penalty" && (
+              <MissedPenaltyEvent event={event} away={event.team.slug === awayTeamSlug} />
+          )}
 
         {event.type === "Card" && (
           <CardEvent event={event} away={awayTeamSlug === event.team.slug} />
