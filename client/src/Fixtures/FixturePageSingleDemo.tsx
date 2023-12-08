@@ -13,7 +13,8 @@ import FixtureLineup from "./FixtureLineup";
 import FixtureLineupMobile from "./FixtureLineupMobile";
 import FixturePlayerStepperAway from "./FixturePlayerStepperAway";
 import FixturePlayerStepperHome from "./FixturePlayerStepperHome";
-import FixturePlayerStepper from "./FixturePlayerStepper";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -36,7 +37,7 @@ function FixturePageSingle() {
     };
 
     fetchData();
-    const intervalId = setInterval(fetchData, 30000); // 30 seconds in milliseconds
+    const intervalId = setInterval(fetchData, 15000); // 30 seconds in milliseconds
     return () => clearInterval(intervalId);
   }, [slug]);
   return loading ? (
@@ -103,7 +104,7 @@ function FixturePageSingle() {
           </Grid>
           <Grid item xs={12} sm={6}>
             <Tile sx={{ flexDirection: "column" }}>
-              {fixtureData?.events &&
+              {fixtureData?.events ? (
                 fixtureData.events.map((event, index) => (
                   <Grid item xs={12} key={index}>
                     {fixtureData.teams && (
@@ -113,7 +114,17 @@ function FixturePageSingle() {
                       />
                     )}
                   </Grid>
-                ))}
+                ))
+              ) : (
+                <Box
+                  display="flex"
+                  alignItems="center"
+                  justifyContent="center"
+                  paddingY={10}
+                >
+                  <Typography variant={"subtitle1"}>No Events</Typography>
+                </Box>
+              )}
             </Tile>
           </Grid>
           <Grid item xs={12} sm={3}>

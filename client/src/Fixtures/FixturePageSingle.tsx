@@ -25,14 +25,20 @@ function FixturePageSingle() {
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    slug &&
-      fetch(`${url}/fixtures/${slug}`)
-        .then((response) => response.json())
-        .then((jsonData) => {
-          setFixtureData(jsonData as APIFixtureSet);
-          setLoading(false);
-        })
-        .catch();
+    const fetchData = () => {
+      slug &&
+        fetch(`${url}/fixtures/${slug}`)
+          .then((response) => response.json())
+          .then((jsonData) => {
+            setFixtureData(jsonData as APIFixtureSet);
+            setLoading(false);
+          })
+          .catch();
+    };
+
+    fetchData();
+    const intervalId = setInterval(fetchData, 15000); // 30 seconds in milliseconds
+    return () => clearInterval(intervalId);
   }, [slug]);
   return loading ? (
     <Grid container spacing={2} direction="column">
