@@ -110,8 +110,8 @@ const FixtureLineup: React.FC<FixtureLineupProps> = ({
             style={{
               flexDirection: "row-reverse",
               justifyContent: "space-around",
-              alignItems: "center",
-              gap: "40px",
+              alignItems: "flex-start",
+              gap: "8%",
             }}
           >
             {homeColumns[x].map((player, index) => (
@@ -145,8 +145,8 @@ const FixtureLineup: React.FC<FixtureLineupProps> = ({
             style={{
               flexDirection: "row",
               justifyContent: "space-around",
-              alignItems: "center",
-              gap: "40px",
+              alignItems: "flex-start",
+              gap: "8%",
             }}
           >
             {awayColumns[x].map((player, index) => (

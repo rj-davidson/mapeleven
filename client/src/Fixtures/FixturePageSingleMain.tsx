@@ -8,6 +8,7 @@ import { EventTime } from "./Events/EventTime";
 import Box from "@mui/material/Box";
 import Sports from "@mui/icons-material/Sports";
 import { Link } from "react-router-dom";
+import { useMediaQuery } from "@mui/material";
 
 interface FixturePageSingleMainProps {
   data: APIFixtureSet | undefined;
@@ -16,6 +17,8 @@ interface FixturePageSingleMainProps {
 const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
   data,
 }) => {
+  const isMobile = useMediaQuery("(max-width: 1260px)");
+
   return (
     data &&
     data.teams && (
@@ -60,7 +63,7 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                         data.teams !== undefined &&
                         event.team.name === data.teams.home.name &&
                         event.type === "Goal" &&
-                          event.detail !== "Missed Penalty"
+                        event.detail !== "Missed Penalty"
                     )
                     .map((event, index) => (
                       <Typography
@@ -152,8 +155,8 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                       (event) =>
                         event.type === "Goal" &&
                         data.teams !== undefined &&
-                          event.team.name === data.teams.away.name &&
-                          event.detail !== "Missed Penalty"
+                        event.team.name === data.teams.away.name &&
+                        event.detail !== "Missed Penalty"
                     )
                     .map((event, index) => (
                       <Typography
