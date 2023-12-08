@@ -16,6 +16,7 @@ const FixtureMatchEvent: React.FC<MatchEventProps> = ({
   event,
   awayTeamSlug,
 }) => {
+
   return (
     <Grid container alignItems="center" spacing={2} paddingY={"4px"}>
       <Grid item xs={12} sx={{ paddingLeft: "16px", paddingRight: "16px" }}>
