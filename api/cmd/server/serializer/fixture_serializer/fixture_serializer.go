@@ -67,6 +67,23 @@ func (dfs *FixtureSerializer) GetFixtureBySlug(ctx context.Context, slug string,
 		}
 	}
 
+	// If fixture status is not "Match Finished", then the score should be calculated using "Goal" events that are not "Missed Penalty" events
+	if f.Status != "Match Finished" {
+		var homeScore int
+		var awayScore int
+		for _, e := range *sEvents {
+			if e.Type == "Goal" && e.Assist == nil {
+				if e.Team.Slug == sTeams.Home.Slug {
+					homeScore++
+				} else {
+					awayScore++
+				}
+			}
+		}
+		sFixture.HomeTeamScore = homeScore
+		sFixture.AwayTeamScore = awayScore
+	}
+
 	if getLineups {
 		for _, l := range f.Edges.Lineups {
 			sLineup, err := SerializeLineup(l)
