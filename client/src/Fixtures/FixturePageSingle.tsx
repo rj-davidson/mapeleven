@@ -105,7 +105,7 @@ function FixturePageSingle() {
           <Grid item xs={12} sm={6}>
             <Tile sx={{ flexDirection: "column" }}>
               {fixtureData?.events ? (
-                fixtureData.events.map((event, index) => (
+                fixtureData.events.sort((a, b) => a.time.elapsed - b.time.elapsed).map((event, index) => (
                   <Grid item xs={12} key={index}>
                     {fixtureData.teams && (
                       <FixtureMatchEvents
