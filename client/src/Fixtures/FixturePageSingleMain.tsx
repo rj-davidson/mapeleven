@@ -9,6 +9,7 @@ import Box from "@mui/material/Box";
 import Sports from "@mui/icons-material/Sports";
 import { Link } from "react-router-dom";
 import { useMediaQuery } from "@mui/material";
+import LinearProgress from "@mui/material/LinearProgress";
 
 interface FixturePageSingleMainProps {
   data: APIFixtureSet | undefined;
@@ -98,7 +99,7 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                       variant={isMobile ? "subtitle2" : "h6"}
                       align="center"
                       paddingTop={isMobile ? 0.5 : 1}
-                      fontSize={isMobile ? "12px" : undefined}
+                      fontSize={isMobile ? "14px" : undefined}
                     >
                       {[
                         "In Progress",
@@ -109,6 +110,29 @@ const FixturePageSingleMain: React.FC<FixturePageSingleMainProps> = ({
                         ? `${data.fixture?.elapsed}'`
                         : data.fixture?.status ?? `${data.fixture?.elapsed}'`}
                     </Typography>
+
+                    {[
+                      "In Progress",
+                      "First Half",
+                      "Second Half",
+                      "Extra Time",
+                    ].indexOf(data.fixture?.status ?? "") !== -1 && (
+                      <Box
+                        sx={{
+                          width: "100%",
+                          color: "var(--green)",
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Box
+                          width={isMobile ? "32px" : "44px"}
+                          paddingRight={"2px"}
+                        >
+                          <LinearProgress color={"inherit"} />
+                        </Box>
+                      </Box>
+                    )}
                   </>
                 )}
               </Grid>

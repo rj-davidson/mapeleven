@@ -37,7 +37,7 @@ function FixturePageSingle() {
     };
 
     fetchData();
-    const intervalId = setInterval(fetchData, 15000); // 30 seconds in milliseconds
+    const intervalId = setInterval(fetchData, 10000);
     return () => clearInterval(intervalId);
   }, [slug]);
   return loading ? (
@@ -105,16 +105,18 @@ function FixturePageSingle() {
           <Grid item xs={12} sm={6}>
             <Tile sx={{ flexDirection: "column" }}>
               {fixtureData?.events ? (
-                fixtureData.events.sort((a, b) => a.time.elapsed - b.time.elapsed).map((event, index) => (
-                  <Grid item xs={12} key={index}>
-                    {fixtureData.teams && (
-                      <FixtureMatchEvents
-                        event={event}
-                        awayTeamSlug={fixtureData.teams.away.slug}
-                      />
-                    )}
-                  </Grid>
-                ))
+                fixtureData.events
+                  .sort((a, b) => a.time.elapsed - b.time.elapsed)
+                  .map((event, index) => (
+                    <Grid item xs={12} key={index}>
+                      {fixtureData.teams && (
+                        <FixtureMatchEvents
+                          event={event}
+                          awayTeamSlug={fixtureData.teams.away.slug}
+                        />
+                      )}
+                    </Grid>
+                  ))
               ) : (
                 <Box
                   display="flex"

@@ -17,7 +17,7 @@ func NewDemoFixtureSerializer(client *ent.Client) *DemoFixtureSerializer {
 }
 
 func (dfs *DemoFixtureSerializer) GetDemoFixtureBySlug(ctx context.Context, slug string, getFixture, getEvents, getLineups bool) (*APIFixtureSet, error) {
-	currentCycleTime := time.Now().Unix() % 120
+	currentCycleTime := time.Now().Unix() % 180
 	maxElapsedForCycle := int(currentCycleTime / 2)
 
 	f, err := dfs.client.Fixture.
