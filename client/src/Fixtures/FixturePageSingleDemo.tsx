@@ -37,7 +37,7 @@ function FixturePageSingle() {
     };
 
     fetchData();
-    const intervalId = setInterval(fetchData, 15000); // 30 seconds in milliseconds
+    const intervalId = setInterval(fetchData, 3000);
     return () => clearInterval(intervalId);
   }, [slug]);
   return loading ? (

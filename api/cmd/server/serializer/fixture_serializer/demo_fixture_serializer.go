@@ -17,10 +17,9 @@ func NewDemoFixtureSerializer(client *ent.Client) *DemoFixtureSerializer {
 }
 
 func (dfs *DemoFixtureSerializer) GetDemoFixtureBySlug(ctx context.Context, slug string, getFixture, getEvents, getLineups bool) (*APIFixtureSet, error) {
-	currentCycleTime := time.Now().Unix() % (5 * 60) / 60
-	maxElapsedForCycle := int(currentCycleTime * 24)
+	currentCycleTime := time.Now().Unix() % 120
+	maxElapsedForCycle := int(currentCycleTime / 2)
 
-	// Existing query code...
 	f, err := dfs.client.Fixture.
 		Query().
 		Where(fixture.Slug(slug)).
@@ -102,10 +101,10 @@ func (dfs *DemoFixtureSerializer) serializeDemoFixture(f *ent.Fixture, maxElapse
 	var elapsed int
 	homeTeamScore := 0
 	awayTeamScore := 0
-	if maxElapsedForCycle < 91 {
-		elapsed = maxElapsedForCycle
-	} else {
+	if maxElapsedForCycle > 90 {
 		elapsed = 90
+	} else {
+		elapsed = maxElapsedForCycle
 	}
 
 	for _, e := range f.Edges.FixtureEvents {
