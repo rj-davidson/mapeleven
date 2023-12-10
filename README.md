@@ -87,7 +87,6 @@ Our project makes use of the following key external libraries:
 
 #### Backend
 * [Ent](https://entgo.io/ent)
-* [GoCron](https://github.com/go-co-op/gocron)
 * [Fiber](https://github.com/gofiber/fiber/v2)
 * [Viper](https://github.com/spf13/viper)
 
